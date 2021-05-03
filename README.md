@@ -29,3 +29,15 @@ bundle install
 ```bash
 rails s
 ```
+
+## Contributing
+
+First, thank you for taking the time to contribute to Powerbase! There are many ways you can help out.
+
+### Questions
+
+If you have a question that needs an answer, you can [create an issue](https://docs.github.com/en/github/managing-your-work-on-github/creating-an-issue)
+
+### Issues for bugs or feature requests
+
+If you encounter any bugs, or want to request a new feature, suggest an idea or enhancement, please [create an issue](https://docs.github.com/en/github/managing-your-work-on-github/creating-an-issue) to report it.
