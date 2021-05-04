@@ -39,6 +39,10 @@ class GroupsController < ApplicationController
           return;
         end
       end
+
+      if !@group.is_migrated
+        TableMigrationJob.perform_later(@group.id, Powerbase.connection_string)
+      end
     end
 
     render json: { connected: @db.test_connection, group: @group }
