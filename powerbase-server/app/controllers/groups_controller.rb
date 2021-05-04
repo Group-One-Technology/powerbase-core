@@ -10,16 +10,33 @@ class GroupsController < ApplicationController
 
   # POST /bases/connect
   def connect
-    db = Powerbase.connect({
-      adapter:  "postgres",
-      host:     safe_params[:host],
-      port:     safe_params[:port],
-      user:     safe_params[:username],
-      password: safe_params[:password],
-      database: safe_params[:database],
-      connection_string: safe_params[:connection_string],
-    })
+    adapter = "postgres"
+    user = "#{safe_params[:username]}:#{safe_params[:password]}"
+    server = "#{safe_params[:host]}:#{safe_params[:port]}"
+    connection_string = safe_params[:connection_string] ||
+      "postgresql://#{user}@#{server}/#{safe_params[:database]}"
 
-    render json: { connected: db.test_connection }
+    @db = Powerbase.connect({ connection_string: connection_string })
+    @group = nil
+
+    if @db.test_connection
+      @group = Group.find_by(name: safe_params[:database])
+
+      if !@group
+        @group = Group.new({
+          name: safe_params[:database],
+          connection_string: connection_string,
+          database_type: adapter,
+          is_migrated: false,
+        })
+
+        if !@group.save
+          render json: @group.errors, status: :unprocessable_entity
+          return;
+        end
+      end
+    end
+
+    render json: { connected: @db.test_connection, group: @group }
   end
 end
