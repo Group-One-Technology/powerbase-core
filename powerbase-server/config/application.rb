@@ -39,5 +39,8 @@ module PowerbaseServer
 
     # Allows the conversion between camel case to snake case and vice versa.
     config.middleware.use OliveBranch::Middleware, inflection: "camel"
+
+    # Set Sidekiq for background jobs
+    config.active_job.queue_adapter = :sidekiq
   end
 end
