@@ -24,11 +24,12 @@ module Powerbase
     Sequel.connect(@@connection_string)
   end
 
-  # Returns the database connection
+  # Returns the current database connection
   def self.DB
     @@DB
   end
 
+  # Returns the current connection string
   def self.connection_string
     @@connection_string
   end
