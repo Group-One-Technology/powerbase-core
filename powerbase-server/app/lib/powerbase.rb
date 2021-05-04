@@ -26,6 +26,10 @@ module Powerbase
 
   # Returns the current database connection
   def self.DB
+    if !@@DB || !@@DB&.test_connection
+      raise StandardError.new("A database connection is needed to perform this action.")
+    end
+
     @@DB
   end
 
