@@ -24,7 +24,12 @@ cd powerbase-server
 bundle install
 ```
 
-2. Run the app and you're all set!
+2. Setup Environment Variables
+
+Copy and rename `config/application.example.yml` to `config/application.example.yml` and update the ff variables.
+
+
+3. Run the app and you're all set!
 
 ```bash
 rails s
