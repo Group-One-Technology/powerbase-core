@@ -21,7 +21,7 @@ module Powerbase
     @@connection_string = options[:connection_string] ||
       "postgresql://#{user}@#{server}/#{options[:database]}"
 
-    Sequel.connect(@@connection_string)
+    @@DB = Sequel.connect(@@connection_string)
   end
 
   # Returns the current database connection
