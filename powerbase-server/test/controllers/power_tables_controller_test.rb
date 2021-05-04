@@ -16,7 +16,8 @@ class TablesControllerTest < ActionDispatch::IntegrationTest
   test "should get list of tables of connected group" do
     connect_database()
 
-    get groups_tables_url
+    group = groups(:one)
+    get group_tables_url(group_id: group.id)
     assert_response :success
   end
 end

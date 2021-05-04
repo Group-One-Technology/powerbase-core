@@ -41,7 +41,7 @@ class GroupsController < ApplicationController
       end
 
       if !@group.is_migrated
-        TableMigrationJob.perform_later(@group.id, Powerbase.connection_string)
+        PowerTableMigrationJob.perform_later(@group.id, Powerbase.connection_string)
       end
     end
 

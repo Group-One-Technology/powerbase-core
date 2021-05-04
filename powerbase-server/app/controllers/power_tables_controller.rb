@@ -1,4 +1,4 @@
-class TablesController < ApplicationController
+class PowerTablesController < ApplicationController
   schema(:index) do
     required(:group_id).value(:string)
   end

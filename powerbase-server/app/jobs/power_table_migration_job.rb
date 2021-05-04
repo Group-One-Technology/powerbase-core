@@ -1,4 +1,4 @@
-class TableMigrationJob < ApplicationJob
+class PowerTableMigrationJob < ApplicationJob
   queue_as :default
 
   def perform(group_id, connection_string)
