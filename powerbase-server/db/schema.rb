@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 2021_05_03_134029) do
   create_table "groups", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
-    t.string "connection_string", null: false
+    t.string "encrypted_connection_string", null: false
     t.string "database_type", default: "postgres"
     t.boolean "is_migrated", default: false
     t.datetime "created_at", precision: 6, null: false
