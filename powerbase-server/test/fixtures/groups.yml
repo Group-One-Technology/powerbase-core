@@ -10,7 +10,7 @@ two:
   id: 2
   name: Atlas
   description: Atlas helps you collect, summarise and share knowledge rich content from around the web.
-  connection_string: poostgresql://postgres:postgres@localhost:5432/atlas
+  connection_string: postgresql://postgres:postgres@localhost:5432/atlas
   database_type: postgres
   is_migrated: false
 
