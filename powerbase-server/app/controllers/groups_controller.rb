@@ -10,23 +10,20 @@ class GroupsController < ApplicationController
 
   # POST /bases/connect
   def connect
-    adapter = "postgres"
-    user = "#{safe_params[:username]}:#{safe_params[:password]}"
-    server = "#{safe_params[:host]}:#{safe_params[:port]}"
-    connection_string = safe_params[:connection_string] ||
-      "postgresql://#{user}@#{server}/#{safe_params[:database]}"
+    options = safe_params.output
+    options[:adapter] = "postgres"
 
-    @db = Powerbase.connect({ connection_string: connection_string })
+    @db = Powerbase.connect(options)
     @group = nil
 
     if @db.test_connection
-      @group = Group.find_by(name: safe_params[:database])
+      @group = Group.find_by(name: options[:database])
 
       if !@group
         @group = Group.new({
-          name: safe_params[:database],
-          connection_string: connection_string,
-          database_type: adapter,
+          name: options[:database],
+          connection_string: Powerbase.connection_string,
+          database_type: options[:adapter],
           is_migrated: false,
         })
 

@@ -2,6 +2,9 @@ module Powerbase
   # The database connection.
   @@DB = nil
 
+  # A well-formed URI that is used to connect to the database.
+  @@connection_string = nil
+
   # * Connect to a given database.
   # Accepts the following options:
   # :connection_string :: a well-formed URI that is used to connect to the database.
@@ -12,26 +15,21 @@ module Powerbase
   # :user :: the username of a user that has access to the database.
   # :password :: the password of a user that has access to the database.
   # :database :: the name of the database to connect to.
-  # TODO: Add options validator
   def self.connect(options)
-    if options.has_key?(:connection_string) && options[:connection_string]
-      @@DB = Sequel.connect(options[:connection_string])
-    else
-      @@DB = Sequel.connect(
-        adapter:  options[:database_type] || "postgres",
-        host:     options[:host],
-        port:     options[:port],
-        user:     options[:username],
-        password: options[:password],
-        database: options[:database]
-      )
-    end
+    user = "#{options[:username]}:#{options[:password]}"
+    server = "#{options[:host]}:#{options[:port]}"
+    @@connection_string = options[:connection_string] ||
+      "postgresql://#{user}@#{server}/#{options[:database]}"
 
-    @@DB
+    Sequel.connect(@@connection_string)
   end
 
   # Returns the database connection
   def self.DB
     @@DB
+  end
+
+  def self.connection_string
+    @@connection_string
   end
 end
