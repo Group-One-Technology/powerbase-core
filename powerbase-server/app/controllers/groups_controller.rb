@@ -8,7 +8,14 @@ class GroupsController < ApplicationController
     optional(:connection_string).value(:string)
   end
 
-  # POST /bases/connect
+  # GET /groups/
+  def index
+    @groups = Group.all
+
+    render json: @groups
+  end
+
+  # POST /groups/connect
   def connect
     options = safe_params.output
     options[:adapter] = "postgres"
