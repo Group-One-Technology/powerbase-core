@@ -1,6 +1,11 @@
 require "test_helper"
 
 class GroupsControllerTest < ActionDispatch::IntegrationTest
+  test "should get list of groups" do
+    get groups_url
+    assert_response :success
+  end
+
   test "should connect to a group" do
     post groups_connect_url,
       params: {
