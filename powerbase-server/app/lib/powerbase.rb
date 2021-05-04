@@ -1,6 +1,6 @@
 module Powerbase
   # The database connection.
-  @@DB
+  @@DB = nil
 
   # * Connect to a given database.
   # Accepts the following options:
@@ -30,7 +30,8 @@ module Powerbase
     @@DB
   end
 
-  def db
+  # Returns the database connection
+  def self.DB
     @@DB
   end
 end
