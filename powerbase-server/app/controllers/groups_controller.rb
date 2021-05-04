@@ -10,6 +10,6 @@ class GroupsController < ApplicationController
       database: params[:database],
     })
 
-    render json: { connected: db.test_connection, tables: db.tables }
+    render json: { connected: db.test_connection }
   end
 end
