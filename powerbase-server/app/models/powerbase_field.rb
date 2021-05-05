@@ -5,4 +5,5 @@ class PowerbaseField < ApplicationRecord
   validates :order, presence: true
 
   belongs_to :powerbase_table
+  belongs_to :powerbase_field_type
 end

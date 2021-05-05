@@ -6,4 +6,6 @@ class PowerbaseFieldType < ApplicationRecord
     number: "number",
     boolean: "boolean",
   }
+
+  has_many :powerbase_fields
 end
