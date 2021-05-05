@@ -24,5 +24,9 @@ Copy and rename `config/application.example.yml` to `config/application.example.
 4. Run the app and you're all set!
 
 ```bash
+# Run Rails server
 rails s
+
+# In another terminal, Run sidekiq
+bundle exec sidekiq start
 ```
