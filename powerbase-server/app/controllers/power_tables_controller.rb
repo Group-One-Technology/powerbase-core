@@ -1,20 +1,20 @@
 class PowerTablesController < ApplicationController
   schema(:index) do
-    required(:group_id).value(:string)
+    required(:database_id).value(:string)
   end
 
-  before_action :set_group, only: [:index]
+  before_action :set_database, only: [:index]
 
-  # GET /groups/:group_id/tables
+  # GET /databases/:database_id/tables
   def index
-    render json: { migrated: @group.is_migrated, tables: @group.power_tables }
+    render json: { migrated: @database.is_migrated, tables: @database.power_tables }
   end
 
   private
-    def set_group
-      @group = Group.find(safe_params[:group_id])
+    def set_database
+      @database = PowerbaseDatabase.find(safe_params[:database_id])
 
-      if !@group
+      if !@database
         raise StandardError.new("Must establish a database connection first to execute this action.")
       end
     end

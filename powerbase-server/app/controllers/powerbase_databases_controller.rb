@@ -8,14 +8,14 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:connection_string).value(:string)
   end
 
-  # GET /groups/
+  # GET /databases/
   def index
     @databases = PowerbaseDatabase.all
 
     render json: @databases
   end
 
-  # POST /groups/connect
+  # POST /databases/connect
   def connect
     options = safe_params.output
     options[:adapter] = "postgres"
@@ -40,8 +40,8 @@ class PowerbaseDatabasesController < ApplicationController
         end
       end
 
-      if !@group.is_migrated
-        PowerTableMigrationJob.perform_later(@group.id, Powerbase.connection_string)
+      if !@database.is_migrated
+        PowerTableMigrationJob.perform_later(@database.id, Powerbase.connection_string)
       end
     end
 

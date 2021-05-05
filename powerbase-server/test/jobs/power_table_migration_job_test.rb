@@ -3,12 +3,12 @@ require "test_helper"
 class PowerTableMigrationJobTest < ActiveJob::TestCase
   @connection_string = "postgresql://postgres:postgres@localhost:5432/powerbase_test"
 
-  test "that group's tables are migrated" do
-    group = groups(:one)
+  test "that database's tables are migrated" do
+    database = powerbase_databases(:one)
 
-    PowerTableMigrationJob.perform_now(group.id, @connection_string)
+    PowerTableMigrationJob.perform_now(database.id, @connection_string)
 
-    db_group = Group.find(group.id)
-    assert db_group.is_migrated
+    db_database = PowerbaseDatabase.find(database.id)
+    assert db_database.is_migrated
   end
 end
