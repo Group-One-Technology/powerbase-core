@@ -1,4 +1,4 @@
-class GroupsController < ApplicationController
+class PowerbaseDatabasesController < ApplicationController
   schema(:connect) do
     optional(:host).value(:string)
     optional(:port).value(:integer)
@@ -10,9 +10,9 @@ class GroupsController < ApplicationController
 
   # GET /groups/
   def index
-    @groups = Group.all
+    @databases = PowerbaseDatabase.all
 
-    render json: @groups
+    render json: @databases
   end
 
   # POST /groups/connect
@@ -20,22 +20,22 @@ class GroupsController < ApplicationController
     options = safe_params.output
     options[:adapter] = "postgres"
 
-    @db = Powerbase.connect(options)
-    @group = nil
+    @remote_db = Powerbase.connect(options)
+    @database = nil
 
-    if @db.test_connection
-      @group = Group.find_by(name: options[:database])
+    if @remote_db.test_connection
+      @database = PowerbaseDatabase.find_by(name: options[:database])
 
-      if !@group
-        @group = Group.new({
+      if !@database
+        @database = PowerbaseDatabase.new({
           name: options[:database],
           connection_string: Powerbase.connection_string,
           database_type: options[:adapter],
           is_migrated: false,
         })
 
-        if !@group.save
-          render json: @group.errors, status: :unprocessable_entity
+        if !@database.save
+          render json: @database.errors, status: :unprocessable_entity
           return;
         end
       end
@@ -45,6 +45,6 @@ class GroupsController < ApplicationController
       end
     end
 
-    render json: { connected: @db.test_connection, group: @group }
+    render json: { connected: @remote_db.test_connection, database: @database }
   end
 end

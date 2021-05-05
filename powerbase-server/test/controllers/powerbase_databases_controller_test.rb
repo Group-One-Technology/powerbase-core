@@ -1,13 +1,13 @@
 require "test_helper"
 
-class GroupsControllerTest < ActionDispatch::IntegrationTest
-  test "should get list of groups" do
-    get groups_url
+class PowerbaseDatabasesControllerTest < ActionDispatch::IntegrationTest
+  test "should get list of databases" do
+    get databases_url
     assert_response :success
   end
 
-  test "should connect to a group" do
-    post groups_connect_url,
+  test "should connect to a database" do
+    post databases_connect_url,
       params: {
         host: "localhost",
         port: "5432",
