@@ -7,7 +7,7 @@ class PowerTablesController < ApplicationController
 
   # GET /groups/:group_id/tables
   def index
-    render json: { tables: @group.power_tables }
+    render json: { migrated: @group.is_migrated, tables: @group.power_tables }
   end
 
   private
