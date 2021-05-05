@@ -2,7 +2,7 @@ require "test_helper"
 
 class TablesControllerTest < ActionDispatch::IntegrationTest
   def connect_database
-    post groups_connect_url,
+    post databases_connect_url,
       params: {
         host: "localhost",
         port: "5432",
@@ -13,10 +13,10 @@ class TablesControllerTest < ActionDispatch::IntegrationTest
       as: :json
   end
 
-  test "should get list of tables of connected group" do
+  test "should get list of tables of connected database" do
     connect_database()
 
-    get groups_tables_url
+    get databases_tables_url
     assert_response :success
   end
 end

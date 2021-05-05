@@ -15,7 +15,7 @@ ActiveRecord::Schema.define(version: 2021_05_03_134029) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "groups", force: :cascade do |t|
+  create_table "powerbase_databases", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
     t.string "encrypted_connection_string", null: false

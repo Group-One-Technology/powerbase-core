@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get '/groups/', to: 'groups#index'
-  post '/groups/connect', to: 'groups#connect'
+  get '/databases/', to: 'powerbase_databases#index'
+  post '/databases/connect', to: 'powerbase_databases#connect'
 
-  get '/groups/tables', to: 'tables#index'
+  get '/databases/tables', to: 'tables#index'
 end
