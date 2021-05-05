@@ -39,6 +39,10 @@ class PowerbaseDatabasesController < ApplicationController
           return;
         end
       end
+
+      if !@database.is_migrated
+        PowerbaseTableMigrationJob.perform_later(@database.id, Powerbase.connection_string)
+      end
     end
 
     render json: { connected: @remote_db.test_connection, database: @database }

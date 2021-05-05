@@ -17,6 +17,8 @@ gem 'dry-rails', '~> 0.3.0'
 gem 'attr_encrypted', '~> 3.1.0'
 # Use Figaro for Environment Variables
 gem 'figaro', '~> 1.2'
+# Use Sidekiq for Background Jobs
+gem 'sidekiq', '~> 6.2', '>= 6.2.1'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
