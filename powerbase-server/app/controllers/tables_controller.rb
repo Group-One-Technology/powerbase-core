@@ -1,5 +1,5 @@
 class TablesController < ApplicationController
-  # GET /bases/tables
+  # GET /databases/tables
   def index
     render json: { tables: Powerbase.DB.tables }
   end

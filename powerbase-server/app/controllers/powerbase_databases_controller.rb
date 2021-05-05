@@ -8,14 +8,14 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:connection_string).value(:string)
   end
 
-  # GET /groups/
+  # GET /databases/
   def index
     @databases = PowerbaseDatabase.all
 
     render json: @databases
   end
 
-  # POST /groups/connect
+  # POST /databases/connect
   def connect
     options = safe_params.output
     options[:adapter] = "postgres"
