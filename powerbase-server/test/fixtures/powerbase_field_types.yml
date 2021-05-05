@@ -1,0 +1,55 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Single Line Text
+  description: A short string.
+  data_type: string
+  is_virtual: false
+
+two:
+  name: Long Text
+  description: A super long string.
+  data_type: text
+  is_virtual: false
+
+three:
+  name: Checkbox
+  description: A binary choice.
+  data_type: boolean
+  is_virtual: false
+
+four:
+  name: Number
+  description: Can either be an integer or decimal. Depends on the user.
+  data_type: number
+  is_virtual: false
+
+five:
+  name: Single Select
+  description: Shows a list of options in which a user only selects a single one.
+  data_type: string
+  is_virtual: false
+
+six:
+  name: Multiple Select
+  description: Shows a list of options in which a user can select multiple options.
+  data_type: string
+  is_virtual: false
+
+seven:
+  name: Date
+  description: A date.
+  data_type: string
+  is_virtual: false
+
+eight:
+  name: Email
+  description: An email.
+  data_type: string
+  is_virtual: false
+
+nine:
+  name: Plugin
+  description: A type that uses hooks up a plugin made by other devs.
+  data_type: string
+  is_virtual: true

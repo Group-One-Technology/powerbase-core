@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_05_143050) do
+ActiveRecord::Schema.define(version: 2021_05_05_154545) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,15 @@ ActiveRecord::Schema.define(version: 2021_05_05_143050) do
     t.string "encrypted_connection_string", null: false
     t.string "database_type", default: "postgres"
     t.boolean "is_migrated", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "powerbase_field_types", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "data_type", default: "string"
+    t.boolean "is_virtual", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
