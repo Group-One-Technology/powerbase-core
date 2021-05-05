@@ -6,3 +6,7 @@ default: &default
 development:
   <<: *default
   database: powerbase
+
+test:
+  <<: *default
+  database: powerbase_test

@@ -1,3 +1,6 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  get '/databases/', to: 'powerbase_databases#index'
+  post '/databases/connect', to: 'powerbase_databases#connect'
+
+  get '/databases/tables', to: 'tables#index'
 end
