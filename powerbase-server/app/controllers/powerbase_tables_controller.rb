@@ -1,4 +1,4 @@
-class PowerTablesController < ApplicationController
+class PowerbaseTablesController < ApplicationController
   schema(:index) do
     required(:database_id).value(:string)
   end
@@ -7,7 +7,7 @@ class PowerTablesController < ApplicationController
 
   # GET /databases/:database_id/tables
   def index
-    render json: { migrated: @database.is_migrated, tables: @database.power_tables }
+    render json: { migrated: @database.is_migrated, tables: @database.powerbase_tables }
   end
 
   private

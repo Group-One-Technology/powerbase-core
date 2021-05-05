@@ -1,4 +1,4 @@
-class PowerTable < ApplicationRecord
+class PowerbaseTable < ApplicationRecord
   validates :name, presence: true
 
   belongs_to :powerbase_database

@@ -1,11 +1,11 @@
-class PowerTableMigrationJob < ApplicationJob
+class PowerbaseTableMigrationJob < ApplicationJob
   queue_as :default
 
   def perform(database_id, connection_string)
     db = Powerbase.connect({ connection_string: connection_string })
 
     db.tables.each do |table_name|
-      table = PowerTable.new
+      table = PowerbaseTable.new
       table.name = table_name
       table.powerbase_database_id = database_id
       table.save

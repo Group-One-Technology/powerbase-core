@@ -16,7 +16,7 @@ class TablesControllerTest < ActionDispatch::IntegrationTest
   test "should get list of tables of connected database" do
     connect_database()
 
-    database = powerbase_database(:one)
+    database = powerbase_databases(:one)
     get database_tables_url(database_id: database.id)
     assert_response :success
   end
