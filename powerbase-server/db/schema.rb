@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_05_154545) do
+ActiveRecord::Schema.define(version: 2021_05_05_162215) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,6 +34,26 @@ ActiveRecord::Schema.define(version: 2021_05_05_154545) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "powerbase_fields", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description"
+    t.integer "oid", null: false
+    t.string "db_type", null: false
+    t.string "default_value"
+    t.boolean "is_primary_key", default: false
+    t.boolean "is_foreign_key", default: false
+    t.boolean "is_nullable", default: true
+    t.boolean "is_hidden", default: false
+    t.boolean "is_frozen", default: false
+    t.integer "order", null: false
+    t.bigint "powerbase_table_id"
+    t.bigint "powerbase_field_type_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
+    t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
+  end
+
   create_table "powerbase_tables", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -43,5 +63,7 @@ ActiveRecord::Schema.define(version: 2021_05_05_154545) do
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
 
+  add_foreign_key "powerbase_fields", "powerbase_field_types"
+  add_foreign_key "powerbase_fields", "powerbase_tables"
   add_foreign_key "powerbase_tables", "powerbase_databases"
 end

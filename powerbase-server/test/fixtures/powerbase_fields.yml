@@ -1,0 +1,43 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: id
+  oid: 1
+  db_type: bigint
+  default_value: nextval('powerbase_tables_id_seq'::regclass)
+  is_primary_key: true
+  is_foreign_key: false
+  is_nullable: false
+  is_hidden: false
+  is_frozen: true
+  order: 1
+  powerbase_field_type_id: 4
+  powerbase_table_id: 1
+
+two:
+  name: name
+  oid: 2
+  db_type: character varying
+  default_value: null
+  is_primary_key: false
+  is_foreign_key: false
+  is_nullable: false
+  is_hidden: false
+  is_frozen: false
+  order: 2
+  powerbase_field_type_id: 1
+  powerbase_table_id: 1
+
+three:
+  name: description
+  oid: 3
+  db_type: text
+  default_value: null
+  is_primary_key: false
+  is_foreign_key: false
+  is_nullable: true
+  is_hidden: false
+  is_frozen: false
+  order: 3
+  powerbase_field_type_id: 2
+  powerbase_table_id: 1
