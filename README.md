@@ -6,6 +6,7 @@ Powerbase is the missing bridge to the worlds most trusted relational database.
 
 | Codebase                             |      Description      |
 | :----------------------------------- | :-------------------: |
+| [powerbase-client](powerbase-client) |     React Client      |
 | [powerbase-server](powerbase-server) |   Rails API Server    |
 
 ## Installation
@@ -15,6 +16,10 @@ Clone Powerbase's core repository
 ```bash
 git clone https://github.com/Group-One-Technology/powerbase-core.git
 ```
+
+### Powerbase Client Setup
+
+See [Powerbase Client README](powerbase-client/README.md)
 
 ### Powerbase Server Setup
 

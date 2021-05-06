@@ -4,9 +4,11 @@ import './index.css';
 
 const App = () => {
   return (
-    <div>
-      <h1>Hello World</h1>
-      <p>{process.env.NODE_ENV}</p>
+    <div className="p-4 bg-gray-800 text-white h-screen w-full flex items-center justify-center">
+      <div className="w-96 text-center">
+        <h1 className="text-3xl">Hello World</h1>
+        <p>{process.env.NODE_ENV}</p>
+      </div>
     </div>
   );
 };

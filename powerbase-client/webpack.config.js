@@ -1,6 +1,5 @@
 const HtmlPlugin = require('html-webpack-plugin');
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const webpack = require('webpack');
 
 module.exports = {
@@ -35,8 +34,8 @@ module.exports = {
         ],
       },
       {
-        test: /\.(css)$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
       }
     ],
   },
@@ -45,7 +44,6 @@ module.exports = {
       filename: 'index.html',
       template: './src/index.html',
     }),
-    new MiniCssExtractPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -56,4 +54,4 @@ module.exports = {
     historyApiFallback: true,
     port: 4000,
   },
-}
+};
