@@ -19,17 +19,11 @@ class PowerbaseTableMigrationJob < ApplicationJob
           column_name = column[0]
           column_options = column[1]
 
-          column_type = if column_options[:db_type] === "integer" || column_options[:db_type] === "float" || column_options[:db_type] === "bigint"
-              "Number"
-            elsif column_options[:db_type] === "text" || column_options[:db_type] === "character varying" || column_options[:db_type].include?("varchar")
-              "Single Line Text"
-            elsif column_options[:db_type] === "date" || column_options[:db_type].include?("timestamp")
-              "Date"
-            elsif column_options[:db_type] === "boolean"
-              "Checkbox"
-            else
-              column_options[:db_type].capitalize
-          end
+          existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
+            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
+            .take
+
+          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : column_options[:db_type].capitalize
 
           field_type = PowerbaseFieldType.find_by(name: column_type)
 
