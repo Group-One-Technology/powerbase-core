@@ -35,8 +35,8 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.is_primary_key = column_options[:primary_key]
 
           field_foreign_key = table_foreign_keys.select { |fk_key| fk_key[:columns].include?(column_name) }.first
-          field.is_foreign_key = field_foreign_key ? true : false
           if field_foreign_key
+            field.is_foreign_key = true
             field.join_table_name = field_foreign_key[:table]
             field.join_field_names = field_foreign_key[:key]
           end
