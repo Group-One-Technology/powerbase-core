@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_07_131327) do
+ActiveRecord::Schema.define(version: 2021_05_07_163558) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,6 +57,8 @@ ActiveRecord::Schema.define(version: 2021_05_07_131327) do
     t.bigint "powerbase_field_type_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "join_field_names", default: [], array: true
+    t.string "join_table_name"
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
   end
