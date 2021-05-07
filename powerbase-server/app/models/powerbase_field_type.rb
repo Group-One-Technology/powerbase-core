@@ -8,5 +8,5 @@ class PowerbaseFieldType < ApplicationRecord
   }, _prefix: true
 
   has_many :powerbase_fields
-  has_many :field_db_type_mapping
+  has_many :field_db_type_mappings
 end
