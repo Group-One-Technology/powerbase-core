@@ -40,7 +40,7 @@ seven:
   id: 7
   db_type: bigint
   adapter: sequel
-  powerbase_field_type_id: 5
+  powerbase_field_type_id: 4
 
 eight:
   id: 8
