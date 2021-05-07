@@ -35,7 +35,6 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.is_primary_key = column_options[:primary_key]
 
           field_foreign_key = table_foreign_keys.select { |fk_key| fk_key[:columns].include?(column_name) }
-          puts field_foreign_key
           field.is_foreign_key = field_foreign_key.length > 0 ? true : false
           field.is_nullable = column_options[:allow_null]
           field.order = index + 1
