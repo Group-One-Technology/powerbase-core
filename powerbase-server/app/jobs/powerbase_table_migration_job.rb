@@ -23,8 +23,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
             .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
             .take
 
-          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : column_options[:db_type].capitalize
-
+          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : 'Others'
           field_type = PowerbaseFieldType.find_by(name: column_type)
 
           field = PowerbaseField.find_by(name: column_name) || PowerbaseField.new
