@@ -30,3 +30,17 @@ rails s
 # In another terminal, Run sidekiq
 bundle exec sidekiq start
 ```
+
+## Testing the server
+
+1. Prepare the test database if you don't have on yet.
+
+```bash
+rails db:test:prepare
+```
+
+2. Run the tests
+
+```bash
+rails test
+```
