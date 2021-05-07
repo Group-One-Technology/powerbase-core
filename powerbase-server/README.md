@@ -21,7 +21,14 @@ bundle install
 
 Copy and rename `config/application.example.yml` to `config/application.example.yml` and update the ff variables.
 
-4. Run the app and you're all set!
+4. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase`.
+
+```bash
+rails db:migrate
+rails db:seed
+```
+
+5. Run the app and you're all set!
 
 ```bash
 # Run Rails server
@@ -44,3 +51,14 @@ rails db:test:prepare
 ```bash
 rails test
 ```
+
+## Helpful Commands
+
+| Comand                     |     Description    |
+| :------------------------- | :----------------: |
+| rails s                    | Start server       |
+| rails db:migrate           | Migrate database   |
+| rails db:reset db:migrate  | Reset database     |
+| rails db:seed              | Seed database      |
+| bundle exec sidekiq start  | Run sidekiq        |
+| rails test                 | Run test cases     |
