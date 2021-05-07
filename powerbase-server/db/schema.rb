@@ -10,10 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_07_125455) do
+ActiveRecord::Schema.define(version: 2021_05_07_131327) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "field_db_type_mappings", force: :cascade do |t|
+    t.string "db_type", null: false
+    t.string "adapter", default: "sequel", null: false
+    t.bigint "powerbase_field_type_id", null: false
+    t.index ["powerbase_field_type_id"], name: "index_field_db_type_mappings_on_powerbase_field_type_id"
+  end
 
   create_table "powerbase_databases", force: :cascade do |t|
     t.string "name", null: false
@@ -63,6 +70,7 @@ ActiveRecord::Schema.define(version: 2021_05_07_125455) do
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
 
+  add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"
   add_foreign_key "powerbase_tables", "powerbase_databases"
