@@ -7,4 +7,5 @@ class PowerbaseDatabase < ApplicationRecord
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
 
   has_many :powerbase_tables
+  has_many :powerbase_fields, through: :powerbase_tables
 end
