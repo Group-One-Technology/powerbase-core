@@ -21,13 +21,6 @@ class PowerbaseTableMigrationJob < ApplicationJob
           column_name = column[0]
           column_options = column[1]
 
-          existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
-            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
-            .take
-
-          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : 'Others'
-          field_type = PowerbaseFieldType.find_by(name: column_type)
-
           field = PowerbaseField.find_by(
             name: column_name,
             oid: column_options[:oid],
@@ -42,7 +35,15 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.is_nullable = column_options[:allow_null]
           field.order = index + 1
           field.powerbase_table_id = table.id
-          field.powerbase_field_type_id = field_type ? field_type.id : single_line_text_field.id
+
+          existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
+            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
+            .take
+
+          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : 'Others'
+          field_type = PowerbaseFieldType.find_by(name: column_type).id || single_line_text_field.id
+          field.powerbase_field_type_id = field_type
+
           if field.save
             total_saved_fields += 1
           else
