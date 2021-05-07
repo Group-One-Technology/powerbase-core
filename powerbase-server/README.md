@@ -58,7 +58,7 @@ rails test
 | :------------------------- | :----------------: |
 | rails s                    | Start server       |
 | rails db:migrate           | Migrate database   |
-| rails db:reset db:migrate  | Reset database     |
+| rails db:schema:load       | Reset database     |
 | rails db:seed              | Seed database      |
 | bundle exec sidekiq start  | Run sidekiq        |
 | rails test                 | Run test cases     |
