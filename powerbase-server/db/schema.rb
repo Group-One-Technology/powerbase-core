@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_05_162215) do
+ActiveRecord::Schema.define(version: 2021_05_07_125455) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,8 +19,8 @@ ActiveRecord::Schema.define(version: 2021_05_05_162215) do
     t.string "name", null: false
     t.text "description"
     t.string "encrypted_connection_string", null: false
-    t.string "database_type", default: "postgres"
-    t.boolean "is_migrated", default: false
+    t.string "database_type", default: "postgres", null: false
+    t.boolean "is_migrated", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -28,8 +28,8 @@ ActiveRecord::Schema.define(version: 2021_05_05_162215) do
   create_table "powerbase_field_types", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
-    t.string "data_type", default: "string"
-    t.boolean "is_virtual", default: false
+    t.string "data_type", default: "string", null: false
+    t.boolean "is_virtual", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -40,14 +40,14 @@ ActiveRecord::Schema.define(version: 2021_05_05_162215) do
     t.integer "oid", null: false
     t.string "db_type", null: false
     t.string "default_value"
-    t.boolean "is_primary_key", default: false
-    t.boolean "is_foreign_key", default: false
-    t.boolean "is_nullable", default: true
-    t.boolean "is_hidden", default: false
-    t.boolean "is_frozen", default: false
+    t.boolean "is_primary_key", default: false, null: false
+    t.boolean "is_foreign_key", default: false, null: false
+    t.boolean "is_nullable", default: true, null: false
+    t.boolean "is_hidden", default: false, null: false
+    t.boolean "is_frozen", default: false, null: false
     t.integer "order", null: false
-    t.bigint "powerbase_table_id"
-    t.bigint "powerbase_field_type_id"
+    t.bigint "powerbase_table_id", null: false
+    t.bigint "powerbase_field_type_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
@@ -57,7 +57,7 @@ ActiveRecord::Schema.define(version: 2021_05_05_162215) do
   create_table "powerbase_tables", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
-    t.bigint "powerbase_database_id"
+    t.bigint "powerbase_database_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
