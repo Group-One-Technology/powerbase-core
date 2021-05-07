@@ -44,18 +44,16 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.order = index + 1
           field.powerbase_table_id = table.id
           field.powerbase_field_type_id = field_type ? field_type.id : single_line_text_field.id
-          if !field.save
-            puts field.errors.messages
-          end
-        end
-
-        total_saved_fields = PowerbaseField.where(powerbase_table_id: table.id).count
-
-        if db.schema(table_name.to_sym).length === total_saved_fields
-          database = PowerbaseDatabase.find(database_id)
-          database.update(is_migrated: true)
+          field.save
         end
       end
+    end
+
+    total_saved_tables = PowerbaseTable.where(powerbase_database_id: database_id).count
+
+    if db.tables.length === total_saved_tables
+      database = PowerbaseDatabase.joins(:powerbase_fields).find(database_id)
+      database.update(is_migrated: true)
     end
   end
 end
