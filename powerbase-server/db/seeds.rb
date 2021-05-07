@@ -11,9 +11,11 @@ multiple_select = PowerbaseFieldType.create(name: "Multiple Select", description
 date = PowerbaseFieldType.create(name: "Date", description: "A date.", data_type: "string", is_virtual: false)
 email = PowerbaseFieldType.create(name: "Email", description: "An email.", data_type: "string", is_virtual: false)
 plugin = PowerbaseFieldType.create(name: "Plugin", description: "A type that uses hooks up a plugin made by other devs.", data_type: "string", is_virtual: true)
+others = PowerbaseFieldType.create(name: "Others", description: "A db_type that hasn't been mapped yet.", data_type: "string", is_virtual: false)
 
 FieldDbTypeMapping.create(db_type: "character varying", adapter: "sequel", powerbase_field_type_id: single_line_text.id)
 FieldDbTypeMapping.create(db_type: "varchar", adapter: "sequel", powerbase_field_type_id: single_line_text.id)
+FieldDbTypeMapping.create(db_type: "uuid", adapter: "sequel", powerbase_field_type_id: single_line_text.id)
 FieldDbTypeMapping.create(db_type: "text", adapter: "sequel", powerbase_field_type_id: long_text.id)
 FieldDbTypeMapping.create(db_type: "boolean", adapter: "sequel", powerbase_field_type_id: checkbox.id)
 FieldDbTypeMapping.create(db_type: "integer", adapter: "sequel", powerbase_field_type_id: number.id)
