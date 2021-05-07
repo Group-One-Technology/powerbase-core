@@ -17,6 +17,8 @@ class PowerbaseTableMigrationJob < ApplicationJob
       table.powerbase_database_id = database_id
 
       if table.save
+        table_foreign_keys = db.foreign_key_list(table_name.name)
+
         db.schema(table_name.to_sym).each_with_index do |column, index|
           column_name = column[0]
           column_options = column[1]
@@ -31,7 +33,10 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.db_type = column_options[:db_type]
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
-          field.is_foreign_key = false # TODO: Add foreign key constraints
+
+          field_foreign_key = table_foreign_keys.select { |fk_key| fk_key[:columns].include?(column_name) }
+          puts field_foreign_key
+          field.is_foreign_key = field_foreign_key.length > 0 ? true : false
           field.is_nullable = column_options[:allow_null]
           field.order = index + 1
           field.powerbase_table_id = table.id
