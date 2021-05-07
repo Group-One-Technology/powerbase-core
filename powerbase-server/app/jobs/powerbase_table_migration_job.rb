@@ -46,6 +46,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
           if field.save
             total_saved_fields += 1
           else
+            # TODO: Add error tracker (ex. Sentry)
             puts "Failed to save #{field.name}"
             puts field.errors.messages
           end
