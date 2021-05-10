@@ -22,6 +22,9 @@ module Powerbase
       "postgresql://#{user}@#{server}/#{options[:database]}"
 
     @@DB = Sequel.connect(@@connection_string)
+    @@DB.extension :pg_enum
+
+    @@DB
   end
 
   # Returns the current database connection
