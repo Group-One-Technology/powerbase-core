@@ -17,8 +17,6 @@ class PowerbaseTableMigrationJob < ApplicationJob
       table.powerbase_database_id = database_id
 
       if table.save
-        table_foreign_keys = db.foreign_key_list(table_name.name)
-
         db.schema(table_name.to_sym).each_with_index do |column, index|
           column_name = column[0]
           column_options = column[1]
@@ -33,14 +31,6 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.db_type = column_options[:db_type]
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
-
-          field_foreign_key = table_foreign_keys.select { |fk_key| fk_key[:columns].include?(column_name) }.first
-          if field_foreign_key
-            # field.is_foreign_key = true
-            # field.join_table_name = field_foreign_key[:table]
-            # field.join_field_names = field_foreign_key[:key]
-          end
-
           field.is_nullable = column_options[:allow_null]
           field.order = index + 1
           field.powerbase_table_id = table.id
@@ -57,17 +47,40 @@ class PowerbaseTableMigrationJob < ApplicationJob
             total_saved_fields += 1
           else
             # TODO: Add error tracker (ex. Sentry)
-            puts "Failed to save #{field.name}"
+            puts "Failed to save field: #{field.name}"
             puts field.errors.messages
           end
+        end
+      else
+        # TODO: Add error tracker (ex. Sentry)
+        puts "Failed to save table: #{table.name}"
+        puts table.errors.messages
+      end
+    end
+
+    db_tables = PowerbaseTable.where(powerbase_database_id: database_id)
+
+    db_tables.each do |table|
+      table_foreign_keys = db.foreign_key_list(table.name)
+      table_foreign_keys.each do |foreign_key|
+        referenced_table = db_tables.select { |item| item.name == foreign_key[:table].to_s }.first
+
+        table_foreign_key = TableForeignKey.find_by(name: foreign_key[:name], powerbase_table_id: table.id) || TableForeignKey.new
+        table_foreign_key.name = foreign_key[:name]
+        table_foreign_key.columns = foreign_key[:columns]
+        table_foreign_key.referenced_columns = foreign_key[:key]
+        table_foreign_key.referenced_table_id = referenced_table.id
+        table_foreign_key.powerbase_table_id = table.id
+
+        if !table_foreign_key.save
+          # TODO: Add error tracker (ex. Sentry)
+          puts "Failed to save foreign key constraint: #{table_foreign_key.name}"
+          puts table_foreign_key.errors.messages
         end
       end
     end
 
-    total_saved_tables = PowerbaseTable.where(powerbase_database_id: database_id).count
-
-
-    if db.tables.length === total_saved_tables
+    if db.tables.length === db_tables.length
       database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
 
       if total_saved_fields === database.powerbase_fields.length
