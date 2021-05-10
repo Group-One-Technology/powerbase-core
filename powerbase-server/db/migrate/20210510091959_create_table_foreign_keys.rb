@@ -1,6 +1,6 @@
 class CreateTableForeignKeys < ActiveRecord::Migration[6.1]
   def change
-    remove_column :powerbase_fields, :is_foreign_key
+    remove_column :powerbase_fields, :is_foreign_key, :boolean, default: false
 
     create_table :table_foreign_keys do |t|
       t.string :name, null: false
