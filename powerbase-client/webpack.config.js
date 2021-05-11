@@ -3,8 +3,17 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  context: __dirname,
+  entry: './src/index.jsx',
   output: {
     path: path.resolve(__dirname, 'build'),
+  },
+  resolve: {
+    alias: {
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@components': path.resolve(__dirname, 'src/components'),
+    },
+    extensions: ['.js', '.jsx'],
   },
   module: {
     rules: [
