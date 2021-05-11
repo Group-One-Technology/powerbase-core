@@ -12,7 +12,7 @@ class PowerbaseTableMigrationJobTest < ActiveJob::TestCase
     })
     assert database.save, "Could not save sample database"
 
-    PowerbaseTableMigrationJob.perform_now(database.id, @@connection_string)
+    PowerbaseTableMigrationJob.perform_now(database.id, "postgresql", @@connection_string)
     sleep 1
 
     db_database = PowerbaseDatabase.find(database.id)
