@@ -9,7 +9,7 @@ module Powerbase
   # Accepts the following options:
   # :connection_string :: a well-formed URI that is used to connect to the database.
   # :adapter :: the adapter that is going to be used to connect to the databse.
-  #                   It can be "postgres". "sqlite", etc.
+  #                   It can be "postgresql". "mysql2", etc.
   # :host :: the url of the server in which the database is hosted.
   # :port :: the port that the database uses.
   # :user :: the username of a user that has access to the database.
@@ -19,14 +19,10 @@ module Powerbase
     user = "#{options[:username]}:#{options[:password]}"
     server = "#{options[:host]}:#{options[:port]}"
 
-    @@connection_string = options[:connection_string] || if options[:adapter] === "postgres"
-      "postgresql://#{user}@#{server}/#{options[:database]}"
-    elsif options[:adapter] === "mysql"
-      "mysql2://#{user}@#{server}/#{options[:database]}"
-    end
+    @@connection_string = options[:connection_string] || "#{options[:adapter]}://#{user}@#{server}/#{options[:database]}"
 
     @@DB = Sequel.connect(@@connection_string)
-    @@DB.extension :pg_enum if options[:adapter] === "postgres"
+    @@DB.extension :pg_enum if options[:adapter] === "postgresql"
 
     @@DB
   end
@@ -43,5 +39,10 @@ module Powerbase
   # Returns the current connection string
   def self.connection_string
     @@connection_string
+  end
+
+  # Returns a boolean whether the database has successfully connected
+  def self.connected?
+    @@DB.test_connection
   end
 end

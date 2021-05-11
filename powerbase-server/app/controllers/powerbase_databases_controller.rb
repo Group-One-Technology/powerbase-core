@@ -19,7 +19,7 @@ class PowerbaseDatabasesController < ApplicationController
   # POST /databases/connect
   def connect
     options = safe_params.output
-    options[:adapter] = options[:adapter] || "postgres"
+    options[:adapter] = options[:adapter] || "postgresql"
 
     @remote_db = Powerbase.connect(options)
     @database = nil

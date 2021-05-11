@@ -1,7 +1,7 @@
 class PowerbaseDatabase < ApplicationRecord
   validates :name, presence: true
   validates :connection_string, presence: true
-  enum database_type: { postgres: "postgres", mysql: "mysql" }, _prefix: :database
+  enum database_type: { postgresql: "postgresql", mysql2: "mysql2" }, _prefix: :database
 
   attr_encrypted :connection_string, key: ENV["encryption_key"],
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
