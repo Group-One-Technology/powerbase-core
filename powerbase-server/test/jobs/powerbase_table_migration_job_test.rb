@@ -7,7 +7,7 @@ class PowerbaseTableMigrationJobTest < ActiveJob::TestCase
     database = PowerbaseDatabase.new({
       name: "powerbase_test",
       connection_string: @@connection_string,
-      database_type: "postgres",
+      adapter: "postgresql",
       is_migrated: false,
     })
     assert database.save, "Could not save sample database"

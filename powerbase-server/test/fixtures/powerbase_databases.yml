@@ -4,7 +4,7 @@ one:
   description: Editmode makes it easy to stop storing text in your codebase, allowing you and your team to safely make changes at every stage of the product development process. It's for digital agencies, enterprise engineering teams, and anyone who builds web applications where non-technical colleagues need to change text easily.
   encrypted_connection_string: "f87rv+Ky1oOlh23dbC8Y8HqhDgl515/ja2c29YYii0qRK/KbU5G+gbJZ769y
 /qde4GLTY4EL8ZI9kQzkXz3zDA=="
-  database_type: postgres
+  adapter: postgresql
   is_migrated: false
 
 two:
@@ -13,7 +13,7 @@ two:
   description: Atlas helps you collect, summarise and share knowledge rich content from around the web.
   encrypted_connection_string: "f87rv+Ky1oOlh23dbC8Y8HqhDgl515/ja2c29YYii0qRK/KbU5G+gbJZ769y
 /qde4GLTY4EL8ZI9kQzkXz3zDA=="
-  database_type: postgres
+  adapter: postgresql
   is_migrated: false
 
 three:
@@ -22,5 +22,5 @@ three:
   description: A platform for saving and organizing online resources into a directed learning path.
   encrypted_connection_string: "f87rv+Ky1oOlh23dbC8Y8HqhDgl515/ja2c29YYii0qRK/KbU5G+gbJZ769y
 /qde4GLTY4EL8ZI9kQzkXz3zDA=="
-  database_type: postgres
+  adapter: postpostgresqlgres
   is_migrated: true

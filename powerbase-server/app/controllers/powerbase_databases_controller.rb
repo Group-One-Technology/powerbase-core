@@ -31,7 +31,7 @@ class PowerbaseDatabasesController < ApplicationController
         @database = PowerbaseDatabase.new({
           name: options[:database],
           connection_string: Powerbase.connection_string,
-          database_type: options[:adapter],
+          adapter: Powerbase.adapter,
           is_migrated: false,
         })
 
@@ -42,7 +42,7 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
-        PowerbaseTableMigrationJob.perform_later(@database.id, Powerbase.connection_string)
+        PowerbaseTableMigrationJob.perform_later(@database.id, Powerbase.adapter, Powerbase.connection_string)
       end
     end
 

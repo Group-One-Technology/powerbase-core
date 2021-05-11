@@ -33,7 +33,7 @@ ActiveRecord::Schema.define(version: 2021_05_11_050217) do
     t.string "name", null: false
     t.text "description"
     t.string "encrypted_connection_string", null: false
-    t.string "database_type", default: "postgres", null: false
+    t.string "adapter", default: "postgresql", null: false
     t.boolean "is_migrated", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
