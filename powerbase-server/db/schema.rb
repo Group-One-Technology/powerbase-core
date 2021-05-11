@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_07_131327) do
+ActiveRecord::Schema.define(version: 2021_05_10_091959) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -48,7 +48,6 @@ ActiveRecord::Schema.define(version: 2021_05_07_131327) do
     t.string "db_type", null: false
     t.string "default_value"
     t.boolean "is_primary_key", default: false, null: false
-    t.boolean "is_foreign_key", default: false, null: false
     t.boolean "is_nullable", default: true, null: false
     t.boolean "is_hidden", default: false, null: false
     t.boolean "is_frozen", default: false, null: false
@@ -70,8 +69,20 @@ ActiveRecord::Schema.define(version: 2021_05_07_131327) do
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
 
+  create_table "table_foreign_keys", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "columns", default: [], null: false, array: true
+    t.string "referenced_columns", default: [], null: false, array: true
+    t.bigint "powerbase_table_id", null: false
+    t.bigint "referenced_table_id", null: false
+    t.index ["powerbase_table_id"], name: "index_table_foreign_keys_on_powerbase_table_id"
+    t.index ["referenced_table_id"], name: "index_table_foreign_keys_on_referenced_table_id"
+  end
+
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"
   add_foreign_key "powerbase_tables", "powerbase_databases"
+  add_foreign_key "table_foreign_keys", "powerbase_tables"
+  add_foreign_key "table_foreign_keys", "powerbase_tables", column: "referenced_table_id"
 end

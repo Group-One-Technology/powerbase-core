@@ -4,9 +4,8 @@ one:
   name: id
   oid: 1
   db_type: bigint
-  default_value: nextval('powerbase_tables_id_seq'::regclass)
+  default_value: null
   is_primary_key: true
-  is_foreign_key: false
   is_nullable: false
   is_hidden: false
   is_frozen: true
@@ -20,7 +19,6 @@ two:
   db_type: character varying
   default_value: null
   is_primary_key: false
-  is_foreign_key: false
   is_nullable: false
   is_hidden: false
   is_frozen: false
@@ -34,10 +32,35 @@ three:
   db_type: text
   default_value: null
   is_primary_key: false
-  is_foreign_key: false
   is_nullable: true
   is_hidden: false
   is_frozen: false
   order: 3
   powerbase_field_type_id: 2
   powerbase_table_id: 1
+
+four:
+  name: id
+  oid: 4
+  db_type: bigint
+  default_value: null
+  is_primary_key: true
+  is_nullable: false
+  is_hidden: false
+  is_frozen: false
+  order: 1
+  powerbase_field_type_id: 4
+  powerbase_table_id: 2
+
+five:
+  name: user_id
+  oid: 5
+  db_type: bigint
+  default_value: null
+  is_primary_key: false
+  is_nullable: false
+  is_hidden: false
+  is_frozen: false
+  order: 2
+  powerbase_field_type_id: 4
+  powerbase_table_id: 2
