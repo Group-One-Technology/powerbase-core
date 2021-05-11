@@ -2,7 +2,7 @@
   "name": "powerbase-client",
   "version": "0.1.0",
   "description": "The ReactJS client of Powerbase",
-  "main": "index.js",
+  "main": "index.jsx",
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack serve",
     "build": "cross-env NODE_ENV=production webpack"
@@ -23,6 +23,7 @@
     "postcss-preset-env": "^6.7.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0",
     "style-loader": "^2.0.0",
     "tailwindcss": "^2.1.2",
     "webpack": "^5.36.2",
