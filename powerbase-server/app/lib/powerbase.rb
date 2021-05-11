@@ -8,7 +8,7 @@ module Powerbase
   # * Connect to a given database.
   # Accepts the following options:
   # :connection_string :: a well-formed URI that is used to connect to the database.
-  # :database_type :: the adapter that is going to be used to connect to the databse.
+  # :adapter :: the adapter that is going to be used to connect to the databse.
   #                   It can be "postgres". "sqlite", etc.
   # :host :: the url of the server in which the database is hosted.
   # :port :: the port that the database uses.
@@ -18,11 +18,15 @@ module Powerbase
   def self.connect(options)
     user = "#{options[:username]}:#{options[:password]}"
     server = "#{options[:host]}:#{options[:port]}"
-    @@connection_string = options[:connection_string] ||
+
+    @@connection_string = options[:connection_string] || if options[:adapter] === "postgres"
       "postgresql://#{user}@#{server}/#{options[:database]}"
+    elsif options[:adapter] === "mysql"
+      "mysql2://#{user}@#{server}/#{options[:database]}"
+    end
 
     @@DB = Sequel.connect(@@connection_string)
-    @@DB.extension :pg_enum
+    @@DB.extension :pg_enum if options[:adapter] === "postgres"
 
     @@DB
   end
