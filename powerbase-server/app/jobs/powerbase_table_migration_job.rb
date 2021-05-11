@@ -2,6 +2,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
   queue_as :default
 
   def perform(database_id, connection_string)
+    # Database Connection
     db = Powerbase.connect({ connection_string: connection_string })
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
@@ -12,6 +13,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
     total_saved_fields = 0
 
     db.tables.each do |table_name|
+      # Table Migration
       table = PowerbaseTable.find_by(name: table_name) || PowerbaseTable.new
       table.name = table_name
       table.powerbase_database_id = database_id
@@ -21,6 +23,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
           column_name = column[0]
           column_options = column[1]
 
+          # Field Migration
           field = PowerbaseField.find_by(
             name: column_name,
             oid: column_options[:oid],
@@ -45,6 +48,22 @@ class PowerbaseTableMigrationJob < ApplicationJob
 
           if field.save
             total_saved_fields += 1
+
+            if column_options[:type] === :enum
+              # Field Select Options / Enums Migration
+              field_select_options = FieldSelectOption.find_by(
+                name: column_options[:db_type],
+                powerbase_field_id: field.id,
+              ) || FieldSelectOption.new
+              field_select_options.name = column_options[:db_type]
+              field_select_options.values = column_options[:enum_values]
+              field_select_options.powerbase_field_id = field.id
+              if !field_select_options.save
+                # TODO: Add error tracker (ex. Sentry)
+                puts "Failed to save enums: #{field_select_options.name}"
+                puts field_select_options.errors.messages
+              end
+            end
           else
             # TODO: Add error tracker (ex. Sentry)
             puts "Failed to save field: #{field.name}"
@@ -61,6 +80,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
     db_tables = PowerbaseTable.where(powerbase_database_id: database_id)
 
     db_tables.each do |table|
+      # Foreign Keys Migration
       table_foreign_keys = db.foreign_key_list(table.name)
       table_foreign_keys.each do |foreign_key|
         referenced_table = db_tables.select { |item| item.name == foreign_key[:table].to_s }.first

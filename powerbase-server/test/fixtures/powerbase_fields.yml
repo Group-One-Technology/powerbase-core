@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  id: 1
   name: id
   oid: 1
   db_type: bigint
@@ -14,6 +15,7 @@ one:
   powerbase_table_id: 1
 
 two:
+  id: 2
   name: name
   oid: 2
   db_type: character varying
@@ -27,6 +29,7 @@ two:
   powerbase_table_id: 1
 
 three:
+  id: 3
   name: description
   oid: 3
   db_type: text
@@ -40,6 +43,7 @@ three:
   powerbase_table_id: 1
 
 four:
+  id: 4
   name: id
   oid: 4
   db_type: bigint
@@ -53,6 +57,7 @@ four:
   powerbase_table_id: 2
 
 five:
+  id: 5
   name: user_id
   oid: 5
   db_type: bigint
@@ -64,3 +69,17 @@ five:
   order: 2
   powerbase_field_type_id: 4
   powerbase_table_id: 2
+
+six:
+  id: 6
+  name: user_role
+  oid: 6
+  db_type: user_userrole_enum
+  default_value: "'basic'::user_userrole_enum"
+  is_primary_key: false
+  is_nullable: true
+  is_hidden: false
+  is_frozen: false
+  order: 4
+  powerbase_field_type_id: 5
+  powerbase_table_id: 1
