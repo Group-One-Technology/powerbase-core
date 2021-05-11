@@ -21,10 +21,10 @@ class PowerbaseDatabasesController < ApplicationController
     options = safe_params.output
     options[:adapter] = options[:adapter] || "postgresql"
 
-    @remote_db = Powerbase.connect(options)
+    Powerbase.connect(options)
     @database = nil
 
-    if @remote_db.test_connection
+    if Powerbase.connected?
       @database = PowerbaseDatabase.find_by(name: options[:database])
 
       if !@database
@@ -46,6 +46,6 @@ class PowerbaseDatabasesController < ApplicationController
       end
     end
 
-    render json: { connected: @remote_db.test_connection, database: @database }
+    render json: { connected: Powerbase.connected?, database: @database }
   end
 end
