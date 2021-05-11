@@ -2,6 +2,7 @@ class PowerbaseDatabasesController < ApplicationController
   schema(:connect) do
     optional(:host).value(:string)
     optional(:port).value(:integer)
+    optional(:adapter).value(:string)
     optional(:username).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
@@ -18,7 +19,7 @@ class PowerbaseDatabasesController < ApplicationController
   # POST /databases/connect
   def connect
     options = safe_params.output
-    options[:adapter] = "postgres"
+    options[:adapter] = options[:adapter] || "postgres"
 
     @remote_db = Powerbase.connect(options)
     @database = nil
