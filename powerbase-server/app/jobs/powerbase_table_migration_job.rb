@@ -9,6 +9,8 @@ class PowerbaseTableMigrationJob < ApplicationJob
       raise StandardError.new("There is no 'single line text' field in the database.")
     end
 
+    total_saved_fields = 0
+
     db.tables.each do |table_name|
       table = PowerbaseTable.find_by(name: table_name) || PowerbaseTable.new
       table.name = table_name
@@ -19,21 +21,18 @@ class PowerbaseTableMigrationJob < ApplicationJob
           column_name = column[0]
           column_options = column[1]
 
-          column_type = if column_options[:db_type] === "integer" || column_options[:db_type] === "float" || column_options[:db_type] === "bigint"
-              "Number"
-            elsif column_options[:db_type] === "text" || column_options[:db_type] === "character varying" || column_options[:db_type].include?("varchar")
-              "Single Line Text"
-            elsif column_options[:db_type] === "date" || column_options[:db_type].include?("timestamp")
-              "Date"
-            elsif column_options[:db_type] === "boolean"
-              "Checkbox"
-            else
-              column_options[:db_type].capitalize
-          end
+          existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
+            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
+            .take
 
+          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : 'Others'
           field_type = PowerbaseFieldType.find_by(name: column_type)
 
-          field = PowerbaseField.find_by(name: column_name) || PowerbaseField.new
+          field = PowerbaseField.find_by(
+            name: column_name,
+            oid: column_options[:oid],
+            powerbase_table_id: table.id,
+          ) || PowerbaseField.new
           field.name = column_name
           field.oid = column_options[:oid]
           field.db_type = column_options[:db_type]
@@ -44,16 +43,26 @@ class PowerbaseTableMigrationJob < ApplicationJob
           field.order = index + 1
           field.powerbase_table_id = table.id
           field.powerbase_field_type_id = field_type ? field_type.id : single_line_text_field.id
-          field.save
+          if field.save
+            total_saved_fields += 1
+          else
+            # TODO: Add error tracker (ex. Sentry)
+            puts "Failed to save #{field.name}"
+            puts field.errors.messages
+          end
         end
       end
     end
 
     total_saved_tables = PowerbaseTable.where(powerbase_database_id: database_id).count
 
+
     if db.tables.length === total_saved_tables
-      database = PowerbaseDatabase.joins(:powerbase_fields).find(database_id)
-      database.update(is_migrated: true)
+      database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
+
+      if total_saved_fields === database.powerbase_fields.length
+        database.update(is_migrated: true)
+      end
     end
   end
 end
