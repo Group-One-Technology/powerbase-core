@@ -4,7 +4,6 @@ class PowerbaseTableMigrationJob < ApplicationJob
   def perform(database_id, adapter, connection_string)
     # Database Connection
     db = Powerbase.connect({ adapter: adapter, connection_string: connection_string })
-    database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
     if !single_line_text_field
@@ -17,7 +16,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
       # Table Migration
       table = PowerbaseTable.find_by(name: table_name) || PowerbaseTable.new
       table.name = table_name
-      table.powerbase_database_id = database.id
+      table.powerbase_database_id = database_id
 
       if table.save
         db.schema(table_name.to_sym).each_with_index do |column, index|
@@ -58,10 +57,9 @@ class PowerbaseTableMigrationJob < ApplicationJob
               ) || FieldSelectOption.new
               field_select_options.name = column_options[:db_type]
 
-              if database.adapter === "postgresql"
+              if adapter === "postgresql"
                 field_select_options.values = column_options[:enum_values]
-                puts column_options[:enum_values]
-              elsif database.adapter === "mysql2"
+              elsif adapter === "mysql2"
                 field_select_options.values = column_options[:db_type].slice(5..-2)
                   .tr("''", "")
                   .split(",")
@@ -87,7 +85,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
       end
     end
 
-    db_tables = PowerbaseTable.where(powerbase_database_id: database.id)
+    db_tables = PowerbaseTable.where(powerbase_database_id: database_id)
 
     db_tables.each do |table|
       # Foreign Keys Migration
@@ -111,9 +109,15 @@ class PowerbaseTableMigrationJob < ApplicationJob
     end
 
     if db.tables.length === db_tables.length
+      database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
+
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
+      else
+        puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{database.powerbase_fields.length}"
       end
+    else
+      puts "Total tables are not equal. Expected: #{db.tables.length}, Actual: #{db_tables.length}"
     end
   end
 end
