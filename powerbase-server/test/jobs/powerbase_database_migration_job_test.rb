@@ -1,6 +1,6 @@
 require "test_helper"
 
-class PowerbaseTableMigrationJobTest < ActiveJob::TestCase
+class PowerbaseDatabaseMigrationJobTest < ActiveJob::TestCase
   @@connection_string = "postgresql://postgres:postgres@localhost:5432/powerbase_test"
 
   test "that database's tables are migrated" do
@@ -12,7 +12,7 @@ class PowerbaseTableMigrationJobTest < ActiveJob::TestCase
     })
     assert database.save, "Could not save sample database"
 
-    PowerbaseTableMigrationJob.perform_now(database.id, "postgresql", @@connection_string)
+    PowerbaseDatabaseMigrationJob.perform_now(database.id, "postgresql", @@connection_string)
     sleep 1
 
     db_database = PowerbaseDatabase.find(database.id)

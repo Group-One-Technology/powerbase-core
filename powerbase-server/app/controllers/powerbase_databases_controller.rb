@@ -42,7 +42,7 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
-        PowerbaseTableMigrationJob.perform_later(@database.id, Powerbase.adapter, Powerbase.connection_string)
+        PowerbaseDatabaseMigrationJob.perform_later(@database.id, Powerbase.adapter, Powerbase.connection_string)
       end
     end
 

@@ -1,4 +1,4 @@
-class PowerbaseTableMigrationJob < ApplicationJob
+class PowerbaseDatabaseMigrationJob < ApplicationJob
   queue_as :default
 
   def perform(database_id, adapter, connection_string)
@@ -14,7 +14,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
 
     db.tables.each do |table_name|
       # Table Migration
-      table = PowerbaseTable.find_by(name: table_name) || PowerbaseTable.new
+      table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: database_id) || PowerbaseTable.new
       table.name = table_name
       table.powerbase_database_id = database_id
 
@@ -109,7 +109,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
     end
 
     if db.tables.length === db_tables.length
-      database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
+      database = PowerbaseDatabase.find(database_id)
 
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
