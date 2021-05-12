@@ -4,7 +4,7 @@ import { useAuthUser } from '@models/AuthUser';
 
 export function HomePage() {
   const history = useHistory();
-  const authUser = useAuthUser();
+  const { user: authUser } = useAuthUser();
 
   useEffect(() => {
     if (authUser === null) history.push('/login');
