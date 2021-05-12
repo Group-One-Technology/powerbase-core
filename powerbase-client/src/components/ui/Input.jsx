@@ -35,24 +35,31 @@ export function Input({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <>
-      <input
-        id={inputId}
-        name={name || label || props['aria-label']}
-        onFocus={focus}
-        onBlur={blur}
-        onChange={change}
-        className={cn('appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm', {
-          [showErrorText ? 'border-red-400': 'border-gray-300']: true
-        })}
-        {...props}
-      />
-      {(showErrorText && error) && (
-        <p className="text-xs text-red-400 my-2">
-          {error.message}
-        </p>
+    <div>
+      {label && (
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
       )}
-    </>
+      <div className="mt-1">
+        <input
+          id={inputId}
+          name={name || label || props['aria-label']}
+          onFocus={focus}
+          onBlur={blur}
+          onChange={change}
+          className={cn('appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm', {
+            [showErrorText ? 'border-red-400': 'border-gray-300']: true
+          })}
+          {...props}
+        />
+        {(showErrorText && error) && (
+          <p className="text-xs text-red-400 my-2">
+            {error.message}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 

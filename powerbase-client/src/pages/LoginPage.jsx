@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Input } from '@components/ui/Input';
+import { useValidState } from '@lib/hooks/useValidState';
+import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
+import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 
 export function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
+  const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
 
   const onEmailChange = (evt) => setEmail(evt.target.value);
   const onPasswordChange = (evt) => setPassword(evt.target.value);
@@ -33,40 +36,28 @@ export function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={onEmailChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1">
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={onPasswordChange}
-                  required
-                />
-              </div>
-            </div>
-
+            <Input
+              id="email"
+              label="Email address"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={onEmailChange}
+              error={emailError}
+              required
+            />
+            <Input
+              id="password"
+              label="Password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={onPasswordChange}
+              error={passwordError}
+              required
+            />
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
