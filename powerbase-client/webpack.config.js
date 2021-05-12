@@ -12,6 +12,7 @@ module.exports = {
     alias: {
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@components': path.resolve(__dirname, 'src/components'),
+      '@lib': path.resolve(__dirname, 'src/lib'),
     },
     extensions: ['.js', '.jsx'],
   },
