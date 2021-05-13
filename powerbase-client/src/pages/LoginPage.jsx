@@ -34,7 +34,7 @@ export function LoginPage() {
   }, [authUser]);
 
   return (
-    <Page className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <Page className="flex flex-col justify-center py-12 sm:px-6 lg:px-8" navbar={false}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img src="./public/img/logo.svg" alt="Powerbase logo" className="mx-auto h-12 w-auto" />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
