@@ -39,7 +39,7 @@ export function Navbar() {
             <div className="flex justify-between h-16">
               <div className="flex">
                 <div className="flex-shrink-0 flex items-center">
-                  <img src="./public/img/logo.svg" alt="Powerbase logo" className="block h-8 w-auto" />
+                  <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-8 w-auto" />
                 </div>
               </div>
               <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
