@@ -11,7 +11,7 @@ import { Input } from '@components/ui/Input';
 
 export function LoginPage() {
   const history = useHistory();
-  const { user: authUser, setUser } = useAuthUser();
+  const { authUser, setAuthUser } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
   const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
@@ -21,7 +21,7 @@ export function LoginPage() {
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
-    setUser(userMock);
+    setAuthUser(userMock);
   };
 
   useEffect(() => {

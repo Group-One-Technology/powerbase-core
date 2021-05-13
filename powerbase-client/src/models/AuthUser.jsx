@@ -3,9 +3,9 @@ import constate from 'constate';
 
 // TODO: Add authentication logic
 function useAuthUserModel() {
-  const [user, setUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
 
-  return { user, setUser };
+  return { authUser, setAuthUser };
 }
 
 export const [AuthUserProvider, useAuthUser] = constate(useAuthUserModel);
