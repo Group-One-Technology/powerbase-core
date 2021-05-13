@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 
-import logoImg from '@assets/img/logo.svg';
+import logoImg from '@public/img/logo.svg';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';

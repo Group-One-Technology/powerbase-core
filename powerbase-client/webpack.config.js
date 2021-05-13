@@ -1,6 +1,6 @@
-const HtmlPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+const HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
   context: __dirname,
@@ -13,7 +13,7 @@ module.exports = {
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@lib': path.resolve(__dirname, 'src/lib'),
-      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@public': path.resolve(__dirname, 'src/public'),
       '@models': path.resolve(__dirname, 'src/models'),
     },
     extensions: ['.js', '.jsx'],

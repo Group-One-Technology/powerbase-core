@@ -4,7 +4,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 
-import logoImg from '@assets/img/logo.svg';
+import logoImg from '@public/img/logo.svg';
 import { useAuthUser } from '@models/AuthUser';
 
 const NAVIGATION = [
