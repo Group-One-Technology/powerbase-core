@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 
-import logoImg from '@public/img/logo.svg';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 import { user as userMock } from '@lib/mock/userMock';
 import { useAuthUser } from '@models/AuthUser';
+import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
 
 export function LoginPage() {
@@ -34,9 +34,9 @@ export function LoginPage() {
   }, [authUser]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <Page className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <img src={logoImg} alt="Powerbase logo" className="mx-auto h-12 w-auto" />
+        <img src="./public/img/logo.svg" alt="Powerbase logo" className="mx-auto h-12 w-auto" />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or&nbsp;
@@ -167,6 +167,6 @@ export function LoginPage() {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
