@@ -2,6 +2,7 @@ class PowerbaseDatabasesController < ApplicationController
   schema(:connect) do
     optional(:host).value(:string)
     optional(:port).value(:integer)
+    optional(:adapter).value(:string)
     optional(:username).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
@@ -18,19 +19,19 @@ class PowerbaseDatabasesController < ApplicationController
   # POST /databases/connect
   def connect
     options = safe_params.output
-    options[:adapter] = "postgres"
+    options[:adapter] = options[:adapter] || "postgresql"
 
-    @remote_db = Powerbase.connect(options)
+    Powerbase.connect(options)
     @database = nil
 
-    if @remote_db.test_connection
+    if Powerbase.connected?
       @database = PowerbaseDatabase.find_by(name: options[:database])
 
       if !@database
         @database = PowerbaseDatabase.new({
           name: options[:database],
           connection_string: Powerbase.connection_string,
-          database_type: options[:adapter],
+          adapter: Powerbase.adapter,
           is_migrated: false,
         })
 
@@ -41,10 +42,10 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
-        PowerbaseTableMigrationJob.perform_later(@database.id, Powerbase.connection_string)
+        PowerbaseDatabaseMigrationJob.perform_later(@database.id, Powerbase.adapter, Powerbase.connection_string)
       end
     end
 
-    render json: { connected: @remote_db.test_connection, database: @database }
+    render json: { connected: Powerbase.connected?, database: @database }
   end
 end

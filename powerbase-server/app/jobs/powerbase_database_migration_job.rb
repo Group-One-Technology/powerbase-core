@@ -1,9 +1,9 @@
-class PowerbaseTableMigrationJob < ApplicationJob
+class PowerbaseDatabaseMigrationJob < ApplicationJob
   queue_as :default
 
-  def perform(database_id, connection_string)
+  def perform(database_id, adapter, connection_string)
     # Database Connection
-    db = Powerbase.connect({ connection_string: connection_string })
+    db = Powerbase.connect({ adapter: adapter, connection_string: connection_string })
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
     if !single_line_text_field
@@ -14,7 +14,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
 
     db.tables.each do |table_name|
       # Table Migration
-      table = PowerbaseTable.find_by(name: table_name) || PowerbaseTable.new
+      table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: database_id) || PowerbaseTable.new
       table.name = table_name
       table.powerbase_database_id = database_id
 
@@ -42,7 +42,7 @@ class PowerbaseTableMigrationJob < ApplicationJob
             .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
             .take
 
-          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : 'Others'
+          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : "Others"
           field_type = PowerbaseFieldType.find_by(name: column_type).id || single_line_text_field.id
           field.powerbase_field_type_id = field_type
 
@@ -56,7 +56,15 @@ class PowerbaseTableMigrationJob < ApplicationJob
                 powerbase_field_id: field.id,
               ) || FieldSelectOption.new
               field_select_options.name = column_options[:db_type]
-              field_select_options.values = column_options[:enum_values]
+
+              if adapter === "postgresql"
+                field_select_options.values = column_options[:enum_values]
+              elsif adapter === "mysql2"
+                field_select_options.values = column_options[:db_type].slice(5..-2)
+                  .tr("''", "")
+                  .split(",")
+              end
+
               field_select_options.powerbase_field_id = field.id
               if !field_select_options.save
                 # TODO: Add error tracker (ex. Sentry)
@@ -101,11 +109,15 @@ class PowerbaseTableMigrationJob < ApplicationJob
     end
 
     if db.tables.length === db_tables.length
-      database = PowerbaseDatabase.includes(:powerbase_fields).find(database_id)
+      database = PowerbaseDatabase.find(database_id)
 
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
+      else
+        puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{database.powerbase_fields.length}"
       end
+    else
+      puts "Total tables are not equal. Expected: #{db.tables.length}, Actual: #{db_tables.length}"
     end
   end
 end
