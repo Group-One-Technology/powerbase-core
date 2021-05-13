@@ -8,6 +8,7 @@ import cn from 'classnames';
 import { useAuthUser } from '@models/AuthUser';
 import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
+import { PageHeader } from '@components/layout/PageHeader';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -25,11 +26,9 @@ export function HomePage() {
     return (
       <Page>
         <div className="py-10">
-          <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold leading-tight text-gray-900 pb-4">
-              Bases
-            </h1>
-          </header>
+          <PageHeader>
+            Bases
+          </PageHeader>
           <main className="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div className="px-4 py-8 sm:px-0 border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
               <div className="text-center">
