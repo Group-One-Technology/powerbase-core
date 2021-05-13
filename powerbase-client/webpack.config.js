@@ -8,6 +8,9 @@ module.exports = {
   entry: './src/index.jsx',
   output: {
     path: path.resolve(__dirname, 'build'),
+    filename: '[name].js',
+    publicPath: '/',
+    clean: true,
   },
   resolve: {
     alias: {
@@ -67,9 +70,12 @@ module.exports = {
         'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       }
     }),
+    new webpack.HotModuleReplacementPlugin(),
   ],
   devServer: {
     historyApiFallback: true,
     port: 4000,
+    compress: true,
+    hot: true,
   },
 };
