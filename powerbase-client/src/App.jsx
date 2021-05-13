@@ -1,8 +1,8 @@
 import React from 'react';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 
-import { LoginPage } from '@pages/LoginPage';
-import { HomePage } from '@pages/HomePage';
+import { LoginPage } from '@pages/login';
+import { HomePage } from '@pages/home';
 import { GlobalProviders } from '@components/GlobalProviders';
 
 import './index.css';
