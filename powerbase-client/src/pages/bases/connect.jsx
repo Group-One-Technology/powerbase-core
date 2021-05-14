@@ -15,6 +15,7 @@ function classNames(...classes) {
 }
 
 export function BasesConnectPage() {
+  const history = useHistory();
   const { authUser } = useAuthUser();
 
   useEffect(() => {
@@ -33,5 +34,5 @@ export function BasesConnectPage() {
     );
   }
 
-  return null;
+  return <>Loading...</>;
 }
