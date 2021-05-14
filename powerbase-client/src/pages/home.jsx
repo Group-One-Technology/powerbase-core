@@ -1,5 +1,5 @@
 import React, { useEffect, Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { InboxIcon } from '@heroicons/react/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
@@ -62,8 +62,8 @@ export function HomePage() {
                           <div className="py-1">
                             <Menu.Item>
                               {({ active }) => (
-                                <a
-                                  href="/bases/create"
+                                <Link
+                                  to="/bases/create"
                                   className={cn('block px-4 py-2 text-sm', (
                                     active
                                       ? 'bg-gray-100 text-gray-900'
@@ -71,13 +71,13 @@ export function HomePage() {
                                   ))}
                                 >
                                   Create New Database
-                                </a>
+                                </Link>
                               )}
                             </Menu.Item>
                             <Menu.Item>
                               {({ active }) => (
-                                <a
-                                  href="/bases/connect"
+                                <Link
+                                  to="/bases/connect"
                                   className={cn('block px-4 py-2 text-sm', (
                                     active
                                       ? 'bg-gray-100 text-gray-900'
@@ -85,7 +85,7 @@ export function HomePage() {
                                   ))}
                                 >
                                   Connect A Database You Own
-                                </a>
+                                </Link>
                               )}
                             </Menu.Item>
                           </div>

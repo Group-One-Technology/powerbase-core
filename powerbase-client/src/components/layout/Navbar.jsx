@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, Link } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
@@ -47,9 +47,9 @@ export function Navbar() {
                   const isCurrentItem = location.pathname === item.href;
 
                   return (
-                    <a
+                    <Link
                       key={item.name}
-                      href={item.href}
+                      to={item.href}
                       className={cn('inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium', (
                         isCurrentItem
                           ? 'border-indigo-500 text-gray-900'
@@ -58,7 +58,7 @@ export function Navbar() {
                       aria-current={isCurrentItem ? 'page' : undefined}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   );
                 })}
               </div>
@@ -94,14 +94,14 @@ export function Navbar() {
                           {USER_NAVIGATION.map((item) => (
                             <Menu.Item key={item.name}>
                               {({ active }) => (
-                                <a
-                                  href={item.href}
+                                <Link
+                                  to={item.href}
                                   className={cn('block px-4 py-2 text-sm text-gray-700', {
                                     'bg-gray-100': active,
                                   })}
                                 >
                                   {item.name}
-                                </a>
+                                </Link>
                               )}
                             </Menu.Item>
                           ))}
@@ -144,9 +144,9 @@ export function Navbar() {
                 const isCurrentItem = location.pathname === item.href;
 
                 return (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
+                    to={item.href}
                     className={cn('block pl-3 pr-4 py-2 border-l-4 text-base font-medium', (
                       isCurrentItem
                         ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
@@ -155,7 +155,7 @@ export function Navbar() {
                     aria-current={isCurrentItem ? 'page' : undefined}
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -175,13 +175,13 @@ export function Navbar() {
               </div>
               <div className="mt-3 space-y-1">
                 {USER_NAVIGATION.map((item) => (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
+                    to={item.href}
                     className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
                 <button
                   type="button"
