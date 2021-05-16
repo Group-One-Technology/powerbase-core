@@ -4,7 +4,8 @@
   "description": "The ReactJS client of Powerbase",
   "main": "index.jsx",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack serve",
+    "start": "node src/server.js",
+    "dev": "cross-env NODE_ENV=development webpack serve",
     "build": "cross-env NODE_ENV=production webpack"
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "copy-webpack-plugin": "^8.1.1",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.4",
+    "express": "^4.17.1",
     "file-loader": "^6.2.0",
     "html-loader": "^2.1.2",
     "html-webpack-plugin": "^5.3.1",
