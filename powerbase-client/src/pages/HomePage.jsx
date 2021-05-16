@@ -7,6 +7,7 @@ import cn from 'classnames';
 
 import { useAuthUser } from '@models/AuthUser';
 import { Navbar } from '@components/layout/Navbar';
+import { Page } from '@components/layout/Page';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -22,8 +23,7 @@ export function HomePage() {
 
   if (authUser) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <Navbar />
+      <Page>
         <div className="py-10">
           <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold leading-tight text-gray-900 pb-4">
@@ -99,7 +99,7 @@ export function HomePage() {
             </div>
           </main>
         </div>
-      </div>
+      </Page>
     );
   }
 
