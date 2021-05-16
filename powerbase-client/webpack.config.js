@@ -3,8 +3,20 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
+  context: __dirname,
+  entry: './src/index.jsx',
   output: {
     path: path.resolve(__dirname, 'build'),
+  },
+  resolve: {
+    alias: {
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@lib': path.resolve(__dirname, 'src/lib'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@models': path.resolve(__dirname, 'src/models'),
+    },
+    extensions: ['.js', '.jsx'],
   },
   module: {
     rules: [
@@ -26,7 +38,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|jpe?g|gif|svg)$/i,
         use: [
           {
             loader: 'file-loader',
