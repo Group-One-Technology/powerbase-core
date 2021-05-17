@@ -19,6 +19,7 @@ import { PageContent } from '@components/layout/PageContent';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
+import { Button } from '@components/ui/Button';
 
 export function CreateBasePage() {
   const history = useHistory();
@@ -35,35 +36,47 @@ export function CreateBasePage() {
         </PageHeader>
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
-            <InlineInput
-              type="text"
-              label="Name"
-              name="database-name"
-              placeholder="e.g. powerbase"
-              value={databaseName}
-              onChange={(evt) => setDatabaseName(evt.target.value)}
-              error={databaseNameError.error}
-            />
-            <InlineSelect
-              label="Type"
-              value={databaseType}
-              setValue={setDatabaseType}
-              options={DATABASE_TYPES}
-            />
-            <InlineRadio
-              label="Where"
-              aria-label="Cloud Platform"
-              value={databasePlatform}
-              setValue={setDatabasePlatform}
-              options={DB_PLATFORMS}
-              enhancer={(option) => !!option.price && (
-                <RadioGroup.Description as="div" className="mt-2 flex text-sm sm:mt-0 sm:block sm:ml-4 sm:text-right">
-                  <div className="font-medium text-gray-900">{option.price}</div>
-                  <div className="ml-1 text-gray-500 sm:ml-0">/mo</div>
-                </RadioGroup.Description>
-              )}
-            />
-            <InlineColorRadio value={color} setValue={setColor} />
+            <form>
+              <InlineInput
+                type="text"
+                label="Name"
+                name="database-name"
+                placeholder="e.g. powerbase"
+                value={databaseName}
+                onChange={(evt) => setDatabaseName(evt.target.value)}
+                error={databaseNameError.error}
+                className="my-6"
+              />
+              <InlineSelect
+                label="Type"
+                value={databaseType}
+                setValue={setDatabaseType}
+                options={DATABASE_TYPES}
+                className="my-6"
+              />
+              <InlineRadio
+                label="Where"
+                aria-label="Cloud Platform"
+                value={databasePlatform}
+                setValue={setDatabasePlatform}
+                options={DB_PLATFORMS}
+                enhancer={(option) => !!option.price && (
+                  <RadioGroup.Description as="div" className="mt-2 flex text-sm sm:mt-0 sm:block sm:ml-4 sm:text-right">
+                    <div className="font-medium text-gray-900">{option.price}</div>
+                    <div className="ml-1 text-gray-500 sm:ml-0">/mo</div>
+                  </RadioGroup.Description>
+                )}
+                className="my-6"
+              />
+              <InlineColorRadio value={color} setValue={setColor} />
+              <div className="grid grid-cols-12 my-8">
+                <div className="col-start-4 col-span-9">
+                  <Button type="submit" size="lg" className="w-full justify-center">
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
         </PageContent>
       </div>
