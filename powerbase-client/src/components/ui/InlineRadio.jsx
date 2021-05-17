@@ -9,11 +9,21 @@ export function InlineRadio({
   setValue,
   options,
   enhancer,
+  error,
+  setError,
   className,
+  classNames,
   ...props
 }) {
   return (
-    <RadioGroup value={value} onChange={setValue} className={cn('grid grid-cols-12', className)}>
+    <RadioGroup
+      value={value}
+      onChange={(curVal) => {
+        setValue(curVal);
+        if (setError) setError(undefined);
+      }}
+      className={cn('grid grid-cols-12', className)}
+    >
       <div className="col-span-3">
         <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>
         {props['aria-label'] && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
@@ -28,7 +38,8 @@ export function InlineRadio({
                 active ? 'ring-1 ring-offset-2 ring-indigo-500' : ''
               ), {
                 'cursor-not-allowed': option.disabled,
-              })
+              }, option.className,
+              value.name === option.name ? classNames?.checked : '')
             }
             disabled={option.disabled}
           >
@@ -36,7 +47,7 @@ export function InlineRadio({
               <>
                 <div className="flex items-center">
                   <div className="text-sm">
-                    <RadioGroup.Label as="p" className="font-medium text-gray-900">
+                    <RadioGroup.Label as="p" className={cn('font-medium text-gray-900', option.classNames?.label)}>
                       {option.name}
                     </RadioGroup.Label>
                     {option.description && (
@@ -48,7 +59,7 @@ export function InlineRadio({
                     )}
                   </div>
                 </div>
-                {enhancer(option)}
+                {enhancer && enhancer(option)}
                 <div
                   className={cn('absolute -inset-px rounded-lg border-2 pointer-events-none', (
                     checked ? 'border-indigo-500' : 'border-transparent'
@@ -60,6 +71,13 @@ export function InlineRadio({
           </RadioGroup.Option>
         ))}
       </div>
+      {error && (
+        <div className="col-start-4 col-span-9">
+          <p className="text-xs text-red-600 my-2">
+            {error.message}
+          </p>
+        </div>
+      )}
     </RadioGroup>
   )
 }
@@ -68,6 +86,10 @@ const IValue = PropTypes.shape({
   name: PropTypes.string.isRequired,
   description: PropTypes.string,
   disabled: PropTypes.bool,
+  className: PropTypes.string,
+  classNames: PropTypes.shape({
+    label: PropTypes.string,
+  }),
 });
 
 InlineRadio.propTypes = {
@@ -77,4 +99,6 @@ InlineRadio.propTypes = {
   options: PropTypes.arrayOf(IValue),
   className: PropTypes.string,
   enhancer: PropTypes.any,
+  error: PropTypes.instanceOf(Error),
+  setError: PropTypes.func,
 };
