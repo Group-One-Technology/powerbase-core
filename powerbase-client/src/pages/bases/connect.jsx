@@ -37,6 +37,7 @@ export function BasesConnectPage() {
               type="text"
               label="Name"
               name="database-name"
+              placeholder="e.g. powerbase"
               value={databaseName}
               onChange={(evt) => setDatabaseName(evt.target.value)}
               error={databaseNameError.error}
