@@ -41,6 +41,7 @@ export function ConnectBasePage() {
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
+      setLoading(false);
       return;
     }
 
