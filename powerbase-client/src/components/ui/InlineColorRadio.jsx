@@ -13,27 +13,39 @@ const COLORS = {
   pink: 'text-pink-400 focus:text-pink-400 active:text-pink-400 ring-pink-400 focus:ring-pink-400 active:ring-pink-400',
 }
 
-export function InlineColorRadio({ value, setValue, className }) {
+export function InlineColorRadio({ value, setValue, className, error, setError }) {
   return (
     <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
       <div className="col-span-3">
         <span className="block text-base font-medium text-gray-700">Colors</span>
       </div>
-      <div className="mt-2 flex space-x-3">
-        {Object.keys(COLORS).map((color) => (
-          <label key={color} className="inline-flex items-center">
-            <input
-              type="radio"
-              name="color"
-              value={color}
-              className={cn(COLORS[color], 'h-6 w-6')}
-              onChange={() => setValue(color)}
-              checked={color === value}
-            />
-            <span className="sr-only">{color}</span>
-          </label>
-        ))}
+      <div className="mt-2 col-span-9">
+        <div className="flex flex-wrap gap-3">
+          {Object.keys(COLORS).map((color, index) => (
+            <label key={color} className="inline-flex items-center">
+              <input
+                type="radio"
+                name="color"
+                value={color}
+                className={cn(COLORS[color], 'h-6 w-6')}
+                onChange={() => {
+                  setValue(color);
+                  if (setError) setError(undefined);
+                }}
+                checked={color === value}
+              />
+              <span className="sr-only">{color}</span>
+            </label>
+          ))}
+        </div>
       </div>
+      {error && (
+        <div className="col-start-4 col-span-9">
+          <p className="text-xs text-red-600 my-2">
+            {error.message}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -42,4 +54,6 @@ InlineColorRadio.propTypes = {
   value: PropTypes.string.isRequired,
   setValue: PropTypes.func.isRequired,
   className: PropTypes.string,
+  error: PropTypes.instanceOf(Error),
+  setError: PropTypes.func,
 };
