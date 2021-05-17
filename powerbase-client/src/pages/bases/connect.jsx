@@ -9,6 +9,10 @@ import { useAuthUser } from '@models/AuthUser';
 import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
+import { InlineInput } from '@components/ui/InlineInput';
+import { PageContent } from '@components/layout/PageContent';
+import { useValidState } from '@lib/hooks/useValidState';
+import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -17,6 +21,7 @@ function classNames(...classes) {
 export function BasesConnectPage() {
   const history = useHistory();
   const { authUser } = useAuthUser();
+  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
 
   useEffect(() => {
     if (authUser === null) history.push('/login');
@@ -26,9 +31,21 @@ export function BasesConnectPage() {
     return (
       <Page>
         <div className="py-10">
-          <PageHeader>
+          <PageHeader className="text-center">
             Connect A Database You Own
           </PageHeader>
+          <PageContent className="mt-6">
+            <div className="max-w-xl mx-auto">
+              <InlineInput
+                type="text"
+                label="Name"
+                name="database-name"
+                value={databaseName}
+                onChange={(evt) => setDatabaseName(evt.target.value)}
+                error={databaseNameError.error}
+              />
+            </div>
+          </PageContent>
         </div>
       </Page>
     );
