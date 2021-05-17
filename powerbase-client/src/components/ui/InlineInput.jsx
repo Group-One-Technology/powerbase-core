@@ -32,12 +32,12 @@ export function InlineInput({
 
   return (
     <div className="grid grid-cols-12 gap-x-2 items-center">
-      <div className="sm:col-span-3">
+      <div className="col-span-3">
         <label htmlFor={inputId} className="block text-base font-medium text-gray-700">
           {label}
         </label>
       </div>
-      <div className="sm:col-span-9">
+      <div className="col-span-9">
         <input
           id={inputId}
           name={name || label || props['aria-label']}
