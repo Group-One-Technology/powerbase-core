@@ -9,6 +9,7 @@ import { useAuthUser } from '@models/AuthUser';
 import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
+import { PageContent } from '@components/layout/PageContent';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -29,7 +30,7 @@ export function HomePage() {
           <PageHeader>
             Bases
           </PageHeader>
-          <main className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <PageContent>
             <div className="px-4 py-8 sm:px-0 border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
               <div className="text-center">
                 <p className="text-lg text-gray-500 pb-4">
@@ -96,7 +97,7 @@ export function HomePage() {
                 </Menu>
               </div>
             </div>
-          </main>
+          </PageContent>
         </div>
       </Page>
     );
