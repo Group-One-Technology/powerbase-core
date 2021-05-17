@@ -20,7 +20,7 @@ import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 
-export function BasesConnectPage() {
+export function CreateBasePage() {
   const history = useHistory();
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
@@ -31,7 +31,7 @@ export function BasesConnectPage() {
     <Page authOnly>
       <div className="py-10">
         <PageHeader className="text-center">
-          Connect A Database You Own
+          Add Database
         </PageHeader>
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
