@@ -18,12 +18,14 @@ import { InlineInput } from '@components/ui/InlineInput';
 import { PageContent } from '@components/layout/PageContent';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineRadio } from '@components/ui/InlineRadio';
+import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 
 export function BasesConnectPage() {
   const history = useHistory();
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
+  const [color, setColor] = useState('');
 
   return (
     <Page authOnly>
@@ -61,6 +63,7 @@ export function BasesConnectPage() {
                 </RadioGroup.Description>
               )}
             />
+            <InlineColorRadio value={color} setValue={setColor} />
           </div>
         </PageContent>
       </div>
