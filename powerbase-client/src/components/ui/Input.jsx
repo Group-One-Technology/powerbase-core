@@ -11,6 +11,7 @@ export function Input({
   onFocus,
   onBlur,
   showError,
+  className,
   ...props
 }) {
   const [focused, setFocused] = useState(false);
@@ -33,7 +34,7 @@ export function Input({
   return (
     <div>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className={cn('block text-sm font-medium text-gray-700', className)}>
           {label}
         </label>
       )}
@@ -76,4 +77,5 @@ Input.propTypes = {
   onBlur: PropTypes.func,
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
+  className: PropTypes.string,
 }

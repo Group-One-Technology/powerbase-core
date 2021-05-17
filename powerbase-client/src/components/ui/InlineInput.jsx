@@ -11,6 +11,7 @@ export function InlineInput({
   onFocus,
   onBlur,
   showError,
+  className,
   ...props
 }) {
   const [focused, setFocused] = useState(false);
@@ -31,7 +32,7 @@ export function InlineInput({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <div className="grid grid-cols-12 gap-x-2 items-center my-4">
+    <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
       <div className="col-span-3">
         <label htmlFor={inputId} className="block text-base font-medium text-gray-700">
           {label}
@@ -80,4 +81,5 @@ InlineInput.propTypes = {
   onBlur: PropTypes.func,
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
+  className: PropTypes.string,
 }

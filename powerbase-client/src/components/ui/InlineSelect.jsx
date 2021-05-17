@@ -4,11 +4,11 @@ import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
-export function InlineSelect({ label, value, setValue, options }) {
+export function InlineSelect({ label, value, setValue, options, className }) {
   return (
     <Listbox value={value} onChange={setValue}>
       {({ open }) => (
-        <div className="grid grid-cols-12 gap-x-2 items-center my-4">
+        <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
           <div className="col-span-3">
             <Listbox.Label className="block text-base font-medium text-gray-700">{label}</Listbox.Label>
           </div>
@@ -91,4 +91,5 @@ InlineSelect.propTypes = {
   value: IValue,
   setValue: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(IValue),
+  className: PropTypes.string,
 };

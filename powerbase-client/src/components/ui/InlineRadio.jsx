@@ -9,10 +9,11 @@ export function InlineRadio({
   setValue,
   options,
   enhancer,
+  className,
   ...props
 }) {
   return (
-    <RadioGroup value={value} onChange={setValue} className="grid grid-cols-12">
+    <RadioGroup value={value} onChange={setValue} className={cn('grid grid-cols-12', className)}>
       <div className="col-span-3">
         <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>
         {props['aria-label'] && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
@@ -74,5 +75,6 @@ InlineRadio.propTypes = {
   value: IValue,
   setValue: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(IValue),
+  className: PropTypes.string,
   enhancer: PropTypes.any,
 };

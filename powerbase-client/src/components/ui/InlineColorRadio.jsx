@@ -13,9 +13,9 @@ const COLORS = {
   pink: 'text-pink-400 focus:text-pink-400 active:text-pink-400 ring-pink-400 focus:ring-pink-400 active:ring-pink-400',
 }
 
-export function InlineColorRadio({ value, setValue }) {
+export function InlineColorRadio({ value, setValue, className }) {
   return (
-    <div className="grid grid-cols-12 gap-x-2 items-center my-4">
+    <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
       <div className="col-span-3">
         <span className="block text-base font-medium text-gray-700">Colors</span>
       </div>
@@ -41,4 +41,5 @@ export function InlineColorRadio({ value, setValue }) {
 InlineColorRadio.propTypes = {
   value: PropTypes.string.isRequired,
   setValue: PropTypes.func.isRequired,
+  className: PropTypes.string,
 };
