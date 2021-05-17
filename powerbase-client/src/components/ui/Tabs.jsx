@@ -1,9 +1,10 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
 export function Tabs({ id, name, label, tabs }) {
+  const history = useHistory();
   const location = useLocation();
 
   return (
@@ -19,7 +20,14 @@ export function Tabs({ id, name, label, tabs }) {
           defaultValue={tabs.find((tab) => location.pathname === tab.href).name}
         >
           {tabs.map((tab) => (
-            <option key={tab.name}>{tab.name}</option>
+            <option
+              key={tab.name}
+              onClick={() => {
+                if (location.pathname !== tab.href) history.push(tab.href)
+              }}
+            >
+              {tab.name}
+            </option>
           ))}
         </select>
       </div>
