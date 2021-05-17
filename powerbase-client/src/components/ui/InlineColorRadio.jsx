@@ -68,7 +68,7 @@ export function InlineColorRadio({ value, setValue, className, error, setError }
   return (
     <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
       <div className="col-span-3">
-        <span className="block text-base font-medium text-gray-700">Colors</span>
+        <span className="block text-base font-medium text-gray-700">Color</span>
       </div>
       <div className="mt-2 col-span-9">
         <div
