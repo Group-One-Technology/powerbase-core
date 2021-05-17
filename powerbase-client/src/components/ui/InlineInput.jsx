@@ -31,7 +31,7 @@ export function InlineInput({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <div className="grid grid-cols-12 gap-x-2 items-center">
+    <div className="grid grid-cols-12 gap-x-2 items-center my-4">
       <div className="col-span-3">
         <label htmlFor={inputId} className="block text-base font-medium text-gray-700">
           {label}
