@@ -6,6 +6,7 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:username).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
+    optional(:color).value(:string)
     optional(:connection_string).value(:string)
   end
 
@@ -33,6 +34,7 @@ class PowerbaseDatabasesController < ApplicationController
           connection_string: Powerbase.connection_string,
           adapter: Powerbase.adapter,
           is_migrated: false,
+          color: options[:color]
         })
 
         if !@database.save
