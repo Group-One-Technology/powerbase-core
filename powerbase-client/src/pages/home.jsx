@@ -11,10 +11,6 @@ import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
-
 export function HomePage() {
   const history = useHistory();
   const { authUser } = useAuthUser();
@@ -86,6 +82,20 @@ export function HomePage() {
                                   ))}
                                 >
                                   Connect A Database You Own
+                                </Link>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <Link
+                                  to="/bases/connect-url"
+                                  className={cn('block px-4 py-2 text-sm', (
+                                    active
+                                      ? 'bg-gray-100 text-gray-900'
+                                      : 'text-gray-700'
+                                  ))}
+                                >
+                                  Connect from a URL
                                 </Link>
                               )}
                             </Menu.Item>
