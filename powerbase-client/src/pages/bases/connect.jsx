@@ -14,10 +14,6 @@ import { PageContent } from '@components/layout/PageContent';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
-
 export function BasesConnectPage() {
   const history = useHistory();
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
