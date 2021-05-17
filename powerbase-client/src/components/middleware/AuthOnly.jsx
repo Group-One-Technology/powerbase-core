@@ -7,7 +7,6 @@ export function AuthOnly({ children }) {
   const history = useHistory();
   const { authUser } = useAuthUser();
 
-  console.log({ authUser });
   useEffect(() => {
     if (authUser === null) history.push('/login');
   }, [authUser]);
