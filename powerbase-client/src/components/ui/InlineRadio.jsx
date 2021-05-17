@@ -25,7 +25,9 @@ export function InlineRadio({
             className={({ active }) =>
               cn('flex-1 relative block rounded-lg border border-gray-300 bg-white shadow-sm px-6 py-4 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none', (
                 active ? 'ring-1 ring-offset-2 ring-indigo-500' : ''
-              ))
+              ), {
+                'cursor-not-allowed': option.disabled,
+              })
             }
             disabled={option.disabled}
           >
