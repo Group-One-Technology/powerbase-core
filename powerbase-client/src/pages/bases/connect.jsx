@@ -10,6 +10,7 @@ import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { DATABASE_TYPES, DB_PLATFORMS } from '@lib/constants';
+import { connectDatabase } from '@lib/api/databases';
 
 import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
@@ -32,7 +33,7 @@ export function ConnectBasePage() {
   const [password, setPassword, passwordError] = useValidState('', REQUIRED_VALIDATOR);
   const [color, setColor, colorError] = useValidState('');
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
 
     if (!color.length) {
@@ -40,18 +41,39 @@ export function ConnectBasePage() {
       return;
     }
 
-    const hasErrors = !!(!databaseName.length && databaseNameError)
-      || !databaseType
-      || !databasePlatform;
+    const hasErrors = !!(!databaseName.length && databaseNameError.error)
+      || !!(!host.length && hostError.error)
+      || !!portError.error
+      || !databaseType;
 
+    console.log({
+      databaseName,
+      databaseNameError,
+      databaseType,
+      host,
+      hostError,
+      portError,
+    });
     if (!hasErrors) {
-      console.log({
-        success: true,
-        name: databaseName,
-        adapter: databaseType,
-        platform: databasePlatform,
-        color,
-      });
+      try {
+        const response = await connectDatabase({
+          host,
+          port,
+          username,
+          password,
+          database: databaseName,
+          adapter: databaseType,
+          color,
+        });
+
+        if (response.connected) {
+          alert('Database Connected!');
+          console.log(response);
+        }
+      } catch (error) {
+        console.log({ error });
+        alert(error.response.data.exception);
+      }
     }
   };
 
