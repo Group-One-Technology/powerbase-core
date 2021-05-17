@@ -20,6 +20,7 @@ import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
+import { Tabs } from '@components/ui/Tabs';
 
 export function CreateBasePage() {
   const history = useHistory();
@@ -59,6 +60,14 @@ export function CreateBasePage() {
         </PageHeader>
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
+            <Tabs
+              id="databaseTabs"
+              name="database-tabs"
+              tabs={[
+                { name: 'New', href: '/bases/create' },
+                { name: 'Link Existing', href: '/bases/connect' },
+              ]}
+            />
             <form onSubmit={handleSubmit}>
               <InlineInput
                 type="text"
