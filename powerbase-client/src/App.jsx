@@ -9,6 +9,7 @@ import {
 import { LoginPage } from '@pages/login';
 import { HomePage } from '@pages/home';
 import { CreateBasePage } from '@pages/bases/create';
+import { ConnectBasePage } from '@pages/bases/connect';
 import { GlobalProviders } from '@components/GlobalProviders';
 
 import './index.css';
@@ -35,9 +36,8 @@ function BasesRoute() {
 
   return (
     <Switch>
-      <Route exact path={`${path}/create`}>
-        <CreateBasePage />
-      </Route>
+      <Route exact path={`${path}/create`} component={CreateBasePage} />
+      <Route exact path={`${path}/connect`} component={ConnectBasePage} />
     </Switch>
   );
 }
