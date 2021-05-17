@@ -20,36 +20,27 @@ function classNames(...classes) {
 
 export function BasesConnectPage() {
   const history = useHistory();
-  const { authUser } = useAuthUser();
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
 
-  useEffect(() => {
-    if (authUser === null) history.push('/login');
-  }, [authUser]);
-
-  if (authUser) {
-    return (
-      <Page>
-        <div className="py-10">
-          <PageHeader className="text-center">
-            Connect A Database You Own
-          </PageHeader>
-          <PageContent className="mt-6">
-            <div className="max-w-xl mx-auto">
-              <InlineInput
-                type="text"
-                label="Name"
-                name="database-name"
-                value={databaseName}
-                onChange={(evt) => setDatabaseName(evt.target.value)}
-                error={databaseNameError.error}
-              />
-            </div>
-          </PageContent>
-        </div>
-      </Page>
-    );
-  }
-
-  return <>Loading...</>;
+  return (
+    <Page authOnly>
+      <div className="py-10">
+        <PageHeader className="text-center">
+          Connect A Database You Own
+        </PageHeader>
+        <PageContent className="mt-6">
+          <div className="max-w-xl mx-auto">
+            <InlineInput
+              type="text"
+              label="Name"
+              name="database-name"
+              value={databaseName}
+              onChange={(evt) => setDatabaseName(evt.target.value)}
+              error={databaseNameError.error}
+            />
+          </div>
+        </PageContent>
+      </div>
+    </Page>
+  );
 }
