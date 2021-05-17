@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 
 import { SITE_DESCRIPTION, SITE_NAME } from '@lib/constants';
+import { Middleware } from '@components/middleware/Middleware';
 import { Navbar } from './Navbar';
 
 export function Page({
@@ -11,6 +12,7 @@ export function Page({
   description,
   className,
   children,
+  authOnly,
   navbar = <Navbar />,
 }) {
   return (
@@ -26,8 +28,10 @@ export function Page({
         <meta name="msapplication-TileColor" content="#2d89ef" />
         <meta name="theme-color" content="#ffffff" />
       </Helmet>
-      {navbar}
-      {children}
+      <Middleware authOnly={authOnly}>
+        {navbar}
+        {children}
+      </Middleware>
     </div>
   );
 }
@@ -36,6 +40,7 @@ Page.propTypes = {
   title: PropTypes.string,
   className: PropTypes.string,
   navbar: PropTypes.any,
+  authOnly: PropTypes.bool,
   children: PropTypes.oneOfType([
     PropTypes.element,
     PropTypes.arrayOf(PropTypes.element),
