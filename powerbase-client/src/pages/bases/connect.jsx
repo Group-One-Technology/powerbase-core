@@ -33,8 +33,11 @@ export function ConnectBasePage() {
   const [password, setPassword, passwordError] = useValidState('', REQUIRED_VALIDATOR);
   const [color, setColor, colorError] = useValidState('');
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
+    setLoading(true);
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
@@ -46,14 +49,6 @@ export function ConnectBasePage() {
       || !!portError.error
       || !databaseType;
 
-    console.log({
-      databaseName,
-      databaseNameError,
-      databaseType,
-      host,
-      hostError,
-      portError,
-    });
     if (!hasErrors) {
       try {
         const response = await connectDatabase({
@@ -67,14 +62,15 @@ export function ConnectBasePage() {
         });
 
         if (response.connected) {
-          alert('Database Connected!');
-          console.log(response);
+          history.push(`/bases/${response.database.id}`)
         }
       } catch (error) {
         console.log({ error });
         alert(error.response.data.exception);
       }
     }
+
+    setLoading(false);
   };
 
   return (
@@ -161,7 +157,12 @@ export function ConnectBasePage() {
               />
               <div className="grid grid-cols-12 my-6">
                 <div className="col-start-4 col-span-9">
-                  <Button type="submit" size="lg" className="w-full justify-center">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full justify-center"
+                    loading={loading}
+                  >
                     Connect and Save
                   </Button>
                 </div>
