@@ -51,8 +51,8 @@ Tabs.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
-  tabs: PropTypes.shape({
+  tabs: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
-  }).isRequired,
+  })).isRequired,
 };
