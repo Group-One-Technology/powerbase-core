@@ -1,6 +1,8 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import { isSafari } from 'react-device-detect';
+import { capitalize } from '@lib/helpers/capitalize';
 
 const COLORS = {
   gray: 'text-gray-400 focus:text-gray-400 active:text-gray-400 ring-gray-400 focus:ring-gray-400 active:ring-gray-400',
@@ -20,7 +22,11 @@ export function InlineColorRadio({ value, setValue, className, error, setError }
         <span className="block text-base font-medium text-gray-700">Colors</span>
       </div>
       <div className="mt-2 col-span-9">
-        <div className="flex flex-wrap gap-3">
+        <div
+          className={cn('flex flex-wrap gap-3', {
+            'flex-col': isSafari,
+          })}
+        >
           {Object.keys(COLORS).map((color, index) => (
             <label key={color} className="inline-flex items-center">
               <input
@@ -34,7 +40,7 @@ export function InlineColorRadio({ value, setValue, className, error, setError }
                 }}
                 checked={color === value}
               />
-              <span className="sr-only">{color}</span>
+              <span className={cn(!isSafari ? 'sr-only' : '')}>{capitalize(color)}</span>
             </label>
           ))}
         </div>
