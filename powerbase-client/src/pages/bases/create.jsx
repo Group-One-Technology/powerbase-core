@@ -26,7 +26,30 @@ export function CreateBasePage() {
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
-  const [color, setColor] = useState('');
+  const [color, setColor, colorError] = useValidState('');
+
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+
+    if (!color.length) {
+      colorError.setError(new Error('Required'));
+      return;
+    }
+
+    const hasErrors = !!(!databaseName.length && databaseNameError)
+      || !databaseType
+      || !databasePlatform;
+
+    if (!hasErrors) {
+      console.log({
+        success: true,
+        name: databaseName,
+        adapter: databaseType,
+        platform: databasePlatform,
+        color,
+      });
+    }
+  };
 
   return (
     <Page authOnly>
@@ -36,7 +59,7 @@ export function CreateBasePage() {
         </PageHeader>
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
-            <form>
+            <form onSubmit={handleSubmit}>
               <InlineInput
                 type="text"
                 label="Name"
@@ -46,6 +69,7 @@ export function CreateBasePage() {
                 onChange={(evt) => setDatabaseName(evt.target.value)}
                 error={databaseNameError.error}
                 className="my-6"
+                required
               />
               <InlineSelect
                 label="Type"
@@ -68,8 +92,14 @@ export function CreateBasePage() {
                 )}
                 className="my-6"
               />
-              <InlineColorRadio value={color} setValue={setColor} />
-              <div className="grid grid-cols-12 my-8">
+              <InlineColorRadio
+                value={color}
+                setValue={setColor}
+                error={colorError.error}
+                setError={colorError.setError}
+                className="my-6"
+              />
+              <div className="grid grid-cols-12 my-6">
                 <div className="col-start-4 col-span-9">
                   <Button type="submit" size="lg" className="w-full justify-center">
                     Save
