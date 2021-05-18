@@ -4,7 +4,7 @@ one:
   first_name: John
   last_name: Doe
   email: johndoe@example.com
-  password_digest: $2a$12$5SjuYvklZ9s4mwG3C4y0ouVT5sVk3HSb9JlASYj3OmyUCsd4Reg3i
+  password_digest: "$2a$12$Zc4v9WFWqYqrY9KyAKt2g.CIvVKUjGZk8XANJRhEOt2gS.Egh8Y9C"
   created_at: "2021-05-18T19:39:27.157Z"
   updated_at: "2021-05-18T19:39:27.157Z"
 
@@ -12,6 +12,6 @@ two:
   first_name: Ellie
   last_name: Doe
   email: elliedoe@example.com
-  password_digest: $2a$12$5SjuYvklZ9s4mwG3C4y0ouVT5sVk3HSb9JlASYj3OmyUCsd4Reg3i
+  password_digest: "$2a$12$Zc4v9WFWqYqrY9KyAKt2g.CIvVKUjGZk8XANJRhEOt2gS.Egh8Y9C"
   created_at: "2021-05-18T19:39:27.157Z"
   updated_at: "2021-05-18T19:39:27.157Z"
