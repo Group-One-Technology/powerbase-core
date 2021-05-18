@@ -9,6 +9,7 @@ class PowerbaseDatabasesControllerTest < ActionDispatch::IntegrationTest
   test "should connect to a database" do
     post databases_connect_url,
       params: {
+        adapter: "postgresql",
         host: "localhost",
         port: "5432",
         username: "postgres",
