@@ -15,3 +15,27 @@ export async function login({ email, password }) {
 
   return undefined;
 }
+
+export async function logout() {
+  const response = await securedApi.post('/logout');
+
+  if (response.statusText === 'OK') {
+    return true;
+  }
+
+  return undefined;
+}
+
+export async function auth() {
+  if (!localStorage.signedIn) {
+    return null;
+  }
+
+  const response = await securedApi.get('/auth');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
