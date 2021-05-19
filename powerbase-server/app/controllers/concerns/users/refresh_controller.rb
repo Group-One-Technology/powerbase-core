@@ -15,7 +15,7 @@ class Users::RefreshController < ApplicationController
     render json: { csrf: tokens[:csrf] }
   end
 
-  def access_payload
-    build_access_payload_based_on_refresh(payload)
+  def auth
+    render json: { user: current_user }
   end
 end
