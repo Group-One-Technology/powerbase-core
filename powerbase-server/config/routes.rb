@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
+  get '/auth/', to: 'users/refresh#auth'
   post '/refresh/', to: 'users/refresh#create'
-  post '/auth/', to: 'users/refresh#auth'
   post '/login/', to: 'users/login#create'
-  post '/logout/', to: 'users/logout#destroy'
+  post '/logout/', to: 'users/login#destroy'
   post '/register/', to: 'users/register#create'
 
   get '/databases/', to: 'powerbase_databases#index'
