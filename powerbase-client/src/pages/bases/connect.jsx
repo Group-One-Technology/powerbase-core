@@ -41,6 +41,7 @@ export function ConnectBasePage() {
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
+      setLoading(false);
       return;
     }
 
@@ -57,7 +58,7 @@ export function ConnectBasePage() {
           username,
           password,
           database: databaseName,
-          adapter: databaseType,
+          adapter: databaseType.value,
           color,
         });
 
@@ -87,6 +88,7 @@ export function ConnectBasePage() {
               tabs={[
                 { name: 'New', href: '/bases/create' },
                 { name: 'Link Existing', href: '/bases/connect' },
+                { name: 'Link from URL', href: '/bases/connect-url' },
               ]}
             />
             <form onSubmit={handleSubmit}>

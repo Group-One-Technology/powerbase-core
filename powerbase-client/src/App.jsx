@@ -11,6 +11,7 @@ import { HomePage } from '@pages/home';
 import { BasePage } from '@pages/bases/[id]';
 import { CreateBasePage } from '@pages/bases/create';
 import { ConnectBasePage } from '@pages/bases/connect';
+import { ConnectURLBasePage } from '@pages/bases/connect-url';
 import { GlobalProviders } from '@components/GlobalProviders';
 
 import './index.css';
@@ -39,6 +40,7 @@ function BasesRoute() {
     <Switch>
       <Route exact path={`${path}/create`} component={CreateBasePage} />
       <Route exact path={`${path}/connect`} component={ConnectBasePage} />
+      <Route exact path={`${path}/connect-url`} component={ConnectURLBasePage} />
       <Route path={`${path}/:id`} component={BasePage} />
       <Route path="*" component={() => <h1>Not found!</h1>} />
     </Switch>

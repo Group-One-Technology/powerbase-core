@@ -10,6 +10,7 @@ import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { DATABASE_TYPES, DB_PLATFORMS } from '@lib/constants';
+import { connectDatabase } from '@lib/api/databases';
 
 import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
@@ -22,34 +23,43 @@ import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
 
-export function CreateBasePage() {
+export function ConnectURLBasePage() {
   const history = useHistory();
-  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
-  const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
-  const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
+  const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
   const [color, setColor, colorError] = useValidState('');
 
-  const handleSubmit = (evt) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    setLoading(true);
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
+      setLoading(false);
       return;
     }
 
-    const hasErrors = !!(!databaseName.length && databaseNameError)
-      || !databaseType
-      || !databasePlatform;
+    const hasErrors = !connectionString.length
+      || !!connectionStringError.error;
 
     if (!hasErrors) {
-      console.log({
-        success: true,
-        name: databaseName,
-        adapter: databaseType,
-        platform: databasePlatform,
-        color,
-      });
+      try {
+        const response = await connectDatabase({
+          connectionString,
+          color,
+        });
+
+        if (response.connected) {
+          history.push(`/bases/${response.database.id}`)
+        }
+      } catch (error) {
+        console.log({ error });
+        alert(error.response.data.exception);
+      }
     }
+
+    setLoading(false);
   };
 
   return (
@@ -72,35 +82,14 @@ export function CreateBasePage() {
             <form onSubmit={handleSubmit}>
               <InlineInput
                 type="text"
-                label="Name"
-                name="database-name"
-                placeholder="e.g. powerbase"
-                value={databaseName}
-                onChange={(evt) => setDatabaseName(evt.target.value)}
-                error={databaseNameError.error}
+                label="Database"
+                name="connection-url"
+                placeholder="e.g. postgresql://user:password@localhost:port/database"
+                value={connectionString}
+                onChange={(evt) => setConnectionString(evt.target.value)}
+                error={connectionStringError.error}
                 className="my-6"
                 required
-              />
-              <InlineSelect
-                label="Type"
-                value={databaseType}
-                setValue={setDatabaseType}
-                options={DATABASE_TYPES}
-                className="my-6"
-              />
-              <InlineRadio
-                label="Where"
-                aria-label="Cloud Platform"
-                value={databasePlatform}
-                setValue={setDatabasePlatform}
-                options={DB_PLATFORMS}
-                enhancer={(option) => !!option.price && (
-                  <RadioGroup.Description as="div" className="mt-2 flex text-sm sm:mt-0 sm:block sm:ml-4 sm:text-right">
-                    <div className="font-medium text-gray-900">{option.price}</div>
-                    <div className="ml-1 text-gray-500 sm:ml-0">/mo</div>
-                  </RadioGroup.Description>
-                )}
-                className="my-6"
               />
               <InlineColorRadio
                 value={color}
@@ -111,8 +100,13 @@ export function CreateBasePage() {
               />
               <div className="grid grid-cols-12 my-6">
                 <div className="col-start-4 col-span-9">
-                  <Button type="submit" size="lg" className="w-full justify-center">
-                    Save
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full justify-center"
+                    loading={loading}
+                  >
+                    Connect and Save
                   </Button>
                 </div>
               </div>

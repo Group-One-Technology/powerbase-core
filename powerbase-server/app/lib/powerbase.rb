@@ -5,6 +5,9 @@ module Powerbase
   # The adapter of the current connection.
   @@adapter = nil
 
+  # The database name of the current connection.
+  @@database = nil
+
   # A well-formed URI that is used to connect to the database.
   @@connection_string = nil
 
@@ -19,15 +22,20 @@ module Powerbase
   # :password :: the password of a user that has access to the database.
   # :database :: the name of the database to connect to.
   def self.connect(options)
-    if !options[:adapter]
-      raise StandardError.new("Must have an adapter in order to establish a connection.");
+    if options[:adapter] && options[:database]
+      @@adapter = options[:adapter]
+      @@database = options[:database]
+      user = "#{options[:username]}:#{options[:password]}"
+      server = "#{options[:host]}:#{options[:port]}"
+      @@connection_string = "#{options[:adapter]}://#{user}@#{server}/#{options[:database]}"
+    elsif options[:connection_string]
+      @@connection_string = options[:connection_string]
+      @@adapter, connection_string = options[:connection_string].split('://')
+      @@database = options[:connection_string].split(/[:@\/]/).last
+    else
+      raise StandardError.new('Missing connection credentials to connect to Powerbase.')
     end
 
-    user = "#{options[:username]}:#{options[:password]}"
-    server = "#{options[:host]}:#{options[:port]}"
-
-    @@adapter = options[:adapter]
-    @@connection_string = options[:connection_string] || "#{options[:adapter]}://#{user}@#{server}/#{options[:database]}"
     @@DB = Sequel.connect(@@connection_string)
     @@DB.extension :pg_enum if options[:adapter] == "postgresql"
 
@@ -43,23 +51,23 @@ module Powerbase
     @@DB
   end
 
-  # Returns the current connection string
+  # Returns the current connection string.
   def self.connection_string
     @@connection_string
   end
 
-  # Returns a boolean whether the database has successfully connected
+  # Returns a boolean whether the database has successfully connected.
   def self.connected?
     @@DB.test_connection
   end
 
-  # Returns the current connection string
+  # Returns the adapter of the current connection.
   def self.adapter
     @@adapter
   end
 
-  # Returns the current connection string
-  def self.connection_string
-    @@connection_string
+  # Returns the database of the current connection.
+  def self.database
+    @@database
   end
 end

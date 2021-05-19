@@ -20,17 +20,16 @@ class PowerbaseDatabasesController < ApplicationController
   # POST /databases/connect
   def connect
     options = safe_params.output
-    options[:adapter] = options[:adapter] || "postgresql"
 
     Powerbase.connect(options)
     @database = nil
 
     if Powerbase.connected?
-      @database = PowerbaseDatabase.find_by(name: options[:database])
+      @database = PowerbaseDatabase.find_by(name: Powerbase.database)
 
       if !@database
         @database = PowerbaseDatabase.new({
-          name: options[:database],
+          name: Powerbase.database,
           connection_string: Powerbase.connection_string,
           adapter: Powerbase.adapter,
           is_migrated: false,
