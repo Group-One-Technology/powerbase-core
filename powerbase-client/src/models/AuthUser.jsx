@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import constate from 'constate';
+import useSWR from 'swr';
+import { auth } from '@lib/api/auth';
 
 // TODO: Add authentication logic
 function useAuthUserModel() {
-  const [tokens, setTokens] = useState(null);
-  const [authUser, setAuthUser] = useState(null);
+  const response = useSWR('/auth', auth);
 
   return {
-    tokens,
-    setTokens,
-    authUser,
-    setAuthUser,
+    authUser: response.data,
+    ...response,
   };
 }
 

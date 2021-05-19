@@ -12,7 +12,7 @@ import { login } from '@lib/api/auth';
 
 export function LoginPage() {
   const history = useHistory();
-  const { authUser, setAuthUser, setTokens } = useAuthUser();
+  const { authUser, mutate: refetchAuthUser } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
   const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
@@ -32,8 +32,8 @@ export function LoginPage() {
       try {
         const response = await login({ email, password });
 
-        setTokens({ csrf: response.csrf });
-        setAuthUser(response.user);
+        await refetchAuthUser();
+        history.push('/');
       } catch (err) {
         console.error(err);
       }
@@ -43,7 +43,7 @@ export function LoginPage() {
   };
 
   useEffect(() => {
-    if (authUser) history.push('/');
+    if (authUser && localStorage.signedIn) history.push('/');
   }, [authUser]);
 
   return (
