@@ -8,47 +8,47 @@ import { InlineRadio } from './InlineRadio';
 const COLORS = [
   {
     name: 'gray',
-    className: '!px-2 !py-1 bg-gray-400 text-gray-400 focus:text-gray-400 active:text-gray-400 ring-gray-400 focus:ring-gray-400 active:ring-gray-400 active:ring-2', classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-gray-400 text-gray-400 focus:text-gray-400 active:text-gray-400 ring-gray-400 focus:ring-gray-400 active:ring-gray-400 active:ring-2', classNames: { label: 'sr-only' },
   },
   {
     name: 'red',
-    className: '!px-2 !py-1 bg-red-400 text-red-400 focus:text-red-400 active:text-red-400 ring-red-400 focus:ring-red-400 active:ring-red-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-red-400 text-red-400 focus:text-red-400 active:text-red-400 ring-red-400 focus:ring-red-400 active:ring-red-400',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'yellow',
-    className: '!px-2 !py-1 bg-yellow-400 text-yellow-400 focus:text-yellow-400 active:text-yellow-400 ring-yellow-400 focus:ring-yellow-400 active:ring-yellow-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-yellow-400 text-yellow-400 focus:text-yellow-400 active:text-yellow-400 ring-yellow-400 focus:ring-yellow-400 active:ring-yellow-400',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'green',
-    className: '!px-2 !py-1 bg-green-400 text-green-400 focus:text-green-400 active:text-green-400 ring-green-400 focus:ring-green-400 active:ring-green-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-green-400 text-green-400 focus:text-green-400 active:text-green-400 ring-green-400 focus:ring-green-400 active:ring-green-400',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'blue',
-    className: '!px-2 !py-1 bg-blue-400 text-blue-400 focus:text-blue-400 active:text-blue-400 ring-blue-400 focus:ring-blue-400 active:ring-blue-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-blue-400 text-blue-400 focus:text-blue-400 active:text-blue-400 ring-blue-400 focus:ring-blue-400 active:ring-blue-400',
+    classNames: { label: 'sr-only' },
    },
   {
     name: 'indigo',
-    className: '!px-2 !py-1 bg-indigo-400 text-indigo-400 focus:text-indigo-400 active:text-indigo-400 ring-indigo-400 focus:ring-indigo-400 active:ring-indigo-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-indigo-400 text-indigo-400 focus:text-indigo-400 active:text-indigo-400 ring-indigo-400 focus:ring-indigo-400 active:ring-indigo-400',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'purple',
-    className: '!px-2 !py-1 bg-purple-400 text-purple-400 focus:text-purple-400 active:text-purple-400 ring-purple-400 focus:ring-purple-400 active:ring-purple-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-purple-400 text-purple-400 focus:text-purple-400 active:text-purple-400 ring-purple-400 focus:ring-purple-400 active:ring-purple-400',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'pink',
-    className: '!px-2 !py-1 bg-pink-400 text-pink-400 focus:text-pink-400 active:text-pink-400 ring-pink-400 focus:ring-pink-400 active:ring-pink-400',
-    classNames: { label: 'text-transparent' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-pink-400 text-pink-400 focus:text-pink-400 active:text-pink-400 ring-pink-400 focus:ring-pink-400 active:ring-pink-400',
+    classNames: { label: 'sr-only' },
   },
 ];
 
 export function InlineColorRadio({ value, setValue, className, error, setError }) {
-  if (isSafari) {
+  if (!isSafari) {
     return (
       <InlineRadio
         label="Colors"
