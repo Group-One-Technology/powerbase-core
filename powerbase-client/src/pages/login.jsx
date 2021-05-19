@@ -30,8 +30,7 @@ export function LoginPage() {
 
     if (!hasErrors) {
       try {
-        const response = await login({ email, password });
-
+        await login({ email, password });
         await refetchAuthUser();
         history.push('/');
       } catch (err) {
