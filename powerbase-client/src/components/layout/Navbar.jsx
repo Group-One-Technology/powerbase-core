@@ -3,6 +3,7 @@ import { useHistory, useLocation, Link } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
+import Gravatar from 'react-gravatar';
 
 import { useAuthUser } from '@models/AuthUser';
 
@@ -70,10 +71,10 @@ export function Navbar() {
                       <div>
                         <Menu.Button className="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                           <span className="sr-only">Open user menu</span>
-                          <img
-                            src={authUser.displayPhotoUrl}
-                            alt={`${authUser.firstName}'s profile picture`}
+                          <Gravatar
+                            email={authUser.email}
                             className="h-8 w-8 rounded-full"
+                            alt={`${authUser.firstName}'s profile picture`}
                           />
                         </Menu.Button>
                       </div>
