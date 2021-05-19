@@ -1,5 +1,5 @@
 class PowerbaseTablesController < ApplicationController
-  before_action :authorize_access_request!
+  # before_action :authorize_access_request!
   before_action :set_database, only: [:index]
 
   schema(:index) do

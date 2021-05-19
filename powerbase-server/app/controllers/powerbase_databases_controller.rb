@@ -1,5 +1,5 @@
 class PowerbaseDatabasesController < ApplicationController
-  before_action :authorize_access_request!
+  # before_action :authorize_access_request!
 
   schema(:connect) do
     optional(:host).value(:string)
