@@ -51,7 +51,6 @@ securedApi.interceptors.response.use(null, (error) => {
         delete localStorage.csrf;
         delete localStorage.signedIn;
 
-        location.replace('/');
         return Promise.reject(error);
       });
   } else {
