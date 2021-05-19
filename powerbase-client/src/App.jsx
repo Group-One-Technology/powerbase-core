@@ -8,7 +8,9 @@ import {
 
 import { LoginPage } from '@pages/login';
 import { HomePage } from '@pages/home';
+import { BasePage } from '@pages/bases/[id]';
 import { CreateBasePage } from '@pages/bases/create';
+import { ConnectBasePage } from '@pages/bases/connect';
 import { GlobalProviders } from '@components/GlobalProviders';
 
 import './index.css';
@@ -35,9 +37,10 @@ function BasesRoute() {
 
   return (
     <Switch>
-      <Route exact path={`${path}/create`}>
-        <CreateBasePage />
-      </Route>
+      <Route exact path={`${path}/create`} component={CreateBasePage} />
+      <Route exact path={`${path}/connect`} component={ConnectBasePage} />
+      <Route path={`${path}/:id`} component={BasePage} />
+      <Route path="*" component={() => <h1>Not found!</h1>} />
     </Switch>
   );
 }
