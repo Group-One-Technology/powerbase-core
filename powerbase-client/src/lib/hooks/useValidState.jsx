@@ -18,8 +18,10 @@ export function useValidState(initialState, validator) {
         : value;
 
       try {
-        validator(newValue);
-        setError(undefined);
+        if (validator) {
+          validator(newValue);
+          setError(undefined);
+        }
       } catch (err) {
         if (validate) {
           setError(err);

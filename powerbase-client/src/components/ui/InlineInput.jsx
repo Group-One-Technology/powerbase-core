@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
-export function Input({
+export function InlineInput({
   id,
   label,
   name,
@@ -32,13 +32,13 @@ export function Input({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <div>
-      {label && (
-        <label htmlFor={inputId} className={cn('block text-sm font-medium text-gray-700', className)}>
+    <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
+      <div className="col-span-3">
+        <label htmlFor={inputId} className="block text-base font-medium text-gray-700">
           {label}
         </label>
-      )}
-      <div className="mt-1">
+      </div>
+      <div className="col-span-9">
         <input
           id={inputId}
           name={name || label || props['aria-label']}
@@ -49,27 +49,31 @@ export function Input({
           })}
           {...props}
         />
-        {(showErrorText && error) && (
-          <p className="mt-2 text-xs text-red-600 my-2">
+      </div>
+      {(showErrorText && error) && (
+        <div className="col-start-4 col-span-9">
+          <p className="text-xs text-red-600 my-2">
             {error.message}
           </p>
-        )}
-        {caption && !(showErrorText && error) && (
-          <p className="mt-2 text-xs text-gray-500 my-2">
+        </div>
+      )}
+      {caption && !(showErrorText && error) && (
+        <div className="col-start-4 col-span-9">
+          <p className="text-xs text-gray-500 my-2">
             {caption}
           </p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
 
-Input.propTypes = {
+InlineInput.propTypes = {
   id: PropTypes.string,
   type: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  label: PropTypes.string,
   value: PropTypes.any,
+  label: PropTypes.string.isRequired,
   error: PropTypes.object,
   showError: PropTypes.bool,
   caption: PropTypes.string,
