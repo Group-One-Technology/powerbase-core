@@ -8,10 +8,11 @@ import { user as userMock } from '@lib/mock/userMock';
 import { useAuthUser } from '@models/AuthUser';
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
+import { login } from '@lib/api/auth';
 
 export function LoginPage() {
   const history = useHistory();
-  const { authUser, setAuthUser } = useAuthUser();
+  const { authUser, setAuthUser, setTokens } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
   const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
@@ -20,11 +21,23 @@ export function LoginPage() {
   const onEmailChange = (evt) => setEmail(evt.target.value);
   const onPasswordChange = (evt) => setPassword(evt.target.value);
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
 
-    setAuthUser(userMock);
+    const hasErrors = (!email.length && emailError.error)
+      || (!password.length && passwordError.error);
+
+    if (!hasErrors) {
+      try {
+        const response = await login({ email, password });
+
+        setTokens({ csrf: response.csrf });
+        setAuthUser(response.user);
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     setLoading(false)
   };
