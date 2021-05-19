@@ -6,6 +6,7 @@ import cn from 'classnames';
 import Gravatar from 'react-gravatar';
 
 import { useAuthUser } from '@models/AuthUser';
+import { logout } from '@lib/api/auth';
 
 const NAVIGATION = [
   { name: 'Bases', href: '/' },
@@ -21,11 +22,16 @@ const USER_NAVIGATION = [
 export function Navbar() {
   const history = useHistory();
   const location = useLocation();
-  const { authUser, setAuthUser } = useAuthUser();
+  const { authUser, mutate } = useAuthUser();
 
-  const logout = () => {
-    setAuthUser(null);
-    history.push('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      mutate(null);
+      history.push('/login');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!authUser) {
@@ -110,7 +116,7 @@ export function Navbar() {
                             {({ active }) => (
                               <button
                                 type="button"
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className={cn('block w-full text-left px-4 py-2 text-sm text-gray-700', {
                                   'bg-gray-100': active,
                                 })}
@@ -186,7 +192,7 @@ export function Navbar() {
                 ))}
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Sign Out
