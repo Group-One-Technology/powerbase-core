@@ -22,7 +22,7 @@ class Users::LoginController < ApplicationController
         secure: Rails.env.production?
       )
 
-      render json: { csrf: tokens[:csrf] }
+      render json: { csrf: tokens[:csrf], user: user }
     else
       not_found
     end
