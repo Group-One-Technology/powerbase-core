@@ -12,6 +12,7 @@ import { BasePage } from '@pages/bases/[id]';
 import { CreateBasePage } from '@pages/bases/create';
 import { ConnectBasePage } from '@pages/bases/connect';
 import { ConnectURLBasePage } from '@pages/bases/connect-url';
+import { RegisterPage } from '@pages/register';
 import { GlobalProviders } from '@components/GlobalProviders';
 
 import './index.css';
@@ -23,6 +24,7 @@ export function App() {
         <Switch>
           <Route exact path="/" component={HomePage} />
           <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/register" component={RegisterPage} />
           <Route path="/bases">
             <BasesRoute />
           </Route>
