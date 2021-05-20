@@ -10,16 +10,25 @@ export function ErrorAlert({ errors }) {
           <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
         </div>
         <div className="ml-3">
-          <h3 className="text-sm font-medium text-red-800">
-            There were {errors.length} error(s) with your submission.
-          </h3>
-          <div className="mt-2 text-sm text-red-700">
-            <ul className="list-disc pl-5 space-y-1">
-              {errors.map((error) => (
-                <li key={error}>{error}.</li>
-              ))}
-            </ul>
-          </div>
+          {Array.isArray(errors)
+            ? (
+            <>
+              <h3 className="text-sm font-medium text-red-800">
+                There were {errors.length} error(s) with your submission.
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <ul className="list-disc pl-5 space-y-1">
+                  {errors.map((error) => (
+                    <li key={error}>{error}.</li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm font-medium text-red-800">
+              {errors}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -27,5 +36,8 @@ export function ErrorAlert({ errors }) {
 }
 
 ErrorAlert.propTypes = {
-  errors: PropTypes.arrayOf(PropTypes.string).isRequired,
+  errors: PropTypes.oneOfType(
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ).isRequired,
 };
