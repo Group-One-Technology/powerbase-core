@@ -4,7 +4,6 @@ import { useHistory, Link } from 'react-router-dom';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
-import { user as userMock } from '@lib/mock/userMock';
 import { useAuthUser } from '@models/AuthUser';
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
