@@ -3,7 +3,6 @@ import constate from 'constate';
 import useSWR from 'swr';
 import { auth } from '@lib/api/auth';
 
-// TODO: Add authentication logic
 function useAuthUserModel() {
   const response = useSWR('/auth', auth);
 
