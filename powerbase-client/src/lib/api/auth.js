@@ -39,3 +39,28 @@ export async function auth() {
 
   return undefined;
 }
+
+export async function register({
+  firstName,
+  lastName,
+  email,
+  password,
+  passwordConfirmation,
+}) {
+  const response = await securedApi.post('/register', {
+    firstName,
+    lastName,
+    email,
+    password,
+    passwordConfirmation,
+  });
+
+  if (response.statusText === 'OK') {
+    localStorage.csrf = response.data.csrf;
+    localStorage.signedIn = true;
+
+    return response.data;
+  }
+
+  return undefined;
+}
