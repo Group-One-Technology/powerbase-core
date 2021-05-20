@@ -31,9 +31,10 @@ export function RegisterPage() {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
+    setErrors(undefined);
 
     if (password && confirmPassword && (password !== confirmPassword)) {
-      setErrors(['Password doesn\'t match confirm password']);
+      setErrors('Password doesn\'t match confirm password.');
       setLoading(false);
       return;
     }
