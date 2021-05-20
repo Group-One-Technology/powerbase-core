@@ -9,6 +9,7 @@ import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
 import { login } from '@lib/api/auth';
 import { Button } from '@components/ui/Button';
+import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function LoginPage() {
   const history = useHistory();
@@ -16,6 +17,8 @@ export function LoginPage() {
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
   const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
+
+  const [errors, setErrors] = useState();
   const [loading, setLoading] = useState(false);
 
   const onEmailChange = (evt) => setEmail(evt.target.value);
@@ -24,6 +27,7 @@ export function LoginPage() {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
+    setErrors(undefined);
 
     const hasErrors = (!email.length && emailError.error)
       || (!password.length && passwordError.error);
@@ -34,7 +38,7 @@ export function LoginPage() {
         await refetchAuthUser();
         history.push('/');
       } catch (err) {
-        console.error(err);
+        setErrors(err.response.data.error);
       }
     }
 
@@ -60,6 +64,7 @@ export function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {errors && <ErrorAlert errors={errors} />}
           <form className="space-y-6" onSubmit={handleSubmit} aria-busy={loading}>
             <Input
               id="email"

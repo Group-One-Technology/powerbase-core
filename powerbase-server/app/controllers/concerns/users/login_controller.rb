@@ -10,7 +10,7 @@ class Users::LoginController < ApplicationController
   def create
     user = User.find_by(email: safe_params[:email])
 
-    if user.authenticate(safe_params[:password])
+    if user&.authenticate(safe_params[:password])
       payload = { user_id: user.id }
       session = JWTSessions::Session.new(payload: payload, refresh_by_access_allowed: true)
       tokens = session.login
@@ -37,6 +37,6 @@ class Users::LoginController < ApplicationController
 
   private
     def not_found
-      render json: { error: "Invalid email/password" }, status: :not_found
+      render json: { error: "Invalid email and/or password." }, status: :not_found
     end
 end
