@@ -48,7 +48,7 @@ const COLORS = [
 ];
 
 export function InlineColorRadio({ value, setValue, className, error, setError }) {
-  if (!isSafari) {
+  if (isSafari) {
     return (
       <InlineRadio
         label="Colors"
