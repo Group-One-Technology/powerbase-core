@@ -4,14 +4,14 @@ import { useHistory, Link } from 'react-router-dom';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
-import { user as userMock } from '@lib/mock/userMock';
 import { useAuthUser } from '@models/AuthUser';
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
+import { login } from '@lib/api/auth';
 
 export function LoginPage() {
   const history = useHistory();
-  const { authUser, setAuthUser } = useAuthUser();
+  const { authUser, mutate: refetchAuthUser } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
   const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
@@ -20,17 +20,28 @@ export function LoginPage() {
   const onEmailChange = (evt) => setEmail(evt.target.value);
   const onPasswordChange = (evt) => setPassword(evt.target.value);
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
 
-    setAuthUser(userMock);
+    const hasErrors = (!email.length && emailError.error)
+      || (!password.length && passwordError.error);
+
+    if (!hasErrors) {
+      try {
+        await login({ email, password });
+        await refetchAuthUser();
+        history.push('/');
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     setLoading(false)
   };
 
   useEffect(() => {
-    if (authUser) history.push('/');
+    if (authUser && localStorage.signedIn) history.push('/');
   }, [authUser]);
 
   return (

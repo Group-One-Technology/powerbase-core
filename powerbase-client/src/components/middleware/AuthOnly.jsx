@@ -8,7 +8,7 @@ export function AuthOnly({ children }) {
   const { authUser } = useAuthUser();
 
   useEffect(() => {
-    if (authUser === null) history.push('/login');
+    if (authUser === null || !localStorage.signedIn) history.push('/login');
   }, [authUser]);
 
   if (authUser) {

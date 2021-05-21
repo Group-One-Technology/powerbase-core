@@ -1,5 +1,6 @@
 class Users::RefreshController < ApplicationController
-  before_action :authorize_refresh_by_access_request!
+  before_action :authorize_refresh_by_access_request!, only: :create
+  before_action :authorize_access_request!, only: :auth
 
   def create
     session = JWTSessions::Session.new(payload: claimless_payload, refresh_by_access_allowed: true)
@@ -15,7 +16,7 @@ class Users::RefreshController < ApplicationController
     render json: { csrf: tokens[:csrf] }
   end
 
-  def access_payload
-    build_access_payload_based_on_refresh(payload)
+  def auth
+    render json: current_user
   end
 end
