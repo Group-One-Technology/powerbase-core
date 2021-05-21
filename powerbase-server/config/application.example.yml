@@ -1,1 +1,3 @@
 encryption_key: ""
+jwt_encryption_key: ""
+redis_url: "redis://localhost:6379/0"

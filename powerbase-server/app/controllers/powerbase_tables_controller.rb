@@ -1,9 +1,10 @@
 class PowerbaseTablesController < ApplicationController
+  # before_action :authorize_access_request!
+  before_action :set_database, only: [:index]
+
   schema(:index) do
     required(:database_id).value(:string)
   end
-
-  before_action :set_database, only: [:index]
 
   # GET /databases/:database_id/tables
   def index
