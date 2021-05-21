@@ -1,5 +1,5 @@
 class PowerbaseDatabasesController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:connect) do
     optional(:host).value(:string)
@@ -14,7 +14,7 @@ class PowerbaseDatabasesController < ApplicationController
 
   # GET /databases/
   def index
-    @databases = PowerbaseDatabase.all
+    @databases = PowerbaseDatabase.find_by(user_id: current_user.id)
 
     render json: @databases
   end
@@ -27,7 +27,7 @@ class PowerbaseDatabasesController < ApplicationController
     @database = nil
 
     if Powerbase.connected?
-      @database = PowerbaseDatabase.find_by(name: Powerbase.database)
+      @database = PowerbaseDatabase.find_by(name: Powerbase.database, user_id: current_user.id)
 
       if !@database
         @database = PowerbaseDatabase.new({
@@ -35,7 +35,8 @@ class PowerbaseDatabasesController < ApplicationController
           connection_string: Powerbase.connection_string,
           adapter: Powerbase.adapter,
           is_migrated: false,
-          color: options[:color]
+          color: options[:color],
+          user_id: current_user.id,
         })
 
         if !@database.save
