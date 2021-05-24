@@ -36,8 +36,8 @@ export function ErrorAlert({ errors }) {
 }
 
 ErrorAlert.propTypes = {
-  errors: PropTypes.oneOfType(
+  errors: PropTypes.oneOfType([
     PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string)
-  ).isRequired,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
 };
