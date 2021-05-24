@@ -13,7 +13,7 @@ import { PageContent } from '@components/layout/PageContent';
 import { getDatabases } from '@lib/api/databases';
 import { EmptyBase } from '@components/bases/EmptyBase';
 
-export function HomePage() {
+export function BasesPage() {
   const history = useHistory();
   const authUser = useAuthUser();
   const { data: bases} = useSWR(authUser ? '/databases' : null, getDatabases);
