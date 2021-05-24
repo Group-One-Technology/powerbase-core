@@ -28,18 +28,18 @@ export function BasesPage() {
         )}
         <PageContent>
           {!!bases?.length && (
-            <ul className="mt-16 flex justify-center items-center flex-wrap gap-6">
+            <ul className="mt-16 flex flex-col sm:flex-row justify-center flex-wrap gap-6">
               {bases.map((base) => (
                 <li
                   key={base.id}
-                  className="w-48 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200"
+                  className="sm:w-48 sm:h-48 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
                 >
                   <BaseItem key={base.id} base={base} />
                 </li>
               ))}
-              <li className="w-48 flex flex-col text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
-                <Link to="/bases/create">
-                  <div className="flex-1 flex flex-col p-8 items-center justify-center">
+              <li className="sm:w-48 sm:h-48 text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
+                <Link to="/bases/create" className="h-full">
+                  <div className="h-full flex flex-col p-8 items-center justify-center">
                     <PlusCircleIcon className="mt-3 h-12 w-12 text-gray-500" />
                     <p className="mt-2 text-sm text-gray-500">
                       Add New

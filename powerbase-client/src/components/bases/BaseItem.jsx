@@ -4,9 +4,9 @@ import { ChevronRightIcon } from '@heroicons/react/outline';
 
 export function BaseItem({ base }) {
   return (
-    <Link to={`/bases/${base.id}`}>
-      <div className="flex-1 flex flex-col p-8">
-        <h2 className="mt-3 text-gray-900 text-2xl font-bold uppercase">{base.name}</h2>
+    <Link to={`/bases/${base.id}`} className="h-full flex flex-col justify-center">
+      <div className="p-8">
+        <h2 className="mt-3 text-gray-900 text-xl font-bold uppercase break-words" style={{ hyphens: 'auto' }}>{base.name}</h2>
         <dl className="mt-1 flex-grow flex flex-col justify-between">
           <dt className="sr-only">No. of Tables</dt>
           <dd className="text-gray-500 text-sm">{base.totalTables} tables</dd>
