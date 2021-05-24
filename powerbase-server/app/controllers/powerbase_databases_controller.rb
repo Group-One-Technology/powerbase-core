@@ -14,9 +14,9 @@ class PowerbaseDatabasesController < ApplicationController
 
   # GET /databases/
   def index
-    @databases = PowerbaseDatabase.find_by(user_id: current_user.id)
+    @databases = PowerbaseDatabase.where(user_id: current_user.id)
 
-    render json: @databases
+    render json: @databases.map {|item| format_json(item)}
   end
 
   # POST /databases/connect
@@ -52,4 +52,20 @@ class PowerbaseDatabasesController < ApplicationController
 
     render json: { connected: Powerbase.connected?, database: @database }
   end
+
+  private
+    def format_json(database)
+      {
+        id: database.id,
+        user_id: database.user_id,
+        adapter: database.adapter,
+        name: database.name,
+        description: database.description,
+        color: database.color,
+        is_migrated: database.is_migrated,
+        created_at: database.created_at,
+        updated_at: database.updated_at,
+        total_tables: database.powerbase_tables.length,
+      }
+    end
 end
