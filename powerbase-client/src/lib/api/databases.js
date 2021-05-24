@@ -27,3 +27,13 @@ export async function connectDatabase({
 
   return undefined;
 }
+
+export async function getDatabases({ userId }) {
+  const response = await securedApi.get('/databases');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
