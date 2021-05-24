@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { useHistory, Link } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
 import { useAuthUser } from '@models/AuthUser';
@@ -52,13 +53,15 @@ export function UserMenu({ list }) {
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <span className="sr-only">Open user menu</span>
+            <Menu.Button className="bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               <Gravatar
                 email={authUser.email}
                 className="h-6 w-6 rounded-full"
                 alt={`${authUser.firstName}'s profile picture`}
               />
+              <span className="text-sm font-normal ml-1">{authUser.firstName}</span>
+              <span className="sr-only">Open user menu</span>
+              <ChevronDownIcon className="h-4 w-4 mt-0.5 ml-1" />
             </Menu.Button>
           </div>
           <Transition
