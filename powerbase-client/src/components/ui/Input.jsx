@@ -75,6 +75,7 @@ Input.propTypes = {
   caption: PropTypes.string,
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
+  onChange: PropTypes.func,
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
   className: PropTypes.string,
