@@ -8,6 +8,7 @@ import cn from 'classnames';
 import { useAuthUser } from '@models/AuthUser';
 import { logout } from '@lib/api/auth';
 import { UserMenu } from './UserMenu';
+import { BaseMenu } from './BaseMenu';
 
 const NAVIGATION = [
   { name: 'Bases', href: '/' },
@@ -15,7 +16,7 @@ const NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
-export function Navbar({ base }) {
+export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser, mutate } = useAuthUser();
 
@@ -28,18 +29,16 @@ export function Navbar({ base }) {
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-12">
-              <div className="flex">
+            <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-12">
+              <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
-                  <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-5 w-auto" />
+                  <Link to="/">
+                    <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-5 w-auto" />
+                  </Link>
                 </div>
               </div>
-              <div className={cn('hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8', { 'h-full': !base })}>
-                {base && (
-                  <h1 className="text-lg font-semibold">
-                    {base.name}
-                  </h1>
-                )}
+              <div className={cn('hidden sm:col-span-1 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
+                {base && <BaseMenu base={base} bases={bases} />}
                 {!base && NAVIGATION.map((item) => {
                   const isCurrentItem = location.pathname === item.href;
 
@@ -59,7 +58,7 @@ export function Navbar({ base }) {
                   );
                 })}
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
                 <UserMenu />
               </div>
               <div className="-mr-2 flex items-center sm:hidden">
@@ -77,7 +76,7 @@ export function Navbar({ base }) {
           </div>
 
           <Disclosure.Panel className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
+            <div className="pb-3 space-y-1">
               {!base && NAVIGATION.map((item) => {
                 const isCurrentItem = location.pathname === item.href;
 
@@ -97,7 +96,7 @@ export function Navbar({ base }) {
                 );
               })}
             </div>
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-b border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <Gravatar
