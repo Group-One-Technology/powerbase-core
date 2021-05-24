@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Disclosure } from '@headlessui/react';
 import { MenuIcon, XIcon } from '@heroicons/react/outline';
+import Gravatar from 'react-gravatar';
 import cn from 'classnames';
 
 import { useAuthUser } from '@models/AuthUser';
@@ -63,7 +64,7 @@ export function Navbar({ base }) {
               </div>
               <div className="-mr-2 flex items-center sm:hidden">
                 {/* Mobile menu button */}
-                <Disclosure.Button className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <Disclosure.Button className="bg-white inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -99,10 +100,10 @@ export function Navbar({ base }) {
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
-                  <img
-                    src={authUser.displayPhotoUrl}
+                  <Gravatar
+                    email={authUser.email}
+                    className="h-6 w-6 rounded-full"
                     alt={`${authUser.firstName}'s profile picture`}
-                    className="h-4 w-4 rounded-full"
                   />
                 </div>
                 <div className="ml-3">
