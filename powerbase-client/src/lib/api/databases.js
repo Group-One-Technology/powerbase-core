@@ -40,7 +40,6 @@ export async function getDatabases({ userId }) {
 
 export async function getDatabase({ id }) {
   const response = await securedApi.get(`/databases/${id}`);
-  console.log(response);
 
   if (response.statusText === 'OK') {
     return response.data;
