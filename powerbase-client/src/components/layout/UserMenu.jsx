@@ -1,0 +1,111 @@
+import React, { Fragment } from 'react';
+import { useHistory, Link } from 'react-router-dom';
+import { Menu, Transition } from '@headlessui/react';
+import Gravatar from 'react-gravatar';
+import { useAuthUser } from '@models/AuthUser';
+import cn from 'classnames';
+
+const USER_NAVIGATION = [
+  { name: 'Profile', href: '/profile' },
+  { name: 'Settings', href: '/settings' },
+];
+
+export function UserMenu({ list }) {
+  const history = useHistory();
+  const { authUser, mutate } = useAuthUser();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      mutate(null);
+      history.push('/login');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (list) {
+    return (
+      <>
+        {USER_NAVIGATION.map((item) => (
+          <Link
+            key={item.name}
+            to={item.href}
+            className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+          >
+            {item.name}
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+        >
+          Sign Out
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <Menu as="div" className="ml-3 relative">
+      {({ open }) => (
+        <>
+          <div>
+            <Menu.Button className="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <span className="sr-only">Open user menu</span>
+              <Gravatar
+                email={authUser.email}
+                className="h-8 w-8 rounded-full"
+                alt={`${authUser.firstName}'s profile picture`}
+              />
+            </Menu.Button>
+          </div>
+          <Transition
+            show={open}
+            as={Fragment}
+            enter="transition ease-out duration-200"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items
+              static
+              className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+            >
+              {USER_NAVIGATION.map((item) => (
+                <Menu.Item key={item.name}>
+                  {({ active }) => (
+                    <Link
+                      to={item.href}
+                      className={cn('block px-4 py-2 text-sm text-gray-700', {
+                        'bg-gray-100': active,
+                      })}
+                    >
+                      {item.name}
+                    </Link>
+                  )}
+                </Menu.Item>
+              ))}
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className={cn('block w-full text-left px-4 py-2 text-sm text-gray-700', {
+                      'bg-gray-100': active,
+                    })}
+                  >
+                    Sign Out
+                  </button>
+                )}
+              </Menu.Item>
+            </Menu.Items>
+          </Transition>
+        </>
+      )}
+    </Menu>
+  );
+}
