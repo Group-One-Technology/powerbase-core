@@ -3,7 +3,6 @@ class ApplcationControllerTest < ActionDispatch::IntegrationTest
   require "test_helper"
 
   @@request = {
-    cookies: {},
     headers: {},
   }
 
@@ -15,7 +14,6 @@ class ApplcationControllerTest < ActionDispatch::IntegrationTest
       },
       as: :json
 
-    @@request[:cookies][:jwt_access] = cookies[:jwt_access]
     @@request[:headers]["X-CSRF-TOKEN"] = JSON.parse(response.body)["csrf"]
   end
 
