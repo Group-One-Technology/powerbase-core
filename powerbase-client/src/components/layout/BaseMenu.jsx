@@ -6,9 +6,8 @@ import Gravatar from 'react-gravatar';
 import cn from 'classnames';
 import { Input } from '@components/ui/Input';
 
-export function BaseMenu({ base, bases }) {
+export function BaseMenu({ base, otherBases }) {
   const history = useHistory();
-  const otherBases = bases?.filter((item) => item.id !== base.id);
   const [name, setName] = useState(base.name);
 
   return (

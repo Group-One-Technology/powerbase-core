@@ -19,6 +19,9 @@ const NAVIGATION = [
 export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser, mutate } = useAuthUser();
+  const otherBases = base && bases
+    ? bases.filter((item) => item.id !== base.id)
+    : undefined;
 
   if (!authUser) {
     return null;
@@ -38,7 +41,7 @@ export function Navbar({ base, bases }) {
                 </div>
               </div>
               <div className={cn('hidden sm:col-span-1 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
-                {base && <BaseMenu base={base} bases={bases} />}
+                {base && <BaseMenu base={base} otherBases={otherBases} />}
                 {!base && NAVIGATION.map((item) => {
                   const isCurrentItem = location.pathname === item.href;
 
@@ -77,6 +80,34 @@ export function Navbar({ base, bases }) {
 
           <Disclosure.Panel className="sm:hidden">
             <div className="pb-3 space-y-1">
+              {!!otherBases?.length && (
+                <>
+                  <p className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium bg-indigo-50 border-indigo-500 text-indigo-700">
+                    {base.name}
+                  </p>
+                  <p className="text-xs px-4 py-2 text-gray-500 uppercase">
+                    Other Bases
+                  </p>
+                  {otherBases.map((item) => {
+                    const isCurrentItem = location.pathname === `/bases/${item.id}`;
+
+                    return (
+                      <Link
+                        key={item.name}
+                        to={`/bases/${item.id}`}
+                        className={cn('block pl-3 pr-4 py-2 border-l-4 text-base font-medium', (
+                          isCurrentItem
+                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                            : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                        ))}
+                        aria-current={isCurrentItem ? 'page' : undefined}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
               {!base && NAVIGATION.map((item) => {
                 const isCurrentItem = location.pathname === item.href;
 
@@ -96,7 +127,7 @@ export function Navbar({ base, bases }) {
                 );
               })}
             </div>
-            <div className="pt-4 pb-3 border-b border-gray-200">
+            <div className="pt-4 pb-3 border-b border-t border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <Gravatar
