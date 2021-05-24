@@ -56,7 +56,7 @@ export function UserMenu({ list }) {
               <span className="sr-only">Open user menu</span>
               <Gravatar
                 email={authUser.email}
-                className="h-8 w-8 rounded-full"
+                className="h-6 w-6 rounded-full"
                 alt={`${authUser.firstName}'s profile picture`}
               />
             </Menu.Button>

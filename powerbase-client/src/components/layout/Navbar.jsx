@@ -14,7 +14,7 @@ const NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
-export function Navbar() {
+export function Navbar({ base }) {
   const location = useLocation();
   const { authUser, mutate } = useAuthUser();
 
@@ -23,18 +23,23 @@ export function Navbar() {
   }
 
   return (
-    <Disclosure as="nav" className="bg-white shadow-sm">
+    <Disclosure as="nav" className={cn('bg-white', { 'shadow-sm': !base })}>
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
+            <div className="flex justify-between items-center h-12">
               <div className="flex">
                 <div className="flex-shrink-0 flex items-center">
-                  <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-8 w-auto" />
+                  <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-5 w-auto" />
                 </div>
               </div>
-              <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                {NAVIGATION.map((item) => {
+              <div className={cn('hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8', { 'h-full': !base })}>
+                {base && (
+                  <h1 className="text-lg font-semibold">
+                    {base.name}
+                  </h1>
+                )}
+                {!base && NAVIGATION.map((item) => {
                   const isCurrentItem = location.pathname === item.href;
 
                   return (
@@ -72,7 +77,7 @@ export function Navbar() {
 
           <Disclosure.Panel className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
-              {NAVIGATION.map((item) => {
+              {!base && NAVIGATION.map((item) => {
                 const isCurrentItem = location.pathname === item.href;
 
                 return (
@@ -97,7 +102,7 @@ export function Navbar() {
                   <img
                     src={authUser.displayPhotoUrl}
                     alt={`${authUser.firstName}'s profile picture`}
-                    className="h-10 w-10 rounded-full"
+                    className="h-4 w-4 rounded-full"
                   />
                 </div>
                 <div className="ml-3">
