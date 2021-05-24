@@ -32,7 +32,19 @@ class RegisterControllerTest < ApplcationControllerTest
       as: :json
     assert JSON.parse(response.body)["errors"], "Error for duplicate email is not in the response."
     assert_response :unprocessable_entity
+  end
 
-    logout
+  test "should not be able to register for wrong password confirmation" do
+    post register_url,
+      params: {
+        first_name: "Annabeth",
+        last_name: "Chase",
+        email: "annabethchase@powerbase.com",
+        password: "password",
+        password_confirmation: "wrong_password",
+      },
+      as: :json
+      assert JSON.parse(response.body)["errors"], "There's no errors variable in the response."
+    assert_response :unprocessable_entity
   end
 end
