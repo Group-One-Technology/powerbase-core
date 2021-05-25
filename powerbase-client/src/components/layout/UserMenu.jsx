@@ -14,7 +14,7 @@ const USER_NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
-export function UserMenu({ list }) {
+export function UserMenu({ list, colored }) {
   const history = useHistory();
   const { authUser, mutate } = useAuthUser();
 
@@ -35,7 +35,10 @@ export function UserMenu({ list }) {
           <Link
             key={item.name}
             to={item.href}
-            className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+            className={cn(
+              'block px-4 py-2 text-base font-medium',
+              colored ? 'text-white hover:bg-gray-100 hover:bg-opacity-30' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+            )}
           >
             {item.name}
           </Link>
@@ -43,7 +46,10 @@ export function UserMenu({ list }) {
         <button
           type="button"
           onClick={handleLogout}
-          className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+          className={cn(
+            'block w-full text-left px-4 py-2 text-base font-medium',
+            colored ? 'text-white hover:bg-gray-100 hover:bg-opacity-30' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+          )}
         >
           Sign Out
         </button>
@@ -56,7 +62,12 @@ export function UserMenu({ list }) {
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <Menu.Button
+              className={cn(
+                'bg-transparent flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-current',
+                !colored && 'focus:ring-offset-2',
+              )}
+            >
               <Gravatar
                 email={authUser.email}
                 className="h-6 w-6 rounded-full"
@@ -118,4 +129,5 @@ export function UserMenu({ list }) {
 
 UserMenu.propTypes = {
   list: PropTypes.bool,
+  colored: PropTypes.bool,
 };
