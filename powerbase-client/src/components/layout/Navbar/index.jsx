@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 
 import { useAuthUser } from '@models/AuthUser';
 import { IBase } from '@lib/propTypes/base';
+import { BG_COLORS } from '@lib/constants';
 import { UserMenu } from './UserMenu';
 import { BaseMenu } from './BaseMenu';
 
@@ -16,17 +17,6 @@ const NAVIGATION = [
   { name: 'Team', href: '/team' },
   { name: 'Settings', href: '/settings' },
 ];
-
-const BG_COLORS = {
-  gray: 'bg-gray-500',
-  yellow: 'bg-yellow-500',
-  red: 'bg-red-500',
-  green: 'bg-green-500',
-  blue: 'bg-blue-500',
-  indigo: 'bg-indigo-500',
-  purple: 'bg-purple-500',
-  pink: 'bg-pink-500',
-};
 
 export function Navbar({ base, bases }) {
   const location = useLocation();
@@ -104,7 +94,7 @@ export function Navbar({ base, bases }) {
             </div>
           </div>
 
-          <Disclosure.Panel className="sm:hidden">
+          <Disclosure.Panel className="sm:hidden pb-3">
             <div className="pb-3 space-y-1">
               {!!otherBases?.length && (
                 <>
@@ -148,7 +138,7 @@ export function Navbar({ base, bases }) {
                 );
               })}
             </div>
-            <div className="pt-4 pb-3 border-b border-t border-gray-200">
+            <div className={cn('pt-4 pb-3 border-b border-t border-gray-200', base ? 'border-opacity-30' : '')}>
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <Gravatar
