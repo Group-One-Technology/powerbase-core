@@ -29,8 +29,12 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: [
+          'babel-loader',
           {
-            loader: 'babel-loader',
+            loader: 'eslint-loader',
+            options: {
+              quiet: true,
+            },
           },
         ],
       },
@@ -53,7 +57,7 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
-      }
+      },
     ],
   },
   plugins: [
@@ -68,9 +72,9 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-        'API': JSON.stringify(process.env.API),
-      }
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        API: JSON.stringify(process.env.API),
+      },
     }),
     new webpack.HotModuleReplacementPlugin(),
   ],
