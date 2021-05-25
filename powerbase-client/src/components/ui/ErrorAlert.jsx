@@ -12,23 +12,23 @@ export function ErrorAlert({ errors }) {
         <div className="ml-3">
           {Array.isArray(errors)
             ? (
-            <>
-              <h3 className="text-sm font-medium text-red-800">
-                There were {errors.length} error(s) with your submission.
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <ul className="list-disc pl-5 space-y-1">
-                  {errors.map((error) => (
-                    <li key={error}>{error}.</li>
-                  ))}
-                </ul>
-              </div>
-            </>
-          ) : (
-            <p className="text-sm font-medium text-red-800">
-              {errors}
-            </p>
-          )}
+              <>
+                <h3 className="text-sm font-medium text-red-800">
+                  There were {errors.length} error(s) with your submission.
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {errors.map((error) => (
+                      <li key={error}>{error}.</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm font-medium text-red-800">
+                {errors}
+              </p>
+            )}
         </div>
       </div>
     </div>

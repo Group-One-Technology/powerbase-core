@@ -18,7 +18,7 @@ export function InlineInput({
   const [inputId] = useState(() => id || (label ? `formInput-${label.replace(/\s+/g, '-')}` : undefined));
 
   const focus = (evt) => {
-    if (onBlur)  onFocus(evt);
+    if (onFocus) onFocus(evt);
 
     setFocused(true);
   };
@@ -45,7 +45,7 @@ export function InlineInput({
           onFocus={focus}
           onBlur={blur}
           className={cn('appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm', {
-            [showErrorText ? 'border-red-500': 'border-gray-300']: true
+            [showErrorText ? 'border-red-500' : 'border-gray-300']: true,
           })}
           {...props}
         />
@@ -82,4 +82,5 @@ InlineInput.propTypes = {
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
   className: PropTypes.string,
-}
+  'aria-label': PropTypes.string,
+};

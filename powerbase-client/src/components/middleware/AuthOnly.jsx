@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { useAuthUser } from '@models/AuthUser';
 
 export function AuthOnly({ children }) {
@@ -19,9 +19,5 @@ export function AuthOnly({ children }) {
 }
 
 AuthOnly.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element),
-  ]),
+  children: PropTypes.any,
 };

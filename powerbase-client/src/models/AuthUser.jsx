@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import constate from 'constate';
 import useSWR from 'swr';
 import { auth } from '@lib/api/auth';

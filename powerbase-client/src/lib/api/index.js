@@ -42,18 +42,18 @@ securedApi.interceptors.response.use(null, (error) => {
         localStorage.csrf = response.data.csrf;
         localStorage.signedIn = true;
 
-        let retryConfig = error.response.config;
+        const retryConfig = error.response.config;
         retryConfig.headers['X-CSRF-TOKEN'] = localStorage.csrf;
 
-        return api.request(retryConfig)
+        return api.request(retryConfig);
       })
-      .catch((error) => {
+      .catch((err) => {
         delete localStorage.csrf;
         delete localStorage.signedIn;
 
-        return Promise.reject(error);
+        return Promise.reject(err);
       });
-  } else {
-    return Promise.reject(error);
   }
+
+  return Promise.reject(error);
 });

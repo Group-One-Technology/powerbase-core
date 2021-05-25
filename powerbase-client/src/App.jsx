@@ -33,10 +33,10 @@ export function App() {
       </Router>
     </GlobalProviders>
   );
-};
+}
 
 function BasesRoute() {
-  const { path, url } = useRouteMatch();
+  const { path } = useRouteMatch();
 
   return (
     <Switch>

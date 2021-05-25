@@ -10,7 +10,7 @@ export function PageHeader({ children, className }) {
       </h1>
     </header>
   );
-};
+}
 
 PageHeader.propTypes = {
   className: PropTypes.string,

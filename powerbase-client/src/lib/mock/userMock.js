@@ -5,4 +5,4 @@ export const user = {
   name: 'Darby Von',
   email: 'darbyvon@gmail.com',
   displayPhotoUrl: 'https://i.pravatar.cc/150?img=67',
-}
+};

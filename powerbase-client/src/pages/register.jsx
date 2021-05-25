@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 
@@ -6,7 +7,7 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { login, register } from '@lib/api/auth';
+import { register } from '@lib/api/auth';
 
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';

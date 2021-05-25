@@ -1,9 +1,15 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import { useLocation, Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
-export function Tabs({ id, name, label, tabs }) {
+export function Tabs({
+  id,
+  name,
+  label,
+  tabs,
+}) {
   const history = useHistory();
   const location = useLocation();
 
@@ -23,7 +29,7 @@ export function Tabs({ id, name, label, tabs }) {
             <option
               key={tab.name}
               onClick={() => {
-                if (location.pathname !== tab.href) history.push(tab.href)
+                if (location.pathname !== tab.href) history.push(tab.href);
               }}
             >
               {tab.name}
@@ -47,12 +53,12 @@ export function Tabs({ id, name, label, tabs }) {
               >
                 {tab.name}
               </Link>
-            )
+            );
           })}
         </nav>
       </div>
     </div>
-  )
+  );
 }
 
 Tabs.propTypes = {

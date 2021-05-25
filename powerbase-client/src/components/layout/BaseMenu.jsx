@@ -1,15 +1,13 @@
-import React, { Fragment, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronDownIcon, ChevronRightIcon, CogIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
-import Gravatar from 'react-gravatar';
 import cn from 'classnames';
-import { Input } from '@components/ui/Input';
+import PropTypes from 'prop-types';
+
+import { IBase } from '@lib/propTypes/base';
 
 export function BaseMenu({ base, otherBases }) {
-  const history = useHistory();
-  const [name, setName] = useState(base.name);
-
   return (
     <Menu as="div" className="ml-3 relative">
       {({ open }) => (
@@ -76,10 +74,15 @@ export function BaseMenu({ base, otherBases }) {
                   ))}
                 </>
               )}
-              </Menu.Items>
-            </Transition>
-          </>
-        )}
-      </Menu>
-    );
-  }
+            </Menu.Items>
+          </Transition>
+        </>
+      )}
+    </Menu>
+  );
+}
+
+BaseMenu.propTypes = {
+  base: IBase.isRequired,
+  otherBases: PropTypes.arrayOf(IBase).isRequired,
+};
