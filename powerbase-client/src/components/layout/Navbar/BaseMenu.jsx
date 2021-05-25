@@ -13,7 +13,7 @@ export function BaseMenu({ base, otherBases }) {
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="bg-transparent flex items-center px-2 text-xl font-medium rounded-full focus:outline-none focus:ring-2 focus:ring-current">
+            <Menu.Button className="bg-transparent flex items-center px-2 text-lg font-medium rounded-full focus:outline-none focus:ring-2 focus:ring-current">
               {base.name}
               <div className="sr-only">Open base settings</div>
               <ChevronDownIcon className="h-4 w-4 mt-0.5 ml-1" />
