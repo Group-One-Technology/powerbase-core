@@ -44,7 +44,7 @@ export function BaseMenu({ base, otherBases }) {
                       'bg-gray-100': active,
                     })}
                   >
-                    <CogIcon className="h-6 w-6 mr-2" />
+                    <CogIcon className="h-4 w-4 mr-2" />
                     Settings
                   </Link>
                 )}
