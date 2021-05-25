@@ -1,12 +1,14 @@
 import React, { Fragment } from 'react';
-import { useHistory, useLocation, Link } from 'react-router-dom';
-import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
-import cn from 'classnames';
+import { useLocation, Link } from 'react-router-dom';
+import { Disclosure } from '@headlessui/react';
+import { MenuIcon, XIcon } from '@heroicons/react/outline';
 import Gravatar from 'react-gravatar';
+import cn from 'classnames';
 
 import { useAuthUser } from '@models/AuthUser';
 import { logout } from '@lib/api/auth';
+import { UserMenu } from './UserMenu';
+import { BaseMenu } from './BaseMenu';
 
 const NAVIGATION = [
   { name: 'Bases', href: '/' },
@@ -14,43 +16,33 @@ const NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
-const USER_NAVIGATION = [
-  { name: 'Profile', href: '/profile' },
-  { name: 'Settings', href: '/settings' },
-];
-
-export function Navbar() {
-  const history = useHistory();
+export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser, mutate } = useAuthUser();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      mutate(null);
-      history.push('/login');
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const otherBases = base && bases
+    ? bases.filter((item) => item.id !== base.id)
+    : undefined;
 
   if (!authUser) {
     return null;
   }
 
   return (
-    <Disclosure as="nav" className="bg-white shadow-sm">
+    <Disclosure as="nav" className={cn('bg-white', { 'shadow-sm': !base })}>
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex">
+            <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-12">
+              <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
-                  <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-8 w-auto" />
+                  <Link to="/">
+                    <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-5 w-auto" />
+                  </Link>
                 </div>
               </div>
-              <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                {NAVIGATION.map((item) => {
+              <div className={cn('hidden sm:col-span-1 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
+                {base && <BaseMenu base={base} otherBases={otherBases} />}
+                {!base && NAVIGATION.map((item) => {
                   const isCurrentItem = location.pathname === item.href;
 
                   return (
@@ -69,71 +61,12 @@ export function Navbar() {
                   );
                 })}
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                {/* Profile dropdown */}
-                <Menu as="div" className="ml-3 relative">
-                  {({ open }) => (
-                    <>
-                      <div>
-                        <Menu.Button className="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                          <span className="sr-only">Open user menu</span>
-                          <Gravatar
-                            email={authUser.email}
-                            className="h-8 w-8 rounded-full"
-                            alt={`${authUser.firstName}'s profile picture`}
-                          />
-                        </Menu.Button>
-                      </div>
-                      <Transition
-                        show={open}
-                        as={Fragment}
-                        enter="transition ease-out duration-200"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                      >
-                        <Menu.Items
-                          static
-                          className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-                        >
-                          {USER_NAVIGATION.map((item) => (
-                            <Menu.Item key={item.name}>
-                              {({ active }) => (
-                                <Link
-                                  to={item.href}
-                                  className={cn('block px-4 py-2 text-sm text-gray-700', {
-                                    'bg-gray-100': active,
-                                  })}
-                                >
-                                  {item.name}
-                                </Link>
-                              )}
-                            </Menu.Item>
-                          ))}
-                          <Menu.Item>
-                            {({ active }) => (
-                              <button
-                                type="button"
-                                onClick={handleLogout}
-                                className={cn('block w-full text-left px-4 py-2 text-sm text-gray-700', {
-                                  'bg-gray-100': active,
-                                })}
-                              >
-                                Sign Out
-                              </button>
-                            )}
-                          </Menu.Item>
-                        </Menu.Items>
-                      </Transition>
-                    </>
-                  )}
-                </Menu>
+              <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
+                <UserMenu />
               </div>
               <div className="-mr-2 flex items-center sm:hidden">
                 {/* Mobile menu button */}
-                <Disclosure.Button className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <Disclosure.Button className="bg-white inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -146,8 +79,36 @@ export function Navbar() {
           </div>
 
           <Disclosure.Panel className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
-              {NAVIGATION.map((item) => {
+            <div className="pb-3 space-y-1">
+              {!!otherBases?.length && (
+                <>
+                  <p className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium bg-indigo-50 border-indigo-500 text-indigo-700">
+                    {base.name}
+                  </p>
+                  <p className="text-xs px-4 py-2 text-gray-500 uppercase">
+                    Other Bases
+                  </p>
+                  {otherBases.map((item) => {
+                    const isCurrentItem = location.pathname === `/bases/${item.id}`;
+
+                    return (
+                      <Link
+                        key={item.name}
+                        to={`/bases/${item.id}`}
+                        className={cn('block pl-3 pr-4 py-2 border-l-4 text-base font-medium', (
+                          isCurrentItem
+                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                            : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                        ))}
+                        aria-current={isCurrentItem ? 'page' : undefined}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
+              {!base && NAVIGATION.map((item) => {
                 const isCurrentItem = location.pathname === item.href;
 
                 return (
@@ -166,13 +127,13 @@ export function Navbar() {
                 );
               })}
             </div>
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-b border-t border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
-                  <img
-                    src={authUser.displayPhotoUrl}
+                  <Gravatar
+                    email={authUser.email}
+                    className="h-6 w-6 rounded-full"
                     alt={`${authUser.firstName}'s profile picture`}
-                    className="h-10 w-10 rounded-full"
                   />
                 </div>
                 <div className="ml-3">
@@ -181,22 +142,7 @@ export function Navbar() {
                 </div>
               </div>
               <div className="mt-3 space-y-1">
-                {USER_NAVIGATION.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                >
-                  Sign Out
-                </button>
+                <UserMenu list />
               </div>
             </div>
           </Disclosure.Panel>

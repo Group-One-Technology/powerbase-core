@@ -1,6 +1,10 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!
 
+  schema(:show) do
+    required(:id).value(:integer)
+  end
+
   schema(:connect) do
     optional(:host).value(:string)
     optional(:port).value(:integer)
@@ -17,6 +21,16 @@ class PowerbaseDatabasesController < ApplicationController
     @databases = PowerbaseDatabase.where(user_id: current_user.id)
 
     render json: @databases.map {|item| format_json(item)}
+  end
+
+  # GET /databases/:id
+  def show
+    puts safe_params.output
+    @database = PowerbaseDatabase.find(safe_params[:id])
+
+    if @database
+      render json: format_json(@database)
+    end
   end
 
   # POST /databases/connect

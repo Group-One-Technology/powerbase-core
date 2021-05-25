@@ -37,3 +37,13 @@ export async function getDatabases({ userId }) {
 
   return undefined;
 }
+
+export async function getDatabase({ id }) {
+  const response = await securedApi.get(`/databases/${id}`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
