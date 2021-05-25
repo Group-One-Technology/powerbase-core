@@ -1,4 +1,4 @@
-import { api } from './index';
+import { securedApi } from './index';
 
 export async function connectDatabase({
   adapter,
@@ -10,7 +10,7 @@ export async function connectDatabase({
   connectionString,
   color,
 }) {
-  const response = await api.post('/databases/connect', {
+  const response = await securedApi.post('/databases/connect', {
     adapter,
     host,
     port,
@@ -20,6 +20,16 @@ export async function connectDatabase({
     connectionString,
     color,
   });
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function getDatabases({ userId }) {
+  const response = await securedApi.get('/databases');
 
   if (response.statusText === 'OK') {
     return response.data;

@@ -11,9 +11,5 @@ export function PageContent({ children, className }) {
 };
 
 PageContent.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element),
-  ]),
+  children: PropTypes.any,
 };

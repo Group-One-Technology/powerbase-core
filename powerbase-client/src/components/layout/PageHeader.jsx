@@ -14,9 +14,5 @@ export function PageHeader({ children, className }) {
 
 PageHeader.propTypes = {
   className: PropTypes.string,
-  children: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element),
-  ]),
+  children: PropTypes.any,
 };

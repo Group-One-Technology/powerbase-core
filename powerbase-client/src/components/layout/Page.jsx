@@ -41,8 +41,5 @@ Page.propTypes = {
   className: PropTypes.string,
   navbar: PropTypes.any,
   authOnly: PropTypes.bool,
-  children: PropTypes.oneOfType([
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element),
-  ]).isRequired,
+  children: PropTypes.any.isRequired,
 }
