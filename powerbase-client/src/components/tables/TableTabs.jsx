@@ -1,0 +1,49 @@
+import React from 'react';
+import cn from 'classnames';
+import { Link } from 'react-router-dom';
+
+const tabs = [
+  { name: 'My Account', href: '#', current: false },
+  { name: 'Company', href: '#', current: false },
+  { name: 'Team Members', href: '#', current: true },
+  { name: 'Billing', href: '#', current: false },
+];
+
+export function TableTabs() {
+  return (
+    <div className="px-4 sm:px-6 lg:px-8">
+      <div className="pb-2 sm:hidden">
+        <label htmlFor="tabs" className="sr-only">
+          Select a tab
+        </label>
+        <select
+          id="tabs"
+          name="tabs"
+          className="block w-full bg-white bg-opacity-20 border-current text-white border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+          defaultValue={tabs.find((tab) => tab.current).name}
+        >
+          {tabs.map((tab) => (
+            <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="hidden sm:block">
+        <nav className="flex space-x-1" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.name}
+              to={tab.href}
+              className={cn(
+                'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
+                tab.current ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+              )}
+              aria-current={tab.current ? 'page' : undefined}
+            >
+              {tab.name}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
+}
