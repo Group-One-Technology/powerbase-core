@@ -1,6 +1,14 @@
-require "test_helper"
+require "controllers/application_controller_test"
 
-class PowerbaseDatabasesControllerTest < ActionDispatch::IntegrationTest
+class PowerbaseDatabasesControllerTest < ApplcationControllerTest
+  setup do
+    login
+  end
+
+  teardown do
+    logout
+  end
+
   test "should get list of databases" do
     get databases_url
     assert_response :success
@@ -15,7 +23,9 @@ class PowerbaseDatabasesControllerTest < ActionDispatch::IntegrationTest
         username: "postgres",
         password: "postgres",
         database: "powerbase_test",
+        color: "red",
       },
+      headers: @@request[:headers],
       as: :json
 
     assert_response :success

@@ -1,5 +1,6 @@
 one:
   id: 1
+  user_id: 1
   name: editmode
   description: Editmode makes it easy to stop storing text in your codebase, allowing you and your team to safely make changes at every stage of the product development process. It's for digital agencies, enterprise engineering teams, and anyone who builds web applications where non-technical colleagues need to change text easily.
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
@@ -8,6 +9,7 @@ one:
 
 two:
   id: 2
+  user_id: 1
   name: atlas
   description: Atlas helps you collect, summarise and share knowledge rich content from around the web.
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
@@ -16,6 +18,7 @@ two:
 
 three:
   id: 3
+  user_id: 1
   name: sutle
   description: A platform for saving and organizing online resources into a directed learning path.
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="

@@ -7,8 +7,15 @@ class Users::RegisterController < ApplicationController
     required(:password_confirmation).value(:string)
   end
 
-  # POST /register/create
+  # POST /register
   def create
+    existing_user = User.find_by(email: safe_params[:email])
+
+    if existing_user
+      render json: { errors: ["Email \"#{safe_params[:email]}\" has already been taken"] }, status: :unprocessable_entity
+      return;
+    end
+
     user = User.new(safe_params.output)
 
     if user.save

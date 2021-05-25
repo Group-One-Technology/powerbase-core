@@ -6,7 +6,7 @@ class Users::LoginController < ApplicationController
     required(:password).value(:string)
   end
 
-  # POST /login/create
+  # POST /login
   def create
     user = User.find_by(email: safe_params[:email])
 
@@ -28,7 +28,7 @@ class Users::LoginController < ApplicationController
     end
   end
 
-  # POST /login/destroy
+  # POST /logout
   def destroy
     session = JWTSessions::Session.new(payload: payload)
     session.flush_by_access_payload
