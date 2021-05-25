@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ChevronRightIcon, CogIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
 import cn from 'classnames';
@@ -33,21 +33,21 @@ export function BaseMenu({ base, otherBases }) {
           >
             <Menu.Items
               static
-              className="origin-top-right absolute -top-4 left-1/2 -ml-24 mx-auto mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+              className="origin-top-right absolute -top-4 left-1/2 -ml-24 mx-auto mt-2 w-64 rounded-md shadow py-1 bg-white ring-opacity-5 focus:outline-none"
             >
               <Menu.Item>
-                <p className="text-lg font-medium text-center">{base.name}</p>
+                <p className="text-lg font-medium text-center mb-2">{base.name}</p>
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (
                   <Link
                     to={`/bases/${base.id}/settings`}
-                    className={cn('flex justify-between items-center px-4 py-2 text-sm text-gray-700', {
+                    className={cn('flex items-center px-4 py-2 text-sm text-gray-700', {
                       'bg-gray-100': active,
                     })}
                   >
+                    <CogIcon className="h-6 w-6 mr-2" />
                     Settings
-                    <ChevronRightIcon className="h-6 w-6" />
                   </Link>
                 )}
               </Menu.Item>
@@ -63,7 +63,7 @@ export function BaseMenu({ base, otherBases }) {
                       {({ active }) => (
                         <Link
                           to={`/bases/${item.id}`}
-                          className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-700 border-solid border-gray-200', {
+                          className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
                             'border-b': index !== otherBases.length - 1,
                             'bg-gray-100': active,
                           })}
