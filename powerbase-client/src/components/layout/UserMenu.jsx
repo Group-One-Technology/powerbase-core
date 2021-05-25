@@ -3,8 +3,9 @@ import { useHistory, Link } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
-import { useAuthUser } from '@models/AuthUser';
 import cn from 'classnames';
+import { useAuthUser } from '@models/AuthUser';
+import { logout } from '@lib/api/auth';
 
 const USER_NAVIGATION = [
   { name: 'Profile', href: '/profile' },
