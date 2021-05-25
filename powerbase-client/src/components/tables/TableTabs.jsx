@@ -1,5 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
+import { PlusIcon } from '@heroicons/react/solid';
 import { Link } from 'react-router-dom';
 
 const tabs = [
@@ -10,6 +11,10 @@ const tabs = [
 ];
 
 export function TableTabs() {
+  const addTable = () => {
+    alert('add new table clicked');
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="pb-2 sm:hidden">
@@ -25,10 +30,13 @@ export function TableTabs() {
           {tabs.map((tab) => (
             <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
           ))}
+          <option onClick={addTable} className="text-white bg-gray-900 bg-opacity-80">
+            + Add Table
+          </option>
         </select>
       </div>
-      <div className="hidden sm:block">
-        <nav className="flex space-x-1" aria-label="Tabs">
+      <div className="hidden sm:flex">
+        <nav className="inline-flex space-x-1" aria-label="Tabs">
           {tabs.map((tab) => (
             <Link
               key={tab.name}
@@ -42,6 +50,16 @@ export function TableTabs() {
               {tab.name}
             </Link>
           ))}
+          <div className="my-auto px-2">
+            <button
+              type="button"
+              onClick={addTable}
+              className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25"
+            >
+              <span className="sr-only">Add Table</span>
+              <PlusIcon className="h-5 w-5" />
+            </button>
+          </div>
         </nav>
       </div>
     </div>
