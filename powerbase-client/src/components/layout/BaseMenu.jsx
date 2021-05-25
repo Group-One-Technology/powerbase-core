@@ -33,7 +33,7 @@ export function BaseMenu({ base, otherBases }) {
           >
             <Menu.Items
               static
-              className="origin-top-right absolute -top-4 left-1/2 -ml-24 mx-auto mt-2 w-64 rounded-md shadow py-1 bg-white ring-opacity-5 focus:outline-none"
+              className="origin-top-right absolute -top-4 left-1/2 -ml-32 mx-auto mt-2 w-64 rounded-md shadow py-1 bg-white ring-opacity-5 focus:outline-none"
             >
               <Menu.Item>
                 <p className="text-lg font-medium text-center mb-2">{base.name}</p>
