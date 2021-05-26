@@ -1,7 +1,9 @@
 import React from 'react';
-import cn from 'classnames';
 import { PlusIcon } from '@heroicons/react/solid';
 import { Link } from 'react-router-dom';
+import cn from 'classnames';
+import PropTypes from 'prop-types';
+import { BG_COLORS } from '@lib/constants';
 
 const tabs = [
   { name: 'My Account', href: '#', current: false },
@@ -10,13 +12,13 @@ const tabs = [
   { name: 'Billing', href: '#', current: false },
 ];
 
-export function TableTabs() {
+export function TableTabs({ color }) {
   const addTable = () => {
     alert('add new table clicked');
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className={cn('px-4 sm:px-6 lg:px-8', BG_COLORS[color])}>
       <div className="pb-2 sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
@@ -65,3 +67,7 @@ export function TableTabs() {
     </div>
   );
 }
+
+TableTabs.propTypes = {
+  color: PropTypes.oneOf(Object.keys(BG_COLORS)),
+};

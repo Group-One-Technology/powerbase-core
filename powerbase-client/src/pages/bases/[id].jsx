@@ -1,15 +1,13 @@
 import React from 'react';
 import useSWR from 'swr';
 import { useParams } from 'react-router-dom';
-import cn from 'classnames';
 
-import { getDatabase, getDatabases } from '@lib/api/databases';
 import { useAuthUser } from '@models/AuthUser';
+import { getDatabase, getDatabases } from '@lib/api/databases';
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
-import { BG_COLORS } from '@lib/constants';
 
 export function BasePage() {
   const { id } = useParams();
@@ -23,8 +21,8 @@ export function BasePage() {
 
   return (
     <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white" authOnly>
-      <PageContent className={cn('!px-0 max-w-full', BG_COLORS[base.color])}>
-        <TableTabs />
+      <PageContent className="!px-0 max-w-full">
+        <TableTabs color={base.color} />
       </PageContent>
     </Page>
   );
