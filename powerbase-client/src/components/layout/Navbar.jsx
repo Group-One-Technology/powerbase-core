@@ -4,9 +4,10 @@ import { Disclosure } from '@headlessui/react';
 import { MenuIcon, XIcon } from '@heroicons/react/outline';
 import Gravatar from 'react-gravatar';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 
 import { useAuthUser } from '@models/AuthUser';
-import { logout } from '@lib/api/auth';
+import { IBase } from '@lib/propTypes/base';
 import { UserMenu } from './UserMenu';
 import { BaseMenu } from './BaseMenu';
 
@@ -18,7 +19,7 @@ const NAVIGATION = [
 
 export function Navbar({ base, bases }) {
   const location = useLocation();
-  const { authUser, mutate } = useAuthUser();
+  const { authUser } = useAuthUser();
   const otherBases = base && bases
     ? bases.filter((item) => item.id !== base.id)
     : undefined;
@@ -151,3 +152,8 @@ export function Navbar({ base, bases }) {
     </Disclosure>
   );
 }
+
+Navbar.propTypes = {
+  base: IBase,
+  bases: PropTypes.arrayOf(IBase),
+};

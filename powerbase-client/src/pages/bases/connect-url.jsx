@@ -1,24 +1,14 @@
-import React, { useEffect, Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { RadioGroup } from '@headlessui/react';
-import { InboxIcon } from '@heroicons/react/outline';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/solid';
-import cn from 'classnames';
 
-import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { DATABASE_TYPES, DB_PLATFORMS } from '@lib/constants';
 import { connectDatabase } from '@lib/api/databases';
 
-import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { InlineInput } from '@components/ui/InlineInput';
 import { PageContent } from '@components/layout/PageContent';
-import { InlineSelect } from '@components/ui/InlineSelect';
-import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
@@ -51,7 +41,7 @@ export function ConnectURLBasePage() {
         });
 
         if (response.connected) {
-          history.push(`/bases/${response.database.id}`)
+          history.push(`/bases/${response.database.id}`);
         }
       } catch (error) {
         console.log({ error });

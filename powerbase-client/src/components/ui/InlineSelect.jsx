@@ -1,10 +1,16 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
-export function InlineSelect({ label, value, setValue, options, className }) {
+export function InlineSelect({
+  label,
+  value,
+  setValue,
+  options,
+  className,
+}) {
   return (
     <Listbox value={value} onChange={setValue}>
       {({ open }) => (
@@ -37,13 +43,13 @@ export function InlineSelect({ label, value, setValue, options, className }) {
                 {options.map((option) => (
                   <Listbox.Option
                     key={option.name}
-                    className={({ active }) =>
+                    className={({ active }) => (
                       cn('cursor-default select-none relative py-2 pl-3 pr-9', (
                         active ? 'text-white bg-indigo-600' : 'text-gray-900'
                       ), {
                         'cursor-not-allowed': option.disabled,
                       })
-                    }
+                    )}
                     value={option}
                     disabled={option.disabled}
                   >

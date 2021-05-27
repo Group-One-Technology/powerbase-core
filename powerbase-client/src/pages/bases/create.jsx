@@ -1,17 +1,10 @@
-import React, { useEffect, Fragment, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
 import { RadioGroup } from '@headlessui/react';
-import { InboxIcon } from '@heroicons/react/outline';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/solid';
-import cn from 'classnames';
 
-import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { DATABASE_TYPES, DB_PLATFORMS } from '@lib/constants';
 
-import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { InlineInput } from '@components/ui/InlineInput';
@@ -23,7 +16,6 @@ import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
 
 export function CreateBasePage() {
-  const history = useHistory();
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);

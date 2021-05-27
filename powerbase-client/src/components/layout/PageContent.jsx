@@ -8,8 +8,9 @@ export function PageContent({ children, className }) {
       {children}
     </main>
   );
-};
+}
 
 PageContent.propTypes = {
   children: PropTypes.any,
+  className: PropTypes.string,
 };

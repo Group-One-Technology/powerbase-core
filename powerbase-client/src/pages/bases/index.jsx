@@ -1,22 +1,19 @@
-import React, { useEffect, Fragment } from 'react';
+import React from 'react';
 import useSWR from 'swr';
-import { useHistory, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 
 import { useAuthUser } from '@models/AuthUser';
+import { getDatabases } from '@lib/api/databases';
 import { BaseItem } from '@components/bases/BaseItem';
-
-import { Navbar } from '@components/layout/Navbar';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
-import { getDatabases } from '@lib/api/databases';
 import { EmptyBase } from '@components/bases/EmptyBase';
 
 export function BasesPage() {
-  const history = useHistory();
   const authUser = useAuthUser();
-  const { data: bases} = useSWR(authUser ? '/databases' : null, getDatabases);
+  const { data: bases } = useSWR(authUser ? '/databases' : null, getDatabases);
 
   return (
     <Page authOnly>

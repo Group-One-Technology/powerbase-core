@@ -11,7 +11,7 @@ export function Middleware({ children, authOnly }) {
     );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 Middleware.propTypes = {

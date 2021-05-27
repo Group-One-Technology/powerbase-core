@@ -28,7 +28,7 @@ export async function connectDatabase({
   return undefined;
 }
 
-export async function getDatabases({ userId }) {
+export async function getDatabases() {
   const response = await securedApi.get('/databases');
 
   if (response.statusText === 'OK') {

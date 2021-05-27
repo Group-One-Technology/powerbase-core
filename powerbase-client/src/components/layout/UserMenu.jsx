@@ -4,6 +4,8 @@ import { ChevronDownIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
+
 import { useAuthUser } from '@models/AuthUser';
 import { logout } from '@lib/api/auth';
 
@@ -113,3 +115,7 @@ export function UserMenu({ list }) {
     </Menu>
   );
 }
+
+UserMenu.propTypes = {
+  list: PropTypes.bool,
+};

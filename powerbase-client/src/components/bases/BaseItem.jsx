@@ -1,6 +1,7 @@
-import React from 'react'
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRightIcon } from '@heroicons/react/outline';
+import { IBase } from '@lib/propTypes/base';
 
 export function BaseItem({ base }) {
   return (
@@ -20,3 +21,7 @@ export function BaseItem({ base }) {
     </Link>
   );
 }
+
+BaseItem.propTypes = {
+  base: IBase.isRequired,
+};

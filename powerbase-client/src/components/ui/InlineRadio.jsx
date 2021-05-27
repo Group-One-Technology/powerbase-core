@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RadioGroup } from '@headlessui/react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -33,14 +33,14 @@ export function InlineRadio({
           <RadioGroup.Option
             key={option.name}
             value={option}
-            className={({ active }) =>
+            className={({ active }) => (
               cn('flex-1 relative block rounded-lg border border-gray-300 bg-white shadow-sm px-6 py-4 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none', (
                 active ? 'ring-1 ring-offset-2 ring-indigo-500' : ''
-              ), {
-                'cursor-not-allowed': option.disabled,
-              }, option.className,
+              ),
+              { 'cursor-not-allowed': option.disabled },
+              option.className,
               value.name === option.name ? classNames?.checked : '')
-            }
+            )}
             disabled={option.disabled}
           >
             {({ checked }) => (
@@ -79,7 +79,7 @@ export function InlineRadio({
         </div>
       )}
     </RadioGroup>
-  )
+  );
 }
 
 const IValue = PropTypes.shape({
@@ -98,7 +98,9 @@ InlineRadio.propTypes = {
   setValue: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(IValue),
   className: PropTypes.string,
+  classNames: PropTypes.object,
   enhancer: PropTypes.any,
   error: PropTypes.instanceOf(Error),
   setError: PropTypes.func,
+  'aria-label': PropTypes.string,
 };

@@ -9,7 +9,7 @@ export function EmptyBase() {
     <div className="px-4 py-8 sm:px-0 border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
       <div className="text-center">
         <p className="text-lg text-gray-500 pb-4">
-          Looks lke you haven't added any databases.
+          Looks lke you haven&apos;t added any databases.
         </p>
         <Menu as="div" className="relative inline-block text-left">
           {({ open }) => (

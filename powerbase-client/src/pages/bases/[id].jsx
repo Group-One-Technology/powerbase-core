@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import { useParams } from 'react-router-dom';
 
 import { getDatabase, getDatabases } from '@lib/api/databases';
 import { useAuthUser } from '@models/AuthUser';
 import { Page } from '@components/layout/Page';
-import { PageHeader } from '@components/layout/PageHeader';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 

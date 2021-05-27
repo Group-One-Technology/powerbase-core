@@ -8,7 +8,8 @@ import { InlineRadio } from './InlineRadio';
 const COLORS = [
   {
     name: 'gray',
-    className: '!px-4 !py-4 !flex-none rounded-full bg-gray-400 text-gray-400 focus:text-gray-400 active:text-gray-400 ring-gray-400 focus:ring-gray-400 active:ring-gray-400 active:ring-2', classNames: { label: 'sr-only' },
+    className: '!px-4 !py-4 !flex-none rounded-full bg-gray-400 text-gray-400 focus:text-gray-400 active:text-gray-400 ring-gray-400 focus:ring-gray-400 active:ring-gray-400 active:ring-2',
+    classNames: { label: 'sr-only' },
   },
   {
     name: 'red',
@@ -29,7 +30,7 @@ const COLORS = [
     name: 'blue',
     className: '!px-4 !py-4 !flex-none rounded-full bg-blue-400 text-blue-400 focus:text-blue-400 active:text-blue-400 ring-blue-400 focus:ring-blue-400 active:ring-blue-400',
     classNames: { label: 'sr-only' },
-   },
+  },
   {
     name: 'indigo',
     className: '!px-4 !py-4 !flex-none rounded-full bg-indigo-400 text-indigo-400 focus:text-indigo-400 active:text-indigo-400 ring-indigo-400 focus:ring-indigo-400 active:ring-indigo-400',
@@ -47,7 +48,13 @@ const COLORS = [
   },
 ];
 
-export function InlineColorRadio({ value, setValue, className, error, setError }) {
+export function InlineColorRadio({
+  value,
+  setValue,
+  className,
+  error,
+  setError,
+}) {
   if (isSafari) {
     return (
       <InlineRadio
@@ -59,10 +66,10 @@ export function InlineColorRadio({ value, setValue, className, error, setError }
         setError={setError}
         className={cn('items-center', className)}
         classNames={{
-          checked: 'ring-2 ring-offset-2'
+          checked: 'ring-2 ring-offset-2',
         }}
       />
-    )
+    );
   }
 
   return (
@@ -76,9 +83,10 @@ export function InlineColorRadio({ value, setValue, className, error, setError }
             'flex-col': isSafari,
           })}
         >
-          {COLORS.map((color, index) => (
-            <label key={color.name} className="inline-flex items-center">
+          {COLORS.map((color) => (
+            <label htmlFor={`color-${color}`} key={color.name} className="inline-flex items-center">
               <input
+                id={`color-${color}`}
                 type="radio"
                 name="color"
                 value={color.name}
