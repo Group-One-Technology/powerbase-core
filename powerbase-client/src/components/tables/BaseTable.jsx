@@ -32,9 +32,11 @@ export function BaseTable() {
       style={style}
       tabIndex={0}
       onKeyDown={(evt) => {
+        const el = evt.target;
+
         if (evt.code === 'Enter') {
-          evt.target.contentEditable = evt.target.contentEditable !== 'true';
-        } else if (evt.target.contentEditable !== 'true') {
+          el.contentEditable = el.contentEditable !== 'true';
+        } else if (el.contentEditable !== 'true') {
           setCurrentCell({ row: rowIndex, column: columnIndex });
         }
       }}
