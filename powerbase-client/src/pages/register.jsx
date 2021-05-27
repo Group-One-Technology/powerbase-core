@@ -65,7 +65,7 @@ export function RegisterPage() {
   };
 
   useEffect(() => {
-    if (authUser && localStorage.signedIn) history.push('/');
+    if (localStorage.signedIn) history.push('/');
   }, [authUser]);
 
   return (
