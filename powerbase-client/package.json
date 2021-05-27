@@ -26,6 +26,7 @@
     "react-gravatar": "^2.6.3",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
+    "react-virtualized": "^9.22.3",
     "swr": "^0.5.6",
     "tailwindcss": "^2.1.2"
   },
