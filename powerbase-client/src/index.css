@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.single-line {
+  white-space: nowrap;
+  width: 200px;
+  overflow: hidden;
+}
+
+.single-line br {
+  display: none;
+}
+
+.single-line * {
+  display: inline;
+  white-space: nowrap;
+}
