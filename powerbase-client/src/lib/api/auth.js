@@ -20,6 +20,9 @@ export async function logout() {
   const response = await securedApi.post('/logout');
 
   if (response.statusText === 'OK') {
+    delete localStorage.csrf;
+    delete localStorage.signedIn;
+
     return true;
   }
 
