@@ -8,6 +8,7 @@ import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
+import { BaseTable } from '@components/tables/BaseTable';
 
 export function BasePage() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ export function BasePage() {
     <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white" authOnly>
       <PageContent className="!px-0 max-w-full">
         <TableTabs color={base.color} />
+        <BaseTable />
       </PageContent>
     </Page>
   );
