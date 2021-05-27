@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 export const IBase = PropTypes.shape({
   id: PropTypes.number.isRequired,
-  userId: PropTypes.string.isRequired,
+  userId: PropTypes.number.isRequired,
   adapter: PropTypes.oneOf(['postgresql', 'mysql2']).isRequired,
   name: PropTypes.string.isRequired,
   description: PropTypes.string,

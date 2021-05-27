@@ -17,6 +17,17 @@ const NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
+const BG_COLORS = {
+  gray: 'bg-gray-500',
+  yellow: 'bg-yellow-500',
+  red: 'bg-red-500',
+  green: 'bg-green-500',
+  blue: 'bg-blue-500',
+  indigo: 'bg-indigo-500',
+  purple: 'bg-purple-500',
+  pink: 'bg-pink-500',
+};
+
 export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
@@ -29,15 +40,22 @@ export function Navbar({ base, bases }) {
   }
 
   return (
-    <Disclosure as="nav" className={cn('bg-white', { 'shadow-sm': !base })}>
+    <Disclosure
+      as="nav"
+      className={cn({
+        'bg-white': !base,
+        'shadow-sm': !base,
+        'text-white': base,
+      }, base && BG_COLORS[base.color])}
+    >
       {({ open }) => (
         <>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-12">
               <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
                   <Link to="/">
-                    <img src="/public/img/logo.svg" alt="Powerbase logo" className="block h-5 w-auto" />
+                    <img src={`/public/img/${base ? 'logo-white' : 'logo'}.svg`} alt="Powerbase logo" className="block h-5 w-auto" />
                   </Link>
                 </div>
               </div>
@@ -63,11 +81,18 @@ export function Navbar({ base, bases }) {
                 })}
               </div>
               <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
-                <UserMenu />
+                <UserMenu colored={!!base} />
               </div>
               <div className="-mr-2 flex items-center sm:hidden">
                 {/* Mobile menu button */}
-                <Disclosure.Button className="bg-white inline-flex items-center justify-center p-1 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <Disclosure.Button
+                  className={cn(
+                    'inline-flex items-center justify-center p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-current',
+                    base
+                      ? 'base-transparent text-white hover:bg-opacity-10 hover:bg-gray-100 '
+                      : 'bg-white text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:ring-offset-2',
+                  )}
+                >
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -83,30 +108,25 @@ export function Navbar({ base, bases }) {
             <div className="pb-3 space-y-1">
               {!!otherBases?.length && (
                 <>
-                  <p className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium bg-indigo-50 border-indigo-500 text-indigo-700">
+                  <p
+                    className={cn(
+                      'block pl-3 pr-4 py-2 border-l-4 text-base font-medium bg-gray-100 bg-opacity-30 border-current',
+                    )}
+                  >
                     {base.name}
                   </p>
-                  <p className="text-xs px-4 py-2 text-gray-500 uppercase">
+                  <p className="text-xs px-4 py-2 text-white text-opacity-80 uppercase">
                     Other Bases
                   </p>
-                  {otherBases.map((item) => {
-                    const isCurrentItem = location.pathname === `/bases/${item.id}`;
-
-                    return (
-                      <Link
-                        key={item.name}
-                        to={`/bases/${item.id}`}
-                        className={cn('block pl-3 pr-4 py-2 border-l-4 text-base font-medium', (
-                          isCurrentItem
-                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                            : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                        ))}
-                        aria-current={isCurrentItem ? 'page' : undefined}
-                      >
-                        {item.name}
-                      </Link>
-                    );
-                  })}
+                  {otherBases.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={`/bases/${item.id}`}
+                      className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 </>
               )}
               {!base && NAVIGATION.map((item) => {
@@ -138,12 +158,12 @@ export function Navbar({ base, bases }) {
                   />
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800">{authUser.name}</div>
-                  <div className="text-sm font-medium text-gray-500">{authUser.email}</div>
+                  <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>{authUser.name}</div>
+                  <div className={cn('text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>{authUser.email}</div>
                 </div>
               </div>
               <div className="mt-3 space-y-1">
-                <UserMenu list />
+                <UserMenu list colored={!!base} />
               </div>
             </div>
           </Disclosure.Panel>
