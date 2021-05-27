@@ -18,7 +18,9 @@ cd powerbase-client
 yarn
 ```
 
-3. Run the app and you're all set!
+3. Copy and rename `.env.example` to `.env`, then update the variables.
+
+4. Run the app and you're all set!
 
 ```bash
 yarn start
