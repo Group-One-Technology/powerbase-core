@@ -83,5 +83,5 @@ export function MobileNav({ base, bases, navigation }) {
 MobileNav.propTypes = {
   base: IBase,
   bases: PropTypes.arrayOf(IBase),
-  navigation: PropTypes.object.isRequired,
+  navigation: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
