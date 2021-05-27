@@ -98,7 +98,6 @@ export function LoginPage() {
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
-                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                 <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
                   Remember me
                 </label>
