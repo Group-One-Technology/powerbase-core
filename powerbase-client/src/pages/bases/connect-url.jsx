@@ -41,7 +41,7 @@ export function ConnectURLBasePage() {
         });
 
         if (response.connected) {
-          history.push(`/bases/${response.database.id}`);
+          history.push('/');
         }
       } catch (error) {
         console.log({ error });
