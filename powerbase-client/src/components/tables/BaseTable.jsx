@@ -89,7 +89,7 @@ export function BaseTable() {
                 columnCount={columnCount}
                 rowHeight={40}
                 rowCount={rowCount}
-                height={windowSize.height ? windowSize.height - 85 : 0}
+                height={windowSize.height ? windowSize.height - 125 : 0}
                 width={width}
               />
             )}
