@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_21_163317) do
+ActiveRecord::Schema.define(version: 2021_05_28_082331) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -89,6 +89,15 @@ ActiveRecord::Schema.define(version: 2021_05_21_163317) do
     t.index ["referenced_table_id"], name: "index_table_foreign_keys_on_referenced_table_id"
   end
 
+  create_table "table_views", force: :cascade do |t|
+    t.string "name", default: "Grid", null: false
+    t.string "view_type", default: "grid", null: false
+    t.bigint "powerbase_table_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["powerbase_table_id"], name: "index_table_views_on_powerbase_table_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "first_name", null: false
     t.string "last_name", null: false
@@ -106,4 +115,5 @@ ActiveRecord::Schema.define(version: 2021_05_21_163317) do
   add_foreign_key "powerbase_tables", "powerbase_databases"
   add_foreign_key "table_foreign_keys", "powerbase_tables"
   add_foreign_key "table_foreign_keys", "powerbase_tables", column: "referenced_table_id"
+  add_foreign_key "table_views", "powerbase_tables"
 end
