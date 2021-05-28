@@ -43,7 +43,7 @@ export function Navbar({ base, bases }) {
       {({ open }) => (
         <>
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-12">
+            <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-11">
               <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
                   <Link to="/">
