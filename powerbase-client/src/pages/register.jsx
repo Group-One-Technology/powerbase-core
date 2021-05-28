@@ -13,6 +13,7 @@ import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
+import { Logo } from '@components/ui/Logo';
 
 export function RegisterPage() {
   const history = useHistory();
@@ -71,7 +72,7 @@ export function RegisterPage() {
   return (
     <Page title="Login" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <img src="/public/img/logo.svg" alt="Powerbase logo" className="mx-auto h-12 w-auto" />
+        <Logo className="mx-auto h-12 w-auto" />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create an Account</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or&nbsp;

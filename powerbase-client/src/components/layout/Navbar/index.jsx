@@ -8,6 +8,8 @@ import PropTypes from 'prop-types';
 import { useAuthUser } from '@models/AuthUser';
 import { IBase } from '@lib/propTypes/base';
 import { BG_COLORS } from '@lib/constants';
+
+import { Logo } from '@components/ui/Logo';
 import { UserMenu } from './UserMenu';
 import { BaseMenu } from './BaseMenu';
 import { MobileNav } from './MobileNav';
@@ -45,7 +47,7 @@ export function Navbar({ base, bases }) {
               <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
                   <Link to="/">
-                    <img src={`/public/img/${base ? 'logo-white' : 'logo'}.svg`} alt="Powerbase logo" className="block h-5 w-auto" />
+                    <Logo white={!!base} className="block h-5 w-auto" />
                   </Link>
                 </div>
               </div>
