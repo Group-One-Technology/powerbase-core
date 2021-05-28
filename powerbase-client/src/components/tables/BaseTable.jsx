@@ -1,8 +1,10 @@
 import { useWindowSize } from '@lib/hooks/useWindowSize';
 import React, { useState } from 'react';
 import { ArrowKeyStepper, Grid, AutoSizer } from 'react-virtualized';
-import { tableValuesMock } from '@lib/mock/tableValuesMock';
 import cn from 'classnames';
+
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { tableValuesMock } from '@lib/mock/tableValuesMock';
 import 'react-virtualized/styles.css';
 
 export function BaseTable() {
@@ -20,37 +22,45 @@ export function BaseTable() {
     key,
     rowIndex,
     style,
-  }) => (
-    <div
-      role="button"
-      id={`row-${rowIndex}_col-${columnIndex}`}
-      key={key}
-      className={cn(
-        'single-line text-base truncate focus:bg-gray-100',
-      )}
-      onClick={() => setCurrentCell({ row: rowIndex, column: columnIndex })}
-      style={style}
-      tabIndex={0}
-      onKeyDown={(evt) => {
-        const el = evt.target;
+  }) => {
+    const isHeader = rowIndex === 0;
+    const isRowNo = columnIndex === 0;
 
-        if (evt.code === 'Enter') {
-          el.contentEditable = el.contentEditable !== 'true';
-        } else if (el.contentEditable !== 'true') {
-          setCurrentCell({ row: rowIndex, column: columnIndex });
-        }
-      }}
-      onDoubleClick={(evt) => {
-        evt.target.contentEditable = true;
-      }}
-      onBlur={(evt) => {
-        evt.target.contentEditable = false;
-      }}
-      suppressContentEditableWarning
-    >
-      {tableValuesMock[rowIndex][columnIndex]}
-    </div>
-  );
+    return (
+      <div
+        role="button"
+        id={`row-${rowIndex}_col-${columnIndex}`}
+        key={key}
+        className={cn(
+          'single-line text-sm truncate focus:bg-gray-100 border-b border-r border-gray-200 flex items-center py-1 px-2',
+          isHeader && 'bg-gray-100',
+          isRowNo && 'flex justify-center text-xs text-gray-500',
+        )}
+        onClick={() => setCurrentCell({ row: rowIndex, column: columnIndex })}
+        style={style}
+        tabIndex={0}
+        onKeyDown={(evt) => {
+          const el = evt.target;
+
+          if (evt.code === 'Enter' && !isRowNo) {
+            el.contentEditable = el.contentEditable !== 'true';
+          } else if (el.contentEditable !== 'true') {
+            setCurrentCell({ row: rowIndex, column: columnIndex });
+          }
+        }}
+        onDoubleClick={(evt) => {
+          if (!isRowNo) evt.target.contentEditable = true;
+        }}
+        onBlur={(evt) => {
+          if (!isRowNo) evt.target.contentEditable = false;
+        }}
+        suppressContentEditableWarning
+      >
+        {(isHeader && columnIndex !== 0) && <FieldTypeIcon className="mr-1" />}
+        {tableValuesMock[rowIndex][columnIndex]}
+      </div>
+    );
+  };
 
   const handleScrollToChange = ({ scrollToRow, scrollToColumn }) => {
     const editableElement = document.querySelector('[contenteditable=true]');
@@ -85,9 +95,9 @@ export function BaseTable() {
                   scrollToRow,
                   ...props,
                 })}
-                columnWidth={200}
+                columnWidth={({ index }) => (index === 0 ? 50 : 300)}
                 columnCount={columnCount}
-                rowHeight={40}
+                rowHeight={30}
                 rowCount={rowCount}
                 height={windowSize.height ? windowSize.height - 125 : 0}
                 width={width}
