@@ -58,7 +58,7 @@ export function UserMenu({ list, colored }) {
   }
 
   return (
-    <Menu as="div" className="ml-3 relative z-50">
+    <Menu as="div" className="ml-3 relative z-10">
       {({ open }) => (
         <>
           <div>
