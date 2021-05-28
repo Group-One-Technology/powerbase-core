@@ -4,6 +4,7 @@ export const tableValuesMock = new Array(1000)
   .fill(true)
   .map((_, index) => (index === 0
     ? [
+      '',
       'Name',
       'Job Title',
       'City',
@@ -14,6 +15,7 @@ export const tableValuesMock = new Array(1000)
       'Notes',
     ]
     : [
+      index,
       faker.name.findName(),
       faker.name.jobTitle(),
       faker.address.city(),
