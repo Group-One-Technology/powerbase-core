@@ -3,7 +3,7 @@ import { RadioGroup } from '@headlessui/react';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { DATABASE_TYPES, DB_PLATFORMS } from '@lib/constants';
+import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -19,6 +19,7 @@ export function CreateBasePage() {
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
+  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
   const handleSubmit = (evt) => {
@@ -39,6 +40,7 @@ export function CreateBasePage() {
         name: databaseName,
         adapter: databaseType,
         platform: databasePlatform,
+        isTurbo: powerbaseType.name === 'Powerbase Turbo',
         color,
       });
     }
@@ -92,6 +94,13 @@ export function CreateBasePage() {
                     <div className="ml-1 text-gray-500 sm:ml-0">/mo</div>
                   </RadioGroup.Description>
                 )}
+                className="my-6"
+              />
+              <InlineRadio
+                label="Powerbase Type"
+                value={powerbaseType}
+                setValue={setPowerbaseType}
+                options={POWERBASE_TYPE}
                 className="my-6"
               />
               <InlineColorRadio

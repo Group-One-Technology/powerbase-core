@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { DATABASE_TYPES } from '@lib/constants';
+import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
 import { connectDatabase } from '@lib/api/databases';
 
 import { Page } from '@components/layout/Page';
@@ -14,6 +14,7 @@ import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
+import { InlineRadio } from '@components/ui/InlineRadio';
 
 export function ConnectBasePage() {
   const history = useHistory();
@@ -23,6 +24,7 @@ export function ConnectBasePage() {
   const [port, setPort, portError] = useValidState(5432, REQUIRED_VALIDATOR);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
   const [loading, setLoading] = useState(false);
@@ -51,6 +53,7 @@ export function ConnectBasePage() {
           password,
           database: databaseName,
           adapter: databaseType.value,
+          isTurbo: powerbaseType.name === 'Powerbase Turbo',
           color,
         });
 
@@ -140,6 +143,13 @@ export function ConnectBasePage() {
                 placeholder="e.g. ******"
                 value={password}
                 onChange={(evt) => setPassword(evt.target.value)}
+                className="my-6"
+              />
+              <InlineRadio
+                label="Powerbase Type"
+                value={powerbaseType}
+                setValue={setPowerbaseType}
+                options={POWERBASE_TYPE}
                 className="my-6"
               />
               <InlineColorRadio

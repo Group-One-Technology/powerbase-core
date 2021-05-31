@@ -8,6 +8,7 @@ export async function connectDatabase({
   password,
   database,
   connectionString,
+  isTurbo,
   color,
 }) {
   const response = await securedApi.post('/databases/connect', {
@@ -18,6 +19,7 @@ export async function connectDatabase({
     password,
     database,
     connectionString,
+    isTurbo,
     color,
   });
 

@@ -9,8 +9,13 @@ export const DATABASE_TYPES = [
 ];
 
 export const DB_PLATFORMS = [
-  { name: 'Powerbase Cloud', description: 'A free cloud platform great for hobby and MVP apps.', price: '$0' },
+  { name: 'Powerbase Cloud', description: 'A free cloud platform powered by Powerbase.', price: '$0' },
   { name: 'AWS', description: 'Coming Soon', disabled: true },
+];
+
+export const POWERBASE_TYPE = [
+  { name: 'Powerbase Turbo', description: 'Get a faster experience with the power of Elastic Search. Great for dealing with large datasets.' },
+  { name: 'Regular', description: 'A normal experience suited for dealing with small datasets.' },
 ];
 
 export const BG_COLORS = {
