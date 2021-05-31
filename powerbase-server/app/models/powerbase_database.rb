@@ -2,7 +2,6 @@ require 'elasticsearch/model'
 
 class PowerbaseDatabase < ApplicationRecord
   include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
   scope :turbo, -> { where(is_turbo: true) }
 
   validates :name, presence: true
