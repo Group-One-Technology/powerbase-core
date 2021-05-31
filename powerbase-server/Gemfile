@@ -29,6 +29,9 @@ gem 'jwt_sessions', '~> 2.5', '>= 2.5.2'
 gem 'redis', '~> 4.2', '>= 4.2.5'
 # Use Json for parsing request.body to json
 gem 'json', '~> 2.5', '>= 2.5.1'
+# Use Rails Elastic Search for powerbase turbo
+gem 'elasticsearch-model', '~> 7.1', '>= 7.1.1'
+gem 'elasticsearch-rails', '~> 7.1', '>= 7.1.1'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.7'
 
