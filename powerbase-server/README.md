@@ -4,8 +4,9 @@ Powerbase's api-server that is built with Rails.
 
 ## Pre-requisites
 
-- PostgreSQL
-- Ruby / Rails
+- [PostgreSQL](https://www.postgresql.org/)
+- [Ruby 3.0.1](https://www.ruby-lang.org/en/)
+- [Docker](https://www.docker.com/)
 
 ## Installation
 
@@ -44,7 +45,6 @@ Copy and rename `config/application.example.yml` to `config/application.example.
         --env "discovery.type=single-node" \
         --env "cluster.name=elasticsearch-rails" \
         --env "cluster.routing.allocation.disk.threshold_enabled=false" \
-        --rm \
         docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     ```
 
@@ -52,12 +52,11 @@ Copy and rename `config/application.example.yml` to `config/application.example.
 
     ```bash
     docker run \
-    --name powerbase-kibana \
-    --net powerbase \
-    --publish 5601:5601 \
-    --env "ELASTICSEARCH_HOSTS=http://powerbase-elasticsearch:9200" \
-    --rm \
-    docker.elastic.co/kibana/kibana-oss:7.10.2
+        --name powerbase-kibana \
+        --net powerbase \
+        --publish 5601:5601 \
+        --env "ELASTICSEARCH_HOSTS=http://powerbase-elasticsearch:9200" \
+        docker.elastic.co/kibana/kibana-oss:7.10.2
     ```
 
 5. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed.
