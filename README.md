@@ -9,6 +9,17 @@ Powerbase is the missing bridge to the worlds most trusted relational database.
 | [powerbase-client](powerbase-client) |     React Client      |
 | [powerbase-server](powerbase-server) |   Rails API Server    |
 
+
+## Running Services
+| Comand                     | Port  |     Description    |
+| :------------------------- | :---: |:----------------: |
+| React-NodeJS Client        | 4000  | The frontend of Powerbase |
+| Rails API Server           | 4001  | The API Server that communicates to the frontend |
+| Elastic Search             | 9200  |  For fast searching for Powerbase Turbo |
+| Kibana                     | 5601  | UI for Elastic Search (optional) |
+| Sidekiq                    |  -    | For handling background jobs |
+
+
 ## Installation
 
 Clone Powerbase's core repository
