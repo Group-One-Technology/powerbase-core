@@ -13,6 +13,7 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:password).value(:string)
     optional(:database).value(:string)
     optional(:color).value(:string)
+    optional(:is_turbo).value(:bool)
     optional(:connection_string).value(:string)
   end
 
@@ -50,6 +51,7 @@ class PowerbaseDatabasesController < ApplicationController
           adapter: Powerbase.adapter,
           is_migrated: false,
           color: options[:color],
+          is_turbo: options[:is_turbo],
           user_id: current_user.id,
         })
 

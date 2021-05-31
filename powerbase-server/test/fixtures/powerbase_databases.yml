@@ -6,6 +6,7 @@ one:
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
   adapter: postgresql
   is_migrated: false
+  is_turbo: true
 
 two:
   id: 2
@@ -15,6 +16,7 @@ two:
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
   adapter: postgresql
   is_migrated: false
+  is_turbo: true
 
 three:
   id: 3
@@ -24,3 +26,4 @@ three:
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
   adapter: postgresql
   is_migrated: true
+  is_turbo: true
