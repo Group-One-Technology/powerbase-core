@@ -10,11 +10,11 @@ import { GlobalProviders } from '@components/GlobalProviders';
 import { LoginPage } from '@pages/login';
 import { RegisterPage } from '@pages/register';
 import { BasesPage } from '@pages/bases';
-import { BasePage } from '@pages/bases/[id]';
-import { CreateBasePage } from '@pages/bases/create';
-import { ConnectBasePage } from '@pages/bases/connect';
-import { ConnectURLBasePage } from '@pages/bases/connect-url';
-import { TablePage } from '@pages/tables/[id]';
+import { BasePage } from '@pages/base/[id]';
+import { CreateBasePage } from '@pages/base/create';
+import { ConnectBasePage } from '@pages/base/connect';
+import { ConnectURLBasePage } from '@pages/base/connect-url';
+import { TablePage } from '@pages/table/[id]';
 
 import './index.css';
 
@@ -26,7 +26,8 @@ export function App() {
           <Route exact path="/" component={BasesPage} />
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/register" component={RegisterPage} />
-          <Route path="/bases">
+          <Route exact path="/bases" component={BasesPage} />
+          <Route path="/base">
             <BasesRoute />
           </Route>
           <Route path="*" component={() => <h1>Not found!</h1>} />
@@ -41,12 +42,11 @@ function BasesRoute() {
 
   return (
     <Switch>
-      <Route exact path={`${path}/`} component={BasesPage} />
       <Route exact path={`${path}/create`} component={CreateBasePage} />
       <Route exact path={`${path}/connect`} component={ConnectBasePage} />
       <Route exact path={`${path}/connect-url`} component={ConnectURLBasePage} />
       <Route exact path={`${path}/:id`} component={BasePage} />
-      <Route path={`${path}/:databaseId/tables/:id`} component={TablePage} />
+      <Route path={`${path}/:databaseId/table/:id`} component={TablePage} />
       <Route path="*" component={() => <h1>Not found!</h1>} />
     </Switch>
   );

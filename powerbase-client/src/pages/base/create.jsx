@@ -58,9 +58,9 @@ export function CreateBasePage() {
               id="databaseTabs"
               name="database-tabs"
               tabs={[
-                { name: 'New', href: '/bases/create' },
-                { name: 'Link Existing', href: '/bases/connect' },
-                { name: 'Link from URL', href: '/bases/connect-url' },
+                { name: 'New', href: '/base/create' },
+                { name: 'Link Existing', href: '/base/connect' },
+                { name: 'Link from URL', href: '/base/connect-url' },
               ]}
             />
             <form onSubmit={handleSubmit}>

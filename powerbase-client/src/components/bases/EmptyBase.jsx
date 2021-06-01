@@ -39,7 +39,7 @@ export function EmptyBase() {
                     <Menu.Item>
                       {({ active }) => (
                         <Link
-                          to="/bases/create"
+                          to="/base/create"
                           className={cn('block px-4 py-2 text-sm', (
                             active
                               ? 'bg-gray-100 text-gray-900'
@@ -53,7 +53,7 @@ export function EmptyBase() {
                     <Menu.Item>
                       {({ active }) => (
                         <Link
-                          to="/bases/connect"
+                          to="/base/connect"
                           className={cn('block px-4 py-2 text-sm', (
                             active
                               ? 'bg-gray-100 text-gray-900'
@@ -67,7 +67,7 @@ export function EmptyBase() {
                     <Menu.Item>
                       {({ active }) => (
                         <Link
-                          to="/bases/connect-url"
+                          to="/base/connect-url"
                           className={cn('block px-4 py-2 text-sm', (
                             active
                               ? 'bg-gray-100 text-gray-900'

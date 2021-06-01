@@ -43,7 +43,7 @@ export function TableTabs({
             return (
               <Link
                 key={table.name}
-                to={`/bases/${databaseId}/tables/${table.id}`}
+                to={`/base/${databaseId}/table/${table.id}`}
                 className={cn(
                   'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',

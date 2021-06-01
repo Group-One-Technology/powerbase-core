@@ -7,7 +7,7 @@ function Base({ id }) {
   const { data: tables } = useBaseTables();
 
   if (tables) {
-    return <Redirect to={`/bases/${id}/tables/${tables[0].id}`} />;
+    return <Redirect to={`/base/${id}/table/${tables[0].id}`} />;
   }
 
   return <div>Loading...</div>;
