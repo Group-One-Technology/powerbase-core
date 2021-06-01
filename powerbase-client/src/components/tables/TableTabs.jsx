@@ -5,31 +5,24 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
 
-const tabs = [
-  { name: 'My Account', href: '#', current: false },
-  { name: 'Company', href: '#', current: false },
-  { name: 'Team Members', href: '#', current: true },
-  { name: 'Billing', href: '#', current: false },
-];
-
-export function TableTabs({ color }) {
+export function TableTabs({ color, currentTableId, tables }) {
   const addTable = () => {
     alert('add new table clicked');
   };
 
   return (
-    <div className={cn('px-4 sm:px-6 lg:px-8', BG_COLORS[color])}>
+    <div className={cn('px-4 sm:px-6 lg:px-8 w-full overflow-auto', BG_COLORS[color])}>
       <div className="pb-2 sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
         </label>
         <select
-          id="tabs"
-          name="tabs"
+          id="tableTabs"
+          name="table-tabs"
           className="block w-full bg-white bg-opacity-20 border-current text-white border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-          defaultValue={tabs.find((tab) => tab.current).name}
+          defaultValue={tables.find((table) => table.id === currentTableId).name}
         >
-          {tabs.map((tab) => (
+          {tables.map((tab) => (
             <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
           ))}
           <option onClick={addTable} className="text-white bg-gray-900 bg-opacity-80">
@@ -39,19 +32,23 @@ export function TableTabs({ color }) {
       </div>
       <div className="hidden sm:flex">
         <nav className="inline-flex space-x-1" aria-label="Tabs">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              to={tab.href}
-              className={cn(
-                'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
-                tab.current ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
-              )}
-              aria-current={tab.current ? 'page' : undefined}
-            >
-              {tab.name}
-            </Link>
-          ))}
+          {tables.map((table) => {
+            const isCurrentTable = table.id === currentTableId;
+
+            return (
+              <Link
+                key={table.name}
+                to={`/tables/${table.id}`}
+                className={cn(
+                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
+                  isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                )}
+                aria-current={isCurrentTable ? 'page' : undefined}
+              >
+                {table.name}
+              </Link>
+            );
+          })}
           <div className="my-auto px-2">
             <button
               type="button"
@@ -70,4 +67,6 @@ export function TableTabs({ color }) {
 
 TableTabs.propTypes = {
   color: PropTypes.oneOf(Object.keys(BG_COLORS)),
+  currentTableId: PropTypes.number.isRequired,
+  tables: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
