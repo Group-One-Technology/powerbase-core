@@ -17,7 +17,7 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /tables/:id
   def show
-    @table = PowerbaseTable.includes(:powerbase_database).find(safe_params[:id])
+    @table = PowerbaseTable.find(safe_params[:id])
     render json: format_json(@table)
   end
 
@@ -40,17 +40,6 @@ class PowerbaseTablesController < ApplicationController
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
-        database: {
-          id: database.id,
-          user_id: database.user_id,
-          adapter: database.adapter,
-          name: database.name,
-          description: database.description,
-          color: database.color,
-          is_migrated: database.is_migrated,
-          created_at: database.created_at,
-          updated_at: database.updated_at,
-        }
       }
     end
 end
