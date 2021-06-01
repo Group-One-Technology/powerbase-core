@@ -5,7 +5,12 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
 
-export function TableTabs({ color, currentTableId, tables }) {
+export function TableTabs({
+  color,
+  tableId,
+  databaseId,
+  tables,
+}) {
   const addTable = () => {
     alert('add new table clicked');
   };
@@ -20,7 +25,7 @@ export function TableTabs({ color, currentTableId, tables }) {
           id="tableTabs"
           name="table-tabs"
           className="block w-full bg-white bg-opacity-20 border-current text-white border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-          defaultValue={tables.find((table) => table.id === currentTableId).name}
+          defaultValue={tables.find((table) => table.id === tableId).name}
         >
           {tables.map((tab) => (
             <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
@@ -33,12 +38,12 @@ export function TableTabs({ color, currentTableId, tables }) {
       <div className="hidden sm:flex">
         <nav className="inline-flex space-x-1" aria-label="Tabs">
           {tables.map((table) => {
-            const isCurrentTable = table.id === currentTableId;
+            const isCurrentTable = table.id === tableId;
 
             return (
               <Link
                 key={table.name}
-                to={`/tables/${table.id}`}
+                to={`/bases/${databaseId}/tables/${table.id}`}
                 className={cn(
                   'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
@@ -67,6 +72,7 @@ export function TableTabs({ color, currentTableId, tables }) {
 
 TableTabs.propTypes = {
   color: PropTypes.oneOf(Object.keys(BG_COLORS)),
-  currentTableId: PropTypes.number.isRequired,
+  tableId: PropTypes.number.isRequired,
+  databaseId: PropTypes.number.isRequired,
   tables: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
