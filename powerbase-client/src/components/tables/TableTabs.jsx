@@ -25,9 +25,9 @@ export function TableTabs({
           id="tableTabs"
           name="table-tabs"
           className="block w-full bg-white bg-opacity-20 border-current text-white border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-          defaultValue={tables.find((table) => table.id === tableId).name}
+          defaultValue={tables?.find((table) => table.id.toString() === tableId)?.name}
         >
-          {tables.map((tab) => (
+          {tables?.map((tab) => (
             <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
           ))}
           <option onClick={addTable} className="text-white bg-gray-900 bg-opacity-80">
@@ -37,12 +37,26 @@ export function TableTabs({
       </div>
       <div className="hidden sm:flex">
         <nav className="inline-flex space-x-1" aria-label="Tabs">
-          {tables.map((table) => {
-            const isCurrentTable = table.id === tableId;
+          {tables == null && (
+            <>
+              <span className="sr-only">Loading the database' tables.</span>
+              <div className="flex items-center py-2">
+                <span class="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
+              </div>
+              <div className="flex items-center py-2">
+                <span class="h-5 bg-white bg-opacity-40 rounded w-60 animate-pulse" />
+              </div>
+              <div className="flex items-center py-2">
+                <span class="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
+              </div>
+            </>
+          )}
+          {tables?.map((table) => {
+            const isCurrentTable = table.id.toString() === tableId;
 
             return (
               <Link
-                key={table.name}
+                key={table.id}
                 to={`/base/${databaseId}/table/${table.id}`}
                 className={cn(
                   'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
@@ -54,16 +68,18 @@ export function TableTabs({
               </Link>
             );
           })}
-          <div className="my-auto px-2">
-            <button
-              type="button"
-              onClick={addTable}
-              className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25"
-            >
-              <span className="sr-only">Add Table</span>
-              <PlusIcon className="h-5 w-5" />
-            </button>
-          </div>
+          {tables && (
+            <div className="my-auto px-2">
+              <button
+                type="button"
+                onClick={addTable}
+                className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25"
+              >
+                <span className="sr-only">Add Table</span>
+                <PlusIcon className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </nav>
       </div>
     </div>
@@ -72,7 +88,7 @@ export function TableTabs({
 
 TableTabs.propTypes = {
   color: PropTypes.oneOf(Object.keys(BG_COLORS)),
-  tableId: PropTypes.number.isRequired,
-  databaseId: PropTypes.number.isRequired,
-  tables: PropTypes.arrayOf(PropTypes.object).isRequired,
+  tableId: PropTypes.string.isRequired,
+  databaseId: PropTypes.string.isRequired,
+  tables: PropTypes.any,
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 import { BasesProvider, useBases } from '@models/Bases';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
-import { BaseTableProvider, useBaseTable } from '@models/BaseTable';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -11,14 +11,14 @@ import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
 import { BaseTable } from '@components/tables/BaseTable';
 import { TableViewsNav } from '@components/views/TableViewsNav';
+import { BaseProvider, useBase } from '@models/Base';
 
-function Table() {
+function Table({ id: tableId, databaseId }) {
   const { data: bases } = useBases();
+  const { data: base } = useBase();
   const { data: tables } = useBaseTables();
-  const { data: table } = useBaseTable();
-  const base = table?.database;
 
-  if (table == null || tables == null) {
+  if (base == null || bases == null) {
     return <div>Loading...</div>;
   }
 
@@ -28,8 +28,8 @@ function Table() {
         <TableTabs
           color={base.color}
           tables={tables}
-          tableId={table.id}
-          databaseId={table.database.id}
+          tableId={tableId}
+          databaseId={databaseId}
         />
         <TableViewsNav />
         <BaseTable />
@@ -38,16 +38,21 @@ function Table() {
   );
 }
 
+Table.propTypes = {
+  id: PropTypes.string.isRequired,
+  databaseId: PropTypes.string.isRequired,
+};
+
 export function TablePage() {
   const { id, databaseId } = useParams();
 
   return (
     <BasesProvider>
-      <BaseTableProvider id={id}>
+      <BaseProvider id={databaseId}>
         <BaseTablesProvider id={databaseId}>
-          <Table />
+          <Table id={id} databaseId={databaseId} />
         </BaseTablesProvider>
-      </BaseTableProvider>
+      </BaseProvider>
     </BasesProvider>
   );
 }
