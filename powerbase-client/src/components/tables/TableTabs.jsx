@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlusIcon } from '@heroicons/react/solid';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
@@ -11,6 +11,8 @@ export function TableTabs({
   databaseId,
   tables,
 }) {
+  const history = useHistory();
+
   const addTable = () => {
     alert('add new table clicked');
   };
@@ -27,8 +29,14 @@ export function TableTabs({
           className="block w-full bg-white bg-opacity-20 border-current text-white border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
           defaultValue={tables?.find((table) => table.id.toString() === tableId)?.name}
         >
-          {tables?.map((tab) => (
-            <option key={tab.name} className="text-white bg-gray-900 bg-opacity-80">{tab.name}</option>
+          {tables?.map((table) => (
+            <option
+              key={table.id}
+              onClick={() => history.push(`/base/${databaseId}/table/${table.id}`)}
+              className="text-white bg-gray-900 bg-opacity-80"
+            >
+              {table.name}
+            </option>
           ))}
           <option onClick={addTable} className="text-white bg-gray-900 bg-opacity-80">
             + Add Table
