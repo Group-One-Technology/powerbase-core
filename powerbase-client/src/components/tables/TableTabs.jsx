@@ -23,13 +23,13 @@ export function TableTabs({
 
   const handleScroll = (position) => {
     if (tabsContainerEl.current) {
-      const scrollWidth = tabsContainerEl.current.scrollWidth
+      const { scrollWidth } = tabsContainerEl.current;
       const scrollOffsetWidth = tabsContainerEl.current.offsetWidth - SCROLL_OFFSET;
       const scrollPosition = tabsContainerEl.current.scrollLeft;
 
       let scrollTo = position === 'right'
         ? scrollPosition + scrollOffsetWidth
-        : scrollPosition - scrollOffsetWidth
+        : scrollPosition - scrollOffsetWidth;
 
       if (scrollTo <= 0) {
         scrollTo = 0;
@@ -99,15 +99,15 @@ export function TableTabs({
         <nav ref={tabsContainerEl} className="inline-flex space-x-1 overflow-auto scrollbar-none" aria-label="Tabs">
           {tables == null && (
             <>
-              <span className="sr-only">Loading the database' tables.</span>
+              <span className="sr-only">Loading the database&apos;s tables.</span>
               <div className="flex items-center py-2">
-                <span class="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
+                <span className="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
               </div>
               <div className="flex items-center py-2">
-                <span class="h-5 bg-white bg-opacity-40 rounded w-60 animate-pulse" />
+                <span className="h-5 bg-white bg-opacity-40 rounded w-60 animate-pulse" />
               </div>
               <div className="flex items-center py-2">
-                <span class="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
+                <span className="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
               </div>
             </>
           )}
