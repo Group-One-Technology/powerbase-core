@@ -5,7 +5,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
 
-const SCROLL_OFFSET = 200;
+const SCROLL_OFFSET = 100;
 
 export function TableTabs({
   color,
@@ -19,6 +19,18 @@ export function TableTabs({
 
   useEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
+
+    if (tabsContainerEl.current) {
+      const leftArrowEl = document.getElementById('tableTabsLeftArrow');
+      const rightArrowEl = document.getElementById('tableTabsRightArrow');
+      const scrollPosition = tabsContainerEl.current.scrollLeft;
+
+      if (scrollPosition <= 0) {
+        leftArrowEl.classList.add('invisible');
+      } else if (scrollPosition >= tabsContainerEl.current.scrollWidth - SCROLL_OFFSET) {
+        rightArrowEl.classList.add('invisible');
+      }
+    }
   }, []);
 
   const handleScroll = (position) => {
