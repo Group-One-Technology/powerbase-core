@@ -1,9 +1,11 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { BasesProvider, useBases } from '@models/Bases';
+import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
+import { useAuthUser } from '@models/AuthUser';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -11,19 +13,26 @@ import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
 import { BaseTable } from '@components/tables/BaseTable';
 import { TableViewsNav } from '@components/views/TableViewsNav';
-import { BaseProvider, useBase } from '@models/Base';
+import { AuthOnly } from '@components/middleware/AuthOnly';
 
 function Table({ id: tableId, databaseId }) {
+  const history = useHistory();
+  const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
 
-  if (base == null || bases == null) {
+  if (base == null || bases == null || authUser == null) {
+    return <div>Loading...</div>;
+  }
+
+  if (base.userId !== authUser.id) {
+    history.push('/login');
     return <div>Loading...</div>;
   }
 
   return (
-    <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white" authOnly>
+    <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white">
       <PageContent className="!px-0 max-w-full">
         <TableTabs
           color={base.color}
@@ -50,7 +59,9 @@ export function TablePage() {
     <BasesProvider>
       <BaseProvider id={databaseId}>
         <BaseTablesProvider id={databaseId}>
-          <Table id={id} databaseId={databaseId} />
+          <AuthOnly>
+            <Table id={id} databaseId={databaseId} />
+          </AuthOnly>
         </BaseTablesProvider>
       </BaseProvider>
     </BasesProvider>
