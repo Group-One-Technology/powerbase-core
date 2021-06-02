@@ -12,7 +12,7 @@ import {
 export function TableViewsNav() {
   return (
     <>
-      <div className="w-full px-4 sm:px-6 lg:px-8 border border-b-2 border-gray-200 text-gray-700">
+      <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
         <div className="relative flex  py-1.5 gap-x-2">
           <div className="flex-1 flex items-center">
             <button
