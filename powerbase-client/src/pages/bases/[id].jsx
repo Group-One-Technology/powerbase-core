@@ -9,6 +9,7 @@ import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
 import { BaseTable } from '@components/tables/BaseTable';
+import { TableViewsNav } from '@components/views/TableViewsNav';
 
 export function BasePage() {
   const { id } = useParams();
@@ -17,13 +18,14 @@ export function BasePage() {
   const { data: base } = useSWR(id ? `/databases/${id}` : null, () => getDatabase({ id }));
 
   if (base == null) {
-    return null;
+    return <div>Loading...</div>;
   }
 
   return (
     <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white" authOnly>
       <PageContent className="!px-0 max-w-full">
         <TableTabs color={base.color} />
+        <TableViewsNav />
         <BaseTable />
       </PageContent>
     </Page>

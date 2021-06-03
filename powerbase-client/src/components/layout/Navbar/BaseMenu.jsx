@@ -9,7 +9,7 @@ import { IBase } from '@lib/propTypes/base';
 
 export function BaseMenu({ base, otherBases }) {
   return (
-    <Menu as="div" className="ml-3 relative z-50">
+    <Menu as="div" className="ml-3 relative z-10">
       {({ open }) => (
         <>
           <div>
