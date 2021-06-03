@@ -17,13 +17,16 @@ class PowerbaseDatabase < ApplicationRecord
     purple: "purple",
     pink: "pink",
   }, _prefix: true
-
   attr_encrypted :connection_string, key: ENV["encryption_key"],
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
 
   belongs_to :user
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
+
+  def as_indexed_json(options = {})
+    as_json(except: [:encrypted_connection_string, :connection_string, :is_turbo])
+  end
 
   after_commit on: [:create] do
     logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.is_turbo

@@ -31,7 +31,7 @@ export function MobileNav({ base, bases, navigation }) {
             {bases.map((item) => (
               <Link
                 key={item.name}
-                to={`/bases/${item.id}`}
+                to={`/base/${item.id}`}
                 className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
               >
                 {item.name}

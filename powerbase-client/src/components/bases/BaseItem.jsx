@@ -9,7 +9,7 @@ import { Badge } from '@components/ui/Badge';
 export function BaseItem({ base }) {
   return (
     <Link
-      to={base.isMigrated ? `/bases/${base.id}` : '#'}
+      to={base.isMigrated ? `/base/${base.id}` : '#'}
       className={cn('h-full flex flex-col justify-center', { 'cursor-not-allowed': !base.isMigrated })}
     >
       <div className="p-8">

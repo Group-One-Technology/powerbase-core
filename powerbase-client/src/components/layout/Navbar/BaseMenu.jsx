@@ -39,7 +39,7 @@ export function BaseMenu({ base, otherBases }) {
               <Menu.Item>
                 {({ active }) => (
                   <Link
-                    to={`/bases/${base.id}/settings`}
+                    to={`/base/${base.id}/settings`}
                     className={cn('flex items-center px-4 py-2 text-sm text-gray-700', {
                       'bg-gray-100': active,
                     })}
@@ -60,7 +60,7 @@ export function BaseMenu({ base, otherBases }) {
                     <Menu.Item key={item.id}>
                       {({ active }) => (
                         <Link
-                          to={`/bases/${item.id}`}
+                          to={`/base/${item.id}`}
                           className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
                             'border-b': index !== otherBases.length - 1,
                             'bg-gray-100': active,

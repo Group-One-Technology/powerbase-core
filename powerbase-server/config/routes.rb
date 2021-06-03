@@ -9,4 +9,5 @@ Rails.application.routes.draw do
   post '/databases/connect', to: 'powerbase_databases#connect'
 
   get '/databases/:database_id/tables', to: 'powerbase_tables#index', as: 'database_tables'
+  get '/tables/:id', to: 'powerbase_tables#show', as: 'database_table'
 end
