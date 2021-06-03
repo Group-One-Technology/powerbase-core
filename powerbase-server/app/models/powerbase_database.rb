@@ -1,4 +1,9 @@
+require 'elasticsearch/model'
+
 class PowerbaseDatabase < ApplicationRecord
+  include Elasticsearch::Model
+  scope :turbo, -> { where(is_turbo: true) }
+
   validates :name, presence: true
   validates :connection_string, presence: true
   enum adapter: { postgresql: "postgresql", mysql2: "mysql2" }, _prefix: true
@@ -16,6 +21,11 @@ class PowerbaseDatabase < ApplicationRecord
   attr_encrypted :connection_string, key: ENV["encryption_key"],
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
 
+  belongs_to :user
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
+
+  after_commit on: [:create] do
+    logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.is_turbo
+  end
 end

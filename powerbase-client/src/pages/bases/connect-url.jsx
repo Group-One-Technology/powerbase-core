@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { connectDatabase } from '@lib/api/databases';
+import { POWERBASE_TYPE } from '@lib/constants';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -12,10 +13,12 @@ import { PageContent } from '@components/layout/PageContent';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
+import { InlineRadio } from '@components/ui/InlineRadio';
 
 export function ConnectURLBasePage() {
   const history = useHistory();
   const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
+  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
   const [loading, setLoading] = useState(false);
@@ -37,6 +40,7 @@ export function ConnectURLBasePage() {
       try {
         const response = await connectDatabase({
           connectionString,
+          isTurbo: powerbaseType.name === 'Powerbase Turbo',
           color,
         });
 
@@ -80,6 +84,13 @@ export function ConnectURLBasePage() {
                 error={connectionStringError.error}
                 className="my-6"
                 required
+              />
+              <InlineRadio
+                label="Powerbase Type"
+                value={powerbaseType}
+                setValue={setPowerbaseType}
+                options={POWERBASE_TYPE}
+                className="my-6"
               />
               <InlineColorRadio
                 value={color}

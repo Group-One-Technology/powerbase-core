@@ -29,3 +29,7 @@ FieldDbTypeMapping.create(db_type: "date", adapter: "sequel", powerbase_field_ty
 FieldDbTypeMapping.create(db_type: "time", adapter: "sequel", powerbase_field_type_id: date.id)
 FieldDbTypeMapping.create(db_type: "timestamp", adapter: "sequel", powerbase_field_type_id: date.id)
 FieldDbTypeMapping.create(db_type: "enum", adapter: "sequel", powerbase_field_type_id: single_select.id)
+
+# Import Elastic Search indices and data
+PowerbaseDatabase.__elasticsearch__.create_index!
+PowerbaseDatabase.import(scope: "turbo")
