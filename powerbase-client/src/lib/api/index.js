@@ -32,7 +32,7 @@ securedApi.interceptors.request.use((config) => {
 });
 
 securedApi.interceptors.response.use(null, (error) => {
-  if (error?.response?.status === 401) {
+  if (error?.response.status === 401 && error?.response.config.url === '/auth') {
     return api.post('/refresh', {}, {
       headers: {
         'X-CSRF-TOKEN': localStorage.csrf,

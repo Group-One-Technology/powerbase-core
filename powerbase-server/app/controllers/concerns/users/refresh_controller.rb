@@ -1,6 +1,5 @@
 class Users::RefreshController < ApplicationController
-  before_action :authorize_refresh_by_access_request!, only: :create
-  before_action :authorize_access_request!, only: :auth
+  before_action :authorize_refresh_by_access_request!
 
   # POST /refresh
   def create
@@ -15,10 +14,5 @@ class Users::RefreshController < ApplicationController
     )
 
     render json: { csrf: tokens[:csrf] }
-  end
-
-  # GET /auth
-  def auth
-    render json: current_user
   end
 end

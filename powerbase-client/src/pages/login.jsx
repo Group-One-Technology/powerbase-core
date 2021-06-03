@@ -47,7 +47,7 @@ export function LoginPage() {
   };
 
   useEffect(() => {
-    if (authUser && localStorage.signedIn) history.push('/');
+    if (localStorage.signedIn) history.push('/');
   }, [authUser]);
 
   return (

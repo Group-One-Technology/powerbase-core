@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get '/auth/', to: 'users/refresh#auth'
+  get '/auth/', to: 'users/auth#index'
   post '/refresh/', to: 'users/refresh#create'
   post '/login/', to: 'users/login#create'
   post '/logout/', to: 'users/login#destroy'
