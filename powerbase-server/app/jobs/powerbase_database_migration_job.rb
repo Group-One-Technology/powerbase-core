@@ -78,6 +78,17 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             puts field.errors.messages
           end
         end
+
+        # Add default views
+        table_view = TableView.new
+        table_view.powerbase_table_id = table.id
+        table_view.name = "Grid"
+        table_view.view_type = "grid"
+        if !table_view.save
+          # TODO: Add error tracker (ex. Sentry)
+          puts "Failed to save default grid view: #{table.name}"
+          puts table_view.errors.messages
+        end
       else
         # TODO: Add error tracker (ex. Sentry)
         puts "Failed to save table: #{table.name}"
