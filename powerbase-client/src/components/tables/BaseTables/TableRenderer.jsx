@@ -7,7 +7,7 @@ import 'react-virtualized/styles.css';
 
 export function TableRenderer({ fields, records, height }) {
   const columnCount = fields.length;
-  const rowCount = records.length;
+  const rowCount = records.length + 1;
   const tableValues = [fields, ...records];
 
   const [currentCell, setCurrentCell] = useState({

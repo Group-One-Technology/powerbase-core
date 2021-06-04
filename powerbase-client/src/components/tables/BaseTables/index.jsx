@@ -22,7 +22,10 @@ export function BaseTable() {
   return (
     <TableRenderer
       fields={['', ...fields.map((field) => field.name)]}
-      records={records.map((record, index) => [index + 1, ...Object.values(record)])}
+      records={[
+        ...records.map((record, index) => [index + 1, ...Object.values(record)]),
+        [records.length + 1, ...new Array(fields.length).fill('')],
+      ]}
       height={height}
     />
   );
