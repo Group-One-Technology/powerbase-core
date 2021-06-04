@@ -8,14 +8,14 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /tables/:table_id/fields
   def index
-    render json: @tables.powerbase_fields.map {|item| format_json(item)}
+    render json: @table.powerbase_fields.map {|item| format_json(item)}
   end
 
   private
     def set_table
-      @tables = PowerbaseTable.find(safe_params[:table_id])
+      @table = PowerbaseTable.find(safe_params[:table_id])
 
-      if !@tables
+      if !@table
         raise StandardError.new("Could not find table with id of '#{safe_params[:table_id]}'")
       end
     end
