@@ -6,7 +6,7 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
-import { TableFieldsProvider, useTableFields } from '@models/TableFields';
+import { TableFieldsProvider } from '@models/TableFields';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -15,6 +15,7 @@ import { TableTabs } from '@components/tables/TableTabs';
 import { BaseTable } from '@components/tables/BaseTables';
 import { TableViewsNav } from '@components/views/TableViewsNav';
 import { AuthOnly } from '@components/middleware/AuthOnly';
+import { TableRecordsProvider } from '@models/TableRecords';
 
 function Table({ id: tableId, databaseId }) {
   const history = useHistory();
@@ -22,7 +23,6 @@ function Table({ id: tableId, databaseId }) {
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
-  const { data: fields } = useTableFields();
 
   if (base == null || bases == null || authUser == null) {
     return <div>Loading...</div>;
@@ -43,7 +43,11 @@ function Table({ id: tableId, databaseId }) {
           databaseId={databaseId}
         />
         <TableViewsNav />
-        <BaseTable fields={fields} />
+        <TableFieldsProvider id={tableId}>
+          <TableRecordsProvider id={tableId}>
+            <BaseTable />
+          </TableRecordsProvider>
+        </TableFieldsProvider>
       </PageContent>
     </Page>
   );
@@ -61,11 +65,9 @@ export function TablePage() {
     <BasesProvider>
       <BaseProvider id={databaseId}>
         <BaseTablesProvider id={databaseId}>
-          <TableFieldsProvider id={id}>
-            <AuthOnly>
-              <Table id={id} databaseId={databaseId} />
-            </AuthOnly>
-          </TableFieldsProvider>
+          <AuthOnly>
+            <Table id={id} databaseId={databaseId} />
+          </AuthOnly>
         </BaseTablesProvider>
       </BaseProvider>
     </BasesProvider>
