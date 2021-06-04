@@ -2,15 +2,18 @@ import { useWindowSize } from '@lib/hooks/useWindowSize';
 import React, { useState } from 'react';
 import { ArrowKeyStepper, Grid, AutoSizer } from 'react-virtualized';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import { tableValuesMock } from '@lib/mock/tableValuesMock';
 import 'react-virtualized/styles.css';
 
-export function BaseTable() {
+export function BaseTable({ fields }) {
   const windowSize = useWindowSize();
-  const columnCount = tableValuesMock[0].length;
-  const rowCount = tableValuesMock.length;
+  const columnCount = fields?.length;
+  const rowCount = 1;
+  const records = fields
+    ? [['', ...fields.map((item) => item.name)]]
+    : undefined;
 
   const [currentCell, setCurrentCell] = useState({
     row: 0,
@@ -22,6 +25,7 @@ export function BaseTable() {
     key,
     rowIndex,
     style,
+    value,
   }) => {
     const isHeader = rowIndex === 0;
     const isRowNo = columnIndex === 0;
@@ -57,7 +61,7 @@ export function BaseTable() {
         suppressContentEditableWarning
       >
         {(isHeader && columnIndex !== 0) && <FieldTypeIcon className="mr-1" />}
-        {tableValuesMock[rowIndex][columnIndex]}
+        {value}
       </div>
     );
   };
@@ -71,6 +75,14 @@ export function BaseTable() {
       focusedCell.focus();
     }
   };
+
+  if (fields == null) {
+    return (
+      <div>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full overflow-hidden z-0">
@@ -90,9 +102,12 @@ export function BaseTable() {
                 onSectionRendered={onSectionRendered}
                 scrollToColumn={scrollToColumn}
                 scrollToRow={scrollToRow}
-                cellRenderer={(props) => cellRenderer({
+                cellRenderer={({ rowIndex, columnIndex, ...props }) => cellRenderer({
                   scrollToColumn,
                   scrollToRow,
+                  rowIndex,
+                  columnIndex,
+                  value: records[rowIndex][columnIndex],
                   ...props,
                 })}
                 columnWidth={({ index }) => (index === 0 ? 50 : 300)}
@@ -109,3 +124,7 @@ export function BaseTable() {
     </div>
   );
 }
+
+BaseTable.propTypes = {
+  fields: PropTypes.arrayOf(PropTypes.object),
+};

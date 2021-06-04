@@ -14,7 +14,7 @@ import { BasePage } from '@pages/base/[id]';
 import { CreateBasePage } from '@pages/base/create';
 import { ConnectBasePage } from '@pages/base/connect';
 import { ConnectURLBasePage } from '@pages/base/connect-url';
-import { TablePage } from '@pages/table/[id]';
+import { TablePage } from '@pages/base/table/[id]';
 
 import './index.css';
 

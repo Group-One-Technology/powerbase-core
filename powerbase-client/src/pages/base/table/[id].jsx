@@ -6,12 +6,13 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
+import { TableFieldsProvider, useTableFields } from '@models/TableFields';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
-import { BaseTable } from '@components/tables/BaseTable';
+import { BaseTable } from '@components/tables/BaseTables';
 import { TableViewsNav } from '@components/views/TableViewsNav';
 import { AuthOnly } from '@components/middleware/AuthOnly';
 
@@ -21,6 +22,7 @@ function Table({ id: tableId, databaseId }) {
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
+  const { data: fields } = useTableFields();
 
   if (base == null || bases == null || authUser == null) {
     return <div>Loading...</div>;
@@ -41,7 +43,7 @@ function Table({ id: tableId, databaseId }) {
           databaseId={databaseId}
         />
         <TableViewsNav />
-        <BaseTable />
+        <BaseTable fields={fields} />
       </PageContent>
     </Page>
   );
@@ -59,9 +61,11 @@ export function TablePage() {
     <BasesProvider>
       <BaseProvider id={databaseId}>
         <BaseTablesProvider id={databaseId}>
-          <AuthOnly>
-            <Table id={id} databaseId={databaseId} />
-          </AuthOnly>
+          <TableFieldsProvider id={id}>
+            <AuthOnly>
+              <Table id={id} databaseId={databaseId} />
+            </AuthOnly>
+          </TableFieldsProvider>
         </BaseTablesProvider>
       </BaseProvider>
     </BasesProvider>
