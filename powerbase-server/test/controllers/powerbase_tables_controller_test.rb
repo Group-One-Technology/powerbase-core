@@ -1,6 +1,14 @@
-require "test_helper"
+require "controllers/application_controller_test"
 
-class TablesControllerTest < ActionDispatch::IntegrationTest
+class TablesControllerTest < ApplcationControllerTest
+  setup do
+    login
+  end
+
+  teardown do
+    logout
+  end
+
   def connect_database
     post databases_connect_url,
       params: {
@@ -10,6 +18,7 @@ class TablesControllerTest < ActionDispatch::IntegrationTest
         username: "postgres",
         password: "postgres",
         database: "powerbase_test",
+        color: "red",
       },
       as: :json
   end

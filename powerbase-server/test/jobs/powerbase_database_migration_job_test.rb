@@ -10,6 +10,7 @@ class PowerbaseDatabaseMigrationJobTest < ActiveJob::TestCase
       adapter: "postgresql",
       is_migrated: false,
       user_id: 1,
+      color: "red",
     })
     assert database.save, "Could not save sample database"
 
