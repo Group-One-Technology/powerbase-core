@@ -12,8 +12,10 @@ class TableRecordsController < ApplicationController
       adapter: @table.powerbase_database.adapter,
       connection_string: @table.powerbase_database.connection_string,
     })
+    records = Powerbase.DB.from(@table.name).all
+    Powerbase.disconnect
 
-    render json: Powerbase.DB.from(@table.name).all
+    render json: records
   end
 
   private
