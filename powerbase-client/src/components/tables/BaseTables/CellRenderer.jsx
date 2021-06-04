@@ -45,7 +45,7 @@ export function CellRenderer({
       suppressContentEditableWarning
     >
       {(isHeader && columnIndex !== 0) && <FieldTypeIcon className="mr-1" />}
-      {value}
+      {value?.toString()}
     </div>
   );
 }
