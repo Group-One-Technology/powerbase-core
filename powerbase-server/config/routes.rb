@@ -10,4 +10,5 @@ Rails.application.routes.draw do
 
   get '/databases/:database_id/tables', to: 'powerbase_tables#index', as: 'database_tables'
   get '/tables/:id', to: 'powerbase_tables#show', as: 'database_table'
+  get '/tables/:table_id/fields', to: 'powerbase_fields#index', as: 'table_fields'
 end
