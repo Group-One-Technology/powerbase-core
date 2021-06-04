@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { ArrowKeyStepper, Grid, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
-import { useWindowSize } from '@lib/hooks/useWindowSize';
 import { CellRenderer } from './CellRenderer';
 import 'react-virtualized/styles.css';
 
-export function TableRenderer({ fields, records }) {
-  const windowSize = useWindowSize();
+export function TableRenderer({ fields, records, height }) {
   const columnCount = fields.length;
   const rowCount = records.length;
   const tableValues = [fields, ...records];
@@ -58,7 +56,7 @@ export function TableRenderer({ fields, records }) {
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
-                height={windowSize.height ? windowSize.height - 125 : 0}
+                height={height}
                 width={width}
               />
             )}
@@ -74,4 +72,5 @@ TableRenderer.propTypes = {
   records: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
+  height: PropTypes.number.isRequired,
 };
