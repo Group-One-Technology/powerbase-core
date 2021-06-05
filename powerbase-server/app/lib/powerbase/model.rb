@@ -6,25 +6,34 @@ module Powerbase
       @client = Elasticsearch::Client.new
     end
 
-    def records()
-      @table.all
-    end
-
-    def insert_record(record)
+    def records
       if Powerbase.is_turbo
-        puts "Saving document in table_records_#{@table_id} index..."
-        @client.index(index: "table_records_#{@table_id}", body: record)
+        puts "Retrieving table #{@table_id}'s records from elasticsearch..."
+        result = @client.search(
+          index: "table_records_#{@table_id}",
+          body: {
+            query: { match_all: {} }
+          }
+        )
+
+        result['hits']['hits'].map {|result| result['_source']}
+      else
+        @table.all
       end
     end
 
-    def insert_records
-      puts "Saving documents in table_records_#{@table_id} index..."
+    def index_record(record)
+      puts "Saving document at index table_records_#{@table_id}..."
+      @client.index(index: "table_records_#{@table_id}", body: record)
+    end
 
-      self.records.each {|record|
-        @client.index(index: "table_records_#{@table_id}", body: record) if Powerbase.is_turbo
-      }
+    def index_records
+      records = @table.all
+      puts "Saving #{records.length} documents at index table_records_#{@table_id}..."
 
-      puts "Finished saving #{self.records.length} documents in table_records_#{@table_id} index..."
+      records.each {|record| @client.index(index: "table_records_#{@table_id}", body: record) }
+
+      puts "Finished saving #{records.length} documents at index table_records_#{@table_id}..."
     end
   end
 end

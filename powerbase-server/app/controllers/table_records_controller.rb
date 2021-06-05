@@ -11,6 +11,7 @@ class TableRecordsController < ApplicationController
     Powerbase.connect({
       adapter: @table.powerbase_database.adapter,
       connection_string: @table.powerbase_database.connection_string,
+      is_turbo: @table.powerbase_database.is_turbo,
     })
     model = Powerbase::Model.new(@table.id, @table.name)
     Powerbase.disconnect

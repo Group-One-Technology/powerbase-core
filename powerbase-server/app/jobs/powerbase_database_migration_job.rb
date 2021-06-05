@@ -97,7 +97,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
         # Table Records Migration
         table_model = Powerbase::Model.new(table.id, table.name)
-        table_model.insert_records
+        table_model.index_records
       else
         # TODO: Add error tracker (ex. Sentry)
         puts "Failed to save table: #{table.name}"
