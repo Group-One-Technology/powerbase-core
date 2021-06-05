@@ -11,6 +11,9 @@ module Powerbase
   # A well-formed URI that is used to connect to the database.
   @@connection_string = nil
 
+  # Param options regarding the database connection.
+  @@params = nil
+
   # Check whether the DB uses Powerbase Turbo.
   @@is_turbo = false
 
@@ -40,7 +43,7 @@ module Powerbase
     elsif options[:connection_string]
       @@connection_string = options[:connection_string]
       @@adapter, connection_string = options[:connection_string].split('://')
-      @@database = options[:connection_string].split(/[:@\/]/).last
+      @@database, @@params = options[:connection_string].split(/[:@\/]/).last.split('?')
     else
       raise StandardError.new('Missing connection credentials to connect to Powerbase.')
     end
