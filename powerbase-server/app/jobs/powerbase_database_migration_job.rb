@@ -1,9 +1,14 @@
 class PowerbaseDatabaseMigrationJob < ApplicationJob
   queue_as :default
 
-  def perform(database_id, adapter, connection_string)
+  # { database_id, adapter, connection_string, is_turbo }
+  def perform(options)
     # Database Connection
-    db = Powerbase.connect({ adapter: adapter, connection_string: connection_string })
+    db = Powerbase.connect({
+      adapter: options[:adapter],
+      connection_string: options[:connection_string],
+      is_turbo: options[:is_turbo],
+    })
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
     if !single_line_text_field
@@ -14,9 +19,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     db.tables.each do |table_name|
       # Table Migration
-      table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: database_id) || PowerbaseTable.new
+      table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: options[:database_id]) || PowerbaseTable.new
       table.name = table_name
-      table.powerbase_database_id = database_id
+      table.powerbase_database_id = options[:database_id]
 
       if table.save
         db.schema(table_name.to_sym).each_with_index do |column, index|
@@ -57,9 +62,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               ) || FieldSelectOption.new
               field_select_options.name = column_options[:db_type]
 
-              if adapter === "postgresql"
+              if options[:adapter] === "postgresql"
                 field_select_options.values = column_options[:enum_values]
-              elsif adapter === "mysql2"
+              elsif options[:adapter] === "mysql2"
                 field_select_options.values = column_options[:db_type].slice(5..-2)
                   .tr("''", "")
                   .split(",")
@@ -89,6 +94,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           puts "Failed to save default grid view: #{table.name}"
           puts table_view.errors.messages
         end
+
+        # Table Records Migration
+        table_model = Powerbase::Model.new(table.id, table.name)
+        table_model.insert_records
       else
         # TODO: Add error tracker (ex. Sentry)
         puts "Failed to save table: #{table.name}"
@@ -96,7 +105,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       end
     end
 
-    db_tables = PowerbaseTable.where(powerbase_database_id: database_id)
+    db_tables = PowerbaseTable.where(powerbase_database_id: options[:database_id])
 
     db_tables.each do |table|
       # Foreign Keys Migration
@@ -120,7 +129,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     if db.tables.length === db_tables.length
-      database = PowerbaseDatabase.find(database_id)
+      database = PowerbaseDatabase.find(options[:database_id])
 
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
