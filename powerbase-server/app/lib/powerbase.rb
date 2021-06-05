@@ -11,8 +11,17 @@ module Powerbase
   # A well-formed URI that is used to connect to the database.
   @@connection_string = nil
 
+  # Check whether the DB uses Powerbase Turbo.
+  @@is_turbo = false
+
+  mattr_accessor :database
+  mattr_accessor :adapter
+  mattr_accessor :connection_string
+  mattr_accessor :is_turbo
+
   # * Connect to a given database.
   # Accepts the following options:
+  # :is_turbo :: a boolean value that checks whether the DB is in Powerbase Turbo mode.
   # :connection_string :: a well-formed URI that is used to connect to the database.
   # :adapter :: the adapter that is going to be used to connect to the databse.
   #                   It can be "postgresql". "mysql2", etc.
@@ -36,6 +45,7 @@ module Powerbase
       raise StandardError.new('Missing connection credentials to connect to Powerbase.')
     end
 
+    @@is_turbo = options[:is_turbo]
     @@DB = Sequel.connect(@@connection_string)
     @@DB.extension :pg_enum if options[:adapter] == "postgresql"
 
@@ -60,23 +70,8 @@ module Powerbase
     @@DB
   end
 
-  # Returns the current connection string.
-  def self.connection_string
-    @@connection_string
-  end
-
   # Returns a boolean whether the database has successfully connected.
   def self.connected?
     @@DB.test_connection
-  end
-
-  # Returns the adapter of the current connection.
-  def self.adapter
-    @@adapter
-  end
-
-  # Returns the database of the current connection.
-  def self.database
-    @@database
   end
 end
