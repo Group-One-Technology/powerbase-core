@@ -124,6 +124,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
+        Powerbase.disconnect
       else
         puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{database.powerbase_fields.length}"
       end

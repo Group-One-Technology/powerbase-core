@@ -6,14 +6,16 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
+import { TableFieldsProvider } from '@models/TableFields';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
-import { BaseTable } from '@components/tables/BaseTable';
+import { BaseTable } from '@components/tables/BaseTables';
 import { TableViewsNav } from '@components/views/TableViewsNav';
 import { AuthOnly } from '@components/middleware/AuthOnly';
+import { TableRecordsProvider } from '@models/TableRecords';
 
 function Table({ id: tableId, databaseId }) {
   const history = useHistory();
@@ -41,7 +43,11 @@ function Table({ id: tableId, databaseId }) {
           databaseId={databaseId}
         />
         <TableViewsNav />
-        <BaseTable />
+        <TableFieldsProvider id={tableId}>
+          <TableRecordsProvider id={tableId}>
+            <BaseTable />
+          </TableRecordsProvider>
+        </TableFieldsProvider>
       </PageContent>
     </Page>
   );

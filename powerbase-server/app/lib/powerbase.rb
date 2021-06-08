@@ -42,7 +42,16 @@ module Powerbase
     @@DB
   end
 
-  # Returns the current database connection
+  # Disconnects from the current database connection.
+  def self.disconnect
+    if !@@DB || !self.connected?
+      raise StandardError.new("A database connection is needed to perform this action.")
+    end
+
+    @@DB.disconnect
+  end
+
+  # Returns the current database connection.
   def self.DB
     if !@@DB || !self.connected?
       raise StandardError.new("A database connection is needed to perform this action.")
