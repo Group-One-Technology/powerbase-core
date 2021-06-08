@@ -12,5 +12,5 @@ export function Spinner({ className = '-ml-3 mr-3 h-5 w-5 text-current' }) {
 }
 
 Spinner.propTypes = {
-  className: PropTypes.string.isRequired,
+  className: PropTypes.string,
 };

@@ -11,11 +11,12 @@ class TableRecordsController < ApplicationController
     Powerbase.connect({
       adapter: @table.powerbase_database.adapter,
       connection_string: @table.powerbase_database.connection_string,
+      is_turbo: @table.powerbase_database.is_turbo,
     })
-    records = Powerbase.DB.from(@table.name).all
+    model = Powerbase::Model.new(@table.id, @table.name)
     Powerbase.disconnect
 
-    render json: records
+    render json: model.records
   end
 
   private
