@@ -11,6 +11,7 @@ module Powerbase
 
       if @is_turbo
         @es_table = @es_table['_source']
+        @table_name = @es_table['name']
         @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])['_source']
         @remote_table = Powerbase.DB.from(@es_table['name'])
       else
@@ -22,6 +23,7 @@ module Powerbase
           is_turbo: @powerbase_database.is_turbo,
         })
         @remote_table = Powerbase.DB.from(@powerbase_table.name)
+        @table_name = @powerbase_table.name
       end
     end
 
@@ -81,7 +83,7 @@ module Powerbase
     private
       def parse_sequel_value(value)
         if value.key?('field')
-          "Sequel.lit('#{value['field']}')"
+          "Sequel.lit('\"#{value['field']}\"')"
         elsif value.key?('value')
           value['value'].is_a?(String) ? "'#{value['value']}'" : value['value']
         end
