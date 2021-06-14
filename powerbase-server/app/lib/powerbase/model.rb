@@ -32,11 +32,14 @@ module Powerbase
 
     def index_records
       records = @table.all
-      puts "Saving #{records.length} documents at index table_records_#{@table_id}..."
+      index = "table_records_#{@table_id}"
 
-      records.each {|record| @client.index(index: "table_records_#{@table_id}", body: record) }
+      puts "Saving #{records.length} documents at index #{index}..."
 
-      puts "Finished saving #{records.length} documents at index table_records_#{@table_id}..."
+      @client.indices.create(index: index, body: nil)
+      records.each {|record| @client.index(index: index, body: record) }
+
+      puts "Finished saving #{records.length} documents at index #{index}..."
     end
   end
 end
