@@ -25,27 +25,6 @@ module Powerbase
       end
     end
 
-    # Retrieve all table records.
-    def all
-      if @is_turbo
-        puts "Retrieving max of 1000 table #{@table_id}'s records from elasticsearch..."
-        # TODO: Add pagination
-        result = @esclient.search(
-          index: "table_records_#{@table_id}",
-          body: {
-            from: 0,
-            size: 1000,
-            query: { match_all: {} }
-          }
-        )
-
-        result['hits']['hits'].map {|result| result['_source']}
-      else
-        puts "Retrieving table #{@table_id}'s records from remote database..."
-        @remote_table.all
-      end
-    end
-
     # Disconnects to the remote database
     def disconnect
       Powerbase.disconnect if !@is_turbo
@@ -68,6 +47,27 @@ module Powerbase
       records.each {|record| @esclient.index(index: index, body: record) }
 
       puts "Finished saving #{records.length} documents at index #{index}..."
+    end
+
+    # Retrieve all table records.
+    def all
+      if @is_turbo
+        puts "Retrieving max of 1000 table #{@table_id}'s records from elasticsearch..."
+        # TODO: Add pagination
+        result = @esclient.search(
+          index: "table_records_#{@table_id}",
+          body: {
+            from: 0,
+            size: 1000,
+            query: { match_all: {} }
+          }
+        )
+
+        result['hits']['hits'].map {|result| result['_source']}
+      else
+        puts "Retrieving table #{@table_id}'s records from remote database..."
+        @remote_table.all
+      end
     end
   end
 end
