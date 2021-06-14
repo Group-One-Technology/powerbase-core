@@ -96,8 +96,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         end
 
         # Table Records Migration
-        table_model = Powerbase::Model.new(table.id, table.name)
-        table_model.index_records
+        if options[:is_turbo]
+          table_model = Powerbase::Model.new(table.id)
+          table_model.index_records
+        end
       else
         # TODO: Add error tracker (ex. Sentry)
         puts "Failed to save table: #{table.name}"
