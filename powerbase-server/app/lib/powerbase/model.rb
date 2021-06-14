@@ -25,16 +25,16 @@ module Powerbase
       end
     end
 
-    # Retrieve the table records.
-    def records
+    # Retrieve all table records.
+    def all
       if @is_turbo
-        puts "Retrieving max of 100 table #{@table_id}'s records from elasticsearch..."
+        puts "Retrieving max of 1000 table #{@table_id}'s records from elasticsearch..."
         # TODO: Add pagination
         result = @esclient.search(
           index: "table_records_#{@table_id}",
           body: {
             from: 0,
-            size: 100,
+            size: 1000,
             query: { match_all: {} }
           }
         )
