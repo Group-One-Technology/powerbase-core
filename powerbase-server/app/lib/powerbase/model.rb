@@ -69,5 +69,50 @@ module Powerbase
         @remote_table.all
       end
     end
+
+    # Filter the table records.
+    def filter(filters)
+      if @is_turbo
+      else
+        @remote_table.where(eval(parse_sequel_filter(filters)))
+      end
+    end
+
+    private
+      def parse_sequel_value(value)
+        if value.key?('field')
+          "Sequel.lit('#{value['field']}')"
+        elsif value.key?('value')
+          value['value'].is_a?(String) ? "'#{value['value']}'" : value['value']
+        end
+      end
+
+      def parse_sequel_filter(filters)
+        return if !filters&.length
+
+        result = ""
+        filters.each do |key, value|
+          first_val = parse_sequel_value(value[0])
+          second_val = parse_sequel_value(value[1])
+
+          if key == "eq"
+            result += "(Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "neq"
+            result += "(Sequel.~(#{first_val} => #{second_val}))"
+          elsif key == "gt"
+            result += "(#{first_val} > #{second_val})"
+          elsif key == "gte"
+            result += "(#{first_val} > #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "lt"
+            result += "(#{first_val} < #{second_val})"
+          elsif key == "lte"
+            result += "(#{first_val} < #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "like"
+            result += "(Sequel.like(#{first_val}, #{second_val}))"
+          end
+        end
+
+        result
+      end
   end
 end
