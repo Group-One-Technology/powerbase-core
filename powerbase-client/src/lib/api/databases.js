@@ -1,6 +1,7 @@
 import { securedApi } from './index';
 
 export async function connectDatabase({
+  name,
   adapter,
   host,
   port,
@@ -12,6 +13,7 @@ export async function connectDatabase({
   color,
 }) {
   const response = await securedApi.post('/databases/connect', {
+    name,
     adapter,
     host,
     port,

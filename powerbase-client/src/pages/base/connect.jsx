@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
 import { connectDatabase } from '@lib/api/databases';
 
@@ -18,7 +19,8 @@ import { InlineRadio } from '@components/ui/InlineRadio';
 
 export function ConnectBasePage() {
   const history = useHistory();
-  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
+  const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
+  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [host, setHost, hostError] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, portError] = useValidState(5432, REQUIRED_VALIDATOR);
@@ -47,6 +49,7 @@ export function ConnectBasePage() {
     if (!hasErrors) {
       try {
         const response = await connectDatabase({
+          name,
           host,
           port,
           username,
@@ -89,9 +92,20 @@ export function ConnectBasePage() {
             <form onSubmit={handleSubmit}>
               <InlineInput
                 type="text"
-                label="Database"
+                label="Name"
+                name="name"
+                placeholder="e.g. Powerbase or Field Projects"
+                value={name}
+                onChange={(evt) => setName(evt.target.value)}
+                error={nameError.error}
+                className="my-6"
+                required
+              />
+              <InlineInput
+                type="text"
+                label="Database Name"
                 name="database-name"
-                placeholder="e.g. powerbase"
+                placeholder="e.g. powerbase or field_projects"
                 value={databaseName}
                 onChange={(evt) => setDatabaseName(evt.target.value)}
                 error={databaseNameError.error}

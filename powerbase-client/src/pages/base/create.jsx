@@ -3,6 +3,7 @@ import { RadioGroup } from '@headlessui/react';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants';
 
 import { Page } from '@components/layout/Page';
@@ -16,7 +17,8 @@ import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
 
 export function CreateBasePage() {
-  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', REQUIRED_VALIDATOR);
+  const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
+  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
@@ -37,7 +39,8 @@ export function CreateBasePage() {
     if (!hasErrors) {
       console.log({
         success: true,
-        name: databaseName,
+        name,
+        database: databaseName,
         adapter: databaseType,
         platform: databasePlatform,
         isTurbo: powerbaseType.name === 'Powerbase Turbo',
@@ -67,8 +70,19 @@ export function CreateBasePage() {
               <InlineInput
                 type="text"
                 label="Name"
+                name="name"
+                placeholder="e.g. Powerbase or Field Projects"
+                value={name}
+                onChange={(evt) => setName(evt.target.value)}
+                error={nameError.error}
+                className="my-6"
+                required
+              />
+              <InlineInput
+                type="text"
+                label="Database Name"
                 name="database-name"
-                placeholder="e.g. powerbase"
+                placeholder="e.g. powerbase or field_projects"
                 value={databaseName}
                 onChange={(evt) => setDatabaseName(evt.target.value)}
                 error={databaseNameError.error}
