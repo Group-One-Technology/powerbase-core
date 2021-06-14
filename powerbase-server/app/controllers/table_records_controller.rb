@@ -3,12 +3,13 @@ class TableRecordsController < ApplicationController
 
   schema(:index) do
     required(:table_id).value(:integer)
+    optional(:filters)
   end
 
-  # GET /tables/:table_id/records
+  # PUT /tables/:table_id/records
   def index
     model = Powerbase::Model.new(safe_params[:table_id])
-    records = model.all
+    records = safe_params[:filters] ? model.filter(safe_params[:filters]) : model.all
     model.disconnect
 
     render json: records
