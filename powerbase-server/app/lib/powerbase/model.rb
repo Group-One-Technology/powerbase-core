@@ -8,10 +8,13 @@ module Powerbase
 
     def records
       if Powerbase.is_turbo
-        puts "Retrieving table #{@table_id}'s records from elasticsearch..."
+        puts "Retrieving 100 table #{@table_id}'s records from elasticsearch..."
+        # TODO: Add pagination
         result = @client.search(
           index: "table_records_#{@table_id}",
           body: {
+            from: 0,
+            size: 100,
             query: { match_all: {} }
           }
         )
