@@ -17,6 +17,7 @@ class PowerbaseDatabasesControllerTest < ApplcationControllerTest
   test "should connect to a database" do
     post databases_connect_url,
       params: {
+        name: "Powerbase Test",
         adapter: "postgresql",
         host: "localhost",
         port: "5432",

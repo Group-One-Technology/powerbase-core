@@ -6,6 +6,7 @@ class PowerbaseDatabasesController < ApplicationController
   end
 
   schema(:connect) do
+    optional(:name).value(:string)
     optional(:host).value(:string)
     optional(:port).value(:integer)
     optional(:adapter).value(:string)
@@ -26,7 +27,6 @@ class PowerbaseDatabasesController < ApplicationController
 
   # GET /databases/:id
   def show
-    puts safe_params.output
     @database = PowerbaseDatabase.find(safe_params[:id])
 
     if @database
@@ -42,11 +42,12 @@ class PowerbaseDatabasesController < ApplicationController
     @database = nil
 
     if Powerbase.connected?
-      @database = PowerbaseDatabase.find_by(name: Powerbase.database, user_id: current_user.id)
+      @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
 
       if !@database
         @database = PowerbaseDatabase.new({
-          name: Powerbase.database,
+          name: options[:name],
+          database_name: Powerbase.database,
           connection_string: Powerbase.connection_string,
           adapter: Powerbase.adapter,
           is_migrated: false,
@@ -81,6 +82,7 @@ class PowerbaseDatabasesController < ApplicationController
         user_id: database.user_id,
         adapter: database.adapter,
         name: database.name,
+        database_name: database.database_name,
         description: database.description,
         color: database.color,
         is_migrated: database.is_migrated,

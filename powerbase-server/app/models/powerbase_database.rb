@@ -5,6 +5,7 @@ class PowerbaseDatabase < ApplicationRecord
   scope :turbo, -> { where(is_turbo: true) }
 
   validates :name, presence: true
+  validates :database_name, presence: true
   validates :connection_string, presence: true
   enum adapter: { postgresql: "postgresql", mysql2: "mysql2" }, _prefix: true
   enum color: {
