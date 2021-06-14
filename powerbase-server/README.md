@@ -59,7 +59,7 @@ Copy and rename `config/application.example.yml` to `config/application.example.
         docker.elastic.co/kibana/kibana-oss:7.10.2
     ```
 
-5. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed.
+5. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
 
 ```bash
 # Will migrate the schema to PostgreSQL and import the indices for Elastic Search
