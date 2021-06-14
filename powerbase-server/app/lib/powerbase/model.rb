@@ -8,11 +8,12 @@ module Powerbase
 
       @es_table = @esclient.get(index: "powerbase_tables", id: table_id, ignore: 404)
       @is_turbo = !!@es_table['found']
-      @es_database = @is_turbo ?
-        @esclient.get(index: "powerbase_databases", id: @es_table['source']['powerbase_database_id'])['source'] :
-        nil
 
-      if !@is_turbo
+      if @is_turbo
+        @es_table = @es_table['_source']
+        @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])['_source']
+        @remote_table = Powerbase.DB.from(@es_table['name'])
+      else
         @powerbase_table = PowerbaseTable.find(table_id)
         @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
         Powerbase.connect({
@@ -21,7 +22,6 @@ module Powerbase
           is_turbo: @powerbase_database.is_turbo,
         })
         @remote_table = Powerbase.DB.from(@powerbase_table.name)
-        Powerbase.disconnect
       end
     end
 
@@ -44,6 +44,11 @@ module Powerbase
         puts "Retrieving table #{@table_id}'s records from remote database..."
         @remote_table.all
       end
+    end
+
+    # Disconnects to the remote database
+    def disconnect
+      Powerbase.disconnect if !@is_turbo
     end
 
     # Save a document of a table to Elasticsearch.

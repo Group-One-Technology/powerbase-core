@@ -8,7 +8,9 @@ class TableRecordsController < ApplicationController
   # GET /tables/:table_id/records
   def index
     model = Powerbase::Model.new(safe_params[:table_id])
+    records = model.records
+    model.disconnect
 
-    render json: model.records
+    render json: records
   end
 end
