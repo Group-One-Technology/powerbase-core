@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useAuthUser } from '@models/AuthUser';
+import { Loader } from '@components/ui/Loader';
 
 export function AuthOnly({ children }) {
   const history = useHistory();
@@ -15,7 +16,7 @@ export function AuthOnly({ children }) {
     return <>{children}</>;
   }
 
-  return <div>Loading...</div>;
+  return <Loader className="h-screen" />;
 }
 
 AuthOnly.propTypes = {

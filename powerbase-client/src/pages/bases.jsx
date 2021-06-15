@@ -10,6 +10,7 @@ import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { EmptyBase } from '@components/bases/EmptyBase';
+import { Loader } from '@components/ui/Loader';
 
 export function BasesPage() {
   const authUser = useAuthUser();
@@ -47,6 +48,7 @@ export function BasesPage() {
             </ul>
           )}
           {bases?.length === 0 && <EmptyBase />}
+          {bases == null && <Loader className="h-80" />}
         </PageContent>
       </div>
     </Page>

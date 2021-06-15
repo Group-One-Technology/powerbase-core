@@ -11,6 +11,7 @@ module Powerbase
 
       if @is_turbo
         @es_table = @es_table['_source']
+        @table_name = @es_table['name']
         @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])['_source']
         @remote_table = Powerbase.DB.from(@es_table['name'])
       else
@@ -22,27 +23,7 @@ module Powerbase
           is_turbo: @powerbase_database.is_turbo,
         })
         @remote_table = Powerbase.DB.from(@powerbase_table.name)
-      end
-    end
-
-    # Retrieve the table records.
-    def records
-      if @is_turbo
-        puts "Retrieving max of 100 table #{@table_id}'s records from elasticsearch..."
-        # TODO: Add pagination
-        result = @esclient.search(
-          index: "table_records_#{@table_id}",
-          body: {
-            from: 0,
-            size: 100,
-            query: { match_all: {} }
-          }
-        )
-
-        result['hits']['hits'].map {|result| result['_source']}
-      else
-        puts "Retrieving table #{@table_id}'s records from remote database..."
-        @remote_table.all
+        @table_name = @powerbase_table.name
       end
     end
 
@@ -69,5 +50,71 @@ module Powerbase
 
       puts "Finished saving #{records.length} documents at index #{index}..."
     end
+
+    # Retrieve all table records.
+    def all
+      if @is_turbo
+        puts "Retrieving max of 1000 table #{@table_id}'s records from elasticsearch..."
+        # TODO: Add pagination
+        result = @esclient.search(
+          index: "table_records_#{@table_id}",
+          body: {
+            from: 0,
+            size: 1000,
+            query: { match_all: {} }
+          }
+        )
+
+        result['hits']['hits'].map {|result| result['_source']}
+      else
+        puts "Retrieving table #{@table_id}'s records from remote database..."
+        @remote_table.all
+      end
+    end
+
+    # Filter the table records.
+    def filter(filters)
+      if @is_turbo
+      else
+        @remote_table.where(eval(parse_sequel_filter(filters)))
+      end
+    end
+
+    private
+      def parse_sequel_value(value)
+        if value.key?('field')
+          "Sequel.lit('\"#{value['field']}\"')"
+        elsif value.key?('value')
+          value['value'].is_a?(String) ? "'#{value['value']}'" : value['value']
+        end
+      end
+
+      def parse_sequel_filter(filters)
+        return if !filters&.length
+
+        result = ""
+        filters.each do |key, value|
+          first_val = parse_sequel_value(value[0])
+          second_val = parse_sequel_value(value[1])
+
+          if key == "eq"
+            result += "(Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "neq"
+            result += "(Sequel.~(#{first_val} => #{second_val}))"
+          elsif key == "gt"
+            result += "(#{first_val} > #{second_val})"
+          elsif key == "gte"
+            result += "(#{first_val} > #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "lt"
+            result += "(#{first_val} < #{second_val})"
+          elsif key == "lte"
+            result += "(#{first_val} < #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "like"
+            result += "(Sequel.like(#{first_val}, #{second_val}))"
+          end
+        end
+
+        result
+      end
   end
 end
