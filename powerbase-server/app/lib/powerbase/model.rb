@@ -13,16 +13,8 @@ module Powerbase
         @es_table = @es_table['_source']
         @table_name = @es_table['name']
         @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])['_source']
-        @remote_table = Powerbase.DB.from(@es_table['name'])
       else
-        @powerbase_table = PowerbaseTable.find(table_id)
-        @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
-        Powerbase.connect({
-          adapter: @powerbase_database.adapter,
-          connection_string: @powerbase_database.connection_string,
-          is_turbo: @powerbase_database.is_turbo,
-        })
-        @remote_table = Powerbase.DB.from(@powerbase_table.name)
+        connect_remote_db(table_id)
         @table_name = @powerbase_table.name
       end
     end
@@ -40,6 +32,7 @@ module Powerbase
 
     # Save multiple documents of a table to Elasticsearch.
     def index_records
+      connect_remote_db(table_id)
       records = @remote_table.all
       index = "table_records_#{@table_id}"
 
@@ -79,5 +72,17 @@ module Powerbase
         Philtre.new(filters).apply(@remote_table)
       end
     end
+
+    private
+      def connect_remote_db(table_id)
+        @powerbase_table = PowerbaseTable.find(table_id)
+        @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
+        Powerbase.connect({
+          adapter: @powerbase_database.adapter,
+          connection_string: @powerbase_database.connection_string,
+          is_turbo: @powerbase_database.is_turbo,
+        })
+        @remote_table = Powerbase.DB.from(@powerbase_table.name)
+      end
   end
 end
