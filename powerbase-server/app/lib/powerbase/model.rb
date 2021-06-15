@@ -66,10 +66,52 @@ module Powerbase
     end
 
     # Filter the table records.
-    def filter(filters)
+    def filter(filter_params)
+      index = "table_records_#{@table_id}"
+
       if @is_turbo
+        filter = {
+          query: {
+            bool: {
+              filter: {}
+            }
+          }
+        }
+
+        predicates = ["lt", "gt", "lte", "gte", "eq", "not_eq"]
+
+        field_mappings = @esclient.perform_request("GET", "#{index}/_mappings").body[index]
+        field_mappings = field_mappings['mappings']['properties'].map{|key, val| key }
+
+        filter_params.each do |key, val|
+          dup_key = key.dup
+          field_key = dup_key.gsub(/\_(#{predicates.join("|")})$/, "")&.to_sym
+          predicate = dup_key.sub!(/^#{field_key}_/, "")
+
+          if ["lt", "gt", "lte", "gte"].include? predicate
+            if !filter[:query][:bool][:filter].key?('range')
+              filter[:query][:bool][:filter][:range] = {}
+            end
+            filter[:query][:bool][:filter][:range][field_key] = {}
+            filter[:query][:bool][:filter][:range][field_key][predicate.to_sym] = val
+          elsif predicate == nil or predicate == "eq"
+            if !filter[:query][:bool][:filter].key?('term')
+              filter[:query][:bool][:filter][:term] = {}
+            end
+            filter_field_key = val.is_a?(String) ? "#{key}.keyword".to_sym : key.to_sym
+            filter[:query][:bool][:filter][:term][filter_field_key] = val
+          end
+        end
+
+        # return filter
+        result = @esclient.search(
+          index: "table_records_#{@table_id}",
+          body: filter
+        )
+
+        result['hits']['hits'].map {|result| result['_source']}
       else
-        Philtre.new(filters).apply(@remote_table)
+        Philtre.new(filter_params).apply(@remote_table)
       end
     end
 
