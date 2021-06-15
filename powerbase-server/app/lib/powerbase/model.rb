@@ -8,10 +8,13 @@ module Powerbase
 
     def records
       if Powerbase.is_turbo
-        puts "Retrieving table #{@table_id}'s records from elasticsearch..."
+        puts "Retrieving 100 table #{@table_id}'s records from elasticsearch..."
+        # TODO: Add pagination
         result = @client.search(
           index: "table_records_#{@table_id}",
           body: {
+            from: 0,
+            size: 100,
             query: { match_all: {} }
           }
         )
@@ -29,11 +32,14 @@ module Powerbase
 
     def index_records
       records = @table.all
-      puts "Saving #{records.length} documents at index table_records_#{@table_id}..."
+      index = "table_records_#{@table_id}"
 
-      records.each {|record| @client.index(index: "table_records_#{@table_id}", body: record) }
+      puts "Saving #{records.length} documents at index #{index}..."
 
-      puts "Finished saving #{records.length} documents at index table_records_#{@table_id}..."
+      @client.indices.create(index: index, body: nil)
+      records.each {|record| @client.index(index: index, body: record) }
+
+      puts "Finished saving #{records.length} documents at index #{index}..."
     end
   end
 end

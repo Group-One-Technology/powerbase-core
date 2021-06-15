@@ -17,6 +17,7 @@ import { InlineRadio } from '@components/ui/InlineRadio';
 
 export function ConnectURLBasePage() {
   const history = useHistory();
+  const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
@@ -39,6 +40,7 @@ export function ConnectURLBasePage() {
     if (!hasErrors) {
       try {
         const response = await connectDatabase({
+          name,
           connectionString,
           isTurbo: powerbaseType.name === 'Powerbase Turbo',
           color,
@@ -74,6 +76,17 @@ export function ConnectURLBasePage() {
               ]}
             />
             <form onSubmit={handleSubmit}>
+              <InlineInput
+                type="text"
+                label="Name"
+                name="name"
+                placeholder="e.g. Powerbase or Field Projects"
+                value={name}
+                onChange={(evt) => setName(evt.target.value)}
+                error={nameError.error}
+                className="my-6"
+                required
+              />
               <InlineInput
                 type="text"
                 label="Database"
