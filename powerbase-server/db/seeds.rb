@@ -33,3 +33,6 @@ FieldDbTypeMapping.create(db_type: "enum", adapter: "sequel", powerbase_field_ty
 # Import Elastic Search indices and data
 PowerbaseDatabase.__elasticsearch__.create_index!
 PowerbaseDatabase.import(scope: "turbo")
+
+PowerbaseTable.__elasticsearch__.create_index!
+PowerbaseTable.import(scope: "turbo")
