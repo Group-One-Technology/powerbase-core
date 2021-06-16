@@ -75,7 +75,7 @@ module Powerbase
         predicates = ["lt", "gt", "lte", "gte", "eq", "not_eq", "matches"]
 
         field_mappings = @esclient.perform_request("GET", "#{index}/_mappings").body[index]
-        field_mappings = field_mappings['mappings']['properties'].map{|key, val| key }
+        field_mappings = field_mappings['mappings']['properties']
 
         filter_params.each do |key, val|
           dup_key = key.dup
@@ -83,22 +83,37 @@ module Powerbase
           predicate = dup_key.sub!(/^#{field_key}_/, "")
 
           if ["lt", "gt", "lte", "gte"].include? predicate
-            filter[:query][:bool][:filter] = {} if !filter[:query][:bool].key?('filter')
-            filter[:query][:bool][:filter][:range] = {} if !filter[:query][:bool][:filter].key?('range')
+            filter[:query][:bool][:filter] = [] if !filter[:query][:bool].key?(:filter)
 
-            filter[:query][:bool][:filter][:range][field_key] = {}
-            filter[:query][:bool][:filter][:range][field_key][predicate.to_sym] = val
+            range_filter = {}
+            range_filter[field_key] = {}
+            range_filter[field_key][predicate.to_sym] = val
+
+            filter[:query][:bool][:filter].push({ range: range_filter })
           elsif predicate == "matches"
-            filter[:query][:bool][:must] = {} if !filter[:query][:bool].key?('must')
-            filter[:query][:bool][:must][:wildcard] = {} if !filter[:query][:bool][:must].key?('wildcard')
+            filter[:query][:bool][:must] = [] if !filter[:query][:bool].key?(:must)
 
-            filter[:query][:bool][:must][:wildcard][field_key] = "*#{val}*"
+            wildcard_filter = {}
+            wildcard_filter[field_key] = val
+
+            filter[:query][:bool][:must].push({ match_phrase: wildcard_filter })
           elsif predicate == nil or predicate == "eq"
-            filter[:query][:bool][:filter] = {} if !filter[:query][:bool].key?('filter')
-            filter[:query][:bool][:filter][:term] = {} if !filter[:query][:bool][:filter].key?('term')
+            filter[:query][:bool][:filter] = [] if !filter[:query][:bool].key?(:filter)
 
-            filter_field_key = val.is_a?(String) ? "#{key}.keyword".to_sym : key.to_sym
-            filter[:query][:bool][:filter][:term][filter_field_key] = val
+            current_field_mapping = field_mappings.find {|k, v| k.to_s == field_key.to_s}
+
+            filter_field_key = if current_field_mapping && current_field_mapping[1]['type'] == "date"
+                field_key.to_sym
+              elsif val.is_a?(String)
+                "#{field_key}.keyword".to_sym
+              else
+                field_key.to_sym
+              end
+
+            term_filter = {}
+            term_filter[filter_field_key] = val
+
+            filter[:query][:bool][:filter].push({ term: term_filter })
           end
         end
 
