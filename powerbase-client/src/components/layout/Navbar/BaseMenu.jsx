@@ -81,7 +81,7 @@ export function BaseMenu({ base, otherBases }) {
                               })}
                             >
                               {item.name}
-                              <Badge color="yellow" className="ml-2">Migrating</Badge>
+                              <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>
                             </p>
                           )
                       )}
