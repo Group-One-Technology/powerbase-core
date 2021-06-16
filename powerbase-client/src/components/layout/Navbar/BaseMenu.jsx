@@ -6,6 +6,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { IBase } from '@lib/propTypes/base';
+import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
   return (
@@ -59,16 +60,29 @@ export function BaseMenu({ base, otherBases }) {
                   {otherBases.map((item, index) => (
                     <Menu.Item key={item.id}>
                       {({ active }) => (
-                        <Link
-                          to={`/base/${item.id}`}
-                          className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
-                            'border-b': index !== otherBases.length - 1,
-                            'bg-gray-100': active,
-                          })}
-                        >
-                          {item.name}
-                          <ChevronRightIcon className="h-6 w-6" />
-                        </Link>
+                        item.isMigrated
+                          ? (
+                            <Link
+                              to={`/base/${item.id}`}
+                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
+                                'border-b': index !== otherBases.length - 1,
+                                'bg-gray-100': active,
+                              })}
+                            >
+                              {item.name}
+                              <ChevronRightIcon className="h-6 w-6" />
+                            </Link>
+                          )
+                          : (
+                            <p
+                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
+                                'border-b': index !== otherBases.length - 1,
+                              })}
+                            >
+                              {item.name}
+                              <Badge color="yellow" className="ml-2">Migrating</Badge>
+                            </p>
+                          )
                       )}
                     </Menu.Item>
                   ))}

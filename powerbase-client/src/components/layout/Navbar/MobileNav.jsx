@@ -7,6 +7,7 @@ import cn from 'classnames';
 
 import { useAuthUser } from '@models/AuthUser';
 import { IBase } from '@lib/propTypes/base';
+import { Badge } from '@components/ui/Badge';
 import { UserMenu } from './UserMenu';
 
 export function MobileNav({ base, bases, navigation }) {
@@ -29,13 +30,24 @@ export function MobileNav({ base, bases, navigation }) {
               Other Bases
             </p>
             {bases.map((item) => (
-              <Link
-                key={item.name}
-                to={`/base/${item.id}`}
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
-              >
-                {item.name}
-              </Link>
+              item.isMigrated
+                ? (
+                  <Link
+                    key={item.name}
+                    to={`/base/${item.id}`}
+                    className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+                  >
+                    {item.name}
+                  </Link>
+                ) : (
+                  <p
+                    key={item.name}
+                    className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+                  >
+                    {item.name}
+                    <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>
+                  </p>
+                )
             ))}
           </>
         )}
