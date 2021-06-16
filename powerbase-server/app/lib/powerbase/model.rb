@@ -70,15 +70,9 @@ module Powerbase
       index = "table_records_#{@table_id}"
 
       if @is_turbo
-        filter = {
-          query: {
-            bool: {
-              filter: {}
-            }
-          }
-        }
+        filter = { query: { bool: {} } }
 
-        predicates = ["lt", "gt", "lte", "gte", "eq", "not_eq"]
+        predicates = ["lt", "gt", "lte", "gte", "eq", "not_eq", "matches"]
 
         field_mappings = @esclient.perform_request("GET", "#{index}/_mappings").body[index]
         field_mappings = field_mappings['mappings']['properties'].map{|key, val| key }
@@ -89,15 +83,20 @@ module Powerbase
           predicate = dup_key.sub!(/^#{field_key}_/, "")
 
           if ["lt", "gt", "lte", "gte"].include? predicate
-            if !filter[:query][:bool][:filter].key?('range')
-              filter[:query][:bool][:filter][:range] = {}
-            end
+            filter[:query][:bool][:filter] = {} if !filter[:query][:bool].key?('filter')
+            filter[:query][:bool][:filter][:range] = {} if !filter[:query][:bool][:filter].key?('range')
+
             filter[:query][:bool][:filter][:range][field_key] = {}
             filter[:query][:bool][:filter][:range][field_key][predicate.to_sym] = val
+          elsif predicate == "matches"
+            filter[:query][:bool][:must] = {} if !filter[:query][:bool].key?('must')
+            filter[:query][:bool][:must][:wildcard] = {} if !filter[:query][:bool][:must].key?('wildcard')
+
+            filter[:query][:bool][:must][:wildcard][field_key] = "*#{val}*"
           elsif predicate == nil or predicate == "eq"
-            if !filter[:query][:bool][:filter].key?('term')
-              filter[:query][:bool][:filter][:term] = {}
-            end
+            filter[:query][:bool][:filter] = {} if !filter[:query][:bool].key?('filter')
+            filter[:query][:bool][:filter][:term] = {} if !filter[:query][:bool][:filter].key?('term')
+
             filter_field_key = val.is_a?(String) ? "#{key}.keyword".to_sym : key.to_sym
             filter[:query][:bool][:filter][:term][filter_field_key] = val
           end
