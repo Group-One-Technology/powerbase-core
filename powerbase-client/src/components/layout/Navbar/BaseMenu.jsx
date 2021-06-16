@@ -16,6 +16,7 @@ export function BaseMenu({ base, otherBases }) {
           <div>
             <Menu.Button className="bg-transparent flex items-center px-2 text-lg font-medium rounded-full focus:outline-none focus:ring-2 focus:ring-current">
               {base.name}
+              {!base.isMigrated && <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>}
               <div className="sr-only">Open base settings</div>
               <ChevronDownIcon className="h-4 w-4 mt-0.5 ml-1" />
             </Menu.Button>
