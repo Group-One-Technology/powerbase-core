@@ -38,7 +38,13 @@ module PowerbaseServer
     config.api_only = true
 
     # Allows the conversion between camel case to snake case and vice versa.
-    config.middleware.use OliveBranch::Middleware, inflection: "camel"
+    excluded_routes = -> (env) {
+      env["PATH_INFO"].match(%r{^\/tables\/\S+\/records}) # /tables/:id/records
+    }
+    config.middleware.use OliveBranch::Middleware,
+      inflection: "camel",
+      exclude_params: excluded_routes,
+      exclude_response: excluded_routes
 
     # Set Sidekiq for background jobs
     config.active_job.queue_adapter = :sidekiq
