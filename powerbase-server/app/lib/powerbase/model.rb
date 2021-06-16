@@ -117,7 +117,6 @@ module Powerbase
           end
         end
 
-        # return filter
         result = @esclient.search(
           index: "table_records_#{@table_id}",
           body: filter
