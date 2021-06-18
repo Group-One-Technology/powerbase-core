@@ -6,6 +6,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { IBase } from '@lib/propTypes/base';
+import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
   return (
@@ -15,6 +16,7 @@ export function BaseMenu({ base, otherBases }) {
           <div>
             <Menu.Button className="bg-transparent flex items-center px-2 text-lg font-medium rounded-full focus:outline-none focus:ring-2 focus:ring-current">
               {base.name}
+              {!base.isMigrated && <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>}
               <div className="sr-only">Open base settings</div>
               <ChevronDownIcon className="h-4 w-4 mt-0.5 ml-1" />
             </Menu.Button>
@@ -59,16 +61,29 @@ export function BaseMenu({ base, otherBases }) {
                   {otherBases.map((item, index) => (
                     <Menu.Item key={item.id}>
                       {({ active }) => (
-                        <Link
-                          to={`/base/${item.id}`}
-                          className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
-                            'border-b': index !== otherBases.length - 1,
-                            'bg-gray-100': active,
-                          })}
-                        >
-                          {item.name}
-                          <ChevronRightIcon className="h-6 w-6" />
-                        </Link>
+                        item.isMigrated
+                          ? (
+                            <Link
+                              to={`/base/${item.id}`}
+                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
+                                'border-b': index !== otherBases.length - 1,
+                                'bg-gray-100': active,
+                              })}
+                            >
+                              {item.name}
+                              <ChevronRightIcon className="h-6 w-6" />
+                            </Link>
+                          )
+                          : (
+                            <p
+                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
+                                'border-b': index !== otherBases.length - 1,
+                              })}
+                            >
+                              {item.name}
+                              <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>
+                            </p>
+                          )
                       )}
                     </Menu.Item>
                   ))}

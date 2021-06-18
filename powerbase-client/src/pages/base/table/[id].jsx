@@ -7,6 +7,8 @@ import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
 import { TableFieldsProvider } from '@models/TableFields';
+import { TableRecordsProvider } from '@models/TableRecords';
+import { useWindowSize } from '@lib/hooks/useWindowSize';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -15,7 +17,7 @@ import { TableTabs } from '@components/tables/TableTabs';
 import { BaseTable } from '@components/tables/BaseTables';
 import { TableViewsNav } from '@components/views/TableViewsNav';
 import { AuthOnly } from '@components/middleware/AuthOnly';
-import { TableRecordsProvider } from '@models/TableRecords';
+import { Loader } from '@components/ui/Loader';
 
 function Table({ id: tableId, databaseId }) {
   const history = useHistory();
@@ -24,13 +26,26 @@ function Table({ id: tableId, databaseId }) {
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
 
+  const windowSize = useWindowSize();
+  const height = windowSize.height ? windowSize.height - 125 : 0;
+
   if (base == null || bases == null || authUser == null) {
-    return <div>Loading...</div>;
+    return <Loader className="h-screen" />;
   }
 
   if (base.userId !== authUser.id) {
     history.push('/login');
-    return <div>Loading...</div>;
+    return <Loader className="h-screen" />;
+  }
+
+  if (!base.isMigrated) {
+    return (
+      <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white">
+        <PageContent className="!px-0 max-w-full">
+          <Loader style={{ height }} />;
+        </PageContent>
+      </Page>
+    );
   }
 
   return (
