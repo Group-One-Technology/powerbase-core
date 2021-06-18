@@ -83,7 +83,7 @@ module Powerbase
 
         return results
       else
-        Philtre.new(filter_params).apply(@remote_table)
+        @remote_table.where(eval(parse_sequel_filter(filter_params)))
       end
     end
 
@@ -97,6 +97,42 @@ module Powerbase
           is_turbo: @powerbase_database.is_turbo,
         })
         @remote_table = Powerbase.DB.from(@powerbase_table.name)
+      end
+
+      def parse_sequel_value(value)
+        if value.key?('field')
+          "Sequel.lit('\"#{value['field']}\"')"
+        elsif value.key?('value')
+          value['value'].is_a?(String) ? "'#{value['value']}'" : value['value']
+        end
+      end
+
+      def parse_sequel_filter(filters)
+        return if !filters&.length
+
+        result = ""
+        filters.each do |key, value|
+          first_val = parse_sequel_value(value[0])
+          second_val = parse_sequel_value(value[1])
+
+          if key == "eq"
+            result += "(Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "neq"
+            result += "(Sequel.~(#{first_val} => #{second_val}))"
+          elsif key == "gt"
+            result += "(#{first_val} > #{second_val})"
+          elsif key == "gte"
+            result += "(#{first_val} > #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "lt"
+            result += "(#{first_val} < #{second_val})"
+          elsif key == "lte"
+            result += "(#{first_val} < #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
+          elsif key == "like"
+            result += "(Sequel.like(#{first_val}, #{second_val}))"
+          end
+        end
+
+        result
       end
   end
 end
