@@ -24,14 +24,13 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       table.powerbase_database_id = options[:database_id]
 
       if table.save
-        db.schema(table_name.to_sym).each_with_index do |column, index|
+        db.schema(table_name.to_sym).each do |column|
           column_name = column[0]
           column_options = column[1]
 
           # Field Migration
           field = PowerbaseField.find_by(
             name: column_name,
-            oid: column_options[:oid],
             powerbase_table_id: table.id,
           ) || PowerbaseField.new
           field.name = column_name
@@ -40,7 +39,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
           field.is_nullable = column_options[:allow_null]
-          field.order = index + 1
           field.powerbase_table_id = table.id
 
           existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
