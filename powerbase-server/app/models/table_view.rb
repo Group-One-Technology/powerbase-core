@@ -4,4 +4,5 @@ class TableView < ApplicationRecord
   enum view_type: { grid: "grid" }, _prefix: true
 
   belongs_to :powerbase_table
+  has_many :view_field_options
 end

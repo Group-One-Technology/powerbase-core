@@ -5,4 +5,5 @@ class PowerbaseField < ApplicationRecord
   belongs_to :powerbase_table
   belongs_to :powerbase_field_type
   has_one :field_select_option
+  has_many :view_field_options
 end
