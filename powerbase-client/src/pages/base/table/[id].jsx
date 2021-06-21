@@ -7,6 +7,7 @@ import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
 import { TableFieldsProvider } from '@models/TableFields';
+import { TableViewsProvider } from '@models/TableViews';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
 
@@ -57,7 +58,9 @@ function Table({ id: tableId, databaseId }) {
           tableId={tableId}
           databaseId={databaseId}
         />
-        <TableViewsNav tableId={tableId} />
+        <TableViewsProvider id={tableId}>
+          <TableViewsNav />
+        </TableViewsProvider>
         <TableFieldsProvider id={tableId}>
           <TableRecordsProvider id={tableId}>
             <BaseTable />

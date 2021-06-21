@@ -1,12 +1,19 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { ViewGridIcon } from '@heroicons/react/outline';
+import { ViewGridIcon, PlusIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { IViewField } from '@lib/propTypes/view_field';
+import { IId } from '@lib/propTypes/common';
 
-export function TableViewsSelect({ tableId, currentGrid, grids }) {
+export function TableViewsSelect({
+  tableId,
+  baseId,
+  viewId,
+  currentGrid,
+  grids,
+}) {
   return (
     <Menu as="div" className="relative inline-block text-left">
       {({ open }) => (
@@ -33,18 +40,18 @@ export function TableViewsSelect({ tableId, currentGrid, grids }) {
               className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
             >
               <div className="py-1">
-                {grids.map((grid) => (
-                  <Menu.Item>
+                {grids.map((grid) => grid.id !== currentGrid.id && (
+                  <Menu.Item key={grid.id}>
                     {({ active }) => (
                       <Link
-                        to="/base/create"
-                        className={cn('block px-4 py-2 text-sm', (
+                        to={`/base/${baseId}/table/${tableId}/view/${viewId}`}
+                        className={cn('flex p-2 text-xs items-center', (
                           active
                             ? 'bg-gray-100 text-gray-900'
                             : 'text-gray-700'
                         ))}
                       >
-                        {grid.name} View
+                        {grid.name}
                       </Link>
                     )}
                   </Menu.Item>
@@ -53,12 +60,13 @@ export function TableViewsSelect({ tableId, currentGrid, grids }) {
                   {({ active }) => (
                     <Link
                       to={`table/${tableId}/view/create`}
-                      className={cn('block px-4 py-2 text-sm', (
+                      className={cn('flex p-2 text-xs items-center', (
                         active
                           ? 'bg-gray-100 text-gray-900'
                           : 'text-gray-700'
                       ))}
                     >
+                      <PlusIcon className="h-3 w-3 mr-1 inline-block" />
                       Add View
                     </Link>
                   )}
@@ -73,10 +81,9 @@ export function TableViewsSelect({ tableId, currentGrid, grids }) {
 }
 
 TableViewsSelect.propTypes = {
-  tableId: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
+  tableId: IId.isRequired,
+  baseId: IId.isRequired,
+  viewId: IId.isRequired,
   currentGrid: IViewField.isRequired,
   grids: PropTypes.arrayOf(IViewField).isRequired,
 };

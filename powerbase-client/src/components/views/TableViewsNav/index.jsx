@@ -7,11 +7,15 @@ import {
   SwitchVerticalIcon,
   ShareIcon,
 } from '@heroicons/react/outline';
-import PropTypes from 'prop-types';
+import { useTableViews } from '@models/TableViews';
 
 import { TableViewsSelect } from './TableViewsSelect';
 
-export function TableViewsNav({ tableId }) {
+export function TableViewsNav() {
+  const { tableId, data: views } = useTableViews();
+
+  if (!views || !views?.length) return null;
+
   return (
     <>
       <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
@@ -19,8 +23,8 @@ export function TableViewsNav({ tableId }) {
           <div className="flex-1 flex items-center">
             <TableViewsSelect
               tableId={tableId}
-              currentGrid={{ name: 'Grid View' }}
-              grids={[]}
+              currentGrid={views[0]}
+              grids={views}
             />
           </div>
           <div className="flex-1 flex items-center justify-center gap-x-2">
@@ -60,7 +64,3 @@ export function TableViewsNav({ tableId }) {
     </>
   );
 }
-
-TableViewsNav.propTypes = {
-  tableId: PropTypes.number.isRequired,
-};
