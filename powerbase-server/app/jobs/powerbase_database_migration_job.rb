@@ -82,12 +82,22 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           end
         end
 
-        # Add default views
+        # Add default views and view fields
         table_view = TableView.new
         table_view.powerbase_table_id = table.id
         table_view.name = "Grid"
         table_view.view_type = "grid"
-        if !table_view.save
+        if table_view.save
+          fields = PowerbaseField.where(powerbase_table_id: table.id)
+          fields.each_with_index do |cur_field, index|
+            view_field = ViewFieldOption.new
+            view_field.width = cur_field.name.length * 10
+            view_field.order = index + 1
+            view_field.table_view_id = table_view.id
+            view_field.powerbase_field_id = cur_field.id
+            view_field.save
+          end
+        else
           # TODO: Add error tracker (ex. Sentry)
           puts "Failed to save default grid view: #{table.name}"
           puts table_view.errors.messages
