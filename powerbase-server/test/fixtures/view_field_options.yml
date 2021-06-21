@@ -1,0 +1,49 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  table_view_id: 1
+  powerbase_field_id: 1
+  width: 300
+  is_hidden: false
+  is_frozen: true
+  order: 1
+
+two:
+  table_view_id: 1
+  powerbase_field_id: 2
+  width: 300
+  is_hidden: false
+  is_frozen: false
+  order: 2
+
+three:
+  table_view_id: 1
+  powerbase_field_id: 3
+  width: 300
+  is_hidden: false
+  is_frozen: false
+  order: 3
+
+four:
+  table_view_id: 1
+  powerbase_field_id: 4
+  width: 300
+  is_hidden: false
+  is_frozen: false
+  order: 4
+
+five:
+  table_view_id: 1
+  powerbase_field_id: 5
+  width: 300
+  is_hidden: false
+  is_frozen: false
+  order: 5
+
+six:
+  table_view_id: 1
+  powerbase_field_id: 6
+  width: 300
+  is_hidden: false
+  is_frozen: false
+  order: 6

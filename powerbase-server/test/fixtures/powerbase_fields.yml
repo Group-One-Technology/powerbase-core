@@ -8,9 +8,6 @@ one:
   default_value: null
   is_primary_key: true
   is_nullable: false
-  is_hidden: false
-  is_frozen: true
-  order: 1
   powerbase_field_type_id: 4
   powerbase_table_id: 1
 
@@ -22,9 +19,6 @@ two:
   default_value: null
   is_primary_key: false
   is_nullable: false
-  is_hidden: false
-  is_frozen: false
-  order: 2
   powerbase_field_type_id: 1
   powerbase_table_id: 1
 
@@ -36,9 +30,6 @@ three:
   default_value: null
   is_primary_key: false
   is_nullable: true
-  is_hidden: false
-  is_frozen: false
-  order: 3
   powerbase_field_type_id: 2
   powerbase_table_id: 1
 
@@ -50,9 +41,6 @@ four:
   default_value: null
   is_primary_key: true
   is_nullable: false
-  is_hidden: false
-  is_frozen: false
-  order: 1
   powerbase_field_type_id: 4
   powerbase_table_id: 2
 
@@ -64,9 +52,6 @@ five:
   default_value: null
   is_primary_key: false
   is_nullable: false
-  is_hidden: false
-  is_frozen: false
-  order: 2
   powerbase_field_type_id: 4
   powerbase_table_id: 2
 
@@ -78,8 +63,5 @@ six:
   default_value: "'basic'::user_userrole_enum"
   is_primary_key: false
   is_nullable: true
-  is_hidden: false
-  is_frozen: false
-  order: 4
   powerbase_field_type_id: 5
   powerbase_table_id: 1
