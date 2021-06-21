@@ -57,7 +57,7 @@ function Table({ id: tableId, databaseId }) {
           tableId={tableId}
           databaseId={databaseId}
         />
-        <TableViewsNav />
+        <TableViewsNav tableId={tableId} />
         <TableFieldsProvider id={tableId}>
           <TableRecordsProvider id={tableId}>
             <BaseTable />
