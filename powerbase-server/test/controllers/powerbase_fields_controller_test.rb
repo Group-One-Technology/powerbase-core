@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class PowerbaseFieldsControllerTest <ApplcationControllerTest
+class PowerbaseFieldsControllerTest < ApplcationControllerTest
   setup do
     login
   end
