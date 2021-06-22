@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_14_031622) do
+ActiveRecord::Schema.define(version: 2021_06_21_120324) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -61,9 +61,6 @@ ActiveRecord::Schema.define(version: 2021_06_14_031622) do
     t.string "default_value"
     t.boolean "is_primary_key", default: false, null: false
     t.boolean "is_nullable", default: true, null: false
-    t.boolean "is_hidden", default: false, null: false
-    t.boolean "is_frozen", default: false, null: false
-    t.integer "order", null: false
     t.bigint "powerbase_table_id", null: false
     t.bigint "powerbase_field_type_id", null: false
     t.datetime "created_at", precision: 6, null: false
@@ -109,6 +106,19 @@ ActiveRecord::Schema.define(version: 2021_06_14_031622) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "view_field_options", force: :cascade do |t|
+    t.integer "width", default: 300
+    t.boolean "is_frozen", default: false
+    t.boolean "is_hidden", default: false
+    t.integer "order", null: false
+    t.bigint "table_view_id", null: false
+    t.bigint "powerbase_field_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["powerbase_field_id"], name: "index_view_field_options_on_powerbase_field_id"
+    t.index ["table_view_id"], name: "index_view_field_options_on_table_view_id"
+  end
+
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "field_select_options", "powerbase_fields"
   add_foreign_key "powerbase_databases", "users"
@@ -118,4 +128,6 @@ ActiveRecord::Schema.define(version: 2021_06_14_031622) do
   add_foreign_key "table_foreign_keys", "powerbase_tables"
   add_foreign_key "table_foreign_keys", "powerbase_tables", column: "referenced_table_id"
   add_foreign_key "table_views", "powerbase_tables"
+  add_foreign_key "view_field_options", "powerbase_fields"
+  add_foreign_key "view_field_options", "table_views"
 end

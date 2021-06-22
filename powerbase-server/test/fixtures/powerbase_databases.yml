@@ -6,5 +6,5 @@ one:
   description: A test database for powerbase
   encrypted_connection_string: "7fciCT/AxIvP+O2j1MHHbo4A6P1cazx93AHKyxvqlZ5KZqkyXWWWqWzA2mnP\nHjIA0cEDLcqcb8XMq40RJs28bg=="
   adapter: postgresql
-  is_migrated: false
+  is_migrated: true
   is_turbo: true

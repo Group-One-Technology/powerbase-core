@@ -36,7 +36,7 @@ module Powerbase
 
     # Save multiple documents of a table to Elasticsearch.
     def index_records
-      connect_remote_db(table_id)
+      connect_remote_db(@table_id)
       records = @remote_table.all
       index = "table_records_#{@table_id}"
 
