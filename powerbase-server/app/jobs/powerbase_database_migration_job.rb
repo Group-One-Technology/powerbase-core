@@ -85,7 +85,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         # Add default views and view fields
         table_view = TableView.new
         table_view.powerbase_table_id = table.id
-        table_view.name = "Grid"
+        table_view.name = "Grid View"
         table_view.view_type = "grid"
         if table_view.save
           fields = PowerbaseField.where(powerbase_table_id: table.id)
