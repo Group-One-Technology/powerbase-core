@@ -1,0 +1,1 @@
+ElasticsearchClient = Elasticsearch::Client.new

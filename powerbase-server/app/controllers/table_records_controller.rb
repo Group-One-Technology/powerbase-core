@@ -8,7 +8,7 @@ class TableRecordsController < ApplicationController
 
   # PUT /tables/:table_id/records
   def index
-    model = Powerbase::Model.new(safe_params[:table_id])
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
     records = safe_params[:filters] ? model.filter(safe_params[:filters]) : model.all
     model.disconnect
 
