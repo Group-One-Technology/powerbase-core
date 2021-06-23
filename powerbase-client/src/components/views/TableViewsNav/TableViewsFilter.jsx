@@ -6,6 +6,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view_field';
+import { useTableRecords } from '@models/TableRecords';
 
 const NUMBER_FIELD_TYPE = 4;
 
@@ -23,23 +24,33 @@ const NUMBER_OPERATORS = [
   '<=',
 ];
 
+const OPERATOR = {
+  Is: 'eq',
+  Contains: 'like',
+  '=': 'eq',
+  '!=': 'neq',
+  '>': 'gt',
+  '>=': 'gte',
+  '<': 'lt',
+  '<=': 'lte',
+};
 export function TableViewsFilter({ fields }) {
   const [firstOperand, setFirstOperand] = useState('');
   const [operators, setOperators] = useState([]);
   const [operator, setOperator] = useState();
-  const [secondOperand, setSecondOperand] = useState();
+  const [secondOperand, setSecondOperand] = useState('');
+  const [fieldType, setFieldType] = useState('number');
+  const { setFilters, mutate: mutateTableRecords } = useTableRecords();
 
   useEffect(() => {
     if (!firstOperand && fields) {
       const [firstField] = fields;
-      setFirstOperand(firstField);
+      const isNumber = firstField.fieldTypeId === NUMBER_FIELD_TYPE;
 
-      setOperators(firstField.fieldTypeId === NUMBER_FIELD_TYPE
-        ? NUMBER_OPERATORS
-        : TEXT_OPERATORS);
-      setOperator(firstField.fieldTypeId === NUMBER_FIELD_TYPE
-        ? NUMBER_OPERATORS[0]
-        : TEXT_OPERATORS[0]);
+      setFirstOperand(firstField);
+      setFieldType(isNumber ? 'number' : 'text');
+      setOperators(isNumber ? NUMBER_OPERATORS : TEXT_OPERATORS);
+      setOperator(isNumber ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
     }
   }, [fields]);
 
@@ -48,13 +59,34 @@ export function TableViewsFilter({ fields }) {
   const handleFirstOperandChange = (evt) => {
     const selectedField = fields?.find((field) => field.id.toString() === evt.target.value.toString());
     setFirstOperand(selectedField);
-    setOperators(selectedField.fieldTypeId === NUMBER_FIELD_TYPE
-      ? NUMBER_OPERATORS
-      : TEXT_OPERATORS);
+    setOperators(fieldType ? NUMBER_OPERATORS : TEXT_OPERATORS);
   };
 
-  const handleOperatorChange = (evt) => setOperator(evt.target.value);
-  const handleSecondOperandChange = (evt) => setSecondOperand(evt.target.value);
+  const handleOperatorChange = (evt) => {
+    setOperator(evt.target.value);
+  };
+
+  const handleSecondOperandChange = (evt) => {
+    if (fieldType === 'number') {
+      const value = Number(evt.target.value);
+      setSecondOperand(!Number.isNaN(value) ? value : 0);
+    } else {
+      setSecondOperand(evt.target.value);
+    }
+  };
+
+  const handleSubmit = async (evt) => {
+    evt.preventDefault();
+
+    setFilters({
+      [OPERATOR[operator]]: [
+        { field: firstOperand.name },
+        { value: secondOperand },
+      ],
+    });
+
+    await mutateTableRecords();
+  };
 
   return (
     <Popover className="relative">
@@ -79,7 +111,7 @@ export function TableViewsFilter({ fields }) {
           >
             <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className="bg-white p-4 text-sm">
+                <form onSubmit={handleSubmit} className="bg-white p-4 text-sm">
                   <div className="grid grid-cols-4 gap-x-2">
                     <p className="">Where</p>
                     <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
@@ -87,7 +119,6 @@ export function TableViewsFilter({ fields }) {
                       id="firstOperand"
                       name="first_operand"
                       className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
-                      value={firstOperand}
                       onChange={handleFirstOperandChange}
                     >
                       {fields?.map((field) => (
@@ -108,7 +139,7 @@ export function TableViewsFilter({ fields }) {
                     </select>
                     <input
                       id="secondOperand"
-                      type={firstOperand.fieldTypeId === NUMBER_FIELD_TYPE ? 'number' : 'text'}
+                      type={fieldType}
                       aria-label="Second Operand"
                       name="second_operand"
                       value={secondOperand}
@@ -117,7 +148,15 @@ export function TableViewsFilter({ fields }) {
                       required
                     />
                   </div>
-                </div>
+                  <div className="mt-2">
+                    <button
+                      type="submit"
+                      className={cn('inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 focus:outline-none hover:ring-2 ring-offset-2 ring-gray-500')}
+                    >
+                      Submit Filter (Temporary)
+                    </button>
+                  </div>
+                </form>
                 <div className="p-1 bg-gray-50">
                   <button
                     type="button"

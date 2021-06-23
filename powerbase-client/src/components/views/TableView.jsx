@@ -21,7 +21,7 @@ function BaseTableView({ baseId, tableId }) {
   }
 
   return (
-    <>
+    <TableRecordsProvider id={tableId}>
       <TableViewsNav
         baseId={baseId}
         tableId={tableId}
@@ -29,10 +29,8 @@ function BaseTableView({ baseId, tableId }) {
         views={views}
         fields={fields}
       />
-      <TableRecordsProvider id={tableId}>
-        <BaseTable view={view} />
-      </TableRecordsProvider>
-    </>
+      <BaseTable view={view} />
+    </TableRecordsProvider>
   );
 }
 
