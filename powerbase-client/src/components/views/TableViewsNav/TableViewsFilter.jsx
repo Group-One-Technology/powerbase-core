@@ -58,8 +58,10 @@ export function TableViewsFilter({ fields }) {
 
   const handleFirstOperandChange = (evt) => {
     const selectedField = fields?.find((field) => field.id.toString() === evt.target.value.toString());
+    const selectedFieldType = selectedField.fieldTypeId === NUMBER_FIELD_TYPE ? 'number' : 'text';
     setFirstOperand(selectedField);
-    setOperators(fieldType ? NUMBER_OPERATORS : TEXT_OPERATORS);
+    setFieldType(selectedFieldType);
+    setOperators(selectedFieldType === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS);
   };
 
   const handleOperatorChange = (evt) => {
@@ -119,6 +121,7 @@ export function TableViewsFilter({ fields }) {
                       id="firstOperand"
                       name="first_operand"
                       className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+                      value={firstOperand.id}
                       onChange={handleFirstOperandChange}
                     >
                       {fields?.map((field) => (
