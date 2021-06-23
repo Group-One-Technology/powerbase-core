@@ -21,6 +21,7 @@ class ViewFieldOptionsController < ApplicationController
         is_primary_key: view_field.powerbase_field.is_primary_key,
         is_nullable: view_field.powerbase_field.is_nullable,
         order: view_field.order,
+        width: view_field.width,
         is_frozen: view_field.is_frozen,
         is_hidden: view_field.is_hidden,
         view_id: view_field.table_view_id,

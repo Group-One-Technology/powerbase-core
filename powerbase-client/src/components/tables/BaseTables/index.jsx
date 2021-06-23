@@ -21,7 +21,7 @@ export function BaseTable() {
 
   return (
     <TableRenderer
-      fields={['', ...fields.map((field) => field.name)]}
+      fields={fields}
       records={[
         ...records.map((record, index) => [index + 1, ...Object.values(record)]),
         [records.length + 1, ...new Array(fields.length).fill('')],

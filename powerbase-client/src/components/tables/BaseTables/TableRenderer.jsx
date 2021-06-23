@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { ArrowKeyStepper, Grid, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
+import { IViewField } from '@lib/propTypes/view_field';
 import { CellRenderer } from './CellRenderer';
-import 'react-virtualized/styles.css';
 
 export function TableRenderer({ fields, records, height }) {
   const columnCount = fields.length;
   const rowCount = records.length + 1;
-  const tableValues = [fields, ...records];
+  const tableValues = [
+    ['', ...fields.map((field) => field.name)],
+    ...records,
+  ];
 
   const [currentCell, setCurrentCell] = useState({
     row: 0,
@@ -52,7 +55,7 @@ export function TableRenderer({ fields, records, height }) {
                   value: tableValues[rowIndex][columnIndex],
                   ...props,
                 })}
-                columnWidth={({ index }) => (index === 0 ? 50 : 300)}
+                columnWidth={({ index }) => (index === 0 ? 50 : fields[index].width)}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
@@ -68,7 +71,7 @@ export function TableRenderer({ fields, records, height }) {
 }
 
 TableRenderer.propTypes = {
-  fields: PropTypes.arrayOf(PropTypes.any).isRequired,
+  fields: PropTypes.arrayOf(IViewField).isRequired,
   records: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
