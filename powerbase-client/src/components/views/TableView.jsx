@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ViewFieldsProvider } from '@models/ViewFields';
+import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { useTableViews } from '@models/TableViews';
@@ -14,6 +14,7 @@ import { TableViewsNav } from './TableViewsNav';
 function BaseTableView({ baseId, tableId }) {
   const { data: view } = useTableView();
   const { data: views } = useTableViews();
+  const { data: fields } = useViewFields();
 
   if (!view) {
     return <Loader className="h-screen" />;
@@ -26,12 +27,11 @@ function BaseTableView({ baseId, tableId }) {
         tableId={tableId}
         currentView={view}
         views={views}
+        fields={fields}
       />
-      <ViewFieldsProvider id={view.id}>
-        <TableRecordsProvider id={tableId}>
-          <BaseTable view={view} />
-        </TableRecordsProvider>
-      </ViewFieldsProvider>
+      <TableRecordsProvider id={tableId}>
+        <BaseTable view={view} />
+      </TableRecordsProvider>
     </>
   );
 }
@@ -56,7 +56,9 @@ export function TableView({ baseId, tableId }) {
 
   return (
     <TableViewProvider id={currentView.id}>
-      <BaseTableView baseId={baseId} tableId={tableId} />
+      <ViewFieldsProvider id={currentView.id}>
+        <BaseTableView baseId={baseId} tableId={tableId} />
+      </ViewFieldsProvider>
     </TableViewProvider>
   );
 }
