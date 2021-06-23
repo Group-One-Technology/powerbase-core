@@ -5,29 +5,24 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { useAuthUser } from '@models/AuthUser';
-import { TableFieldsProvider } from '@models/TableFields';
-import { TableViewsProvider, useTableViews } from '@models/TableViews';
-import { TableRecordsProvider } from '@models/TableRecords';
+import { TableViewsProvider } from '@models/TableViews';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
-import { useQuery } from '@lib/hooks/useQuery';
 import { IId } from '@lib/propTypes/common';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { TableTabs } from '@components/tables/TableTabs';
-import { BaseTable } from '@components/tables/BaseTables';
-import { TableViewsNav } from '@components/views/TableViewsNav';
 import { AuthOnly } from '@components/middleware/AuthOnly';
 import { Loader } from '@components/ui/Loader';
+import { TableView } from '@components/views/TableView';
 
-function Table({ id: tableId, viewId, baseId }) {
+function Table({ id: tableId, baseId }) {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
-  const { data: views } = useTableViews();
 
   const windowSize = useWindowSize();
   const height = windowSize.height ? windowSize.height - 125 : 0;
@@ -60,17 +55,7 @@ function Table({ id: tableId, viewId, baseId }) {
           tableId={tableId}
           baseId={baseId}
         />
-        <TableViewsNav
-          baseId={base.id}
-          tableId={tableId}
-          viewId={viewId}
-          views={views}
-        />
-        <TableFieldsProvider id={tableId}>
-          <TableRecordsProvider id={tableId}>
-            <BaseTable />
-          </TableRecordsProvider>
-        </TableFieldsProvider>
+        <TableView baseId={baseId} tableId={tableId} />
       </PageContent>
     </Page>
   );
@@ -78,14 +63,11 @@ function Table({ id: tableId, viewId, baseId }) {
 
 Table.propTypes = {
   id: IId.isRequired,
-  viewId: IId.isRequired,
   baseId: IId.isRequired,
 };
 
 export function TablePage() {
   const { id, baseId } = useParams();
-  const query = useQuery();
-  const viewId = query.get('view');
 
   return (
     <BasesProvider>
@@ -93,7 +75,7 @@ export function TablePage() {
         <BaseTablesProvider id={baseId}>
           <TableViewsProvider id={id}>
             <AuthOnly>
-              <Table id={id} viewId={viewId} baseId={baseId} />
+              <Table id={id} baseId={baseId} />
             </AuthOnly>
           </TableViewsProvider>
         </BaseTablesProvider>

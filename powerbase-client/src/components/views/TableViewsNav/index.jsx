@@ -16,19 +16,9 @@ import { TableViewsSelect } from './TableViewsSelect';
 export function TableViewsNav({
   baseId,
   tableId,
-  viewId,
+  currentView,
   views,
 }) {
-  if (!views || !views?.length) {
-    return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 h-11" />
-    );
-  }
-
-  const currentView = viewId
-    ? views?.find((item) => item.id.toString() === viewId.toString())
-    : views[0];
-
   return (
     <>
       <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
@@ -81,7 +71,7 @@ export function TableViewsNav({
 
 TableViewsNav.propTypes = {
   baseId: IId.isRequired,
-  viewId: IId.isRequired,
   tableId: IId.isRequired,
+  currentView: IView,
   views: PropTypes.arrayOf(IView),
 };
