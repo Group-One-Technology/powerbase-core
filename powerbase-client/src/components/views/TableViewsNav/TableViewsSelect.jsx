@@ -4,15 +4,14 @@ import { Menu, Transition } from '@headlessui/react';
 import { ViewGridIcon, PlusIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-import { IViewField } from '@lib/propTypes/view_field';
+import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
 
 export function TableViewsSelect({
   tableId,
   baseId,
-  viewId,
-  currentGrid,
-  grids,
+  currentView,
+  views,
 }) {
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -21,7 +20,7 @@ export function TableViewsSelect({
           <div>
             <Menu.Button className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
               <ViewGridIcon className="inline h-4 w-4 mr-1" />
-              {currentGrid.name}
+              {currentView.name}
             </Menu.Button>
           </div>
 
@@ -40,11 +39,11 @@ export function TableViewsSelect({
               className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
             >
               <div className="py-1">
-                {grids.map((grid) => grid.id !== currentGrid.id && (
+                {views.map((grid) => grid.id !== currentView.id && (
                   <Menu.Item key={grid.id}>
                     {({ active }) => (
                       <Link
-                        to={`/base/${baseId}/table/${tableId}/view/${viewId}`}
+                        to={`/base/${baseId}/table/${tableId}/?view=${currentView.id}`}
                         className={cn('flex p-2 text-xs items-center', (
                           active
                             ? 'bg-gray-100 text-gray-900'
@@ -83,7 +82,6 @@ export function TableViewsSelect({
 TableViewsSelect.propTypes = {
   tableId: IId.isRequired,
   baseId: IId.isRequired,
-  viewId: IId.isRequired,
-  currentGrid: IViewField.isRequired,
-  grids: PropTypes.arrayOf(IViewField).isRequired,
+  currentView: IView.isRequired,
+  views: PropTypes.arrayOf(IView).isRequired,
 };

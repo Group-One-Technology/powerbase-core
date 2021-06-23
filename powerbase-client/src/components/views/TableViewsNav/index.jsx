@@ -7,14 +7,27 @@ import {
   SwitchVerticalIcon,
   ShareIcon,
 } from '@heroicons/react/outline';
-import { useTableViews } from '@models/TableViews';
+import PropTypes from 'prop-types';
 
+import { IId } from '@lib/propTypes/common';
+import { IView } from '@lib/propTypes/view';
 import { TableViewsSelect } from './TableViewsSelect';
 
-export function TableViewsNav() {
-  const { tableId, data: views } = useTableViews();
+export function TableViewsNav({
+  baseId,
+  tableId,
+  viewId,
+  views,
+}) {
+  if (!views || !views?.length) {
+    return (
+      <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 h-11" />
+    );
+  }
 
-  if (!views || !views?.length) return null;
+  const currentView = viewId
+    ? views?.find((item) => item.id.toString() === viewId.toString())
+    : views[0];
 
   return (
     <>
@@ -22,9 +35,10 @@ export function TableViewsNav() {
         <div className="relative flex  py-1.5 gap-x-2">
           <div className="flex-1 flex items-center">
             <TableViewsSelect
+              baseId={baseId}
               tableId={tableId}
-              currentGrid={views[0]}
-              grids={views}
+              currentView={currentView}
+              views={views}
             />
           </div>
           <div className="flex-1 flex items-center justify-center gap-x-2">
@@ -64,3 +78,10 @@ export function TableViewsNav() {
     </>
   );
 }
+
+TableViewsNav.propTypes = {
+  baseId: IId.isRequired,
+  viewId: IId.isRequired,
+  tableId: IId.isRequired,
+  views: PropTypes.arrayOf(IView),
+};
