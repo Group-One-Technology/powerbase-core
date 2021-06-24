@@ -7,7 +7,7 @@ import { TableViewsProvider, useTableViews } from '@models/TableViews';
 import { IId } from '@lib/propTypes/common';
 import { Loader } from '@components/ui/Loader';
 
-function TableView({ id, tableId }) {
+function View({ id, tableId }) {
   const { data: views } = useTableViews();
 
   if (views) {
@@ -17,7 +17,7 @@ function TableView({ id, tableId }) {
   return <Loader className="h-screen" />;
 }
 
-TableView.propTypes = {
+View.propTypes = {
   id: IId.isRequired,
   tableId: IId.isRequired,
 };
@@ -30,7 +30,7 @@ function Base({ id }) {
 
     return (
       <TableViewsProvider id={tableId}>
-        <TableView id={id} tableId={tableId} />
+        <View id={id} tableId={tableId} />
       </TableViewsProvider>
     );
   }

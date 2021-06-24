@@ -9,6 +9,7 @@ export const IViewField = PropTypes.shape({
   isPrimaryKey: PropTypes.bool.isRequired,
   isNullable: PropTypes.bool.isRequired,
   order: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
   isFrozen: PropTypes.bool.isRequired,
   isHidden: PropTypes.bool.isRequired,
   viewId: IId.isRequired,
