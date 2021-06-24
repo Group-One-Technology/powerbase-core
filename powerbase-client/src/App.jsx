@@ -46,7 +46,7 @@ function BasesRoute() {
       <Route exact path={`${path}/connect`} component={ConnectBasePage} />
       <Route exact path={`${path}/connect-url`} component={ConnectURLBasePage} />
       <Route exact path={`${path}/:id`} component={BasePage} />
-      <Route path={`${path}/:databaseId/table/:id`} component={TablePage} />
+      <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
       <Route path="*" component={() => <h1>Not found!</h1>} />
     </Switch>
   );

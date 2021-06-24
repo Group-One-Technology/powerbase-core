@@ -4,13 +4,14 @@ import { Link, useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
+import { IId } from '@lib/propTypes/common';
 
 const SCROLL_OFFSET = 100;
 
 export function TableTabs({
   color,
   tableId,
-  databaseId,
+  baseId,
   tables,
 }) {
   const history = useHistory();
@@ -87,7 +88,7 @@ export function TableTabs({
           {tables?.map((table) => (
             <option
               key={table.id}
-              onClick={() => history.push(`/base/${databaseId}/table/${table.id}`)}
+              onClick={() => history.push(`/base/${baseId}/table/${table.id}`)}
               className="text-sm text-white bg-gray-900 bg-opacity-80"
             >
               {table.name}
@@ -130,7 +131,7 @@ export function TableTabs({
               <Link
                 key={table.id}
                 ref={isCurrentTable ? activeTabEl : undefined}
-                to={`/base/${databaseId}/table/${table.id}`}
+                to={`/base/${baseId}/table/${table.id}`}
                 className={cn(
                   'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
@@ -170,7 +171,7 @@ export function TableTabs({
 
 TableTabs.propTypes = {
   color: PropTypes.oneOf(Object.keys(BG_COLORS)),
-  tableId: PropTypes.string.isRequired,
-  databaseId: PropTypes.string.isRequired,
+  tableId: IId.isRequired,
+  baseId: IId.isRequired,
   tables: PropTypes.any,
 };
