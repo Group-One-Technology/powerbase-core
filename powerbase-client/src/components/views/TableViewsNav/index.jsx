@@ -1,23 +1,21 @@
 /* eslint-disable no-shadow */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment } from 'react';
-import {
-  SearchIcon,
-  FilterIcon,
-  SwitchVerticalIcon,
-  ShareIcon,
-} from '@heroicons/react/outline';
 import PropTypes from 'prop-types';
+import { SearchIcon, SwitchVerticalIcon, ShareIcon } from '@heroicons/react/outline';
 
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
+import { IViewField } from '@lib/propTypes/view_field';
 import { TableViewsSelect } from './TableViewsSelect';
+import { TableViewsFilter } from './TableViewsFilter';
 
 export function TableViewsNav({
   baseId,
   tableId,
   currentView,
   views,
+  fields,
 }) {
   return (
     <>
@@ -32,13 +30,7 @@ export function TableViewsNav({
             />
           </div>
           <div className="flex-1 flex items-center justify-center gap-x-2">
-            <button
-              type="button"
-              className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-            >
-              <span className="sr-only">Filter fields</span>
-              <FilterIcon className="block h-4 w-4" />
-            </button>
+            <TableViewsFilter fields={fields} />
             <button
               type="button"
               className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -74,4 +66,5 @@ TableViewsNav.propTypes = {
   tableId: IId.isRequired,
   currentView: IView,
   views: PropTypes.arrayOf(IView),
+  fields: PropTypes.arrayOf(IViewField),
 };

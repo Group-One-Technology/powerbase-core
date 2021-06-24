@@ -4,21 +4,19 @@ module Powerbase
   class Model
     # Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
-    def initialize(table_id)
+    def initialize(esclient, table_id)
       @table_id = table_id
-      @esclient = Elasticsearch::Client.new
+      @esclient = esclient
 
       @es_table = @esclient.get(index: "powerbase_tables", id: table_id, ignore: 404)
       @is_turbo = !!@es_table["found"]
+      connect_remote_db(table_id)
 
       if @is_turbo
         @es_table = @es_table["_source"]
         @table_name = @es_table["name"]
         @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])["_source"]
-
-        connect_remote_db(table_id)
       else
-        connect_remote_db(table_id)
         @table_name = @powerbase_table.name
       end
     end
