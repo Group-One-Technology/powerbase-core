@@ -3,10 +3,15 @@
 one:
   id: 1
   powerbase_table_id: 1
-  name: Grid
+  name: Grid View
   view_type: grid
 
 two:
   powerbase_table_id: 2
-  name: Grid
+  name: Grid View
+  view_type: grid
+
+three:
+  powerbase_table_id: 3
+  name: Grid View
   view_type: grid

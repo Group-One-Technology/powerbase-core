@@ -5,15 +5,18 @@ one:
   name: users
   description: "Users of Powerbase"
   powerbase_database_id: 1
+  default_view_id: 1
 
 two:
   id: 2
   name: projects
   description: "Projects owned by a user"
   powerbase_database_id: 1
+  default_view_id: 2
 
 three:
   id: 3
   name: permissions
   description: "List of who has access for a project"
   powerbase_database_id: 1
+  default_view_id: 3
