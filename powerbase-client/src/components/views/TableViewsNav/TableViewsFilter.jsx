@@ -3,9 +3,10 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from 'react';
 import { Popover, Transition } from '@headlessui/react';
-import { PlusIcon, FilterIcon } from '@heroicons/react/outline';
+import { PlusIcon, FilterIcon, TrashIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import debounce from 'lodash.debounce';
@@ -40,6 +41,7 @@ const OPERATOR = {
   '<=': 'lte',
 };
 export function TableViewsFilter({ fields }) {
+  const filterRef = useRef();
   const [firstOperand, setFirstOperand] = useState('');
   const [operators, setOperators] = useState([]);
   const [operator, setOperator] = useState();
@@ -140,6 +142,10 @@ export function TableViewsFilter({ fields }) {
     }
   };
 
+  const removeFilter = () => {
+    if (filterRef.current) filterRef.current.remove();
+  };
+
   return (
     <Popover className="relative">
       {({ open }) => (
@@ -164,8 +170,8 @@ export function TableViewsFilter({ fields }) {
             <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="bg-white p-4 text-sm">
-                  <div className="grid grid-cols-4 gap-x-2">
-                    <p className="">Where</p>
+                  <div ref={filterRef} className="flex gap-x-2 items-center">
+                    <p className="inline w-80">Where</p>
                     <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
                     <select
                       id="firstOperand"
@@ -200,6 +206,14 @@ export function TableViewsFilter({ fields }) {
                       className={cn('appearance-none block w-full px-3 py-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm')}
                       required
                     />
+                    <button
+                      type="button"
+                      className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+                      onClick={() => removeFilter('filter-1')}
+                    >
+                      <span className="sr-only">Remove Filter</span>
+                      <TrashIcon className="block h-4 w-4" />
+                    </button>
                   </div>
                 </div>
                 <div className="p-1 bg-gray-50">
