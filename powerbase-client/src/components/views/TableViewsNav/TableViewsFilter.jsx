@@ -62,23 +62,28 @@ export function TableViewsFilter({ fields }) {
   }, [fields]);
 
   const updateTableRecords = useCallback(debounce(async ({
+    reset,
     operatorPayload,
     firstOperandPayload,
     secondOperandPayload,
   }) => {
-    const secondOperandValue = OPERATOR[operatorPayload] === 'like'
-      ? `%${secondOperandPayload}%`
-      : secondOperandPayload;
+    if (reset) {
+      setFilters(undefined);
+    } else {
+      const secondOperandValue = OPERATOR[operatorPayload] === 'like'
+        ? `%${secondOperandPayload}%`
+        : secondOperandPayload;
 
-    setFilters({
-      id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
-      value: {
-        [OPERATOR[operatorPayload]]: [
-          { field: firstOperandPayload },
-          { value: secondOperandValue },
-        ],
-      },
-    });
+      setFilters({
+        id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
+        value: {
+          [OPERATOR[operatorPayload]]: [
+            { field: firstOperandPayload },
+            { value: secondOperandValue },
+          ],
+        },
+      });
+    }
 
     await mutateTableRecords();
   }, 500), []);
@@ -97,7 +102,7 @@ export function TableViewsFilter({ fields }) {
     setSecondOperand('');
 
     if (operator != null && selectedField != null
-      && ((selectedFieldType === 'number' && secondOperand != null)
+      && ((selectedFieldType === 'number' && typeof secondOperand === 'number')
         || (selectedFieldType === 'text' && secondOperand.length))) {
       updateTableRecords({
         operatorPayload: operator,
@@ -112,7 +117,7 @@ export function TableViewsFilter({ fields }) {
     setOperator(value);
 
     if (value != null && firstOperand != null
-      && ((fieldType === 'number' && secondOperand != null)
+      && ((fieldType === 'number' && typeof secondOperand === 'number')
         || (fieldType === 'text' && secondOperand.length))) {
       updateTableRecords({
         operatorPayload: value,
@@ -132,7 +137,7 @@ export function TableViewsFilter({ fields }) {
     }
 
     if (operator != null && firstOperand != null
-      && ((fieldType === 'number' && value != null)
+      && ((fieldType === 'number' && typeof value === 'number')
         || (fieldType === 'text' && value.length))) {
       updateTableRecords({
         operatorPayload: operator,
