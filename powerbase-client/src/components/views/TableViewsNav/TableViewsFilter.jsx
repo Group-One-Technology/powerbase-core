@@ -148,7 +148,10 @@ export function TableViewsFilter({ fields }) {
   };
 
   const removeFilter = () => {
-    if (filterRef.current) filterRef.current.remove();
+    if (filterRef.current) {
+      filterRef.current.remove();
+      updateTableRecords({ reset: true });
+    }
   };
 
   return (
