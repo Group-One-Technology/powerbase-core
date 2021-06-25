@@ -6,5 +6,4 @@ class TableView < ApplicationRecord
 
   belongs_to :powerbase_table
   has_many :view_field_options
-  has_one :powerbase_table, foreign_key: :default_view_id
 end
