@@ -110,7 +110,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
         # Table Records Migration
         if options[:is_turbo]
-          table_model = Powerbase::Model.new(table.id)
+          table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
         end
       else
