@@ -19,3 +19,13 @@ export async function getTableViews({ tableId }) {
 
   return undefined;
 }
+
+export async function updateTableView({ id, ...payload }) {
+  const response = await securedApi.put(`/views/${id}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
