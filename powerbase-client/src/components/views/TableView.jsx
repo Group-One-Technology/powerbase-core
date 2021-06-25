@@ -39,14 +39,14 @@ BaseTableView.propTypes = {
   tableId: IId,
 };
 
-export function TableView({ baseId, tableId }) {
+export function TableView({ baseId, defaultViewId, tableId }) {
   const query = useQuery();
   const viewId = query.get('view');
   const { data: views } = useTableViews();
 
   const currentView = viewId != null
     ? views?.find((item) => item.id.toString() === viewId.toString())
-    : views?.length && views[0];
+    : views?.find((item) => item.id.toString() === defaultViewId.toString());
 
   if (!views || !views?.length) {
     return <Loader className="h-screen" />;
@@ -64,4 +64,5 @@ export function TableView({ baseId, tableId }) {
 TableView.propTypes = {
   baseId: IId,
   tableId: IId,
+  defaultViewId: IId,
 };

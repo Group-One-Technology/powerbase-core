@@ -3,36 +3,15 @@ import { Redirect, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
-import { TableViewsProvider, useTableViews } from '@models/TableViews';
-import { IId } from '@lib/propTypes/common';
 import { Loader } from '@components/ui/Loader';
-
-function View({ id, tableId }) {
-  const { data: views } = useTableViews();
-
-  if (views) {
-    return <Redirect to={`/base/${id}/table/${tableId}?view=${views[0].id}`} />;
-  }
-
-  return <Loader className="h-screen" />;
-}
-
-View.propTypes = {
-  id: IId.isRequired,
-  tableId: IId.isRequired,
-};
 
 function Base({ id }) {
   const { data: tables } = useBaseTables();
 
   if (tables) {
-    const tableId = tables[0].id;
+    const [firstTable] = tables;
 
-    return (
-      <TableViewsProvider id={tableId}>
-        <View id={id} tableId={tableId} />
-      </TableViewsProvider>
-    );
+    return <Redirect to={`/base/${id}/table/${firstTable.id}?view=${firstTable.defaultViewId}`} />;
   }
 
   return <Loader className="h-screen" />;
