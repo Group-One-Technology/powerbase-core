@@ -13,6 +13,8 @@ import debounce from 'lodash.debounce';
 
 import { IViewField } from '@lib/propTypes/view_field';
 import { useTableRecords } from '@models/TableRecords';
+import { updateTableView } from '@lib/api/views';
+import { IId } from '@lib/propTypes/common';
 
 const NUMBER_FIELD_TYPE = 4;
 
@@ -40,7 +42,7 @@ const OPERATOR = {
   '<': 'lt',
   '<=': 'lte',
 };
-export function TableViewsFilter({ fields }) {
+export function TableViewsFilter({ viewId, fields }) {
   const filterRef = useRef();
   const [firstOperand, setFirstOperand] = useState('');
   const [operators, setOperators] = useState([]);
@@ -69,12 +71,16 @@ export function TableViewsFilter({ fields }) {
   }) => {
     if (reset) {
       setFilters(undefined);
+      await updateTableView({
+        id: viewId,
+        filters: null,
+      });
     } else {
       const secondOperandValue = OPERATOR[operatorPayload] === 'like'
         ? `%${secondOperandPayload}%`
         : secondOperandPayload;
 
-      setFilters({
+      const updatedFilter = {
         id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
         value: {
           [OPERATOR[operatorPayload]]: [
@@ -82,6 +88,12 @@ export function TableViewsFilter({ fields }) {
             { value: secondOperandValue },
           ],
         },
+      };
+
+      setFilters(updatedFilter);
+      await updateTableView({
+        id: viewId,
+        filters: updatedFilter.value,
       });
     }
 
@@ -243,5 +255,6 @@ export function TableViewsFilter({ fields }) {
 }
 
 TableViewsFilter.propTypes = {
+  viewId: IId.isRequired,
   fields: PropTypes.arrayOf(IViewField),
 };

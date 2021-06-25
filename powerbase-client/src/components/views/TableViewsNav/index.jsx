@@ -30,7 +30,7 @@ export function TableViewsNav({
             />
           </div>
           <div className="flex-1 flex items-center justify-center gap-x-2">
-            <TableViewsFilter fields={fields} />
+            <TableViewsFilter viewId={currentView.id} fields={fields} />
             <button
               type="button"
               className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
