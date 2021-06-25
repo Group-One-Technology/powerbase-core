@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class RegisterControllerTest < ApplcationControllerTest
+class RegisterControllerTest < ApplicationControllerTest
   test "should be able to register" do
     post register_url,
       params: {

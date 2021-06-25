@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class TableRecordsControllerTest <ApplcationControllerTest
+class TableRecordsControllerTest < ApplicationControllerTest
   setup do
     login
   end
@@ -11,7 +11,9 @@ class TableRecordsControllerTest <ApplcationControllerTest
 
   test "should get list of records of a given table" do
     table = powerbase_tables(:one)
-    put table_records_url(table_id: table.id)
+    put table_records_table_url(id: table.id),
+      headers: @@request[:headers],
+      as: :json
     assert_response :success
   end
 end

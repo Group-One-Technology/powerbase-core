@@ -5,16 +5,22 @@ Rails.application.routes.draw do
   post '/logout/', to: 'users/login#destroy'
   post '/register/', to: 'users/register#create'
 
-  resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show]
-  post '/databases/connect', to: 'powerbase_databases#connect'
+  resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show], shallow: true do
+    collection do
+      post 'connect'
+    end
 
-  get '/databases/:database_id/tables', to: 'powerbase_tables#index', as: 'database_tables'
-  get '/tables/:id', to: 'powerbase_tables#show', as: 'database_table'
-  get '/tables/:table_id/fields', to: 'powerbase_fields#index', as: 'table_fields'
-  put '/tables/:table_id/records', to: 'table_records#index', as: 'table_records'
+    resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show], shallow: true do
+      resources :table_views, path: 'views', as: 'views', only: [:index, :show, :update], shallow: true do
+        member do
+          get 'fields', to: 'view_field_options#index', as: 'view_fields'
+        end
+      end
 
-  get '/tables/:table_id/views', to: 'table_views#index', as: 'table_views'
-  get '/views/:id', to: 'table_views#show', as: 'table_view'
-
-  get '/views/:view_id/fields', to: 'view_field_options#index', as: 'view_fields'
+      member do
+        get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
+        put 'records', to: 'table_records#index', as: 'table_records'
+      end
+    end
+  end
 end

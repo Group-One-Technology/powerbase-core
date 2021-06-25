@@ -1,4 +1,4 @@
-class ApplcationControllerTest < ActionDispatch::IntegrationTest
+class ApplicationControllerTest < ActionDispatch::IntegrationTest
   require "json"
   require "test_helper"
 

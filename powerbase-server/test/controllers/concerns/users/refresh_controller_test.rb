@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class RefreshControllerTest < ApplcationControllerTest
+class RefreshControllerTest < ApplicationControllerTest
   test "should be able to get current user" do
     login
 

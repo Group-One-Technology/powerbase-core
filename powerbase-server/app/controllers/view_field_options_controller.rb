@@ -2,12 +2,12 @@ class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
 
   schema(:index) do
-    required(:view_id).value(:integer)
+    required(:id).value(:integer)
   end
 
-  # GET /views/:view_id/fields
+  # GET /views/:id/fields
   def index
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
+    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
   end
 
