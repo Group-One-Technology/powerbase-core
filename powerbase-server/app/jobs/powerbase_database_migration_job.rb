@@ -96,7 +96,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             view_field = ViewFieldOption.new
             view_field.width = case cur_field.powerbase_field_type_id
               when 3
-                (cur_field.name.length * 10) < 20 ? 20 : cur_field.name.length + 20
+                cur_field.name.length > 4 ? 50 : cur_field.name.length * 10
               else
                 300
               end
