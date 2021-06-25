@@ -7,6 +7,7 @@ class TableViewsController < ApplicationController
 
  schema(:show, :update) do
     required(:id).value(:integer)
+    optional(:filters)
   end
 
   # GET /tables/:table_id/views
