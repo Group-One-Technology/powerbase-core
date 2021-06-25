@@ -1,9 +1,14 @@
-/* eslint-disable max-len */
-import React, { Fragment, useEffect, useState } from 'react';
+import React, {
+  Fragment,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, FilterIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import debounce from 'lodash.debounce';
 
 import { IViewField } from '@lib/propTypes/view_field';
 import { useTableRecords } from '@models/TableRecords';
@@ -54,40 +59,85 @@ export function TableViewsFilter({ fields }) {
     }
   }, [fields]);
 
+  const updateTableRecords = useCallback(debounce(async ({
+    operatorPayload,
+    firstOperandPayload,
+    secondOperandPayload,
+  }) => {
+    const secondOperandValue = OPERATOR[operatorPayload] === 'like'
+      ? `%${secondOperandPayload}%`
+      : secondOperandPayload;
+
+    setFilters({
+      id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
+      value: {
+        [OPERATOR[operatorPayload]]: [
+          { field: firstOperandPayload },
+          { value: secondOperandValue },
+        ],
+      },
+    });
+
+    await mutateTableRecords();
+  }, 500), []);
+
   if (fields == null) return null;
 
   const handleFirstOperandChange = (evt) => {
-    const selectedField = fields?.find((field) => field.id.toString() === evt.target.value.toString());
+    const selectedField = fields?.find((field) => (
+      field.id.toString() === evt.target.value.toString()
+    ));
     const selectedFieldType = selectedField.fieldTypeId === NUMBER_FIELD_TYPE ? 'number' : 'text';
     setFirstOperand(selectedField);
     setFieldType(selectedFieldType);
     setOperators(selectedFieldType === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS);
-  };
+    setOperator(selectedFieldType === 'number' ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
+    setSecondOperand('');
 
-  const handleOperatorChange = (evt) => {
-    setOperator(evt.target.value);
-  };
-
-  const handleSecondOperandChange = (evt) => {
-    if (fieldType === 'number') {
-      const value = Number(evt.target.value);
-      setSecondOperand(!Number.isNaN(value) ? value : 0);
-    } else {
-      setSecondOperand(evt.target.value);
+    if (operator != null && selectedField != null
+      && ((selectedFieldType === 'number' && secondOperand != null)
+        || (selectedFieldType === 'text' && secondOperand.length))) {
+      updateTableRecords({
+        operatorPayload: operator,
+        firstOperandPayload: selectedField,
+        secondOperandPayload: secondOperand,
+      });
     }
   };
 
-  const handleSubmit = async (evt) => {
-    evt.preventDefault();
+  const handleOperatorChange = (evt) => {
+    const { value } = evt.target;
+    setOperator(value);
 
-    setFilters({
-      [OPERATOR[operator]]: [
-        { field: firstOperand.name },
-        { value: secondOperand },
-      ],
-    });
+    if (value != null && firstOperand != null
+      && ((fieldType === 'number' && secondOperand != null)
+        || (fieldType === 'text' && secondOperand.length))) {
+      updateTableRecords({
+        operatorPayload: value,
+        firstOperandPayload: firstOperand.name,
+        secondOperandPayload: secondOperand,
+      });
+    }
+  };
 
-    await mutateTableRecords();
+  const handleSecondOperandChange = async (evt) => {
+    const value = fieldType === 'number' ? Number(evt.target.value) : evt.target.value;
+
+    if (fieldType === 'number') {
+      setSecondOperand(!Number.isNaN(value) ? value : 0);
+    } else {
+      setSecondOperand(value);
+    }
+
+    if (operator != null && firstOperand != null
+      && ((fieldType === 'number' && value != null)
+        || (fieldType === 'text' && value.length))) {
+      updateTableRecords({
+        operatorPayload: operator,
+        firstOperandPayload: firstOperand.name,
+        secondOperandPayload: value,
+      });
+    }
   };
 
   return (
@@ -113,7 +163,7 @@ export function TableViewsFilter({ fields }) {
           >
             <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                <form onSubmit={handleSubmit} className="bg-white p-4 text-sm">
+                <div className="bg-white p-4 text-sm">
                   <div className="grid grid-cols-4 gap-x-2">
                     <p className="">Where</p>
                     <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
@@ -151,15 +201,7 @@ export function TableViewsFilter({ fields }) {
                       required
                     />
                   </div>
-                  <div className="mt-2">
-                    <button
-                      type="submit"
-                      className={cn('inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 focus:outline-none hover:ring-2 ring-offset-2 ring-gray-500')}
-                    >
-                      Submit Filter (Temporary)
-                    </button>
-                  </div>
-                </form>
+                </div>
                 <div className="p-1 bg-gray-50">
                   <button
                     type="button"
