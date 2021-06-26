@@ -11,10 +11,11 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import debounce from 'lodash.debounce';
 
-import { IViewField } from '@lib/propTypes/view_field';
 import { useTableRecords } from '@models/TableRecords';
 import { updateTableView } from '@lib/api/views';
-import { IId } from '@lib/propTypes/common';
+import { IViewField } from '@lib/propTypes/view_field';
+import { IView } from '@lib/propTypes/view';
+import { mutate } from 'swr';
 
 const NUMBER_FIELD_TYPE = 4;
 
@@ -42,13 +43,32 @@ const OPERATOR = {
   '<': 'lt',
   '<=': 'lte',
 };
-export function TableViewsFilter({ viewId, fields }) {
+
+export function TableViewsFilter({ view, fields }) {
   const filterRef = useRef();
-  const [firstOperand, setFirstOperand] = useState('');
-  const [operators, setOperators] = useState([]);
-  const [operator, setOperator] = useState();
-  const [secondOperand, setSecondOperand] = useState('');
-  const [fieldType, setFieldType] = useState('number');
+  const initialOperator = view.filters
+    ? Object.keys(view.filters)[0]
+    : undefined;
+  const initialFieldType = (initialOperator
+    && typeof view.filters[initialOperator][1].value === 'number')
+    ? 'number'
+    : 'text';
+
+  const [firstOperand, setFirstOperand] = useState(initialOperator
+    ? view.filters[initialOperator][0].field
+    : '');
+  const [operators, setOperators] = useState(initialFieldType === 'number'
+    ? NUMBER_OPERATORS
+    : TEXT_OPERATORS);
+  const [operator, setOperator] = useState(view.filters
+    ? Object.keys(OPERATOR).find((key) => (
+      OPERATOR[key] === Object.keys(view.filters)[0]
+    ))
+    : undefined);
+  const [secondOperand, setSecondOperand] = useState(initialOperator
+    ? view.filters[initialOperator][1].value
+    : '');
+  const [fieldType, setFieldType] = useState(initialFieldType);
   const { setFilters, mutate: mutateTableRecords } = useTableRecords();
 
   useEffect(() => {
@@ -63,6 +83,26 @@ export function TableViewsFilter({ viewId, fields }) {
     }
   }, [fields]);
 
+  useEffect(() => {
+    if (view.filters) {
+      setFirstOperand(initialOperator
+        ? view.filters[initialOperator][0].field
+        : '');
+      setOperators(initialFieldType === 'number'
+        ? NUMBER_OPERATORS
+        : TEXT_OPERATORS);
+      setOperator(view.filters
+        ? Object.keys(OPERATOR).find((key) => (
+          OPERATOR[key] === Object.keys(view.filters)[0]
+        ))
+        : undefined);
+      setSecondOperand(initialOperator
+        ? view.filters[initialOperator][1].value
+        : '');
+      setFieldType(initialFieldType);
+    }
+  }, [view]);
+
   const updateTableRecords = useCallback(debounce(async ({
     reset,
     operatorPayload,
@@ -72,7 +112,7 @@ export function TableViewsFilter({ viewId, fields }) {
     if (reset) {
       setFilters(undefined);
       await updateTableView({
-        id: viewId,
+        id: view.id,
         filters: null,
       });
     } else {
@@ -92,9 +132,11 @@ export function TableViewsFilter({ viewId, fields }) {
 
       setFilters(updatedFilter);
       await updateTableView({
-        id: viewId,
+        id: view.id,
         filters: updatedFilter.value,
       });
+      await mutate(`/tables/${view.tableId}/views`);
+      await mutate(`/views/${view.id}`);
     }
 
     await mutateTableRecords();
@@ -255,6 +297,6 @@ export function TableViewsFilter({ viewId, fields }) {
 }
 
 TableViewsFilter.propTypes = {
-  viewId: IId.isRequired,
+  view: IView.isRequired,
   fields: PropTypes.arrayOf(IViewField),
 };
