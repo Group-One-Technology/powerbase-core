@@ -115,7 +115,7 @@ export function TableViewsFilter({ view, fields }) {
         id: view.id,
         filters: null,
       });
-    } else {
+    } else if (operatorPayload && firstOperandPayload && secondOperandPayload) {
       const secondOperandValue = OPERATOR[operatorPayload] === 'like'
         ? `%${secondOperandPayload}%`
         : secondOperandPayload;
@@ -239,7 +239,7 @@ export function TableViewsFilter({ view, fields }) {
                       id="firstOperand"
                       name="first_operand"
                       className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
-                      value={firstOperand.id}
+                      value={firstOperand?.id}
                       onChange={handleFirstOperandChange}
                     >
                       {fields?.map((field) => (
