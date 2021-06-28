@@ -69,20 +69,34 @@ module Powerbase
     # * Get the filtered and paginated table records.
     # Accepts the following options:
     # :filter :: a hash that contains the filter for the records.
-    # :connection_string :: a well-formed URI that is used to connect to the database.
+    # :page :: the page number.
+    # :limit :: the page count. No. of records to get per paage.
     def get(options)
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || 1000
 
       if @is_turbo
-        model = Class.new(Sequel::Model(@remote_table)) do
-          plugin :elasticsearch, index: index
+        search_params = {
+          from: (page - 1) * limit,
+          size: limit,
+        }
+
+        if options[:filter]
+          search_params[:query_string] = {
+            query: parse_elasticsearch_filter(options[:filter])
+          }
         end
 
-        model.es(parse_elasticsearch_filter(options[:filter]), from: 0, to: 10)
+        result = @esclient.search(
+          index: "table_records_#{@table_id}",
+          body: search_params
+        )
+
+        result["hits"]["hits"].map {|result| result["_source"]}
       else
-        @remote_table.where(options[:filter] ? eval(parse_sequel_filter(options[:filter])) : true)
+        @remote_table
+          .where(options[:filter] ? eval(parse_sequel_filter(options[:filter])) : true)
           .paginate(page, limit)
       end
     end
