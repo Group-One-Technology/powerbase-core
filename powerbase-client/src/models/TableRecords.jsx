@@ -8,15 +8,7 @@ import { useAuthUser } from './AuthUser';
 
 function useTableRecordsModel({ id, initialFilter }) {
   const { authUser } = useAuthUser();
-  const initialOperator = initialFilter
-    ? Object.keys(initialFilter)[0]
-    : undefined;
-  const [filters, setFilters] = useState(initialFilter && initialOperator
-    ? ({
-      id: `${initialFilter[initialOperator][0].field}:${initialOperator}=${initialFilter[initialOperator][1].value}`,
-      value: initialFilter,
-    })
-    : undefined);
+  const [filters, setFilters] = useState(initialFilter);
 
   const response = useSWR(
     (id && authUser) ? `/tables/${id}/records?${filters?.id}` : null,

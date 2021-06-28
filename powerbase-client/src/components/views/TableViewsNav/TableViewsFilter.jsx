@@ -46,30 +46,32 @@ const OPERATOR = {
 
 export function TableViewsFilter({ view, fields }) {
   const filterRef = useRef();
-  const initialOperator = view.filters
-    ? Object.keys(view.filters)[0]
+  const { filters, setFilters, mutate: mutateTableRecords } = useTableRecords();
+
+  const filterValue = filters?.value || undefined;
+  const initialOperator = filterValue
+    ? Object.keys(filterValue)[0]
     : undefined;
-  const initialFieldType = (initialOperator
-    && typeof view.filters[initialOperator][1].value === 'number')
+  const initialFieldType = (initialOperator && filterValue
+    && typeof filterValue[initialOperator][1].value === 'number')
     ? 'number'
     : 'text';
 
   const [firstOperand, setFirstOperand] = useState(initialOperator
-    ? view.filters[initialOperator][0].field
+    ? filterValue[initialOperator][0].field
     : '');
   const [operators, setOperators] = useState(initialFieldType === 'number'
     ? NUMBER_OPERATORS
     : TEXT_OPERATORS);
-  const [operator, setOperator] = useState(view.filters
+  const [operator, setOperator] = useState(filters
     ? Object.keys(OPERATOR).find((key) => (
-      OPERATOR[key] === Object.keys(view.filters)[0]
+      OPERATOR[key] === Object.keys(filters)[0]
     ))
     : undefined);
   const [secondOperand, setSecondOperand] = useState(initialOperator
-    ? view.filters[initialOperator][1].value
+    ? filterValue[initialOperator][1].value
     : '');
   const [fieldType, setFieldType] = useState(initialFieldType);
-  const { setFilters, mutate: mutateTableRecords } = useTableRecords();
 
   useEffect(() => {
     if (!firstOperand && fields) {
@@ -84,20 +86,20 @@ export function TableViewsFilter({ view, fields }) {
   }, [fields]);
 
   useEffect(() => {
-    if (view.filters) {
+    if (filterValue) {
       setFirstOperand(initialOperator
-        ? view.filters[initialOperator][0].field
+        ? fields?.find((field) => field.name === filterValue[initialOperator][0].field)
         : '');
       setOperators(initialFieldType === 'number'
         ? NUMBER_OPERATORS
         : TEXT_OPERATORS);
-      setOperator(view.filters
+      setOperator(filterValue
         ? Object.keys(OPERATOR).find((key) => (
-          OPERATOR[key] === Object.keys(view.filters)[0]
+          OPERATOR[key] === Object.keys(filterValue)[0]
         ))
         : undefined);
       setSecondOperand(initialOperator
-        ? view.filters[initialOperator][1].value
+        ? filterValue[initialOperator][1].value
         : '');
       setFieldType(initialFieldType);
     }
@@ -133,7 +135,7 @@ export function TableViewsFilter({ view, fields }) {
       setFilters(updatedFilter);
       updateTableView({
         id: view.id,
-        filters: updatedFilter.value,
+        filters: updatedFilter,
       });
       mutate(`/tables/${view.tableId}/views`);
       mutate(`/views/${view.id}`);
@@ -160,7 +162,7 @@ export function TableViewsFilter({ view, fields }) {
         || (selectedFieldType === 'text' && secondOperand.length))) {
       updateTableRecords({
         operatorPayload: operator,
-        firstOperandPayload: selectedField,
+        firstOperandPayload: selectedField.name,
         secondOperandPayload: secondOperand,
       });
     }
