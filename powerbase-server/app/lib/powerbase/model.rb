@@ -1,5 +1,3 @@
-require "sequel/plugins/elasticsearch"
-
 module Powerbase
   class Model
     # Initialize the Powerbase::Model

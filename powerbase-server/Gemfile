@@ -32,8 +32,6 @@ gem 'json', '~> 2.5', '>= 2.5.1'
 # Use Rails Elastic Search for powerbase turbo
 gem 'elasticsearch-model', '~> 7.1', '>= 7.1.1'
 gem 'elasticsearch-rails', '~> 7.1', '>= 7.1.1'
-# Use Sequel Elasticsearch for filtering operations
-gem 'sequel-elasticsearch'
 # Use Philtre for filtering operations with Sequel
 gem 'philtre', '~> 0.1.2'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
