@@ -111,7 +111,7 @@ export function TableViewsFilter({ view, fields }) {
   }) => {
     if (reset) {
       setFilters(undefined);
-      await updateTableView({
+      updateTableView({
         id: view.id,
         filters: null,
       });
@@ -131,12 +131,12 @@ export function TableViewsFilter({ view, fields }) {
       };
 
       setFilters(updatedFilter);
-      await updateTableView({
+      updateTableView({
         id: view.id,
         filters: updatedFilter.value,
       });
-      await mutate(`/tables/${view.tableId}/views`);
-      await mutate(`/views/${view.id}`);
+      mutate(`/tables/${view.tableId}/views`);
+      mutate(`/views/${view.id}`);
     }
 
     await mutateTableRecords();
