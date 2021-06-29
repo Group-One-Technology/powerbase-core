@@ -4,6 +4,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
+import { BaseTableProvider, useBaseTable } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
 import { TableViewsProvider } from '@models/TableViews';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
@@ -22,12 +23,13 @@ function Table({ id: tableId, baseId }) {
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
+  const { data: table } = useBaseTable();
   const { data: tables } = useBaseTables();
 
   const windowSize = useWindowSize();
   const height = windowSize.height ? windowSize.height - 125 : 0;
 
-  if (base == null || bases == null || authUser == null) {
+  if (base == null || bases == null || authUser == null || table == null) {
     return <Loader className="h-screen" />;
   }
 
@@ -55,7 +57,11 @@ function Table({ id: tableId, baseId }) {
           tableId={tableId}
           baseId={baseId}
         />
-        <TableView baseId={baseId} tableId={tableId} />
+        <TableView
+          baseId={baseId}
+          tableId={tableId}
+          defaultViewId={table.defaultViewId}
+        />
       </PageContent>
     </Page>
   );
@@ -72,13 +78,15 @@ export function TablePage() {
   return (
     <BasesProvider>
       <BaseProvider id={baseId}>
-        <BaseTablesProvider id={baseId}>
-          <TableViewsProvider id={id}>
-            <AuthOnly>
-              <Table id={id} baseId={baseId} />
-            </AuthOnly>
-          </TableViewsProvider>
-        </BaseTablesProvider>
+        <BaseTableProvider id={id}>
+          <BaseTablesProvider id={baseId}>
+            <TableViewsProvider id={id}>
+              <AuthOnly>
+                <Table id={id} baseId={baseId} />
+              </AuthOnly>
+            </TableViewsProvider>
+          </BaseTablesProvider>
+        </BaseTableProvider>
       </BaseProvider>
     </BasesProvider>
   );

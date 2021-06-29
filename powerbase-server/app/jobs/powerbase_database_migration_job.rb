@@ -88,6 +88,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         table_view.name = "Grid View"
         table_view.view_type = "grid"
         if table_view.save
+          table.default_view_id = table_view.id
+          table.save
+
           fields = PowerbaseField.where(powerbase_table_id: table.id)
           fields.each_with_index do |cur_field, index|
             view_field = ViewFieldOption.new
