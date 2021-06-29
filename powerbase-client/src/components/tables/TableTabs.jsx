@@ -82,7 +82,7 @@ export function TableTabs({
   };
 
   return (
-    <div className={cn('px-4 sm:px-6 lg:px-8 w-full', BG_COLORS[color])}>
+    <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[color])}>
       <div className="pb-2 sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
