@@ -3,20 +3,20 @@ class PowerbaseFieldsController < ApplicationController
   before_action :set_table, only: [:index]
 
   schema(:index) do
-    required(:table_id).value(:integer)
+    required(:id).value(:integer)
   end
 
-  # GET /tables/:table_id/fields
+  # GET /tables/:id/fields
   def index
     render json: @table.powerbase_fields.map {|item| format_json(item)}
   end
 
   private
     def set_table
-      @table = PowerbaseTable.find(safe_params[:table_id])
+      @table = PowerbaseTable.find(safe_params[:id])
 
       if !@table
-        raise StandardError.new("Could not find table with id of '#{safe_params[:table_id]}'")
+        raise StandardError.new("Could not find table with id of '#{safe_params[:id]}'")
       end
     end
 

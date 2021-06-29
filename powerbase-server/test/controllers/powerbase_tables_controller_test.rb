@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class TablesControllerTest < ApplcationControllerTest
+class TablesControllerTest < ApplicationControllerTest
   setup do
     login
   end
@@ -10,7 +10,7 @@ class TablesControllerTest < ApplcationControllerTest
   end
 
   def connect_database
-    post databases_connect_url,
+    post connect_databases_url,
       params: {
         adapter: "postgresql",
         host: "localhost",

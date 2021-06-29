@@ -55,7 +55,7 @@ module Powerbase
           index: "table_records_#{@table_id}",
           body: {
             from: 0,
-            size: 1000,
+            size: 10000,
             query: { match_all: {} }
           }
         )

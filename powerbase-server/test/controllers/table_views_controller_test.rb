@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class TableViewsControllerTest < ApplcationControllerTest
+class TableViewsControllerTest < ApplicationControllerTest
   setup do
     login
   end

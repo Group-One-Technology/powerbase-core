@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class LoginControllerTest < ApplcationControllerTest
+class LoginControllerTest < ApplicationControllerTest
   test "should be able to login" do
     login
     assert cookies[:jwt_access], "JWT Access Cookie could not be saved."

@@ -21,7 +21,7 @@ function BaseTableView({ baseId, tableId }) {
   }
 
   return (
-    <TableRecordsProvider id={tableId}>
+    <TableRecordsProvider id={tableId} initialFilter={view.filters}>
       <TableViewsNav
         baseId={baseId}
         tableId={tableId}

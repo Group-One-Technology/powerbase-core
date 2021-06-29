@@ -55,7 +55,7 @@ export function TableRenderer({ fields, records, height }) {
                   value: tableValues[rowIndex][columnIndex],
                   ...props,
                 })}
-                columnWidth={({ index }) => (index === 0 ? 50 : fields[index].width)}
+                columnWidth={({ index }) => (index === 0 ? 50 : fields[index - 1].width)}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}

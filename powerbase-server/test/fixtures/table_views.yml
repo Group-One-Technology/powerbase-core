@@ -5,13 +5,18 @@ one:
   powerbase_table_id: 1
   name: Grid View
   view_type: grid
+  filters:
 
 two:
+  id: 2
   powerbase_table_id: 2
   name: Grid View
   view_type: grid
+  filters:
 
 three:
+  id: 3
   powerbase_table_id: 3
   name: Grid View
   view_type: grid
+  filters:

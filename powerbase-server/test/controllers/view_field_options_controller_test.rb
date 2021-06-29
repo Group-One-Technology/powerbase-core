@@ -1,7 +1,7 @@
 
 require "controllers/application_controller_test"
 
-class ViewFieldOptionsControllerTest < ApplcationControllerTest
+class ViewFieldOptionsControllerTest < ApplicationControllerTest
   setup do
     login
   end
@@ -12,7 +12,7 @@ class ViewFieldOptionsControllerTest < ApplcationControllerTest
 
   test "should get list of fields of a given view" do
     view = table_views(:one)
-    get view_fields_url(view_id: view.id)
+    get view_fields_view_url(id: view.id)
     assert_response :success
   end
 end

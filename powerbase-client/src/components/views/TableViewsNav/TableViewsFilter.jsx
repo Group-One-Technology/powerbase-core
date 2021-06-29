@@ -11,8 +11,11 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import debounce from 'lodash.debounce';
 
-import { IViewField } from '@lib/propTypes/view_field';
 import { useTableRecords } from '@models/TableRecords';
+import { updateTableView } from '@lib/api/views';
+import { IViewField } from '@lib/propTypes/view_field';
+import { IView } from '@lib/propTypes/view';
+import { mutate } from 'swr';
 
 const NUMBER_FIELD_TYPE = 4;
 
@@ -40,14 +43,35 @@ const OPERATOR = {
   '<': 'lt',
   '<=': 'lte',
 };
-export function TableViewsFilter({ fields }) {
+
+export function TableViewsFilter({ view, fields }) {
   const filterRef = useRef();
-  const [firstOperand, setFirstOperand] = useState('');
-  const [operators, setOperators] = useState([]);
-  const [operator, setOperator] = useState();
-  const [secondOperand, setSecondOperand] = useState('');
-  const [fieldType, setFieldType] = useState('number');
-  const { setFilters, mutate: mutateTableRecords } = useTableRecords();
+  const { filters, setFilters, mutate: mutateTableRecords } = useTableRecords();
+
+  const filterValue = filters?.value || undefined;
+  const initialOperator = filterValue
+    ? Object.keys(filterValue)[0]
+    : undefined;
+  const initialFieldType = (initialOperator && filterValue
+    && typeof filterValue[initialOperator][1].value === 'number')
+    ? 'number'
+    : 'text';
+
+  const [firstOperand, setFirstOperand] = useState(initialOperator
+    ? filterValue[initialOperator][0].field
+    : '');
+  const [operators, setOperators] = useState(initialFieldType === 'number'
+    ? NUMBER_OPERATORS
+    : TEXT_OPERATORS);
+  const [operator, setOperator] = useState(filters
+    ? Object.keys(OPERATOR).find((key) => (
+      OPERATOR[key] === Object.keys(filters)[0]
+    ))
+    : undefined);
+  const [secondOperand, setSecondOperand] = useState(initialOperator
+    ? filterValue[initialOperator][1].value
+    : '');
+  const [fieldType, setFieldType] = useState(initialFieldType);
 
   useEffect(() => {
     if (!firstOperand && fields) {
@@ -61,6 +85,26 @@ export function TableViewsFilter({ fields }) {
     }
   }, [fields]);
 
+  useEffect(() => {
+    if (filterValue) {
+      setFirstOperand(initialOperator
+        ? fields?.find((field) => field.name === filterValue[initialOperator][0].field)
+        : '');
+      setOperators(initialFieldType === 'number'
+        ? NUMBER_OPERATORS
+        : TEXT_OPERATORS);
+      setOperator(filterValue
+        ? Object.keys(OPERATOR).find((key) => (
+          OPERATOR[key] === Object.keys(filterValue)[0]
+        ))
+        : undefined);
+      setSecondOperand(initialOperator
+        ? filterValue[initialOperator][1].value
+        : '');
+      setFieldType(initialFieldType);
+    }
+  }, [view]);
+
   const updateTableRecords = useCallback(debounce(async ({
     reset,
     operatorPayload,
@@ -69,12 +113,16 @@ export function TableViewsFilter({ fields }) {
   }) => {
     if (reset) {
       setFilters(undefined);
-    } else {
+      updateTableView({
+        id: view.id,
+        filters: null,
+      });
+    } else if (operatorPayload && firstOperandPayload && secondOperandPayload) {
       const secondOperandValue = OPERATOR[operatorPayload] === 'like'
         ? `%${secondOperandPayload}%`
         : secondOperandPayload;
 
-      setFilters({
+      const updatedFilter = {
         id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
         value: {
           [OPERATOR[operatorPayload]]: [
@@ -82,7 +130,15 @@ export function TableViewsFilter({ fields }) {
             { value: secondOperandValue },
           ],
         },
+      };
+
+      setFilters(updatedFilter);
+      updateTableView({
+        id: view.id,
+        filters: updatedFilter,
       });
+      mutate(`/tables/${view.tableId}/views`);
+      mutate(`/views/${view.id}`);
     }
 
     await mutateTableRecords();
@@ -106,7 +162,7 @@ export function TableViewsFilter({ fields }) {
         || (selectedFieldType === 'text' && secondOperand.length))) {
       updateTableRecords({
         operatorPayload: operator,
-        firstOperandPayload: selectedField,
+        firstOperandPayload: selectedField.name,
         secondOperandPayload: secondOperand,
       });
     }
@@ -185,7 +241,7 @@ export function TableViewsFilter({ fields }) {
                       id="firstOperand"
                       name="first_operand"
                       className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
-                      value={firstOperand.id}
+                      value={firstOperand?.id}
                       onChange={handleFirstOperandChange}
                     >
                       {fields?.map((field) => (
@@ -243,5 +299,6 @@ export function TableViewsFilter({ fields }) {
 }
 
 TableViewsFilter.propTypes = {
+  view: IView.isRequired,
   fields: PropTypes.arrayOf(IViewField),
 };
