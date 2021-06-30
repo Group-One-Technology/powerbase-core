@@ -20,7 +20,7 @@ Rails.application.routes.draw do
       member do
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         put 'records', to: 'table_records#index', as: 'table_records'
-        get 'count', to: 'table_records#count', as: 'table_records_count'
+        get 'records_count', to: 'table_records#count', as: 'table_records_count'
       end
     end
   end
