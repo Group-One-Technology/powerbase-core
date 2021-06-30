@@ -9,3 +9,13 @@ export async function getTableRecords({ tableId, ...payload }) {
 
   return undefined;
 }
+
+export async function getTableRecordsCount({ tableId }) {
+  const response = await securedApi.get(`/tables/${tableId}/records_count`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
