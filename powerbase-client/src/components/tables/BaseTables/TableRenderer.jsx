@@ -5,7 +5,12 @@ import PropTypes from 'prop-types';
 import { IViewField } from '@lib/propTypes/view_field';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ fields, records, height }) {
+export function TableRenderer({
+  fields,
+  records,
+  totalRecords,
+  height,
+}) {
   const columnCount = fields.length;
   const rowCount = records.length + 1;
   const tableValues = [
@@ -14,7 +19,6 @@ export function TableRenderer({ fields, records, height }) {
   ];
 
   // TODO: Replace with SWR Infinite API
-  const totalRowCount = 10000;
   const isRowLoaded = ({ index }) => !!tableValues[index];
   const loadMoreRows = () => {
     console.log('loading more...');
@@ -25,7 +29,7 @@ export function TableRenderer({ fields, records, height }) {
       <InfiniteLoader
         isRowLoaded={isRowLoaded}
         loadMoreRows={loadMoreRows}
-        rowCount={totalRowCount}
+        rowCount={totalRecords}
       >
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer disableHeight>
@@ -69,5 +73,6 @@ TableRenderer.propTypes = {
   records: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
+  totalRecords: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
 };
