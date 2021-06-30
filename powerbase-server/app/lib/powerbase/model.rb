@@ -21,7 +21,7 @@ module Powerbase
 
     # Disconnects to the remote database
     def disconnect
-      Powerbase.disconnect if !@is_turbo
+      Powerbase.disconnect
     end
 
     # Save a document of a table to Elasticsearch.
