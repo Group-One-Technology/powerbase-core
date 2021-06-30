@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, AutoSizer } from 'react-virtualized';
+import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view_field';
@@ -13,26 +13,53 @@ export function TableRenderer({ fields, records, height }) {
     ...records,
   ];
 
+  // TODO: Replace with SWR Infinite API
+  const totalRowCount = 10000;
+  const isRowLoaded = ({ index }) => !!tableValues[index];
+  const loadMoreRows = () => {
+    console.log('loading more...');
+  };
+
   return (
     <div className="w-full overflow-hidden z-0">
-      <AutoSizer disableHeight>
-        {({ width }) => (
-          <Grid
-            cellRenderer={({ rowIndex, columnIndex, ...props }) => CellRenderer({
-              rowIndex,
-              columnIndex,
-              value: tableValues[rowIndex][columnIndex],
-              ...props,
-            })}
-            columnWidth={({ index }) => (index === 0 ? 50 : fields[index - 1].width)}
-            columnCount={columnCount}
-            rowHeight={30}
-            rowCount={rowCount}
-            height={height}
-            width={width}
-          />
+      <InfiniteLoader
+        isRowLoaded={isRowLoaded}
+        loadMoreRows={loadMoreRows}
+        rowCount={totalRowCount}
+      >
+        {({ onRowsRendered, registerChild }) => (
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <Grid
+                ref={registerChild}
+                onSectionRendered={({
+                  columnStartIndex,
+                  columnStopIndex,
+                  rowStartIndex,
+                  rowStopIndex,
+                }) => {
+                  const startIndex = rowStartIndex * columnCount + columnStartIndex;
+                  const stopIndex = rowStopIndex * columnCount + columnStopIndex;
+
+                  onRowsRendered({ startIndex, stopIndex });
+                }}
+                cellRenderer={({ rowIndex, columnIndex, ...props }) => CellRenderer({
+                  rowIndex,
+                  columnIndex,
+                  value: tableValues[rowIndex][columnIndex],
+                  ...props,
+                })}
+                columnWidth={({ index }) => (index === 0 ? 50 : fields[index - 1].width)}
+                columnCount={columnCount}
+                rowHeight={30}
+                rowCount={rowCount}
+                height={height}
+                width={width}
+              />
+            )}
+          </AutoSizer>
         )}
-      </AutoSizer>
+      </InfiniteLoader>
     </div>
   );
 }
