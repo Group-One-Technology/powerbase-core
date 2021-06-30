@@ -13,7 +13,7 @@ import 'react-virtualized/styles.css';
 export function BaseTable() {
   const { data: fields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records } = useTableRecords();
+  const { data: records, loadMore } = useTableRecords();
   const windowSize = useWindowSize();
   const height = windowSize.height ? windowSize.height - 125 : 0;
 
@@ -29,6 +29,7 @@ export function BaseTable() {
         [records.length + 1, ...new Array(fields.length).fill('')],
       ]}
       totalRecords={totalRecords}
+      loadMoreRows={loadMore}
       height={height}
     />
   );

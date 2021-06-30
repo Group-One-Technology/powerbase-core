@@ -9,6 +9,7 @@ export function TableRenderer({
   fields,
   records,
   totalRecords,
+  loadMoreRows,
   height,
 }) {
   const columnCount = fields.length;
@@ -18,11 +19,7 @@ export function TableRenderer({
     ...records,
   ];
 
-  // TODO: Replace with SWR Infinite API
   const isRowLoaded = ({ index }) => !!tableValues[index];
-  const loadMoreRows = () => {
-    console.log('loading more...');
-  };
 
   return (
     <div className="w-full overflow-hidden z-0">
@@ -74,5 +71,6 @@ TableRenderer.propTypes = {
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
   totalRecords: PropTypes.number.isRequired,
+  loadMoreRows: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,
 };
