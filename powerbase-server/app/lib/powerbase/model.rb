@@ -100,10 +100,14 @@ module Powerbase
     end
 
     def get_count
-      index = "table_records_#{@table_id}"
+      if @is_turbo
+        index = "table_records_#{@table_id}"
 
-      response = @esclient.perform_request("GET", "#{index}/_count").body
-      response["count"]
+        response = @esclient.perform_request("GET", "#{index}/_count").body
+        response["count"]
+      else
+        @remote_table.count
+      end
     end
 
     private
