@@ -11,7 +11,11 @@ class TableRecordsController < ApplicationController
   # PUT /tables/:id/records
   def index
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
-    records = model.get({ page: safe_params[:page], limit: safe_params[:limit], filters: safe_params[:filters] })
+    records = model.get({
+      page: safe_params[:page],
+      limit: safe_params[:limit],
+      filters: safe_params[:filters]
+    })
     model.disconnect
 
     render json: records
