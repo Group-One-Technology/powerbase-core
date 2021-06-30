@@ -20,12 +20,13 @@ export function TableRenderer({
   ];
 
   const isRowLoaded = ({ index }) => !!tableValues[index];
+  const handleLoadMoreRows = () => loadMoreRows();
 
   return (
     <div className="w-full overflow-hidden z-0">
       <InfiniteLoader
         isRowLoaded={isRowLoaded}
-        loadMoreRows={loadMoreRows}
+        loadMoreRows={handleLoadMoreRows}
         rowCount={totalRecords}
       >
         {({ onRowsRendered, registerChild }) => (
@@ -70,7 +71,7 @@ TableRenderer.propTypes = {
   records: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
-  totalRecords: PropTypes.number.isRequired,
+  totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,
 };
