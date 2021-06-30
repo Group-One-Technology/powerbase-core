@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { useState } from 'react';
 import constate from 'constate';
 import useSWR from 'swr';
