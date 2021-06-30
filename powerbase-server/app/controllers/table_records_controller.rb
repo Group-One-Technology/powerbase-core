@@ -1,5 +1,5 @@
 class TableRecordsController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:index) do
     required(:id).value(:integer)
