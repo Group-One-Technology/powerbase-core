@@ -99,6 +99,13 @@ module Powerbase
       end
     end
 
+    def get_count
+      index = "table_records_#{@table_id}"
+
+      response = @esclient.perform_request("GET", "#{index}/_count").body
+      response["count"]
+    end
+
     private
       def connect_remote_db(table_id)
         @powerbase_table = PowerbaseTable.find(table_id)
