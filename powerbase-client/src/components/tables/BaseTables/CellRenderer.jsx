@@ -9,7 +9,6 @@ export function CellRenderer({
   rowIndex,
   style,
   value,
-  setCurrentCell,
 }) {
   const isHeader = rowIndex === 0;
   const isRowNo = columnIndex === 0;
@@ -24,7 +23,6 @@ export function CellRenderer({
         isHeader && 'bg-gray-100',
         isRowNo && 'flex justify-center text-xs text-gray-500',
       )}
-      onClick={() => setCurrentCell({ row: rowIndex, column: columnIndex })}
       style={style}
       tabIndex={0}
       onKeyDown={(evt) => {
@@ -32,8 +30,6 @@ export function CellRenderer({
 
         if (evt.code === 'Enter' && !isRowNo) {
           el.contentEditable = el.contentEditable !== 'true';
-        } else if (el.contentEditable !== 'true') {
-          setCurrentCell({ row: rowIndex, column: columnIndex });
         }
       }}
       onDoubleClick={(evt) => {
@@ -56,5 +52,4 @@ CellRenderer.propTypes = {
   columnIndex: PropTypes.number.isRequired,
   style: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
-  setCurrentCell: PropTypes.func.isRequired,
 };

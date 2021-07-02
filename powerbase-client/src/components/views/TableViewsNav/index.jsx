@@ -4,6 +4,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { SearchIcon, SwitchVerticalIcon, ShareIcon } from '@heroicons/react/outline';
 
+import { useTableRecords } from '@models/TableRecords';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view_field';
@@ -17,17 +19,25 @@ export function TableViewsNav({
   views,
   fields,
 }) {
+  const { data: records } = useTableRecords();
+  const { data: totalRecords } = useTableRecordsCount();
+
   return (
     <>
       <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
         <div className="relative flex  py-1.5 gap-x-2">
-          <div className="flex-1 flex items-center">
+          <div className="flex-1 flex items-center gap-x-2">
             <TableViewsSelect
               baseId={baseId}
               tableId={tableId}
               currentView={currentView}
               views={views}
             />
+            {!!(records && totalRecords) && (
+              <p className="text-xs hidden lg:inline">
+                {records.length} loaded out of {totalRecords}
+              </p>
+            )}
           </div>
           <div className="flex-1 flex items-center justify-center gap-x-2">
             <TableViewsFilter view={currentView} fields={fields} />

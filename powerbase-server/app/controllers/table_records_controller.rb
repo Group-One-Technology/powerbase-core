@@ -1,7 +1,7 @@
 class TableRecordsController < ApplicationController
   before_action :authorize_access_request!
 
-  schema(:index) do
+  schema(:index, :count) do
     required(:id).value(:integer)
     optional(:filters)
     optional(:page).value(:integer)
@@ -19,5 +19,14 @@ class TableRecordsController < ApplicationController
     model.disconnect
 
     render json: records
+  end
+
+  # GET /tables/:id/records_count
+  def count
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
+    total_records = model.get_count
+    model.disconnect
+
+    render json: { count: total_records }
   end
 end

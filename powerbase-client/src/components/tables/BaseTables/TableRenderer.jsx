@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { ArrowKeyStepper, Grid, AutoSizer } from 'react-virtualized';
+import React from 'react';
+import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view_field';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ fields, records, height }) {
+export function TableRenderer({
+  fields,
+  records,
+  totalRecords,
+  loadMoreRows,
+  height,
+}) {
   const columnCount = fields.length;
   const rowCount = records.length + 1;
   const tableValues = [
@@ -13,45 +19,35 @@ export function TableRenderer({ fields, records, height }) {
     ...records,
   ];
 
-  const [currentCell, setCurrentCell] = useState({
-    row: 0,
-    column: 0,
-  });
-
-  const handleScrollToChange = ({ scrollToRow, scrollToColumn }) => {
-    const editableElement = document.querySelector('[contenteditable=true]');
-
-    if (!editableElement) {
-      setCurrentCell({ row: scrollToRow, column: scrollToColumn });
-      const focusedCell = document.getElementById(`row-${scrollToRow}_col-${scrollToColumn}`);
-      focusedCell.focus();
-    }
-  };
+  const isRowLoaded = ({ index }) => !!tableValues[index];
+  const handleLoadMoreRows = () => loadMoreRows();
 
   return (
     <div className="w-full overflow-hidden z-0">
-      <ArrowKeyStepper
-        mode="cells"
-        columnCount={columnCount}
-        rowCount={rowCount}
-        onScrollToChange={handleScrollToChange}
-        scrollToColumn={currentCell.column}
-        scrollToRow={currentCell.row}
-        isControlled
+      <InfiniteLoader
+        isRowLoaded={isRowLoaded}
+        loadMoreRows={handleLoadMoreRows}
+        rowCount={totalRecords}
       >
-        {({ onSectionRendered, scrollToColumn, scrollToRow }) => (
+        {({ onRowsRendered, registerChild }) => (
           <AutoSizer disableHeight>
             {({ width }) => (
               <Grid
-                onSectionRendered={onSectionRendered}
-                scrollToColumn={scrollToColumn}
-                scrollToRow={scrollToRow}
+                ref={registerChild}
+                onSectionRendered={({
+                  columnStartIndex,
+                  columnStopIndex,
+                  rowStartIndex,
+                  rowStopIndex,
+                }) => {
+                  const startIndex = rowStartIndex * columnCount + columnStartIndex;
+                  const stopIndex = rowStopIndex * columnCount + columnStopIndex;
+
+                  onRowsRendered({ startIndex, stopIndex });
+                }}
                 cellRenderer={({ rowIndex, columnIndex, ...props }) => CellRenderer({
-                  scrollToColumn,
-                  scrollToRow,
                   rowIndex,
                   columnIndex,
-                  setCurrentCell,
                   value: tableValues[rowIndex][columnIndex],
                   ...props,
                 })}
@@ -65,7 +61,7 @@ export function TableRenderer({ fields, records, height }) {
             )}
           </AutoSizer>
         )}
-      </ArrowKeyStepper>
+      </InfiniteLoader>
     </div>
   );
 }
@@ -75,5 +71,7 @@ TableRenderer.propTypes = {
   records: PropTypes.arrayOf(
     PropTypes.arrayOf(PropTypes.any),
   ).isRequired,
+  totalRecords: PropTypes.number,
+  loadMoreRows: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,
 };

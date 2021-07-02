@@ -21,7 +21,7 @@ module Powerbase
 
     # Disconnects to the remote database
     def disconnect
-      Powerbase.disconnect if !@is_turbo
+      Powerbase.disconnect
     end
 
     # Save a document of a table to Elasticsearch.
@@ -96,6 +96,17 @@ module Powerbase
         @remote_table
           .where(options[:filter] ? eval(parse_sequel_filter(options[:filter])) : true)
           .paginate(page, limit)
+      end
+    end
+
+    def get_count
+      if @is_turbo
+        index = "table_records_#{@table_id}"
+
+        response = @esclient.perform_request("GET", "#{index}/_count").body
+        response["count"]
+      else
+        @remote_table.count
       end
     end
 
