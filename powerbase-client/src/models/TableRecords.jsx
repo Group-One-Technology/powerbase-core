@@ -1,7 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import constate from 'constate';
 import { useSWRInfinite } from 'swr';
-import debounce from 'lodash.debounce';
 
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
@@ -44,9 +43,7 @@ function useTableRecordsModel({ id, initialFilter }) {
       || !!(size > 0 && data && typeof data[size - 1] === 'undefined');
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < PAGE_SIZE);
-  const loadMore = useCallback(debounce(() => {
-    setSize((page) => page + 1);
-  }, 500), []);
+  const loadMore = () => setSize((page) => page + 1);
 
   return {
     ...response,
