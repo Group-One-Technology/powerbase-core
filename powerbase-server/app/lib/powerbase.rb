@@ -49,7 +49,7 @@ module Powerbase
     end
 
     @@is_turbo = options[:is_turbo]
-    @@DB = Sequel.connect(@@connection_string)
+    @@DB = Sequel.connect(@@connection_string, :max_connections => 100)
     @@DB.extension :pg_enum if options[:adapter] == "postgresql"
     @@DB.extension :pagination
 

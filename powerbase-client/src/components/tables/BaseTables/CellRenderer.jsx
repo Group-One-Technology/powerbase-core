@@ -7,6 +7,7 @@ export function CellRenderer({
   columnIndex,
   key,
   rowIndex,
+  isLoaded,
   style,
   value,
 }) {
@@ -41,7 +42,9 @@ export function CellRenderer({
       suppressContentEditableWarning
     >
       {(isHeader && columnIndex !== 0) && <FieldTypeIcon className="mr-1" />}
-      {value?.toString()}
+      {(isHeader || columnIndex === 0 || isLoaded)
+        ? value?.toString()
+        : <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />}
     </div>
   );
 }
@@ -50,6 +53,7 @@ CellRenderer.propTypes = {
   key: PropTypes.number.isRequired,
   rowIndex: PropTypes.number.isRequired,
   columnIndex: PropTypes.number.isRequired,
+  isLoaded: PropTypes.bool.isRequired,
   style: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
 };

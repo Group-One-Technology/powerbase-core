@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
@@ -10,6 +11,7 @@ export function TableRenderer({
   records,
   totalRecords,
   loadMoreRows,
+  isLoading,
   height,
 }) {
   const columnCount = fields.length;
@@ -20,14 +22,20 @@ export function TableRenderer({
   ];
 
   const isRowLoaded = ({ index }) => !!tableValues[index];
-  const handleLoadMoreRows = () => loadMoreRows();
+  const handleLoadMoreRows = ({ startIndex }) => {
+    const start = startIndex / columnCount;
+
+    if (!isLoading && start + 100 > records.length) {
+      loadMoreRows();
+    }
+  };
 
   return (
     <div className="w-full overflow-hidden z-0">
       <InfiniteLoader
         isRowLoaded={isRowLoaded}
         loadMoreRows={handleLoadMoreRows}
-        rowCount={totalRecords}
+        rowCount={totalRecords * columnCount}
       >
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer disableHeight>
@@ -43,11 +51,13 @@ export function TableRenderer({
                   const startIndex = rowStartIndex * columnCount + columnStartIndex;
                   const stopIndex = rowStopIndex * columnCount + columnStopIndex;
 
-                  onRowsRendered({ startIndex, stopIndex });
+                  return onRowsRendered({ startIndex, stopIndex });
                 }}
+                onRowsRendered={onRowsRendered}
                 cellRenderer={({ rowIndex, columnIndex, ...props }) => CellRenderer({
                   rowIndex,
                   columnIndex,
+                  isLoaded: !!tableValues[rowIndex],
                   value: tableValues[rowIndex][columnIndex],
                   ...props,
                 })}
@@ -73,5 +83,6 @@ TableRenderer.propTypes = {
   ).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
 };
