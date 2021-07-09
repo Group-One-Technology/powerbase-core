@@ -82,7 +82,7 @@ module Powerbase
 
         if options[:filter]
           search_params[:query_string] = {
-            query: parse_elasticsearch_filter(options[:filter])
+            query: parse_elasticsearch_filter(options[:filters])
           }
         end
 
@@ -94,7 +94,7 @@ module Powerbase
         result["hits"]["hits"].map {|result| result["_source"]}
       else
         @remote_table
-          .where(options[:filter] ? eval(parse_sequel_filter(options[:filter])) : true)
+          .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
           .paginate(page, limit)
       end
     end
