@@ -76,7 +76,7 @@ export function TableViewsFilter({ view, fields }) {
   const [fieldType, setFieldType] = useState(initialFieldType);
 
   useEffect(() => {
-    if (!firstOperand && fields) {
+    if (firstOperand == null && fields) {
       const [firstField] = fields;
       const isNumber = firstField.fieldTypeId === NUMBER_FIELD_TYPE;
 
@@ -120,16 +120,12 @@ export function TableViewsFilter({ view, fields }) {
         filters: null,
       });
     } else if (operatorPayload && firstOperandPayload && secondOperandPayload) {
-      const secondOperandValue = OPERATOR[operatorPayload] === 'like'
-        ? `%${secondOperandPayload}%`
-        : secondOperandPayload;
-
       const updatedFilter = {
-        id: `${firstOperandPayload}:${operatorPayload}=${secondOperandValue}`,
+        id: `${firstOperandPayload}:${operatorPayload}=${secondOperandPayload}`,
         value: {
           [OPERATOR[operatorPayload]]: [
             { field: firstOperandPayload },
-            { value: secondOperandValue },
+            { value: secondOperandPayload },
           ],
         },
       };
