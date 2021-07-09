@@ -22,10 +22,10 @@ export function TableRenderer({
   ];
 
   const isRowLoaded = ({ index }) => !!tableValues[index];
-  const handleLoadMoreRows = ({ startIndex }) => {
-    const start = startIndex / columnCount;
+  const handleLoadMoreRows = ({ stopIndex }) => {
+    const stop = stopIndex / columnCount;
 
-    if (!isLoading && start + 100 > records.length) {
+    if (!isLoading && stop + 100 > records.length) {
       loadMoreRows();
     }
   };
