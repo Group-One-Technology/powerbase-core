@@ -25,7 +25,7 @@ export function TableRenderer({
   const handleLoadMoreRows = ({ stopIndex }) => {
     const stop = stopIndex / columnCount;
 
-    if (!isLoading && stop + 100 > records.length) {
+    if ((!isLoading && stop + 100 > records.length) && records.length - 1 !== totalRecords) {
       loadMoreRows();
     }
   };
