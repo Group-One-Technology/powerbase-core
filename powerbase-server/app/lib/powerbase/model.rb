@@ -45,7 +45,7 @@ module Powerbase
 
     # * Get the filtered and paginated table records.
     # Accepts the following options:
-    # :filter :: a hash that contains the filter for the records.
+    # :filter :: a JSON that contains the filter for the records.
     # :page :: the page number.
     # :limit :: the page count. No. of records to get per paage.
     def get(options)
@@ -59,9 +59,11 @@ module Powerbase
           size: limit,
         }
 
-        if options[:filter]
-          search_params[:query_string] = {
-            query: parse_elasticsearch_filter(options[:filters])
+        if options[:filters]
+          search_params[:query] = {
+            query_string: {
+              query: parse_elasticsearch_filter(options[:filters])
+            }
           }
         end
 
@@ -78,14 +80,24 @@ module Powerbase
       end
     end
 
-    def get_count
+    # * Get total table records.
+    # Accepts the following options:
+    # :filter :: a JSON that contains the filter for the records.
+    def get_count(options)
       if @is_turbo
         index = "table_records_#{@table_id}"
+        query = if options[:filters]
+            "q=#{parse_elasticsearch_filter(options[:filters])}"
+          else
+            nil
+          end
 
-        response = @esclient.perform_request("GET", "#{index}/_count").body
+        response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
         response["count"]
       else
-        @remote_table.count
+        @remote_table
+          .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+          .count
       end
     end
 
