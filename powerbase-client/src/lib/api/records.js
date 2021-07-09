@@ -1,7 +1,7 @@
 import { securedApi } from './index';
 
 export async function getTableRecords({ url, ...payload }) {
-  const response = await securedApi.put(url, payload);
+  const response = await securedApi.post(url, payload);
 
   if (response.statusText === 'OK') {
     return response.data;
@@ -10,8 +10,8 @@ export async function getTableRecords({ url, ...payload }) {
   return undefined;
 }
 
-export async function getTableRecordsCount({ tableId }) {
-  const response = await securedApi.get(`/tables/${tableId}/records_count`);
+export async function getTableRecordsCount({ tableId, ...payload }) {
+  const response = await securedApi.post(`/tables/${tableId}/records_count`, payload);
 
   if (response.statusText === 'OK') {
     return response.data;

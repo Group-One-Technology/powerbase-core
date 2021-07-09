@@ -19,8 +19,8 @@ Rails.application.routes.draw do
 
       member do
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
-        put 'records', to: 'table_records#index', as: 'table_records'
-        get 'records_count', to: 'table_records#count', as: 'table_records_count'
+        post 'records', to: 'table_records#index', as: 'table_records'
+        post 'records_count', to: 'table_records#count', as: 'table_records_count'
       end
     end
   end

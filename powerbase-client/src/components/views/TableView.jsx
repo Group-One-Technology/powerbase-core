@@ -4,6 +4,7 @@ import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { useTableViews } from '@models/TableViews';
+import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { useQuery } from '@lib/hooks/useQuery';
 import { IId } from '@lib/propTypes/common';
@@ -22,18 +23,20 @@ function BaseTableView({ baseId, tableId }) {
   }
 
   return (
-    <TableRecordsCountProvider id={tableId}>
-      <TableRecordsProvider id={tableId} initialFilter={view.filters}>
-        <TableViewsNav
-          baseId={baseId}
-          tableId={tableId}
-          currentView={view}
-          views={views}
-          fields={fields}
-        />
-        <BaseTable view={view} />
-      </TableRecordsProvider>
-    </TableRecordsCountProvider>
+    <RecordsFilterProvider initialFilters={view.filters}>
+      <TableRecordsCountProvider id={tableId}>
+        <TableRecordsProvider id={tableId}>
+          <TableViewsNav
+            baseId={baseId}
+            tableId={tableId}
+            currentView={view}
+            views={views}
+            fields={fields}
+          />
+          <BaseTable view={view} />
+        </TableRecordsProvider>
+      </TableRecordsCountProvider>
+    </RecordsFilterProvider>
   );
 }
 

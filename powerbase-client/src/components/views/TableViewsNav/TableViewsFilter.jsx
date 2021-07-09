@@ -16,6 +16,7 @@ import { updateTableView } from '@lib/api/views';
 import { IViewField } from '@lib/propTypes/view_field';
 import { IView } from '@lib/propTypes/view';
 import { mutate } from 'swr';
+import { useRecordsFilter } from '@models/views/RecordsFilter';
 
 const NUMBER_FIELD_TYPE = 4;
 
@@ -46,7 +47,8 @@ const OPERATOR = {
 
 export function TableViewsFilter({ view, fields }) {
   const filterRef = useRef();
-  const { filters, setFilters, mutate: mutateTableRecords } = useTableRecords();
+  const { filters, setFilters } = useRecordsFilter();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const filterValue = filters?.value || undefined;
   const initialOperator = filterValue
