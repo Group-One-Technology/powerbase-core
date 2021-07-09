@@ -43,27 +43,6 @@ module Powerbase
       puts "Finished saving #{records.length} documents at index #{index}..."
     end
 
-    # Retrieve all table records.
-    def all
-      if @is_turbo
-        puts "Retrieving max of 1000 table #{@table_id}'s records from elasticsearch..."
-        # TODO: Add pagination
-        result = @esclient.search(
-          index: "table_records_#{@table_id}",
-          body: {
-            from: 0,
-            size: 10000,
-            query: { match_all: {} }
-          }
-        )
-
-        result["hits"]["hits"].map {|result| result["_source"]}
-      else
-        puts "Retrieving table #{@table_id}'s records from remote database..."
-        @remote_table.all
-      end
-    end
-
     # * Get the filtered and paginated table records.
     # Accepts the following options:
     # :filter :: a hash that contains the filter for the records.
