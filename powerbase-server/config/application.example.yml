@@ -1,3 +1,5 @@
 encryption_key: ""
 jwt_encryption_key: ""
 redis_url: "redis://localhost:6379/0"
+elasticsearch_url_development: "http://localhost:9200"
+elasticsearch_url: ""
