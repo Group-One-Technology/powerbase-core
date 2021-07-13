@@ -24,7 +24,9 @@ class TableRecordsController < ApplicationController
   # GET /tables/:id/records_count
   def count
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
-    total_records = model.get_count
+    total_records = model.get_count({
+      filters: safe_params[:filters]
+    })
     model.disconnect
 
     render json: { count: total_records }

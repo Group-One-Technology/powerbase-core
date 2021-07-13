@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import constate from 'constate';
 import { useSWRInfinite } from 'swr';
 
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
+import { useRecordsFilter } from './views/RecordsFilter';
 
 const PAGE_SIZE = 1000;
 
@@ -15,9 +15,9 @@ function getKey({ index, tableId, filters }) {
   return `/tables/${tableId}/records?${pageQuery}${filterQuery}`;
 }
 
-function useTableRecordsModel({ id, initialFilter }) {
+function useTableRecordsModel({ id }) {
   const { authUser } = useAuthUser();
-  const [filters, setFilters] = useState(initialFilter);
+  const { filters } = useRecordsFilter();
 
   const response = useSWRInfinite(
     (index) => ((id && authUser)
@@ -47,8 +47,6 @@ function useTableRecordsModel({ id, initialFilter }) {
 
   return {
     ...response,
-    filters,
-    setFilters,
     data: parsedData,
     isLoading,
     isReachingEnd,
