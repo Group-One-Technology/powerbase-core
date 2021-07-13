@@ -6,6 +6,7 @@ export const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
+    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });
@@ -14,6 +15,7 @@ export const securedApi = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
+    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });

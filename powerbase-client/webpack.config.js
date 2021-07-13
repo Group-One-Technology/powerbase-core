@@ -8,7 +8,7 @@ module.exports = {
   context: __dirname,
   entry: './src/index.jsx',
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'public'),
     filename: '[name].js',
     publicPath: '/',
     clean: true,
