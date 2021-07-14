@@ -115,6 +115,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         if options[:is_turbo]
           table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
+          table_model.disconnect
         end
       else
         # TODO: Add error tracker (ex. Sentry)
