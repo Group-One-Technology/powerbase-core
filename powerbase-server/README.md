@@ -104,3 +104,5 @@ rails test
 | bundle exec sidekiq start  | Run sidekiq        |
 | rails test                 | Run test cases     |
 | bundle exec rake environment elasticsearch:import:model CLASS='MODEL_NAME_HERE' SCOPE='turbo' | Import data to elastic search |
+| heroku logs --taill -a app_name --dyno worker | Checkout Heroku sidekiq logs |
+| heroku pg:killall -a app_name | Kill all the pg connection |
