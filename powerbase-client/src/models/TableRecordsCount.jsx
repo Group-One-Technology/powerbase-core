@@ -7,12 +7,12 @@ import { useRecordsFilter } from './views/RecordsFilter';
 
 function useTableRecordsCountModel({ id }) {
   const { authUser } = useAuthUser();
-  const { filters } = useRecordsFilter();
+  const { filters, viewId } = useRecordsFilter();
 
   const filterQuery = filters?.id ? `filterId=${filters?.id}` : '';
 
   const response = useSWR(
-    (id && authUser) ? `/tables/${id}/records_count?${filterQuery}` : null,
+    (id && authUser && viewId) ? `/tables/${id}/records_count?${filterQuery}` : null,
     () => getTableRecordsCount({ tableId: id, filters: filters?.value }),
   );
 

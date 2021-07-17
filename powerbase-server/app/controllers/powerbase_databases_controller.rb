@@ -40,8 +40,9 @@ class PowerbaseDatabasesController < ApplicationController
 
     Powerbase.connect(options)
     @database = nil
+    @is_connected = Powerbase.connected?
 
-    if Powerbase.connected?
+    if @is_connected
       @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
 
       if !@database
@@ -70,9 +71,11 @@ class PowerbaseDatabasesController < ApplicationController
           is_turbo: @database.is_turbo,
         })
       end
+
+      Powerbase.disconnect
     end
 
-    render json: { connected: Powerbase.connected?, database: @database }
+    render json: { connected: @is_connected, database: @database }
   end
 
   private

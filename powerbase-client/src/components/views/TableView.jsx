@@ -1,29 +1,28 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
-import { useTableViews } from '@models/TableViews';
 import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
-import { useQuery } from '@lib/hooks/useQuery';
 import { IId } from '@lib/propTypes/common';
+import { IView } from '@lib/propTypes/view';
 
 import { BaseTable } from '@components/tables/BaseTables';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-function BaseTableView({ baseId, tableId }) {
+const BaseTableView = React.memo(({ views, baseId, tableId }) => {
   const { data: view } = useTableView();
-  const { data: views } = useTableViews();
   const { data: fields } = useViewFields();
 
-  if (!view) {
+  if (!view || !fields) {
     return <Loader className="h-screen" />;
   }
 
   return (
-    <RecordsFilterProvider initialFilters={view.filters}>
+    <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
       <TableRecordsCountProvider id={tableId}>
         <TableRecordsProvider id={tableId}>
           <TableViewsNav
@@ -38,22 +37,20 @@ function BaseTableView({ baseId, tableId }) {
       </TableRecordsCountProvider>
     </RecordsFilterProvider>
   );
-}
+});
 
 BaseTableView.propTypes = {
   baseId: IId,
   tableId: IId,
+  views: PropTypes.arrayOf(IView),
 };
 
-export function TableView({ baseId, defaultViewId, tableId }) {
-  const query = useQuery();
-  const viewId = query.get('view');
-  const { data: views } = useTableViews();
-
-  const currentView = viewId != null
-    ? views?.find((item) => item.id.toString() === viewId.toString())
-    : views?.find((item) => item.id.toString() === defaultViewId.toString());
-
+export const TableView = React.memo(({
+  baseId,
+  currentView,
+  views,
+  tableId,
+}) => {
   if (!views || !views?.length) {
     return <Loader className="h-screen" />;
   }
@@ -61,14 +58,19 @@ export function TableView({ baseId, defaultViewId, tableId }) {
   return (
     <TableViewProvider id={currentView.id}>
       <ViewFieldsProvider id={currentView.id}>
-        <BaseTableView baseId={baseId} tableId={tableId} />
+        <BaseTableView
+          baseId={baseId}
+          tableId={tableId}
+          views={views}
+        />
       </ViewFieldsProvider>
     </TableViewProvider>
   );
-}
+});
 
 TableView.propTypes = {
   baseId: IId,
   tableId: IId,
-  defaultViewId: IId,
+  currentView: IView,
+  views: PropTypes.arrayOf(IView),
 };

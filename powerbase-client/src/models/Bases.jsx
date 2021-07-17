@@ -7,7 +7,11 @@ import { useAuthUser } from './AuthUser';
 function useBasesModel() {
   const { authUser } = useAuthUser();
 
-  const response = useSWR(authUser ? '/databases' : null, getDatabases);
+  const response = useSWR(
+    authUser ? '/databases' : null,
+    getDatabases,
+    { revalidateOnFocus: true },
+  );
 
   return {
     ...response,

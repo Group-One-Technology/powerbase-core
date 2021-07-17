@@ -14,7 +14,11 @@ import { Loader } from '@components/ui/Loader';
 
 export function BasesPage() {
   const authUser = useAuthUser();
-  const { data: bases } = useSWR(authUser ? '/databases' : null, getDatabases);
+  const { data: bases } = useSWR(
+    authUser ? '/databases' : null,
+    getDatabases,
+    { revalidateOnFocus: true },
+  );
 
   return (
     <Page authOnly>

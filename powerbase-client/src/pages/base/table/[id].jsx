@@ -6,9 +6,10 @@ import { BaseProvider, useBase } from '@models/Base';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { BaseTableProvider, useBaseTable } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
-import { TableViewsProvider } from '@models/TableViews';
+import { TableViewsProvider, useTableViews } from '@models/TableViews';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
 import { IId } from '@lib/propTypes/common';
+import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -18,16 +19,22 @@ import { AuthOnly } from '@components/middleware/AuthOnly';
 import { Loader } from '@components/ui/Loader';
 import { TableView } from '@components/views/TableView';
 
-function Table({ id: tableId, baseId }) {
+const Table = React.memo(({ id: tableId, baseId }) => {
+  const query = useQuery();
   const history = useHistory();
+  const viewId = query.get('view');
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: table } = useBaseTable();
   const { data: tables } = useBaseTables();
+  const { data: views } = useTableViews();
 
   const windowSize = useWindowSize();
   const height = windowSize.height ? windowSize.height - 125 : 0;
+  const currentView = viewId != null
+    ? views?.find((item) => item.id.toString() === viewId.toString())
+    : views?.find((item) => item.id.toString() === table.defaultViewId.toString());
 
   if (base == null || bases == null || authUser == null || table == null) {
     return <Loader className="h-screen" />;
@@ -60,12 +67,13 @@ function Table({ id: tableId, baseId }) {
         <TableView
           baseId={baseId}
           tableId={tableId}
-          defaultViewId={table.defaultViewId}
+          views={views}
+          currentView={currentView}
         />
       </PageContent>
     </Page>
   );
-}
+});
 
 Table.propTypes = {
   id: IId.isRequired,

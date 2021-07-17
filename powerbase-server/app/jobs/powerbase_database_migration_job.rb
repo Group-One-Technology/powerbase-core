@@ -115,7 +115,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         if options[:is_turbo]
           table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
-          table_model.disconnect
         end
       else
         # TODO: Add error tracker (ex. Sentry)
@@ -152,12 +151,13 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
       if total_saved_fields === database.powerbase_fields.length
         database.update(is_migrated: true)
-        Powerbase.disconnect
       else
         puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{database.powerbase_fields.length}"
       end
     else
       puts "Total tables are not equal. Expected: #{db.tables.length}, Actual: #{db_tables.length}"
     end
+
+    Powerbase.disconnect
   end
 end

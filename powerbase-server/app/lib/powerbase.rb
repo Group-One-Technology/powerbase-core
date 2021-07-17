@@ -33,7 +33,7 @@ module Powerbase
   # :user :: the username of a user that has access to the database.
   # :password :: the password of a user that has access to the database.
   # :database :: the name of the database to connect to.
-  def self.connect(options)
+  def self.connect(options, &block)
     if options[:adapter] && options[:database]
       @@adapter = options[:adapter]
       @@database = options[:database]
@@ -49,16 +49,20 @@ module Powerbase
     end
 
     @@is_turbo = options[:is_turbo]
-    @@DB = Sequel.connect(@@connection_string, :max_connections => 100)
-    @@DB.extension :pg_enum if options[:adapter] == "postgresql"
-    @@DB.extension :pagination
 
-    @@DB
+    Sequel.extension :pg_enum if options[:adapter] == "postgresql"
+
+    if block_given?
+      Sequel.connect(@@connection_string, :keep_reference => false, &block)
+    else
+      @@DB = Sequel.connect(@@connection_string, :keep_reference => false)
+      @@DB
+    end
   end
 
   # Disconnects from the current database connection.
   def self.disconnect
-    if !@@DB || !self.connected?
+    if !self.connected?
       raise StandardError.new("A database connection is needed to perform this action.")
     end
 
@@ -67,7 +71,7 @@ module Powerbase
 
   # Returns the current database connection.
   def self.DB
-    if !@@DB || !self.connected?
+    if !self.connected?
       raise StandardError.new("A database connection is needed to perform this action.")
     end
 
@@ -76,6 +80,6 @@ module Powerbase
 
   # Returns a boolean whether the database has successfully connected.
   def self.connected?
-    @@DB.test_connection
+    !!@@DB && @@DB.test_connection
   end
 end

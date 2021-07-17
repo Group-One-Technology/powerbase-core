@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { auth } from '@lib/api/auth';
 
 function useAuthUserModel() {
-  const response = useSWR('/auth', auth);
+  const response = useSWR('/auth', auth, { revalidateOnFocus: true });
 
   return {
     authUser: response.data,
