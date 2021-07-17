@@ -16,7 +16,6 @@ class TableRecordsController < ApplicationController
       limit: safe_params[:limit],
       filters: safe_params[:filters]
     })
-    model.disconnect
 
     render json: records
   end
@@ -27,7 +26,6 @@ class TableRecordsController < ApplicationController
     total_records = model.get_count({
       filters: safe_params[:filters]
     })
-    model.disconnect
 
     render json: { count: total_records }
   end

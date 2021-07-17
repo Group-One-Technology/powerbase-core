@@ -6,22 +6,10 @@ module Powerbase
       @table_id = table_id
       @esclient = esclient
 
-      @es_table = @esclient.get(index: "powerbase_tables", id: table_id, ignore: 404)
-      @is_turbo = !!@es_table["found"]
-      connect_remote_db(table_id)
-
-      if @is_turbo
-        @es_table = @es_table["_source"]
-        @table_name = @es_table["name"]
-        @es_database = @esclient.get(index: "powerbase_databases", id: @es_table['powerbase_database_id'])["_source"]
-      else
-        @table_name = @powerbase_table.name
-      end
-    end
-
-    # Disconnects to the remote database
-    def disconnect
-      Powerbase.disconnect
+      @powerbase_table = PowerbaseTable.find(table_id)
+      @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
+      @table_name = @powerbase_table.name
+      @is_turbo = @powerbase_database.is_turbo
     end
 
     # Save a document of a table to Elasticsearch.
@@ -32,7 +20,7 @@ module Powerbase
 
     # Save multiple documents of a table to Elasticsearch.
     def index_records
-      records = @remote_table.all
+      records = remote_db() {|db| db.from(@table_name).all }
       index = "table_records_#{@table_id}"
 
       puts "Saving #{records.length} documents at index #{index}..."
@@ -74,9 +62,12 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        @remote_table
-          .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
-          .paginate(page, limit)
+        remote_db() {|db|
+          db.from(@table_name)
+            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .paginate(page, limit)
+            .all
+        }
       end
     end
 
@@ -95,22 +86,21 @@ module Powerbase
         response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
         response["count"]
       else
-        @remote_table
-          .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
-          .count
+        remote_db() {|db|
+          db.from(@table_name)
+            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .count
+        }
       end
     end
 
     private
-      def connect_remote_db(table_id)
-        @powerbase_table = PowerbaseTable.find(table_id)
-        @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
+      def remote_db(&block)
         Powerbase.connect({
           adapter: @powerbase_database.adapter,
           connection_string: @powerbase_database.connection_string,
           is_turbo: @powerbase_database.is_turbo,
-        })
-        @remote_table = Powerbase.DB.from(@powerbase_table.name)
+        }, &block)
       end
 
       def parse_value(value)
