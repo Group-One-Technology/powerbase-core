@@ -17,10 +17,10 @@ function getKey({ index, tableId, filters }) {
 
 function useTableRecordsModel({ id }) {
   const { authUser } = useAuthUser();
-  const { filters } = useRecordsFilter();
+  const { filters, viewId } = useRecordsFilter();
 
   const response = useSWRInfinite(
-    (index) => ((id && authUser)
+    (index) => ((id && authUser && viewId)
       ? getKey({
         index,
         tableId: id,

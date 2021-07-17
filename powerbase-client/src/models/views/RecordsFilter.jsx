@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import constate from 'constate';
 
-function useRecordsFilterModel({ initialFilters }) {
+function useRecordsFilterModel({ viewId, initialFilters }) {
   const [filters, setFilters] = useState(initialFilters);
 
   return {
+    viewId,
     filters,
     setFilters,
   };
