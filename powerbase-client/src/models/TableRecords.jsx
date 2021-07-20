@@ -5,17 +5,20 @@ import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
 import { useRecordsFilter } from './views/RecordsFilter';
 
-const PAGE_SIZE = 1000;
-
-function getKey({ index, tableId, filters }) {
+function getKey({
+  index,
+  tableId,
+  filters,
+  pageSize,
+}) {
   const page = index + 1;
-  const pageQuery = `page=${page}&limit=${PAGE_SIZE}`;
+  const pageQuery = `page=${page}&limit=${pageSize}`;
   const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
 
   return `/tables/${tableId}/records?${pageQuery}${filterQuery}`;
 }
 
-function useTableRecordsModel({ id }) {
+function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
   const { filters, viewId } = useRecordsFilter();
 
@@ -25,6 +28,7 @@ function useTableRecordsModel({ id }) {
         index,
         tableId: id,
         filters,
+        pageSize,
       })
       : null),
     (url) => getTableRecords({ url, filters: filters?.value }),
@@ -42,7 +46,7 @@ function useTableRecordsModel({ id }) {
   const isLoading = isLoadingInitialData
       || !!(size > 0 && data && typeof data[size - 1] === 'undefined');
   const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < PAGE_SIZE);
+  const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
 
   return {

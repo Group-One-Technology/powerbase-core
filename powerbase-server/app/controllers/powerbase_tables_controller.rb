@@ -38,6 +38,7 @@ class PowerbaseTablesController < ApplicationController
         name: table.name,
         description: table.description,
         default_view_id: table.default_view_id,
+        page_size: table.page_size,
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,

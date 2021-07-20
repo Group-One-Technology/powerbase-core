@@ -1,6 +1,6 @@
 module Powerbase
   class Model
-    # Initialize the Powerbase::Model
+    # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
     def initialize(esclient, table_id)
       @table_id = table_id
@@ -12,13 +12,13 @@ module Powerbase
       @is_turbo = @powerbase_database.is_turbo
     end
 
-    # Save a document of a table to Elasticsearch.
+    # * Save a document of a table to Elasticsearch.
     def index_record(record)
       puts "Saving document at index table_records_#{@table_id}..."
       @esclient.index(index: "table_records_#{@table_id}", body: record)
     end
 
-    # Save multiple documents of a table to Elasticsearch.
+    # * Save multiple documents of a table to Elasticsearch.
     def index_records
       records = remote_db() {|db| db.from(@table_name).all }
       index = "table_records_#{@table_id}"
@@ -39,7 +39,7 @@ module Powerbase
     def get(options)
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
-      limit = options[:limit] || 1000
+      limit = options[:limit] || @powerbase_table.page_size
 
       if @is_turbo
         search_params = {

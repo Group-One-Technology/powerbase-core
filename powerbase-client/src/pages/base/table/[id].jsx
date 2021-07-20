@@ -66,7 +66,7 @@ const Table = React.memo(({ id: tableId, baseId }) => {
         />
         <TableView
           baseId={baseId}
-          tableId={tableId}
+          table={table}
           views={views}
           currentView={currentView}
         />
