@@ -89,6 +89,7 @@ class PowerbaseDatabasesController < ApplicationController
         description: database.description,
         color: database.color,
         is_migrated: database.is_migrated,
+        is_turbo: database.is_turbo,
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
