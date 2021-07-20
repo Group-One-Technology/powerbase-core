@@ -44,6 +44,14 @@ module Powerbase
       @@connection_string = options[:connection_string]
       @@adapter, connection_string = options[:connection_string].split('://')
       @@database, @@params = options[:connection_string].split(/[:@\/]/).last.split('?')
+
+      @@adapter = if @@adapter == "postgres"
+          "postgresql"
+        elsif @@adapter == "mysql"
+          "mysql2"
+        else
+          @@adapter
+        end
     else
       raise StandardError.new('Missing connection credentials to connect to Powerbase.')
     end
