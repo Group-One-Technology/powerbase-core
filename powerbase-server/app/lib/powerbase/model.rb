@@ -30,7 +30,7 @@ module Powerbase
 
         @esclient.indices.create(index: index, body: nil)
 
-        table.paged_each(:rows_per_fetch => 100) {|record|
+        table.paged_each {|record|
           @esclient.index(index: index, body: record)
         }
       }
