@@ -6,7 +6,7 @@ export const ITable = PropTypes.shape({
   name: PropTypes.string.isRequired,
   description: PropTypes.string,
   defaultViewId: IId.isRequired,
-  page_size: PropTypes.number.isRequired,
+  pageSize: PropTypes.number.isRequired,
   createdAt: PropTypes.string.isRequired,
   updatedAt: PropTypes.string.isRequired,
   databaseId: IId.isRequired,
