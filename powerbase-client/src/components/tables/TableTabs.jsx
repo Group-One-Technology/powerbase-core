@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
-import { Link, useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
@@ -11,10 +10,9 @@ const SCROLL_OFFSET = 100;
 export function TableTabs({
   color,
   tableId,
-  baseId,
   tables,
+  handleTableChange,
 }) {
-  const history = useHistory();
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
 
@@ -69,14 +67,6 @@ export function TableTabs({
     }
   };
 
-  const handleSelectTableChange = (evt) => {
-    if (tables) {
-      const selectedTableId = evt.target.value;
-      const selectedTable = tables.find((table) => table.id.toString() === selectedTableId);
-      history.push(`/base/${baseId}/table/${selectedTable.id}?view=${selectedTable.defaultViewId}`);
-    }
-  };
-
   const addTable = () => {
     alert('add new table clicked');
   };
@@ -92,7 +82,13 @@ export function TableTabs({
           name="table-tabs"
           className="block w-full bg-white bg-opacity-20 border-current text-white text-sm py-1 border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
           defaultValue={tables?.find((table) => table.id.toString() === tableId)?.id}
-          onChange={handleSelectTableChange}
+          onChange={(evt) => {
+            if (tables) {
+              const selectedTableId = evt.target.value;
+              const selectedTable = tables.find((table) => table.id.toString() === selectedTableId);
+              handleTableChange({ table: selectedTable });
+            }
+          }}
         >
           {tables?.map((table) => (
             <option
@@ -137,10 +133,10 @@ export function TableTabs({
             const isCurrentTable = table.id.toString() === tableId;
 
             return (
-              <Link
+              <button
                 key={table.id}
                 ref={isCurrentTable ? activeTabEl : undefined}
-                to={`/base/${baseId}/table/${table.id}?view=${table.defaultViewId}`}
+                onClick={() => handleTableChange({ table })}
                 className={cn(
                   'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
@@ -148,7 +144,7 @@ export function TableTabs({
                 aria-current={isCurrentTable ? 'page' : undefined}
               >
                 {table.name}
-              </Link>
+              </button>
             );
           })}
           {tables && (
@@ -181,6 +177,6 @@ export function TableTabs({
 TableTabs.propTypes = {
   color: PropTypes.oneOf(Object.keys(BG_COLORS)),
   tableId: IId.isRequired,
-  baseId: IId.isRequired,
   tables: PropTypes.any,
+  handleTableChange: PropTypes.func.isRequired,
 };
