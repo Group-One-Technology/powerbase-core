@@ -8,12 +8,13 @@ import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
+import { ITable } from '@lib/propTypes/table';
 
 import { BaseTable } from '@components/tables/BaseTables';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableView = React.memo(({ views, baseId, tableId }) => {
+const BaseTableView = React.memo(({ views, baseId, table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
 
@@ -23,11 +24,11 @@ const BaseTableView = React.memo(({ views, baseId, tableId }) => {
 
   return (
     <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
-      <TableRecordsCountProvider id={tableId}>
-        <TableRecordsProvider id={tableId}>
+      <TableRecordsCountProvider id={table.id}>
+        <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <TableViewsNav
             baseId={baseId}
-            tableId={tableId}
+            tableId={table.id}
             currentView={view}
             views={views}
             fields={fields}
@@ -41,17 +42,17 @@ const BaseTableView = React.memo(({ views, baseId, tableId }) => {
 
 BaseTableView.propTypes = {
   baseId: IId,
-  tableId: IId,
+  table: ITable,
   views: PropTypes.arrayOf(IView),
 };
 
 export const TableView = React.memo(({
   baseId,
+  table,
   currentView,
   views,
-  tableId,
 }) => {
-  if (!views || !views?.length) {
+  if (!table || !views || !views?.length) {
     return <Loader className="h-screen" />;
   }
 
@@ -60,7 +61,7 @@ export const TableView = React.memo(({
       <ViewFieldsProvider id={currentView.id}>
         <BaseTableView
           baseId={baseId}
-          tableId={tableId}
+          table={table}
           views={views}
         />
       </ViewFieldsProvider>
@@ -70,7 +71,7 @@ export const TableView = React.memo(({
 
 TableView.propTypes = {
   baseId: IId,
-  tableId: IId,
+  table: ITable,
   currentView: IView,
   views: PropTypes.arrayOf(IView),
 };

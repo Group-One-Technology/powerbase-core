@@ -1,7 +1,16 @@
 class PowerbaseDatabaseMigrationJob < ApplicationJob
   queue_as :default
 
-  # { database_id, adapter, connection_string, is_turbo }
+  DEFAULT_PAGE_SIZE = 40
+  DEFAULT_PAGE_SIZE_TURBO = 200
+
+  # * Migrates the given remote database.
+  # Accepts the following options:
+  # :database_id :: id of the database that is being migrated.
+  # :adapter :: the adapter that is going to be used to connect to the databse.
+  #                   It can be "postgresql". "mysql2", etc.
+  # :connection_string :: a well-formed URI that is used to connect to the database.
+  # :is_turbo :: a boolean value that checks whether the DB is in Powerbase Turbo mode.
   def perform(options)
     # Database Connection
     db = Powerbase.connect({
@@ -22,6 +31,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: options[:database_id]) || PowerbaseTable.new
       table.name = table_name
       table.powerbase_database_id = options[:database_id]
+      table.page_size = options[:is_turbo] ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
 
       if table.save
         db.schema(table_name.to_sym).each do |column|
