@@ -71,9 +71,9 @@ class PowerbaseDatabasesController < ApplicationController
           is_turbo: @database.is_turbo,
         })
       end
-
-      Powerbase.disconnect
     end
+
+    Powerbase.disconnect
 
     render json: { connected: @is_connected, database: @database }
   end
