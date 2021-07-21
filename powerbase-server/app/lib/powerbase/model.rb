@@ -20,15 +20,20 @@ module Powerbase
 
     # * Save multiple documents of a table to Elasticsearch.
     def index_records
-      records = remote_db() {|db| db.from(@table_name).all }
       index = "table_records_#{@table_id}"
 
-      puts "Saving #{records.length} documents at index #{index}..."
+      records = remote_db() {|db|
+        table = db.from(@table_name)
+        total_records = table.count
 
-      @esclient.indices.create(index: index, body: nil)
-      records.each {|record| @esclient.index(index: index, body: record) }
+        puts "Saving #{total_records} documents at index #{index}..."
 
-      puts "Finished saving #{records.length} documents at index #{index}..."
+        @esclient.indices.create(index: index, body: nil)
+
+        table.paged_each {|record|
+          @esclient.index(index: index, body: record)
+        }
+      }
     end
 
     # * Get the filtered and paginated table records.
