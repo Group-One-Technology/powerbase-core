@@ -19,7 +19,7 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
   const { data: fields } = useViewFields();
 
   if (!view || !fields) {
-    return <Loader className="h-screen" />;
+    return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
 
   return (
@@ -53,7 +53,7 @@ export const TableView = React.memo(({
   views,
 }) => {
   if (!table || !views || !views?.length) {
-    return <Loader className="h-screen" />;
+    return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
 
   return (
