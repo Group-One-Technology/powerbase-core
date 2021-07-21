@@ -130,7 +130,7 @@ export function TableTabs({
             </>
           )}
           {tables?.map((table) => {
-            const isCurrentTable = table.id.toString() === tableId;
+            const isCurrentTable = table.id.toString() === tableId.toString();
 
             return (
               <button
