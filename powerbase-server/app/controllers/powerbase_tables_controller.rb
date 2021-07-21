@@ -12,7 +12,10 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /databases/:database_id/tables
   def index
-    render json: { migrated: @database.is_migrated, tables: @database.powerbase_tables }
+    render json: {
+      migrated: @database.is_migrated,
+      tables: @database.powerbase_tables.map {|item| format_json(item)}
+    }
   end
 
   # GET /tables/:id
