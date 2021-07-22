@@ -10,6 +10,7 @@ class Users::RefreshController < ApplicationController
       JWTSessions.access_cookie,
       value: tokens[:access],
       httponly: true,
+      same_site: Rails.env.production? ? :none : nil,
       secure: Rails.env.production?
     )
 
