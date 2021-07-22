@@ -3,6 +3,10 @@ default: &default
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
+production:
+    <<: *default
+    database: powerbase
+
 development:
   <<: *default
   database: powerbase
