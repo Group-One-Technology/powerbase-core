@@ -6,5 +6,7 @@ elasticsearch_url = if Rails.env.production?
     ENV["elasticsearch_url_development"]
   end
 
-ElasticsearchClient = Elasticsearch::Client.new url: elasticsearch_url, log: false
-Elasticsearch::Model.client = Elasticsearch::Client.new url: elasticsearch_url, log: false
+logger = Logger.new("#{Rails.root}/log/elasticsearch.log")
+
+ElasticsearchClient = Elasticsearch::Client.new url: elasticsearch_url, logger: logger
+Elasticsearch::Model.client = Elasticsearch::Client.new url: elasticsearch_url, logger: logger
