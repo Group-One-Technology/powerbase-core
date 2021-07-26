@@ -21,6 +21,10 @@ module Powerbase
     # * Save multiple documents of a table to Elasticsearch.
     def index_records
       index = "table_records_#{@table_id}"
+      primary_keys = PowerbaseField.where(
+        powerbase_table_id: @table_id,
+        is_primary_key: true,
+      )
 
       records = remote_db() {|db|
         table = db.from(@table_name)
@@ -31,7 +35,15 @@ module Powerbase
         @esclient.indices.create(index: index, body: nil)
 
         table.paged_each {|record|
-          @esclient.index(index: index, body: record)
+          doc_id = primary_keys
+            .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
+            .join("-")
+
+          if @esclient.exists(index: index, id: doc_id)
+            @esclient.update(index: index, id: doc_id, body: record)
+          else
+            @esclient.index(index: index, id: doc_id, body: record)
+          end
         }
       }
     end
