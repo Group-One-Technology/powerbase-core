@@ -140,7 +140,7 @@ export function TableViewsFilter({ view, fields }) {
     }
 
     await mutateTableRecords();
-  }, 500), []);
+  }, 500), [view]);
 
   if (fields == null) return null;
 
@@ -153,16 +153,20 @@ export function TableViewsFilter({ view, fields }) {
     setFieldType(selectedFieldType);
     setOperators(selectedFieldType === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS);
     setOperator(selectedFieldType === 'number' ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
-    setSecondOperand('');
+    setSecondOperand((value) => value || '');
 
     if (operator != null && selectedField != null
       && ((selectedFieldType === 'number' && typeof secondOperand === 'number')
-        || (selectedFieldType === 'text' && secondOperand.length))) {
-      updateTableRecords({
-        operatorPayload: operator,
-        firstOperandPayload: selectedField.name,
-        secondOperandPayload: secondOperand,
-      });
+        || (selectedFieldType === 'text'))) {
+      if (secondOperand.length) {
+        updateTableRecords({
+          operatorPayload: operator,
+          firstOperandPayload: selectedField.name,
+          secondOperandPayload: secondOperand,
+        });
+      } else {
+        updateTableRecords({ reset: true });
+      }
     }
   };
 
