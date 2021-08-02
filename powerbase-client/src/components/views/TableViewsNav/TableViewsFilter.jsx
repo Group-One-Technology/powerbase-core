@@ -192,12 +192,16 @@ export function TableViewsFilter({ view, fields }) {
 
     if (operator != null && firstOperand != null
       && ((fieldType === 'number' && typeof value === 'number')
-        || (fieldType === 'text' && value.length))) {
-      updateTableRecords({
-        operatorPayload: operator,
-        firstOperandPayload: firstOperand.name,
-        secondOperandPayload: value,
-      });
+        || (fieldType === 'text'))) {
+      if (value.length) {
+        updateTableRecords({
+          operatorPayload: operator,
+          firstOperandPayload: firstOperand.name,
+          secondOperandPayload: value,
+        });
+      } else {
+        updateTableRecords({ reset: true });
+      }
     }
   };
 
