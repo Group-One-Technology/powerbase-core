@@ -76,7 +76,7 @@ export function TableViewsFilter({ view, fields }) {
   const [fieldType, setFieldType] = useState(initialFieldType);
 
   useEffect(() => {
-    if (firstOperand == null && fields) {
+    if (!firstOperand && fields) {
       const [firstField] = fields;
       const isNumber = firstField.fieldTypeId === NUMBER_FIELD_TYPE;
 
