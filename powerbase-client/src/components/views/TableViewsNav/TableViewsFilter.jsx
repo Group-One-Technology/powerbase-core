@@ -60,7 +60,7 @@ export function TableViewsFilter({ view, fields }) {
     : 'text';
 
   const [firstOperand, setFirstOperand] = useState(initialOperator
-    ? filterValue[initialOperator][0].field
+    ? fields?.find((field) => field.name === filterValue[initialOperator][0].field)
     : '');
   const [operators, setOperators] = useState(initialFieldType === 'number'
     ? NUMBER_OPERATORS
@@ -105,7 +105,7 @@ export function TableViewsFilter({ view, fields }) {
         : '');
       setFieldType(initialFieldType);
     }
-  }, [view]);
+  }, [view, fields, filterValue]);
 
   const updateTableRecords = useCallback(debounce(async ({
     reset,
