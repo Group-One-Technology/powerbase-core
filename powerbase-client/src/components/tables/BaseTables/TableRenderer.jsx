@@ -14,7 +14,7 @@ export function TableRenderer({
   isLoading,
   height,
 }) {
-  const columnCount = fields.length;
+  const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
   const tableValues = [
     ['', ...fields.map((field) => field.name)],
