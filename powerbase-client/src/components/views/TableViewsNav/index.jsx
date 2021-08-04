@@ -7,12 +7,15 @@ import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view_field';
+import { ITable } from '@lib/propTypes/table';
+
+import { Badge } from '@components/ui/Badge';
 import { TableViewsSelect } from './TableViewsSelect';
 import { TableViewsFilter } from './TableViewsFilter';
 
 export function TableViewsNav({
   baseId,
-  tableId,
+  table,
   currentView,
   views,
   fields,
@@ -26,15 +29,16 @@ export function TableViewsNav({
         <div className="flex-1 flex items-center gap-x-2">
           <TableViewsSelect
             baseId={baseId}
-            tableId={tableId}
+            tableId={table.id}
             currentView={currentView}
             views={views}
           />
-          {!!(records && totalRecords) && (
+          {!!(records && totalRecords && table.isMigrated) && (
             <p className="text-xs hidden lg:inline">
               {records.length} loaded out of {totalRecords}
             </p>
           )}
+          {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-2">
           <TableViewsFilter view={currentView} fields={fields} />
@@ -69,7 +73,7 @@ export function TableViewsNav({
 
 TableViewsNav.propTypes = {
   baseId: IId.isRequired,
-  tableId: IId.isRequired,
+  table: ITable,
   currentView: IView,
   views: PropTypes.arrayOf(IView),
   fields: PropTypes.arrayOf(IViewField),

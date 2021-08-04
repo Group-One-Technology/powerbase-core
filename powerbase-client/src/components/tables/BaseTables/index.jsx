@@ -1,21 +1,19 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { useWindowSize } from '@lib/hooks/useWindowSize';
 
 import { Loader } from '@components/ui/Loader';
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function BaseTable() {
+export function BaseTable({ height }) {
   const { data: fields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
-  const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 125 : 0;
 
   if (fields == null || records == null) {
     return <Loader style={{ height }} />;
@@ -35,3 +33,7 @@ export function BaseTable() {
     />
   );
 }
+
+BaseTable.propTypes = {
+  height: PropTypes.number,
+};
