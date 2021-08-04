@@ -8,7 +8,7 @@ import { Loader } from '@components/ui/Loader';
 function Base({ id }) {
   const { data: tables } = useBaseTables();
 
-  if (tables) {
+  if (tables?.length) {
     const [firstTable] = tables;
 
     return <Redirect to={`/base/${id}/table/${firstTable.id}?view=${firstTable.defaultViewId}`} />;
