@@ -19,6 +19,8 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     # Table Migration
+    puts "#{Time.now} Migrating tables of database with id of #{database_id}..."
+
     connect(@database) {|db|
       db.tables.each do |table_name|
         table = PowerbaseTable.find_by(
@@ -41,9 +43,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
 
-    # TODO: Add is_migrated column
     @database_tables.each do |table|
       # Table Fields Migration
+      puts "#{Time.now} Migrating tables fields of table with id of #{table.id}..."
+
       connect(@database) {|db|
         db.schema(table.name.to_sym).each do |column|
           column_name = column[0]
@@ -104,6 +107,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       }
 
       # Table View and View Fields Migration
+      puts "#{Time.now} Migrating table view and view fields of table with id of #{table.id}..."
       table_view = TableView.new
       table_view.powerbase_table_id = table.id
       table_view.name = "Grid View"
@@ -133,6 +137,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       end
 
       # Foreign Keys Migration
+      puts "#{Time.now} Migrating foreign keys of table with id of #{table.id}..."
       connect(@database) {|db|
         table_foreign_keys = db.foreign_key_list(table.name)
         table_foreign_keys.each do |foreign_key|
@@ -177,7 +182,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     if total_tables === @database_tables.length
       if total_saved_fields === @database.powerbase_fields.length
-        unmigrated_tables = PowerbaseTable.where(is_migrated: false)
+        unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)
 
         if unmigrated_tables.length == 0
           @database.update(is_migrated: true)
