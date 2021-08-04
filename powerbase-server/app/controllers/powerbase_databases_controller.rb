@@ -64,12 +64,7 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
-        PowerbaseDatabaseMigrationJob.perform_later({
-          database_id: @database.id,
-          adapter: Powerbase.adapter,
-          connection_string: Powerbase.connection_string,
-          is_turbo: @database.is_turbo,
-        })
+        PowerbaseDatabaseMigrationJob.perform_later(@database.id)
       end
     end
 

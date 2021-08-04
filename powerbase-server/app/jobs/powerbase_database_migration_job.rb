@@ -5,40 +5,50 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
   DEFAULT_PAGE_SIZE_TURBO = 200
 
   # * Migrates the given remote database.
-  # Accepts the following options:
-  # :database_id :: id of the database that is being migrated.
-  # :adapter :: the adapter that is going to be used to connect to the databse.
-  #                   It can be "postgresql". "mysql2", etc.
-  # :connection_string :: a well-formed URI that is used to connect to the database.
-  # :is_turbo :: a boolean value that checks whether the DB is in Powerbase Turbo mode.
-  def perform(options)
-    # Database Connection
-    db = Powerbase.connect({
-      adapter: options[:adapter],
-      connection_string: options[:connection_string],
-      is_turbo: options[:is_turbo],
-    })
+  def perform(database_id)
+    @database = PowerbaseDatabase.find(database_id);
+
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
+    total_saved_fields = 0
+    total_tables = 0
 
     if !single_line_text_field
       raise StandardError.new("There is no 'single line text' field in the database.")
+    elsif !@database
+      raise StandardError.new("Database with id of #{database_id} could not be found.")
     end
 
-    total_saved_fields = 0
+    # Table Migration
+    connect(@database) {|db|
+      db.tables.each do |table_name|
+        table = PowerbaseTable.find_by(
+          name: table_name,
+          powerbase_database_id: @database.id,
+        ) || PowerbaseTable.new
+        table.name = table_name
+        table.powerbase_database_id = @database.id
+        table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
 
-    db.tables.each do |table_name|
-      # Table Migration
-      table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: options[:database_id]) || PowerbaseTable.new
-      table.name = table_name
-      table.powerbase_database_id = options[:database_id]
-      table.page_size = options[:is_turbo] ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
+        if !table.save
+          # TODO: Add error tracker (ex. Sentry)
+          puts "Failed to save table: #{table.name}"
+          puts table.errors.messages
+        end
+      end
 
-      if table.save
-        db.schema(table_name.to_sym).each do |column|
+      total_tables = db.tables.length
+    }
+
+    @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
+
+    # TODO: Add is_migrated column
+    @database_tables.each do |table|
+      # Table Fields Migration
+      connect(@database) {|db|
+        db.schema(table.name.to_sym).each do |column|
           column_name = column[0]
           column_options = column[1]
 
-          # Field Migration
           field = PowerbaseField.find_by(
             name: column_name,
             powerbase_table_id: table.id,
@@ -70,9 +80,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               ) || FieldSelectOption.new
               field_select_options.name = column_options[:db_type]
 
-              if options[:adapter] === "postgresql"
+              if @database.adapter === "postgresql"
                 field_select_options.values = column_options[:enum_values]
-              elsif options[:adapter] === "mysql2"
+              elsif @database.adapter === "mysql2"
                 field_select_options.values = column_options[:db_type].slice(5..-2)
                   .tr("''", "")
                   .split(",")
@@ -91,83 +101,87 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             puts field.errors.messages
           end
         end
+      }
 
-        # Add default views and view fields
-        table_view = TableView.new
-        table_view.powerbase_table_id = table.id
-        table_view.name = "Grid View"
-        table_view.view_type = "grid"
-        if table_view.save
-          table.default_view_id = table_view.id
-          table.save
+      # Table View and View Fields Migration
+      table_view = TableView.new
+      table_view.powerbase_table_id = table.id
+      table_view.name = "Grid View"
+      table_view.view_type = "grid"
+      if table_view.save
+        table.default_view_id = table_view.id
+        table.save
 
-          fields = PowerbaseField.where(powerbase_table_id: table.id)
-          fields.each_with_index do |cur_field, index|
-            view_field = ViewFieldOption.new
-            view_field.width = case cur_field.powerbase_field_type_id
-              when 3
-                cur_field.name.length > 4 ? 50 : cur_field.name.length * 10
-              else
-                300
-              end
-            view_field.order = index + 1
-            view_field.table_view_id = table_view.id
-            view_field.powerbase_field_id = cur_field.id
-            view_field.save
-          end
-        else
-          # TODO: Add error tracker (ex. Sentry)
-          puts "Failed to save default grid view: #{table.name}"
-          puts table_view.errors.messages
-        end
-
-        # Table Records Migration
-        if options[:is_turbo]
-          table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
-          table_model.index_records
+        fields = PowerbaseField.where(powerbase_table_id: table.id)
+        fields.each_with_index do |cur_field, index|
+          view_field = ViewFieldOption.new
+          view_field.width = case cur_field.powerbase_field_type_id
+            when 3
+              cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
+            else
+              300
+            end
+          view_field.order = index + 1
+          view_field.table_view_id = table_view.id
+          view_field.powerbase_field_id = cur_field.id
+          view_field.save
         end
       else
         # TODO: Add error tracker (ex. Sentry)
-        puts "Failed to save table: #{table.name}"
-        puts table.errors.messages
+        puts "Failed to save default grid view: #{table.name}"
+        puts table_view.errors.messages
       end
-    end
 
-    db_tables = PowerbaseTable.where(powerbase_database_id: options[:database_id])
-
-    db_tables.each do |table|
       # Foreign Keys Migration
-      table_foreign_keys = db.foreign_key_list(table.name)
-      table_foreign_keys.each do |foreign_key|
-        referenced_table = db_tables.select { |item| item.name == foreign_key[:table].to_s }.first
+      connect(@database) {|db|
+        table_foreign_keys = db.foreign_key_list(table.name)
+        table_foreign_keys.each do |foreign_key|
+          referenced_table = @database_tables
+            .select { |item| item.name == foreign_key[:table].to_s }
+            .first
 
-        table_foreign_key = TableForeignKey.find_by(name: foreign_key[:name], powerbase_table_id: table.id) || TableForeignKey.new
-        table_foreign_key.name = foreign_key[:name]
-        table_foreign_key.columns = foreign_key[:columns]
-        table_foreign_key.referenced_columns = foreign_key[:key]
-        table_foreign_key.referenced_table_id = referenced_table.id
-        table_foreign_key.powerbase_table_id = table.id
+          table_foreign_key = TableForeignKey.find_by(
+            name: foreign_key[:name],
+            powerbase_table_id: table.id
+          ) || TableForeignKey.new
+          table_foreign_key.name = foreign_key[:name]
+          table_foreign_key.columns = foreign_key[:columns]
+          table_foreign_key.referenced_columns = foreign_key[:key]
+          table_foreign_key.referenced_table_id = referenced_table.id
+          table_foreign_key.powerbase_table_id = table.id
 
-        if !table_foreign_key.save
-          # TODO: Add error tracker (ex. Sentry)
-          puts "Failed to save foreign key constraint: #{table_foreign_key.name}"
-          puts table_foreign_key.errors.messages
+          if !table_foreign_key.save
+            # TODO: Add error tracker (ex. Sentry)
+            puts "Failed to save foreign key constraint: #{table_foreign_key.name}"
+            puts table_foreign_key.errors.messages
+          end
         end
+      }
+    end
+
+    if @database.is_turbo
+      @database_tables.each do |table|
+        # Table Records Migration
+        table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
+        table_model.index_records
       end
     end
 
-    if db.tables.length === db_tables.length
-      database = PowerbaseDatabase.find(options[:database_id])
-
-      if total_saved_fields === database.powerbase_fields.length
-        database.update(is_migrated: true)
+    if total_tables === @database_tables.length
+      if total_saved_fields === @database.powerbase_fields.length
+        @database.update(is_migrated: true)
       else
-        puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{database.powerbase_fields.length}"
+        puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{@database.powerbase_fields.length}"
       end
-    else
-      puts "Total tables are not equal. Expected: #{db.tables.length}, Actual: #{db_tables.length}"
     end
-
-    Powerbase.disconnect
   end
+
+  private
+    def connect(db, &block)
+      Powerbase.connect({
+        adapter: db.adapter,
+        connection_string: db.connection_string,
+        is_turbo: db.is_turbo,
+      }, &block)
+    end
 end
