@@ -157,6 +157,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           end
         end
       }
+
+      if !@database.is_turbo
+        table.is_migrated = true
+        table.save
+      end
     end
 
     if @database.is_turbo
@@ -164,12 +169,21 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         # Table Records Migration
         table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
         table_model.index_records
+
+        table.is_migrated = true
+        table.save
       end
     end
 
     if total_tables === @database_tables.length
       if total_saved_fields === @database.powerbase_fields.length
-        @database.update(is_migrated: true)
+        unmigrated_tables = PowerbaseTable.where(is_migrated: false)
+
+        if unmigrated_tables.length == 0
+          @database.update(is_migrated: true)
+        else
+          puts "Some tables hasn't finished migrating yet."
+        end
       else
         puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{@database.powerbase_fields.length}"
       end
