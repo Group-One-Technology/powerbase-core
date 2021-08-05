@@ -26,7 +26,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     window.history.replaceState(
       null,
       table.name,
-      `/base/${baseId}/table/${table.id}?view=${table.defaultViewId}`,
+      `/base/${baseId}/table/${table.id}?${table.defaultViewId ? `view=${table.defaultViewId}` : ''}`,
     );
 
     setTableId(table.id);
