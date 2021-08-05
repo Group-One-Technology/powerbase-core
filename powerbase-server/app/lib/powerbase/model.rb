@@ -32,21 +32,22 @@ module Powerbase
 
         @esclient.indices.create(index: index, body: nil)
 
-        table.paged_each {|record|
+        table.select(Sequel.lit('ctid'), Sequel.lit('*')).paged_each {|record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
                 .join("-")
             else
-              fields
-                .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                .join("-")
+              # * Note: Only works for PostgreSQL
+              "ctid_#{record[:ctid]}"
             end
 
+          doc_body = record.slice!(:ctid)
+
           if @esclient.exists(index: index, id: doc_id)
-            @esclient.update(index: index, id: doc_id, body: record)
+            @esclient.update(index: index, id: doc_id, body: doc_body)
           else
-            @esclient.index(index: index, id: doc_id, body: record)
+            @esclient.index(index: index, id: doc_id, body: doc_body)
           end
         }
       }
