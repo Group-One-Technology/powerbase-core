@@ -5,7 +5,6 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
-import { useWindowSize } from '@lib/hooks/useWindowSize';
 import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
 
@@ -25,9 +24,6 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   const { data: bases } = useBases();
   const { data: base } = useBase();
 
-  const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 125 : 0;
-
   if (base == null || bases == null || authUser == null) {
     return <Loader className="h-screen" />;
   }
@@ -35,16 +31,6 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   if (base.userId !== authUser.id) {
     history.push('/login');
     return <Loader className="h-screen" />;
-  }
-
-  if (!base.isMigrated) {
-    return (
-      <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white">
-        <PageContent className="!px-0 max-w-full">
-          <Loader style={{ height }} />;
-        </PageContent>
-      </Page>
-    );
   }
 
   return (

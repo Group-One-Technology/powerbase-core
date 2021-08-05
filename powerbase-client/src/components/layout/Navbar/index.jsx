@@ -43,7 +43,7 @@ export function Navbar({ base, bases }) {
       {({ open }) => (
         <>
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <div className="flex sm:grid sm:grid-cols-3 justify-between items-center h-11">
+            <div className="flex sm:grid sm:grid-cols-4 justify-between items-center h-11">
               <div className="col-span-1">
                 <div className="flex-shrink-0 flex items-center">
                   <Link to="/">
@@ -51,7 +51,7 @@ export function Navbar({ base, bases }) {
                   </Link>
                 </div>
               </div>
-              <div className={cn('hidden sm:col-span-1 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
+              <div className={cn('hidden sm:col-span-2 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
                 {base && <BaseMenu base={base} otherBases={otherBases} />}
                 {!base && NAVIGATION.map((item) => {
                   const isCurrentItem = location.pathname === item.href;

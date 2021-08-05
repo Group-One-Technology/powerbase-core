@@ -13,11 +13,13 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const tablesResponse = useSWR(
     (baseId && authUser) ? `/databases/${baseId}/tables` : null,
     () => getTables({ databaseId: baseId }),
+    { revalidateOnFocus: true },
   );
 
   const viewsResponse = useSWR(
     (tableId && authUser) ? `/tables/${tableId}/views` : null,
     () => getTableViews({ tableId }),
+    { revalidateOnFocus: true },
   );
 
   const handleTableChange = ({ table }) => {

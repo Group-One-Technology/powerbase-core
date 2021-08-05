@@ -4,6 +4,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
+import { Dot } from '@components/ui/Dot';
 
 const SCROLL_OFFSET = 100;
 
@@ -97,6 +98,7 @@ export function TableTabs({
               className="text-sm text-white bg-gray-900 bg-opacity-80"
             >
               {table.name}
+              {!table.isMigrated && ' (Migrating)'}
             </option>
           ))}
           <option onClick={addTable} className="text-sm text-white bg-gray-900 bg-opacity-80">
@@ -138,11 +140,16 @@ export function TableTabs({
                 ref={isCurrentTable ? activeTabEl : undefined}
                 onClick={() => handleTableChange({ table })}
                 className={cn(
-                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md',
+                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
                 )}
                 aria-current={isCurrentTable ? 'page' : undefined}
               >
+                {!table.isMigrated && (
+                  <Dot color="yellow" className="mr-1.5">
+                    <span className="sr-only">Migrating</span>
+                  </Dot>
+                )}
                 {table.name}
               </button>
             );

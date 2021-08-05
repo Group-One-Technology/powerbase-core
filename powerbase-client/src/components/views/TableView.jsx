@@ -9,6 +9,7 @@ import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
+import { useWindowSize } from '@lib/hooks/useWindowSize';
 
 import { BaseTable } from '@components/tables/BaseTables';
 import { Loader } from '@components/ui/Loader';
@@ -17,6 +18,9 @@ import { TableViewsNav } from './TableViewsNav';
 const BaseTableView = React.memo(({ views, baseId, table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
+
+  const windowSize = useWindowSize();
+  const height = windowSize.height ? windowSize.height - 125 : 0;
 
   if (!view || !fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
@@ -28,12 +32,14 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <TableViewsNav
             baseId={baseId}
-            tableId={table.id}
+            table={table}
             currentView={view}
             views={views}
             fields={fields}
           />
-          <BaseTable view={view} />
+          {table.isMigrated
+            ? <BaseTable view={view} height={height} />
+            : <Loader style={{ height }} />}
         </TableRecordsProvider>
       </TableRecordsCountProvider>
     </RecordsFilterProvider>

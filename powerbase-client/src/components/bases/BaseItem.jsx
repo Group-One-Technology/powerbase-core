@@ -1,17 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRightIcon } from '@heroicons/react/outline';
-import cn from 'classnames';
 
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
 export function BaseItem({ base }) {
   return (
-    <Link
-      to={base.isMigrated ? `/base/${base.id}` : '#'}
-      className={cn('h-full flex flex-col justify-center', { 'cursor-not-allowed': !base.isMigrated })}
-    >
+    <Link to={`/base/${base.id}`} className="h-full flex flex-col justify-center">
       <div className="p-8">
         <h2 className="mt-3 text-gray-900 text-xl font-bold uppercase break-words" style={{ hyphens: 'auto' }}>{base.name}</h2>
         {base.isMigrated
