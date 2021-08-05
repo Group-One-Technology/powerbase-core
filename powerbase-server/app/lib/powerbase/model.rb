@@ -31,15 +31,33 @@ module Powerbase
         puts "#{Time.now} Saving #{total_records} documents at index #{index}..."
 
         @esclient.indices.create(index: index, body: nil)
+        table_select = [Sequel.lit('*')]
 
-        table.select(Sequel.lit('ctid'), Sequel.lit('*')).paged_each {|record|
+        if @powerbase_database.adapter == "postgresql"
+          table_select.push(Sequel.lit('ctid'))
+        end
+
+        table.select(*table_select).paged_each {|record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
                 .join("-")
-            else
-              # * Note: Only works for PostgreSQL
+            elsif @powerbase_database.adapter == "postgresql"
               "ctid_#{record[:ctid]}"
+            else
+              field_ids = fields.select {|field|
+                field.name.downcase.include?("id") || field.name.downcase.include?("identifier")
+              }
+
+              if field_ids.length > 0
+                field_ids
+                  .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
+                  .join("-")
+              else
+                fields
+                  .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
+                  .join("-")
+              end
             end
 
           doc_body = record.slice!(:ctid)
