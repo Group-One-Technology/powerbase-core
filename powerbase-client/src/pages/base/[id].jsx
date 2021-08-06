@@ -11,7 +11,7 @@ function Base({ id }) {
   if (tables?.length) {
     const [firstTable] = tables;
 
-    return <Redirect to={`/base/${id}/table/${firstTable.id}?view=${firstTable.defaultViewId}`} />;
+    return <Redirect to={`/base/${id}/table/${firstTable.id}?${firstTable.defaultViewId ? `view=${firstTable.defaultViewId}` : ''}`} />;
   }
 
   return <Loader className="h-screen" />;
