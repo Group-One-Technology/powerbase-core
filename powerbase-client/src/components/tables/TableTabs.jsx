@@ -2,9 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+
 import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
 import { Dot } from '@components/ui/Dot';
+import { Tooltip } from '@components/ui/Tooltip';
 
 const SCROLL_OFFSET = 100;
 
@@ -131,27 +133,29 @@ export function TableTabs({
               </div>
             </>
           )}
-          {tables?.map((table) => {
+          {tables?.map((table, index) => {
             const isCurrentTable = table.id.toString() === tableId.toString();
 
             return (
-              <button
-                key={table.id}
-                ref={isCurrentTable ? activeTabEl : undefined}
-                onClick={() => handleTableChange({ table })}
-                className={cn(
-                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
-                  isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
-                )}
-                aria-current={isCurrentTable ? 'page' : undefined}
+              <Tooltip
+                text="Migrating"
+                position={index > 1 ? 'left' : 'right'}
+                className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
               >
-                {!table.isMigrated && (
-                  <Dot color="yellow" className="mr-1.5">
-                    <span className="sr-only">Migrating</span>
-                  </Dot>
-                )}
-                {table.name}
-              </button>
+                <button
+                  key={table.id}
+                  ref={isCurrentTable ? activeTabEl : undefined}
+                  onClick={() => handleTableChange({ table })}
+                  className={cn(
+                    'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
+                    isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                  )}
+                  aria-current={isCurrentTable ? 'page' : undefined}
+                >
+                  {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
+                  {table.name}
+                </button>
+              </Tooltip>
             );
           })}
           {tables && (
