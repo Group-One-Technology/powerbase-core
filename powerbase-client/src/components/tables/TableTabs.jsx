@@ -136,27 +136,35 @@ export function TableTabs({
           {tables?.map((table, index) => {
             const isCurrentTable = table.id.toString() === tableId.toString();
 
-            return (
-              <Tooltip
-                text="Migrating"
-                position={index > 1 ? 'left' : 'right'}
-                className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
+            const button = (
+              <button
+                key={table.id}
+                ref={isCurrentTable ? activeTabEl : undefined}
+                onClick={() => handleTableChange({ table })}
+                className={cn(
+                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
+                  isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                )}
+                aria-current={isCurrentTable ? 'page' : undefined}
               >
-                <button
-                  key={table.id}
-                  ref={isCurrentTable ? activeTabEl : undefined}
-                  onClick={() => handleTableChange({ table })}
-                  className={cn(
-                    'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
-                    isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
-                  )}
-                  aria-current={isCurrentTable ? 'page' : undefined}
-                >
-                  {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                  {table.name}
-                </button>
-              </Tooltip>
+                {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
+                {table.name}
+              </button>
             );
+
+            if (!table.isMigrated) {
+              return (
+                <Tooltip
+                  text="Migrating"
+                  position={index > 1 ? 'left' : 'right'}
+                  className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
+                >
+                  {button}
+                </Tooltip>
+              );
+            }
+
+            return button;
           })}
           {tables && (
             <div className="my-auto px-2">
