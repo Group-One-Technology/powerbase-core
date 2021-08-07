@@ -35,23 +35,33 @@ module Powerbase
   # :database :: the name of the database to connect to.
   def self.connect(options, &block)
     if options[:adapter] && options[:database]
-      @@adapter = options[:adapter]
+      @@adapter = case options[:adapter]
+        when "postgres"
+          "postgresql"
+        when "mysql"
+          "mysql2"
+        else
+          options[:adapter]
+        end
       @@database = options[:database]
       user = "#{options[:username]}:#{options[:password]}"
       server = "#{options[:host]}:#{options[:port]}"
-      @@connection_string = "#{options[:adapter]}://#{user}@#{server}/#{options[:database]}"
+      @@connection_string = "#{@@adapter}://#{user}@#{server}/#{@@database}"
     elsif options[:connection_string]
       @@connection_string = options[:connection_string]
       @@adapter, connection_string = options[:connection_string].split('://')
       @@database, @@params = options[:connection_string].split(/[:@\/]/).last.split('?')
 
-      @@adapter = if @@adapter == "postgres"
+      @@adapter = case @@adapter
+        when "postgres"
           "postgresql"
-        elsif @@adapter == "mysql"
+        when "mysql"
           "mysql2"
         else
           @@adapter
         end
+
+      @@connection_string = "#{@@adapter}://#{connection_string}"
     else
       raise StandardError.new('Missing connection credentials to connect to Powerbase.')
     end
