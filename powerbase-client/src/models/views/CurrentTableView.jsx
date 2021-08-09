@@ -37,7 +37,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   return {
     table: tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString()),
     tables: tablesResponse.data?.tables,
-    view: viewsResponse.data?.find((view) => view.id.toString() === viewId.toString()),
+    view: viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString()),
     views: viewsResponse.data,
     setViewId,
     setTableId,

@@ -63,8 +63,8 @@ export const TableView = React.memo(({
   }
 
   return (
-    <TableViewProvider id={currentView.id}>
-      <ViewFieldsProvider id={currentView.id}>
+    <TableViewProvider id={currentView?.id}>
+      <ViewFieldsProvider id={currentView?.id}>
         <BaseTableView
           baseId={baseId}
           table={table}
