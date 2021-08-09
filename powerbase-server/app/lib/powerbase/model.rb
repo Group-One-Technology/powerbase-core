@@ -63,7 +63,7 @@ module Powerbase
           doc_body = record.slice!(:ctid)
 
           if @esclient.exists(index: index, id: doc_id)
-            @esclient.update(index: index, id: doc_id, body: doc_body)
+            @esclient.update(index: index, id: doc_id, body: { doc: doc_body })
           else
             @esclient.index(index: index, id: doc_id, body: doc_body)
           end
