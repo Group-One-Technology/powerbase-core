@@ -64,13 +64,27 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
+        case Powerbase.adapter
+        when "postgresql"
+          @db_size = Powerbase.DB
+            .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
+            .first[:size]
+        when "mysql2"
+          @db_size = Powerbase.DB
+            .from(Sequel.lit("information_schema.TABLES"))
+            .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
+            .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
+            .group(:table_schema)
+            .first[:size]
+        end
+
         PowerbaseDatabaseMigrationJob.perform_later(@database.id)
       end
     end
 
     Powerbase.disconnect
 
-    render json: { connected: @is_connected, database: @database }
+    render json: { connected: @is_connected, database: @database, db_size: @db_size }
   end
 
   private
