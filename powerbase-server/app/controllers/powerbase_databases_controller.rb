@@ -84,7 +84,7 @@ class PowerbaseDatabasesController < ApplicationController
 
     Powerbase.disconnect
 
-    render json: { connected: @is_connected, database: @database, db_size: @db_size }
+    render json: { connected: @is_connected, database: format_json(@database), db_size: @db_size }
   end
 
   private
