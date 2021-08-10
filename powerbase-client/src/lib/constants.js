@@ -1,10 +1,11 @@
 /* eslint-disable object-curly-newline */
 export const SITE_NAME = 'Powerbase';
 export const SITE_DESCRIPTION = 'Powerbase is the missing bridge to the worlds most trusted relational database.';
+export const MAX_SMALL_DATABASE_SIZE = 1000000; // 976.56 KB
 
 export const DATABASE_TYPES = [
   { name: 'PostgreSQL', value: 'postgresql' },
-  { name: 'MySQL', value: 'mysql2', description: 'Coming Soon', disabled: true },
+  { name: 'MySQL', value: 'mysql2' },
   { name: 'SQLite', value: 'sqlite', description: 'Coming Soon', disabled: true },
 ];
 

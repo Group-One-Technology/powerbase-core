@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { connectDatabase } from '@lib/api/databases';
-import { POWERBASE_TYPE } from '@lib/constants';
+import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants';
+import { formatBytes } from '@lib/helpers/formatBytes';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -13,9 +14,6 @@ import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
-import { formatBytes } from '@lib/helpers/formatBytes';
-
-const MAX_SMALL_DATABASE_SIZE = 1000000; // 976.56 KB
 
 export function ConnectURLBasePage() {
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
@@ -26,7 +24,6 @@ export function ConnectURLBasePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState();
   const [modalContent, setModalContent] = useState();
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (evt) => {
