@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { connectDatabase } from '@lib/api/databases';
-import { POWERBASE_TYPE } from '@lib/constants';
+import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants';
+import { formatBytes } from '@lib/helpers/formatBytes';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -14,19 +13,24 @@ import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
 import { InlineRadio } from '@components/ui/InlineRadio';
+import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
 
 export function ConnectURLBasePage() {
-  const history = useHistory();
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState();
+  const [modalContent, setModalContent] = useState();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
+    setError(undefined);
+    setModalContent(undefined);
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
@@ -46,15 +50,19 @@ export function ConnectURLBasePage() {
           color,
         });
 
-        if (response.connected) {
-          history.push('/');
+        if (response.connected && response.database.isTurbo) {
+          const databaseSize = +response.dbSize.split(' ')[0];
+
+          if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
+            setModalContent(`It might take hours/days to import the database with the size of ${formatBytes(databaseSize)}`);
+          }
         }
-      } catch (error) {
-        console.log({ error });
-        alert(error.response.data.exception);
+      } catch (err) {
+        setError(err.response.data.exception);
       }
     }
 
+    setIsModalOpen(true);
     setLoading(false);
   };
 
@@ -128,6 +136,12 @@ export function ConnectURLBasePage() {
           </div>
         </PageContent>
       </div>
+      <ConnectBaseModal
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        content={modalContent}
+        error={error}
+      />
     </Page>
   );
 }

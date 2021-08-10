@@ -27,5 +27,6 @@ module.exports = {
     'no-param-reassign': 'off',
     'react/jsx-props-no-spreading': 'off',
     'jsx-a11y/label-has-associated-control': 'off',
+    'max-len': 'off',
   },
 };
