@@ -1,4 +1,6 @@
 module Powerbase
+  ELASTICSEACH_ID_LIMIT = 512
+
   class Model
     # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
@@ -54,19 +56,32 @@ module Powerbase
                   .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
                   .join("-")
               else
-                fields
-                  .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                  .join("-")
+                not_nullable_fields = fields.select {|field| !field.is_nullable }
+
+                if not_nullable_fields.length > 0
+                  not_nullable_fields
+                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
+                    .join("-")
+                else
+                  fields
+                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
+                    .join("-")
+                end
               end
             end
 
-          doc_body = record.slice!(:ctid)
+          doc_id = doc_id
+            .parameterize(separator: "_")
+            .truncate(ELASTICSEACH_ID_LIMIT)
 
-          if @esclient.exists(index: index, id: doc_id)
-            @esclient.update(index: index, id: doc_id, body: { doc: doc_body })
-          else
-            @esclient.index(index: index, id: doc_id, body: doc_body)
-          end
+          @esclient.update(
+            index: index,
+            id: doc_id,
+            body: {
+              doc: record.slice!(:ctid),
+              doc_as_upsert: true
+            }
+          )
         }
       }
     end
