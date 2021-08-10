@@ -11,8 +11,9 @@ connection_hash = {
   reload_connections: true,
   retry_on_failure: 2,
   request_timeout: 60,
-  logger: Logger.new("#{Rails.root}/log/elasticsearch.log"),
 }
+
+connection_hash[:logger] = Logger.new("#{Rails.root}/log/elasticsearch.log") if !Rails.env.production?
 
 ElasticsearchClient = Elasticsearch::Client.new(connection_hash)
 Elasticsearch::Model.client = Elasticsearch::Client.new(connection_hash)
