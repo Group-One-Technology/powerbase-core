@@ -18,6 +18,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       raise StandardError.new("Database with id of #{database_id} could not be found.")
     end
 
+    if @database.is_migrated
+      raise StandardError.new("Database with id of #{database_id} has already been migrated.")
+    end
+
     # Table Migration
     puts "#{Time.now} Migrating tables of database with id of #{database_id}..."
 
@@ -44,6 +48,8 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
 
     @database_tables.each do |table|
+      next if table.is_migrated
+
       # Table Fields Migration
       puts "#{Time.now} Migrating tables fields of table with id of #{table.id}..."
 
@@ -172,11 +178,13 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     if @database.is_turbo
       @database_tables.each do |table|
         # Table Records Migration
-        table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
-        table_model.index_records
+        if !table.is_migrated
+          table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
+          table_model.index_records
 
-        table.is_migrated = true
-        table.save
+          table.is_migrated = true
+          table.save
+        end
       end
     end
 
