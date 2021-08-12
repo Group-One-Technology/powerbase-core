@@ -153,21 +153,9 @@ export function TableViewsFilter({ view, fields }) {
     setFieldType(selectedFieldType);
     setOperators(selectedFieldType === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS);
     setOperator(selectedFieldType === 'number' ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
-    setSecondOperand((value) => value || '');
+    setSecondOperand('');
 
-    if (operator != null && selectedField != null
-      && ((selectedFieldType === 'number' && typeof secondOperand === 'number')
-        || (selectedFieldType === 'text'))) {
-      if (secondOperand.length) {
-        updateTableRecords({
-          operatorPayload: operator,
-          firstOperandPayload: selectedField.name,
-          secondOperandPayload: secondOperand,
-        });
-      } else {
-        updateTableRecords({ reset: true });
-      }
-    }
+    updateTableRecords({ reset: true });
   };
 
   const handleOperatorChange = (evt) => {
