@@ -197,7 +197,7 @@ export function TableViewsFilter({ view, fields }) {
     if (operator != null && firstOperand != null
       && ((fieldType === 'number' && typeof value === 'number')
         || (fieldType === 'text'))) {
-      if (value.length) {
+      if ((typeof value === 'string' && value.length) || value != null) {
         updateTableRecords({
           operatorPayload: operator,
           firstOperandPayload: firstOperand.name,
@@ -268,7 +268,7 @@ export function TableViewsFilter({ view, fields }) {
                     </select>
                     <input
                       id="secondOperand"
-                      type={fieldType}
+                      type="text"
                       aria-label="Second Operand"
                       name="second_operand"
                       value={secondOperand}
