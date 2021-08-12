@@ -13,13 +13,16 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     total_tables = 0
 
     if !single_line_text_field
-      raise StandardError.new("There is no 'single line text' field in the database.")
+      puts "ERROR: There is no 'single line text' field in the database."
+      return
     elsif !@database
-      raise StandardError.new("Database with id of #{database_id} could not be found.")
+      puts "ERROR: Database with id of #{database_id} could not be found."
+      return
     end
 
     if @database.is_migrated
-      raise StandardError.new("Database with id of #{database_id} has already been migrated.")
+      puts "ERROR: Database with id of #{database_id} has already been migrated."
+      return
     end
 
     # Table Migration
