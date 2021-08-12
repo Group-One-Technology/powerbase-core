@@ -84,6 +84,7 @@ export function TableViewsFilter({ view, fields }) {
       setFieldType(isNumber ? 'number' : 'text');
       setOperators(isNumber ? NUMBER_OPERATORS : TEXT_OPERATORS);
       setOperator(isNumber ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
+      setSecondOperand('');
     }
   }, [fields]);
 
