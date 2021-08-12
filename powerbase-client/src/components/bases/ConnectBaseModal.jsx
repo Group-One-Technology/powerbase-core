@@ -33,7 +33,7 @@ export function ConnectBaseModal({
             </Dialog.Title>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                {content || 'Please wait for a couple of minutes for the database to finish importing.'}
+                {error || content || 'Please wait for a couple of minutes for the database to finish importing.'}
               </p>
             </div>
           </div>

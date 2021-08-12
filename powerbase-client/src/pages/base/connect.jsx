@@ -68,7 +68,9 @@ export function ConnectBasePage() {
         if (response.connected && response.database.isTurbo) {
           const databaseSize = +response.dbSize.split(' ')[0];
 
-          if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
+          if (response.isExisting) {
+            setError(`Database with name of "${response.database.name}" already exists in this account.`);
+          } else if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
             setModalContent(`It might take hours/days to import the database with the size of ${formatBytes(databaseSize)}`);
           }
         }
