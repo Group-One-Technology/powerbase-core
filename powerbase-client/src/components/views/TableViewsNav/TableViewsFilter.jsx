@@ -84,6 +84,7 @@ export function TableViewsFilter({ view, fields }) {
       setFieldType(isNumber ? 'number' : 'text');
       setOperators(isNumber ? NUMBER_OPERATORS : TEXT_OPERATORS);
       setOperator(isNumber ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
+      setSecondOperand('');
     }
   }, [fields]);
 
@@ -153,21 +154,9 @@ export function TableViewsFilter({ view, fields }) {
     setFieldType(selectedFieldType);
     setOperators(selectedFieldType === 'number' ? NUMBER_OPERATORS : TEXT_OPERATORS);
     setOperator(selectedFieldType === 'number' ? NUMBER_OPERATORS[0] : TEXT_OPERATORS[0]);
-    setSecondOperand((value) => value || '');
+    setSecondOperand('');
 
-    if (operator != null && selectedField != null
-      && ((selectedFieldType === 'number' && typeof secondOperand === 'number')
-        || (selectedFieldType === 'text'))) {
-      if (secondOperand.length) {
-        updateTableRecords({
-          operatorPayload: operator,
-          firstOperandPayload: selectedField.name,
-          secondOperandPayload: secondOperand,
-        });
-      } else {
-        updateTableRecords({ reset: true });
-      }
-    }
+    updateTableRecords({ reset: true });
   };
 
   const handleOperatorChange = (evt) => {
@@ -186,22 +175,20 @@ export function TableViewsFilter({ view, fields }) {
   };
 
   const handleSecondOperandChange = async (evt) => {
-    const value = fieldType === 'number' ? Number(evt.target.value) : evt.target.value;
+    let { value } = evt.target;
 
     if (fieldType === 'number') {
-      setSecondOperand(!Number.isNaN(value) ? value : 0);
-    } else {
-      setSecondOperand(value);
+      value = !Number.isNaN(Number(value)) ? value : '';
     }
 
-    if (operator != null && firstOperand != null
-      && ((fieldType === 'number' && typeof value === 'number')
-        || (fieldType === 'text'))) {
+    setSecondOperand(value);
+
+    if (operator != null && firstOperand != null) {
       if (value.length) {
         updateTableRecords({
           operatorPayload: operator,
           firstOperandPayload: firstOperand.name,
-          secondOperandPayload: value,
+          secondOperandPayload: fieldType === 'number' ? Number(value) : value,
         });
       } else {
         updateTableRecords({ reset: true });
@@ -268,7 +255,7 @@ export function TableViewsFilter({ view, fields }) {
                     </select>
                     <input
                       id="secondOperand"
-                      type={fieldType}
+                      type="text"
                       aria-label="Second Operand"
                       name="second_operand"
                       value={secondOperand}
