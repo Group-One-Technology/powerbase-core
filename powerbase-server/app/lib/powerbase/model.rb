@@ -26,20 +26,21 @@ module Powerbase
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       primary_keys = fields.select {|field| field.is_primary_key }
 
+      @esclient.indices.create(index: index, body: nil) if !@esclient.indices.exists(index: index)
+
       records = remote_db() {|db|
         table = db.from(@table_name)
         total_records = table.count
 
         puts "#{Time.now} Saving #{total_records} documents at index #{index}..."
 
-        @esclient.indices.create(index: index, body: nil)
         table_select = [Sequel.lit('*')]
 
         if @powerbase_database.adapter == "postgresql"
           table_select.push(Sequel.lit('ctid'))
         end
 
-        table.select(*table_select).paged_each {|record|
+        table.select(*table_select).paged_each(:rows_per_fetch => 500) {|record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
@@ -74,14 +75,19 @@ module Powerbase
             .parameterize(separator: "_")
             .truncate(ELASTICSEACH_ID_LIMIT)
 
-          @esclient.update(
-            index: index,
-            id: doc_id,
-            body: {
-              doc: record.slice!(:ctid),
-              doc_as_upsert: true
-            }
-          )
+          if doc_id != nil
+            @esclient.update(
+              index: index,
+              id: doc_id,
+              body: {
+                doc: record.slice!(:ctid),
+                doc_as_upsert: true
+              }
+            )
+          else
+            puts "Failed to generate #{doc_id} for record in table with id of #{@table_id}"
+            puts record
+          end
         }
       }
     end

@@ -44,6 +44,7 @@ class PowerbaseDatabasesController < ApplicationController
 
     if @is_connected
       @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
+      @is_existing = true
 
       if !@database
         @database = PowerbaseDatabase.new({
@@ -56,6 +57,7 @@ class PowerbaseDatabasesController < ApplicationController
           is_turbo: options[:is_turbo],
           user_id: current_user.id,
         })
+        @is_existing = false
 
         if !@database.save
           render json: @database.errors, status: :unprocessable_entity
@@ -63,28 +65,33 @@ class PowerbaseDatabasesController < ApplicationController
         end
       end
 
-      if !@database.is_migrated
-        case Powerbase.adapter
-        when "postgresql"
-          @db_size = Powerbase.DB
-            .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
-            .first[:size]
-        when "mysql2"
-          @db_size = Powerbase.DB
-            .from(Sequel.lit("information_schema.TABLES"))
-            .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
-            .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
-            .group(:table_schema)
-            .first[:size]
-        end
+      case Powerbase.adapter
+      when "postgresql"
+        @db_size = Powerbase.DB
+          .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
+          .first[:size]
+      when "mysql2"
+        @db_size = Powerbase.DB
+          .from(Sequel.lit("information_schema.TABLES"))
+          .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
+          .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
+          .group(:table_schema)
+          .first[:size]
+      end
 
+      if !@database.is_migrated
         PowerbaseDatabaseMigrationJob.perform_later(@database.id)
       end
     end
 
     Powerbase.disconnect
 
-    render json: { connected: @is_connected, database: format_json(@database), db_size: @db_size }
+    render json: {
+      connected: @is_connected,
+      is_existing: @is_existing,
+      database: format_json(@database),
+      db_size: @db_size,
+    }
   end
 
   private
