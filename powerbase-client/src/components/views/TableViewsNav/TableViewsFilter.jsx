@@ -186,22 +186,20 @@ export function TableViewsFilter({ view, fields }) {
   };
 
   const handleSecondOperandChange = async (evt) => {
-    const value = fieldType === 'number' ? Number(evt.target.value) : evt.target.value;
+    let { value } = evt.target;
 
     if (fieldType === 'number') {
-      setSecondOperand(!Number.isNaN(value) ? value : 0);
-    } else {
-      setSecondOperand(value);
+      value = !Number.isNaN(Number(value)) ? value : '';
     }
 
-    if (operator != null && firstOperand != null
-      && ((fieldType === 'number' && typeof value === 'number')
-        || (fieldType === 'text'))) {
-      if ((typeof value === 'string' && value.length) || value != null) {
+    setSecondOperand(value);
+
+    if (operator != null && firstOperand != null) {
+      if (value.length) {
         updateTableRecords({
           operatorPayload: operator,
           firstOperandPayload: firstOperand.name,
-          secondOperandPayload: value,
+          secondOperandPayload: fieldType === 'number' ? Number(value) : value,
         });
       } else {
         updateTableRecords({ reset: true });
