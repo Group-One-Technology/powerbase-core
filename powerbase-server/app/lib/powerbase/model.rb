@@ -1,5 +1,6 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
+  NUMBER_FIELD_TYPE = 4
 
   class Model
     # * Initialize the Powerbase::Model
@@ -101,11 +102,22 @@ module Powerbase
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
+      fields = PowerbaseField.where(powerbase_table_id: @table_id)
+      primary_keys = fields.select {|field| field.is_primary_key }
+      order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
 
       if @is_turbo
+        sort_column = {}
+        if order_field.powerbase_field_type_id == NUMBER_FIELD_TYPE
+          sort_column[order_field.name.to_sym] = "asc"
+        else
+          sort_column["#{order_field.name}.keyword".to_sym] = "asc"
+        end
+
         search_params = {
           from: (page - 1) * limit,
           size: limit,
+          sort: [sort_column]
         }
 
         if options[:filters]
@@ -125,6 +137,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
+            .order(order_field.name.to_sym)
             .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
             .paginate(page, limit)
             .all
