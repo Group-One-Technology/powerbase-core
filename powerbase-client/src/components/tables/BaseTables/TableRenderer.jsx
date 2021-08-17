@@ -3,7 +3,7 @@ import React from 'react';
 import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
-import { IViewField } from '@lib/propTypes/view_field';
+import { IViewField } from '@lib/propTypes/view-field';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({

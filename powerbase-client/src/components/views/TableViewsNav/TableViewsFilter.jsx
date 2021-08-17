@@ -13,7 +13,7 @@ import debounce from 'lodash.debounce';
 
 import { useTableRecords } from '@models/TableRecords';
 import { updateTableView } from '@lib/api/views';
-import { IViewField } from '@lib/propTypes/view_field';
+import { IViewField } from '@lib/propTypes/view-field';
 import { IView } from '@lib/propTypes/view';
 import { mutate } from 'swr';
 import { useRecordsFilter } from '@models/views/RecordsFilter';

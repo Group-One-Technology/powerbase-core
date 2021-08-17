@@ -6,7 +6,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
-import { IViewField } from '@lib/propTypes/view_field';
+import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 
 import { Badge } from '@components/ui/Badge';
