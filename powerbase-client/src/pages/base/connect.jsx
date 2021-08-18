@@ -6,6 +6,7 @@ import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDAT
 import { DATABASE_TYPES, MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants';
 import { connectDatabase } from '@lib/api/databases';
 import { formatBytes } from '@lib/helpers/formatBytes';
+import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -19,9 +20,14 @@ import { InlineRadio } from '@components/ui/InlineRadio';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
 
 export function ConnectBasePage() {
+  const query = useQuery();
+  const initialAdapter = query.get('adapter');
+
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
-  const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
+  const [databaseType, setDatabaseType] = useState(initialAdapter
+    ? DATABASE_TYPES.find((item) => item.value === initialAdapter)
+    : DATABASE_TYPES[0]);
   const [host, setHost, hostError] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, portError] = useValidState(5432, REQUIRED_VALIDATOR);
   const [username, setUsername] = useState('');

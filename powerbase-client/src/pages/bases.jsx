@@ -36,11 +36,11 @@ export function BasesPage() {
                   key={base.id}
                   className="sm:w-48 sm:h-48 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
                 >
-                  <BaseItem key={base.id} base={base} />
+                  <BaseItem base={base} />
                 </li>
               ))}
               <li className="sm:w-48 sm:h-48 text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
-                <Link to="/base/create" className="h-full">
+                <Link to="/base/add" className="h-full">
                   <div className="h-full flex flex-col p-8 items-center justify-center">
                     <PlusCircleIcon className="mt-3 h-12 w-12 text-gray-500" />
                     <p className="mt-2 text-sm text-gray-500">
