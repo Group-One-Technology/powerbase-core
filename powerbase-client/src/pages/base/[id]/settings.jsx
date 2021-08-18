@@ -6,12 +6,14 @@ import { CogIcon, TableIcon, ViewGridAddIcon } from '@heroicons/react/outline';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
+import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { BaseCoreSettings } from '@components/bases/settings/BaseCoreSettings';
+import { BaseTablesSettings } from '@components/bases/settings/BaseTablesSettings';
 
 const TABS = [
   {
@@ -33,10 +35,11 @@ const TABS = [
 
 function BaseSettings() {
   const history = useHistory();
-  const { data: base } = useBase();
   const { authUser } = useAuthUser();
+  const { data: base } = useBase();
+  const { data: tables } = useBaseTables();
 
-  if (base == null || authUser == null) {
+  if (base == null || tables == null || authUser == null) {
     return <Loader className="h-screen" />;
   }
 
@@ -77,7 +80,9 @@ function BaseSettings() {
                     <Tab.Panel>
                       <BaseCoreSettings base={base} />
                     </Tab.Panel>
-                    <Tab.Panel>dfsadf</Tab.Panel>
+                    <Tab.Panel>
+                      <BaseTablesSettings tables={tables} />
+                    </Tab.Panel>
                     <Tab.Panel>dfdsfsdf</Tab.Panel>
                   </Tab.Panels>
                 </Tab.Group>
@@ -95,7 +100,9 @@ export function BaseSettingsPage() {
 
   return (
     <BaseProvider id={id}>
-      <BaseSettings />
+      <BaseTablesProvider id={id}>
+        <BaseSettings />
+      </BaseTablesProvider>
     </BaseProvider>
   );
 }
