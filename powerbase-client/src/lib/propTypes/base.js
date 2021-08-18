@@ -14,3 +14,10 @@ export const IBase = PropTypes.shape({
   updatedAt: PropTypes.string.isRequired,
   totalTables: PropTypes.number.isRequired,
 });
+
+export const IBaseSource = PropTypes.shape({
+  pretext: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  footnote: PropTypes.string,
+});
