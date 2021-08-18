@@ -34,7 +34,7 @@ function BaseTableSettingsItem({ initialData }) {
           />
         </div>
         <div className="col-span-1 flex justify-end">
-          <GripVerticalIcon className="ml-auto h-4 w-4 text-gray-500" />
+          <GripVerticalIcon className="h-4 w-4 text-gray-500" />
         </div>
       </div>
     </li>
