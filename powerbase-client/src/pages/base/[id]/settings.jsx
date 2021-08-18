@@ -14,6 +14,7 @@ import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { BaseCoreSettings } from '@components/bases/settings/BaseCoreSettings';
 import { BaseTablesSettings } from '@components/bases/settings/BaseTablesSettings';
+import { BaseConnectionsSettings } from '@components/bases/settings/BaseConnectionsSettings';
 
 const TABS = [
   {
@@ -83,7 +84,9 @@ function BaseSettings() {
                     <Tab.Panel>
                       <BaseTablesSettings tables={tables} />
                     </Tab.Panel>
-                    <Tab.Panel>dfdsfsdf</Tab.Panel>
+                    <Tab.Panel>
+                      <BaseConnectionsSettings base={base} tables={tables} />
+                    </Tab.Panel>
                   </Tab.Panels>
                 </Tab.Group>
               </div>
