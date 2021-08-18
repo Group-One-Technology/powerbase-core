@@ -32,13 +32,13 @@ export function Input({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <div>
+    <div className="w-full">
       {label && (
         <label htmlFor={inputId} className={cn('block text-sm font-medium text-gray-700', className)}>
           {label}
         </label>
       )}
-      <div className="mt-1">
+      <div className="mt-1 w-full">
         <input
           id={inputId}
           name={name || label || props['aria-label']}
