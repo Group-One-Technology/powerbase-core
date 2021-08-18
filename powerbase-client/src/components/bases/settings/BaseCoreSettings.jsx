@@ -38,9 +38,9 @@ export function BaseCoreSettings({ base }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="py-6 px-4 sm:p-6 lg:pb-8">
-        <h2 className="text-xl leading-6 font-medium text-gray-900">Core Settings</h2>
+    <div className="py-6 px-4 sm:p-6 lg:pb-8">
+      <h2 className="text-xl leading-6 font-medium text-gray-900">Core Settings</h2>
+      <form onSubmit={handleSubmit}>
         <InlineInput
           type="text"
           label="Name"
@@ -79,8 +79,8 @@ export function BaseCoreSettings({ base }) {
             Save
           </Button>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
 
