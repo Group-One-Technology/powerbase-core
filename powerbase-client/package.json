@@ -10,7 +10,7 @@
     "lint": "eslint \"src/**/*.{js,jsx}\""
   },
   "dependencies": {
-    "@headlessui/react": "^1.2.0",
+    "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.1",
     "@tailwindcss/forms": "^0.3.2",
     "axios": "^0.21.1",
@@ -20,7 +20,7 @@
     "express": "^4.17.1",
     "faker": "^5.5.3",
     "lodash.debounce": "^4.0.8",
-    "postcss": "^8.2.14",
+    "postcss": "^8.3.6",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-device-detect": "^1.17.0",
@@ -30,7 +30,7 @@
     "react-router-dom": "^5.2.0",
     "react-virtualized": "^9.22.3",
     "swr": "^0.5.6",
-    "tailwindcss": "^2.1.2"
+    "tailwindcss": "^2.2.7"
   },
   "devDependencies": {
     "@babel/core": "^7.14.0",
