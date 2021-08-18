@@ -15,6 +15,7 @@ import { AddBasePage } from '@pages/base/add-base';
 import { CreateBasePage } from '@pages/base/create';
 import { ConnectBasePage } from '@pages/base/connect';
 import { ConnectURLBasePage } from '@pages/base/connect-url';
+import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
 import { TablePage } from '@pages/base/table/[id]';
 
 import './index.css';
@@ -47,6 +48,7 @@ function BasesRoute() {
       <Route exact path={`${path}/create`} component={CreateBasePage} />
       <Route exact path={`${path}/connect`} component={ConnectBasePage} />
       <Route exact path={`${path}/connect-url`} component={ConnectURLBasePage} />
+      <Route exact path={`${path}/integration/connect`} component={ConnectIntegrationBasePage} />
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
       <Route path="*" component={() => <h1>Not found!</h1>} />
