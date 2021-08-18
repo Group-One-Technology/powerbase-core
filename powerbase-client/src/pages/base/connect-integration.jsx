@@ -5,6 +5,7 @@ import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { ConnectHubspotForm } from '@components/integrations/ConnectHubspotForm';
+import { ConnectShopifyForm } from '@components/integrations/ConnectShopifyForm';
 
 const BASE_INTEGRATION = {
   hubspot: {
@@ -13,7 +14,7 @@ const BASE_INTEGRATION = {
   },
   shopify: {
     name: 'Shopify',
-    component: <ConnectHubspotForm />,
+    component: <ConnectShopifyForm />,
   },
 };
 
