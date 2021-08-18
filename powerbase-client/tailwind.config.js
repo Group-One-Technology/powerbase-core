@@ -1,4 +1,6 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
+const forms = require('@tailwindcss/forms');
+const colors = require('tailwindcss/colors');
 
 module.exports = {
   mode: 'jit',
@@ -12,12 +14,19 @@ module.exports = {
       fontFamily: {
         sans: ['Inter var', ...defaultTheme.fontFamily.sans],
       },
+      colors: {
+        rose: colors.rose,
+        fuchsia: colors.fuchsia,
+        indigo: colors.indigo,
+        teal: colors.teal,
+        sky: colors.sky,
+        lime: colors.lime,
+        orange: colors.orange,
+      },
     },
   },
   variants: {
     extend: {},
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
-}
+  plugins: [forms],
+};
