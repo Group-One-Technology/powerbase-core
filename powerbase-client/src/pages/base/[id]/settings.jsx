@@ -7,6 +7,7 @@ import { CogIcon, TableIcon, ViewGridAddIcon } from '@heroicons/react/outline';
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
+import { BasesProvider, useBases } from '@models/Bases';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -38,6 +39,7 @@ function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base } = useBase();
+  const { data: bases } = useBases();
   const { data: tables } = useBaseTables();
 
   if (base == null || authUser == null) {
@@ -85,7 +87,11 @@ function BaseSettings() {
                       <BaseTablesSettings tables={tables} />
                     </Tab.Panel>
                     <Tab.Panel>
-                      <BaseConnectionsSettings base={base} tables={tables} />
+                      <BaseConnectionsSettings
+                        base={base}
+                        bases={bases}
+                        tables={tables}
+                      />
                     </Tab.Panel>
                   </Tab.Panels>
                 </Tab.Group>
@@ -103,9 +109,11 @@ export function BaseSettingsPage() {
 
   return (
     <BaseProvider id={id}>
-      <BaseTablesProvider id={id}>
-        <BaseSettings />
-      </BaseTablesProvider>
+      <BasesProvider>
+        <BaseTablesProvider id={id}>
+          <BaseSettings />
+        </BaseTablesProvider>
+      </BasesProvider>
     </BaseProvider>
   );
 }
