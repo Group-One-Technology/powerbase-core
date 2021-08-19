@@ -40,7 +40,7 @@ function BaseSettings() {
   const { data: base } = useBase();
   const { data: tables } = useBaseTables();
 
-  if (base == null || tables == null || authUser == null) {
+  if (base == null || authUser == null) {
     return <Loader className="h-screen" />;
   }
 

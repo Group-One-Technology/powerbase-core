@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { ITable } from '@lib/propTypes/table';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
+import { Loader } from '@components/ui/Loader';
 
 function BaseTableSettingsItem({ initialData }) {
   const [table, setTable] = useState(initialData);
@@ -49,17 +50,20 @@ export function BaseTablesSettings({ tables }) {
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
       <h2 className="text-xl leading-6 font-medium text-gray-900">Tables</h2>
-      <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
-        <ul className="divide-y divide-gray-200">
-          {tables.map((table) => (
-            <BaseTableSettingsItem key={table.id} initialData={table} />
-          ))}
-        </ul>
-      </div>
+      {tables == null && <Loader className="h-[50vh]" />}
+      {!!tables?.length && (
+        <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
+          <ul className="divide-y divide-gray-200">
+            {tables.map((table) => (
+              <BaseTableSettingsItem key={table.id} initialData={table} />
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
 
 BaseTablesSettings.propTypes = {
-  tables: PropTypes.arrayOf(ITable).isRequired,
+  tables: PropTypes.arrayOf(ITable),
 };
