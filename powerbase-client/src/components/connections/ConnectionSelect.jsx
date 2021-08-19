@@ -87,7 +87,7 @@ export function ConnectionSelect({
               <select
                 id={`${heading.toLowerCase()}Base`}
                 name={`${heading.toLowerCase()}-base`}
-                className="flex-1 block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
+                className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-2 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
                 value={base?.id}
                 onChange={handleBaseChange}
               >
@@ -103,7 +103,7 @@ export function ConnectionSelect({
         <select
           id={`${heading.toLowerCase()}Table`}
           name={`${heading.toLowerCase()}-table`}
-          className="flex-1 block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-r-md"
+          className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-3 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-r-md"
           value={table?.id}
           onChange={handleTableChange}
         >
@@ -119,7 +119,7 @@ export function ConnectionSelect({
         <select
           id={`${heading.toLowerCase()}Field`}
           name={`${heading.toLowerCase()}-field`}
-          className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+          className="block w-full text-sm h-8 py-1 pl-1 pr-2 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={field?.id}
           onChange={handleFieldChange}
         >
