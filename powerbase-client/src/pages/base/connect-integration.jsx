@@ -4,8 +4,8 @@ import { useQuery } from '@lib/hooks/useQuery';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
-import { ConnectHubspotForm } from '@components/integrations/ConnectHubspotForm';
-import { ConnectShopifyForm } from '@components/integrations/ConnectShopifyForm';
+import { ConnectHubspotForm } from '@components/bases/ConnectHubspotForm';
+import { ConnectShopifyForm } from '@components/bases/ConnectShopifyForm';
 
 const BASE_INTEGRATION = {
   hubspot: {
