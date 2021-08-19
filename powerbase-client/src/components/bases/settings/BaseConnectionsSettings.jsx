@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ArrowRightIcon } from '@heroicons/react/outline';
-import { Link } from 'react-router-dom';
 
 import { ITable } from '@lib/propTypes/table';
 import { IBase } from '@lib/propTypes/base';
 import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { Loader } from '@components/ui/Loader';
+import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 
 const MOCK_CONNECTIONS = (base, tables) => [
   {
@@ -43,8 +43,14 @@ export function BaseConnectionsSettings({ base, bases, tables }) {
     ? MOCK_CONNECTIONS(base, tables)
     : [];
   const [openAddModal, setAddModalOpen] = useState(false);
+  const [openEditModal, setEditModalOpen] = useState(false);
+  const [selectedConnection, setSelectedConnection] = useState();
 
   const handleAddConnection = () => setAddModalOpen(true);
+  const handleEditConnection = (value) => {
+    setSelectedConnection(value);
+    setEditModalOpen(true);
+  };
 
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
@@ -86,19 +92,28 @@ export function BaseConnectionsSettings({ base, bases, tables }) {
                     </div>
                   </div>
                   <div className="col-span-1 flex justify-end">
-                    <Link
-                      to={`/base/${base.id}/connection/${connection.id}/edit`}
+                    <button
+                      type="button"
                       className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => handleEditConnection(connection)}
                     >
                       Edit
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </li>
             ))}
           </ul>
+          <EditConnectionModal
+            open={openEditModal}
+            setOpen={setEditModalOpen}
+            connection={selectedConnection}
+            base={base}
+            bases={bases}
+          />
           <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
             <button
+              type="button"
               className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
               onClick={handleAddConnection}
             >
