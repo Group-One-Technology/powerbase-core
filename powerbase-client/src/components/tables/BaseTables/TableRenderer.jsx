@@ -1,10 +1,12 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
+import React, { useState } from 'react';
 import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view-field';
 import { CellRenderer } from './CellRenderer';
+
+const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
   fields,
@@ -20,6 +22,8 @@ export function TableRenderer({
     ['', ...fields.map((field) => field.name)],
     ...records,
   ];
+
+  const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
 
   const isRowLoaded = ({ index }) => !!tableValues[index];
   const handleLoadMoreRows = ({ stopIndex }) => {
@@ -59,9 +63,14 @@ export function TableRenderer({
                   columnIndex,
                   isLoaded: !!tableValues[rowIndex],
                   value: tableValues[rowIndex][columnIndex],
+                  hoveredCell,
+                  setHoveredCell,
+                  isLastRecord: rowIndex >= tableValues.length - 1,
                   ...props,
                 })}
-                columnWidth={({ index }) => (index === 0 ? 50 : fields[index - 1].width)}
+                columnWidth={({ index }) => (index === 0
+                  ? ROW_NO_CELL_WIDTH
+                  : fields[index - 1].width)}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
