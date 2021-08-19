@@ -12,10 +12,13 @@ export function Input({
   onBlur,
   showError,
   className,
+  rootClassName,
   ...props
 }) {
   const [focused, setFocused] = useState(false);
-  const [inputId] = useState(() => id || (label ? `formInput-${label.replace(/\s+/g, '-')}` : undefined));
+  const [inputId] = useState(() => id || (label && typeof label === 'string'
+    ? `formInput-${label.replace(/\s+/g, '-')}`
+    : undefined));
 
   const focus = (evt) => {
     if (onFocus) onFocus(evt);
@@ -32,9 +35,9 @@ export function Input({
   const showErrorText = !!(showError || (!focused && error));
 
   return (
-    <div className="w-full">
+    <div className={cn('w-full', rootClassName)}>
       {label && (
-        <label htmlFor={inputId} className={cn('block text-sm font-medium text-gray-700', className)}>
+        <label htmlFor={inputId} className={cn('block text-sm font-medium text-gray-700 mb-2', className)}>
           {label}
         </label>
       )}
@@ -68,7 +71,7 @@ Input.propTypes = {
   id: PropTypes.string,
   type: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  label: PropTypes.string,
+  label: PropTypes.any,
   value: PropTypes.any,
   error: PropTypes.object,
   showError: PropTypes.bool,
@@ -79,5 +82,6 @@ Input.propTypes = {
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
   className: PropTypes.string,
+  rootClassName: PropTypes.string,
   'aria-label': PropTypes.string,
 };
