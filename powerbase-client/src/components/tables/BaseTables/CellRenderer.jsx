@@ -12,6 +12,8 @@ function CellValue({
   isRowNo,
   isHoveredRow,
   isLastRecord,
+  fieldTypeId,
+  handleExpandRecord,
 }) {
   if (isHeader || isLoaded) {
     if (isRowNo && !isHeader) {
@@ -23,8 +25,11 @@ function CellValue({
               <button
                 type="button"
                 className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
-                // TODO: Add View Record Modal
-                onClick={() => alert('show view record modal')}
+                onClick={() => {
+                  if (handleExpandRecord) {
+                    handleExpandRecord(value);
+                  }
+                }}
               >
                 <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
                 <span className="sr-only">Expand Record</span>
@@ -37,7 +42,7 @@ function CellValue({
 
     return (
       <>
-        {(isHeader && !isRowNo) && <FieldTypeIcon className="mr-1" />}
+        {(isHeader && fieldTypeId != null) && <FieldTypeIcon className="mr-1" typeId={fieldTypeId} />}
         {value?.toString()}
       </>
     );
@@ -53,6 +58,8 @@ CellValue.propTypes = {
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
+  fieldTypeId: PropTypes.number,
+  handleExpandRecord: PropTypes.func,
 };
 
 export function CellRenderer({
@@ -62,14 +69,14 @@ export function CellRenderer({
   isLoaded,
   style,
   value,
-  hoveredCell,
   setHoveredCell,
+  isHeader,
+  isHoveredRow,
+  isRowNo,
   isLastRecord,
+  fieldTypeId,
+  handleExpandRecord,
 }) {
-  const isHeader = rowIndex === 0;
-  const isRowNo = columnIndex === 0;
-  const isHoveredRow = hoveredCell.row === rowIndex;
-
   const handleMouseEnter = () => {
     setHoveredCell({
       row: rowIndex,
@@ -114,6 +121,8 @@ export function CellRenderer({
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
         isLastRecord={isLastRecord}
+        fieldTypeId={fieldTypeId}
+        handleExpandRecord={handleExpandRecord}
       />
     </div>
   );
@@ -126,7 +135,11 @@ CellRenderer.propTypes = {
   isLoaded: PropTypes.bool.isRequired,
   style: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
-  hoveredCell: PropTypes.object.isRequired,
   setHoveredCell: PropTypes.func.isRequired,
+  isHeader: PropTypes.bool.isRequired,
+  isHoveredRow: PropTypes.bool.isRequired,
+  isRowNo: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
+  fieldTypeId: PropTypes.number,
+  handleExpandRecord: PropTypes.func,
 };

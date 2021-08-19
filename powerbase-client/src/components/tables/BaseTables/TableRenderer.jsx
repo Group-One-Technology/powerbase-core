@@ -4,6 +4,7 @@ import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view-field';
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -24,14 +25,24 @@ export function TableRenderer({
   ];
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
+
   const handleLoadMoreRows = ({ stopIndex }) => {
     const stop = stopIndex / columnCount;
 
     if ((!isLoading && stop + 100 > records.length) && records.length - 1 !== totalRecords) {
       loadMoreRows();
     }
+  };
+
+  const handleExpandRecord = (rowNo) => {
+    setIsModalOpen(true);
+    setSelectedRecord(fields.map((item, index) => ({
+      ...item,
+      value: tableValues[rowNo][index + 1],
+    })));
   };
 
   return (
@@ -58,16 +69,31 @@ export function TableRenderer({
                   return onRowsRendered({ startIndex, stopIndex });
                 }}
                 onRowsRendered={onRowsRendered}
-                cellRenderer={({ rowIndex, columnIndex, ...props }) => CellRenderer({
-                  rowIndex,
-                  columnIndex,
-                  isLoaded: !!tableValues[rowIndex],
-                  value: tableValues[rowIndex][columnIndex],
-                  hoveredCell,
-                  setHoveredCell,
-                  isLastRecord: rowIndex >= tableValues.length - 1,
-                  ...props,
-                })}
+                cellRenderer={({ rowIndex, columnIndex, ...props }) => {
+                  const isHeader = rowIndex === 0;
+                  const isRowNo = columnIndex === 0 && rowIndex !== 0;
+                  const isLastRecord = rowIndex >= tableValues.length - 1;
+                  const isHoveredRow = hoveredCell.row === rowIndex;
+
+                  return CellRenderer({
+                    rowIndex,
+                    columnIndex,
+                    isLoaded: !!tableValues[rowIndex],
+                    value: tableValues[rowIndex][columnIndex],
+                    setHoveredCell,
+                    isHeader,
+                    isHoveredRow,
+                    isRowNo,
+                    isLastRecord,
+                    fieldTypeId: isHeader && columnIndex !== 0
+                      ? fields[columnIndex - 1].fieldTypeId - 1
+                      : undefined,
+                    handleExpandRecord: isRowNo
+                      ? handleExpandRecord
+                      : undefined,
+                    ...props,
+                  });
+                }}
                 columnWidth={({ index }) => (index === 0
                   ? ROW_NO_CELL_WIDTH
                   : fields[index - 1].width)}
@@ -81,6 +107,13 @@ export function TableRenderer({
           </AutoSizer>
         )}
       </InfiniteLoader>
+      {selectedRecord && (
+        <SingleRecordModal
+          open={isModalOpen}
+          setOpen={setIsModalOpen}
+          record={selectedRecord}
+        />
+      )}
     </div>
   );
 }
