@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { POWERBASE_TYPE } from '@lib/constants';
 
 import { InlineInput } from '@components/ui/InlineInput';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
-import { InlineRadio } from '@components/ui/InlineRadio';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
 
 // TODO: Add scope multiple select
@@ -15,7 +13,6 @@ export function ConnectShopifyForm() {
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [shop, setShop, shopError] = useValidState('', REQUIRED_VALIDATOR);
   const [apiKey, setApiKey, apiKeyError] = useValidState('', REQUIRED_VALIDATOR);
-  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,13 +84,6 @@ export function ConnectShopifyForm() {
             error={apiKeyError.error}
             className="my-6"
             required
-          />
-          <InlineRadio
-            label="Powerbase Type"
-            value={powerbaseType}
-            setValue={setPowerbaseType}
-            options={POWERBASE_TYPE}
-            className="my-6"
           />
           <InlineColorRadio
             value={color}
