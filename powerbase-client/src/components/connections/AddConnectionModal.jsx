@@ -47,6 +47,7 @@ export function AddConnectionModal({
               setTable={setDestinationTable}
               field={destinationField}
               setField={setDestinationField}
+              isDestination
             />
             <ConnectionSelect
               heading="Target"
