@@ -18,6 +18,7 @@ export function ConnectionSelect({
   setField,
   heading,
   label,
+  isDestination,
 }) {
   const { authUser } = useAuthUser();
 
@@ -75,20 +76,29 @@ export function ConnectionSelect({
       <h4 className="font-medium text-lg">{heading}</h4>
       <p className="mt-4 mb-2 text-base text-gray-900">{label}</p>
       <div className="flex">
-        <label htmlFor={`${heading.toLowerCase()}Base`} className="sr-only">{heading} Base</label>
-        <select
-          id={`${heading.toLowerCase()}Base`}
-          name={`${heading.toLowerCase()}-base`}
-          className="flex-1 block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
-          value={base?.id}
-          onChange={handleBaseChange}
-        >
-          {bases?.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        {isDestination
+          ? (
+            <span className="flex-none inline-flex items-center px-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+              {base.name}
+            </span>
+          ) : (
+            <>
+              <label htmlFor={`${heading.toLowerCase()}Base`} className="sr-only">{heading} Base</label>
+              <select
+                id={`${heading.toLowerCase()}Base`}
+                name={`${heading.toLowerCase()}-base`}
+                className="flex-1 block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
+                value={base?.id}
+                onChange={handleBaseChange}
+              >
+                {bases?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         <label htmlFor={`${heading.toLowerCase()}Table`} className="sr-only">{heading} Table</label>
         <select
           id={`${heading.toLowerCase()}Table`}
@@ -134,4 +144,5 @@ ConnectionSelect.propTypes = {
   setField: PropTypes.func.isRequired,
   heading: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  isDestination: PropTypes.bool,
 };
