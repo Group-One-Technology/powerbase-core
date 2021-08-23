@@ -40,10 +40,23 @@ export function TableRenderer({
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item, index) => ({
-      ...item,
-      value: tableValues[rowNo][index + 1],
-    })));
+    setSelectedRecord(fields.map((item, index) => {
+      const foreignKey = foreignKeyIndices.includes(index + 1)
+        ? foreignKeys.find((key) => key.columns.includes(item.name))
+        : undefined;
+
+      return ({
+        ...item,
+        value: tableValues[rowNo][index + 1],
+        isForeignKey: !!foreignKey,
+        foreignKey: foreignKey
+          ? ({
+            ...foreignKey,
+            columnIndex: foreignKey.columns.indexOf(item.name),
+          })
+          : undefined,
+      });
+    }));
   };
 
   return (
@@ -114,7 +127,6 @@ export function TableRenderer({
           open={isModalOpen}
           setOpen={setIsModalOpen}
           record={selectedRecord}
-          foreignKeys={foreignKeys}
         />
       )}
     </div>
@@ -130,5 +142,4 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  foreignKeys: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

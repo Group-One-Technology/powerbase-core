@@ -39,7 +39,7 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
             fields={fields}
           />
           {table.isMigrated
-            ? <BaseTable table={table.id} height={height} />
+            ? <BaseTable height={height} />
             : <Loader style={{ height }} />}
         </TableRecordsProvider>
       </TableRecordsCountProvider>
