@@ -106,9 +106,7 @@ module Powerbase
           .each_key {|key| "#{key}_#{options[:primary_keys][key]}" }
           .join("-")
 
-        result = @esclient.get(index: index, id: id)
-
-        result["hits"]["hits"].map {|result| result["_source"]}
+        @esclient.get(index: index, id: id)["_source"]
       else
         filters = options[:primary_keys]
           .collect {|key, value| key }
