@@ -11,7 +11,7 @@ class TableRecordsControllerTest < ApplicationControllerTest
 
   test "should get list of records of a given table" do
     table = powerbase_tables(:one)
-    put table_records_table_url(id: table.id),
+    post table_records_table_url(id: table.id),
       headers: @@request[:headers],
       as: :json
     assert_response :success
