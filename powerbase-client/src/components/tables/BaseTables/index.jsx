@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
+import { useTableForeignKeys } from '@models/TableForeignKeys';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 
@@ -12,10 +13,11 @@ import 'react-virtualized/styles.css';
 
 export function BaseTable({ height }) {
   const { data: fields } = useViewFields();
+  const { data: foreignKeys } = useTableForeignKeys();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
 
-  if (fields == null || records == null) {
+  if (fields == null || foreignKeys == null || records == null) {
     return <Loader style={{ height }} />;
   }
 
@@ -30,6 +32,7 @@ export function BaseTable({ height }) {
       loadMoreRows={loadMore}
       isLoading={isLoading}
       height={height}
+      foreignKeys={foreignKeys}
     />
   );
 }

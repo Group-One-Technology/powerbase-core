@@ -16,13 +16,14 @@ export function TableRenderer({
   loadMoreRows,
   isLoading,
   height,
+  foreignKeys,
 }) {
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
-  const tableValues = [
-    ['', ...fields.map((field) => field.name)],
-    ...records,
-  ];
+  const fieldNames = fields.map((field) => field.name);
+  const tableValues = [['', ...fieldNames], ...records];
+  const foreignKeyIndices = foreignKeys.map((item) => item.columns).flat()
+    .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,10 +40,23 @@ export function TableRenderer({
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item, index) => ({
-      ...item,
-      value: tableValues[rowNo][index + 1],
-    })));
+    setSelectedRecord(fields.map((item, index) => {
+      const foreignKey = foreignKeyIndices.includes(index + 1)
+        ? foreignKeys.find((key) => key.columns.includes(item.name))
+        : undefined;
+
+      return ({
+        ...item,
+        value: tableValues[rowNo][index + 1],
+        isForeignKey: !!foreignKey,
+        foreignKey: foreignKey
+          ? ({
+            ...foreignKey,
+            columnIndex: foreignKey.columns.indexOf(item.name),
+          })
+          : undefined,
+      });
+    }));
   };
 
   return (
@@ -85,6 +99,7 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
+                    isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId: isHeader && columnIndex !== 0
                       ? fields[columnIndex - 1].fieldTypeId - 1
                       : undefined,

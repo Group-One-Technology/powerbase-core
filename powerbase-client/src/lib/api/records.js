@@ -10,6 +10,16 @@ export async function getTableRecords({ url, ...payload }) {
   return undefined;
 }
 
+export async function getTableRecord({ tableId, recordId, ...payload }) {
+  const response = await securedApi.post(`/tables/${tableId}/records/${recordId}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function getTableRecordsCount({ tableId, ...payload }) {
   const response = await securedApi.post(`/tables/${tableId}/records_count`, payload);
 
