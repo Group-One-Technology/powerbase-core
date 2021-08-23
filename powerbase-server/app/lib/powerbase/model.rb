@@ -81,6 +81,8 @@ module Powerbase
               index: index,
               id: doc_id,
               body: {
+                # Sanitize check whether number or string.
+                # Set datetime records to string.
                 doc: record.slice!(:ctid),
                 doc_as_upsert: true
               }
@@ -141,10 +143,17 @@ module Powerbase
 
       if @is_turbo
         sort_column = {}
+
         if order_field.powerbase_field_type_id == NUMBER_FIELD_TYPE
-          sort_column[order_field.name.to_sym] = "asc"
+          sort_column[order_field.name.to_sym] = {
+            order: "asc",
+            unmapped_type: "long",
+          }
         else
-          sort_column["#{order_field.name}.keyword".to_sym] = "asc"
+          sort_column["#{order_field.name}.keyword".to_sym] = {
+            order: "asc",
+            unmapped_type: "long",
+          }
         end
 
         search_params = {
