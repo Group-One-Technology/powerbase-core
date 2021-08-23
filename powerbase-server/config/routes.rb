@@ -26,4 +26,6 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
 end

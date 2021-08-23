@@ -93,12 +93,47 @@ module Powerbase
       }
     end
 
+    # * Get a document/table record.
+    # Accepts the following options:
+    # :id :: the document ID or a SWR key.
+    # :primary_keys :: an object of the table's primary keys.
+    #    Ex: { pathId: 123, userId: 1245 }
+    def get(options)
+      index = "table_records_#{@table_id}"
+
+      if @is_turbo
+        id = options[:id] || options[:primary_keys]
+          .each_key {|key| "#{key}_#{options[:primary_keys][key]}" }
+          .join("-")
+
+        result = @esclient.get(index: index, id: id)
+
+        result["hits"]["hits"].map {|result| result["_source"]}
+      else
+        filters = options[:primary_keys]
+          .collect {|key, value| key }
+          .map do |key|
+            value = options[:primary_keys][key]
+            value = "\"#{value}\"" if value.is_a?(String)
+
+            "(Sequel[{Sequel.lit(\"#{key}\") => #{value}}])"
+          end
+          .join(" AND ")
+
+        remote_db() {|db|
+          db.from(@table_name)
+            .where(eval(filters))
+            .first
+        }
+      end
+    end
+
     # * Get the filtered and paginated table records.
     # Accepts the following options:
     # :filter :: a JSON that contains the filter for the records.
     # :page :: the page number.
-    # :limit :: the page count. No. of records to get per paage.
-    def get(options)
+    # :limit :: the page count. No. of records to get per page.
+    def search(options)
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
@@ -128,10 +163,7 @@ module Powerbase
           }
         end
 
-        result = @esclient.search(
-          index: "table_records_#{@table_id}",
-          body: search_params
-        )
+        result = @esclient.search(index: index, body: search_params)
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else

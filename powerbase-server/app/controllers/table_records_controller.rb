@@ -1,5 +1,5 @@
 class TableRecordsController < ApplicationController
-  before_action :authorize_access_request!
+  # before_action :authorize_access_request!
 
   schema(:index, :count) do
     required(:id).value(:integer)
@@ -8,16 +8,33 @@ class TableRecordsController < ApplicationController
     optional(:limit).value(:integer)
   end
 
-  # PUT /tables/:id/records
+  schema(:show) do
+    required(:table_id).value(:integer)
+    required(:id).value(:string)
+    required(:primary_keys)
+  end
+
+  # POST /tables/:id/records
   def index
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
-    records = model.get({
+    records = model.search({
       page: safe_params[:page],
       limit: safe_params[:limit],
       filters: safe_params[:filters]
     })
 
     render json: records
+  end
+
+  # POST /tables/:table_id/records/:id
+  def show
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+    record = model.get({
+      id: safe_params[:id],
+      primary_keys: safe_params[:primary_keys],
+    })
+
+    render json: record
   end
 
   # GET /tables/:id/records_count
