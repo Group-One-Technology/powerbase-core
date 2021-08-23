@@ -17,7 +17,7 @@ import { ConnectBasePage } from '@pages/base/connect';
 import { ConnectURLBasePage } from '@pages/base/connect-url';
 import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
 import { BaseSettingsPage } from '@pages/base/[id]/settings';
-import { TablePage } from '@pages/base/table/[id]';
+import { TablePage } from '@pages/base/[id]/table/[id]';
 
 import './index.css';
 
