@@ -16,13 +16,14 @@ export function TableRenderer({
   loadMoreRows,
   isLoading,
   height,
+  foreignKeys,
 }) {
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
-  const tableValues = [
-    ['', ...fields.map((field) => field.name)],
-    ...records,
-  ];
+  const fieldNames = fields.map((field) => field.name);
+  const tableValues = [['', ...fieldNames], ...records];
+  const foreignKeyIndices = foreignKeys.map((item) => item.columns).flat()
+    .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,6 +86,7 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
+                    isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId: isHeader && columnIndex !== 0
                       ? fields[columnIndex - 1].fieldTypeId - 1
                       : undefined,
@@ -112,6 +114,7 @@ export function TableRenderer({
           open={isModalOpen}
           setOpen={setIsModalOpen}
           record={selectedRecord}
+          foreignKeys={foreignKeys}
         />
       )}
     </div>
@@ -127,4 +130,5 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
+  foreignKeys: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

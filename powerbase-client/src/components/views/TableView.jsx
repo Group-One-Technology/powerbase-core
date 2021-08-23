@@ -6,6 +6,7 @@ import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
+import { TableForeignKeysProvider } from '@models/TableForeignKeys';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
@@ -38,7 +39,7 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
             fields={fields}
           />
           {table.isMigrated
-            ? <BaseTable view={view} height={height} />
+            ? <BaseTable table={table.id} height={height} />
             : <Loader style={{ height }} />}
         </TableRecordsProvider>
       </TableRecordsCountProvider>
@@ -63,15 +64,17 @@ export const TableView = React.memo(({
   }
 
   return (
-    <TableViewProvider id={currentView?.id}>
-      <ViewFieldsProvider id={currentView?.id}>
-        <BaseTableView
-          baseId={baseId}
-          table={table}
-          views={views}
-        />
-      </ViewFieldsProvider>
-    </TableViewProvider>
+    <TableForeignKeysProvider id={table.id}>
+      <TableViewProvider id={currentView?.id}>
+        <ViewFieldsProvider id={currentView?.id}>
+          <BaseTableView
+            baseId={baseId}
+            table={table}
+            views={views}
+          />
+        </ViewFieldsProvider>
+      </TableViewProvider>
+    </TableForeignKeysProvider>
   );
 });
 

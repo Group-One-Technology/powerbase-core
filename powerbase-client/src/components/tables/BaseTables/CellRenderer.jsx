@@ -12,6 +12,7 @@ function CellValue({
   isRowNo,
   isHoveredRow,
   isLastRecord,
+  isForeignKey,
   fieldTypeId,
   handleExpandRecord,
 }) {
@@ -19,7 +20,9 @@ function CellValue({
     if (isRowNo && !isHeader) {
       return (
         <>
-          <span className="flex-1 text-right mr-4">{value?.toString()}</span>
+          <span className="flex-1 text-right mr-4">
+            {value?.toString()}
+          </span>
           <span className="flex-1">
             {(isHoveredRow && !isLastRecord) && (
               <button
@@ -43,7 +46,9 @@ function CellValue({
     return (
       <>
         {(isHeader && fieldTypeId != null) && <FieldTypeIcon className="mr-1" typeId={fieldTypeId} />}
-        {value?.toString()}
+        <span className={cn(isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded')}>
+          {value?.toString()}
+        </span>
       </>
     );
   }
@@ -58,13 +63,14 @@ CellValue.propTypes = {
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
+  isForeignKey: PropTypes.bool.isRequired,
   fieldTypeId: PropTypes.number,
   handleExpandRecord: PropTypes.func,
 };
 
 export function CellRenderer({
-  columnIndex,
   key,
+  columnIndex,
   rowIndex,
   isLoaded,
   style,
@@ -74,6 +80,7 @@ export function CellRenderer({
   isHoveredRow,
   isRowNo,
   isLastRecord,
+  isForeignKey,
   fieldTypeId,
   handleExpandRecord,
 }) {
@@ -121,6 +128,7 @@ export function CellRenderer({
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
         isLastRecord={isLastRecord}
+        isForeignKey={isForeignKey}
         fieldTypeId={fieldTypeId}
         handleExpandRecord={handleExpandRecord}
       />
@@ -140,6 +148,7 @@ CellRenderer.propTypes = {
   isHoveredRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
+  isForeignKey: PropTypes.bool.isRequired,
   fieldTypeId: PropTypes.number,
   handleExpandRecord: PropTypes.func,
 };
