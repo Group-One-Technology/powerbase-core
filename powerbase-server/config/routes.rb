@@ -17,6 +17,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :table_foreign_keys, path: 'foreign_keys', as: 'foreign_keys', only: [:index], shallow: true
+
       member do
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
