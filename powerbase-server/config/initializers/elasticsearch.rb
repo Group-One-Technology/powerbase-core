@@ -7,7 +7,7 @@ elasticsearch_url = if Rails.env.production?
   end
 
 logger = Logger.new("#{Rails.root}/log/elasticsearch.log")
-logger.level = Logger::FATAL
+logger.level = Logger::FATAL if Rails.env.production?
 
 connection_hash = {
   url: elasticsearch_url,
