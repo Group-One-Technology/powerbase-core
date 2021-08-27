@@ -76,14 +76,20 @@ module Powerbase
             .parameterize(separator: "_")
             .truncate(ELASTICSEACH_ID_LIMIT)
 
+          doc = {}
+          record.collect {|key, value| key }
+            .map do |key|
+              cur_field = fields.find {|field| field.powerbase_field_type_id == NUMBER_FIELD_TYPE }
+              doc[key] = !!cur_field ? cur_field : cur_field.to_s
+            end
+          doc = record.slice!(:ctid)
+
           if doc_id != nil
             @esclient.update(
               index: index,
               id: doc_id,
               body: {
-                # Sanitize check whether number or string.
-                # Set datetime records to string.
-                doc: record.slice!(:ctid),
+                doc: doc,
                 doc_as_upsert: true
               }
             )
