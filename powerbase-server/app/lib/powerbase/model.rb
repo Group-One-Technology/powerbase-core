@@ -78,12 +78,12 @@ module Powerbase
             .truncate(ELASTICSEACH_ID_LIMIT)
 
           doc = {}
-          record.collect {|key, value| key }
-            .map do |key|
+          record_keys = record.collect {|key, value| key }
+          record_keys.map do |key|
               cur_field = fields.find {|field|
                 field.powerbase_field_type_id == NUMBER_FIELD_TYPE && field.name == key
               }
-              doc[key] = !!cur_field ? value : %Q(#{value})
+              doc[key] = !!cur_field ? record[key] : %Q(#{record[key]})
             end
           doc = doc.slice!(:ctid)
 
