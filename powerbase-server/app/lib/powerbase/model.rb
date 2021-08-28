@@ -1,6 +1,7 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
   NUMBER_FIELD_TYPE = 4
+  DEFAULT_PAGE_SIZE_TURBO = 200
 
   class Model
     # * Initialize the Powerbase::Model
@@ -41,7 +42,7 @@ module Powerbase
           table_select.push(Sequel.lit('ctid'))
         end
 
-        table.select(*table_select).paged_each(:rows_per_fetch => 500) {|record|
+        table.select(*table_select).paged_each(:rows_per_fetch => DEFAULT_PAGE_SIZE_TURBO) {|record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
@@ -79,10 +80,12 @@ module Powerbase
           doc = {}
           record.collect {|key, value| key }
             .map do |key|
-              cur_field = fields.find {|field| field.powerbase_field_type_id == NUMBER_FIELD_TYPE }
-              doc[key] = !!cur_field ? cur_field : cur_field.to_s
+              cur_field = fields.find {|field|
+                field.powerbase_field_type_id == NUMBER_FIELD_TYPE && field.name == key
+              }
+              doc[key] = !!cur_field ? value : %Q(#{value})
             end
-          doc = record.slice!(:ctid)
+          doc = doc.slice!(:ctid)
 
           if doc_id != nil
             @esclient.update(
