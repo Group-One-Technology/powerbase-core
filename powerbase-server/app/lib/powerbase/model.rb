@@ -1,7 +1,7 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
-  NUMBER_FIELD_TYPE = 4
   DEFAULT_PAGE_SIZE_TURBO = 200
+  NUMBER_FIELD_TYPE = 4
 
   class Model
     # * Initialize the Powerbase::Model
@@ -28,7 +28,14 @@ module Powerbase
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       primary_keys = fields.select {|field| field.is_primary_key }
 
-      @esclient.indices.create(index: index, body: nil) if !@esclient.indices.exists(index: index)
+      if !@esclient.indices.exists(index: index)
+        @esclient.indices.create(
+          index: index,
+          body: {
+            settings: { "index.mapping.ignore_malformed": true },
+          }
+        )
+      end
 
       records = remote_db() {|db|
         table = db.from(@table_name)
@@ -80,11 +87,14 @@ module Powerbase
           doc = {}
           record_keys = record.collect {|key, value| key }
           record_keys.map do |key|
-              cur_field = fields.find {|field|
-                field.powerbase_field_type_id == NUMBER_FIELD_TYPE && field.name == key
-              }
-              doc[key] = !!cur_field ? record[key] : %Q(#{record[key]})
-            end
+            cur_field = fields.find {|field| field.name == key }
+            doc[key] =  @@adapter = case cur_field.powerbase_field_type_id
+              when NUMBER_FIELD_TYPE
+                record[key]
+              else
+                %Q(#{record[key]})
+              end
+          end
           doc = doc.slice!(:ctid)
 
           if doc_id != nil
