@@ -16,7 +16,12 @@ import { BaseTable } from '@components/tables/BaseTables';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableView = React.memo(({ views, baseId, table }) => {
+const BaseTableView = React.memo(({
+  views,
+  baseId,
+  table,
+  tables,
+}) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
 
@@ -39,7 +44,7 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
             fields={fields}
           />
           {table.isMigrated
-            ? <BaseTable height={height} />
+            ? <BaseTable tables={tables} height={height} />
             : <Loader style={{ height }} />}
         </TableRecordsProvider>
       </TableRecordsCountProvider>
@@ -50,16 +55,18 @@ const BaseTableView = React.memo(({ views, baseId, table }) => {
 BaseTableView.propTypes = {
   baseId: IId,
   table: ITable,
+  tables: PropTypes.arrayOf(ITable),
   views: PropTypes.arrayOf(IView),
 };
 
 export const TableView = React.memo(({
   baseId,
   table,
+  tables,
   currentView,
   views,
 }) => {
-  if (!table || !views || !views?.length) {
+  if (!table || !views || !views?.length || !tables.length) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
 
@@ -70,6 +77,7 @@ export const TableView = React.memo(({
           <BaseTableView
             baseId={baseId}
             table={table}
+            tables={tables}
             views={views}
           />
         </ViewFieldsProvider>
@@ -81,6 +89,7 @@ export const TableView = React.memo(({
 TableView.propTypes = {
   baseId: IId,
   table: ITable,
+  tables: PropTypes.arrayOf(ITable),
   currentView: IView,
   views: PropTypes.arrayOf(IView),
 };

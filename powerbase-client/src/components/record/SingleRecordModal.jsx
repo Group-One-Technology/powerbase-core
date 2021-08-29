@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
 import { TableRecordProvider } from '@models/TableRecord';
+import { ITable } from '@lib/propTypes/table';
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
 
@@ -10,6 +11,8 @@ export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
+  foreignKeys,
+  tables,
 }) {
   const [record, setRecord] = useState(initialRecord);
 
@@ -37,6 +40,10 @@ export function SingleRecordModal({
           </Dialog.Title>
           <div className="mt-8 flex flex-col gap-x-6 w-full text-gray-900">
             {record.map((item) => {
+              if (item.foreignKey?.columns.length > 1) {
+                return null;
+              }
+
               const primaryKeys = item.isForeignKey && item.foreignKey
                 ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
                 : undefined;
@@ -45,6 +52,52 @@ export function SingleRecordModal({
                 <TableRecordProvider
                   key={item.id}
                   tableId={item.isForeignKey ? item.foreignKey.referencedTableId : undefined}
+                  recordId={primaryKeys
+                    ? Object.entries(primaryKeys)
+                      .map(([key, value]) => `${key}_${value}`)
+                      .join('-')
+                    : undefined}
+                  primaryKeys={primaryKeys}
+                >
+                  <RecordItem
+                    item={{
+                      ...item,
+                      name: item.isForeignKey
+                        ? tables
+                          .find((table) => (
+                            table.id.toString() === item?.foreignKey.referencedTableId.toString()
+                          ))
+                          ?.name
+                            || item.name
+                        : item.name,
+                    }}
+                    handleRecordInputChange={handleRecordInputChange}
+                  />
+                </TableRecordProvider>
+              );
+            })}
+            {foreignKeys.map((foreignKey) => {
+              if (foreignKey?.columns.length <= 1) {
+                return null;
+              }
+
+              const primaryKeys = {};
+              foreignKey.columns.forEach((col, index) => {
+                const curColumn = record.find((recordItem) => recordItem.name === col);
+                primaryKeys[foreignKey.referencedColumns[index]] = curColumn.value;
+              });
+
+              const item = {
+                isForeignKey: true,
+                name: tables
+                  .find((table) => table.id.toString() === foreignKey.referencedTableId.toString())
+                  ?.name,
+              };
+
+              return (
+                <TableRecordProvider
+                  key={foreignKey.name}
+                  tableId={foreignKey.referencedTableId}
                   recordId={primaryKeys
                     ? Object.entries(primaryKeys)
                       .map(([key, value]) => `${key}_${value}`)
@@ -78,4 +131,6 @@ SingleRecordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
+  foreignKeys: PropTypes.array,
+  tables: PropTypes.arrayOf(ITable),
 };

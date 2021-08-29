@@ -30,6 +30,7 @@ export function Table({ base }) {
       <TableView
         baseId={base.id}
         table={table}
+        tables={tables}
         views={views}
         currentView={view}
       />

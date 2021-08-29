@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { useTableRecord } from '@models/TableRecord';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
-import { useTableRecord } from '@models/TableRecord';
+import { Loader } from '@components/ui/Loader';
 
 // TODO: Replace with API
 const FIELD_TYPES = [
@@ -35,15 +36,18 @@ export function RecordItem({ item, handleRecordInputChange }) {
         <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
           {labelContent}
         </label>
-        <div className="mt-2 border border-gray-300 rounded-md sm:divide-y sm:divide-gray-200">
-          {linkedRecord && Object.entries(linkedRecord)
-            .map(([key, value]) => (
-              <div key={key} className="py-2 sm:grid sm:grid-cols-3 sm:gap-1 sm:px-2">
-                <dt className="text-sm font-medium text-gray-900">{key}</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{value}</dd>
-              </div>
-            ))}
-        </div>
+        {linkedRecord == null && <Loader />}
+        {linkedRecord && (
+          <div className="mt-2 border border-gray-300 rounded-md overflow-auto sm:divide-y sm:divide-gray-200">
+            {Object.entries(linkedRecord)
+              .map(([key, value]) => (
+                <div key={key} className="py-2 sm:grid sm:grid-cols-3 sm:gap-1 sm:px-2">
+                  <dt className="text-sm font-medium text-gray-900">{key}</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{value}</dd>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -59,7 +63,7 @@ export function RecordItem({ item, handleRecordInputChange }) {
           name={item.name}
           type="checkbox"
           className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-          checked={item.value}
+          checked={!!item.value}
           onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
         />
       </div>
