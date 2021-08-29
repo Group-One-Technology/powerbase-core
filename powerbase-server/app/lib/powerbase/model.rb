@@ -1,5 +1,6 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
+  DEFAULT_PAGE_SIZE_TURBO = 200
   NUMBER_FIELD_TYPE = 4
   DEFAULT_PAGE_SIZE_TURBO = 200
 
@@ -28,7 +29,14 @@ module Powerbase
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       primary_keys = fields.select {|field| field.is_primary_key }
 
-      @esclient.indices.create(index: index, body: nil) if !@esclient.indices.exists(index: index)
+      if !@esclient.indices.exists(index: index)
+        @esclient.indices.create(
+          index: index,
+          body: {
+            settings: { "index.mapping.ignore_malformed": true },
+          }
+        )
+      end
 
       records = remote_db() {|db|
         table = db.from(@table_name)
@@ -73,24 +81,26 @@ module Powerbase
               end
             end
 
-          doc_id = doc_id
-            .parameterize(separator: "_")
-            .truncate(ELASTICSEACH_ID_LIMIT)
-
           doc = {}
           record_keys = record.collect {|key, value| key }
           record_keys.map do |key|
-              cur_field = fields.find {|field|
-                field.powerbase_field_type_id == NUMBER_FIELD_TYPE && field.name == key
-              }
-              doc[key] = !!cur_field ? record[key] : %Q(#{record[key]})
+            cur_field = fields.find {|field| field.name.to_sym == key }
+
+            if cur_field
+              doc[key] = case cur_field.powerbase_field_type_id
+                when NUMBER_FIELD_TYPE
+                  record[key]
+                else
+                  %Q(#{record[key]})
+                end
             end
+          end
           doc = doc.slice!(:ctid)
 
           if doc_id != nil
             @esclient.update(
               index: index,
-              id: doc_id,
+              id: format_doc_id(doc_id),
               body: {
                 doc: doc,
                 doc_as_upsert: true
@@ -117,7 +127,7 @@ module Powerbase
           .each_key {|key| "#{key}_#{options[:primary_keys][key]}" }
           .join("-")
 
-        @esclient.get(index: index, id: id)["_source"]
+        @esclient.get(index: index, id: format_doc_id(id))["_source"]
       else
         filters = options[:primary_keys]
           .collect {|key, value| key }
@@ -223,6 +233,12 @@ module Powerbase
           connection_string: @powerbase_database.connection_string,
           is_turbo: @powerbase_database.is_turbo,
         }, &block)
+      end
+
+      def format_doc_id(value)
+        value
+          .parameterize(separator: "_")
+          .truncate(ELASTICSEACH_ID_LIMIT)
       end
 
       def parse_value(value)
