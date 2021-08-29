@@ -4,6 +4,7 @@ import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view-field';
+import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { CellRenderer } from './CellRenderer';
 
@@ -16,6 +17,7 @@ export function TableRenderer({
   loadMoreRows,
   isLoading,
   height,
+  tables,
   foreignKeys,
 }) {
   const columnCount = fields.length + 1;
@@ -49,6 +51,7 @@ export function TableRenderer({
         ...item,
         value: tableValues[rowNo][index + 1],
         isForeignKey: !!foreignKey,
+        isCompositeKey: foreignKey?.columns.length > 1,
         foreignKey: foreignKey
           ? ({
             ...foreignKey,
@@ -127,6 +130,8 @@ export function TableRenderer({
           open={isModalOpen}
           setOpen={setIsModalOpen}
           record={selectedRecord}
+          tables={tables}
+          foreignKeys={foreignKeys}
         />
       )}
     </div>
@@ -142,4 +147,6 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
+  foreignKeys: PropTypes.array,
+  tables: PropTypes.arrayOf(ITable),
 };

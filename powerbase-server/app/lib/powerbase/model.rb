@@ -2,6 +2,7 @@ module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
   DEFAULT_PAGE_SIZE_TURBO = 200
   NUMBER_FIELD_TYPE = 4
+  DEFAULT_PAGE_SIZE_TURBO = 200
 
   class Model
     # * Initialize the Powerbase::Model

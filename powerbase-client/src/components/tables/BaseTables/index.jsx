@@ -5,13 +5,14 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableForeignKeys } from '@models/TableForeignKeys';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function BaseTable({ height }) {
+export function BaseTable({ height, tables }) {
   const { data: fields } = useViewFields();
   const { data: foreignKeys } = useTableForeignKeys();
   const { data: totalRecords } = useTableRecordsCount();
@@ -32,6 +33,7 @@ export function BaseTable({ height }) {
       loadMoreRows={loadMore}
       isLoading={isLoading}
       height={height}
+      tables={tables}
       foreignKeys={foreignKeys}
     />
   );
@@ -39,4 +41,5 @@ export function BaseTable({ height }) {
 
 BaseTable.propTypes = {
   height: PropTypes.number,
+  tables: PropTypes.arrayOf(ITable),
 };
