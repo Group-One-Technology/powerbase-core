@@ -28,4 +28,5 @@ Rails.application.routes.draw do
   end
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
+  get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
 end
