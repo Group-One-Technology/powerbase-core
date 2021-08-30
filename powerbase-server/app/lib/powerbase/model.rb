@@ -2,6 +2,7 @@ module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
   DEFAULT_PAGE_SIZE_TURBO = 200
   NUMBER_FIELD_TYPE = 4
+  DATE_FIELD_TYPE = 7
   DEFAULT_PAGE_SIZE_TURBO = 200
 
   class Model
@@ -90,6 +91,13 @@ module Powerbase
               doc[key] = case cur_field.powerbase_field_type_id
                 when NUMBER_FIELD_TYPE
                   record[key]
+                when DATE_FIELD_TYPE
+                  date = DateTime.parse(record[key]) rescue nil
+                  if date
+                    date.utc.strftime("%Y-%m-%dT%jT%RZ")
+                  else
+                    record[key]
+                  end
                 else
                   %Q(#{record[key]})
                 end
