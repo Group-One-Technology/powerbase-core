@@ -134,10 +134,13 @@ module Powerbase
           .map do |key|
             value = options[:primary_keys][key]
             value = "\"#{value}\"" if value.is_a?(String)
-
-            "(Sequel[{Sequel.lit(\"#{key}\") => #{value}}])"
+            if @powerbase_database.adapter == "postgresql"
+              "(Sequel[{Sequel.lit('\"#{key}\"') => #{value}}])"
+            else
+              "(Sequel[{Sequel.lit('#{key}') => #{value}}])"
+            end
           end
-          .join(" AND ")
+          .join(" & ")
 
         remote_db() {|db|
           db.from(@table_name)
