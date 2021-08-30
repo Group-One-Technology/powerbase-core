@@ -57,6 +57,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       puts "#{Time.now} Migrating tables fields of table with id of #{table.id}..."
 
       connect(@database) {|db|
+        db.extension :pg_enum if @database.adapter == "postgresql"
         db.schema(table.name.to_sym).each do |column|
           column_name = column[0]
           column_options = column[1]
@@ -73,18 +74,19 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.is_nullable = column_options[:allow_null]
           field.powerbase_table_id = table.id
 
-          existing_column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
+          column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
             .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
             .take
 
-          column_type =  existing_column_type ? existing_column_type.powerbase_field_type.name : "Others"
-          field_type = PowerbaseFieldType.find_by(name: column_type).id || single_line_text_field.id
+          field_type = PowerbaseFieldType.find_by(
+            name: column_type ? column_type.powerbase_field_type.name : "Others"
+          ).id || single_line_text_field.id
           field.powerbase_field_type_id = field_type
 
           if field.save
             total_saved_fields += 1
 
-            if column_options[:type] === :enum
+            if column_type.db_type === "enum"
               # Field Select Options / Enums Migration
               field_select_options = FieldSelectOption.find_by(
                 name: column_options[:db_type],
