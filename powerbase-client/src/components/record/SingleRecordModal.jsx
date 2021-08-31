@@ -11,8 +11,9 @@ export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
-  foreignKeys,
   tables,
+  foreignKeys,
+  fieldTypes,
 }) {
   const [record, setRecord] = useState(initialRecord);
 
@@ -71,6 +72,7 @@ export function SingleRecordModal({
                             || item.name
                         : item.name,
                     }}
+                    fieldTypes={fieldTypes}
                     handleRecordInputChange={handleRecordInputChange}
                   />
                 </TableRecordProvider>
@@ -131,6 +133,7 @@ SingleRecordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
-  foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  foreignKeys: PropTypes.array,
+  fieldTypes: PropTypes.array.isRequired,
 };

@@ -12,24 +12,11 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/solid';
 
-// TODO: Replace with API
-const FIELD_TYPES = [
-  'Single Line Text',
-  'Long Text',
-  'Checkbox',
-  'Number',
-  'Single Select',
-  'Multiple Selct',
-  'Date',
-  'Email',
-  'Plugin',
-  'Others',
-];
-
-export function FieldTypeIcon({ typeId, className }) {
+export const FieldTypeIcon = React.memo(({ typeId, fieldTypes, className }) => {
   const generatedClassName = cn('text-sm text-gray-600 h-4 w-4', className);
+  const fieldType = fieldTypes?.find((item) => item.id === typeId);
 
-  switch (FIELD_TYPES[typeId]) {
+  switch (fieldType?.name) {
     case 'Long Text':
       return <MenuAlt1Icon className={generatedClassName} />;
     case 'Checkbox':
@@ -51,9 +38,10 @@ export function FieldTypeIcon({ typeId, className }) {
     default:
       return <span className={cn('text-sm font-medium text-gray-600 flex items-center', className)}>A</span>;
   }
-}
+});
 
 FieldTypeIcon.propTypes = {
   typeId: PropTypes.number,
+  fieldTypes: PropTypes.array,
   className: PropTypes.string,
 };

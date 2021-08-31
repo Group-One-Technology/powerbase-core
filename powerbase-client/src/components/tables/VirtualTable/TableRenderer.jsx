@@ -19,6 +19,7 @@ export function TableRenderer({
   height,
   tables,
   foreignKeys,
+  fieldTypes,
 }) {
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
@@ -106,6 +107,7 @@ export function TableRenderer({
                     fieldTypeId: isHeader && columnIndex !== 0
                       ? fields[columnIndex - 1].fieldTypeId - 1
                       : undefined,
+                    fieldTypes,
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
                       : undefined,
@@ -132,6 +134,7 @@ export function TableRenderer({
           record={selectedRecord}
           tables={tables}
           foreignKeys={foreignKeys}
+          fieldTypes={fieldTypes}
         />
       )}
     </div>
@@ -149,4 +152,5 @@ TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  fieldTypes: PropTypes.array.isRequired,
 };

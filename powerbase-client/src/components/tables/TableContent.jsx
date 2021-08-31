@@ -7,6 +7,7 @@ import { TableViewProvider, useTableView } from '@models/TableView';
 import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { TableForeignKeysProvider } from '@models/TableForeignKeys';
+import { FieldTypesProvider } from '@models/FieldTypes';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
@@ -36,16 +37,18 @@ const BaseTableContent = React.memo(({
     <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
-          <TableViewsNav
-            baseId={baseId}
-            table={table}
-            currentView={view}
-            views={views}
-            fields={fields}
-          />
-          {table.isMigrated
-            ? <VirtualTable tables={tables} height={height} />
-            : <Loader style={{ height }} />}
+          <FieldTypesProvider>
+            <TableViewsNav
+              baseId={baseId}
+              table={table}
+              currentView={view}
+              views={views}
+              fields={fields}
+            />
+            {table.isMigrated
+              ? <VirtualTable tables={tables} height={height} />
+              : <Loader style={{ height }} />}
+          </FieldTypesProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
     </RecordsFilterProvider>

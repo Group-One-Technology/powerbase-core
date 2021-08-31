@@ -5,6 +5,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableForeignKeys } from '@models/TableForeignKeys';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useFieldTypes } from '@models/FieldTypes';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
@@ -17,8 +18,9 @@ export function VirtualTable({ height, tables }) {
   const { data: foreignKeys } = useTableForeignKeys();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
+  const { data: fieldTypes } = useFieldTypes();
 
-  if (fields == null || foreignKeys == null || records == null) {
+  if (fields == null || foreignKeys == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
 
@@ -35,6 +37,7 @@ export function VirtualTable({ height, tables }) {
       height={height}
       tables={tables}
       foreignKeys={foreignKeys}
+      fieldTypes={fieldTypes}
     />
   );
 }
