@@ -52,8 +52,8 @@ export function SingleRecordModal({
               return (
                 <TableRecordProvider
                   key={item.id}
-                  tableId={item.isForeignKey ? item.foreignKey.referencedTableId : undefined}
-                  recordId={primaryKeys
+                  tableId={(item.isForeignKey && item.value) ? item.foreignKey.referencedTableId : undefined}
+                  recordId={primaryKeys && item.value
                     ? Object.entries(primaryKeys)
                       .map(([key, value]) => `${key}_${value}`)
                       .join('-')
@@ -63,7 +63,7 @@ export function SingleRecordModal({
                   <RecordItem
                     item={{
                       ...item,
-                      name: item.isForeignKey
+                      name: item.isForeignKey && item.value
                         ? tables
                           .find((table) => (
                             table.id.toString() === item?.foreignKey.referencedTableId.toString()
@@ -94,6 +94,8 @@ export function SingleRecordModal({
                 name: tables
                   .find((table) => table.id.toString() === foreignKey.referencedTableId.toString())
                   ?.name,
+                fieldTypeId: fieldTypes.find(((key) => key.name === 'Single Line Text')).id,
+                value: primaryKeys,
               };
 
               return (
@@ -109,6 +111,7 @@ export function SingleRecordModal({
                 >
                   <RecordItem
                     item={item}
+                    fieldTypes={fieldTypes}
                     handleRecordInputChange={handleRecordInputChange}
                   />
                 </TableRecordProvider>
