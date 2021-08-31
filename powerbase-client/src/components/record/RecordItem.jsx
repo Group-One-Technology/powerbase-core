@@ -5,6 +5,7 @@ import { useTableRecord } from '@models/TableRecord';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
+import { RecordItemSelect } from './RecordItemSelect';
 
 // TODO: Replace with API
 const FIELD_TYPES = [
@@ -22,10 +23,11 @@ const FIELD_TYPES = [
 
 export function RecordItem({ item, handleRecordInputChange }) {
   const { data: linkedRecord } = useTableRecord();
+  const fieldTypeId = item.fieldTypeId - 1;
 
   const labelContent = (
     <>
-      <FieldTypeIcon className="mr-1" typeId={item.fieldTypeId - 1} />
+      <FieldTypeIcon className="mr-1" typeId={fieldTypeId} />
       <span className="font-normal">{item.name.toUpperCase()}</span>
     </>
   );
@@ -52,7 +54,7 @@ export function RecordItem({ item, handleRecordInputChange }) {
     );
   }
 
-  if (FIELD_TYPES[item.fieldTypeId - 1] === 'Checkbox') {
+  if (FIELD_TYPES[fieldTypeId] === 'Checkbox') {
     return (
       <div key={item.id} className="w-full mb-8">
         <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
@@ -70,7 +72,18 @@ export function RecordItem({ item, handleRecordInputChange }) {
     );
   }
 
-  if (FIELD_TYPES[item.fieldTypeId - 1] === 'Long Text') {
+  if (FIELD_TYPES[fieldTypeId] === 'Single Select') {
+    return (
+      <RecordItemSelect
+        key={item.id}
+        item={item}
+        labelContent={labelContent}
+        handleRecordInputChange={handleRecordInputChange}
+      />
+    );
+  }
+
+  if (FIELD_TYPES[fieldTypeId] === 'Long Text') {
     return (
       <div className="w-full mb-8">
         <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
@@ -90,7 +103,7 @@ export function RecordItem({ item, handleRecordInputChange }) {
 
   return (
     <Input
-      type={FIELD_TYPES[item.fieldTypeId - 1] === 'Number'
+      type={FIELD_TYPES[fieldTypeId] === 'Number'
         ? 'number'
         : 'text'}
       id={item.name}
