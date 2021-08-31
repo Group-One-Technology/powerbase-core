@@ -14,6 +14,7 @@ function CellValue({
   isLastRecord,
   isForeignKey,
   fieldTypeId,
+  fieldTypes,
   handleExpandRecord,
 }) {
   if (isHeader || isLoaded) {
@@ -45,7 +46,13 @@ function CellValue({
 
     return (
       <>
-        {(isHeader && fieldTypeId != null) && <FieldTypeIcon className="mr-1" typeId={fieldTypeId} />}
+        {(isHeader && fieldTypeId != null) && (
+          <FieldTypeIcon
+            typeId={fieldTypeId}
+            fieldTypes={fieldTypes}
+            className="mr-1"
+          />
+        )}
         <span className={cn(isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded')}>
           {value?.toString()}
         </span>
@@ -65,6 +72,7 @@ CellValue.propTypes = {
   isLastRecord: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
   fieldTypeId: PropTypes.number,
+  fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
 };
 
@@ -82,6 +90,7 @@ export function CellRenderer({
   isLastRecord,
   isForeignKey,
   fieldTypeId,
+  fieldTypes,
   handleExpandRecord,
 }) {
   const handleMouseEnter = () => {
@@ -130,6 +139,7 @@ export function CellRenderer({
         isLastRecord={isLastRecord}
         isForeignKey={isForeignKey}
         fieldTypeId={fieldTypeId}
+        fieldTypes={fieldTypes}
         handleExpandRecord={handleExpandRecord}
       />
     </div>
@@ -150,5 +160,6 @@ CellRenderer.propTypes = {
   isLastRecord: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
   fieldTypeId: PropTypes.number,
+  fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
 };

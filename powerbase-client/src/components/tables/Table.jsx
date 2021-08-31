@@ -3,7 +3,7 @@ import React from 'react';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { IBase } from '@lib/propTypes/base';
 import { TableTabs } from '@components/tables/TableTabs';
-import { TableView } from '@components/views/TableView';
+import { TableContent } from '@components/tables/TableContent';
 import { Loader } from '@components/ui/Loader';
 
 export function Table({ base }) {
@@ -27,7 +27,7 @@ export function Table({ base }) {
         tableId={table.id}
         handleTableChange={handleTableChange}
       />
-      <TableView
+      <TableContent
         baseId={base.id}
         table={table}
         tables={tables}
