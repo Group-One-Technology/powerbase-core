@@ -86,7 +86,10 @@ export function SingleRecordModal({
               const primaryKeys = {};
               foreignKey.columns.forEach((col, index) => {
                 const curColumn = record.find((recordItem) => recordItem.name === col);
-                primaryKeys[foreignKey.referencedColumns[index]] = curColumn.value;
+
+                if (curColumn) {
+                  primaryKeys[foreignKey.referencedColumns[index]] = curColumn.value;
+                }
               });
 
               const item = {
