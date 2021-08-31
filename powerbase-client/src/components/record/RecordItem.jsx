@@ -9,7 +9,7 @@ import { RecordItemSelect } from './RecordItemSelect';
 
 export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   const { data: linkedRecord } = useTableRecord();
-  const fieldType = fieldTypes?.find((type) => type.id === item.fieldTypeId);
+  const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
 
   const labelContent = (
     <>
@@ -18,7 +18,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
     </>
   );
 
-  if (item.isForeignKey) {
+  if (item.isForeignKey && item.value) {
     return (
       <div className="w-full mb-8">
         <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
