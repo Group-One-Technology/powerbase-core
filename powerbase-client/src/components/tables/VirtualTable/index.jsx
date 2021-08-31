@@ -12,7 +12,7 @@ import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function BaseTable({ height, tables }) {
+export function VirtualTable({ height, tables }) {
   const { data: fields } = useViewFields();
   const { data: foreignKeys } = useTableForeignKeys();
   const { data: totalRecords } = useTableRecordsCount();
@@ -39,7 +39,7 @@ export function BaseTable({ height, tables }) {
   );
 }
 
-BaseTable.propTypes = {
+VirtualTable.propTypes = {
   height: PropTypes.number,
   tables: PropTypes.arrayOf(ITable),
 };

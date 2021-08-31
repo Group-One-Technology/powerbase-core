@@ -12,11 +12,11 @@ import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
 
-import { BaseTable } from '@components/tables/BaseTables';
+import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableView = React.memo(({
+const BaseTableContent = React.memo(({
   views,
   baseId,
   table,
@@ -44,7 +44,7 @@ const BaseTableView = React.memo(({
             fields={fields}
           />
           {table.isMigrated
-            ? <BaseTable tables={tables} height={height} />
+            ? <VirtualTable tables={tables} height={height} />
             : <Loader style={{ height }} />}
         </TableRecordsProvider>
       </TableRecordsCountProvider>
@@ -52,14 +52,14 @@ const BaseTableView = React.memo(({
   );
 });
 
-BaseTableView.propTypes = {
+BaseTableContent.propTypes = {
   baseId: IId,
   table: ITable,
   tables: PropTypes.arrayOf(ITable),
   views: PropTypes.arrayOf(IView),
 };
 
-export const TableView = React.memo(({
+export const TableContent = React.memo(({
   baseId,
   table,
   tables,
@@ -74,7 +74,7 @@ export const TableView = React.memo(({
     <TableForeignKeysProvider id={table.id}>
       <TableViewProvider id={currentView?.id}>
         <ViewFieldsProvider id={currentView?.id}>
-          <BaseTableView
+          <BaseTableContent
             baseId={baseId}
             table={table}
             tables={tables}
@@ -86,7 +86,7 @@ export const TableView = React.memo(({
   );
 });
 
-TableView.propTypes = {
+TableContent.propTypes = {
   baseId: IId,
   table: ITable,
   tables: PropTypes.arrayOf(ITable),
