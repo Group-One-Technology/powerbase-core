@@ -22,6 +22,8 @@ class PowerbaseDatabase < ApplicationRecord
   belongs_to :user
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
+  has_many :base_connections
+  has_many :base_connections, foreign_key: :referenced_database_id
 
   def as_indexed_json(options = {})
     as_json(except: [:encrypted_connection_string, :connection_string, :is_turbo])

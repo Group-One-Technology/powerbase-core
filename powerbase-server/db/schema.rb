@@ -10,10 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_01_013743) do
+ActiveRecord::Schema.define(version: 2021_09_01_234931) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "base_connections", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "columns", default: [], null: false, array: true
+    t.string "referenced_columns", default: [], null: false, array: true
+    t.bigint "powerbase_table_id", null: false
+    t.bigint "referenced_table_id", null: false
+    t.bigint "powerbase_database_id", null: false
+    t.bigint "referenced_database_id", null: false
+    t.index ["powerbase_database_id"], name: "index_base_connections_on_powerbase_database_id"
+    t.index ["powerbase_table_id"], name: "index_base_connections_on_powerbase_table_id"
+    t.index ["referenced_database_id"], name: "index_base_connections_on_referenced_database_id"
+    t.index ["referenced_table_id"], name: "index_base_connections_on_referenced_table_id"
+  end
 
   create_table "field_db_type_mappings", force: :cascade do |t|
     t.string "db_type", null: false
@@ -83,16 +97,6 @@ ActiveRecord::Schema.define(version: 2021_09_01_013743) do
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
 
-  create_table "table_foreign_keys", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "columns", default: [], null: false, array: true
-    t.string "referenced_columns", default: [], null: false, array: true
-    t.bigint "powerbase_table_id", null: false
-    t.bigint "referenced_table_id", null: false
-    t.index ["powerbase_table_id"], name: "index_table_foreign_keys_on_powerbase_table_id"
-    t.index ["referenced_table_id"], name: "index_table_foreign_keys_on_referenced_table_id"
-  end
-
   create_table "table_views", force: :cascade do |t|
     t.string "name", default: "Grid", null: false
     t.string "view_type", default: "grid", null: false
@@ -125,6 +129,10 @@ ActiveRecord::Schema.define(version: 2021_09_01_013743) do
     t.index ["table_view_id"], name: "index_view_field_options_on_table_view_id"
   end
 
+  add_foreign_key "base_connections", "powerbase_databases"
+  add_foreign_key "base_connections", "powerbase_databases", column: "referenced_database_id"
+  add_foreign_key "base_connections", "powerbase_tables"
+  add_foreign_key "base_connections", "powerbase_tables", column: "referenced_table_id"
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "field_select_options", "powerbase_fields"
   add_foreign_key "powerbase_databases", "users"
@@ -132,8 +140,6 @@ ActiveRecord::Schema.define(version: 2021_09_01_013743) do
   add_foreign_key "powerbase_fields", "powerbase_tables"
   add_foreign_key "powerbase_tables", "powerbase_databases"
   add_foreign_key "powerbase_tables", "table_views", column: "default_view_id"
-  add_foreign_key "table_foreign_keys", "powerbase_tables"
-  add_foreign_key "table_foreign_keys", "powerbase_tables", column: "referenced_table_id"
   add_foreign_key "table_views", "powerbase_tables"
   add_foreign_key "view_field_options", "powerbase_fields"
   add_foreign_key "view_field_options", "table_views"
