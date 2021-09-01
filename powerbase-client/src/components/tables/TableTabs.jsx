@@ -99,7 +99,7 @@ export function TableTabs({
               value={table.id}
               className="text-sm text-white bg-gray-900 bg-opacity-80"
             >
-              {table.name}
+              {table.alias || table.name}
               {!table.isMigrated && ' (Migrating)'}
             </option>
           ))}
@@ -142,13 +142,13 @@ export function TableTabs({
                 ref={isCurrentTable ? activeTabEl : undefined}
                 onClick={() => handleTableChange({ table })}
                 className={cn(
-                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center',
+                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
                   isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
                 )}
                 aria-current={isCurrentTable ? 'page' : undefined}
               >
                 {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                {table.name}
+                {table.alias || table.name}
               </button>
             );
 

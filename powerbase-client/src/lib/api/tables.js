@@ -19,3 +19,13 @@ export async function getTables({ databaseId }) {
 
   return undefined;
 }
+
+export async function updateTablesAliases(payload) {
+  const response = await securedApi.put('tables/update/aliases', payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
