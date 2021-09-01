@@ -30,5 +30,6 @@ Rails.application.routes.draw do
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
+  put 'tables/update/aliases', to: 'powerbase_tables#update_aliases', as: 'update_tables_aliases'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
 end

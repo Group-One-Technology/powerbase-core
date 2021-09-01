@@ -9,7 +9,11 @@ class PowerbaseTablesController < ApplicationController
 
   schema(:show, :update) do
     required(:id).value(:string)
-    required(:alias).value(:string)
+    optional(:alias).value(:string)
+  end
+
+  schema(:update_aliases) do
+    required(:tables)
   end
 
 
@@ -26,13 +30,23 @@ class PowerbaseTablesController < ApplicationController
     render json: format_json(@table)
   end
 
-  # PUT /tables/:id
+  # PUT /tables/:id/update
   def update
     if @table.update(safe_params)
       render json: format_json(@table)
     else
       render json: @table.errors, status: :unprocessable_entity
     end
+  end
+
+  # PUT /tables/update/aliases
+  def update_aliases
+    safe_params[:tables].each do |table|
+      @table = PowerbaseTable.find(table[:id])
+      @table.update(alias: table[:alias])
+    end
+
+    render status: :no_content
   end
 
   private

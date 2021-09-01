@@ -6,6 +6,7 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 import { Button } from '@components/ui/Button';
+import { updateTablesAliases } from '@lib/api/tables';
 
 function BaseTableSettingsItem({ table, handleChange }) {
   return (
@@ -39,12 +40,25 @@ BaseTableSettingsItem.propTypes = {
 };
 
 export function BaseTablesSettings({ tables: initialData }) {
-  const [tables, setTables] = useState(initialData);
+  const [tables, setTables] = useState(initialData.map((item) => ({
+    ...item,
+    updated: false,
+  })));
   const [loading, setLoading] = useState(false);
+  const [, setError] = useState();
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
+    setError(undefined);
+
+    const updatedTables = tables.filter((item) => item.updated);
+
+    try {
+      await updateTablesAliases({ tables: updatedTables });
+    } catch (err) {
+      setError(err.response.data.exception);
+    }
 
     setLoading(false);
   };
@@ -55,6 +69,7 @@ export function BaseTablesSettings({ tables: initialData }) {
       alias: item.id === tableId && value.alias
         ? value.alias
         : item.alias,
+      updated: item.id === tableId ? true : item.updated,
     })));
   };
 
@@ -81,7 +96,7 @@ export function BaseTablesSettings({ tables: initialData }) {
               className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
               loading={loading}
             >
-              Save
+              Update
             </Button>
           </div>
         </form>
