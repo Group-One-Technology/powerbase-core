@@ -13,9 +13,9 @@ export function RecordItemSelect({
   const { authUser } = useAuthUser();
 
   const { data: options } = useSWR(
-    (item.id && authUser) ? `/fields/${item.id}/select_options` : null,
-    () => (item.id
-      ? getSelectOptions({ fieldId: item.id })
+    (item.fieldId && authUser) ? `/fields/${item.fieldId}/select_options` : null,
+    () => (item.fieldId
+      ? getSelectOptions({ fieldId: item.fieldId })
       : undefined),
   );
 

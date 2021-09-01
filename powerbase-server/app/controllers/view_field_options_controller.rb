@@ -15,6 +15,7 @@ class ViewFieldOptionsController < ApplicationController
     def format_json(view_field)
       {
         id: view_field.id,
+        field_id: view_field.powerbase_field_id,
         name: view_field.powerbase_field.name,
         description: view_field.powerbase_field.description,
         default_value: view_field.powerbase_field.default_value,
