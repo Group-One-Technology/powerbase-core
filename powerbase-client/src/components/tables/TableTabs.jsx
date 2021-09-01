@@ -99,7 +99,7 @@ export function TableTabs({
               value={table.id}
               className="text-sm text-white bg-gray-900 bg-opacity-80"
             >
-              {table.name}
+              {table.alias || table.name}
               {!table.isMigrated && ' (Migrating)'}
             </option>
           ))}
@@ -148,7 +148,7 @@ export function TableTabs({
                 aria-current={isCurrentTable ? 'page' : undefined}
               >
                 {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                {table.name}
+                {table.alias || table.name}
               </button>
             );
 
