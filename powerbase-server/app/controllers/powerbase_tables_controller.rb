@@ -39,6 +39,7 @@ class PowerbaseTablesController < ApplicationController
       {
         id: table.id,
         name: table.name,
+        alias: table.alias,
         description: table.description,
         default_view_id: table.default_view_id,
         page_size: table.page_size,
