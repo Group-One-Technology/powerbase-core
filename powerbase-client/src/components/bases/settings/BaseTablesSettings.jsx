@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
 import { ITable } from '@lib/propTypes/table';
+import { updateTablesAliases } from '@lib/api/tables';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 import { Button } from '@components/ui/Button';
-import { updateTablesAliases } from '@lib/api/tables';
+import { StatusModal } from '@components/ui/StatusModal';
+
+const INITIAL_MODAL_VALUE = {
+  open: false,
+  icon: (
+    <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+      <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
+    </div>
+  ),
+  title: 'Update Successful',
+  content: 'The tables\' aliases have been updated.',
+};
 
 function BaseTableSettingsItem({ table, handleChange }) {
   return (
@@ -44,20 +57,31 @@ export function BaseTablesSettings({ tables: initialData }) {
     ...item,
     updated: false,
   })));
+
+  const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
   const [loading, setLoading] = useState(false);
-  const [, setError] = useState();
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
-    setError(undefined);
+    setModal(INITIAL_MODAL_VALUE);
 
     const updatedTables = tables.filter((item) => item.updated);
 
     try {
       await updateTablesAliases({ tables: updatedTables });
+      setModal((curVal) => ({ ...curVal, open: true }));
     } catch (err) {
-      setError(err.response.data.exception);
+      setModal({
+        open: true,
+        icon: (
+          <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+            <ExclamationIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+          </div>
+        ),
+        title: 'Update Failed',
+        content: err?.response?.data.exception || 'Something went wrong. Please try again later.',
+      });
     }
 
     setLoading(false);
@@ -66,9 +90,7 @@ export function BaseTablesSettings({ tables: initialData }) {
   const handleChange = (tableId, value) => {
     setTables((curTable) => curTable.map((item) => ({
       ...item,
-      alias: item.id === tableId && value.alias
-        ? value.alias
-        : item.alias,
+      alias: item.id === tableId ? value.alias : item.alias,
       updated: item.id === tableId ? true : item.updated,
     })));
   };
@@ -101,6 +123,15 @@ export function BaseTablesSettings({ tables: initialData }) {
           </div>
         </form>
       )}
+      <StatusModal
+        open={modal.open}
+        setOpen={(value) => setModal((curVal) => ({ ...curVal, open: value }))}
+        icon={modal.icon}
+        title={modal.title}
+        handleClick={() => setModal((curVal) => ({ ...curVal, open: false }))}
+      >
+        {modal.content}
+      </StatusModal>
     </div>
   );
 }
