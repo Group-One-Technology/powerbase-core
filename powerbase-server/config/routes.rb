@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       post 'connect'
     end
 
-    resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show], shallow: true do
+    resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :table_views, path: 'views', as: 'views', only: [:index, :show, :update], shallow: true do
         member do
           get 'fields', to: 'view_field_options#index', as: 'view_fields'

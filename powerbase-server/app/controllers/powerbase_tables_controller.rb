@@ -1,14 +1,17 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :set_database, only: [:index]
+  before_action :set_table, only: [:show, :update]
 
   schema(:index) do
     required(:database_id).value(:string)
   end
 
-  schema(:show) do
+  schema(:show, :update) do
     required(:id).value(:string)
+    required(:alias).value(:string)
   end
+
 
   # GET /databases/:database_id/tables
   def index
@@ -20,8 +23,16 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /tables/:id
   def show
-    @table = PowerbaseTable.find(safe_params[:id])
     render json: format_json(@table)
+  end
+
+  # PUT /tables/:id
+  def update
+    if @table.update(safe_params)
+      render json: format_json(@table)
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
   end
 
   private
@@ -31,6 +42,10 @@ class PowerbaseTablesController < ApplicationController
       if !@database
         raise StandardError.new("Must establish a database connection first to execute this action.")
       end
+    end
+
+    def set_table
+      @table = PowerbaseTable.find(safe_params[:id])
     end
 
     def format_json(table)
