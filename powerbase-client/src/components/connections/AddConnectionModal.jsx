@@ -16,12 +16,12 @@ export function AddConnectionModal({
     (item) => item.id.toString() === base.id.toString(),
   ));
   const [destinationTable, setDestinationTable] = useState();
-  const [destinationField, setDestinationField] = useState();
+  const [destinationFields, setDestinationFields] = useState([]);
   const [targetBase, setTargetBase] = useState(bases.find(
     (item) => item.id.toString() === base.id.toString(),
   ));
   const [targetTable, setTargetTable] = useState();
-  const [targetField, setTargetField] = useState();
+  const [targetFields, setTargetFields] = useState([]);
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
@@ -45,8 +45,8 @@ export function AddConnectionModal({
               bases={bases}
               table={destinationTable}
               setTable={setDestinationTable}
-              field={destinationField}
-              setField={setDestinationField}
+              fields={destinationFields}
+              setFields={setDestinationFields}
               isDestination
             />
             <ConnectionSelect
@@ -57,8 +57,8 @@ export function AddConnectionModal({
               bases={bases}
               table={targetTable}
               setTable={setTargetTable}
-              field={targetField}
-              setField={setTargetField}
+              fields={targetFields}
+              setFields={setTargetFields}
             />
           </div>
           <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">

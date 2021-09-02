@@ -12,8 +12,17 @@ export function BaseConnectionsSettings({
   base,
   bases,
   tables,
-  connections,
+  connections: initialConnections,
 }) {
+  const connections = initialConnections.map((connection) => ({
+    ...connection,
+    base: bases.find((item) => item.id === connection.databaseId),
+    table: tables.find((item) => item.id === connection.tableId),
+    columnName: connection.columns.join(', '),
+    joinBase: bases.find((item) => item.id === connection.referencedDatabaseId),
+    joinTable: tables.find((item) => item.id === connection.referencedTableId),
+    joinColumnName: connection.referencedColumns.join(', '),
+  }));
   const [openAddModal, setAddModalOpen] = useState(false);
   const [openEditModal, setEditModalOpen] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState();
@@ -31,64 +40,53 @@ export function BaseConnectionsSettings({
       {!!bases?.length && (
         <>
           <ul className="mt-4 overflow-auto">
-            {connections?.map((connection) => {
-              const baseName = bases.find((item) => item.id === connection.databaseId)?.name;
-              const table = tables.find((item) => item.id === connection.tableId);
-              const tableName = table?.name || table?.alias || null;
-              const columnName = connection.columns.join(', ');
-
-              const joinBaseName = bases.find((item) => item.id === connection.referencedDatabaseId)?.name;
-              const joinTable = tables.find((item) => item.id === connection.referencedTableId);
-              const joinTableName = joinTable?.name || joinTable?.alias || null;
-              const joinColumnName = connection.referencedColumns.join(', ');
-
-              return (
-                <li key={connection.id} className="block py-2 hover:bg-gray-50">
-                  <div className="flex gap-3 items-center">
-                    <button
-                      type="button"
-                      className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
-                      onClick={() => handleEditConnection(connection)}
-                    >
-                      Edit
-                    </button>
-                    <div className="max-w-lg flex text-sm">
-                      <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
-                        {baseName}
-                      </span>
-                      <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                        {tableName}
-                      </span>
-                      <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
-                        {columnName}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <ArrowRightIcon className="h-4 w-4 text-gray-500" />
-                    </div>
-                    <div className="max-w-lg flex text-sm">
-                      <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
-                        {joinBaseName}
-                      </span>
-                      <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                        {joinTableName}
-                      </span>
-                      <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
-                        {joinColumnName}
-                      </span>
-                    </div>
+            {connections?.map((connection) => (
+              <li key={connection.id} className="block py-2 hover:bg-gray-50">
+                <div className="flex gap-3 items-center">
+                  <button
+                    type="button"
+                    className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
+                    onClick={() => handleEditConnection(connection)}
+                  >
+                    Edit
+                  </button>
+                  <div className="max-w-lg flex text-sm">
+                    <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
+                      {connection.base.name}
+                    </span>
+                    <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
+                      {connection.table.name}
+                    </span>
+                    <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
+                      {connection.columnName}
+                    </span>
                   </div>
-                </li>
-              );
-            })}
+                  <div className="flex items-center justify-center">
+                    <ArrowRightIcon className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div className="max-w-lg flex text-sm">
+                    <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
+                      {connection.joinBase.name}
+                    </span>
+                    <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
+                      {connection.joinTable.name}
+                    </span>
+                    <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
+                      {connection.joinColumnName}
+                    </span>
+                  </div>
+                </div>
+              </li>
+            ))}
           </ul>
-          <EditConnectionModal
-            open={openEditModal}
-            setOpen={setEditModalOpen}
-            connection={selectedConnection}
-            base={base}
-            bases={bases}
-          />
+          {selectedConnection && (
+            <EditConnectionModal
+              open={openEditModal}
+              setOpen={setEditModalOpen}
+              connection={selectedConnection}
+              bases={bases}
+            />
+          )}
           <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
             <button
               type="button"
