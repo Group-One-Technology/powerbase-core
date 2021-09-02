@@ -3,9 +3,11 @@
 one:
   id: 1
   powerbase_table_id: 2
+  powerbase_database_id: 1
   name: FK_fcc4bcfaacc2ca2352b0ff9e25a
   columns:
     - user_id
   referenced_columns:
     - id
   referenced_table_id: 1
+  referenced_database_id: 1

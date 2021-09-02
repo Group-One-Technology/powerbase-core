@@ -7,8 +7,8 @@ class PowerbaseTable < ApplicationRecord
   belongs_to :powerbase_database
   belongs_to :default_view, class_name: "TableView", optional: true
   has_many :powerbase_fields
-  has_many :table_foreign_keys
-  has_many :table_foreign_keys, foreign_key: :referenced_table_id
+  has_many :base_connections
+  has_many :base_connections, foreign_key: :referenced_table_id
   has_many :table_views
 
   after_commit on: [:create] do
