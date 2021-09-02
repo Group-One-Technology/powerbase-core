@@ -156,20 +156,23 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             .select { |item| item.name == foreign_key[:table].to_s }
             .first
 
-          table_foreign_key = TableForeignKey.find_by(
+          base_connection = BaseConnection.find_by(
             name: foreign_key[:name],
-            powerbase_table_id: table.id
-          ) || TableForeignKey.new
-          table_foreign_key.name = foreign_key[:name]
-          table_foreign_key.columns = foreign_key[:columns]
-          table_foreign_key.referenced_columns = foreign_key[:key]
-          table_foreign_key.referenced_table_id = referenced_table.id
-          table_foreign_key.powerbase_table_id = table.id
+            powerbase_table_id: table.id,
+            powerbase_database_id: table.powerbase_database_id,
+          ) || BaseConnection.new
+          base_connection.name = foreign_key[:name]
+          base_connection.columns = foreign_key[:columns]
+          base_connection.referenced_columns = foreign_key[:key]
+          base_connection.referenced_table_id = referenced_table.id
+          base_connection.referenced_database_id = referenced_table.powerbase_database_id
+          base_connection.powerbase_table_id = table.id
+          base_connection.powerbase_database_id = table.powerbase_database_id
 
-          if !table_foreign_key.save
+          if !base_connection.save
             # TODO: Add error tracker (ex. Sentry)
-            puts "Failed to save foreign key constraint: #{table_foreign_key.name}"
-            puts table_foreign_key.errors.messages
+            puts "Failed to save foreign key constraint: #{base_connection.name}"
+            puts base_connection.errors.messages
           end
         end
       }

@@ -1,6 +1,6 @@
 require "controllers/application_controller_test"
 
-class TableForeignKeysControllerTest < ApplicationControllerTest
+class BaseConnectionsControllerTest < ApplicationControllerTest
   setup do
     login
   end
@@ -9,9 +9,9 @@ class TableForeignKeysControllerTest < ApplicationControllerTest
     logout
   end
 
-  test "should get list of foreign keys of a given table" do
+  test "should get list of connections of a given table" do
     table = powerbase_tables(:one)
-    get table_foreign_keys_url(table_id: table.id)
+    get base_connections_url(table_id: table.id)
     assert_response :success
   end
 end
