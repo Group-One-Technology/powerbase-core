@@ -4,12 +4,12 @@ import useSWR from 'swr';
 import { getBaseConnections } from '@lib/api/base-connections';
 import { useAuthUser } from './AuthUser';
 
-function useBaseConnectionsModel({ id }) {
+function useTableConnectionsModel({ tableId }) {
   const { authUser } = useAuthUser();
 
   const response = useSWR(
-    (id && authUser) ? `/tables/${id}/connections` : null,
-    () => getBaseConnections({ tableId: id }),
+    (tableId && authUser) ? `/tables/${tableId}/connections` : null,
+    () => getBaseConnections({ tableId }),
   );
 
   return {
@@ -17,4 +17,4 @@ function useBaseConnectionsModel({ id }) {
   };
 }
 
-export const [BaseConnectionsProvider, useBaseConnections] = constate(useBaseConnectionsModel);
+export const [TableConnectionsProvider, useTableConnections] = constate(useTableConnectionsModel);
