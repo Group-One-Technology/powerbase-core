@@ -1,89 +1,37 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/outline';
-import cn from 'classnames';
+import { PlusIcon } from '@heroicons/react/outline';
 
 export function EmptyBase() {
   return (
     <div className="px-4 py-8 sm:px-0 border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
       <div className="text-center">
-        <p className="text-lg text-gray-500 pb-4">
-          Looks lke you haven&apos;t added any databases.
-        </p>
-        <Menu as="div" className="relative inline-block text-left">
-          {({ open }) => (
-            <>
-              <div>
-                <Menu.Button className="inline-flex justify-center w-full px-8 py-2 rounded-md border border-gray-300 shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
-                  Add Database
-                  <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
-                </Menu.Button>
-              </div>
-
-              <Transition
-                show={open}
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items
-                  static
-                  className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-                >
-                  <div className="py-1">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          to="/base/create"
-                          className={cn('block px-4 py-2 text-sm', (
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          ))}
-                        >
-                          Create New Database
-                        </Link>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          to="/base/connect"
-                          className={cn('block px-4 py-2 text-sm', (
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          ))}
-                        >
-                          Connect A Database You Own
-                        </Link>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          to="/base/connect-url"
-                          className={cn('block px-4 py-2 text-sm', (
-                            active
-                              ? 'bg-gray-100 text-gray-900'
-                              : 'text-gray-700'
-                          ))}
-                        >
-                          Connect from a URL
-                        </Link>
-                      )}
-                    </Menu.Item>
-                  </div>
-                </Menu.Items>
-              </Transition>
-            </>
-          )}
-        </Menu>
+        <svg
+          className="mx-auto pr-1 h-12 w-12 text-gray-400"
+          xmlns="http://www.w3.org/2000/svg"
+          stroke="currentColor"
+          fill="none"
+          viewBox="0 0 48 48"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m0-4c0 4.418-7.163 8-16 8S8 28.418 8 24m32 10v6m0 0v6m0-6h6m-6 0h-6"
+          />
+        </svg>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">No base.</h3>
+        <p className="mt-1 text-sm text-gray-500">Looks lke you haven&apos;t added any databases.</p>
+        <div className="mt-6">
+          <Link
+            to="/base/add"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            New Base
+          </Link>
+        </div>
       </div>
     </div>
   );
