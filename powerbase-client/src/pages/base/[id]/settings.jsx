@@ -13,6 +13,7 @@ import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
 import { BasesProvider, useBases } from '@models/Bases';
+import { BaseConnectionsProvider, useBaseConnections } from '@models/BaseConnections';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -46,6 +47,7 @@ function BaseSettings() {
   const { data: base } = useBase();
   const { data: bases } = useBases();
   const { data: tables } = useBaseTables();
+  const { data: connections } = useBaseConnections();
 
   if (base == null || authUser == null) {
     return <Loader className="h-screen" />;
@@ -103,6 +105,7 @@ function BaseSettings() {
                         base={base}
                         bases={bases}
                         tables={tables}
+                        connections={connections}
                       />
                     </Tab.Panel>
                   </Tab.Panels>
@@ -123,7 +126,9 @@ export function BaseSettingsPage() {
     <BaseProvider id={id}>
       <BasesProvider>
         <BaseTablesProvider id={id}>
-          <BaseSettings />
+          <BaseConnectionsProvider baseId={id}>
+            <BaseSettings />
+          </BaseConnectionsProvider>
         </BaseTablesProvider>
       </BasesProvider>
     </BaseProvider>

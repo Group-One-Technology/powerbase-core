@@ -10,6 +10,8 @@ Rails.application.routes.draw do
       post 'connect'
     end
 
+    resources :base_connections, path: 'connections', as: 'connections', only: [:index], shallow: true
+
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :table_views, path: 'views', as: 'views', only: [:index, :show, :update], shallow: true do
         member do
@@ -17,7 +19,6 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :base_connections, path: 'connections', as: 'connections', only: [:index], shallow: true
 
       member do
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
@@ -30,6 +31,7 @@ Rails.application.routes.draw do
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
+  get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   put 'tables/update/aliases', to: 'powerbase_tables#update_aliases', as: 'update_tables_aliases'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
 end

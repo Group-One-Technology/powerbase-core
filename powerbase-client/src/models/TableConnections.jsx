@@ -1,7 +1,7 @@
 import constate from 'constate';
 import useSWR from 'swr';
 
-import { getBaseConnections } from '@lib/api/base-connections';
+import { getTableConnections } from '@lib/api/base-connections';
 import { useAuthUser } from './AuthUser';
 
 function useTableConnectionsModel({ tableId }) {
@@ -9,7 +9,7 @@ function useTableConnectionsModel({ tableId }) {
 
   const response = useSWR(
     (tableId && authUser) ? `/tables/${tableId}/connections` : null,
-    () => getBaseConnections({ tableId }),
+    () => getTableConnections({ tableId }),
   );
 
   return {
