@@ -4,12 +4,12 @@ import useSWR from 'swr';
 import { getBaseConnections } from '@lib/api/base-connections';
 import { useAuthUser } from './AuthUser';
 
-function useBaseConnectionsModel({ id }) {
+function useBaseConnectionsModel({ baseId }) {
   const { authUser } = useAuthUser();
 
   const response = useSWR(
-    (id && authUser) ? `/tables/${id}/connections` : null,
-    () => getBaseConnections({ tableId: id }),
+    (baseId && authUser) ? `/databases/${baseId}/connections` : null,
+    () => getBaseConnections({ baseId }),
   );
 
   return {

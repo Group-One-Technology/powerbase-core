@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
-import { useBaseConnections } from '@models/BaseConnections';
+import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useFieldTypes } from '@models/FieldTypes';
@@ -15,7 +15,7 @@ import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, tables }) {
   const { data: fields } = useViewFields();
-  const { data: foreignKeys } = useBaseConnections();
+  const { data: foreignKeys } = useTableConnections();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();

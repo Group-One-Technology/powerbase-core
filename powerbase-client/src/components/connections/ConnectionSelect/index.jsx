@@ -7,6 +7,7 @@ import { getTables } from '@lib/api/tables';
 import { getTableFields } from '@lib/api/fields';
 import { IBase } from '@lib/propTypes/base';
 import { ITable } from '@lib/propTypes/table';
+import { ConnectionSelectField } from './ConnectionSelectField';
 
 export function ConnectionSelect({
   base,
@@ -14,8 +15,8 @@ export function ConnectionSelect({
   setBase,
   table,
   setTable,
-  field,
-  setField,
+  fields,
+  setFields,
   heading,
   label,
   isDestination,
@@ -28,7 +29,7 @@ export function ConnectionSelect({
   );
   const tables = tablesResponse.data?.tables;
 
-  const { data: fields } = useSWR(
+  const { data: fieldOptions } = useSWR(
     (table?.id && authUser) ? `/tables/${table?.id}/fields` : null,
     () => (table?.id
       ? getTableFields({ tableId: table.id })
@@ -36,16 +37,16 @@ export function ConnectionSelect({
   );
 
   useEffect(() => {
-    if (tables?.length) {
+    if (!table && tables?.length) {
       setTable(tables[0]);
     }
-  }, [base, tables]);
+  }, [bases]);
 
   useEffect(() => {
-    if (fields?.length) {
-      setField(fields[0]);
+    if (fieldOptions?.length && fields?.length === 0) {
+      setFields([fieldOptions[0].name]);
     }
-  }, [table, fields]);
+  }, [table, fieldOptions]);
 
   const handleBaseChange = (evt) => {
     const selectedBase = bases?.find((item) => (
@@ -53,6 +54,7 @@ export function ConnectionSelect({
     ));
 
     setBase(selectedBase);
+    setTable(tables[0]);
   };
 
   const handleTableChange = (evt) => {
@@ -61,14 +63,7 @@ export function ConnectionSelect({
     ));
 
     setTable(selectedTable);
-  };
-
-  const handleFieldChange = (evt) => {
-    const selectedTable = tables?.find((item) => (
-      item.id.toString() === evt.target.value.toString()
-    ));
-
-    setField(selectedTable);
+    setFields([fieldOptions[0].name]);
   };
 
   return (
@@ -115,20 +110,16 @@ export function ConnectionSelect({
         </select>
       </div>
       <div className="mt-4">
-        <label htmlFor={`${heading.toLowerCase()}Field`} className="mb-2 text-gray-900">Field</label>
-        <select
-          id={`${heading.toLowerCase()}Field`}
-          name={`${heading.toLowerCase()}-field`}
-          className="block w-full text-sm h-8 py-1 pl-1 pr-2 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
-          value={field?.id}
-          onChange={handleFieldChange}
-        >
-          {fields?.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        <p className="mb-2 text-gray-900">Field(s)</p>
+        {fields.map((fieldName, index) => (
+          <ConnectionSelectField
+            key={`${heading.toLowerCase()}Field${fieldName}`}
+            id={`${heading.toLowerCase()}Field${fieldName}`}
+            index={index}
+            field={fieldName}
+            options={fieldOptions}
+          />
+        ))}
       </div>
     </div>
   );
@@ -140,8 +131,8 @@ ConnectionSelect.propTypes = {
   setBase: PropTypes.func.isRequired,
   table: ITable,
   setTable: PropTypes.func.isRequired,
-  field: PropTypes.object,
-  setField: PropTypes.func.isRequired,
+  fields: PropTypes.array.isRequired,
+  setFields: PropTypes.func.isRequired,
   heading: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   isDestination: PropTypes.bool,

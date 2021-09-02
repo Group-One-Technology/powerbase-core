@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
@@ -10,18 +10,23 @@ export function EditConnectionModal({
   open,
   setOpen,
   bases,
-  base,
+  connection,
 }) {
-  const [destinationBase, setDestinationBase] = useState(bases.find(
-    (item) => item.id.toString() === base.id.toString(),
-  ));
-  const [destinationTable, setDestinationTable] = useState();
-  const [destinationField, setDestinationField] = useState();
-  const [targetBase, setTargetBase] = useState(bases.find(
-    (item) => item.id.toString() === base.id.toString(),
-  ));
-  const [targetTable, setTargetTable] = useState();
-  const [targetField, setTargetField] = useState();
+  const [destinationBase, setDestinationBase] = useState(connection.base);
+  const [destinationTable, setDestinationTable] = useState(connection.table);
+  const [destinationFields, setDestinationFields] = useState(connection.columns);
+  const [targetBase, setTargetBase] = useState(connection.joinBase);
+  const [targetTable, setTargetTable] = useState(connection.joinTable);
+  const [targetFields, setTargetFields] = useState(connection.referencedColumns);
+
+  useEffect(() => {
+    setDestinationBase(connection.base);
+    setDestinationTable(connection.table);
+    setDestinationFields(connection.columns);
+    setTargetBase(connection.joinBase);
+    setTargetTable(connection.joinTable);
+    setTargetFields(connection.referencedColumns);
+  }, [connection]);
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
@@ -45,8 +50,8 @@ export function EditConnectionModal({
               bases={bases}
               table={destinationTable}
               setTable={setDestinationTable}
-              field={destinationField}
-              setField={setDestinationField}
+              fields={destinationFields}
+              setFields={setDestinationFields}
               isDestination
             />
             <ConnectionSelect
@@ -57,8 +62,8 @@ export function EditConnectionModal({
               bases={bases}
               table={targetTable}
               setTable={setTargetTable}
-              field={targetField}
-              setField={setTargetField}
+              fields={targetFields}
+              setFields={setTargetFields}
             />
           </div>
           <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
@@ -78,6 +83,6 @@ export function EditConnectionModal({
 EditConnectionModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
-  base: IBase.isRequired,
   bases: PropTypes.arrayOf(IBase).isRequired,
+  connection: PropTypes.object,
 };

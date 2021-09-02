@@ -2,11 +2,21 @@ class BaseConnectionsController < ApplicationController
   before_action :authorize_access_request!
 
   schema(:index) do
+    required(:database_id).value(:integer)
+  end
+
+  schema(:table_connections) do
     required(:table_id).value(:integer)
   end
 
-  # GET /tables/:table_id/connections
+  # GET /database/:database_id/connections
   def index
+    @connections = BaseConnection.where(powerbase_database_id: safe_params[:database_id])
+    render json: @connections.map {|item| format_json(item)}
+  end
+
+  # GET /tables/:table_id/connections
+  def table_connections
     @connections = BaseConnection.where(powerbase_table_id: safe_params[:table_id])
     render json: @connections.map {|item| format_json(item)}
   end
