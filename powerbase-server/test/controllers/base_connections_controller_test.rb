@@ -11,7 +11,7 @@ class BaseConnectionsControllerTest < ApplicationControllerTest
 
   test "should get list of connections of a given table" do
     table = powerbase_tables(:one)
-    get base_connections_url(table_id: table.id)
+    get table_connections_url(table_id: table.id)
     assert_response :success
   end
 end
