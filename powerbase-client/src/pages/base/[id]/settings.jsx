@@ -1,8 +1,13 @@
 import React from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import cn from 'classnames';
 import { Tab } from '@headlessui/react';
-import { CogIcon, TableIcon, ViewGridAddIcon } from '@heroicons/react/outline';
+import {
+  ArrowLeftIcon,
+  CogIcon,
+  TableIcon,
+  ViewGridAddIcon,
+} from '@heroicons/react/outline';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
@@ -78,6 +83,13 @@ function BaseSettings() {
                         <span className="truncate">{item.name}</span>
                       </Tab>
                     ))}
+                    <Link
+                      to={`/base/${base.id}`}
+                      className="group border-l-4 px-3 py-2 flex items-center text-sm font-medium w-full border-transparent text-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <ArrowLeftIcon className="flex-shrink-0 -ml-1 mr-3 h-6 w-6" aria-hidden="true" />
+                      <span className="truncate">Return to Base</span>
+                    </Link>
                   </Tab.List>
                   <Tab.Panels className="divide-y divide-gray-200 lg:col-span-9">
                     <Tab.Panel>
