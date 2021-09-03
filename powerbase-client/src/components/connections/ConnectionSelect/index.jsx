@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
 import useSWR from 'swr';
 import PropTypes from 'prop-types';
+import { MultiSelect } from 'react-multi-select-component';
 
 import { useAuthUser } from '@models/AuthUser';
 import { getTables } from '@lib/api/tables';
 import { getTableFields } from '@lib/api/fields';
 import { IBase } from '@lib/propTypes/base';
 import { ITable } from '@lib/propTypes/table';
-
 import { Loader } from '@components/ui/Loader';
-import { ConnectionSelectField } from './ConnectionSelectField';
 
 export function ConnectionSelect({
   base,
@@ -31,24 +30,22 @@ export function ConnectionSelect({
   );
   const tables = tablesResponse.data?.tables;
 
-  const { data: fieldOptions } = useSWR(
+  const { data: selectedTableFields } = useSWR(
     (table?.id && authUser) ? `/tables/${table?.id}/fields` : null,
     () => (table?.id
       ? getTableFields({ tableId: table.id })
       : undefined),
   );
+  const fieldOptions = selectedTableFields?.map((item) => ({
+    label: item.name,
+    value: item.name,
+  })) || [];
 
   useEffect(() => {
     if (!table && tables?.length) {
       setTable(tables[0]);
     }
   }, [bases]);
-
-  useEffect(() => {
-    if (fieldOptions?.length && fields?.length === 0) {
-      setFields([fieldOptions[0].name]);
-    }
-  }, [table, fieldOptions]);
 
   const handleBaseChange = (evt) => {
     const selectedBase = bases?.find((item) => (
@@ -63,21 +60,18 @@ export function ConnectionSelect({
     const selectedTable = tables?.find((item) => (
       item.id.toString() === evt.target.value.toString()
     ));
+    const fieldName = fieldOptions[0].name;
 
     setTable(selectedTable);
-    setFields([fieldOptions[0].name]);
+    setFields([{ label: fieldName, value: fieldName }]);
   };
 
   if (!fieldOptions) {
-    return (
-      <div className="flex-1">
-        <Loader />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div className="flex-1">
+    <div>
       <h4 className="font-medium text-lg">{heading}</h4>
       <p className="mt-4 mb-2 text-base text-gray-900">{label}</p>
       <div className="flex">
@@ -121,15 +115,13 @@ export function ConnectionSelect({
       </div>
       <div className="mt-4">
         <p className="mb-2 text-gray-900">Field(s)</p>
-        {fields.map((fieldName, index) => (
-          <ConnectionSelectField
-            key={`${heading.toLowerCase()}Field${fieldName}`}
-            id={`${heading.toLowerCase()}Field${fieldName}`}
-            index={index}
-            field={fieldName}
-            options={fieldOptions}
-          />
-        ))}
+        <MultiSelect
+          options={fieldOptions}
+          value={fields}
+          onChange={setFields}
+          className="multi-select text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+          labelledBy={`${heading.toLowerCase()}FieldSelect`}
+        />
       </div>
     </div>
   );

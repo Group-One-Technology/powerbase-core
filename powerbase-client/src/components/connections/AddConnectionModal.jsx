@@ -31,12 +31,12 @@ export function AddConnectionModal({
 
   return (
     <Modal open={open} setOpen={setOpen}>
-      <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
+      <div className="overflow-y-auto inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
         <form onSubmit={handleSubmit} className="sm:mt-5">
           <Dialog.Title as="h3" className="text-center text-2xl leading-6 font-medium">
             Connect
           </Dialog.Title>
-          <div className="mt-8 flex gap-x-6 w-full text-gray-900">
+          <div className="mt-8 grid grid-cols-2 gap-x-6 w-full text-gray-900">
             <ConnectionSelect
               heading="Destination"
               label="Connect"
