@@ -5,7 +5,7 @@ class BaseConnectionsController < ApplicationController
     required(:database_id).value(:integer)
   end
 
-  schema(:create, :update) do
+  schema(:create) do
     required(:table_id).value(:integer)
     optional(:columns).value(:array)
     required(:referenced_table_id).value(:integer)
@@ -14,6 +14,11 @@ class BaseConnectionsController < ApplicationController
 
   schema(:update) do
     required(:id).value(:integer)
+    required(:name).value(:string)
+    required(:table_id).value(:integer)
+    optional(:columns).value(:array)
+    required(:referenced_table_id).value(:integer)
+    optional(:referenced_columns).value(:array)
   end
 
   schema(:table_connections) do
