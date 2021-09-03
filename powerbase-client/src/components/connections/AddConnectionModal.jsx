@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
+import { useBaseConnections } from '@models/BaseConnections';
 import { IBase } from '@lib/propTypes/base';
+import { addBaseConnection } from '@lib/api/base-connections';
+
 import { Modal } from '@components/ui/Modal';
+import { Button } from '@components/ui/Button';
+import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { ConnectionSelect } from './ConnectionSelect';
 
 export function AddConnectionModal({
@@ -12,6 +17,8 @@ export function AddConnectionModal({
   bases,
   base,
 }) {
+  const { mutate: refetchConnections } = useBaseConnections();
+
   const [destinationBase, setDestinationBase] = useState(bases.find(
     (item) => item.id.toString() === base.id.toString(),
   ));
@@ -23,51 +30,88 @@ export function AddConnectionModal({
   const [targetTable, setTargetTable] = useState();
   const [targetFields, setTargetFields] = useState([]);
 
-  const handleSubmit = (evt) => {
-    evt.preventDefault();
+  const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    setOpen(false);
+  const handleSubmit = async (evt) => {
+    evt.preventDefault();
+    setLoading(true);
+    setErrors([]);
+
+    const hasErrors = !(destinationTable && destinationFields?.length && targetTable && targetFields?.length);
+
+    if (!destinationFields?.length) {
+      setErrors((err) => [...err, 'There are no destination fields selected']);
+    }
+
+    if (!targetFields?.length) {
+      setErrors((err) => [...err, 'There are no target fields selected']);
+    }
+
+    if (!hasErrors) {
+      try {
+        const response = await addBaseConnection({
+          tableId: destinationTable.id,
+          columns: destinationFields.map((item) => item.value),
+          referencedTableId: targetTable.id,
+          referencedColumns: targetFields.map((item) => item.value),
+        });
+
+        if (response.id) {
+          await refetchConnections();
+          setOpen(false);
+        }
+      } catch (err) {
+        setErrors(err.response.data.errors);
+      }
+    }
+
+    setLoading(false);
   };
 
   return (
     <Modal open={open} setOpen={setOpen}>
-      <div className="overflow-y-auto inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
+      <div className="overflow-y-scroll inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
         <form onSubmit={handleSubmit} className="sm:mt-5">
           <Dialog.Title as="h3" className="text-center text-2xl leading-6 font-medium">
             Connect
           </Dialog.Title>
-          <div className="mt-8 grid grid-cols-2 gap-x-6 w-full text-gray-900">
-            <ConnectionSelect
-              heading="Destination"
-              label="Connect"
-              base={destinationBase}
-              setBase={setDestinationBase}
-              bases={bases}
-              table={destinationTable}
-              setTable={setDestinationTable}
-              fields={destinationFields}
-              setFields={setDestinationFields}
-              isDestination
-            />
-            <ConnectionSelect
-              heading="Target"
-              label="To"
-              base={targetBase}
-              setBase={setTargetBase}
-              bases={bases}
-              table={targetTable}
-              setTable={setTargetTable}
-              fields={targetFields}
-              setFields={setTargetFields}
-            />
-          </div>
-          <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
-            <button
-              type="submit"
-              className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-            >
-              Save Connection
-            </button>
+          <div className="mt-8 w-full">
+            {errors && <ErrorAlert errors={errors} />}
+            <div className="grid grid-cols-2 gap-x-6 text-gray-900">
+              <ConnectionSelect
+                heading="Destination"
+                label="Connect"
+                base={destinationBase}
+                setBase={setDestinationBase}
+                bases={bases}
+                table={destinationTable}
+                setTable={setDestinationTable}
+                fields={destinationFields}
+                setFields={setDestinationFields}
+                isDestination
+              />
+              <ConnectionSelect
+                heading="Target"
+                label="To"
+                base={targetBase}
+                setBase={setTargetBase}
+                bases={bases}
+                table={targetTable}
+                setTable={setTargetTable}
+                fields={targetFields}
+                setFields={setTargetFields}
+              />
+            </div>
+            <div className="mt-20 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
+              <Button
+                type="submit"
+                size="md"
+                loading={loading}
+              >
+                Save Connection
+              </Button>
+            </div>
           </div>
         </form>
       </div>
