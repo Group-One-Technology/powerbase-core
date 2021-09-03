@@ -5,7 +5,7 @@ import { XCircleIcon } from '@heroicons/react/solid';
 export function ErrorAlert({ errors }) {
   const isArray = Array.isArray(errors);
 
-  if (isArray && !errors?.length) {
+  if (errors == null || (isArray && !errors?.length)) {
     return null;
   }
 
