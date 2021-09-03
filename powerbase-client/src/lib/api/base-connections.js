@@ -19,3 +19,23 @@ export async function getTableConnections({ tableId }) {
 
   return undefined;
 }
+
+export async function addBaseConnection({ baseId, ...payload }) {
+  const response = await securedApi.post(`/databases/${baseId}/connections`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function updateBaseConnection({ id, ...payload }) {
+  const response = await securedApi.put(`/connections/${id}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
