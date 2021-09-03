@@ -3,6 +3,12 @@ import PropTypes from 'prop-types';
 import { XCircleIcon } from '@heroicons/react/solid';
 
 export function ErrorAlert({ errors }) {
+  const isArray = Array.isArray(errors);
+
+  if (isArray && !errors?.length) {
+    return null;
+  }
+
   return (
     <div className="rounded-md bg-red-50 p-4 mb-6">
       <div className="flex">
@@ -10,7 +16,7 @@ export function ErrorAlert({ errors }) {
           <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
         </div>
         <div className="ml-3">
-          {Array.isArray(errors)
+          {isArray && errors.length > 1
             ? (
               <>
                 <h3 className="text-sm font-medium text-red-800">
