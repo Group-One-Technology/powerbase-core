@@ -5,11 +5,15 @@ class BaseConnectionsController < ApplicationController
     required(:database_id).value(:integer)
   end
 
-  schema(:create) do
+  schema(:create, :update) do
     required(:table_id).value(:integer)
     optional(:columns).value(:array)
     required(:referenced_table_id).value(:integer)
     optional(:referenced_columns).value(:array)
+  end
+
+  schema(:update) do
+    required(:id).value(:integer)
   end
 
   schema(:table_connections) do
@@ -57,10 +61,44 @@ class BaseConnectionsController < ApplicationController
     @connection.referenced_table_id = referenced_table.id
     @connection.referenced_columns = safe_params[:referenced_columns]
 
-    if !@connection.save
-      render json: @connection.errors, status: :unprocessable_entity
-    else
+    if @connection.save
       render json: format_json(@connection, [table, referenced_table])
+    else
+      render json: @connection.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /connections/:id
+  def update
+    @connection = BaseConnection.find(safe_params[:id])
+
+    table = PowerbaseTable.find(safe_params[:table_id])
+    referenced_table = PowerbaseTable.find(safe_params[:referenced_table_id])
+
+    if !table || !referenced_table
+      errors = []
+      errors.push("Couldn't find table with id of #{safe_params[:table_id]}") if !table
+      errors.push("Couldn't find referenced table with id of #{safe_params[:referenced_table_id]}") if !referenced_table
+      render json: { errors: errors }, status: :unprocessable_entity
+      return;
+    end
+
+    @connection.name = if @connection.name === safe_params[:name]
+        "fk_#{table.powerbase_database_id}_#{table.name}_#{referenced_table.powerbase_database_id}_#{referenced_table.name}_#{safe_params[:columns].join("_")}"
+      else
+        safe_params[:name]
+      end
+    @connection.powerbase_database_id = table.powerbase_database_id
+    @connection.powerbase_table_id = table.id
+    @connection.columns = safe_params[:columns]
+    @connection.referenced_database_id = referenced_table.powerbase_database_id
+    @connection.referenced_table_id = referenced_table.id
+    @connection.referenced_columns = safe_params[:referenced_columns]
+
+    if @connection.save
+      render json: format_json(@connection, [table, referenced_table])
+    else
+      render json: @connection.errors, status: :unprocessable_entity
     end
   end
 
