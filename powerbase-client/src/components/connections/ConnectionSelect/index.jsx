@@ -7,6 +7,8 @@ import { getTables } from '@lib/api/tables';
 import { getTableFields } from '@lib/api/fields';
 import { IBase } from '@lib/propTypes/base';
 import { ITable } from '@lib/propTypes/table';
+
+import { Loader } from '@components/ui/Loader';
 import { ConnectionSelectField } from './ConnectionSelectField';
 
 export function ConnectionSelect({
@@ -65,6 +67,14 @@ export function ConnectionSelect({
     setTable(selectedTable);
     setFields([fieldOptions[0].name]);
   };
+
+  if (!fieldOptions) {
+    return (
+      <div className="flex-1">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1">

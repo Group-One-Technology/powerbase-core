@@ -20,7 +20,7 @@ export function BaseConnectionsSettings({
     table: tables.find((item) => item.id === connection.tableId),
     columnName: connection.columns.join(', '),
     joinBase: bases.find((item) => item.id === connection.referencedDatabaseId),
-    joinTable: tables.find((item) => item.id === connection.referencedTableId),
+    joinTable: connection.referencedTable,
     joinColumnName: connection.referencedColumns.join(', '),
   }));
   const [openAddModal, setAddModalOpen] = useState(false);
@@ -69,7 +69,7 @@ export function BaseConnectionsSettings({
                       {connection.joinBase.name}
                     </span>
                     <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                      {connection.joinTable.name}
+                      {connection.joinTable?.name || 'Not Found'}
                     </span>
                     <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
                       {connection.joinColumnName}

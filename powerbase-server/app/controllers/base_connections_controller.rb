@@ -19,7 +19,9 @@ class BaseConnectionsController < ApplicationController
   # GET /database/:database_id/connections
   def index
     @connections = BaseConnection.where(powerbase_database_id: safe_params[:database_id])
-    render json: @connections.map {|item| format_json(item)}
+    tables = get_related_tables(@connections)
+
+    render json: @connections.map {|item| format_json(item, tables)}
   end
 
   # POST /database/:database_id/connections
@@ -58,27 +60,55 @@ class BaseConnectionsController < ApplicationController
     if !@connection.save
       render json: @connection.errors, status: :unprocessable_entity
     else
-      render json: format_json(@connection)
+      render json: format_json(@connection, [table, referenced_table])
     end
   end
 
   # GET /tables/:table_id/connections
   def table_connections
     @connections = BaseConnection.where(powerbase_table_id: safe_params[:table_id])
-    render json: @connections.map {|item| format_json(item)}
+    tables = get_related_tables(@connections)
+
+    render json: @connections.map {|item| format_json(item, tables)}
   end
 
   private
-    def format_json(connection)
+    def get_related_tables(connections)
+      table_ids = connections.map {|item| [item.powerbase_table_id, item.referenced_table_id] }.flatten
+      PowerbaseTable.where(id: table_ids)
+    end
+
+    def format_json(connection, tables)
+      table = tables&.find {|table| table.id == connection.powerbase_table_id }
+      referenced_table = tables&.find {|table| table.id == connection.referenced_table_id }
+
       {
         id: connection.id,
         name: connection.name,
         columns: connection.columns,
         referenced_columns: connection.referenced_columns,
         table_id: connection.powerbase_table_id,
+        table: table ? table_format_json(table) : nil,
         database_id: connection.powerbase_database_id,
         referenced_table_id: connection.referenced_table_id,
+        referenced_table: referenced_table ? table_format_json(referenced_table) : nil,
         referenced_database_id: connection.referenced_database_id,
+      }
+    end
+
+    # Reference: powerbase_tables_controller
+    def table_format_json(table)
+      {
+        id: table.id,
+        name: table.name,
+        alias: table.alias,
+        description: table.description,
+        default_view_id: table.default_view_id,
+        page_size: table.page_size,
+        is_migrated: table.is_migrated,
+        created_at: table.created_at,
+        updated_at: table.updated_at,
+        database_id: table.powerbase_database_id,
       }
     end
 end

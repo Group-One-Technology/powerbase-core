@@ -63,8 +63,6 @@ class PowerbaseTablesController < ApplicationController
     end
 
     def format_json(table)
-      database = table.powerbase_database
-
       {
         id: table.id,
         name: table.name,
