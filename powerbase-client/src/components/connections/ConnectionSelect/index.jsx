@@ -54,6 +54,7 @@ export function ConnectionSelect({
 
     setBase(selectedBase);
     setTable(tables[0]);
+    setFields([]);
   };
 
   const handleTableChange = (evt) => {
@@ -76,7 +77,7 @@ export function ConnectionSelect({
       <div className="flex">
         {isDestination
           ? (
-            <span className="flex-none inline-flex items-center px-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+            <span className="flex-1 inline-flex items-center px-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
               {base.name}
             </span>
           ) : (
@@ -88,6 +89,7 @@ export function ConnectionSelect({
                 className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-2 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
                 value={base?.id}
                 onChange={handleBaseChange}
+                required
               >
                 {bases?.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -104,6 +106,7 @@ export function ConnectionSelect({
           className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-3 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-r-md"
           value={table?.id}
           onChange={handleTableChange}
+          required
         >
           {tables?.map((item) => (
             <option key={item.id} value={item.id}>
@@ -120,6 +123,7 @@ export function ConnectionSelect({
           onChange={setFields}
           className="multi-select text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           labelledBy={`${heading.toLowerCase()}FieldSelect`}
+          required
         />
       </div>
     </div>
