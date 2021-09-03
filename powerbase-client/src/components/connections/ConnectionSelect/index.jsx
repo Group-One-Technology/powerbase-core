@@ -60,10 +60,9 @@ export function ConnectionSelect({
     const selectedTable = tables?.find((item) => (
       item.id.toString() === evt.target.value.toString()
     ));
-    const fieldName = fieldOptions[0].name;
 
     setTable(selectedTable);
-    setFields([{ label: fieldName, value: fieldName }]);
+    setFields([]);
   };
 
   if (!fieldOptions) {
