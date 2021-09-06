@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { ArrowsExpandIcon } from '@heroicons/react/outline';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { FieldType } from '@lib/constants/field-types';
 
 function CellValue({
   value,
@@ -17,41 +18,54 @@ function CellValue({
   fieldTypes,
   handleExpandRecord,
 }) {
+  const fieldType = fieldTypeId
+    ? fieldTypes?.find((item) => item.id.toString() === fieldTypeId.toString())
+    : undefined;
+
   if (isHeader || isLoaded) {
-    if (isRowNo && !isHeader) {
-      return (
-        <>
-          <span className="flex-1 text-right mr-4">
-            {value?.toString()}
-          </span>
-          <span className="flex-1">
-            {(isHoveredRow && !isLastRecord) && (
-              <button
-                type="button"
-                className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
-                onClick={() => {
-                  if (handleExpandRecord) {
-                    handleExpandRecord(value);
-                  }
-                }}
-              >
-                <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
-                <span className="sr-only">Expand Record</span>
-              </button>
-            )}
-          </span>
-        </>
-      );
+    if (!isHeader) {
+      if (isRowNo) {
+        return (
+          <>
+            <span className="flex-1 text-right mr-4">
+              {value?.toString()}
+            </span>
+            <span className="flex-1">
+              {(isHoveredRow && !isLastRecord) && (
+                <button
+                  type="button"
+                  className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
+                  onClick={() => {
+                    if (handleExpandRecord) {
+                      handleExpandRecord(value);
+                    }
+                  }}
+                >
+                  <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">Expand Record</span>
+                </button>
+              )}
+            </span>
+          </>
+        );
+      }
+
+      if (fieldType?.name === FieldType.CHECKBOX) {
+        return (
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            checked={value.toString() === 'true'}
+            readOnly
+          />
+        );
+      }
     }
 
     return (
       <>
         {(isHeader && fieldTypeId != null) && (
-          <FieldTypeIcon
-            typeId={fieldTypeId}
-            fieldTypes={fieldTypes}
-            className="mr-1"
-          />
+          <FieldTypeIcon fieldType={fieldType} className="mr-1" />
         )}
         <span className={cn(isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded')}>
           {value?.toString()}
