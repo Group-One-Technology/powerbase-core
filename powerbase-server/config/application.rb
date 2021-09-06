@@ -41,6 +41,7 @@ module PowerbaseServer
     excluded_routes = -> (env) {
       env["PATH_INFO"].match(%r{^\/tables\/\S+\/records}) # /tables/:id/records
       env["PATH_INFO"].match(%r{^\/tables\/\S+\/linked_records}) # /tables/:id/linked_records
+      env["PATH_INFO"].match(%r{^\/tables\/\S+\/records/\S+}) # /tables/:table_id/records/:id
     }
     config.middleware.use OliveBranch::Middleware,
       inflection: "camel",
