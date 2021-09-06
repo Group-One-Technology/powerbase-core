@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { useTableRecord } from '@models/TableRecord';
+import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
@@ -41,7 +42,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   }
 
   switch (fieldType.name) {
-    case 'Checkbox':
+    case FieldType.CHECKBOX:
       return (
         <div key={item.id} className="w-full mb-8">
           <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
@@ -52,12 +53,12 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
             name={item.name}
             type="checkbox"
             className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            checked={!!item.value}
+            checked={item.value.toString() === 'true'}
             onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
           />
         </div>
       );
-    case 'Single Select':
+    case FieldType.SINGLE_SELECT:
       return (
         <RecordItemSelect
           key={item.id}
@@ -66,7 +67,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
           handleRecordInputChange={handleRecordInputChange}
         />
       );
-    case 'Long Text':
+    case FieldType.LONG_TEXT:
       return (
         <div className="w-full mb-8">
           <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
@@ -85,7 +86,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
     default:
       return (
         <Input
-          type={fieldType.name === 'Number'
+          type={fieldType.name === FieldType.NUMBER
             ? 'number'
             : 'text'}
           id={item.name}
