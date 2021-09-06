@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
 import { TableRecordProvider } from '@models/TableRecord';
+import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { ITable } from '@lib/propTypes/table';
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
+import { LinkedRecordsItem } from './LinkedRecordsItem';
 
 export function SingleRecordModal({
   open,
@@ -124,9 +126,27 @@ export function SingleRecordModal({
             {referencedConnections?.length && (
               <div className="mt-2">
                 <h4>Linked Many-to-Many Connections</h4>
-                {referencedConnections.map((connection) => (
-                  <p key={connection.id} className="mt-1">{connection.table.name} - {connection.columns.join(', ')}</p>
-                ))}
+                {referencedConnections.map((connection) => {
+                  const filters = {};
+
+                  connection.referencedColumns.forEach((col, index) => {
+                    const curColumn = record.find((recordItem) => recordItem.name === col);
+
+                    if (curColumn) {
+                      filters[connection.columns[index]] = curColumn.value;
+                    }
+                  });
+
+                  return (
+                    <TableLinkedRecordsProvider
+                      key={connection.id}
+                      tableId={connection.tableId}
+                      filters={filters}
+                    >
+                      <LinkedRecordsItem connection={connection} />
+                    </TableLinkedRecordsProvider>
+                  );
+                })}
               </div>
             )}
           </div>
