@@ -104,7 +104,7 @@ export function TableRenderer({
                     isRowNo,
                     isLastRecord,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
-                    fieldTypeId: isHeader && columnIndex !== 0
+                    fieldTypeId: columnIndex !== 0
                       ? fields[columnIndex - 1].fieldTypeId
                       : undefined,
                     fieldTypes,
