@@ -23,9 +23,9 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   if (item.isForeignKey && item.value) {
     return (
       <div className="w-full mb-8">
-        <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
+        <h4 htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
           {labelContent}
-        </label>
+        </h4>
         {linkedRecord == null && <Loader />}
         {linkedRecord && <LinkedRecordItem record={linkedRecord} />}
       </div>
