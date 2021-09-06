@@ -4,10 +4,15 @@ import { useTableLinkedRecords } from '@models/TableLinkedRecords';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { FieldType } from '@lib/constants/field-types';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/outline';
+import { LinkedRecordItem } from './LinkedRecordItem';
 
 export function LinkedRecordsItem({ connection, fieldTypes }) {
   const { data: linkedRecords } = useTableLinkedRecords();
-  const fieldType = fieldTypes.find((type) => type.name === FieldType.OTHERS);
+  const fieldType = fieldTypes?.find((type) => type.name === FieldType.OTHERS);
+
+  if (linkedRecords == null || linkedRecords?.length === 0) {
+    return null;
+  }
 
   const labelContent = (
     <>
@@ -21,10 +26,6 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
     </>
   );
 
-  if (linkedRecords == null || linkedRecords?.length === 0) {
-    return null;
-  }
-
   return (
     <div className="w-full mb-8">
       <h4 className="flex items-center text-sm font-medium text-gray-800">
@@ -35,19 +36,8 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
           const recordKey = `${index}-${record[0]}`;
 
           return (
-            <li key={recordKey} className="p-2 border border-gray-300 rounded-lg">
-              <p className="mb-2 text-sm font-medium text-gray-900 truncate">
-                {record[Object.keys(record)[0]]}
-              </p>
-              <div className="flex items-center gap-2">
-                {Object.entries(record)
-                  .map(([key, value], recordIndex) => (recordIndex !== 0 && recordIndex <= 3) && (
-                    <div key={key} className="flex-1 overflow-hidden">
-                      <p className="text-xs text-gray-500 truncate">{key.toUpperCase()}</p>
-                      <p className="text-xs text-gray-800 truncate">{value}</p>
-                    </div>
-                  ))}
-              </div>
+            <li key={recordKey}>
+              <LinkedRecordItem record={record} />
             </li>
           );
         })}
