@@ -23,7 +23,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={cn('inline-flex items-center border border-transparent font-medium shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500', SIZE[size], className)}
+      className={cn('inline-flex items-center border border-transparent font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500', SIZE[size], className)}
       disabled={disabled || loading}
       {...props}
     >
