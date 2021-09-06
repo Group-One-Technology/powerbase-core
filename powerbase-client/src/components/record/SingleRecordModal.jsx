@@ -123,32 +123,30 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
-            {referencedConnections?.length && (
-              <div className="mt-2">
-                <h4>Linked Many-to-Many Connections</h4>
-                {referencedConnections.map((connection) => {
-                  const filters = {};
+            {referencedConnections?.map((connection) => {
+              const filters = {};
 
-                  connection.referencedColumns.forEach((col, index) => {
-                    const curColumn = record.find((recordItem) => recordItem.name === col);
+              connection.referencedColumns.forEach((col, index) => {
+                const curColumn = record.find((recordItem) => recordItem.name === col);
 
-                    if (curColumn) {
-                      filters[connection.columns[index]] = curColumn.value;
-                    }
-                  });
+                if (curColumn) {
+                  filters[connection.columns[index]] = curColumn.value;
+                }
+              });
 
-                  return (
-                    <TableLinkedRecordsProvider
-                      key={connection.id}
-                      tableId={connection.tableId}
-                      filters={filters}
-                    >
-                      <LinkedRecordsItem connection={connection} />
-                    </TableLinkedRecordsProvider>
-                  );
-                })}
-              </div>
-            )}
+              return (
+                <TableLinkedRecordsProvider
+                  key={connection.id}
+                  tableId={connection.tableId}
+                  filters={filters}
+                >
+                  <LinkedRecordsItem
+                    connection={connection}
+                    fieldTypes={fieldTypes}
+                  />
+                </TableLinkedRecordsProvider>
+              );
+            })}
           </div>
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <button
