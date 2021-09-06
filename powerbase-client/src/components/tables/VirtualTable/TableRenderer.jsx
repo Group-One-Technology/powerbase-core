@@ -19,6 +19,7 @@ export function TableRenderer({
   height,
   tables,
   connections,
+  referencedConnections,
   fieldTypes,
 }) {
   const columnCount = fields.length + 1;
@@ -134,6 +135,7 @@ export function TableRenderer({
           record={selectedRecord}
           tables={tables}
           connections={connections}
+          referencedConnections={referencedConnections}
           fieldTypes={fieldTypes}
         />
       )}
@@ -150,7 +152,8 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  connections: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
 };

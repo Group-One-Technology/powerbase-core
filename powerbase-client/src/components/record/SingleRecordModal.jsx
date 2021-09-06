@@ -13,6 +13,7 @@ export function SingleRecordModal({
   record: initialRecord,
   tables,
   connections,
+  referencedConnections,
   fieldTypes,
 }) {
   const [record, setRecord] = useState(initialRecord);
@@ -120,6 +121,14 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
+            {referencedConnections?.length && (
+              <div className="mt-2">
+                <h4>Linked Many-to-Many Connections</h4>
+                {referencedConnections.map((connection) => (
+                  <p key={connection.id} className="mt-1">{connection.table.name} - {connection.columns.join(', ')}</p>
+                ))}
+              </div>
+            )}
           </div>
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <button
@@ -141,5 +150,6 @@ SingleRecordModal.propTypes = {
   record: PropTypes.array.isRequired,
   tables: PropTypes.arrayOf(ITable),
   connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
 };
