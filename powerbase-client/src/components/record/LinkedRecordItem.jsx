@@ -12,7 +12,7 @@ export function LinkedRecordItem({ record }) {
           .map(([key, value], recordIndex) => (recordIndex !== 0 && recordIndex <= 3) && (
             <div key={key} className="flex-1 overflow-hidden">
               <p className="text-xs text-gray-500 truncate">{key.toUpperCase()}</p>
-              <p className="text-xs text-gray-800 truncate">{value == null ? <>&nbsp;</> : value}</p>
+              <p className="text-xs text-gray-800 truncate h-[16px]">{value}</p>
             </div>
           ))}
       </div>
