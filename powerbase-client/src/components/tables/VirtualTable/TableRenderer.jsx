@@ -18,14 +18,15 @@ export function TableRenderer({
   isLoading,
   height,
   tables,
-  foreignKeys,
+  connections,
+  referencedConnections,
   fieldTypes,
 }) {
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
   const fieldNames = fields.map((field) => field.name);
   const tableValues = [['', ...fieldNames], ...records];
-  const foreignKeyIndices = foreignKeys.map((item) => item.columns).flat()
+  const connectionsIndices = connections.map((item) => item.columns).flat()
     .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
@@ -44,19 +45,19 @@ export function TableRenderer({
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
     setSelectedRecord(fields.map((item, index) => {
-      const foreignKey = foreignKeyIndices.includes(index + 1)
-        ? foreignKeys.find((key) => key.columns.includes(item.name))
+      const connection = connectionsIndices.includes(index + 1)
+        ? connections.find((key) => key.columns.includes(item.name))
         : undefined;
 
       return ({
         ...item,
         value: tableValues[rowNo][index + 1],
-        isForeignKey: !!foreignKey,
-        isCompositeKey: foreignKey?.columns.length > 1,
-        foreignKey: foreignKey
+        isForeignKey: !!connection,
+        isCompositeKey: connection?.columns.length > 1,
+        foreignKey: connection
           ? ({
-            ...foreignKey,
-            columnIndex: foreignKey.columns.indexOf(item.name),
+            ...connection,
+            columnIndex: connection.columns.indexOf(item.name),
           })
           : undefined,
       });
@@ -103,7 +104,7 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
-                    isForeignKey: foreignKeyIndices.includes(columnIndex),
+                    isForeignKey: connectionsIndices.includes(columnIndex),
                     fieldTypeId: columnIndex !== 0
                       ? fields[columnIndex - 1].fieldTypeId
                       : undefined,
@@ -133,7 +134,8 @@ export function TableRenderer({
           setOpen={setIsModalOpen}
           record={selectedRecord}
           tables={tables}
-          foreignKeys={foreignKeys}
+          connections={connections}
+          referencedConnections={referencedConnections}
           fieldTypes={fieldTypes}
         />
       )}
@@ -150,7 +152,8 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
 };

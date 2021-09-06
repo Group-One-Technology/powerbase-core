@@ -7,6 +7,7 @@ import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 import { RecordItemSelect } from './RecordItemSelect';
+import { LinkedRecordItem } from './LinkedRecordItem';
 
 export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   const { data: linkedRecord } = useTableRecord();
@@ -22,21 +23,11 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   if (item.isForeignKey && item.value) {
     return (
       <div className="w-full mb-8">
-        <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
+        <h4 htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
           {labelContent}
-        </label>
+        </h4>
         {linkedRecord == null && <Loader />}
-        {linkedRecord && (
-          <div className="mt-2 border border-gray-300 rounded-md overflow-auto sm:divide-y sm:divide-gray-200">
-            {Object.entries(linkedRecord)
-              .map(([key, value]) => (
-                <div key={key} className="py-2 sm:grid sm:grid-cols-3 sm:gap-1 sm:px-2">
-                  <dt className="text-sm font-medium text-gray-900">{key}</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{value}</dd>
-                </div>
-              ))}
-          </div>
-        )}
+        {linkedRecord && <LinkedRecordItem record={linkedRecord} />}
       </div>
     );
   }
@@ -92,7 +83,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
           id={item.name}
           label={labelContent}
           name={item.name}
-          value={item.value}
+          value={item.value || ''}
           onChange={(evt) => handleRecordInputChange(item.id, evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"

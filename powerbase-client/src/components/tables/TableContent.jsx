@@ -7,6 +7,7 @@ import { TableViewProvider, useTableView } from '@models/TableView';
 import { RecordsFilterProvider } from '@models/views/RecordsFilter';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { TableConnectionsProvider } from '@models/TableConnections';
+import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { FieldTypesProvider } from '@models/FieldTypes';
 import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
@@ -75,16 +76,18 @@ export const TableContent = React.memo(({
 
   return (
     <TableConnectionsProvider tableId={table.id}>
-      <TableViewProvider id={currentView?.id}>
-        <ViewFieldsProvider id={currentView?.id}>
-          <BaseTableContent
-            baseId={baseId}
-            table={table}
-            tables={tables}
-            views={views}
-          />
-        </ViewFieldsProvider>
-      </TableViewProvider>
+      <TableReferencedConnectionsProvider tableId={table.id}>
+        <TableViewProvider id={currentView?.id}>
+          <ViewFieldsProvider id={currentView?.id}>
+            <BaseTableContent
+              baseId={baseId}
+              table={table}
+              tables={tables}
+              views={views}
+            />
+          </ViewFieldsProvider>
+        </TableViewProvider>
+      </TableReferencedConnectionsProvider>
     </TableConnectionsProvider>
   );
 });

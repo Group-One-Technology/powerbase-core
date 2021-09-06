@@ -20,6 +20,16 @@ export async function getTableConnections({ tableId }) {
   return undefined;
 }
 
+export async function getTableReferencedConnections({ tableId }) {
+  const response = await securedApi.get(`/tables/${tableId}/referenced_connections`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function addBaseConnection({ baseId, ...payload }) {
   const response = await securedApi.post(`/databases/${baseId}/connections`, payload);
 
