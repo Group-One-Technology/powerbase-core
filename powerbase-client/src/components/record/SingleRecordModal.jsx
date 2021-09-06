@@ -12,7 +12,7 @@ export function SingleRecordModal({
   setOpen,
   record: initialRecord,
   tables,
-  foreignKeys,
+  connections,
   fieldTypes,
 }) {
   const [record, setRecord] = useState(initialRecord);
@@ -78,7 +78,7 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
-            {foreignKeys.map((foreignKey) => {
+            {connections.map((foreignKey) => {
               if (foreignKey?.columns.length <= 1) {
                 return null;
               }
@@ -140,6 +140,6 @@ SingleRecordModal.propTypes = {
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
   tables: PropTypes.arrayOf(ITable),
-  foreignKeys: PropTypes.array,
+  connections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
 };

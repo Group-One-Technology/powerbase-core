@@ -15,12 +15,12 @@ import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, tables }) {
   const { data: fields } = useViewFields();
-  const { data: foreignKeys } = useTableConnections();
+  const { data: connections } = useTableConnections();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
-  if (fields == null || foreignKeys == null || records == null || fieldTypes == null) {
+  if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
 
@@ -36,7 +36,7 @@ export function VirtualTable({ height, tables }) {
       isLoading={isLoading}
       height={height}
       tables={tables}
-      foreignKeys={foreignKeys}
+      connections={connections}
       fieldTypes={fieldTypes}
     />
   );
