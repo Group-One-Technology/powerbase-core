@@ -32,6 +32,7 @@ Rails.application.routes.draw do
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
+  get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   put 'tables/update/aliases', to: 'powerbase_tables#update_aliases', as: 'update_tables_aliases'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
 end

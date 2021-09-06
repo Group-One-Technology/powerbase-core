@@ -21,7 +21,7 @@ class BaseConnectionsController < ApplicationController
     optional(:referenced_columns).value(:array)
   end
 
-  schema(:table_connections) do
+  schema(:table_connections, :referenced_table_connections) do
     required(:table_id).value(:integer)
   end
 
@@ -108,6 +108,14 @@ class BaseConnectionsController < ApplicationController
   # GET /tables/:table_id/connections
   def table_connections
     @connections = BaseConnection.where(powerbase_table_id: safe_params[:table_id])
+    tables = get_related_tables(@connections)
+
+    render json: @connections.map {|item| format_json(item, tables)}
+  end
+
+  # GET /tables/:table_id/referenced_connections
+  def referenced_table_connections
+    @connections = BaseConnection.where(referenced_table_id: safe_params[:table_id])
     tables = get_related_tables(@connections)
 
     render json: @connections.map {|item| format_json(item, tables)}
