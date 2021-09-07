@@ -152,6 +152,7 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
+                    handleResizeCol,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId:
                       isHeader && columnIndex !== 0
