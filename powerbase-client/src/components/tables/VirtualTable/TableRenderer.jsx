@@ -121,7 +121,7 @@ export function TableRenderer({
             }
           >
             {({ width }) => (
-              <MultiGrid
+              <Grid
                 // ref={registerChild}
                 ref={gridRef}
                 onSectionRendered={({
