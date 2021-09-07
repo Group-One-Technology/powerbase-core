@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable quotes */
 /* eslint-disable operator-linebreak */
 import React from "react";
@@ -16,7 +17,7 @@ import { TableRenderer } from "./TableRenderer";
 import "react-virtualized/styles.css";
 
 export function VirtualTable({ height, tables }) {
-  const { data: fields } = useViewFields();
+  const { data: fields, mutate } = useViewFields();
   const { data: foreignKeys } = useTableConnections();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
@@ -48,6 +49,7 @@ export function VirtualTable({ height, tables }) {
       tables={tables}
       foreignKeys={foreignKeys}
       fieldTypes={fieldTypes}
+      mutate={mutate}
     />
   );
 }

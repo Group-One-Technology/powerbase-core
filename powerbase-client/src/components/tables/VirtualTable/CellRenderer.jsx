@@ -103,6 +103,7 @@ export function CellRenderer({
   // eslint-disable-next-line react/prop-types
   handleResizeCol,
   columnResized,
+  mutate,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
@@ -118,8 +119,8 @@ export function CellRenderer({
         updatedColumn
       );
       if (response.statusText === "OK") {
-        // eslint-disable-next-line no-alert
-        console.log(response);
+        // mutate();
+        console.log(mutate);
       }
     };
     return updateColumnWidth();

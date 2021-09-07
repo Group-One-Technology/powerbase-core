@@ -1,3 +1,5 @@
+/* eslint-disable dot-notation */
+/* eslint-disable prefer-const */
 /* eslint-disable object-curly-newline */
 /* eslint-disable react/jsx-curly-newline */
 /* eslint-disable comma-dangle */
@@ -30,13 +32,12 @@ export function TableRenderer({
   tables,
   foreignKeys,
   fieldTypes,
+  mutate,
 }) {
-  console.log(fieldsI);
   const [fields, setFields] = useState(fieldsI);
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
   const fieldNames = fields.map((field) => field.name);
-  // console.log(fields);
   const tableValues = [["", ...fieldNames], ...records];
   const foreignKeyIndices = foreignKeys
     .map((item) => item.columns)
@@ -49,7 +50,7 @@ export function TableRenderer({
   const [colResized, setColResized] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
-  const gridRef = useRef(null);
+  let gridRef = useRef(null);
 
   useEffect(() => {
     gridRef.current?.forceUpdate();
@@ -121,9 +122,13 @@ export function TableRenderer({
             }
           >
             {({ width }) => (
-              <Grid
-                // ref={registerChild}
-                ref={gridRef}
+              <MultiGrid
+                ref={(instance) => {
+                  if (instance) {
+                    gridRef.current = instance;
+                    registerChild(instance);
+                  }
+                }}
                 onSectionRendered={({
                   columnStartIndex,
                   columnStopIndex,
@@ -134,7 +139,6 @@ export function TableRenderer({
                     rowStartIndex * columnCount + columnStartIndex;
                   const stopIndex =
                     rowStopIndex * columnCount + columnStopIndex;
-
                   return onRowsRendered({ startIndex, stopIndex });
                 }}
                 onRowsRendered={onRowsRendered}
@@ -155,6 +159,7 @@ export function TableRenderer({
                     isRowNo,
                     isLastRecord,
                     handleResizeCol,
+                    mutate,
                     columnResized: colResized,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId:
