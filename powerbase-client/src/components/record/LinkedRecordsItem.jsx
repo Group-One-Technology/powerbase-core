@@ -1,13 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useTableLinkedRecords } from '@models/TableLinkedRecords';
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import { FieldType } from '@lib/constants/field-types';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/outline';
+
+import { useTableLinkedRecords } from '@models/TableLinkedRecords';
+import { FieldType } from '@lib/constants/field-types';
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { Button } from '@components/ui/Button';
 import { LinkedRecordItem } from './LinkedRecordItem';
 
 export function LinkedRecordsItem({ connection, fieldTypes }) {
-  const { data: linkedRecords } = useTableLinkedRecords();
+  const {
+    data: linkedRecords,
+    isLoading,
+    loadMore,
+    isReachingEnd,
+  } = useTableLinkedRecords();
   const fieldType = fieldTypes?.find((type) => type.name === FieldType.OTHERS);
 
   if (linkedRecords == null || linkedRecords?.length === 0) {
@@ -41,14 +48,25 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
             </li>
           );
         })}
-        <li>
-          <button
+        <li className="flex gap-2">
+          {!isReachingEnd && (
+            <Button
+              type="button"
+              className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              onClick={loadMore}
+              loading={isLoading}
+            >
+              <ChevronDownIcon className="h-3 w-3 mr-1" />
+              View More
+            </Button>
+          )}
+          <Button
             type="button"
             className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             <PlusIcon className="h-3 w-3 mr-1" />
             Link a new record
-          </button>
+          </Button>
         </li>
       </ul>
     </div>
