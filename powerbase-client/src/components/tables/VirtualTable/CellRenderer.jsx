@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 /* eslint-disable comma-dangle */
 /* eslint-disable quotes */
@@ -6,6 +7,7 @@ import PropTypes from "prop-types";
 import cn from "classnames";
 import { ArrowsExpandIcon } from "@heroicons/react/outline";
 import Draggable from "react-draggable";
+import { securedApi } from "@lib/api/index";
 
 import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 
@@ -100,12 +102,24 @@ export function CellRenderer({
   handleExpandRecord,
   // eslint-disable-next-line react/prop-types
   handleResizeCol,
+  columnResized,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
       row: rowIndex,
       column: columnIndex,
     });
+  };
+
+  const handleResizeStop = (updatedColumn) => {
+    const updateColumnWidth = async () => {
+      const response = await securedApi.put(`/fields`, updatedColumn);
+      console.log(response);
+      if (response.statusText === "OK") {
+        // eslint-disable-next-line no-alert
+      }
+    };
+    return updateColumnWidth();
   };
 
   return (
@@ -157,6 +171,7 @@ export function CellRenderer({
           defaultClassNameDragging="DragHandleActive"
           position={{ x: 0 }}
           onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
+          onStop={() => handleResizeStop(columnResized)}
           zIndex={999}
         >
           <div className="DragHandleIcon">⋮</div>

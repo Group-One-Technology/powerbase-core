@@ -31,6 +31,7 @@ export function TableRenderer({
   foreignKeys,
   fieldTypes,
 }) {
+  console.log(fieldsI);
   const [fields, setFields] = useState(fieldsI);
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
@@ -45,6 +46,7 @@ export function TableRenderer({
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
+  const [colResized, setColResized] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
   const gridRef = useRef(null);
@@ -57,6 +59,7 @@ export function TableRenderer({
   const handleResizeCol = (columnIndex, deltaX) => {
     const updatedColumns = fields.map((col, index) => {
       if (columnIndex === index) {
+        setColResized(col);
         return {
           ...col,
           width: Math.max(col.width + deltaX, 10),
@@ -79,7 +82,6 @@ export function TableRenderer({
       loadMoreRows();
     }
   };
-
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
     setSelectedRecord(
@@ -153,6 +155,7 @@ export function TableRenderer({
                     isRowNo,
                     isLastRecord,
                     handleResizeCol,
+                    columnResized: colResized,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId:
                       isHeader && columnIndex !== 0
