@@ -184,7 +184,7 @@ export function CellRenderer({
           onStop={() => handleResizeStop(columnResized, remoteFields)}
           zIndex={999}
         >
-          <div className="DragHandleIcon">⋮</div>
+          <div className="DragHandleIcon cursor-x">⋮</div>
         </Draggable>
       )}
     </div>
