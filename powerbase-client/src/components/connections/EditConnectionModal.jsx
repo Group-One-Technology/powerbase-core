@@ -118,10 +118,10 @@ export function EditConnectionModal({
                 setFields={setTargetFields}
               />
             </div>
-            <div className="mt-20 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
+            <div className="mt-20 py-4 border-t border-solid flex justify-end">
               <Button
                 type="submit"
-                size="md"
+                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 loading={loading}
               >
                 Update Connection
