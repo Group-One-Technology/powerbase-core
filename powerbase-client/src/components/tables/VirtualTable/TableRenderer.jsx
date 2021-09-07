@@ -34,10 +34,10 @@ export function TableRenderer({
   fieldTypes,
   mutate,
 }) {
-  const [fields, setFields] = useState(remoteFields);
-  const columnCount = fields.length + 1;
-  const rowCount = records.length + 1;
-  const fieldNames = fields.map((field) => field.name);
+  const [fields, setFields] = useState([]);
+  const columnCount = remoteFields && remoteFields.length + 1;
+  const rowCount = remoteFields && records.length + 1;
+  const fieldNames = remoteFields.map((field) => field.name);
   const tableValues = [["", ...fieldNames], ...records];
   const foreignKeyIndices = foreignKeys
     .map((item) => item.columns)
@@ -51,6 +51,10 @@ export function TableRenderer({
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
   let gridRef = useRef(null);
+
+  useEffect(() => {
+    setFields(remoteFields);
+  }, []);
 
   useEffect(() => {
     gridRef.current?.forceUpdate();
@@ -165,7 +169,7 @@ export function TableRenderer({
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId:
                       isHeader && columnIndex !== 0
-                        ? fields[columnIndex - 1].fieldTypeId
+                        ? remoteFields[columnIndex - 1].fieldTypeId
                         : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
@@ -175,7 +179,7 @@ export function TableRenderer({
                   });
                 }}
                 columnWidth={({ index }) =>
-                  index === 0 ? ROW_NO_CELL_WIDTH : fields[index - 1].width
+                  index === 0 ? ROW_NO_CELL_WIDTH : fields[index - 1]?.width
                 }
                 columnCount={columnCount}
                 rowHeight={30}
