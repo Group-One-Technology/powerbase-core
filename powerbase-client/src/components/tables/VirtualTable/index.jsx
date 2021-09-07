@@ -34,7 +34,7 @@ export function VirtualTable({ height, tables }) {
 
   return (
     <TableRenderer
-      fieldsI={fields}
+      remoteFields={fields}
       records={[
         ...records.map((record, index) => [
           index + 1,

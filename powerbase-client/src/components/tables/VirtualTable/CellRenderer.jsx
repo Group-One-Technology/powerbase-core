@@ -1,3 +1,4 @@
+/* eslint-disable nonblock-statement-body-position */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 /* eslint-disable comma-dangle */
@@ -100,10 +101,10 @@ export function CellRenderer({
   fieldTypeId,
   fieldTypes,
   handleExpandRecord,
-  // eslint-disable-next-line react/prop-types
   handleResizeCol,
   columnResized,
   mutate,
+  remoteFields,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
@@ -112,15 +113,20 @@ export function CellRenderer({
     });
   };
 
-  const handleResizeStop = (updatedColumn) => {
+  const handleResizeStop = (updatedColumn, remoteColumns) => {
     const updateColumnWidth = async () => {
       const response = await securedApi.put(
         `/fields/resize_col`,
         updatedColumn
       );
       if (response.statusText === "OK") {
-        // mutate();
-        console.log(mutate);
+        const mutatedColList = remoteColumns.map((column) => {
+          if (column.id === updatedColumn.id) {
+            return { ...column, width: updatedColumn.width };
+          }
+          return column;
+        });
+        mutate(mutatedColList);
       }
     };
     return updateColumnWidth();
@@ -175,7 +181,7 @@ export function CellRenderer({
           defaultClassNameDragging="DragHandleActive"
           position={{ x: 0 }}
           onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
-          onStop={() => handleResizeStop(columnResized)}
+          onStop={() => handleResizeStop(columnResized, remoteFields)}
           zIndex={999}
         >
           <div className="DragHandleIcon">⋮</div>

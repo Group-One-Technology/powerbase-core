@@ -23,7 +23,7 @@ import { CellRenderer } from "./CellRenderer";
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
-  fieldsI,
+  remoteFields,
   records,
   totalRecords,
   loadMoreRows,
@@ -34,7 +34,7 @@ export function TableRenderer({
   fieldTypes,
   mutate,
 }) {
-  const [fields, setFields] = useState(fieldsI);
+  const [fields, setFields] = useState(remoteFields);
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
   const fieldNames = fields.map((field) => field.name);
@@ -160,6 +160,7 @@ export function TableRenderer({
                     isLastRecord,
                     handleResizeCol,
                     mutate,
+                    remoteFields,
                     columnResized: colResized,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
                     fieldTypeId:
@@ -201,7 +202,7 @@ export function TableRenderer({
 }
 
 TableRenderer.propTypes = {
-  fieldsI: PropTypes.arrayOf(IViewField).isRequired,
+  remoteFields: PropTypes.arrayOf(IViewField).isRequired,
   records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,

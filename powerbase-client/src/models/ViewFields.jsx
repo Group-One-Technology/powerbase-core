@@ -15,8 +15,6 @@ function useViewFieldsModel({ id }) {
     getViewFields({ viewId: id })
   );
 
-  console.log(response.data);
-
   return {
     ...response,
   };
