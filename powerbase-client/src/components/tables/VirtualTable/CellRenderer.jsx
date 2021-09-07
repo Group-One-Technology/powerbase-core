@@ -113,10 +113,13 @@ export function CellRenderer({
 
   const handleResizeStop = (updatedColumn) => {
     const updateColumnWidth = async () => {
-      const response = await securedApi.put(`/fields`, updatedColumn);
-      console.log(response);
+      const response = await securedApi.put(
+        `/fields/resize_col`,
+        updatedColumn
+      );
       if (response.statusText === "OK") {
         // eslint-disable-next-line no-alert
+        console.log(response);
       }
     };
     return updateColumnWidth();
