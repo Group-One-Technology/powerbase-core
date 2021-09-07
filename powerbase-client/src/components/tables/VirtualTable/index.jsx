@@ -1,17 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+/* eslint-disable quotes */
+/* eslint-disable operator-linebreak */
+import React from "react";
+import PropTypes from "prop-types";
 
-import { useViewFields } from '@models/ViewFields';
-import { useTableConnections } from '@models/TableConnections';
-import { useTableRecords } from '@models/TableRecords';
-import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { useFieldTypes } from '@models/FieldTypes';
-import { ITable } from '@lib/propTypes/table';
+import { useViewFields } from "@models/ViewFields";
+import { useTableConnections } from "@models/TableConnections";
+import { useTableRecords } from "@models/TableRecords";
+import { useTableRecordsCount } from "@models/TableRecordsCount";
+import { useFieldTypes } from "@models/FieldTypes";
+import { ITable } from "@lib/propTypes/table";
 
-import { Loader } from '@components/ui/Loader';
-import { TableRenderer } from './TableRenderer';
+import { Loader } from "@components/ui/Loader";
+import { TableRenderer } from "./TableRenderer";
 
-import 'react-virtualized/styles.css';
+import "react-virtualized/styles.css";
 
 export function VirtualTable({ height, tables }) {
   const { data: fields } = useViewFields();
@@ -20,16 +22,24 @@ export function VirtualTable({ height, tables }) {
   const { data: records, loadMore, isLoading } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
-  if (fields == null || foreignKeys == null || records == null || fieldTypes == null) {
+  if (
+    fields == null ||
+    foreignKeys == null ||
+    records == null ||
+    fieldTypes == null
+  ) {
     return <Loader style={{ height }} />;
   }
 
   return (
     <TableRenderer
-      fields={fields}
+      fieldsI={fields}
       records={[
-        ...records.map((record, index) => [index + 1, ...Object.values(record)]),
-        [records.length + 1, ...new Array(fields.length).fill('')],
+        ...records.map((record, index) => [
+          index + 1,
+          ...Object.values(record),
+        ]),
+        [records.length + 1, ...new Array(fields.length).fill("")],
       ]}
       totalRecords={totalRecords}
       loadMoreRows={loadMore}

@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable comma-dangle */
 /* eslint-disable quotes */
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import cn from "classnames";
 import { ArrowsExpandIcon } from "@heroicons/react/outline";
@@ -105,6 +106,31 @@ export function CellRenderer({
     });
   };
 
+  // const gridRef = useRef(null);
+
+  //   const colCfg = columns[columnIndex - 1];
+  //   const value = data[rowIndex - 1][colCfg.name];
+  //   const divProps = colCfg.resized ? { className: "resized" } : {};
+  //   return (
+  //     <div key={key} style={style} {...divProps}>
+  //       {value}
+  //     </div>
+  //   );
+  // }
+
+  // const handleColResize = (columnIndex, deltaX) => {
+  //   const updatedColumns = this.state.columns.map((colCfg, index) => {
+  //     if (columnIndex === index) {
+  //       return {...colCfg, width: Math.max(colCfg.width + deltaX, 10), resized: true };
+  //     }
+  //     return { ...colCfg };
+  //   });
+  //   this.setState({ columns: updatedColumns }, () => {
+  //     this.grid.current?.forceUpdate();
+  //     this.grid.current?.recomputeGridSize();
+  //   });
+  // }
+
   return (
     <div
       role="button"
@@ -147,12 +173,13 @@ export function CellRenderer({
         fieldTypes={fieldTypes}
         handleExpandRecord={handleExpandRecord}
       />
-      {rowIndex === 0 && (
+      {rowIndex === 0 && columnIndex !== 0 && (
         <Draggable
           axis="x"
           defaultClassName="DragHandle"
           defaultClassNameDragging="DragHandleActive"
           position={{ x: 0 }}
+          onDrag={(e, { deltaX }) => handleResizeCol(headerIndex, deltaX)}
           zIndex={999}
         >
           <div className="DragHandleIcon">⋮</div>
