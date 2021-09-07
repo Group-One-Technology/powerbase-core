@@ -1,9 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+/* eslint-disable comma-dangle */
+/* eslint-disable quotes */
+import React from "react";
+import PropTypes from "prop-types";
+import cn from "classnames";
+import { ArrowsExpandIcon } from "@heroicons/react/outline";
+import Draggable from "react-draggable";
 
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 
 function CellValue({
   value,
@@ -21,11 +24,9 @@ function CellValue({
     if (isRowNo && !isHeader) {
       return (
         <>
-          <span className="flex-1 text-right mr-4">
-            {value?.toString()}
-          </span>
+          <span className="flex-1 text-right mr-4">{value?.toString()}</span>
           <span className="flex-1">
-            {(isHoveredRow && !isLastRecord) && (
+            {isHoveredRow && !isLastRecord && (
               <button
                 type="button"
                 className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -46,14 +47,18 @@ function CellValue({
 
     return (
       <>
-        {(isHeader && fieldTypeId != null) && (
+        {isHeader && fieldTypeId != null && (
           <FieldTypeIcon
             typeId={fieldTypeId}
             fieldTypes={fieldTypes}
             className="mr-1"
           />
         )}
-        <span className={cn(isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded')}>
+        <span
+          className={cn(
+            isForeignKey && !isHeader && "px-2 py-0.25 bg-blue-50 rounded"
+          )}
+        >
           {value?.toString()}
         </span>
       </>
@@ -106,19 +111,19 @@ export function CellRenderer({
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2',
-        (isHeader && !isHoveredRow) && 'bg-gray-100',
-        isHoveredRow && 'bg-gray-50',
-        isRowNo && 'flex justify-center text-xs text-gray-500',
-        !isRowNo && 'border-r',
+        "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2",
+        isHeader && !isHoveredRow && "bg-gray-100",
+        isHoveredRow && "bg-gray-50",
+        isRowNo && "flex justify-center text-xs text-gray-500",
+        !isRowNo && "border-r"
       )}
       style={style}
       tabIndex={0}
       onKeyDown={(evt) => {
         const el = evt.target;
 
-        if (evt.code === 'Enter' && !isRowNo) {
-          el.contentEditable = el.contentEditable !== 'true';
+        if (evt.code === "Enter" && !isRowNo) {
+          el.contentEditable = el.contentEditable !== "true";
         }
       }}
       onDoubleClick={(evt) => {
@@ -142,6 +147,17 @@ export function CellRenderer({
         fieldTypes={fieldTypes}
         handleExpandRecord={handleExpandRecord}
       />
+      {rowIndex === 0 && (
+        <Draggable
+          axis="x"
+          defaultClassName="DragHandle"
+          defaultClassNameDragging="DragHandleActive"
+          position={{ x: 0 }}
+          zIndex={999}
+        >
+          <div className="DragHandleIcon">⋮</div>
+        </Draggable>
+      )}
     </div>
   );
 }

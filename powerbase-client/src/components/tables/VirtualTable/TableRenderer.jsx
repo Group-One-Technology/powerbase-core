@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
@@ -24,8 +25,11 @@ export function TableRenderer({
   const columnCount = fields.length + 1;
   const rowCount = records.length + 1;
   const fieldNames = fields.map((field) => field.name);
+  // console.log(fields);
   const tableValues = [['', ...fieldNames], ...records];
-  const foreignKeyIndices = foreignKeys.map((item) => item.columns).flat()
+  const foreignKeyIndices = foreignKeys
+    .map((item) => item.columns)
+    .flat()
     .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
@@ -33,34 +37,59 @@ export function TableRenderer({
   const [selectedRecord, setSelectedRecord] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
+  const gridRef = useRef(null);
+
+  // const handleResizeCol = (columnIndex, deltaX) => {
+  //   const updatedColumns = this.state.columns.map((colCfg, index) => {
+  //     if (columnIndex === index) {
+  //       return {
+  //         ...colCfg,
+  //         width: Math.max(colCfg.width + deltaX, 10),
+  //         resized: true,
+  //       };
+  //     }
+  //     return { ...colCfg };
+  //   });
+  //   this.setState({ columns: updatedColumns }, () => {
+  //     gridRef.current?.forceUpdate();
+  //     gridRef.current?.recomputeGridSize();
+  //   });
+  // };
+
   const handleLoadMoreRows = ({ stopIndex }) => {
     const stop = stopIndex / columnCount;
 
-    if ((!isLoading && stop + 100 > records.length) && records.length - 1 !== totalRecords) {
+    if (
+      !isLoading
+      && stop + 100 > records.length
+      && records.length - 1 !== totalRecords
+    ) {
       loadMoreRows();
     }
   };
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item, index) => {
-      const foreignKey = foreignKeyIndices.includes(index + 1)
-        ? foreignKeys.find((key) => key.columns.includes(item.name))
-        : undefined;
+    setSelectedRecord(
+      fields.map((item, index) => {
+        const foreignKey = foreignKeyIndices.includes(index + 1)
+          ? foreignKeys.find((key) => key.columns.includes(item.name))
+          : undefined;
 
-      return ({
-        ...item,
-        value: tableValues[rowNo][index + 1],
-        isForeignKey: !!foreignKey,
-        isCompositeKey: foreignKey?.columns.length > 1,
-        foreignKey: foreignKey
-          ? ({
-            ...foreignKey,
-            columnIndex: foreignKey.columns.indexOf(item.name),
-          })
-          : undefined,
-      });
-    }));
+        return {
+          ...item,
+          value: tableValues[rowNo][index + 1],
+          isForeignKey: !!foreignKey,
+          isCompositeKey: foreignKey?.columns.length > 1,
+          foreignKey: foreignKey
+            ? {
+              ...foreignKey,
+              columnIndex: foreignKey.columns.indexOf(item.name),
+            }
+            : undefined,
+        };
+      }),
+    );
   };
 
   return (
@@ -104,9 +133,10 @@ export function TableRenderer({
                     isRowNo,
                     isLastRecord,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
-                    fieldTypeId: isHeader && columnIndex !== 0
-                      ? fields[columnIndex - 1].fieldTypeId
-                      : undefined,
+                    fieldTypeId:
+                      isHeader && columnIndex !== 0
+                        ? fields[columnIndex - 1].fieldTypeId
+                        : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
@@ -114,9 +144,7 @@ export function TableRenderer({
                     ...props,
                   });
                 }}
-                columnWidth={({ index }) => (index === 0
-                  ? ROW_NO_CELL_WIDTH
-                  : fields[index - 1].width)}
+                columnWidth={({ index }) => (index === 0 ? ROW_NO_CELL_WIDTH : fields[index - 1].width)}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
@@ -143,9 +171,7 @@ export function TableRenderer({
 
 TableRenderer.propTypes = {
   fields: PropTypes.arrayOf(IViewField).isRequired,
-  records: PropTypes.arrayOf(
-    PropTypes.arrayOf(PropTypes.any),
-  ).isRequired,
+  records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
