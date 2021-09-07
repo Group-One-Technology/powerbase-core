@@ -10,13 +10,13 @@ export function Button({
 }) {
   return (
     <button disabled={disabled || loading} {...props}>
+      {children}
       {loading && (
         <>
           <span className="sr-only">Loading.</span>
-          <Spinner />
+          <Spinner className="h-4 w-4 ml-1 text-current" />
         </>
       )}
-      {children}
     </button>
   );
 }
