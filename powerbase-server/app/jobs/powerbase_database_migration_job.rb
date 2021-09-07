@@ -194,8 +194,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         referenced_table = @database_tables.find do |item|
           table_name = item.name.downcase.gsub("_","")
 
-          puts "Table: #{table_name}, Reference: #{referenced_table}"
-
           table_name == referenced_table ||
             (is_singular && table_name == referenced_table.pluralize) ||
             (!is_singular && table_name == referenced_table.singularize)
