@@ -8,6 +8,7 @@ import { ITable } from "@lib/propTypes/table";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { CellRenderer } from "./CellRenderer";
 import { useQuery } from "@lib/hooks/useQuery";
+import { useDidMountEffect } from "@lib/hooks/useDidMountEffect";
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
@@ -44,15 +45,6 @@ export function TableRenderer({
   useEffect(() => {
     setFields(remoteFields);
   }, [remoteFields]);
-
-  const useDidMountEffect = (func, deps) => {
-    const didMount = useRef(false);
-
-    useEffect(() => {
-      if (didMount.current) func();
-      else didMount.current = true;
-    }, deps);
-  };
 
   useDidMountEffect(() => {
     gridRef.current?.forceUpdate();
