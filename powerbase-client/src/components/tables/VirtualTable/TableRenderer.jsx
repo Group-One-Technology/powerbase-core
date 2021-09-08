@@ -126,7 +126,7 @@ export function TableRenderer({
             }
           >
             {({ width }) => (
-              <MultiGrid
+              <Grid
                 ref={(instance) => {
                   if (instance) {
                     gridRef.current = instance;
@@ -178,9 +178,16 @@ export function TableRenderer({
                     ...props,
                   });
                 }}
-                columnWidth={({ index }) =>
-                  index === 0 ? ROW_NO_CELL_WIDTH : fields[index - 1]?.width
-                }
+                // eslint-disable-next-line consistent-return
+                columnWidth={({ index }) => {
+                  if (index === 0) {
+                    return ROW_NO_CELL_WIDTH;
+                  }
+                  if (fields && fields[index - 1]?.width) {
+                    return fields[index - 1]?.width;
+                  }
+                  // return 600;
+                }}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
