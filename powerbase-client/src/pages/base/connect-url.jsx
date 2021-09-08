@@ -112,7 +112,7 @@ export function ConnectURLBasePage() {
                 label="Powerbase Type"
                 value={powerbaseType}
                 setValue={setPowerbaseType}
-                options={POWERBASE_TYPE}
+                options={POWERBASE_TYPE.map((item) => ({ ...item, className: 'bg-white' }))}
                 className="my-6"
               />
               <InlineColorRadio
