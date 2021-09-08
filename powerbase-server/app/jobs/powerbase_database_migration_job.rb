@@ -177,6 +177,13 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         end
       }
 
+      if !@database.is_turbo
+        table.is_migrated = true
+        table.save
+      end
+    end
+
+    @database_tables.each do |table|
       # Scan for possible base connections migration
       puts "#{Time.now} Scanning and migrating possible base connections for table with id of #{table.id}..."
       foreign_key_fields = PowerbaseField.where(
@@ -234,11 +241,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             puts "Base Connection #{base_connection.id} already exists for columns of #{field.name} of table #{table.id}."
           end
         end
-      end
-
-      if !@database.is_turbo
-        table.is_migrated = true
-        table.save
       end
     end
 
