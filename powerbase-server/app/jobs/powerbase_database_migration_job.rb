@@ -176,11 +176,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           end
         end
       }
-
-      if !@database.is_turbo
-        table.is_migrated = true
-        table.save
-      end
     end
 
     @database_tables.each do |table|
@@ -241,6 +236,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             puts "Base Connection #{base_connection.id} already exists for columns of #{field.name} of table #{table.id}."
           end
         end
+      end
+
+      if !@database.is_turbo
+        table.is_migrated = true
+        table.save
       end
     end
 
