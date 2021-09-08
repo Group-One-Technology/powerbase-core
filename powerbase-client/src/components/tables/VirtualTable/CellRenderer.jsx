@@ -1,16 +1,11 @@
-/* eslint-disable nonblock-statement-body-position */
-/* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-/* eslint-disable comma-dangle */
-/* eslint-disable quotes */
-import React, { useRef } from "react";
-import PropTypes from "prop-types";
-import cn from "classnames";
-import { ArrowsExpandIcon } from "@heroicons/react/outline";
-import Draggable from "react-draggable";
-import { securedApi } from "@lib/api/index";
+import React from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import Draggable from 'react-draggable';
+import { securedApi } from '@lib/api/index';
 
-import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
 function CellValue({
   value,
@@ -60,7 +55,7 @@ function CellValue({
         )}
         <span
           className={cn(
-            isForeignKey && !isHeader && "px-2 py-0.25 bg-blue-50 rounded"
+            isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded',
           )}
         >
           {value?.toString()}
@@ -116,10 +111,10 @@ export function CellRenderer({
   const handleResizeStop = (updatedColumn, remoteColumns) => {
     const updateColumnWidth = async () => {
       const response = await securedApi.put(
-        `/fields/resize_col`,
-        updatedColumn
+        '/fields/resize_col',
+        updatedColumn,
       );
-      if (response.statusText === "OK") {
+      if (response.statusText === 'OK') {
         const mutatedColList = remoteColumns.map((column) => {
           if (column.id === updatedColumn.id) {
             return { ...column, width: updatedColumn.width };
@@ -138,19 +133,19 @@ export function CellRenderer({
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2",
-        isHeader && !isHoveredRow && "bg-gray-100",
-        isHoveredRow && "bg-gray-50",
-        isRowNo && "flex justify-center text-xs text-gray-500",
-        !isRowNo && "border-r"
+        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2',
+        isHeader && !isHoveredRow && 'bg-gray-100',
+        isHoveredRow && 'bg-gray-50',
+        isRowNo && 'flex justify-center text-xs text-gray-500',
+        !isRowNo && 'border-r',
       )}
       style={style}
       tabIndex={0}
       onKeyDown={(evt) => {
         const el = evt.target;
 
-        if (evt.code === "Enter" && !isRowNo) {
-          el.contentEditable = el.contentEditable !== "true";
+        if (evt.code === 'Enter' && !isRowNo) {
+          el.contentEditable = el.contentEditable !== 'true';
         }
       }}
       onDoubleClick={(evt) => {
@@ -207,4 +202,8 @@ CellRenderer.propTypes = {
   fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
+  mutate: PropTypes.func,
+  handleResizeCol: PropTypes.func,
+  remoteFields: PropTypes.array,
+  columnResized: PropTypes.object,
 };

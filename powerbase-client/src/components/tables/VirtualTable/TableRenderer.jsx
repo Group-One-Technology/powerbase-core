@@ -1,14 +1,15 @@
-/* eslint-disable */
-import React, { useState, useRef, useEffect } from "react";
-import { Grid, InfiniteLoader, AutoSizer, MultiGrid } from "react-virtualized";
-import PropTypes from "prop-types";
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Grid, InfiniteLoader, AutoSizer,
+} from 'react-virtualized';
+import PropTypes from 'prop-types';
 
-import { IViewField } from "@lib/propTypes/view-field";
-import { ITable } from "@lib/propTypes/table";
-import { SingleRecordModal } from "@components/record/SingleRecordModal";
-import { CellRenderer } from "./CellRenderer";
-import { useQuery } from "@lib/hooks/useQuery";
-import { useDidMountEffect } from "@lib/hooks/useDidMountEffect";
+import { IViewField } from '@lib/propTypes/view-field';
+import { ITable } from '@lib/propTypes/table';
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
+import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { CellRenderer } from './CellRenderer';
+
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
@@ -27,7 +28,7 @@ export function TableRenderer({
   const columnCount = remoteFields && remoteFields.length + 1;
   const rowCount = remoteFields && records.length + 1;
   const fieldNames = remoteFields.map((field) => field.name);
-  const tableValues = [["", ...fieldNames], ...records];
+  const tableValues = [['', ...fieldNames], ...records];
   const foreignKeyIndices = foreignKeys
     .map((item) => item.columns)
     .flat()
@@ -39,8 +40,7 @@ export function TableRenderer({
   const [colResized, setColResized] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
-  let gridRef = useRef(null);
-  const query = useQuery();
+  const gridRef = useRef(null);
 
   useEffect(() => {
     setFields(remoteFields);
@@ -70,9 +70,9 @@ export function TableRenderer({
     const stop = stopIndex / columnCount;
 
     if (
-      !isLoading &&
-      stop + 100 > records.length &&
-      records.length - 1 !== totalRecords
+      !isLoading
+      && stop + 100 > records.length
+      && records.length - 1 !== totalRecords
     ) {
       loadMoreRows();
     }
@@ -92,12 +92,12 @@ export function TableRenderer({
           isCompositeKey: foreignKey?.columns.length > 1,
           foreignKey: foreignKey
             ? {
-                ...foreignKey,
-                columnIndex: foreignKey.columns.indexOf(item.name),
-              }
+              ...foreignKey,
+              columnIndex: foreignKey.columns.indexOf(item.name),
+            }
             : undefined,
         };
-      })
+      }),
     );
   };
 
@@ -111,9 +111,7 @@ export function TableRenderer({
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer
             disableHeight
-            onResize={() =>
-              gridRef.current && gridRef.current.recomputeGridSize()
-            }
+            onResize={() => gridRef.current && gridRef.current.recomputeGridSize()}
           >
             {({ width }) => (
               <Grid
@@ -129,10 +127,8 @@ export function TableRenderer({
                   rowStartIndex,
                   rowStopIndex,
                 }) => {
-                  const startIndex =
-                    rowStartIndex * columnCount + columnStartIndex;
-                  const stopIndex =
-                    rowStopIndex * columnCount + columnStopIndex;
+                  const startIndex = rowStartIndex * columnCount + columnStartIndex;
+                  const stopIndex = rowStopIndex * columnCount + columnStopIndex;
                   return onRowsRendered({ startIndex, stopIndex });
                 }}
                 onRowsRendered={onRowsRendered}
@@ -211,4 +207,5 @@ TableRenderer.propTypes = {
   foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
   fieldTypes: PropTypes.array.isRequired,
+  mutate: PropTypes.func,
 };
