@@ -7,7 +7,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 
 export default function TableSearchModal({
-  open, setOpen, bgColor, tables,
+  open, setOpen, bgColor, tables, handleTableChange
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -16,9 +16,15 @@ export default function TableSearchModal({
     setSearchTerm(e.target.value);
   };
   useEffect(() => {
-    const results = tables.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
+    const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
     setSearchResults(results);
   }, [searchTerm]);
+
+  const handleSearchResultClick = (table) => {
+      setOpen(false)
+      setSearchResults(tables)
+      return handleTableChange(table)
+  }
 
   const focusRef = useRef(null);
   const color = bgColor.split('-')[1]
@@ -26,7 +32,7 @@ export default function TableSearchModal({
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="fixed z-10 inset-0 overflow-y-auto max-w-sm mt-16 ml-4" onClose={() => setOpen(false)} initialFocus={focusRef}>
+      <Dialog as="div" className="fixed z-10 inset-0  max-w-sm mt-16 ml-4" onClose={() => setOpen(false)} initialFocus={focusRef}>
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
@@ -73,7 +79,7 @@ export default function TableSearchModal({
                 <div className="mt-3 text-center sm:mt-5">
                   <div className="mt-2">
                     <ul>
-                      {searchResults && searchResults.map((item) => <li className="p-2 text-sm" key={item?.id}>{item.alias || item.name}</li>)}
+                      {searchResults && searchResults.map((item) => <li className={`p-2 text-sm cursor-pointer hover:bg-gray-200`} key={item?.id} onClick={() => handleSearchResultClick({ table: item })}>{item.alias || item.name}</li>)}
                     </ul>
                   </div>
                 </div>
