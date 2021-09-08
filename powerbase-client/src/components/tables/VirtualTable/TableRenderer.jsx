@@ -1,16 +1,4 @@
-/* eslint-disable dot-notation */
-/* eslint-disable prefer-const */
-/* eslint-disable object-curly-newline */
-/* eslint-disable react/jsx-curly-newline */
-/* eslint-disable comma-dangle */
-/* eslint-disable operator-linebreak */
-/* eslint-disable no-confusing-arrow */
-/* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable indent */
-/* eslint-disable import/named */
-/* eslint-disable quotes */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
+/* eslint-disable */
 import React, { useState, useRef, useEffect } from "react";
 import { Grid, InfiniteLoader, AutoSizer, MultiGrid } from "react-virtualized";
 import PropTypes from "prop-types";
@@ -19,7 +7,7 @@ import { IViewField } from "@lib/propTypes/view-field";
 import { ITable } from "@lib/propTypes/table";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { CellRenderer } from "./CellRenderer";
-
+import { useQuery } from "@lib/hooks/useQuery";
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
@@ -51,12 +39,22 @@ export function TableRenderer({
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
   let gridRef = useRef(null);
+  const query = useQuery();
 
   useEffect(() => {
     setFields(remoteFields);
-  }, []);
+  }, [remoteFields]);
 
-  useEffect(() => {
+  const useDidMountEffect = (func, deps) => {
+    const didMount = useRef(false);
+
+    useEffect(() => {
+      if (didMount.current) func();
+      else didMount.current = true;
+    }, deps);
+  };
+
+  useDidMountEffect(() => {
     gridRef.current?.forceUpdate();
     gridRef.current?.recomputeGridSize();
   }, [fields]);
@@ -178,7 +176,6 @@ export function TableRenderer({
                     ...props,
                   });
                 }}
-                // eslint-disable-next-line consistent-return
                 columnWidth={({ index }) => {
                   if (index === 0) {
                     return ROW_NO_CELL_WIDTH;
@@ -186,7 +183,7 @@ export function TableRenderer({
                   if (fields && fields[index - 1]?.width) {
                     return fields[index - 1]?.width;
                   }
-                  // return 600;
+                  return 300;
                 }}
                 columnCount={columnCount}
                 rowHeight={30}

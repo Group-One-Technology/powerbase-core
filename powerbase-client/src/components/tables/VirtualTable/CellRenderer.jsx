@@ -127,7 +127,6 @@ export function CellRenderer({
           return column;
         });
         mutate(mutatedColList);
-        mutate();
       }
     };
     return updateColumnWidth();
