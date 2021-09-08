@@ -29,8 +29,9 @@
 .resized {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   display: block;
+  /* white-space: nowrap; */
+  /* display: flex; */
 }
 .DragHandle {
   flex: 0 0 16px;

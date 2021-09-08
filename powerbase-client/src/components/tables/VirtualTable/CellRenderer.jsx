@@ -138,6 +138,7 @@ export function CellRenderer({
         isHoveredRow && 'bg-gray-50',
         isRowNo && 'flex justify-center text-xs text-gray-500',
         !isRowNo && 'border-r',
+        !isHeader && !isRowNo && 'resized',
       )}
       style={style}
       tabIndex={0}
