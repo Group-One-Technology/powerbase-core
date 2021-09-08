@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import {
+  PlusIcon, ChevronLeftIcon, ChevronRightIcon, TableIcon,
+} from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -109,6 +111,9 @@ export function TableTabs({
         </select>
       </div>
       <div className="hidden sm:flex">
+        <button>
+          <TableIcon className="h-6 w-6 text-gray-700 mt-1/2" />
+        </button>
         <button
           id="tableTabsLeftArrow"
           type="button"
