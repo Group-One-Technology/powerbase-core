@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   PlusIcon, ChevronLeftIcon, ChevronRightIcon, TableIcon,
 } from '@heroicons/react/solid';
@@ -9,6 +9,7 @@ import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
 import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
+import TableSearchModal from './TableSearchModal';
 
 const SCROLL_OFFSET = 100;
 
@@ -20,6 +21,7 @@ export function TableTabs({
 }) {
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
@@ -72,6 +74,10 @@ export function TableTabs({
     }
   };
 
+  const handleSearchModal = () => {
+    setModalOpen(true);
+  };
+
   const addTable = () => {
     alert('add new table clicked');
   };
@@ -111,9 +117,10 @@ export function TableTabs({
         </select>
       </div>
       <div className="hidden sm:flex">
-        <button>
+        <button onClick={() => handleSearchModal()}>
           <TableIcon className="h-6 w-6 text-gray-700 mt-1/2" />
         </button>
+        <TableSearchModal open={modalOpen} setOpen={setModalOpen} bgColor={BG_COLORS[color]} tables={tables} />
         <button
           id="tableTabsLeftArrow"
           type="button"
