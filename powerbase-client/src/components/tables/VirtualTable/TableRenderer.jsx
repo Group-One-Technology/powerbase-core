@@ -147,7 +147,7 @@ export function TableRenderer({
                     isLastRecord,
                     isForeignKey: connectionsIndices.includes(columnIndex),
                     fieldTypeId: columnIndex !== 0
-                      ? fields[columnIndex - 1].fieldTypeId
+                      ? remoteFields[columnIndex - 1].fieldTypeId
                       : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
