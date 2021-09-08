@@ -233,8 +233,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           end
         else
           referenced_column = @field_primary_keys.find {|item| item.name == field.name}
+          other_referenced_columns = referenced_column && @field_primary_keys.select {|item|
+            item.id != referenced_column.id && item.powerbase_table_id == referenced_column.powerbase_table_id
+          }
 
-          if referenced_column && referenced_column.powerbase_table_id != field.powerbase_table_id
+          if referenced_column && other_referenced_columns.length == 0 && referenced_column.powerbase_table_id != field.powerbase_table_id
             referenced_table = referenced_column.powerbase_table
 
             base_connection = BaseConnection.find_by(
