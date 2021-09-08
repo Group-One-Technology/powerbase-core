@@ -182,7 +182,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       # Scan for possible base connections migration
       puts "#{Time.now} Scanning and migrating possible base connections for table with id of #{table.id}..."
       foreign_key_fields = PowerbaseField.where(
-        "powerbase_table_id = ? AND LOWER(name) like '%id' AND is_primary_key = FALSE",
+        "powerbase_table_id = ? AND LOWER(name) like '%id'",
         table.id,
       )
 
