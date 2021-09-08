@@ -222,6 +222,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             base_connection.referenced_database_id = referenced_table.powerbase_database_id
             base_connection.powerbase_table_id = table.id
             base_connection.powerbase_database_id = table.powerbase_database_id
+            base_connection.is_auto_linked = true
 
             if !base_connection.save
               # TODO: Add error tracker (ex. Sentry)

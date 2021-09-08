@@ -7,6 +7,7 @@ import { IBase } from '@lib/propTypes/base';
 import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 import { Loader } from '@components/ui/Loader';
+import { Badge } from '@components/ui/Badge';
 
 export function BaseConnectionsSettings({
   base,
@@ -75,6 +76,11 @@ export function BaseConnectionsSettings({
                       {connection.joinColumnName}
                     </span>
                   </div>
+                  {connection.isAutoLinked && (
+                    <div>
+                      <Badge color="gray">Auto Linked</Badge>
+                    </div>
+                  )}
                 </div>
               </li>
             ))}
