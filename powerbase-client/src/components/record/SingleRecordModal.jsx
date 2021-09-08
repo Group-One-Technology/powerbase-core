@@ -3,16 +3,19 @@ import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
 import { TableRecordProvider } from '@models/TableRecord';
+import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { ITable } from '@lib/propTypes/table';
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
+import { LinkedRecordsItem } from './LinkedRecordsItem';
 
 export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
   tables,
-  foreignKeys,
+  connections,
+  referencedConnections,
   fieldTypes,
 }) {
   const [record, setRecord] = useState(initialRecord);
@@ -78,7 +81,7 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
-            {foreignKeys.map((foreignKey) => {
+            {connections.map((foreignKey) => {
               if (foreignKey?.columns.length <= 1) {
                 return null;
               }
@@ -120,6 +123,30 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
+            {referencedConnections?.map((connection) => {
+              const filters = {};
+
+              connection.referencedColumns.forEach((col, index) => {
+                const curColumn = record.find((recordItem) => recordItem.name === col);
+
+                if (curColumn) {
+                  filters[connection.columns[index]] = curColumn.value;
+                }
+              });
+
+              return (
+                <TableLinkedRecordsProvider
+                  key={connection.id}
+                  tableId={connection.tableId}
+                  filters={filters}
+                >
+                  <LinkedRecordsItem
+                    connection={connection}
+                    fieldTypes={fieldTypes}
+                  />
+                </TableLinkedRecordsProvider>
+              );
+            })}
           </div>
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <button
@@ -140,6 +167,7 @@ SingleRecordModal.propTypes = {
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
   tables: PropTypes.arrayOf(ITable),
-  foreignKeys: PropTypes.array,
+  connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
 };

@@ -11,29 +11,35 @@ import {
   CalendarIcon,
   ChevronDownIcon,
 } from '@heroicons/react/solid';
+import { FieldType } from '@lib/constants/field-types';
 
-export const FieldTypeIcon = React.memo(({ typeId, fieldTypes, className }) => {
+export const FieldTypeIcon = React.memo(({
+  typeId,
+  fieldType: intialFieldType,
+  fieldTypes,
+  className,
+}) => {
   const generatedClassName = cn('text-sm text-gray-600 h-4 w-4', className);
-  const fieldType = fieldTypes?.find((item) => item.id === typeId);
+  const fieldType = intialFieldType || fieldTypes?.find((item) => item.id === typeId);
 
   switch (fieldType?.name) {
-    case 'Long Text':
+    case FieldType.LONG_TEXT:
       return <MenuAlt1Icon className={generatedClassName} />;
-    case 'Checkbox':
+    case FieldType.CHECKBOX:
       return <CheckCircleIcon className={generatedClassName} />;
-    case 'Number ':
+    case FieldType.NUMBER:
       return <HashtagIcon className={generatedClassName} />;
-    case 'Single Select':
+    case FieldType.SINGLE_SELECT:
       return <ChevronDownIcon className={generatedClassName} />;
-    case 'Multiple Select':
+    case FieldType.MULTIPLE_SELECT:
       return <ChevronDownIcon className={generatedClassName} />;
-    case 'Date':
+    case FieldType.DATE:
       return <CalendarIcon className={generatedClassName} />;
-    case 'Email':
+    case FieldType.EMAIL:
       return <MailIcon className={generatedClassName} />;
-    case 'Plugin':
+    case FieldType.PLUGIN:
       return <LightningBoltIcon className={generatedClassName} />;
-    case 'Others':
+    case FieldType.OTHERS:
       return <TemplateIcon className={generatedClassName} />;
     default:
       return <span className={cn('text-sm font-medium text-gray-600 flex items-center', className)}>A</span>;
@@ -42,6 +48,7 @@ export const FieldTypeIcon = React.memo(({ typeId, fieldTypes, className }) => {
 
 FieldTypeIcon.propTypes = {
   typeId: PropTypes.number,
+  fieldType: PropTypes.object,
   fieldTypes: PropTypes.array,
   className: PropTypes.string,
 };
