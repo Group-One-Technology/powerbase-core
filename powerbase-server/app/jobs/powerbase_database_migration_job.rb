@@ -205,7 +205,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             powerbase_table_id: table.id,
             powerbase_database_id: table.powerbase_database_id,
             referenced_table_id: referenced_table.id,
-            referenced_database_i: referenced_table.powerbase_database_id,
+            referenced_database_id: referenced_table.powerbase_database_id,
           )
 
           if !base_connection
