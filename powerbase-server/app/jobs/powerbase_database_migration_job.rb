@@ -201,7 +201,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             (!is_singular && table_name == referenced_table.singularize)
         end
 
-        if referenced_table
+        if referenced_table && referenced_table.id != table.id
           base_connection = BaseConnection.find_by(
             columns: [field.name],
             powerbase_table_id: table.id,
