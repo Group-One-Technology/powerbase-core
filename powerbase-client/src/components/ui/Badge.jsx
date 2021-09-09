@@ -14,7 +14,7 @@ const COLOR = {
 
 export function Badge({ children, color = 'gray', className }) {
   return (
-    <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium', className, color && COLOR[color])}>
+    <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap', className, color && COLOR[color])}>
       {children}
     </span>
   );

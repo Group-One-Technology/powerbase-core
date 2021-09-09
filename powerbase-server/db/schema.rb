@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_01_234931) do
+ActiveRecord::Schema.define(version: 2021_09_08_001355) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 2021_09_01_234931) do
     t.bigint "referenced_table_id", null: false
     t.bigint "powerbase_database_id", null: false
     t.bigint "referenced_database_id", null: false
+    t.boolean "is_auto_linked", default: false
     t.index ["powerbase_database_id"], name: "index_base_connections_on_powerbase_database_id"
     t.index ["powerbase_table_id"], name: "index_base_connections_on_powerbase_table_id"
     t.index ["referenced_database_id"], name: "index_base_connections_on_referenced_database_id"
