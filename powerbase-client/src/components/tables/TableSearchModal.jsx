@@ -12,10 +12,27 @@ export default function TableSearchModal({
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const focusRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  const activeItemRefs = tables.reduce((acc, value) => {
+    acc[value.id] = React.createRef();
+    return acc;
+  }, {});
+
+  const scrollToActiveItem = (id) => activeItemRefs?.id?.current.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 
   const handleChange = (e) => {
     setSearchTerm(e.target.value);
   };
+
+  useEffect(() => {
+    scrollToActiveItem();
+  }, []);
+
   useEffect(() => {
     const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
     setSearchResults(results);
@@ -27,16 +44,13 @@ export default function TableSearchModal({
     return handleTableChange(table);
   };
 
-  const focusRef = useRef(null);
-  const searchInputRef = useRef(null);
-
   useEffect(() => {
     searchInputRef.current?.focus();
   }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="fixed z-10 inset-0  max-w-sm mt-16 ml-4" onClose={() => setOpen(false)} initialFocus={focusRef}>
+      <Dialog as="div" className="fixed z-10 inset-0  max-w-sm mt-16 ml-4 max-h-8" onClose={() => setOpen(false)} initialFocus={focusRef}>
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
@@ -58,7 +72,7 @@ export default function TableSearchModal({
             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <div className="inline-block align-bottom bg-white rounded-md px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div className="inline-block align-bottom bg-white rounded-md px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
               <div>
                 <div className="mx-auto flex items-center justify-center h-12">
                   <div className="mt-1 relative rounded-md shadow-sm w-full">
@@ -70,7 +84,6 @@ export default function TableSearchModal({
                       placeholder="Search for a table"
                       onChange={handleChange}
                       ref={searchInputRef}
-                    //   onBlur={({ target }) => target.focus()}
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <SearchIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
@@ -79,16 +92,16 @@ export default function TableSearchModal({
                 </div>
                 <div className="mt-2 text-center sm:mt-5">
                   {searchResults && (
-                  <div className="mt-1">
-                    <ul>
+                  <div className="mt-1 overflow-y-auto">
+                    <ul className="max-h-60 ">
                       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
                       {searchResults?.map((item) => <li className="p-2 text-sm cursor-pointer hover:bg-gray-200" key={item?.id} onClick={() => handleSearchResultClick({ table: item })}>{item.alias || item.name}</li>)}
                     </ul>
                   </div>
                   )}{!searchResults.length && (
-                  <div className="flex flex-col justify-center content-center">
+                  <div className="flex flex-col justify-center content-center items-center">
                     <ExclamationIcon className="h-9 w-9 text-gray-400" />
-                    <div> There are no matching tables.</div>
+                    <p className="text-gray-400 text-sm mt-1"> There are no matching tables.</p>
                   </div>
                   )}
                 </div>
