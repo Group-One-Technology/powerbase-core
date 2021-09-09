@@ -178,62 +178,93 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       }
     end
 
+    @field_primary_keys = PowerbaseField.where(
+      powerbase_table_id: @database_tables.map {|item| item.id},
+      is_primary_key: true,
+    )
+
     @database_tables.each do |table|
       # Scan for possible base connections migration
       puts "#{Time.now} Scanning and migrating possible base connections for table with id of #{table.id}..."
-      foreign_key_fields = PowerbaseField.where(
-        "powerbase_table_id = ? AND LOWER(name) like '%id'",
-        table.id,
-      )
+      table.powerbase_fields.each do |field|
+        if field.name.downcase.end_with? "id"
+          referenced_table = field.name.downcase.delete_suffix("id")
+          referenced_table = referenced_table.delete_suffix("_") if referenced_table.end_with? "_"
+          referenced_table = referenced_table.gsub("_","")
 
-      foreign_key_fields.each do |field|
-        referenced_table = field.name.downcase.delete_suffix("id")
-        referenced_table = referenced_table.delete_suffix("_") if referenced_table.end_with? "_"
-        referenced_table = referenced_table.gsub("_","")
+          is_singular = referenced_table.pluralize != referenced_table && referenced_table.singularize == referenced_table
 
-        is_singular = referenced_table.pluralize != referenced_table && referenced_table.singularize == referenced_table
+          referenced_table = @database_tables.find do |item|
+            table_name = item.name.downcase.gsub("_","")
 
-        referenced_table = @database_tables.find do |item|
-          table_name = item.name.downcase.gsub("_","")
+            table_name == referenced_table ||
+              (is_singular && table_name == referenced_table.pluralize) ||
+              (!is_singular && table_name == referenced_table.singularize)
+          end
 
-          table_name == referenced_table ||
-            (is_singular && table_name == referenced_table.pluralize) ||
-            (!is_singular && table_name == referenced_table.singularize)
-        end
-
-        if referenced_table && referenced_table.id != table.id
-          base_connection = BaseConnection.find_by(
-            columns: [field.name],
-            powerbase_table_id: table.id,
-            powerbase_database_id: table.powerbase_database_id,
-            referenced_table_id: referenced_table.id,
-            referenced_database_id: referenced_table.powerbase_database_id,
-          )
-
-          if !base_connection
-            referenced_table_primary_keys = PowerbaseField.where(
-              powerbase_table_id: referenced_table.id,
-              is_primary_key: true,
+          if referenced_table && referenced_table.id != table.id
+            base_connection = BaseConnection.find_by(
+              columns: [field.name],
+              powerbase_table_id: table.id,
+              powerbase_database_id: table.powerbase_database_id,
+              referenced_table_id: referenced_table.id,
+              referenced_database_id: referenced_table.powerbase_database_id,
             )
 
-            base_connection = BaseConnection.new
-            base_connection.name = "fk_#{table.powerbase_database_id}_#{table.name}_#{referenced_table.powerbase_database_id}_#{referenced_table.name}_#{field.name}"
-            base_connection.columns = [field.name]
-            base_connection.referenced_columns = referenced_table_primary_keys.map {|key| key.name}
-            base_connection.referenced_table_id = referenced_table.id
-            base_connection.referenced_database_id = referenced_table.powerbase_database_id
-            base_connection.powerbase_table_id = table.id
-            base_connection.powerbase_database_id = table.powerbase_database_id
-            base_connection.is_auto_linked = true
+            if !base_connection
+              referenced_table_column = @field_primary_keys.find {|item| item.powerbase_table_id == referenced_table.id}
 
-            if !base_connection.save
-              # TODO: Add error tracker (ex. Sentry)
-              puts "Failed to save foreign key constraint: #{base_connection.name}"
-              puts base_connection.errors.messages
+              base_connection = BaseConnection.new
+              base_connection.name = "fk_#{table.powerbase_database_id}_#{table.name}_#{referenced_table.powerbase_database_id}_#{referenced_table.name}_#{field.name}"
+              base_connection.columns = [field.name]
+              base_connection.referenced_columns = [referenced_table_column.name]
+              base_connection.referenced_table_id = referenced_table.id
+              base_connection.referenced_database_id = referenced_table.powerbase_database_id
+              base_connection.powerbase_table_id = table.id
+              base_connection.powerbase_database_id = table.powerbase_database_id
+              base_connection.is_auto_linked = true
+
+              if !base_connection.save
+                # TODO: Add error tracker (ex. Sentry)
+                puts "Failed to save foreign key constraint: #{base_connection.name}"
+                puts base_connection.errors.messages
+              end
             end
-          else
-            # TODO: To remove (added for debugging purposes only)
-            puts "Base Connection #{base_connection.id} already exists for columns of #{field.name} of table #{table.id}."
+          end
+        else
+          referenced_column = @field_primary_keys.find {|item| item.name == field.name}
+          other_referenced_columns = referenced_column && @field_primary_keys.select {|item|
+            item.id != referenced_column.id && item.powerbase_table_id == referenced_column.powerbase_table_id
+          }
+
+          if referenced_column && other_referenced_columns.length == 0 && referenced_column.powerbase_table_id != field.powerbase_table_id
+            referenced_table = referenced_column.powerbase_table
+
+            base_connection = BaseConnection.find_by(
+              columns: [field.name],
+              powerbase_table_id: table.id,
+              powerbase_database_id: table.powerbase_database_id,
+              referenced_table_id: referenced_table.id,
+              referenced_database_id: referenced_table.powerbase_database_id,
+            )
+
+            if !base_connection
+              base_connection = BaseConnection.new
+              base_connection.name = "fk_#{table.powerbase_database_id}_#{table.name}_#{referenced_table.powerbase_database_id}_#{referenced_table.name}_#{field.name}"
+              base_connection.columns = [field.name]
+              base_connection.referenced_columns = [referenced_column.name]
+              base_connection.referenced_table_id = referenced_table.id
+              base_connection.referenced_database_id = referenced_table.powerbase_database_id
+              base_connection.powerbase_table_id = table.id
+              base_connection.powerbase_database_id = table.powerbase_database_id
+              base_connection.is_auto_linked = true
+
+              if !base_connection.save
+                # TODO: Add error tracker (ex. Sentry)
+                puts "Failed to save foreign key constraint: #{base_connection.name}"
+                puts base_connection.errors.messages
+              end
+            end
           end
         end
       end
