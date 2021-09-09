@@ -22,7 +22,7 @@ export function TableRenderer({
   tables,
   foreignKeys,
   fieldTypes,
-  mutate,
+  mutateViewFields,
 }) {
   const [fields, setFields] = useState([]);
   const columnCount = remoteFields && remoteFields.length + 1;
@@ -149,7 +149,7 @@ export function TableRenderer({
                     isRowNo,
                     isLastRecord,
                     handleResizeCol,
-                    mutate,
+                    mutateViewFields,
                     remoteFields,
                     columnResized: colResized,
                     isForeignKey: foreignKeyIndices.includes(columnIndex),
@@ -207,5 +207,5 @@ TableRenderer.propTypes = {
   foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
   fieldTypes: PropTypes.array.isRequired,
-  mutate: PropTypes.func,
+  mutateViewFields: PropTypes.func,
 };

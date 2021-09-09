@@ -14,7 +14,7 @@ import { TableRenderer } from './TableRenderer';
 import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, tables }) {
-  const { data: fields, mutate } = useViewFields();
+  const { data: fields, mutateViewFields } = useViewFields();
   const { data: foreignKeys } = useTableConnections();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
@@ -46,7 +46,7 @@ export function VirtualTable({ height, tables }) {
       tables={tables}
       foreignKeys={foreignKeys}
       fieldTypes={fieldTypes}
-      mutate={mutate}
+      mutateViewFields={mutateViewFields}
     />
   );
 }
