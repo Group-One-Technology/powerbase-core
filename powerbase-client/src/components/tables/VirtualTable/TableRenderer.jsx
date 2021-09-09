@@ -62,7 +62,7 @@ export function TableRenderer({
           resized: true,
         };
       }
-      return { ...col };
+      return col;
     });
     setScopedFields(updatedColumns);
   };
