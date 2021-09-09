@@ -14,7 +14,7 @@ import { TableRenderer } from './TableRenderer';
 import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, tables }) {
-  const { data: fields, mutateViewFields } = useViewFields();
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: foreignKeys } = useTableConnections();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore, isLoading } = useTableRecords();
@@ -31,7 +31,7 @@ export function VirtualTable({ height, tables }) {
 
   return (
     <TableRenderer
-      remoteFields={fields}
+      fields={fields}
       records={[
         ...records.map((record, index) => [
           index + 1,

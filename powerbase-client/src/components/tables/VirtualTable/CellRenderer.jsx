@@ -100,7 +100,7 @@ export function CellRenderer({
   handleResizeCol,
   columnResized,
   mutateViewFields,
-  remoteFields,
+  fields,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
@@ -181,7 +181,7 @@ export function CellRenderer({
           defaultClassNameDragging="DragHandleActive"
           position={{ x: 0 }}
           onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
-          onStop={() => handleResizeStop(columnResized, remoteFields)}
+          onStop={() => handleResizeStop(columnResized, fields)}
           zIndex={999}
         >
           <div className="DragHandleIcon cursor-x">⋮</div>
@@ -209,6 +209,6 @@ CellRenderer.propTypes = {
   handleExpandRecord: PropTypes.func,
   mutateViewFields: PropTypes.func,
   handleResizeCol: PropTypes.func,
-  remoteFields: PropTypes.array,
+  fields: PropTypes.array,
   columnResized: PropTypes.object,
 };
