@@ -39,6 +39,7 @@ export default function TableSearchModal({
   }, [searchTerm]);
 
   useEffect(() => {
+    scrollToActiveItem(tableId);
     searchInputRef.current?.focus();
   }, []);
 
@@ -46,6 +47,7 @@ export default function TableSearchModal({
   function onKeyDown(event) {
     const isUp = event.key === 'ArrowUp';
     const isDown = event.key === 'ArrowDown';
+    setHasHovered(true);
     const inputIsFocused = document.activeElement === searchInputRef.current;
 
     const resultsItems = Array.from(listContainerRef.current.children)
