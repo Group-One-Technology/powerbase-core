@@ -7,6 +7,7 @@ import { IBase } from '@lib/propTypes/base';
 import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 import { Loader } from '@components/ui/Loader';
+import { Badge } from '@components/ui/Badge';
 
 export function BaseConnectionsSettings({
   base,
@@ -20,7 +21,7 @@ export function BaseConnectionsSettings({
     table: tables.find((item) => item.id === connection.tableId),
     columnName: connection.columns.join(', '),
     joinBase: bases.find((item) => item.id === connection.referencedDatabaseId),
-    joinTable: tables.find((item) => item.id === connection.referencedTableId),
+    joinTable: connection.referencedTable,
     joinColumnName: connection.referencedColumns.join(', '),
   }));
   const [openAddModal, setAddModalOpen] = useState(false);
@@ -69,12 +70,17 @@ export function BaseConnectionsSettings({
                       {connection.joinBase.name}
                     </span>
                     <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                      {connection.joinTable.name}
+                      {connection.joinTable?.name || 'Not Found'}
                     </span>
                     <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
                       {connection.joinColumnName}
                     </span>
                   </div>
+                  {connection.isAutoLinked && (
+                    <div>
+                      <Badge color="gray">Auto Linked</Badge>
+                    </div>
+                  )}
                 </div>
               </li>
             ))}
@@ -87,7 +93,7 @@ export function BaseConnectionsSettings({
               bases={bases}
             />
           )}
-          <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
+          <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <button
               type="button"
               className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"

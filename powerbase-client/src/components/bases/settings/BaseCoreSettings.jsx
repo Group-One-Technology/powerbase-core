@@ -70,7 +70,7 @@ export function BaseCoreSettings({ base }) {
           setError={colorError.setError}
           className="my-6"
         />
-        <div className="mt-4 py-4 px-4 border-t border-solid flex justify-end sm:px-6">
+        <div className="mt-4 py-4 border-t border-solid flex justify-end">
           <Button
             type="submit"
             className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"

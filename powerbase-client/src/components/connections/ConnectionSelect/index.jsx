@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import useSWR from 'swr';
 import PropTypes from 'prop-types';
+import { MultiSelect } from 'react-multi-select-component';
 
 import { useAuthUser } from '@models/AuthUser';
 import { getTables } from '@lib/api/tables';
 import { getTableFields } from '@lib/api/fields';
 import { IBase } from '@lib/propTypes/base';
 import { ITable } from '@lib/propTypes/table';
-import { ConnectionSelectField } from './ConnectionSelectField';
+import { Loader } from '@components/ui/Loader';
 
 export function ConnectionSelect({
   base,
@@ -29,24 +30,22 @@ export function ConnectionSelect({
   );
   const tables = tablesResponse.data?.tables;
 
-  const { data: fieldOptions } = useSWR(
+  const { data: selectedTableFields } = useSWR(
     (table?.id && authUser) ? `/tables/${table?.id}/fields` : null,
     () => (table?.id
       ? getTableFields({ tableId: table.id })
       : undefined),
   );
+  const fieldOptions = selectedTableFields?.map((item) => ({
+    label: item.name,
+    value: item.name,
+  })) || [];
 
   useEffect(() => {
     if (!table && tables?.length) {
       setTable(tables[0]);
     }
   }, [bases]);
-
-  useEffect(() => {
-    if (fieldOptions?.length && fields?.length === 0) {
-      setFields([fieldOptions[0].name]);
-    }
-  }, [table, fieldOptions]);
 
   const handleBaseChange = (evt) => {
     const selectedBase = bases?.find((item) => (
@@ -55,6 +54,7 @@ export function ConnectionSelect({
 
     setBase(selectedBase);
     setTable(tables[0]);
+    setFields([]);
   };
 
   const handleTableChange = (evt) => {
@@ -63,17 +63,21 @@ export function ConnectionSelect({
     ));
 
     setTable(selectedTable);
-    setFields([fieldOptions[0].name]);
+    setFields([]);
   };
 
+  if (!fieldOptions) {
+    return <Loader />;
+  }
+
   return (
-    <div className="flex-1">
+    <div>
       <h4 className="font-medium text-lg">{heading}</h4>
       <p className="mt-4 mb-2 text-base text-gray-900">{label}</p>
       <div className="flex">
         {isDestination
           ? (
-            <span className="flex-none inline-flex items-center px-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+            <span className="flex-1 inline-flex items-center px-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
               {base.name}
             </span>
           ) : (
@@ -85,6 +89,7 @@ export function ConnectionSelect({
                 className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-2 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-l-md"
                 value={base?.id}
                 onChange={handleBaseChange}
+                required
               >
                 {bases?.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -101,6 +106,7 @@ export function ConnectionSelect({
           className="flex-1 block w-full text-sm h-8 py-1 pl-1 pr-3 truncate focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-r-md"
           value={table?.id}
           onChange={handleTableChange}
+          required
         >
           {tables?.map((item) => (
             <option key={item.id} value={item.id}>
@@ -111,15 +117,14 @@ export function ConnectionSelect({
       </div>
       <div className="mt-4">
         <p className="mb-2 text-gray-900">Field(s)</p>
-        {fields.map((fieldName, index) => (
-          <ConnectionSelectField
-            key={`${heading.toLowerCase()}Field${fieldName}`}
-            id={`${heading.toLowerCase()}Field${fieldName}`}
-            index={index}
-            field={fieldName}
-            options={fieldOptions}
-          />
-        ))}
+        <MultiSelect
+          options={fieldOptions}
+          value={fields}
+          onChange={setFields}
+          className="multi-select text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+          labelledBy={`${heading.toLowerCase()}FieldSelect`}
+          required
+        />
       </div>
     </div>
   );

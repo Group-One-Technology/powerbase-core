@@ -126,7 +126,10 @@ export function CreateBasePage() {
               />
               <div className="grid grid-cols-12 my-6">
                 <div className="col-start-4 col-span-9">
-                  <Button type="submit" size="lg" className="w-full justify-center">
+                  <Button
+                    type="submit"
+                    className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
                     Save
                   </Button>
                 </div>

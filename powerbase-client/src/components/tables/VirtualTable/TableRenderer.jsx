@@ -20,7 +20,8 @@ export function TableRenderer({
   isLoading,
   height,
   tables,
-  foreignKeys,
+  connections,
+  referencedConnections,
   fieldTypes,
   mutateViewFields,
 }) {
@@ -29,9 +30,7 @@ export function TableRenderer({
   const rowCount = fields && records.length + 1;
   const fieldNames = fields.map((field) => field.name);
   const tableValues = [['', ...fieldNames], ...records];
-  const foreignKeyIndices = foreignKeys
-    .map((item) => item.columns)
-    .flat()
+  const connectionsIndices = connections.map((item) => item.columns).flat()
     .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
@@ -81,26 +80,24 @@ export function TableRenderer({
   };
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(
-      scopedFields.map((item, index) => {
-        const foreignKey = foreignKeyIndices.includes(index + 1)
-          ? foreignKeys.find((key) => key.columns.includes(item.name))
-          : undefined;
+    setSelectedRecord(fields.map((item, index) => {
+      const connection = connectionsIndices.includes(index + 1)
+        ? connections.find((key) => key.columns.includes(item.name))
+        : undefined;
 
-        return {
-          ...item,
-          value: tableValues[rowNo][index + 1],
-          isForeignKey: !!foreignKey,
-          isCompositeKey: foreignKey?.columns.length > 1,
-          foreignKey: foreignKey
-            ? {
-              ...foreignKey,
-              columnIndex: foreignKey.columns.indexOf(item.name),
-            }
-            : undefined,
-        };
-      }),
-    );
+      return ({
+        ...item,
+        value: tableValues[rowNo][index + 1],
+        isForeignKey: !!connection,
+        isCompositeKey: connection?.columns.length > 1,
+        foreignKey: connection
+          ? ({
+            ...connection,
+            columnIndex: connection.columns.indexOf(item.name),
+          })
+          : undefined,
+      });
+    }));
   };
 
   return (
@@ -150,19 +147,18 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
-                    handleResizeCol,
-                    mutateViewFields,
-                    fields,
-                    columnResized: colResized,
-                    isForeignKey: foreignKeyIndices.includes(columnIndex),
-                    fieldTypeId:
-                      isHeader && columnIndex !== 0
-                        ? fields[columnIndex - 1].fieldTypeId
-                        : undefined,
+                    isForeignKey: connectionsIndices.includes(columnIndex),
+                    fieldTypeId: columnIndex !== 0
+                      ? fields[columnIndex - 1].fieldTypeId
+                      : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
                       : undefined,
+                    handleResizeCol,
+                    mutateViewFields,
+                    fields,
+                    columnResized: colResized,
                     ...props,
                   });
                 }}
@@ -191,7 +187,8 @@ export function TableRenderer({
           setOpen={setIsModalOpen}
           record={selectedRecord}
           tables={tables}
-          foreignKeys={foreignKeys}
+          connections={connections}
+          referencedConnections={referencedConnections}
           fieldTypes={fieldTypes}
         />
       )}
@@ -206,8 +203,9 @@ TableRenderer.propTypes = {
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
   mutateViewFields: PropTypes.func,
 };
