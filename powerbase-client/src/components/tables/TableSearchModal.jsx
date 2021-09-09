@@ -1,4 +1,5 @@
 /* eslint-disable  */
+// /* eslint-disable  */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable react/prop-types */
@@ -6,23 +7,23 @@ import React, {
   Fragment, useRef, useState, useEffect,
 } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { SearchIcon, ExclamationIcon } from '@heroicons/react/outline';
+import { SearchIcon, ExclamationIcon, CheckIcon } from '@heroicons/react/outline';
 
 export default function TableSearchModal({
-  open, setOpen, bgColor, tables, handleTableChange, tableId,
+  open, setOpen, tables, handleTableChange, tableId,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [currentTable, setCurrentTable] = useState(null);
+  const [hasHovered, setHasHovered] = useState(false);
   const focusRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  const activeItemRefs = tables?.reduce((acc, value) => {
+  const listItemRefs = tables?.reduce((acc, value) => {
     acc[value.id] = React.createRef();
     return acc;
   }, {});
 
-  const scrollToActiveItem = (id) => activeItemRefs[id].current?.scrollIntoView({
+  const scrollToActiveItem = (id) => listItemRefs[id].current?.scrollIntoView({
     behavior: 'smooth',
     block: 'start',
   });
@@ -31,9 +32,13 @@ export default function TableSearchModal({
     setSearchTerm(e.target.value);
   };
 
-useEffect(() => {
-     scrollToActiveItem(tableId);
-    }, [searchResults]);
+  const toggleHover = () => {
+    setHasHovered(true);
+  };
+
+  useEffect(() => {
+    scrollToActiveItem(tableId);
+  }, [searchResults]);
 
   useEffect(() => {
     const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
@@ -95,10 +100,19 @@ useEffect(() => {
                 <div className="mt-2 text-center sm:mt-5">
                   {searchResults && (
                   <div className="mt-1 overflow-y-auto">
-                    <ul className="max-h-60 ">
-                      {searchResults?.map((item) => {
-                        return (<li className="p-2 text-sm cursor-pointer hover:bg-gray-200" key={item?.id} ref={activeItemRefs[item.id]} onClick={() => handleSearchResultClick({ table: item })}>{item.alias || item.name}</li>);
-                      })}
+                    <ul className="max-h-60 " onMouseEnter={() => toggleHover()}>
+                      {searchResults?.map((item) => (
+                        <li
+                          className={`p-2 text-sm cursor-pointer hover:bg-gray-200 flex justify-center 
+                          space-x-1.5 ${!hasHovered && item.id === tableId ? 'bg-gray-200' : ''}`}
+                          key={item?.id}
+                          id={item.id === tableId ? 'mouse' : ''}
+                          ref={listItemRefs[item.id]}
+                          onClick={() => handleSearchResultClick({ table: item })}
+                        > <span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
+                          <span>{item.alias || item.name}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   )}{!searchResults.length && (
