@@ -127,10 +127,11 @@ export function CellRenderer({
 
   const handleResizeStop = (updatedColumn, remoteColumns) => {
     let response;
+    console.log(updatedColumn)
     const updateColumnWidth = async () => {
       try {
         response = await securedApi.put(
-          `/fields/${updatedColumn.fieldId}/resize`,
+          `/fields/${updatedColumn.id}/resize`,
           updatedColumn,
         );
       } catch (error) {

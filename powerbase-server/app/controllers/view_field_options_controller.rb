@@ -6,7 +6,7 @@ class ViewFieldOptionsController < ApplicationController
   end
 
   schema(:update_column_size) do
-    required(:field_id).value(:integer)
+    required(:view_field_id).value(:integer)
   end
 
   # GET /views/:id/fields
@@ -15,9 +15,9 @@ class ViewFieldOptionsController < ApplicationController
     render json: @view_fields.map {|item| format_json(item)}
   end
 
-  # PUT /fields/:field_id/resize
+  # PUT /fields/:view_field_id/resize
   def update_column_size
-    view_field = ViewFieldOption.find_by(powerbase_field_id: safe_params[:field_id])
+    view_field = ViewFieldOption.find_by(id: safe_params[:view_field_id])
     view_field.update_attribute(:width, params[:width])
     render json: format_json(view_field) if view_field.save!
   end
