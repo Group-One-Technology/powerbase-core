@@ -41,7 +41,7 @@ export default function TableSearchModal({
   }, [searchResults]);
 
   useEffect(() => {
-    const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
+    const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name.toLowerCase().includes(searchTerm));
     setSearchResults(results);
   }, [searchTerm]);
 
@@ -90,6 +90,7 @@ export default function TableSearchModal({
                       className="outline-none focus:outline-none block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
                       placeholder="Search for a table"
                       onChange={handleChange}
+                      autocomplete="off"
                       ref={searchInputRef}
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
