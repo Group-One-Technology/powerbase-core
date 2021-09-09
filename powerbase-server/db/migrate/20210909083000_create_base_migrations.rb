@@ -4,7 +4,7 @@ class CreateBaseMigrations < ActiveRecord::Migration[6.1]
       t.datetime :start_time
       t.datetime :end_time
       t.string :database_size, null: false
-      t.text :errors
+      t.text :logs
       t.integer :retries, null: false, default: 0
       t.references :powerbase_database, null: false, foreign_key: true
     end

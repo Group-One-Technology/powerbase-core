@@ -1,6 +1,6 @@
 class BaseMigration < ApplicationRecord
   validates :database_size, presence: true
-  serialize :errors, JSON
+  serialize :logs, JSON
 
   belongs_to :powerbase_database
 end

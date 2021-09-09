@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(version: 2021_09_09_083000) do
     t.datetime "start_time"
     t.datetime "end_time"
     t.string "database_size", null: false
-    t.text "errors"
+    t.text "logs"
     t.integer "retries", default: 0, null: false
     t.bigint "powerbase_database_id", null: false
     t.index ["powerbase_database_id"], name: "index_base_migrations_on_powerbase_database_id"
