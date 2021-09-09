@@ -145,14 +145,16 @@ export default function TableSearchModal({
                     <ul className="max-h-60 " id = "table-search-modal-list" onMouseEnter={() => toggleHover()} ref={listContainerRef}>
                       {searchResults.map((item) => (
                         <li
-                          className={`p-2 text-sm cursor-pointer hover:bg-gray-200 flex justify-center 
-                          space-x-1.5 ${!hasHovered && item.id === tableId ? 'bg-gray-200' : ''}`}
+                          className={`p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12
+                          ${!hasHovered && item.id === tableId ? 'bg-gray-200' : ''}`}
                           key={item?.id}
                           id={item.id === tableId ? 'mouse' : ''}
                           ref={listItemRefs[item.id]}
                           onClick={() => handleSearchResultClick({ table: item })}
-                        > <a href="#" className="focus:bg-gray-200" ><span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
-                          <span>{item.alias || item.name}</span></a>
+                        > <a href="#" className="focus:bg-gray-200 w-full h-full flex justify-center content-center items-center space-x-1.5" tabIndex={item.id} >
+                            <span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
+                            <span>{item.alias || item.name}</span>
+                          </a>
                         </li>
                       ))}
                     </ul>
