@@ -86,7 +86,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           if field.save
             total_saved_fields += 1
 
-            if column_type.db_type === "enum"
+            if column_type&.db_type === "enum"
               # Field Select Options / Enums Migration
               field_select_options = FieldSelectOption.find_by(
                 name: column_options[:db_type],
@@ -278,7 +278,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     if @database.is_turbo
       @database_tables.each do |table|
         # Table Records Migration
-        if !table.is_migrated
+        if !table.is_migrated && table.name == "users"
           table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
 
