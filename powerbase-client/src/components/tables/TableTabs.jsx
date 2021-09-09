@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import React, { useEffect, useRef, useState } from 'react';
 import {
   PlusIcon, ChevronLeftIcon, ChevronRightIcon, TableIcon,
