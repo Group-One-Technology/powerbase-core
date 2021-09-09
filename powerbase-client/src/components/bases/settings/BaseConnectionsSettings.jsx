@@ -101,6 +101,7 @@ export function BaseConnectionsSettings({
                 connection={selectedConnection}
                 open={openDeleteModal}
                 setOpen={setDeleteModalOpen}
+                setEditModalOpen={setEditModalOpen}
               />
             </>
           )}

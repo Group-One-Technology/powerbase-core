@@ -1,18 +1,36 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-
-import { Modal } from '@components/ui/Modal';
 import { Dialog } from '@headlessui/react';
 import { ExclamationIcon } from '@heroicons/react/outline';
 
-export function DeleteConnectionModal({ open, setOpen }) {
+import { useBaseConnections } from '@models/BaseConnections';
+import { Modal } from '@components/ui/Modal';
+import { deleteBaseConnection } from '@lib/api/base-connections';
+
+export function DeleteConnectionModal({
+  open,
+  setOpen,
+  connection,
+  setEditModalOpen,
+}) {
   const cancelButtonRef = useRef();
+  const { mutate: refetchConnections } = useBaseConnections();
+  const [loading, setLoading] = useState(false);
 
-  const handleDelete = (evt) => {
+  const handleDelete = async (evt) => {
     evt.stopPropagation();
+    setLoading(true);
 
-    console.log('delete');
+    try {
+      await deleteBaseConnection({ id: connection.id });
+      await refetchConnections();
+    } catch (err) {
+      console.log(err);
+    }
+
     setOpen(false);
+    setEditModalOpen(false);
+    setLoading(false);
   };
 
   return (
@@ -38,6 +56,7 @@ export function DeleteConnectionModal({ open, setOpen }) {
             type="button"
             className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm"
             onClick={handleDelete}
+            loading={loading}
           >
             Delete
           </button>
@@ -46,6 +65,7 @@ export function DeleteConnectionModal({ open, setOpen }) {
             type="button"
             className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             onClick={() => setOpen(false)}
+            disabled={loading}
           >
             Cancel
           </button>
@@ -58,4 +78,6 @@ export function DeleteConnectionModal({ open, setOpen }) {
 DeleteConnectionModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
+  setEditModalOpen: PropTypes.func.isRequired,
+  connection: PropTypes.object.isRequired,
 };
