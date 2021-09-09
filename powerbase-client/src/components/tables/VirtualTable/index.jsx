@@ -10,12 +10,13 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
+// eslint-disable-next-line import/named
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, tables }) {
-  const { data: fields } = useViewFields();
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { data: totalRecords } = useTableRecordsCount();
@@ -30,7 +31,10 @@ export function VirtualTable({ height, tables }) {
     <TableRenderer
       fields={fields}
       records={[
-        ...records.map((record, index) => [index + 1, ...Object.values(record)]),
+        ...records.map((record, index) => [
+          index + 1,
+          ...Object.values(record),
+        ]),
         [records.length + 1, ...new Array(fields.length).fill('')],
       ]}
       totalRecords={totalRecords}
@@ -41,6 +45,7 @@ export function VirtualTable({ height, tables }) {
       connections={connections}
       referencedConnections={referencedConnections}
       fieldTypes={fieldTypes}
+      mutateViewFields={mutateViewFields}
     />
   );
 }

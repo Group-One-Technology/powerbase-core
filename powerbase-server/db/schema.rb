@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(version: 2021_09_08_001355) do
   end
 
   create_table "table_views", force: :cascade do |t|
-    t.string "name", default: "Grid", null: false
+    t.string "name", default: "Grid View", null: false
     t.string "view_type", default: "grid", null: false
     t.bigint "powerbase_table_id", null: false
     t.datetime "created_at", precision: 6, null: false

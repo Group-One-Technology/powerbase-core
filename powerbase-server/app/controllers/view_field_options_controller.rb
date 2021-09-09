@@ -5,10 +5,21 @@ class ViewFieldOptionsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update_column_size) do
+    required(:view_field_id).value(:integer)
+  end
+
   # GET /views/:id/fields
   def index
     @view_fields = ViewFieldOption.where(table_view_id: safe_params[:id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
+  end
+
+  # PUT /fields/:view_field_id/resize
+  def update_column_size
+    view_field = ViewFieldOption.find_by(id: safe_params[:view_field_id])
+    view_field.update_attribute(:width, params[:width])
+    render json: format_json(view_field) if view_field.save!
   end
 
   private
