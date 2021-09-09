@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_08_001355) do
+ActiveRecord::Schema.define(version: 2021_09_09_083000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,6 +28,16 @@ ActiveRecord::Schema.define(version: 2021_09_08_001355) do
     t.index ["powerbase_table_id"], name: "index_base_connections_on_powerbase_table_id"
     t.index ["referenced_database_id"], name: "index_base_connections_on_referenced_database_id"
     t.index ["referenced_table_id"], name: "index_base_connections_on_referenced_table_id"
+  end
+
+  create_table "base_migrations", force: :cascade do |t|
+    t.datetime "start_time", null: false
+    t.datetime "end_time"
+    t.string "database_size", null: false
+    t.text "errors"
+    t.integer "retries", default: 0, null: false
+    t.bigint "powerbase_database_id", null: false
+    t.index ["powerbase_database_id"], name: "index_base_migrations_on_powerbase_database_id"
   end
 
   create_table "field_db_type_mappings", force: :cascade do |t|
@@ -134,6 +144,7 @@ ActiveRecord::Schema.define(version: 2021_09_08_001355) do
   add_foreign_key "base_connections", "powerbase_databases", column: "referenced_database_id"
   add_foreign_key "base_connections", "powerbase_tables"
   add_foreign_key "base_connections", "powerbase_tables", column: "referenced_table_id"
+  add_foreign_key "base_migrations", "powerbase_databases"
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "field_select_options", "powerbase_fields"
   add_foreign_key "powerbase_databases", "users"
