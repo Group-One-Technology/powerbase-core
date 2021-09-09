@@ -23,6 +23,10 @@ module.exports = {
         lime: colors.lime,
         orange: colors.orange,
       },
+      outline: {
+        blue: ['2px solid #0000ff', '1px'],
+        yellow: ['2px solid yellow', '1px'],
+      },
     },
   },
   variants: {
