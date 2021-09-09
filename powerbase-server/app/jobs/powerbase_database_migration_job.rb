@@ -278,7 +278,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     if @database.is_turbo
       @database_tables.each do |table|
         # Table Records Migration
-        if !table.is_migrated && table.name == "users"
+        if !table.is_migrated
           table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
 
