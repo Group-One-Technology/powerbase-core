@@ -15,7 +15,7 @@ export function Table({ base }) {
     handleTableChange,
   } = useCurrentView();
 
-  if (base == null || tables == null) {
+  if (base == null || table == null || tables == null) {
     return <Loader className="h-screen" />;
   }
 

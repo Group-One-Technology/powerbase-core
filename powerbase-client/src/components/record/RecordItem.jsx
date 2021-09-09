@@ -44,7 +44,7 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
             name={item.name}
             type="checkbox"
             className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            checked={item.value.toString() === 'true'}
+            checked={item.value?.toString() === 'true'}
             onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
           />
         </div>

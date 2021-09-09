@@ -36,5 +36,5 @@ Rails.application.routes.draw do
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   put 'tables/update/aliases', to: 'powerbase_tables#update_aliases', as: 'update_tables_aliases'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
-  put 'fields/resize_col', to: 'view_field_options#update_column_size', as: 'update_field'
+  put 'fields/:field_id/resize', to: 'view_field_options#update_column_size', as: 'update_field'
 end

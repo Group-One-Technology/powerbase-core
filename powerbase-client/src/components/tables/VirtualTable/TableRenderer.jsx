@@ -13,7 +13,7 @@ import { CellRenderer } from './CellRenderer';
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
-  remoteFields,
+  fields,
   records,
   totalRecords,
   loadMoreRows,
@@ -23,12 +23,12 @@ export function TableRenderer({
   connections,
   referencedConnections,
   fieldTypes,
-  mutate,
+  mutateViewFields,
 }) {
-  const [fields, setFields] = useState([]);
-  const columnCount = remoteFields && remoteFields.length + 1;
-  const rowCount = remoteFields && records.length + 1;
-  const fieldNames = remoteFields.map((field) => field.name);
+  const [scopedFields, setScopedFields] = useState([]);
+  const columnCount = fields && fields.length + 1;
+  const rowCount = fields && records.length + 1;
+  const fieldNames = fields.map((field) => field.name);
   const tableValues = [['', ...fieldNames], ...records];
   const connectionsIndices = connections.map((item) => item.columns).flat()
     .map((item) => fieldNames.indexOf(item) + 1);
@@ -42,16 +42,18 @@ export function TableRenderer({
   const gridRef = useRef(null);
 
   useEffect(() => {
-    setFields(remoteFields);
-  }, [remoteFields]);
-
-  useDidMountEffect(() => {
-    gridRef.current?.forceUpdate();
-    gridRef.current?.recomputeGridSize();
+    setScopedFields(fields);
   }, [fields]);
 
+  useDidMountEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.forceUpdate();
+      gridRef.current.recomputeGridSize();
+    }
+  }, [scopedFields]);
+
   const handleResizeCol = (columnIndex, deltaX) => {
-    const updatedColumns = fields.map((col, index) => {
+    const updatedColumns = scopedFields.map((col, index) => {
       if (columnIndex === index) {
         setColResized(col);
         return {
@@ -62,7 +64,7 @@ export function TableRenderer({
       }
       return { ...col };
     });
-    setFields(updatedColumns);
+    setScopedFields(updatedColumns);
   };
 
   const handleLoadMoreRows = ({ stopIndex }) => {
@@ -108,7 +110,7 @@ export function TableRenderer({
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer
             disableHeight
-            onResize={() => gridRef.current && gridRef.current.recomputeGridSize()}
+            onResize={() => gridRef.current?.recomputeGridSize()}
           >
             {({ width }) => (
               <Grid
@@ -147,15 +149,15 @@ export function TableRenderer({
                     isLastRecord,
                     isForeignKey: connectionsIndices.includes(columnIndex),
                     fieldTypeId: columnIndex !== 0
-                      ? remoteFields[columnIndex - 1].fieldTypeId
+                      ? fields[columnIndex - 1].fieldTypeId
                       : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
                       : undefined,
                     handleResizeCol,
-                    mutate,
-                    remoteFields,
+                    mutateViewFields,
+                    fields,
                     columnResized: colResized,
                     ...props,
                   });
@@ -164,8 +166,8 @@ export function TableRenderer({
                   if (index === 0) {
                     return ROW_NO_CELL_WIDTH;
                   }
-                  if (fields && fields[index - 1]?.width) {
-                    return fields[index - 1]?.width;
+                  if (scopedFields && scopedFields[index - 1]?.width) {
+                    return scopedFields[index - 1]?.width;
                   }
                   return 300;
                 }}
@@ -195,7 +197,7 @@ export function TableRenderer({
 }
 
 TableRenderer.propTypes = {
-  remoteFields: PropTypes.arrayOf(IViewField).isRequired,
+  fields: PropTypes.arrayOf(IViewField).isRequired,
   records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
@@ -205,5 +207,5 @@ TableRenderer.propTypes = {
   connections: PropTypes.array,
   referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
-  mutate: PropTypes.func,
+  mutateViewFields: PropTypes.func,
 };

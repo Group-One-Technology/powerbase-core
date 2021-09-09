@@ -1,7 +1,8 @@
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, DotsVerticalIcon } from '@heroicons/react/outline';
 import Draggable from 'react-draggable';
 import { securedApi } from '@lib/api/index';
 
@@ -57,7 +58,7 @@ function CellValue({
           <input
             type="checkbox"
             className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            checked={value.toString() === 'true'}
+            checked={value?.toString() === 'true'}
             readOnly
           />
         );
@@ -114,8 +115,8 @@ export function CellRenderer({
   handleExpandRecord,
   handleResizeCol,
   columnResized,
-  mutate,
-  remoteFields,
+  mutateViewFields,
+  fields,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
@@ -125,19 +126,22 @@ export function CellRenderer({
   };
 
   const handleResizeStop = (updatedColumn, remoteColumns) => {
+    let response;
     const updateColumnWidth = async () => {
-      const response = await securedApi.put(
-        '/fields/resize_col',
-        updatedColumn,
-      );
+      try {
+        response = await securedApi.put(
+          `/fields/${updatedColumn.fieldId}/resize`,
+          updatedColumn,
+        );
+      } catch (error) {
+        console.log(error);
+      }
       if (response.statusText === 'OK') {
-        const mutatedColList = remoteColumns.map((column) => {
-          if (column.id === updatedColumn.id) {
-            return { ...column, width: updatedColumn.width };
-          }
-          return column;
-        });
-        mutate(mutatedColList);
+        const mutatedColList = remoteColumns.map((column) => ({
+          ...column,
+          width: column.id === updatedColumn.id ? updatedColumn.width : column.width,
+        }));
+        mutateViewFields(mutatedColList);
       }
     };
     return updateColumnWidth();
@@ -193,10 +197,10 @@ export function CellRenderer({
           defaultClassNameDragging="DragHandleActive"
           position={{ x: 0 }}
           onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
-          onStop={() => handleResizeStop(columnResized, remoteFields)}
+          onStop={() => handleResizeStop(columnResized, fields)}
           zIndex={999}
         >
-          <div className="DragHandleIcon cursor-x">⋮</div>
+          <DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/>
         </Draggable>
       )}
     </div>
@@ -219,8 +223,8 @@ CellRenderer.propTypes = {
   fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
-  mutate: PropTypes.func,
+  mutateViewFields: PropTypes.func,
   handleResizeCol: PropTypes.func,
-  remoteFields: PropTypes.array,
+  fields: PropTypes.array,
   columnResized: PropTypes.object,
 };
