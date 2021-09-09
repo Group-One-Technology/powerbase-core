@@ -137,7 +137,8 @@ export function EditConnectionModal({
                 onClick={handleDelete}
                 disabled={loading}
               >
-                <TrashIcon className="h-5 w-5" />
+                <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Delete</span>
               </Button>
               <Button
                 type="button"
