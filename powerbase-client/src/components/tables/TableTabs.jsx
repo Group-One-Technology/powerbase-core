@@ -121,7 +121,7 @@ export function TableTabs({
         <button onClick={() => handleSearchModal()}>
           <TableIcon className="h-6 w-6 text-gray-700 mt-1/2" />
         </button>
-        <TableSearchModal open={modalOpen} setOpen={setModalOpen} bgColor={BG_COLORS[color]} tables={tables} handleTableChange={handleTableChange} />
+        {modalOpen && <TableSearchModal open={modalOpen} setOpen={setModalOpen} bgColor={BG_COLORS[color]} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}
         <button
           id="tableTabsLeftArrow"
           type="button"

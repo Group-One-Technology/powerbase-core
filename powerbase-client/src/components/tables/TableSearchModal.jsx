@@ -1,3 +1,4 @@
+/* eslint-disable  */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable react/prop-types */
@@ -8,19 +9,20 @@ import { Dialog, Transition } from '@headlessui/react';
 import { SearchIcon, ExclamationIcon } from '@heroicons/react/outline';
 
 export default function TableSearchModal({
-  open, setOpen, bgColor, tables, handleTableChange,
+  open, setOpen, bgColor, tables, handleTableChange, tableId,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [currentTable, setCurrentTable] = useState(null);
   const focusRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  const activeItemRefs = tables.reduce((acc, value) => {
+  const activeItemRefs = tables?.reduce((acc, value) => {
     acc[value.id] = React.createRef();
     return acc;
   }, {});
 
-  const scrollToActiveItem = (id) => activeItemRefs?.id?.current.scrollIntoView({
+  const scrollToActiveItem = (id) => activeItemRefs[id].current?.scrollIntoView({
     behavior: 'smooth',
     block: 'start',
   });
@@ -29,9 +31,9 @@ export default function TableSearchModal({
     setSearchTerm(e.target.value);
   };
 
-  useEffect(() => {
-    scrollToActiveItem();
-  }, []);
+useEffect(() => {
+     scrollToActiveItem(tableId);
+    }, [searchResults]);
 
   useEffect(() => {
     const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name?.toLowerCase().includes(searchTerm));
@@ -94,8 +96,9 @@ export default function TableSearchModal({
                   {searchResults && (
                   <div className="mt-1 overflow-y-auto">
                     <ul className="max-h-60 ">
-                      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-                      {searchResults?.map((item) => <li className="p-2 text-sm cursor-pointer hover:bg-gray-200" key={item?.id} onClick={() => handleSearchResultClick({ table: item })}>{item.alias || item.name}</li>)}
+                      {searchResults?.map((item) => {
+                        return (<li className="p-2 text-sm cursor-pointer hover:bg-gray-200" key={item?.id} ref={activeItemRefs[item.id]} onClick={() => handleSearchResultClick({ table: item })}>{item.alias || item.name}</li>);
+                      })}
                     </ul>
                   </div>
                   )}{!searchResults.length && (
