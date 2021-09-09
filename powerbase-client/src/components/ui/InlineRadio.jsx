@@ -38,7 +38,7 @@ export function InlineRadio({
                 active ? 'ring-1 ring-offset-2 ring-indigo-500' : ''
               ),
               { 'cursor-not-allowed': option.disabled },
-              option.className,
+              option.className || 'bg-white',
               value.name === option.name ? classNames?.checked : '')
             )}
             disabled={option.disabled}
