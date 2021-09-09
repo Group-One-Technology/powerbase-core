@@ -56,8 +56,7 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
               onClick={loadMore}
               loading={isLoading}
             >
-              <ChevronDownIcon className="h-3 w-3 mr-1" />
-              View More
+              Load More
             </Button>
           )}
           <Button
