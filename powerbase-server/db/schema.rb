@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 2021_09_09_083000) do
   end
 
   create_table "base_migrations", force: :cascade do |t|
-    t.datetime "start_time", null: false
+    t.datetime "start_time"
     t.datetime "end_time"
     t.string "database_size", null: false
     t.text "errors"

@@ -1,7 +1,7 @@
 class CreateBaseMigrations < ActiveRecord::Migration[6.1]
   def change
     create_table :base_migrations do |t|
-      t.datetime :start_time, null: false, default: "now()"
+      t.datetime :start_time
       t.datetime :end_time
       t.string :database_size, null: false
       t.text :errors
