@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
+import { TrashIcon, XIcon } from '@heroicons/react/outline';
 
 import { useBaseConnections } from '@models/BaseConnections';
 import { IBase } from '@lib/propTypes/base';
@@ -15,6 +16,7 @@ export function EditConnectionModal({
   open,
   setOpen,
   bases,
+  handleDelete,
   connection,
 }) {
   const { mutate: refetchConnections } = useBaseConnections();
@@ -85,8 +87,18 @@ export function EditConnectionModal({
   };
 
   return (
-    <Modal open={open} setOpen={setOpen}>
+    <Modal open={open} setOpen={setOpen} onClose={() => null}>
       <div className="overflow-y-scroll inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
+        <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
+          <button
+            type="button"
+            className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => setOpen(false)}
+          >
+            <span className="sr-only">Close</span>
+            <XIcon className="h-6 w-6" aria-hidden="true" />
+          </button>
+        </div>
         <form onSubmit={handleSubmit} className="sm:mt-5">
           <Dialog.Title as="h3" className="text-center text-2xl leading-6 font-medium">
             Edit Connection
@@ -118,7 +130,23 @@ export function EditConnectionModal({
                 setFields={setTargetFields}
               />
             </div>
-            <div className="mt-20 py-4 border-t border-solid flex justify-end">
+            <div className="mt-20 py-4 border-t border-solid flex gap-2">
+              <Button
+                type="button"
+                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-red-400 bg-white hover:bg-red-300 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                <TrashIcon className="h-5 w-5" />
+              </Button>
+              <Button
+                type="button"
+                className="ml-auto inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+                disabled={loading}
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -139,4 +167,5 @@ EditConnectionModal.propTypes = {
   setOpen: PropTypes.func.isRequired,
   bases: PropTypes.arrayOf(IBase).isRequired,
   connection: PropTypes.object,
+  handleDelete: PropTypes.func.isRequired,
 };
