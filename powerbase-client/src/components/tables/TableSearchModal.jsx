@@ -1,8 +1,4 @@
 /* eslint-disable  */
-// /* eslint-disable  */
-/* eslint-disable no-unused-vars */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable react/prop-types */
 import React, {
   Fragment, useRef, useState, useEffect,
 } from 'react';
@@ -17,6 +13,7 @@ export default function TableSearchModal({
   const [hasHovered, setHasHovered] = useState(false);
   const focusRef = useRef(null);
   const searchInputRef = useRef(null);
+  const listContainerRef = useRef(null)
 
   const listItemRefs = tables?.reduce((acc, value) => {
     acc[value.id] = React.createRef();
@@ -37,13 +34,58 @@ export default function TableSearchModal({
   };
 
   useEffect(() => {
-    scrollToActiveItem(tableId);
-  }, [searchResults]);
-
-  useEffect(() => {
     const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name.toLowerCase().includes(searchTerm));
     setSearchResults(results);
   }, [searchTerm]);
+
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
+
+
+  function onKeyDown(event) {
+    const isUp = event.key === 'ArrowUp';
+    const isDown = event.key === 'ArrowDown';
+    const inputIsFocused = document.activeElement === searchInputRef.current;
+
+    const resultsItems = Array.from(listContainerRef.current.children)
+
+    const activeResultIndex = resultsItems.findIndex(child => {
+      return child.querySelector('a') === document.activeElement;
+    });
+    if ( isUp ) {
+      if ( inputIsFocused ) {
+        resultsItems[resultsItems.length - 1].querySelector('a').focus();
+      } else if ( resultsItems[activeResultIndex - 1] ) {
+        resultsItems[activeResultIndex - 1].querySelector('a').focus();
+      } else {
+        searchInputRef.current.focus();
+      }
+    }
+
+    if ( isDown ) {
+      if ( inputIsFocused ) {
+        resultsItems[0].querySelector('a').focus();
+      } else if ( resultsItems[activeResultIndex + 1] ) {
+        resultsItems[activeResultIndex + 1].querySelector('a').focus();
+      } else {
+        searchInputRef.current.focus();
+      }
+    }
+  }
+
+
+  useEffect(() => {
+    if ( searchResults.length ) {
+      document.body.addEventListener('keydown', onKeyDown);
+    } else {
+      document.body.removeEventListener('keydown', onKeyDown);
+    }
+    return () => {
+      document.body.removeEventListener('keydown', onKeyDown);
+    }
+  }, [searchResults]);
+
 
   const handleSearchResultClick = (table) => {
     setOpen(false);
@@ -51,9 +93,6 @@ export default function TableSearchModal({
     return handleTableChange(table);
   };
 
-  useEffect(() => {
-    searchInputRef.current?.focus();
-  }, []);
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -85,12 +124,12 @@ export default function TableSearchModal({
                   <div className="mt-1 relative rounded-md shadow-sm w-full">
                     <input
                       type="text"
-                      name="account-number"
-                      id="account-number"
+                      name="search-input"
+                      id="table-search-input"
                       className="outline-none focus:outline-none block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
                       placeholder="Search for a table"
                       onChange={handleChange}
-                      autocomplete="off"
+                      autoComplete="off"
                       ref={searchInputRef}
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -101,8 +140,8 @@ export default function TableSearchModal({
                 <div className="mt-2 text-center sm:mt-5">
                   {searchResults && (
                   <div className="mt-1 overflow-y-auto">
-                    <ul className="max-h-60 " onMouseEnter={() => toggleHover()}>
-                      {searchResults?.map((item) => (
+                    <ul className="max-h-60 " id = "table-search-modal-list" onMouseEnter={() => toggleHover()} ref={listContainerRef}>
+                      {searchResults.map((item) => (
                         <li
                           className={`p-2 text-sm cursor-pointer hover:bg-gray-200 flex justify-center 
                           space-x-1.5 ${!hasHovered && item.id === tableId ? 'bg-gray-200' : ''}`}
@@ -110,8 +149,8 @@ export default function TableSearchModal({
                           id={item.id === tableId ? 'mouse' : ''}
                           ref={listItemRefs[item.id]}
                           onClick={() => handleSearchResultClick({ table: item })}
-                        > <span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
-                          <span>{item.alias || item.name}</span>
+                        > <a href="#" className="focus:bg-gray-200" ><span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
+                          <span>{item.alias || item.name}</span></a>
                         </li>
                       ))}
                     </ul>
