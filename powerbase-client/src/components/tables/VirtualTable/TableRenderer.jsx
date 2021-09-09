@@ -47,8 +47,10 @@ export function TableRenderer({
   }, [remoteFields]);
 
   useDidMountEffect(() => {
-    gridRef.current?.forceUpdate();
-    gridRef.current?.recomputeGridSize();
+    if (gridRef.current) {
+      gridRef.current.forceUpdate();
+      gridRef.current.recomputeGridSize();
+    }
   }, [fields]);
 
   const handleResizeCol = (columnIndex, deltaX) => {
@@ -111,7 +113,7 @@ export function TableRenderer({
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer
             disableHeight
-            onResize={() => gridRef.current && gridRef.current.recomputeGridSize()}
+            onResize={() => gridRef.current?.recomputeGridSize()}
           >
             {({ width }) => (
               <Grid
