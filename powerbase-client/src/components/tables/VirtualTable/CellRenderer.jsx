@@ -1,8 +1,8 @@
-/* eslint-disable no-console */
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, DotsVerticalIcon } from '@heroicons/react/outline';
 import Draggable from 'react-draggable';
 import { securedApi } from '@lib/api/index';
 
@@ -184,7 +184,7 @@ export function CellRenderer({
           onStop={() => handleResizeStop(columnResized, fields)}
           zIndex={999}
         >
-          <div className="DragHandleIcon cursor-x">⋮</div>
+          <DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/>
         </Draggable>
       )}
     </div>
