@@ -201,7 +201,7 @@ export function CellRenderer({
           onStop={() => handleResizeStop(columnResized, fields)}
           zIndex={999}
         >
-          <DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/>
+          <span><DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/></span>
         </Draggable>
       )}
     </div>
