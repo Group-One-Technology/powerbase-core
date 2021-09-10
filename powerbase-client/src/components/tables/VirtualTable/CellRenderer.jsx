@@ -1,7 +1,10 @@
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, DotsVerticalIcon } from '@heroicons/react/outline';
+import Draggable from 'react-draggable';
+import { securedApi } from '@lib/api/index';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { FieldType } from '@lib/constants/field-types';
@@ -67,7 +70,11 @@ function CellValue({
         {(isHeader && fieldTypeId != null) && (
           <FieldTypeIcon fieldType={fieldType} className="mr-1" />
         )}
-        <span className={cn(isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded')}>
+        <span
+          className={cn(
+            isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded',
+          )}
+        >
           {value?.toString()}
         </span>
       </>
@@ -106,12 +113,38 @@ export function CellRenderer({
   fieldTypeId,
   fieldTypes,
   handleExpandRecord,
+  handleResizeCol,
+  columnResized,
+  mutateViewFields,
+  fields,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
       row: rowIndex,
       column: columnIndex,
     });
+  };
+
+  const handleResizeStop = (updatedColumn, remoteColumns) => {
+    let response;
+    const updateColumnWidth = async () => {
+      try {
+        response = await securedApi.put(
+          `/fields/${updatedColumn.id}/resize`,
+          updatedColumn,
+        );
+      } catch (error) {
+        console.log(error);
+      }
+      if (response.statusText === 'OK') {
+        const mutatedColList = remoteColumns.map((column) => ({
+          ...column,
+          width: column.id === updatedColumn.id ? updatedColumn.width : column.width,
+        }));
+        mutateViewFields(mutatedColList);
+      }
+    };
+    return updateColumnWidth();
   };
 
   return (
@@ -121,10 +154,11 @@ export function CellRenderer({
       key={key}
       className={cn(
         'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2',
-        (isHeader && !isHoveredRow) && 'bg-gray-100',
+        isHeader && !isHoveredRow && 'bg-gray-100',
         isHoveredRow && 'bg-gray-50',
         isRowNo && 'flex justify-center text-xs text-gray-500',
         !isRowNo && 'border-r',
+        !isHeader && !isRowNo && 'resized',
       )}
       style={style}
       tabIndex={0}
@@ -156,6 +190,19 @@ export function CellRenderer({
         fieldTypes={fieldTypes}
         handleExpandRecord={handleExpandRecord}
       />
+      {rowIndex === 0 && columnIndex !== 0 && (
+        <Draggable
+          axis="x"
+          defaultClassName="DragHandle"
+          defaultClassNameDragging="DragHandleActive"
+          position={{ x: 0 }}
+          onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
+          onStop={() => handleResizeStop(columnResized, fields)}
+          zIndex={999}
+        >
+          <span><DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/></span>
+        </Draggable>
+      )}
     </div>
   );
 }
@@ -176,4 +223,8 @@ CellRenderer.propTypes = {
   fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
+  mutateViewFields: PropTypes.func,
+  handleResizeCol: PropTypes.func,
+  fields: PropTypes.array,
+  columnResized: PropTypes.object,
 };
