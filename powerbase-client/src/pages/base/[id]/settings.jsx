@@ -44,8 +44,8 @@ const TABS = [
 function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
-  const { data: base } = useBase();
-  const { data: bases } = useBases();
+  const { data: base, mutate: mutateBase } = useBase();
+  const { data: bases, mutate: mutateBases } = useBases();
   const { data: tables } = useBaseTables();
   const { data: connections } = useBaseConnections();
 
@@ -95,7 +95,7 @@ function BaseSettings() {
                   </Tab.List>
                   <Tab.Panels className="divide-y divide-gray-200 lg:col-span-9">
                     <Tab.Panel>
-                      <BaseCoreSettings base={base} />
+                      <BaseCoreSettings base={base} mutateBase={mutateBase} mutateBases={mutateBases} />
                     </Tab.Panel>
                     <Tab.Panel>
                       <BaseTablesSettings tables={tables} />
