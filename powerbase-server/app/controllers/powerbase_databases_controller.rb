@@ -80,7 +80,7 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
-        @base_migration = BaseMigration.new
+        @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
         @base_migration.powerbase_database_id = @database.id
         @base_migration.database_size = @db_size
         @base_migration.save
@@ -114,6 +114,7 @@ class PowerbaseDatabasesController < ApplicationController
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
+        logs: database.base_migration.logs,
       }
     end
 end
