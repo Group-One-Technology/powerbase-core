@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   post '/logout/', to: 'users/login#destroy'
   post '/register/', to: 'users/register#create'
 
-  resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show], shallow: true do
+  resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show, :update], shallow: true do
     collection do
       post 'connect'
     end

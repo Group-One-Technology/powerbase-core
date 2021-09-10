@@ -5,6 +5,17 @@ class PowerbaseDatabasesController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update) do
+    required(:id).value(:integer)
+    optional(:name).value(:string)
+    optional(:host).value(:string)
+    optional(:port).value(:integer)
+    optional(:username).value(:string)
+    optional(:password).value(:string)
+    optional(:database).value(:string)
+    optional(:color).value(:string)
+  end
+
   schema(:connect) do
     optional(:name).value(:string)
     optional(:host).value(:string)
@@ -34,6 +45,28 @@ class PowerbaseDatabasesController < ApplicationController
     end
   end
 
+  # PUT /databases/:id
+  def update
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    options = safe_params.output
+    options[:adapter] = @database.adapter
+    options[:is_turbo] = @database.is_turbo
+
+    Powerbase.connect(options)
+    @is_connected = Powerbase.connected?
+
+    if @database
+      if !@database.update(options)
+        Powerbase.disconnect
+        render json: @database.errors, status: :unprocessable_entity
+        return;
+      end
+    end
+
+    Powerbase.disconnect
+    render json: { connected: @is_connected, database: format_json(@database) }
+  end
+
   # POST /databases/connect
   def connect
     options = safe_params.output
@@ -60,6 +93,7 @@ class PowerbaseDatabasesController < ApplicationController
         @is_existing = false
 
         if !@database.save
+          Powerbase.disconnect
           render json: @database.errors, status: :unprocessable_entity
           return;
         end
