@@ -13,6 +13,7 @@ export function InlineRadio({
   setError,
   className,
   classNames,
+  disabled,
   ...props
 }) {
   return (
@@ -23,6 +24,7 @@ export function InlineRadio({
         if (setError) setError(undefined);
       }}
       className={cn('grid grid-cols-12', className)}
+      disabled={disabled}
     >
       <div className="col-span-3">
         <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>
@@ -37,7 +39,7 @@ export function InlineRadio({
               cn('flex-1 relative block rounded-lg border border-gray-300 shadow-sm px-6 py-4 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none', (
                 active ? 'ring-1 ring-offset-2 ring-indigo-500' : ''
               ),
-              { 'cursor-not-allowed': option.disabled },
+              { 'cursor-not-allowed': option.disabled || disabled },
               option.className || 'bg-white',
               value.name === option.name ? classNames?.checked : '')
             )}
@@ -102,5 +104,6 @@ InlineRadio.propTypes = {
   enhancer: PropTypes.any,
   error: PropTypes.instanceOf(Error),
   setError: PropTypes.func,
+  disabled: PropTypes.bool,
   'aria-label': PropTypes.string,
 };
