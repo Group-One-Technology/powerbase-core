@@ -19,8 +19,7 @@ export function BaseItem({ base }) {
               </dl>
               <p className="mt-1 ml-2 font-medium text-sm text-indigo-600 hover:text-indigo-500 inline-flex items-center self-center">
                 View
-                {' '}
-                <ChevronRightIcon className="h-4 w-4" />
+                <ChevronRightIcon className="ml-1 h-4 w-4" />
               </p>
             </>
           )

@@ -1,11 +1,13 @@
-/* eslint-disable react/prop-types */
-import React, { useState } from 'react';
-import { Grid, InfiniteLoader, AutoSizer } from 'react-virtualized';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Grid, InfiniteLoader, AutoSizer,
+} from 'react-virtualized';
 import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
+import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -21,9 +23,11 @@ export function TableRenderer({
   connections,
   referencedConnections,
   fieldTypes,
+  mutateViewFields,
 }) {
-  const columnCount = fields.length + 1;
-  const rowCount = records.length + 1;
+  const [scopedFields, setScopedFields] = useState([]);
+  const columnCount = fields && fields.length + 1;
+  const rowCount = fields && records.length + 1;
   const fieldNames = fields.map((field) => field.name);
   const tableValues = [['', ...fieldNames], ...records];
   const connectionsIndices = connections.map((item) => item.columns).flat()
@@ -32,16 +36,48 @@ export function TableRenderer({
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
+  const [colResized, setColResized] = useState();
   const isRowLoaded = ({ index }) => !!tableValues[index];
+
+  const gridRef = useRef(null);
+
+  useEffect(() => {
+    setScopedFields(fields);
+  }, [fields]);
+
+  useDidMountEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.forceUpdate();
+      gridRef.current.recomputeGridSize();
+    }
+  }, [scopedFields]);
+
+  const handleResizeCol = (columnIndex, deltaX) => {
+    const updatedColumns = scopedFields.map((col, index) => {
+      if (columnIndex === index) {
+        setColResized(col);
+        return {
+          ...col,
+          width: Math.max(col.width + deltaX, 10),
+          resized: true,
+        };
+      }
+      return col;
+    });
+    setScopedFields(updatedColumns);
+  };
 
   const handleLoadMoreRows = ({ stopIndex }) => {
     const stop = stopIndex / columnCount;
 
-    if ((!isLoading && stop + 100 > records.length) && records.length - 1 !== totalRecords) {
+    if (
+      !isLoading
+      && stop + 100 > records.length
+      && records.length - 1 !== totalRecords
+    ) {
       loadMoreRows();
     }
   };
-
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
     setSelectedRecord(fields.map((item, index) => {
@@ -72,10 +108,18 @@ export function TableRenderer({
         rowCount={totalRecords * columnCount}
       >
         {({ onRowsRendered, registerChild }) => (
-          <AutoSizer disableHeight>
+          <AutoSizer
+            disableHeight
+            onResize={() => gridRef.current?.recomputeGridSize()}
+          >
             {({ width }) => (
               <Grid
-                ref={registerChild}
+                ref={(instance) => {
+                  if (instance) {
+                    gridRef.current = instance;
+                    registerChild(instance);
+                  }
+                }}
                 onSectionRendered={({
                   columnStartIndex,
                   columnStopIndex,
@@ -84,7 +128,6 @@ export function TableRenderer({
                 }) => {
                   const startIndex = rowStartIndex * columnCount + columnStartIndex;
                   const stopIndex = rowStopIndex * columnCount + columnStopIndex;
-
                   return onRowsRendered({ startIndex, stopIndex });
                 }}
                 onRowsRendered={onRowsRendered}
@@ -112,12 +155,22 @@ export function TableRenderer({
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
                       : undefined,
+                    handleResizeCol,
+                    mutateViewFields,
+                    fields,
+                    columnResized: colResized,
                     ...props,
                   });
                 }}
-                columnWidth={({ index }) => (index === 0
-                  ? ROW_NO_CELL_WIDTH
-                  : fields[index - 1].width)}
+                columnWidth={({ index }) => {
+                  if (index === 0) {
+                    return ROW_NO_CELL_WIDTH;
+                  }
+                  if (scopedFields && scopedFields[index - 1]?.width) {
+                    return scopedFields[index - 1]?.width;
+                  }
+                  return 300;
+                }}
                 columnCount={columnCount}
                 rowHeight={30}
                 rowCount={rowCount}
@@ -145,9 +198,7 @@ export function TableRenderer({
 
 TableRenderer.propTypes = {
   fields: PropTypes.arrayOf(IViewField).isRequired,
-  records: PropTypes.arrayOf(
-    PropTypes.arrayOf(PropTypes.any),
-  ).isRequired,
+  records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
@@ -156,4 +207,5 @@ TableRenderer.propTypes = {
   connections: PropTypes.array,
   referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
+  mutateViewFields: PropTypes.func,
 };
