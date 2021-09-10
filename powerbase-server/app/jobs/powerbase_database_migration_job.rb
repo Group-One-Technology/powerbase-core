@@ -12,16 +12,28 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
     if !single_line_text_field
-      puts "ERROR: There is no 'single line text' field in the database."
+      @base_migration.logs[:errors] = {
+        error: "There is no 'single line text' field in the database.",
+      }
+      @base_migration.save
       return
     elsif !@database
-      puts "ERROR: Database with id of #{database_id} could not be found."
+      @base_migration.logs[:errors] = {
+        error: "Database with id of #{database_id} could not be found.",
+      }
+      @base_migration.save
       return
     elsif !@base_migration
-      puts "ERROR: Base Migration for database with id of #{database_id} could not be found."
+      @base_migration.logs[:errors] = {
+        error: "Base Migration for database with id of #{database_id} could not be found.",
+      }
+      @base_migration.save
       return
     elsif @database.is_migrated
-      puts "ERROR: Database with id of #{database_id} has already been migrated."
+      @base_migration.logs[:errors] = {
+        error: "Database with id of #{database_id} has already been migrated.",
+      }
+      @base_migration.save
       return
     end
 
@@ -45,11 +57,12 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         table.name = table_name
         table.powerbase_database_id = @database.id
         table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
-
         if !table.save
-          # TODO: Add error tracker (ex. Sentry)
-          puts "Failed to save table: #{table.name}"
-          puts table.errors.messages
+          @base_migration.logs[:errors] = {
+            error: "Failed to save '#{table.name}' table",
+            messages: table.errors.messages.to_json,
+          }
+          @base_migration.save
         end
       end
     }
@@ -108,15 +121,19 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
               field_select_options.powerbase_field_id = field.id
               if !field_select_options.save
-                # TODO: Add error tracker (ex. Sentry)
-                puts "Failed to save enums: #{field_select_options.name}"
-                puts field_select_options.errors.messages
+                @base_migration.logs[:errors] = {
+                  error: "Failed to save '#{field_select_options.name}' enums",
+                  messages: field_select_options.errors.messages,
+                }
+                @base_migration.save
               end
             end
           else
-            # TODO: Add error tracker (ex. Sentry)
-            puts "Failed to save field: #{field.name}"
-            puts field.errors.messages
+            @base_migration.logs[:errors] = {
+              error: "Failed to save '#{field.name}' field",
+              messages: field.errors.messages,
+            }
+            @base_migration.save
           end
         end
       }
@@ -143,12 +160,20 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           view_field.order = index + 1
           view_field.table_view_id = table_view.id
           view_field.powerbase_field_id = cur_field.id
-          view_field.save
+          if !view_field.save
+            @base_migration.logs[:errors] = {
+              error: "Failed to save '#{cur_field.name}' view field for #{table_view.name} view",
+              messages: field.errors.messages,
+            }
+            @base_migration.save
+          end
         end
       else
-        # TODO: Add error tracker (ex. Sentry)
-        puts "Failed to save default grid view: #{table.name}"
-        puts table_view.errors.messages
+        @base_migration.logs[:errors] = {
+          error: "Failed to save '#{table_view.name}' view",
+          messages: table_view.errors.messages,
+        }
+        @base_migration.save
       end
 
       # Base Connection Migration
@@ -160,23 +185,27 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             .select { |item| item.name == foreign_key[:table].to_s }
             .first
 
-          base_connection = BaseConnection.find_by(
-            name: foreign_key[:name],
-            powerbase_table_id: table.id,
-            powerbase_database_id: table.powerbase_database_id,
-          ) || BaseConnection.new
-          base_connection.name = foreign_key[:name]
-          base_connection.columns = foreign_key[:columns]
-          base_connection.referenced_columns = foreign_key[:key]
-          base_connection.referenced_table_id = referenced_table.id
-          base_connection.referenced_database_id = referenced_table.powerbase_database_id
-          base_connection.powerbase_table_id = table.id
-          base_connection.powerbase_database_id = table.powerbase_database_id
+          if referenced_table
+            base_connection = BaseConnection.find_by(
+              name: foreign_key[:name],
+              powerbase_table_id: table.id,
+              powerbase_database_id: table.powerbase_database_id,
+            ) || BaseConnection.new
+            base_connection.name = foreign_key[:name]
+            base_connection.columns = foreign_key[:columns]
+            base_connection.referenced_columns = foreign_key[:key]
+            base_connection.referenced_table_id = referenced_table.id
+            base_connection.referenced_database_id = referenced_table.powerbase_database_id
+            base_connection.powerbase_table_id = table.id
+            base_connection.powerbase_database_id = table.powerbase_database_id
 
-          if !base_connection.save
-            # TODO: Add error tracker (ex. Sentry)
-            puts "Failed to save foreign key constraint: #{base_connection.name}"
-            puts base_connection.errors.messages
+            if !base_connection.save
+              @base_migration.logs[:errors] = {
+                error: "Failed to save '#{base_connection.name}' base connection",
+                messages: base_connection.errors.messages,
+              }
+              @base_migration.save
+            end
           end
         end
       }
@@ -229,9 +258,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               base_connection.is_auto_linked = true
 
               if !base_connection.save
-                # TODO: Add error tracker (ex. Sentry)
-                puts "Failed to save foreign key constraint: #{base_connection.name}"
-                puts base_connection.errors.messages
+                @base_migration.logs[:errors] = {
+                  error: "Failed to save '#{base_connection.name}' base connection",
+                  messages: base_connection.errors.messages,
+                }
+                @base_migration.save
               end
             end
           end
@@ -264,9 +295,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               base_connection.is_auto_linked = true
 
               if !base_connection.save
-                # TODO: Add error tracker (ex. Sentry)
-                puts "Failed to save foreign key constraint: #{base_connection.name}"
-                puts base_connection.errors.messages
+                @base_migration.logs[:errors] = {
+                  error: "Failed to save '#{base_connection.name}' base connection",
+                  messages: base_connection.errors.messages,
+                }
+                @base_migration.save
               end
             end
           end
@@ -294,14 +327,16 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)
 
-    if unmigrated_tables.length == 0
-      @database.update(is_migrated: true)
-
-      @base_migration.end_time = Time.now
+    if unmigrated_tables.length > 0
+      @base_migration.logs[:errors] = {
+        error: "Some tables hasn't finished migrating yet.",
+      }
       @base_migration.save
-    else
-      puts "Some tables hasn't finished migrating yet."
     end
+
+    @database.update(is_migrated: true)
+    @base_migration.end_time = Time.now
+    @base_migration.save
   end
 
   private
