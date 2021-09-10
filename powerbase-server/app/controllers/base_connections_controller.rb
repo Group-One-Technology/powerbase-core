@@ -1,5 +1,5 @@
 class BaseConnectionsController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:index) do
     required(:database_id).value(:integer)
@@ -19,6 +19,10 @@ class BaseConnectionsController < ApplicationController
     optional(:columns).value(:array)
     required(:referenced_table_id).value(:integer)
     optional(:referenced_columns).value(:array)
+  end
+
+  schema(:destroy) do
+    required(:id).value(:integer)
   end
 
   schema(:table_connections, :referenced_table_connections) do
@@ -103,6 +107,12 @@ class BaseConnectionsController < ApplicationController
     else
       render json: @connection.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /connections/:id
+  def destroy
+    @connection = BaseConnection.find(safe_params[:id])
+    @connection.destroy
   end
 
   # GET /tables/:table_id/connections

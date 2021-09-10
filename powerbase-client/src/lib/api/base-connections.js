@@ -49,3 +49,13 @@ export async function updateBaseConnection({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function deleteBaseConnection({ id }) {
+  const response = await securedApi.delete(`/connections/${id}`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

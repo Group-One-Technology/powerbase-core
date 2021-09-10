@@ -8,6 +8,7 @@ import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 import { Loader } from '@components/ui/Loader';
 import { Badge } from '@components/ui/Badge';
+import { DeleteConnectionModal } from '@components/connections/DeleteConnectionModal';
 
 export function BaseConnectionsSettings({
   base,
@@ -26,10 +27,12 @@ export function BaseConnectionsSettings({
   }));
   const [openAddModal, setAddModalOpen] = useState(false);
   const [openEditModal, setEditModalOpen] = useState(false);
+  const [openDeleteModal, setDeleteModalOpen] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState();
 
   const handleAddConnection = () => setAddModalOpen(true);
-  const handleEditConnection = (value) => {
+  const handleDeleteConnection = () => setDeleteModalOpen(true);
+  const handleViewConnection = (value) => {
     setSelectedConnection(value);
     setEditModalOpen(true);
   };
@@ -47,9 +50,9 @@ export function BaseConnectionsSettings({
                   <button
                     type="button"
                     className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
-                    onClick={() => handleEditConnection(connection)}
+                    onClick={() => handleViewConnection(connection)}
                   >
-                    Edit
+                    View
                   </button>
                   <div className="max-w-lg flex text-sm">
                     <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
@@ -86,12 +89,21 @@ export function BaseConnectionsSettings({
             ))}
           </ul>
           {selectedConnection && (
-            <EditConnectionModal
-              open={openEditModal}
-              setOpen={setEditModalOpen}
-              connection={selectedConnection}
-              bases={bases}
-            />
+            <>
+              <EditConnectionModal
+                open={openEditModal}
+                setOpen={setEditModalOpen}
+                connection={selectedConnection}
+                handleDelete={handleDeleteConnection}
+                bases={bases}
+              />
+              <DeleteConnectionModal
+                connection={selectedConnection}
+                open={openDeleteModal}
+                setOpen={setDeleteModalOpen}
+                setEditModalOpen={setEditModalOpen}
+              />
+            </>
           )}
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <button

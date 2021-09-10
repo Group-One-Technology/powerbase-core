@@ -2,10 +2,23 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
 
-export function Modal({ open, setOpen, children }) {
+export function Modal({
+  initialFocus,
+  open,
+  setOpen,
+  onClose,
+  children,
+}) {
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" static className="fixed z-10 inset-0 overflow-y-auto" open={open} onClose={setOpen}>
+      <Dialog
+        as="div"
+        static
+        className="fixed z-10 inset-0 overflow-y-auto"
+        open={open}
+        onClose={onClose ?? (() => setOpen(false))}
+        initialFocus={initialFocus}
+      >
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
@@ -41,7 +54,9 @@ export function Modal({ open, setOpen, children }) {
 }
 
 Modal.propTypes = {
+  initialFocus: PropTypes.any,
   children: PropTypes.any.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
 };
