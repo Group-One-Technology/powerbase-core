@@ -13,25 +13,24 @@ import { CellRenderer } from './CellRenderer';
 const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
-  remoteFields,
+  fields,
   records,
   totalRecords,
   loadMoreRows,
   isLoading,
   height,
   tables,
-  foreignKeys,
+  connections,
+  referencedConnections,
   fieldTypes,
-  mutate,
+  mutateViewFields,
 }) {
-  const [fields, setFields] = useState([]);
-  const columnCount = remoteFields && remoteFields.length + 1;
-  const rowCount = remoteFields && records.length + 1;
-  const fieldNames = remoteFields.map((field) => field.name);
+  const [scopedFields, setScopedFields] = useState([]);
+  const columnCount = fields && fields.length + 1;
+  const rowCount = fields && records.length + 1;
+  const fieldNames = fields.map((field) => field.name);
   const tableValues = [['', ...fieldNames], ...records];
-  const foreignKeyIndices = foreignKeys
-    .map((item) => item.columns)
-    .flat()
+  const connectionsIndices = connections.map((item) => item.columns).flat()
     .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
@@ -43,16 +42,18 @@ export function TableRenderer({
   const gridRef = useRef(null);
 
   useEffect(() => {
-    setFields(remoteFields);
-  }, [remoteFields]);
-
-  useDidMountEffect(() => {
-    gridRef.current?.forceUpdate();
-    gridRef.current?.recomputeGridSize();
+    setScopedFields(fields);
   }, [fields]);
 
+  useDidMountEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.forceUpdate();
+      gridRef.current.recomputeGridSize();
+    }
+  }, [scopedFields]);
+
   const handleResizeCol = (columnIndex, deltaX) => {
-    const updatedColumns = fields.map((col, index) => {
+    const updatedColumns = scopedFields.map((col, index) => {
       if (columnIndex === index) {
         setColResized(col);
         return {
@@ -61,9 +62,9 @@ export function TableRenderer({
           resized: true,
         };
       }
-      return { ...col };
+      return col;
     });
-    setFields(updatedColumns);
+    setScopedFields(updatedColumns);
   };
 
   const handleLoadMoreRows = ({ stopIndex }) => {
@@ -79,26 +80,24 @@ export function TableRenderer({
   };
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(
-      fields.map((item, index) => {
-        const foreignKey = foreignKeyIndices.includes(index + 1)
-          ? foreignKeys.find((key) => key.columns.includes(item.name))
-          : undefined;
+    setSelectedRecord(fields.map((item, index) => {
+      const connection = connectionsIndices.includes(index + 1)
+        ? connections.find((key) => key.columns.includes(item.name))
+        : undefined;
 
-        return {
-          ...item,
-          value: tableValues[rowNo][index + 1],
-          isForeignKey: !!foreignKey,
-          isCompositeKey: foreignKey?.columns.length > 1,
-          foreignKey: foreignKey
-            ? {
-              ...foreignKey,
-              columnIndex: foreignKey.columns.indexOf(item.name),
-            }
-            : undefined,
-        };
-      }),
-    );
+      return ({
+        ...item,
+        value: tableValues[rowNo][index + 1],
+        isForeignKey: !!connection,
+        isCompositeKey: connection?.columns.length > 1,
+        foreignKey: connection
+          ? ({
+            ...connection,
+            columnIndex: connection.columns.indexOf(item.name),
+          })
+          : undefined,
+      });
+    }));
   };
 
   return (
@@ -111,7 +110,7 @@ export function TableRenderer({
         {({ onRowsRendered, registerChild }) => (
           <AutoSizer
             disableHeight
-            onResize={() => gridRef.current && gridRef.current.recomputeGridSize()}
+            onResize={() => gridRef.current?.recomputeGridSize()}
           >
             {({ width }) => (
               <Grid
@@ -148,19 +147,18 @@ export function TableRenderer({
                     isHoveredRow,
                     isRowNo,
                     isLastRecord,
-                    handleResizeCol,
-                    mutate,
-                    remoteFields,
-                    columnResized: colResized,
-                    isForeignKey: foreignKeyIndices.includes(columnIndex),
-                    fieldTypeId:
-                      isHeader && columnIndex !== 0
-                        ? remoteFields[columnIndex - 1].fieldTypeId
-                        : undefined,
+                    isForeignKey: connectionsIndices.includes(columnIndex),
+                    fieldTypeId: columnIndex !== 0
+                      ? fields[columnIndex - 1].fieldTypeId
+                      : undefined,
                     fieldTypes,
                     handleExpandRecord: isRowNo
                       ? handleExpandRecord
                       : undefined,
+                    handleResizeCol,
+                    mutateViewFields,
+                    fields,
+                    columnResized: colResized,
                     ...props,
                   });
                 }}
@@ -168,8 +166,8 @@ export function TableRenderer({
                   if (index === 0) {
                     return ROW_NO_CELL_WIDTH;
                   }
-                  if (fields && fields[index - 1]?.width) {
-                    return fields[index - 1]?.width;
+                  if (scopedFields && scopedFields[index - 1]?.width) {
+                    return scopedFields[index - 1]?.width;
                   }
                   return 300;
                 }}
@@ -189,7 +187,8 @@ export function TableRenderer({
           setOpen={setIsModalOpen}
           record={selectedRecord}
           tables={tables}
-          foreignKeys={foreignKeys}
+          connections={connections}
+          referencedConnections={referencedConnections}
           fieldTypes={fieldTypes}
         />
       )}
@@ -198,14 +197,15 @@ export function TableRenderer({
 }
 
 TableRenderer.propTypes = {
-  remoteFields: PropTypes.arrayOf(IViewField).isRequired,
+  fields: PropTypes.arrayOf(IViewField).isRequired,
   records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  foreignKeys: PropTypes.array,
   tables: PropTypes.arrayOf(ITable),
+  connections: PropTypes.array,
+  referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
-  mutate: PropTypes.func,
+  mutateViewFields: PropTypes.func,
 };

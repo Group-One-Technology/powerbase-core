@@ -169,6 +169,7 @@ export function TableTabs({
             if (!table.isMigrated) {
               return (
                 <Tooltip
+                  key={table.id}
                   text="Migrating"
                   position={index > 1 ? 'left' : 'right'}
                   className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}

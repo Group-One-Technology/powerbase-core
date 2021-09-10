@@ -39,7 +39,10 @@ module PowerbaseServer
 
     # Allows the conversion between camel case to snake case and vice versa.
     excluded_routes = -> (env) {
-      env["PATH_INFO"].match(%r{^\/tables\/\S+\/records}) # /tables/:id/records
+      env["PATH_INFO"].match(%r{^\/tables\/\S+\/(records|linked_records)\S*})
+       # /tables/:id/records
+       # /tables/:id/linked_records
+       # /tables/:table_id/records/:id
     }
     config.middleware.use OliveBranch::Middleware,
       inflection: "camel",

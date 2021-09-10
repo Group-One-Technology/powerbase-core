@@ -124,7 +124,7 @@ module Powerbase
 
     # * Get a document/table record.
     # Accepts the following options:
-    # :id :: the document ID or a SWR key.
+    # :id :: the document ID or the SWR key.
     # :primary_keys :: an object of the table's primary keys.
     #    Ex: { pathId: 123, userId: 1245 }
     def get(options)
@@ -158,7 +158,61 @@ module Powerbase
       end
     end
 
+    # * Get document/table records based on the given columns.
+    # :filters :: a JSON that contains the filter for the records.
+    #    Ex: { pathId: 123, userId: 1245 }
+    # :page :: the page number.
+    # :limit :: the page count. No. of records to get per page.
+    def where(options)
+      index = "table_records_#{@table_id}"
+      page = options[:page] || 1
+      limit = options[:limit] || 5
+
+      if @is_turbo
+        query_filter = options[:filters]
+          .collect {|key, value| key }
+          .map {|key| "(#{key}:#{options[:filters][key]})" }
+          .join(" AND ")
+
+        result = @esclient.search(
+          index: index,
+          body: {
+            from: (page - 1) * limit,
+            size: limit,
+            query: {
+              query_string: {
+                query: query_filter
+              }
+            }
+          },
+        )
+
+        result["hits"]["hits"].map {|result| result["_source"]}
+      else
+        query_filter = options[:filters]
+          .collect {|key, value| key }
+          .map do |key|
+            value = options[:filters][key]
+            value = "\"#{value}\"" if value.is_a?(String)
+            if @powerbase_database.adapter == "postgresql"
+              "(Sequel[{Sequel.lit('\"#{key}\"') => #{value}}])"
+            else
+              "(Sequel[{Sequel.lit('#{key}') => #{value}}])"
+            end
+          end
+          .join(" & ")
+
+        remote_db() {|db|
+          db.from(@table_name)
+            .where(eval(query_filter))
+            .paginate(page, limit)
+            .all
+        }
+      end
+    end
+
     # * Get the filtered and paginated table records.
+    # TODO: Refactor Filter
     # Accepts the following options:
     # :filter :: a JSON that contains the filter for the records.
     # :page :: the page number.

@@ -18,6 +18,7 @@ import { ConnectURLBasePage } from '@pages/base/connect-url';
 import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
 import { BaseSettingsPage } from '@pages/base/[id]/settings';
 import { TablePage } from '@pages/base/[id]/table/[id]';
+import { Error404Page } from '@pages/Error404';
 
 import './index.css';
 
@@ -33,7 +34,7 @@ export function App() {
           <Route path="/base">
             <BasesRoute />
           </Route>
-          <Route path="*" component={() => <h1>Not found!</h1>} />
+          <Route path="*" component={Error404Page} />
         </Switch>
       </Router>
     </GlobalProviders>
@@ -53,7 +54,7 @@ function BasesRoute() {
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route exact path={`${path}/:id/settings`} component={BaseSettingsPage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
-      <Route path="*" component={() => <h1>Not found!</h1>} />
+      <Route path="*" component={Error404Page} />
     </Switch>
   );
 }
