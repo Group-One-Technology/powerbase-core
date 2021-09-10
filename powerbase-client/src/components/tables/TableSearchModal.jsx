@@ -172,11 +172,6 @@ export default function TableSearchModal({
                               !hasHovered && isCurrentTable ? 'bg-gray-200' : ''
                             }`}
                               key={item.id}
-                              id={
-                                isCurrentTable
-                                  ? 'table-search-modal-current-table'
-                                  : ''
-                              }
                               ref={listItemRefs[item.id]}
                             >
                               {' '}
