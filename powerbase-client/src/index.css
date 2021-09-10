@@ -26,12 +26,11 @@
   display: none;
 }
 
-.resized {
+.should-truncate-field {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
-  /* white-space: nowrap; */
-  /* display: flex; */
+  display: inline;
 }
 .DragHandle {
   flex: 0 0 16px;

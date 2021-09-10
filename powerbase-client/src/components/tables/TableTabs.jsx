@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  PlusIcon, ChevronLeftIcon, ChevronRightIcon, TableIcon,
+} from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -7,6 +9,7 @@ import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
 import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
+import TableSearchModal from './TableSearchModal';
 
 const SCROLL_OFFSET = 100;
 
@@ -18,6 +21,7 @@ export function TableTabs({
 }) {
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
+  const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
 
   useEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,6 +74,10 @@ export function TableTabs({
     }
   };
 
+  const handleSearchModal = () => {
+    setTableSearchModalOpen(true);
+  };
+
   const addTable = () => {
     alert('add new table clicked');
   };
@@ -109,6 +117,11 @@ export function TableTabs({
         </select>
       </div>
       <div className="hidden sm:flex">
+        <button className="outline-none" onClick={() => handleSearchModal()}>
+          <TableIcon className="h-6 w-6 text-white mt-1/2 " />
+        </button>
+        {/* The extra conditional check is meant to prevent weird behavior where async operations run even when the modal has been closed out */}
+        {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}
         <button
           id="tableTabsLeftArrow"
           type="button"
