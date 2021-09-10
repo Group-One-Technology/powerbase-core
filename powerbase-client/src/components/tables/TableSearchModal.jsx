@@ -1,4 +1,3 @@
-/* eslint-disable  */
 import React, {
   Fragment, useRef, useState, useEffect,
 } from 'react';
@@ -11,8 +10,8 @@ import {
 import PropTypes from 'prop-types';
 
 export default function TableSearchModal({
-  open,
-  setOpen,
+  modalOpen,
+  setModalOpen,
   tables,
   handleTableChange,
   tableId,
@@ -99,17 +98,17 @@ export default function TableSearchModal({
   }, [searchResults]);
 
   const handleSearchResultClick = (table) => {
-    setOpen(false);
+    setModalOpen(false);
     setSearchResults(tables);
     return handleTableChange(table);
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition.Root show={modalOpen} as={Fragment}>
       <Dialog
         as="div"
         className="fixed z-10 inset-0  max-w-sm mt-16 ml-4 max-h-8"
-        onClose={() => setOpen(false)}
+        onClose={() => setModalOpen(false)}
         initialFocus={focusRef}
       >
         <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -221,8 +220,8 @@ export default function TableSearchModal({
 
 TableSearchModal.propTypes = {
   tableId: PropTypes.number.isRequired,
-  setOpen: PropTypes.func.isRequired,
+  setModalOpen: PropTypes.func.isRequired,
   handleTableChange: PropTypes.func.isRequired,
   tables: PropTypes.array.isRequired,
-  open: PropTypes.bool.isRequired,
+  modalOpen: PropTypes.bool.isRequired,
 };

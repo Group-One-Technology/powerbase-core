@@ -22,7 +22,7 @@ export function TableTabs({
 }) {
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
 
   useEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,7 +76,7 @@ export function TableTabs({
   };
 
   const handleSearchModal = () => {
-    setModalOpen(true);
+    setTableSearchModalOpen(true);
   };
 
   const addTable = () => {
@@ -122,7 +122,7 @@ export function TableTabs({
           <TableIcon className="h-6 w-6 text-gray-700 mt-1/2 " />
         </button>
         {/* The extra conditional check is meant to prevent weird behavior where async operations run even when the modal has been closed out */}
-        {modalOpen && <TableSearchModal open={modalOpen} setOpen={setModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}
+        {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}
         <button
           id="tableTabsLeftArrow"
           type="button"
