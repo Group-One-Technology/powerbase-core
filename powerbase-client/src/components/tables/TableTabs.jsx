@@ -118,7 +118,7 @@ export function TableTabs({
       </div>
       <div className="hidden sm:flex">
         <button className="outline-none" onClick={() => handleSearchModal()}>
-          <TableIcon className="h-6 w-6 text-gray-700 mt-1/2 " />
+          <TableIcon className="h-6 w-6 text-white mt-1/2 " />
         </button>
         {/* The extra conditional check is meant to prevent weird behavior where async operations run even when the modal has been closed out */}
         {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}

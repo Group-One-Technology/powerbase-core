@@ -8,6 +8,7 @@ import {
   CheckIcon,
 } from '@heroicons/react/outline';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 
 export default function TableSearchModal({
   modalOpen,
@@ -167,10 +168,10 @@ export default function TableSearchModal({
                           const isCurrentTable = item.id === tableId;
                           return (
                             <li
-                              className={`p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12
-                            ${
-                              !hasHovered && isCurrentTable ? 'bg-gray-200' : ''
-                            }`}
+                              className={cn(
+                                'p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12',
+                                !hasHovered && isCurrentTable && 'bg-gray-200',
+                              )}
                               key={item.id}
                               ref={listItemRefs[item.id]}
                             >
@@ -196,8 +197,8 @@ export default function TableSearchModal({
                   )}
                   {!searchResults.length && (
                     <div className="flex flex-col justify-center content-center items-center">
-                      <ExclamationIcon className="h-9 w-9 text-gray-400" />
-                      <p className="text-gray-400 text-sm mt-1">
+                      <ExclamationIcon className="h-6 w-6 text-gray-800" />
+                      <p className="text-gray-800 text-sm mt-1">
                         {' '}
                         There are no matching tables.
                       </p>
