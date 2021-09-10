@@ -158,7 +158,7 @@ export function CellRenderer({
         isHoveredRow && 'bg-gray-50',
         isRowNo && 'flex justify-center text-xs text-gray-500',
         !isRowNo && 'border-r',
-        !isHeader && !isRowNo && 'resized',
+        fieldTypeId !== 3 && 'should-truncate-field',
       )}
       style={style}
       tabIndex={0}
