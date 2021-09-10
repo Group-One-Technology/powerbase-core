@@ -11,28 +11,34 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
 
+    @base_migration.logs["errors"] = [] if !@base_migration.logs["errors"]
+
     if !single_line_text_field
-      @base_migration.logs[:errors] = {
+      @base_migration.logs["errors"].push({
+        type: "Status",
         error: "There is no 'single line text' field in the database.",
-      }
+      })
       @base_migration.save
       return
     elsif !@database
-      @base_migration.logs[:errors] = {
+      @base_migration.logs["errors"].push({
+        type: "Status",
         error: "Database with id of #{database_id} could not be found.",
-      }
+      })
       @base_migration.save
       return
     elsif !@base_migration
-      @base_migration.logs[:errors] = {
+      @base_migration.logs["errors"].push({
+        type: "Status",
         error: "Base Migration for database with id of #{database_id} could not be found.",
-      }
+      })
       @base_migration.save
       return
     elsif @database.is_migrated
-      @base_migration.logs[:errors] = {
+      @base_migration.logs["errors"].push({
+        type: "Status",
         error: "Database with id of #{database_id} has already been migrated.",
-      }
+      })
       @base_migration.save
       return
     end
@@ -58,10 +64,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         table.powerbase_database_id = @database.id
         table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
         if !table.save
-          @base_migration.logs[:errors] = {
-            error: "Failed to save '#{table.name}' table",
-            messages: table.errors.messages.to_json,
-          }
+          @base_migration.logs["errors"].push({
+            type: "Active Record",
+            error: "Failed to save '#{table_name}' table",
+            messages: table.errors.messages,
+          })
           @base_migration.save
         end
       end
@@ -121,18 +128,20 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
               field_select_options.powerbase_field_id = field.id
               if !field_select_options.save
-                @base_migration.logs[:errors] = {
+                @base_migration.logs["errors"].push({
+                  type: "Active Record",
                   error: "Failed to save '#{field_select_options.name}' enums",
                   messages: field_select_options.errors.messages,
-                }
+                })
                 @base_migration.save
               end
             end
           else
-            @base_migration.logs[:errors] = {
-              error: "Failed to save '#{field.name}' field",
+            @base_migration.logs["errors"].push({
+              type: "Active Record",
+              error: "Failed to save '#{column_name}' field",
               messages: field.errors.messages,
-            }
+            })
             @base_migration.save
           end
         end
@@ -161,18 +170,20 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           view_field.table_view_id = table_view.id
           view_field.powerbase_field_id = cur_field.id
           if !view_field.save
-            @base_migration.logs[:errors] = {
+            @base_migration.logs["errors"].push({
+              type: "Active Record",
               error: "Failed to save '#{cur_field.name}' view field for #{table_view.name} view",
               messages: field.errors.messages,
-            }
+            })
             @base_migration.save
           end
         end
       else
-        @base_migration.logs[:errors] = {
+        @base_migration.logs["errors"].push({
+          type: "Active Record",
           error: "Failed to save '#{table_view.name}' view",
           messages: table_view.errors.messages,
-        }
+        })
         @base_migration.save
       end
 
@@ -200,10 +211,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             base_connection.powerbase_database_id = table.powerbase_database_id
 
             if !base_connection.save
-              @base_migration.logs[:errors] = {
+              @base_migration.logs["errors"].push({
+                type: "Active Record",
                 error: "Failed to save '#{base_connection.name}' base connection",
                 messages: base_connection.errors.messages,
-              }
+              })
               @base_migration.save
             end
           end
@@ -258,10 +270,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               base_connection.is_auto_linked = true
 
               if !base_connection.save
-                @base_migration.logs[:errors] = {
+                @base_migration.logs["errors"].push({
+                  type: "Active Record",
                   error: "Failed to save '#{base_connection.name}' base connection",
                   messages: base_connection.errors.messages,
-                }
+                })
                 @base_migration.save
               end
             end
@@ -295,10 +308,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
               base_connection.is_auto_linked = true
 
               if !base_connection.save
-                @base_migration.logs[:errors] = {
+                @base_migration.logs["errors"].push({
+                  type: "Active Record",
                   error: "Failed to save '#{base_connection.name}' base connection",
                   messages: base_connection.errors.messages,
-                }
+                })
                 @base_migration.save
               end
             end
@@ -323,10 +337,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             table.is_migrated = true
             table.save
           rescue => exception
-            @base_migration.logs[:errors] = {
+            @base_migration.logs["errors"].push({
+              type: "Elasticsearch",
               error: "Failed to index #{table.name}'s records",
               messages: exception,
-            }
+            })
             @base_migration.save
           end
         end
@@ -336,9 +351,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)
 
     if unmigrated_tables.length > 0
-      @base_migration.logs[:errors] = {
+      @base_migration.logs["errors"].push({
+        type: "Status",
         error: "Some tables hasn't finished migrating yet.",
-      }
+      })
       @base_migration.save
     end
 
