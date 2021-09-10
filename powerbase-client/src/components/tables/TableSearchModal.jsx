@@ -3,19 +3,27 @@ import React, {
   Fragment, useRef, useState, useEffect,
 } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { SearchIcon, ExclamationIcon, CheckIcon } from '@heroicons/react/outline';
+import {
+  SearchIcon,
+  ExclamationIcon,
+  CheckIcon,
+} from '@heroicons/react/outline';
+import PropTypes from 'prop-types';
 
 export default function TableSearchModal({
-  open, setOpen, tables, handleTableChange, tableId,
+  open,
+  setOpen,
+  tables,
+  handleTableChange,
+  tableId,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [hasHovered, setHasHovered] = useState(false);
   const focusRef = useRef(null);
   const searchInputRef = useRef(null);
-  const listContainerRef = useRef(null)
-
-  const listItemRefs = tables?.reduce((acc, value) => {
+  const listContainerRef = useRef(null);
+  const listItemRefs = tables.reduce((acc, value) => {
     acc[value.id] = React.createRef();
     return acc;
   }, {});
@@ -29,12 +37,47 @@ export default function TableSearchModal({
     setSearchTerm(e.target.value);
   };
 
-  const toggleHover = () => {
+  const toggleHoverOverListContainer = () => {
     setHasHovered(true);
   };
 
+  function onKeyDown(event) {
+    const isUp = event.key === 'ArrowUp';
+    const isDown = event.key === 'ArrowDown';
+    setHasHovered(true);
+    const inputIsFocused = document.activeElement === searchInputRef.current;
+
+    const resultsItems = Array.from(listContainerRef.current.children);
+
+    const activeResultIndex = resultsItems.findIndex(
+      (child) => child.querySelector('button') === document.activeElement,
+    );
+    if (isUp) {
+      if (inputIsFocused) {
+        resultsItems[resultsItems.length - 1].querySelector('button').focus();
+      } else if (resultsItems[activeResultIndex - 1]) {
+        resultsItems[activeResultIndex - 1].querySelector('button').focus();
+      } else {
+        searchInputRef.current.focus();
+      }
+    }
+
+    if (isDown) {
+      if (inputIsFocused) {
+        resultsItems[0].querySelector('button').focus();
+      } else if (resultsItems[activeResultIndex + 1]) {
+        resultsItems[activeResultIndex + 1].querySelector('button').focus();
+      } else {
+        searchInputRef.current.focus();
+      }
+    }
+  }
+
   useEffect(() => {
-    const results = tables?.filter((table) => table.alias?.toLowerCase().includes(searchTerm) || table.name.toLowerCase().includes(searchTerm));
+    const results = tables.filter(
+      (table) => table.alias?.toLowerCase().includes(searchTerm)
+        || table.name.toLowerCase().includes(searchTerm),
+    );
     setSearchResults(results);
   }, [searchTerm]);
 
@@ -43,51 +86,17 @@ export default function TableSearchModal({
     searchInputRef.current?.focus();
   }, []);
 
-
-  function onKeyDown(event) {
-    const isUp = event.key === 'ArrowUp';
-    const isDown = event.key === 'ArrowDown';
-    setHasHovered(true);
-    const inputIsFocused = document.activeElement === searchInputRef.current;
-
-    const resultsItems = Array.from(listContainerRef.current.children)
-
-    const activeResultIndex = resultsItems.findIndex(child => {
-      return child.querySelector('a') === document.activeElement;
-    });
-    if ( isUp ) {
-      if ( inputIsFocused ) {
-        resultsItems[resultsItems.length - 1].querySelector('a').focus();
-      } else if ( resultsItems[activeResultIndex - 1] ) {
-        resultsItems[activeResultIndex - 1].querySelector('a').focus();
-      } else {
-        searchInputRef.current.focus();
-      }
-    }
-
-    if ( isDown ) {
-      if ( inputIsFocused ) {
-        resultsItems[0].querySelector('a').focus();
-      } else if ( resultsItems[activeResultIndex + 1] ) {
-        resultsItems[activeResultIndex + 1].querySelector('a').focus();
-      } else {
-        searchInputRef.current.focus();
-      }
-    }
-  }
-
-
   useEffect(() => {
-    if ( searchResults.length ) {
+    if (!hasHovered) scrollToActiveItem(tableId);
+    if (searchResults) {
       document.body.addEventListener('keydown', onKeyDown);
     } else {
       document.body.removeEventListener('keydown', onKeyDown);
     }
     return () => {
       document.body.removeEventListener('keydown', onKeyDown);
-    }
+    };
   }, [searchResults]);
-
 
   const handleSearchResultClick = (table) => {
     setOpen(false);
@@ -95,11 +104,15 @@ export default function TableSearchModal({
     return handleTableChange(table);
   };
 
-
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="fixed z-10 inset-0  max-w-sm mt-16 ml-4 max-h-8" onClose={() => setOpen(false)} initialFocus={focusRef}>
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <Dialog
+        as="div"
+        className="fixed z-10 inset-0  max-w-sm mt-16 ml-4 max-h-8"
+        onClose={() => setOpen(false)}
+        initialFocus={focusRef}
+      >
+        <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -135,35 +148,66 @@ export default function TableSearchModal({
                       ref={searchInputRef}
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                      <SearchIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      <SearchIcon
+                        className="h-4 w-4 text-gray-400"
+                        aria-hidden="true"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="mt-2 text-center sm:mt-5">
                   {searchResults && (
-                  <div className="mt-1 overflow-y-auto">
-                    <ul className="max-h-60 " id = "table-search-modal-list" onMouseEnter={() => toggleHover()} ref={listContainerRef}>
-                      {searchResults.map((item) => (
-                        <li
-                          className={`p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12
-                          ${!hasHovered && item.id === tableId ? 'bg-gray-200' : ''}`}
-                          key={item?.id}
-                          id={item.id === tableId ? 'mouse' : ''}
-                          ref={listItemRefs[item.id]}
-                          onClick={() => handleSearchResultClick({ table: item })}
-                        > <a href="#" className="focus:bg-gray-200 w-full h-full flex justify-center content-center items-center space-x-1.5" tabIndex={item.id} >
-                            <span>{item.id === tableId ? (<CheckIcon className="h-5 w-5" />) : ''}</span>
-                            <span>{item.alias || item.name}</span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  )}{!searchResults.length && (
-                  <div className="flex flex-col justify-center content-center items-center">
-                    <ExclamationIcon className="h-9 w-9 text-gray-400" />
-                    <p className="text-gray-400 text-sm mt-1"> There are no matching tables.</p>
-                  </div>
+                    <div className="mt-1 overflow-y-auto">
+                      <ul
+                        className="max-h-60 "
+                        id="table-search-modal-list"
+                        onMouseEnter={() => toggleHoverOverListContainer()}
+                        ref={listContainerRef}
+                      >
+                        {searchResults.map((item) => {
+                          const isCurrentTable = item.id === tableId;
+                          return (
+                            <li
+                              className={`p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12
+                            ${
+                              !hasHovered && isCurrentTable ? 'bg-gray-200' : ''
+                            }`}
+                              key={item.id}
+                              id={
+                                isCurrentTable
+                                  ? 'table-search-modal-current-table'
+                                  : ''
+                              }
+                              ref={listItemRefs[item.id]}
+                            >
+                              {' '}
+                              <button
+                                onClick={() => handleSearchResultClick({ table: item })}
+                                className="focus:bg-gray-200 w-full h-full flex justify-center items-center space-x-1.5 focus:outline-none"
+                              >
+                                <span>
+                                  {isCurrentTable ? (
+                                    <CheckIcon className="h-5 w-5" />
+                                  ) : (
+                                    ''
+                                  )}
+                                </span>
+                                <span>{item.alias || item.name}</span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  {!searchResults.length && (
+                    <div className="flex flex-col justify-center content-center items-center">
+                      <ExclamationIcon className="h-9 w-9 text-gray-400" />
+                      <p className="text-gray-400 text-sm mt-1">
+                        {' '}
+                        There are no matching tables.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -174,3 +218,11 @@ export default function TableSearchModal({
     </Transition.Root>
   );
 }
+
+TableSearchModal.propTypes = {
+  tableId: PropTypes.number.isRequired,
+  setOpen: PropTypes.func.isRequired,
+  handleTableChange: PropTypes.func.isRequired,
+  tables: PropTypes.array.isRequired,
+  open: PropTypes.bool.isRequired,
+};
