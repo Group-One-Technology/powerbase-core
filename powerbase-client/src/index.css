@@ -59,10 +59,3 @@
   align-items: center;
   cursor: ew-resize;
 }
-
-ul#table-search-modal-list a:hover,
-ul#table-search-modal-list a:focus,
-ul#table-search-modal-list a:active {
-  height: 100%;
-  outline: none;
-}

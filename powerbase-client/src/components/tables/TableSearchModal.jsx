@@ -139,7 +139,7 @@ export default function TableSearchModal({
                     <input
                       type="text"
                       name="search-input"
-                      id="table-search-input"
+                      id="table-search-modal-input"
                       className="outline-none focus:outline-none block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
                       placeholder="Search for a table"
                       onChange={handleChange}
