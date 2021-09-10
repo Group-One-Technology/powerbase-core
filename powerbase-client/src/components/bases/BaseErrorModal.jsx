@@ -1,19 +1,37 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ExclamationIcon } from '@heroicons/react/outline';
 import { Dialog } from '@headlessui/react';
 import PropTypes from 'prop-types';
 
-import { Modal } from '@components/ui/Modal';
+import { clearBaseLogs } from '@lib/api/base-migrations';
 import { IBase } from '@lib/propTypes/base';
 import { ErrorType } from '@lib/constants/base-migrations';
+import { Modal } from '@components/ui/Modal';
+import { Button } from '@components/ui/Button';
 
 export function BaseErrorModal({
   open,
   setOpen,
   base,
+  mutateBases,
 }) {
   const cancelButtonRef = useRef();
   const closeModal = () => setOpen(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleClearLogs = async () => {
+    setLoading(true);
+
+    try {
+      await clearBaseLogs({ databaseId: base.id });
+      await mutateBases();
+    } catch (err) {
+      console.log(err);
+    }
+
+    setOpen(false);
+    setLoading(false);
+  };
 
   return (
     <Modal open={open} setOpen={setOpen} initialFocus={cancelButtonRef}>
@@ -35,21 +53,23 @@ export function BaseErrorModal({
             ))}
           </ul>
           <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-            <button
+            <Button
               type="button"
               className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
-              onClick={closeModal}
+              onClick={handleClearLogs}
+              loading={loading}
             >
               Clear Logs
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
               onClick={closeModal}
               ref={cancelButtonRef}
+              disabled={loading}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -61,4 +81,5 @@ BaseErrorModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   base: IBase.isRequired,
+  mutateBases: PropTypes.func.isRequired,
 };

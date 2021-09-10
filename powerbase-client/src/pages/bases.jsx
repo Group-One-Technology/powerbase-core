@@ -15,7 +15,7 @@ import { Loader } from '@components/ui/Loader';
 
 export function BasesPage() {
   const authUser = useAuthUser();
-  const { data: bases } = useSWR(
+  const { data: bases, mutate: mutateBases } = useSWR(
     authUser ? '/databases' : null,
     getDatabases,
     { revalidateOnFocus: true },
@@ -63,7 +63,12 @@ export function BasesPage() {
           {bases?.length === 0 && <EmptyBase />}
           {bases == null && <Loader className="h-80" />}
           {(selectedBase && selectedBase.logs?.errors) && (
-            <BaseErrorModal open={modalOpen} setOpen={setModalOpen} base={selectedBase} />
+            <BaseErrorModal
+              open={modalOpen}
+              setOpen={setModalOpen}
+              base={selectedBase}
+              mutateBases={mutateBases}
+            />
           )}
         </PageContent>
       </div>

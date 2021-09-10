@@ -23,7 +23,7 @@ export function BaseItem({ base, handleErrorClick }) {
                 <ChevronRightIcon className="ml-1 h-4 w-4" />
               </p>
             </Link>
-            {(base?.logs.errors.length > 0) && (
+            {(base.logs.errors?.length > 0) && (
               <button
                 type="button"
                 className="mt-1 font-medium text-sm text-red-600 hover:text-red-500 flex justify-center items-center"

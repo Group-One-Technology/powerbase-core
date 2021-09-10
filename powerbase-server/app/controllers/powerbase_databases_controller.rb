@@ -1,7 +1,7 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!
 
-  schema(:show) do
+  schema(:show, :clear_logs) do
     required(:id).value(:integer)
   end
 
@@ -97,6 +97,17 @@ class PowerbaseDatabasesController < ApplicationController
       database: format_json(@database),
       db_size: @db_size,
     }
+  end
+
+  # PUT /databases/:id/clear_logs
+  def clear_logs
+    @database = PowerbaseDatabase.find(safe_params[:id])
+
+    if @database.base_migration.update(logs: { errors: [] })
+      render status: :no_content
+    else
+      render json: @database.base_migration.errors, status: :unprocessable_entity
+    end
   end
 
   private
