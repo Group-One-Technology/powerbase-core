@@ -10,16 +10,22 @@ export function InlineSelect({
   setValue,
   options,
   className,
+  disabled: isDisabled,
 }) {
   return (
-    <Listbox value={value} onChange={setValue}>
-      {({ open }) => (
+    <Listbox value={value} onChange={setValue} disabled={isDisabled}>
+      {({ open, disabled }) => (
         <div className={cn('grid grid-cols-12 gap-x-2 items-center', className)}>
           <div className="col-span-3">
             <Listbox.Label className="block text-base font-medium text-gray-700">{label}</Listbox.Label>
           </div>
           <div className="col-span-9 mt-1 relative">
-            <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <Listbox.Button
+              className={cn(
+                'relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                disabled && 'bg-gray-100',
+              )}
+            >
               <span className="w-full inline-flex truncate">
                 <span className="truncate">{value.name}</span>
                 <span className="ml-2 truncate text-gray-500 flex-grow text-right">{value.description}</span>
@@ -98,4 +104,5 @@ InlineSelect.propTypes = {
   setValue: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(IValue),
   className: PropTypes.string,
+  disabled: PropTypes.bool,
 };

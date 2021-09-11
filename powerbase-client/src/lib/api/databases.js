@@ -51,3 +51,13 @@ export async function getDatabase({ id }) {
 
   return undefined;
 }
+
+export async function updateDatabase({ id, ...payload }) {
+  const response = await securedApi.put(`/databases/${id}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

@@ -5,6 +5,17 @@ class PowerbaseDatabasesController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update) do
+    required(:id).value(:integer)
+    required(:name).value(:string)
+    optional(:host).value(:string)
+    optional(:port).value(:integer)
+    optional(:username).value(:string)
+    optional(:password).value(:string)
+    optional(:database).value(:string)
+    required(:color).value(:string)
+  end
+
   schema(:connect) do
     optional(:name).value(:string)
     optional(:host).value(:string)
@@ -34,12 +45,68 @@ class PowerbaseDatabasesController < ApplicationController
     end
   end
 
+  # PUT /databases/:id
+  def update
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    options = safe_params.output
+    options[:adapter] = @database.adapter
+    options[:is_turbo] = @database.is_turbo
+    is_connection_updated = false
+    @is_connected = true
+
+    if options[:username] && options[:password]
+      is_connection_updated = true
+
+      begin
+        Powerbase.connect(options)
+        @is_connected = Powerbase.connected?
+      rescue => exception
+        render json: { connected: false, database: format_json(@database) }
+        return;
+      end
+    end
+
+    if @database
+      if options[:name] != @database.name
+        @database.name = options[:name]
+
+        @existing_database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
+
+        if @existing_database && @existing_database.id != @database.id
+          Powerbase.disconnect if is_connection_updated
+          render json: { connected: @is_connected, is_existing: true, database: format_json(@database) }
+          return
+        end
+      end
+
+      @database.database_name = options[:database]
+      @database.color = options[:color]
+      @database.connection_string = Powerbase.connection_string if is_connection_updated
+      if !@database.save
+        Powerbase.disconnect if is_connection_updated
+        render json: @database.errors, status: :unprocessable_entity
+        return;
+      end
+    end
+
+    Powerbase.disconnect if is_connection_updated
+    render json: { connected: @is_connected, is_existing: false, database: format_json(@database) }
+  end
+
   # POST /databases/connect
   def connect
     options = safe_params.output
 
     Powerbase.connect(options)
     @database = nil
+
+    begin
+      Powerbase.connect(options)
+    rescue => exception
+      render json: { connected: false, database: format_json(@database) }
+      return;
+    end
+
     @is_connected = Powerbase.connected?
 
     if @is_connected
@@ -60,6 +127,7 @@ class PowerbaseDatabasesController < ApplicationController
         @is_existing = false
 
         if !@database.save
+          Powerbase.disconnect
           render json: @database.errors, status: :unprocessable_entity
           return;
         end
