@@ -20,6 +20,7 @@ class PowerbaseDatabase < ApplicationRecord
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
 
   belongs_to :user
+  has_one :base_migration
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
   has_many :base_connections

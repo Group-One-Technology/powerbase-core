@@ -7,10 +7,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
   # * Migrates the given remote database.
   def perform(database_id)
     @database = PowerbaseDatabase.find(database_id);
+    @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id)
 
     single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
-    total_saved_fields = 0
-    total_tables = 0
 
     if !single_line_text_field
       puts "ERROR: There is no 'single line text' field in the database."
@@ -18,15 +17,24 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     elsif !@database
       puts "ERROR: Database with id of #{database_id} could not be found."
       return
-    end
-
-    if @database.is_migrated
+    elsif !@base_migration
+      puts "ERROR: Base Migration for database with id of #{database_id} could not be found."
+      return
+    elsif @database.is_migrated
       puts "ERROR: Database with id of #{database_id} has already been migrated."
       return
     end
 
+    if @base_migration.start_time
+      @base_migration.retries = @base_connection.retries + 1
+    else
+      @base_migration.start_time = Time.now
+    end
+
+    @base_migration.save
+
     # Table Migration
-    puts "#{Time.now} Migrating tables of database with id of #{database_id}..."
+    puts "#{@base_migration.start_time} Migrating tables of database with id of #{@database.id}..."
 
     connect(@database) {|db|
       db.tables.each do |table_name|
@@ -44,8 +52,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           puts table.errors.messages
         end
       end
-
-      total_tables = db.tables.length
     }
 
     @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
@@ -84,8 +90,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.powerbase_field_type_id = field_type
 
           if field.save
-            total_saved_fields += 1
-
             if column_type&.db_type === "enum"
               # Field Select Options / Enums Migration
               field_select_options = FieldSelectOption.find_by(
@@ -288,18 +292,15 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       end
     end
 
-    if total_tables === @database_tables.length
-      if total_saved_fields === @database.powerbase_fields.length
-        unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)
+    unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)
 
-        if unmigrated_tables.length == 0
-          @database.update(is_migrated: true)
-        else
-          puts "Some tables hasn't finished migrating yet."
-        end
-      else
-        puts "Total fields are not equal. Expected: #{total_saved_fields}, Actual: #{@database.powerbase_fields.length}"
-      end
+    if unmigrated_tables.length == 0
+      @database.update(is_migrated: true)
+
+      @base_migration.end_time = Time.now
+      @base_migration.save
+    else
+      puts "Some tables hasn't finished migrating yet."
     end
   end
 

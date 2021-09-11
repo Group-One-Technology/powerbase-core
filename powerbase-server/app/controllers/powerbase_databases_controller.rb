@@ -80,6 +80,11 @@ class PowerbaseDatabasesController < ApplicationController
       end
 
       if !@database.is_migrated
+        @base_migration = BaseMigration.new
+        @base_migration.powerbase_database_id = @database.id
+        @base_migration.database_size = @db_size
+        @base_migration.save
+
         PowerbaseDatabaseMigrationJob.perform_later(@database.id)
       end
     end
