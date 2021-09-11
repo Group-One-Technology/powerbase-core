@@ -13,6 +13,7 @@ export const IBase = PropTypes.shape({
   createdAt: PropTypes.string.isRequired,
   updatedAt: PropTypes.string.isRequired,
   totalTables: PropTypes.number.isRequired,
+  logs: PropTypes.object,
 });
 
 export const IBaseSource = PropTypes.shape({
