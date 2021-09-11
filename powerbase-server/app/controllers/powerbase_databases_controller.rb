@@ -150,7 +150,8 @@ class PowerbaseDatabasesController < ApplicationController
       if !@database.is_migrated
         @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
         @base_migration.powerbase_database_id = @database.id
-        @base_migration.database_size = @db_size
+        @base_migration.database_size = @db_size || "0 kB"
+        @base_migration.retries = 0
         @base_migration.save
 
         PowerbaseDatabaseMigrationJob.perform_later(@database.id)

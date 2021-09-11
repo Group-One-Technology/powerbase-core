@@ -27,13 +27,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       })
       @base_migration.save
       return
-    elsif !@base_migration
-      @base_migration.logs["errors"].push({
-        type: "Status",
-        error: "Base Migration for database with id of #{database_id} could not be found.",
-      })
-      @base_migration.save
-      return
     elsif @database.is_migrated
       @base_migration.logs["errors"].push({
         type: "Status",
@@ -41,6 +34,31 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       })
       @base_migration.save
       return
+    end
+
+    if !@base_migration
+      @base_migration = BaseMigration.new
+      @base_migration.powerbase_database_id = @database.id
+
+      case @database.adapter
+      when "postgresql"
+        @db_size = connect(@database) {|db|
+          db.select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
+            .first[:size]
+        }
+      when "mysql2"
+        @db_size = connect(@database) {|db|
+          db.from(Sequel.lit("information_schema.TABLES"))
+          .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
+          .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", @database.database_name))
+          .group(:table_schema)
+          .first[:size]
+        }
+      end
+
+      @base_migration.retries = 0
+      @base_migration.database_size = @db_size || "0 kB"
+      @base_migration.save
     end
 
     if @base_migration.start_time
