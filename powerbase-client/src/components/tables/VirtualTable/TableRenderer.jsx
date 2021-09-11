@@ -40,7 +40,7 @@ export function TableRenderer({
   const isRowLoaded = ({ index }) => !!tableValues[index];
 
   const gridRef = useRef(null);
-  console.log(fields);
+
   useEffect(() => {
     setScopedFields(fields);
   }, [fields]);
