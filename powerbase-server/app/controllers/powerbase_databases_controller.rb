@@ -47,125 +47,123 @@ class PowerbaseDatabasesController < ApplicationController
 
   # PUT /databases/:id
   def update
-    @database = PowerbaseDatabase.find(safe_params[:id])
     options = safe_params.output
+    @database = PowerbaseDatabase.find(safe_params[:id])
+
+    if !@database
+      render status: :not_found
+      return
+    end
+
     options[:adapter] = @database.adapter
     options[:is_turbo] = @database.is_turbo
     is_connection_updated = false
-    @is_connected = true
 
-    if options[:username] && options[:password]
+    if options[:name] != @database.name
+      @database.name = options[:name]
+      @existing_database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
+
+      if @existing_database && @existing_database.id != @database.id
+        render json: { is_existing: true, database: format_json(@database) }
+        return
+      end
+    end
+
+    if options[:username]&.length > 1 && options[:password]&.length > 1
       is_connection_updated = true
 
       begin
         Powerbase.connect(options)
-        @is_connected = Powerbase.connected?
       rescue => exception
+        render json: { connected: false, exception: exception }
+        return
+      end
+
+      if !Powerbase.connected?
+        Powerbase.disconnect
         render json: { connected: false, database: format_json(@database) }
-        return;
+        return
       end
     end
 
-    if @database
-      if options[:name] != @database.name
-        @database.name = options[:name]
-
-        @existing_database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
-
-        if @existing_database && @existing_database.id != @database.id
-          Powerbase.disconnect if is_connection_updated
-          render json: { connected: @is_connected, is_existing: true, database: format_json(@database) }
-          return
-        end
-      end
-
-      @database.database_name = options[:database]
-      @database.color = options[:color]
-      @database.connection_string = Powerbase.connection_string if is_connection_updated
-      if !@database.save
-        Powerbase.disconnect if is_connection_updated
-        render json: @database.errors, status: :unprocessable_entity
-        return;
-      end
+    @database.database_name = options[:database]
+    @database.color = options[:color]
+    @database.connection_string = Powerbase.connection_string if is_connection_updated
+    if !@database.save
+      Powerbase.disconnect if is_connection_updated
+      render json: @database.errors, status: :unprocessable_entity
+      return;
     end
 
     Powerbase.disconnect if is_connection_updated
-    render json: { connected: @is_connected, is_existing: false, database: format_json(@database) }
+    render json: { connected: true, database: format_json(@database) }
   end
 
   # POST /databases/connect
   def connect
     options = safe_params.output
 
-    Powerbase.connect(options)
-    @database = nil
+    @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
+
+    if @database
+      render json: { is_existing: true, database: format_json(@database) }
+      return
+    end
 
     begin
       Powerbase.connect(options)
     rescue => exception
-      render json: { connected: false, database: format_json(@database) }
+      render json: { connected: false }
       return;
     end
 
-    @is_connected = Powerbase.connected?
+    @database = PowerbaseDatabase.new({
+      name: options[:name],
+      database_name: Powerbase.database,
+      connection_string: Powerbase.connection_string,
+      adapter: Powerbase.adapter,
+      is_migrated: false,
+      color: options[:color],
+      is_turbo: options[:is_turbo],
+      user_id: current_user.id,
+    })
 
-    if @is_connected
-      @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
-      @is_existing = true
+    if !Powerbase.connected?
+      Powerbase.disconnect
+      render json: { connected: false, database: format_json(@database) }
+      return
+    elsif !@database.save
+      Powerbase.disconnect
+      render json: @database.errors, status: :unprocessable_entity
+      return
+    end
 
-      if !@database
-        @database = PowerbaseDatabase.new({
-          name: options[:name],
-          database_name: Powerbase.database,
-          connection_string: Powerbase.connection_string,
-          adapter: Powerbase.adapter,
-          is_migrated: false,
-          color: options[:color],
-          is_turbo: options[:is_turbo],
-          user_id: current_user.id,
-        })
-        @is_existing = false
+    case Powerbase.adapter
+    when "postgresql"
+      @db_size = Powerbase.DB
+        .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
+        .first[:size]
+    when "mysql2"
+      @db_size = Powerbase.DB
+        .from(Sequel.lit("information_schema.TABLES"))
+        .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
+        .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
+        .group(:table_schema)
+        .first[:size]
+    end
 
-        if !@database.save
-          Powerbase.disconnect
-          render json: @database.errors, status: :unprocessable_entity
-          return;
-        end
-      end
+    if !@database.is_migrated
+      @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
+      @base_migration.powerbase_database_id = @database.id
+      @base_migration.database_size = @db_size || "0 kB"
+      @base_migration.retries = 0
+      @base_migration.save
 
-      case Powerbase.adapter
-      when "postgresql"
-        @db_size = Powerbase.DB
-          .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
-          .first[:size]
-      when "mysql2"
-        @db_size = Powerbase.DB
-          .from(Sequel.lit("information_schema.TABLES"))
-          .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
-          .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
-          .group(:table_schema)
-          .first[:size]
-      end
-
-      if !@database.is_migrated
-        @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
-        @base_migration.powerbase_database_id = @database.id
-        @base_migration.database_size = @db_size || "0 kB"
-        @base_migration.retries = 0
-        @base_migration.save
-
-        PowerbaseDatabaseMigrationJob.perform_later(@database.id)
-      end
+      PowerbaseDatabaseMigrationJob.perform_later(@database.id)
     end
 
     Powerbase.disconnect
-
-    render json: {
-      connected: @is_connected,
-      is_existing: @is_existing,
-      database: format_json(@database),
-      db_size: @db_size,
-    }
+    render json: { connected: true, database: format_json(@database), db_size: @db_size }
   end
 
   # PUT /databases/:id/clear_logs

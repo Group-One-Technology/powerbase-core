@@ -71,11 +71,11 @@ export function ConnectBasePage() {
           color,
         });
 
-        if (!response.connected) {
-          setError(`Couldn't connect to "${name}". Please check the information given if they are correct.`);
-        } else if (response.isExisting) {
+        if (response.isExisting) {
           setError(`Database with name of "${response.database.name}" already exists in this account.`);
-        } else if (response.connected && response.database.isTurbo) {
+        } else if (!response.connected) {
+          setError(`Couldn't connect to "${name}". Please check the information given if they are correct.`);
+        } else if (response.connected && response.database.isTurbo && response.dbSize) {
           const databaseSize = +response.dbSize.split(' ')[0];
 
           if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
