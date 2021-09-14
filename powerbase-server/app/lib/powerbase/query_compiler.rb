@@ -18,6 +18,7 @@ module Powerbase
       @adapter = adapter
     end
 
+    # * Transform given query string or hash into sequel query string
     def to_sequel
       parsedTokens = if @query.is_a?(String)
           tokens = lexer(@query)
@@ -27,6 +28,18 @@ module Powerbase
         end
 
       transform_sequel_filter(parsedTokens)
+    end
+
+    # * Transform given query string or hash into elasticsearch query string
+    def to_elasticsearch
+      parsedTokens = if @query.is_a?(String)
+          tokens = lexer(@query)
+          parser(tokens)
+        else
+          @query
+        end
+
+      transform_elasticsearch_filter(parsedTokens)
     end
 
     private
@@ -181,7 +194,15 @@ module Powerbase
 
       # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group)
-        logical_op = filter_group[:operator]
+        logical_op = case filter_group[:operator]
+          when "AND"
+            "&"
+          when "OR"
+            "|"
+          when "NOT"
+            "NOT"
+          end
+
         filters = filter_group[:filters]
 
         sequel_filter = filters.map do |filter|
@@ -217,11 +238,66 @@ module Powerbase
           when "<="
             "(#{field} < #{value} | Sequel[{#{field} => #{value}}])"
           when "LIKE"
-            "Sequel.like(#{field}, #{value})"
+            "Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
           end
         end
 
-        "(#{sequel_filter.join(" & ")})"
+        if logical_op == "NOT"
+          query_string = sequel_filter.map {|filter| "(NOT #{filter})"}
+            .join(" & ")
+          "(#{query_string})"
+        else
+          query_string = sequel_filter.join(" #{logical_op} ")
+          "(#{query_string})"
+        end
+      end
+
+      # * Transforms parsed tokens into elasticsearch query string
+      def transform_elasticsearch_filter(filter_group)
+        logical_op = filter_group[:operator]
+        filters = filter_group[:filters]
+
+        elasticsearch_filter = filters.map do |filter|
+          inner_filter_group = filter[:filters]
+
+          if inner_filter_group && inner_filter_group.length > 0
+            next transform_elasticsearch_filter(filter)
+          end
+
+          relational_op = filter[:filter][:operator]
+          field = filter[:field]
+          value = if filter[:filter][:value].is_a?(String)
+              "\"#{filter[:filter][:value]}\""
+            else
+              filter[:filter][:value]
+            end
+
+          case relational_op
+          when "=="
+            "#{field}:#{value}"
+          when "!="
+            "(NOT #{field}:#{value})"
+          when ">"
+            "#{field}:>#{value}"
+          when ">="
+            "#{field}:>=#{value}"
+          when "<"
+            "#{field}:<#{value}"
+          when "<="
+            "#{field}:<=#{value}"
+          when "LIKE"
+            "#{field}:#{value}"
+          end
+        end
+
+        if logical_op == "NOT"
+          query_string = elasticsearch_filter.map {|filter| "(NOT #{filter})"}
+            .join(" AND ")
+          "(#{query_string})"
+        else
+          query_string = elasticsearch_filter.join(" #{logical_op} ")
+          "(#{query_string})"
+        end
       end
   end
 end
