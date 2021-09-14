@@ -13,8 +13,9 @@ module Powerbase
       close_parenthesis: 'CLOSE_PARENTHESIS',
     }
 
-    def initialize(query)
+    def initialize(query, adapter = "postgresql")
       @query = query
+      @adapter = adapter
     end
 
     def to_sequel
@@ -70,7 +71,7 @@ module Powerbase
               elsif token[0] == "'" && token[token.length - 1] == "'"
                 next { type: TOKEN[:string], value: token[1, token.length - 1] }
               elsif Float(token, exception: false)
-                next { type: TOKEN[:number], value: token }
+                next { type: TOKEN[:number], value: token.include?(".") ? token.to_f : token.to_i }
               else
                 next { type: TOKEN[:field], value: token };
               end
@@ -154,7 +155,26 @@ module Powerbase
         end
 
         ast = ast.sort {|a, b| b[:level] <=> a[:level] }
-        root_node = ast.find {|item| item[:parent_index] == nil }
+        root_node = ast.find {|item| item[:parent_index] == nil && item[:operator] }
+
+        if root_node == nil
+          ast.push({
+            index: ast.length,
+            level: 1,
+            parent_index: nil,
+            operator: "AND",
+          })
+
+          ast.map do |cur_ast|
+            if cur_ast[:parent_index] == nil && cur_ast[:operator] == nil
+              cur_ast[:parent_index] = ast.length - 1
+            end
+
+            next cur_ast
+          end
+
+          root_node = ast[ast.length - 1]
+        end
 
         build_tree(root_node, ast)
       end
