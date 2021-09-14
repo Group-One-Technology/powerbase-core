@@ -26,7 +26,7 @@ module Powerbase
           @query
         end
 
-      parsedTokens
+      transform_sequel_filter(parsedTokens)
     end
 
     private
@@ -177,6 +177,50 @@ module Powerbase
         end
 
         build_tree(root_node, ast)
+      end
+
+      def transform_sequel_filter(filter_group)
+        logical_op = filter_group[:operator]
+        filters = filter_group[:filters]
+
+        sequel_filter = filters.map do |filter|
+          inner_filter_group = filter[:filters]
+
+          if inner_filter_group && inner_filter_group.length > 0
+            next transform_sequel_filter(filter)
+          end
+
+          relational_op = filter[:filter][:operator]
+          field = if @adapter == "postgresql"
+              "Sequel.lit(\"#{filter[:field]}\")"
+            else
+              "Sequel.lit(#{filter[:field]}"
+            end
+          value = if filter[:filter][:value].is_a?(String)
+              "'#{filter[:filter][:value]}'"
+            else
+              filter[:filter][:value]
+            end
+
+          case relational_op
+          when "=="
+            "Sequel[{#{field} => #{value}}]"
+          when "!="
+            "Sequel.~(#{field} => #{value})"
+          when ">"
+            "#{field} > #{value}"
+          when ">="
+            "(#{field} > #{value} | Sequel[{#{field} => #{value}}])"
+          when "<"
+            "#{field} < #{value}"
+          when "<="
+            "(#{field} < #{value} | Sequel[{#{field} => #{value}}])"
+          when "LIKE"
+            "Sequel.like(#{field}, #{value})"
+          end
+        end
+
+        "(#{sequel_filter.join(" & ")})"
       end
   end
 end
