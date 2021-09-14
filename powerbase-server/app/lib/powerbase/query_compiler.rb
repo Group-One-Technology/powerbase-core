@@ -29,6 +29,11 @@ module Powerbase
     end
 
     private
+      # * Analyze the tokens in a given code/string
+      # Accepts the following options:
+      # :param :: a query string.
+      #    Ex: '(((occupation == "Student") AND (age > 18)) OR (enrollment_year >= 1998))'
+      # Returns: an array of tokens
       def lexer(code)
         code.split(/\s+/)
           .select {|string| string.length > 0}
@@ -74,6 +79,10 @@ module Powerbase
           .flatten
       end
 
+      # * Builds the filter tree
+      # Accepts the following options:
+      # :cur_ast :: the current logical filter.
+      # :ast :: an array of filters.
       def build_tree(cur_ast, ast)
         filters = ast.select {|item| item[:parent_index] == cur_ast[:index] }
           .map{|item| item[:operator] ? build_tree(item, ast) : item }
@@ -82,6 +91,7 @@ module Powerbase
         cur_ast
       end
 
+      # * Parses the tokens into a filter tree
       def parser(tokens)
         ast = []
         level = 0
