@@ -179,6 +179,7 @@ module Powerbase
         build_tree(root_node, ast)
       end
 
+      # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group)
         logical_op = filter_group[:operator]
         filters = filter_group[:filters]
