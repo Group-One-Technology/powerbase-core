@@ -1,7 +1,7 @@
 module Powerbase
   class QueryCompiler
     PARENTHESIS = ['(', ')']
-    RELATIONAL_OPERATORS = ['<', '>', '==', '<=', '>=', '!=', 'is', 'is not', 'contains', 'does not contain']
+    RELATIONAL_OPERATORS = ['<', '>', '=', '<=', '>=', '!=', 'is', 'is not', 'contains', 'does not contain']
     LOGICAL_OPERATORS = ['and', 'or', 'not']
     TOKEN = {
       number: 'NUMBER',
@@ -223,7 +223,7 @@ module Powerbase
             end
 
           case relational_op
-          when "=="
+          when "="
             "Sequel[{#{field} => #{value}}]"
           when "is"
             "Sequel[{#{field} => '#{value}'}]"
@@ -265,7 +265,7 @@ module Powerbase
           value = filter[:filter][:value]
 
           case relational_op
-          when "=="
+          when "="
             "#{field}:#{value}"
           when "is"
             "#{field}:\"#{value}\""
