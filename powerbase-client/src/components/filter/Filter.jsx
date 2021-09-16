@@ -1,10 +1,15 @@
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useRef, useCallback } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
+import debounce from 'lodash.debounce';
 
+import { useTableRecords } from '@models/TableRecords';
+import { useRecordsFilter } from '@models/views/RecordsFilter';
+import { updateTableView } from '@lib/api/views';
 import { IView } from '@lib/propTypes/view';
+import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
@@ -12,38 +17,8 @@ const FILTERS = {
   operator: 'and',
   filters: [
     {
-      filter: { operator: '>', value: 3 },
+      filter: { operator: '<', value: 3 },
       field: 'id',
-    },
-    {
-      filter: { operator: '==', value: 'Percy' },
-      field: 'title',
-    },
-    {
-      operator: 'or',
-      filters: [
-        {
-          filter: { operator: '>', value: 3 },
-          field: 'id',
-        },
-        {
-          operator: 'and',
-          filters: [
-            {
-              filter: { operator: '>', value: 3 },
-              field: 'id',
-            },
-            {
-              filter: { operator: '==', value: 'Percy' },
-              field: 'title',
-            },
-          ],
-        },
-        {
-          filter: { operator: '==', value: 'Percy' },
-          field: 'title',
-        },
-      ],
     },
   ],
 };
@@ -71,8 +46,10 @@ function buildFilterTree(curFilter, filters) {
 
 export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
   const filterRef = useRef();
+  const { setFilters } = useRecordsFilter();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
-  const updateTableRecords = () => {
+  const updateTableRecords = useCallback(debounce(async () => {
     if (filterRef.current) {
       const filters = Array.from(filterRef.current.querySelectorAll('.filter') || []).map(({ attributes }) => ({
         level: +attributes['data-level'].nodeValue,
@@ -84,13 +61,17 @@ export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
 
       const rootFilter = filters.find((item) => item.level === 0 && item.operator)
         || { level: 0, operator: 'and' };
-
       const filterTree = buildFilterTree(rootFilter, filters);
+      const updatedFilter = {
+        id: encodeURIComponent(parseQueryString(filterTree)),
+        value: filterTree,
+      };
 
-      // TODO: Fetch Table Records here.
-      console.log(filterTree);
+      setFilters(updatedFilter);
+      updateTableView({ id: view.id, filters: updatedFilter });
+      await mutateTableRecords();
     }
-  };
+  }, 500), [view]);
 
   return (
     <Popover className="relative">
