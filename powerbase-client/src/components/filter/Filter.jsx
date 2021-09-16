@@ -14,17 +14,7 @@ import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-const FILTERS = {
-  operator: 'and',
-  filters: [
-    {
-      filter: { operator: '<', value: 3 },
-      field: 'id',
-    },
-  ],
-};
-
-export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
+export function Filter({ view, fields, filters: initialFilter }) {
   const filterRef = useRef();
   const { setFilters } = useRecordsFilter();
   const { mutate: mutateTableRecords } = useTableRecords();

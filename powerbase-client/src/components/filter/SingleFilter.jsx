@@ -21,12 +21,16 @@ export function SingleFilter({
   const { data: fieldTypes } = useFieldTypes();
   const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
 
-  const [field, setField] = useState(fields.find((item) => item.name === filter.field) || fields[0]);
-  const [operator, setOperator] = useState(filter.filter.operator);
+  const [field, setField] = useState(filter?.field
+    ? fields.find((item) => item.name === filter.field) || fields[0]
+    : fields[0]);
+  const [operator, setOperator] = useState(filter?.filter.operator || (field.fieldTypeId === numberFieldTypeId
+    ? OPERATOR.NUMBER[0]
+    : OPERATOR.TEXT[0]));
   const [operators, setOperators] = useState(field.fieldTypeId === numberFieldTypeId
     ? OPERATOR.NUMBER
     : OPERATOR.TEXT);
-  const [value, setValue] = useState(filter.filter.value);
+  const [value, setValue] = useState(filter?.filter.value || '');
 
   const updateField = (selectedField) => {
     const isNumber = selectedField.fieldTypeId === numberFieldTypeId;

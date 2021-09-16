@@ -18,7 +18,7 @@ export function FilterGroup({
 }) {
   const id = `filterGroup${level}`;
   const filterGroupRef = useRef();
-  const [logicalOperator, setLogicalOperator] = useState(filterGroup.operator);
+  const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
 
   const handleChildLogicalOpChange = (evt) => setLogicalOperator(evt.target.value);
   const handleRemoveFilterGroup = () => {
@@ -57,7 +57,7 @@ export function FilterGroup({
       )}
       <div className={cn('flex-1', !root && 'bg-gray-50 border border-gray-300 rounded-md')}>
         <div className="m-3 flex flex-col gap-y-2">
-          {filterGroup.filters.map((item, index) => {
+          {filterGroup?.filters.map((item, index) => {
             if (item.filters?.length) {
               const logicalOperatorChange = root
                 ? handleLogicalOpChange
@@ -93,6 +93,16 @@ export function FilterGroup({
               />
             );
           })}
+          {(!filterGroup || filterGroup?.filters?.length === 0) && (
+            <SingleFilter
+              first
+              id={`${id}-new`}
+              level={level + 1}
+              fields={fields}
+              logicalOperator={logicalOperator}
+              updateTableRecords={updateTableRecords}
+            />
+          )}
         </div>
         <AddFilterMenu root={root} level={level} />
       </div>
@@ -116,7 +126,7 @@ FilterGroup.propTypes = {
   root: PropTypes.bool,
   parentOperator: PropTypes.string,
   level: PropTypes.number,
-  filterGroup: PropTypes.object.isRequired,
+  filterGroup: PropTypes.object,
   fields: PropTypes.arrayOf(IViewField),
   updateTableRecords: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
