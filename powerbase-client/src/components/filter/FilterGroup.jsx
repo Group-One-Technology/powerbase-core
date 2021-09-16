@@ -16,7 +16,7 @@ export function FilterGroup({
   return (
     <div className={cn(!root, 'flex gap-2')}>
       {!root && <p className="inline-block mt-2 w-12 text-right capitalize">{parentOperator}</p>}
-      <div className={cn('flex-1', !root && 'bg-gray-100 border border-gray-300 rounded-md')}>
+      <div className={cn('flex-1', !root && 'bg-gray-50 border border-gray-300 rounded-md')}>
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => (
             item.filters?.length
@@ -39,7 +39,7 @@ export function FilterGroup({
               )
           ))}
         </div>
-        <AddFilterMenu root={root} />
+        <AddFilterMenu root={root} level={level} />
       </div>
     </div>
   );
