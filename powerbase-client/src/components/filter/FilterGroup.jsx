@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { IViewField } from '@lib/propTypes/view-field';
+import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
 import { AddFilterMenu } from './AddFilterMenu';
 import { SingleFilter } from './SingleFilter';
 
@@ -21,35 +22,11 @@ export function FilterGroup({
   const filterGroupId = `filterGroup${level}`;
 
   const [newFilterCount, setNewFilterCount] = useState(1);
-  const [filterGroup, setFilterGroup] = useState(initialFilterGroup
-    ? ({
-      ...initialFilterGroup,
-      filters: initialFilterGroup.filters.map((item, index) => {
-        if (item.filters?.length) {
-          const filterId = `${filterGroupId}-${item.operator}-filter${index}`;
-
-          return ({
-            ...item,
-            id: filterId,
-          });
-        }
-
-        const filterId = (item.filter && item.filter.operator && item.filter.value)
-          ? `${filterGroupId}-${item.field}:${item.filter.operator}${item.filter.value}-filter${index}`
-          : item.id;
-
-        return ({
-          ...item,
-          id: filterId,
-        });
-      }),
-    }) : ({
-      operator: 'and',
-      filters: [{
-        id: `${filterGroupId}-${fields[0].name}-filter-0`,
-        field: fields[0].name,
-      }],
-    }));
+  const [filterGroup, setFilterGroup] = useState(initializeFilterGroup({
+    id: filterGroupId,
+    filterGroup: initialFilterGroup,
+    fields,
+  }));
   const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
 
   const newFilterItem = ({
@@ -57,10 +34,6 @@ export function FilterGroup({
     field: fields[0].name,
   });
 
-  const handleChildLogicalOpChange = (evt) => {
-    setLogicalOperator(evt.target.value);
-    updateTableRecords();
-  };
   const handleAddFilter = (isGroup) => {
     const newFilter = isGroup
       ? ({
@@ -78,6 +51,11 @@ export function FilterGroup({
       ],
     }));
     setNewFilterCount((prevCount) => prevCount + 1);
+  };
+
+  const handleChildLogicalOpChange = (evt) => {
+    setLogicalOperator(evt.target.value);
+    updateTableRecords();
   };
 
   const handleRemoveChildFilter = (filterId) => {
