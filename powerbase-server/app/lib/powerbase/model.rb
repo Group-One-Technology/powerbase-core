@@ -247,9 +247,10 @@ module Powerbase
         }
 
         if options[:filters]
+          query_string = Powerbase::QueryCompiler.new(options[:filters])
           search_params[:query] = {
             query_string: {
-              query: parse_elasticsearch_filter(options[:filters])
+              query: query_string.to_elasticsearch,
             }
           }
         end
@@ -258,10 +259,12 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
+        query_string = Powerbase::QueryCompiler.new(options[:filters])
+
         remote_db() {|db|
           db.from(@table_name)
             .order(order_field.name.to_sym)
-            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .where(options[:filters] ? eval(query_string.to_sequel) : true)
             .paginate(page, limit)
             .all
         }
@@ -275,7 +278,8 @@ module Powerbase
       if @is_turbo
         index = "table_records_#{@table_id}"
         query = if options[:filters]
-            "q=#{parse_elasticsearch_filter(options[:filters])}"
+            query_string = Powerbase::QueryCompiler.new(options[:filters])
+            "q=#{query_string.to_elasticsearch}"
           else
             nil
           end
@@ -283,9 +287,11 @@ module Powerbase
         response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
         response["count"]
       else
+        query_string = Powerbase::QueryCompiler.new(options[:filters])
+
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .where(options[:filters] ? eval(query_string.to_sequel) : true)
             .count
         }
       end
