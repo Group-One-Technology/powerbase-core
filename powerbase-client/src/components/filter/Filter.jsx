@@ -19,6 +19,32 @@ const FILTERS = {
       filter: { operator: '==', value: 'Percy' },
       field: 'title',
     },
+    {
+      operator: 'or',
+      filters: [
+        {
+          filter: { operator: '>', value: 3 },
+          field: 'id',
+        },
+        {
+          operator: 'and',
+          filters: [
+            {
+              filter: { operator: '>', value: 3 },
+              field: 'id',
+            },
+            {
+              filter: { operator: '==', value: 'Percy' },
+              field: 'title',
+            },
+          ],
+        },
+        {
+          filter: { operator: '==', value: 'Percy' },
+          field: 'title',
+        },
+      ],
+    },
   ],
 };
 

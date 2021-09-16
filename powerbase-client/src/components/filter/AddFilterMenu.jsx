@@ -19,7 +19,10 @@ export function AddFilterMenu({ root }) {
         <ChevronDownIcon className="ml-1 h-4 w-4" />
       </Menu.Button>
       <Menu.Items
-        className="absolute left-0 w-52 mt-2 origin-top-right text-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+        className={cn(
+          'absolute w-52 mt-2 origin-top-right text-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+          root ? 'left-0' : 'left-20',
+        )}
       >
         <Menu.Item
           as="button"

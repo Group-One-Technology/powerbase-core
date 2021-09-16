@@ -49,7 +49,9 @@ export function SingleFilter({
 
   return (
     <div ref={filterRef} className="flex gap-2 items-center">
-      <p className="inline-block w-12 text-right capitalize">{first ? 'where' : logicalOperator}</p>
+      <p className="inline-block w-12 text-right capitalize">
+        {first ? 'where' : logicalOperator}
+      </p>
       <div className="flex-1 flex gap-2 items-center">
         <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
         <select
