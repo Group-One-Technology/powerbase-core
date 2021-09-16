@@ -6,8 +6,7 @@ import { FilterIcon, TableIcon } from '@heroicons/react/outline';
 
 import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view-field';
-import { AddFilterMenu } from './AddFilterMenu';
-import { SingleFilter } from './SingleFilter';
+import { FilterGroup } from './FilterGroup';
 
 export function Filter({ view, fields }) {
   console.log({ fields });
@@ -43,10 +42,7 @@ export function Filter({ view, fields }) {
                       {view.name}
                     </strong>
                   </h4>
-                  <div className="m-3">
-                    <SingleFilter fields={fields} />
-                  </div>
-                  <AddFilterMenu />
+                  <FilterGroup root fields={fields} />
                 </div>
               </div>
             </Popover.Panel>
