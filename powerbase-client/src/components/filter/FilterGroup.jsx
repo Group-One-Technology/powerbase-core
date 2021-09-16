@@ -14,21 +14,27 @@ export function FilterGroup({
   fields,
   filterGroup,
   handleLogicalOpChange,
+  updateTableRecords,
 }) {
+  const id = `filterGroup${level}`;
   const [logicalOperator, setLogicalOperator] = useState(filterGroup.operator);
 
   const handleChildLogicalOpChange = (evt) => setLogicalOperator(evt.target.value);
 
   return (
-    <div className={cn(!root, 'flex gap-2')}>
+    <div
+      data-level={level}
+      data-operator={parentOperator}
+      className={cn('filter', !root, 'flex gap-2')}
+    >
       {!root && (
         <div className="inline-block mt-2 w-16 text-right capitalize">
           {handleLogicalOpChange
             ? (
               <>
-                <label htmlFor={`group${level}-logicalOperator`} className="sr-only">Logical Operator</label>
+                <label htmlFor={`${id}-logicalOperator`} className="sr-only">Logical Operator</label>
                 <select
-                  id={`group${level}-logicalOperator`}
+                  id={`${id}-logicalOperator`}
                   name="logical_operator"
                   className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
                   value={parentOperator}
@@ -51,11 +57,12 @@ export function FilterGroup({
 
               return (
                 <FilterGroup
-                  key={`group-${level}-${item.operator}`}
+                  key={`${id}-${item.operator}`}
                   level={level + 1}
                   fields={fields}
                   filterGroup={item}
                   parentOperator={logicalOperator}
+                  updateTableRecords={updateTableRecords}
                   handleLogicalOpChange={index === 1
                     ? logicalOperatorChange
                     : undefined}
@@ -64,12 +71,14 @@ export function FilterGroup({
             }
             return (
               <SingleFilter
-                key={`group-${level}-${item.field}:${item.filter.operator}${item.filter.value}`}
-                id={`group-${level}-${item.field}:${item.filter.operator}${item.filter.value}`}
+                key={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
+                id={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
+                level={level + 1}
                 first={index === 0}
                 fields={fields}
                 filter={item}
                 logicalOperator={logicalOperator}
+                updateTableRecords={updateTableRecords}
                 handleLogicalOpChange={index === 1
                   ? handleChildLogicalOpChange
                   : undefined}
@@ -100,5 +109,6 @@ FilterGroup.propTypes = {
   level: PropTypes.number,
   filterGroup: PropTypes.object.isRequired,
   fields: PropTypes.arrayOf(IViewField),
+  updateTableRecords: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
 };

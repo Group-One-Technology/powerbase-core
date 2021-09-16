@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -10,12 +10,13 @@ import { OPERATOR } from '@lib/constants/filter';
 export function SingleFilter({
   id,
   first,
+  level,
   fields,
   filter,
   logicalOperator = 'and',
+  updateTableRecords,
   handleLogicalOpChange,
 }) {
-  const filterRef = useRef();
   const { data: fieldTypes } = useFieldTypes();
   const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
 
@@ -32,6 +33,7 @@ export function SingleFilter({
     setOperators(isNumber ? OPERATOR.NUMBER : OPERATOR.TEXT);
     setOperator(isNumber ? OPERATOR.NUMBER[0] : OPERATOR.TEXT[0]);
     setValue('');
+    updateTableRecords();
   };
 
   const handleFieldChange = (evt) => {
@@ -43,14 +45,24 @@ export function SingleFilter({
 
   const handleOperatorChange = (evt) => {
     setOperator(evt.target.value);
+    updateTableRecords();
   };
 
   const handleValueChange = (evt) => {
     setValue(evt.target.value);
+    updateTableRecords();
   };
 
   return (
-    <div ref={filterRef} className="flex gap-2 items-center">
+    <div
+      data-level={level}
+      data-filter={JSON.stringify({
+        field: field?.name,
+        filter: { operator, value },
+      })}
+      data-filter-group={false}
+      className="filter flex gap-2 items-center"
+    >
       <div className="inline-block w-16 text-right capitalize">
         {handleLogicalOpChange
           ? (
@@ -120,8 +132,10 @@ export function SingleFilter({
 SingleFilter.propTypes = {
   id: PropTypes.string.isRequired,
   first: PropTypes.bool,
+  level: PropTypes.number.isRequired,
   fields: PropTypes.arrayOf(IViewField),
   filter: PropTypes.object,
   logicalOperator: PropTypes.string,
+  updateTableRecords: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
 };
