@@ -7,6 +7,7 @@ import { FilterIcon, TableIcon } from '@heroicons/react/outline';
 import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view-field';
 import { AddFilterMenu } from './AddFilterMenu';
+import { SingleFilter } from './SingleFilter';
 
 export function Filter({ view, fields }) {
   console.log({ fields });
@@ -33,17 +34,20 @@ export function Filter({ view, fields }) {
             leaveTo="opacity-0 translate-y-1"
           >
             <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
-              <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className="bg-white p-3 text-sm text-gray-900">
-                  <h4 className="flex items-center">
+              <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                <div className="text-sm text-gray-900">
+                  <h4 className="flex m-3 items-center">
                     Filters for&nbsp;
                     <strong>
                       <TableIcon className="inline mr-1 h-5 w-5 " />
                       {view.name}
                     </strong>
                   </h4>
+                  <div className="m-3">
+                    <SingleFilter fields={fields} />
+                  </div>
+                  <AddFilterMenu />
                 </div>
-                <AddFilterMenu />
               </div>
             </Popover.Panel>
           </Transition>
