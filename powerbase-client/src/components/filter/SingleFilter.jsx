@@ -53,7 +53,9 @@ export function SingleFilter({
 
   const handleOperatorChange = (evt) => {
     setOperator(evt.target.value);
-    updateTableRecords();
+    if (value !== '') {
+      updateTableRecords();
+    }
   };
 
   const handleValueChange = (evt) => {
