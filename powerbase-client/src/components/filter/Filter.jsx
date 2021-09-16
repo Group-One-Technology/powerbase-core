@@ -67,7 +67,7 @@ export function Filter({ view, fields, filters: initialFilter }) {
             <Popover.Panel className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                 <div className="text-sm text-gray-900">
-                  <h4 className="flex m-3 items-center">
+                  <h4 className="flex mx-3 mt-3 items-center">
                     Filters for&nbsp;
                     <strong>
                       <TableIcon className="inline mr-1 h-5 w-5 " />

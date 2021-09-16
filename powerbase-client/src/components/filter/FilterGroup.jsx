@@ -121,7 +121,7 @@ export function FilterGroup({
       )}
       <div className={cn('flex-1', !root && 'bg-gray-50 border border-gray-300 rounded-md')}>
         <div className="m-3 flex flex-col gap-y-2">
-          {filterGroup?.filters.map((item, index) => {
+          {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {
               const logicalOperatorChange = root
                 ? handleLogicalOpChange
@@ -161,6 +161,11 @@ export function FilterGroup({
               />
             );
           })}
+          {filterGroup.filters.length === 0 && (
+            <p className="ml-3 text-sm text-gray-700">
+              There are no filters for this view.
+            </p>
+          )}
         </div>
         <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />
       </div>
