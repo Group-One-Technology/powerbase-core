@@ -69,6 +69,8 @@ export function FilterGroup({
     if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
       handleParentRemoveFilter(id);
     }
+
+    updateTableRecords();
   };
 
   return (
