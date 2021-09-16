@@ -24,13 +24,13 @@ export function SingleFilter({
   const [field, setField] = useState(filter?.field
     ? fields.find((item) => item.name === filter.field) || fields[0]
     : fields[0]);
-  const [operator, setOperator] = useState(filter?.filter.operator || (field.fieldTypeId === numberFieldTypeId
+  const [operator, setOperator] = useState(filter?.filter?.operator || (field.fieldTypeId === numberFieldTypeId
     ? OPERATOR.NUMBER[0]
     : OPERATOR.TEXT[0]));
   const [operators, setOperators] = useState(field.fieldTypeId === numberFieldTypeId
     ? OPERATOR.NUMBER
     : OPERATOR.TEXT);
-  const [value, setValue] = useState(filter?.filter.value || '');
+  const [value, setValue] = useState(filter?.filter?.value || '');
 
   const updateField = (selectedField) => {
     const isNumber = selectedField.fieldTypeId === numberFieldTypeId;
@@ -52,7 +52,10 @@ export function SingleFilter({
     const selectedField = fields?.find((item) => (
       item.id.toString() === evt.target.value.toString()
     ));
-    updateField(selectedField);
+
+    if (value) {
+      updateField(selectedField);
+    }
   };
 
   const handleOperatorChange = (evt) => {

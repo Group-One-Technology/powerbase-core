@@ -12,15 +12,40 @@ export function FilterGroup({
   parentOperator = 'and',
   level = 0,
   fields,
-  filterGroup,
+  filterGroup: initialFilterGroup,
   handleLogicalOpChange,
   updateTableRecords,
 }) {
   const id = `filterGroup${level}`;
   const filterGroupRef = useRef();
+
+  const [newFilterCount, setNewFilterCount] = useState(1);
+  const [filterGroup, setFilterGroup] = useState(initialFilterGroup || {
+    operator: 'and',
+    filters: [{
+      id: `${id}-${fields[0].name}-filter-0`,
+      field: fields[0].name,
+    }],
+  });
   const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
 
-  const handleChildLogicalOpChange = (evt) => setLogicalOperator(evt.target.value);
+  const handleChildLogicalOpChange = (evt) => {
+    setLogicalOperator(evt.target.value);
+    updateTableRecords();
+  };
+  const handleAddFilter = () => {
+    setFilterGroup((prevFilterGroup) => ({
+      operator: prevFilterGroup.operator,
+      filters: [
+        ...(prevFilterGroup.filters || []),
+        {
+          id: `${id}-${fields[0].name}-filter-${newFilterCount}`,
+          field: fields[0].name,
+        },
+      ],
+    }));
+    setNewFilterCount((prevCount) => prevCount + 1);
+  };
   const handleRemoveFilterGroup = () => {
     if (filterGroupRef.current) {
       filterGroupRef.current.remove();
@@ -62,10 +87,11 @@ export function FilterGroup({
               const logicalOperatorChange = root
                 ? handleLogicalOpChange
                 : handleChildLogicalOpChange;
+              const filterId = `${id}-${item.operator}-filter${index}`;
 
               return (
                 <FilterGroup
-                  key={`${id}-${item.operator}`}
+                  key={filterId}
                   level={level + 1}
                   fields={fields}
                   filterGroup={item}
@@ -77,10 +103,15 @@ export function FilterGroup({
                 />
               );
             }
+
+            const filterId = (item.filter && item.filter.operator && item.filter.value)
+              ? `${id}-${item.field}:${item.filter.operator}${item.filter.value}-filter${index}`
+              : item.id;
+
             return (
               <SingleFilter
-                key={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
-                id={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
+                key={filterId}
+                id={filterId}
                 level={level + 1}
                 first={index === 0}
                 fields={fields}
@@ -93,18 +124,8 @@ export function FilterGroup({
               />
             );
           })}
-          {(!filterGroup || filterGroup?.filters?.length === 0) && (
-            <SingleFilter
-              first
-              id={`${id}-new`}
-              level={level + 1}
-              fields={fields}
-              logicalOperator={logicalOperator}
-              updateTableRecords={updateTableRecords}
-            />
-          )}
         </div>
-        <AddFilterMenu root={root} level={level} />
+        <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />
       </div>
       {!root && (
         <div className="mt-2">
