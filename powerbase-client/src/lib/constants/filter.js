@@ -1,8 +1,9 @@
 export const OPERATOR = {
   TEXT: [
-    'Is',
-    'Is not',
-    'Contains',
+    'is',
+    'is not',
+    'contains',
+    'does not contain',
   ],
   NUMBER: [
     '=',

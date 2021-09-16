@@ -100,7 +100,7 @@ export function SingleFilter({
         <select
           id={`filter${id}-operator`}
           name="operator"
-          className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+          className="block w-full text-sm capitalize h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={operator}
           onChange={handleOperatorChange}
         >
