@@ -1,8 +1,8 @@
 module Powerbase
   class QueryCompiler
     PARENTHESIS = ['(', ')']
-    RELATIONAL_OPERATORS = ['<', '>', '==', '<=', '>=', '!=', 'LIKE']
-    LOGICAL_OPERATORS = ['AND', 'OR', 'NOT']
+    RELATIONAL_OPERATORS = ['<', '>', '==', '<=', '>=', '!=', 'is', 'is not', 'contains']
+    LOGICAL_OPERATORS = ['and', 'or', 'not']
     TOKEN = {
       number: 'NUMBER',
       field: 'FIELD',
@@ -168,14 +168,14 @@ module Powerbase
         end
 
         ast = ast.sort {|a, b| b[:level] <=> a[:level] }
-        root_node = ast.find {|item| item[:parent_index] == nil && item[:operator] }
+        root_node = ast.find {|item| item[:parent_index] == nil && item[:operator]&.length }
 
         if root_node == nil
           ast.push({
             index: ast.length,
             level: 1,
             parent_index: nil,
-            operator: "AND",
+            operator: "and",
           })
 
           ast.map do |cur_ast|
@@ -195,12 +195,10 @@ module Powerbase
       # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group)
         logical_op = case filter_group[:operator]
-          when "AND"
+          when "and"
             "&"
-          when "OR"
+          when "or"
             "|"
-          when "NOT"
-            "NOT"
           end
 
         filters = filter_group[:filters]
@@ -227,8 +225,12 @@ module Powerbase
           case relational_op
           when "=="
             "Sequel[{#{field} => #{value}}]"
+          when "is"
+            "Sequel[{#{field} => '#{value}'}]"
           when "!="
             "Sequel.~(#{field} => #{value})"
+          when "is not"
+            "Sequel.~(#{field} => '#{value}')"
           when ">"
             "#{field} > #{value}"
           when ">="
@@ -237,19 +239,13 @@ module Powerbase
             "#{field} < #{value}"
           when "<="
             "(#{field} < #{value} | Sequel[{#{field} => #{value}}])"
-          when "LIKE"
+          when "contains"
             "Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
           end
         end
 
-        if logical_op == "NOT"
-          query_string = sequel_filter.map {|filter| "(NOT #{filter})"}
-            .join(" & ")
-          "(#{query_string})"
-        else
-          query_string = sequel_filter.join(" #{logical_op} ")
-          "(#{query_string})"
-        end
+        query_string = sequel_filter.join(" #{logical_op} ")
+        "(#{query_string})"
       end
 
       # * Transforms parsed tokens into elasticsearch query string
@@ -275,7 +271,11 @@ module Powerbase
           case relational_op
           when "=="
             "#{field}:#{value}"
+          when "is"
+            "#{field}:#{value}"
           when "!="
+            "(NOT #{field}:#{value})"
+          when "is not"
             "(NOT #{field}:#{value})"
           when ">"
             "#{field}:>#{value}"
@@ -285,19 +285,13 @@ module Powerbase
             "#{field}:<#{value}"
           when "<="
             "#{field}:<=#{value}"
-          when "LIKE"
+          when "contains"
             "#{field}:#{value}"
           end
         end
 
-        if logical_op == "NOT"
-          query_string = elasticsearch_filter.map {|filter| "(NOT #{filter})"}
-            .join(" AND ")
-          "(#{query_string})"
-        else
-          query_string = elasticsearch_filter.join(" #{logical_op} ")
-          "(#{query_string})"
-        end
+        query_string = elasticsearch_filter.join(" #{logical_op} ")
+        "(#{query_string})"
       end
   end
 end
