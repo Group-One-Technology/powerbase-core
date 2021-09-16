@@ -29,17 +29,19 @@ export function FilterGroup({
   });
   const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
 
+  const newFilterItem = ({
+    id: `${id}-${fields[0].name}-filter-${newFilterCount}`,
+    field: fields[0].name,
+  });
+
   const handleChildLogicalOpChange = (evt) => {
     setLogicalOperator(evt.target.value);
     updateTableRecords();
   };
   const handleAddFilter = (isGroup) => {
-    const newFilterItem = ({
-      id: `${id}-${fields[0].name}-filter-${newFilterCount}`,
-      field: fields[0].name,
-    });
     const newFilter = isGroup
       ? ({
+        id: `${id}-${fields[0].name}-filter-group-${newFilterCount}`,
         operator: 'and',
         filters: [newFilterItem],
       })
@@ -54,7 +56,13 @@ export function FilterGroup({
     }));
     setNewFilterCount((prevCount) => prevCount + 1);
   };
-  const handleRemoveFilterGroup = () => {
+  const handleRemoveFilterGroup = (filterId) => {
+    setFilterGroup((prevFilterGroup) => ({
+      operator: prevFilterGroup.operator,
+      filters: prevFilterGroup.filters.filter((item) => (
+        item.id !== filterId
+      )),
+    }));
     if (filterGroupRef.current) {
       filterGroupRef.current.remove();
       updateTableRecords();
