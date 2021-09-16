@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -17,6 +17,7 @@ export function SingleFilter({
   updateTableRecords,
   handleLogicalOpChange,
 }) {
+  const filterRef = useRef();
   const { data: fieldTypes } = useFieldTypes();
   const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
 
@@ -34,6 +35,13 @@ export function SingleFilter({
     setOperator(isNumber ? OPERATOR.NUMBER[0] : OPERATOR.TEXT[0]);
     setValue('');
     updateTableRecords();
+  };
+
+  const handleRemoveFilter = () => {
+    if (filterRef.current) {
+      filterRef.current.remove();
+      updateTableRecords();
+    }
   };
 
   const handleFieldChange = (evt) => {
@@ -55,6 +63,7 @@ export function SingleFilter({
 
   return (
     <div
+      ref={filterRef}
       data-level={level}
       data-filter={JSON.stringify({
         field: field?.name,
@@ -120,6 +129,7 @@ export function SingleFilter({
         <button
           type="button"
           className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+          onClick={handleRemoveFilter}
         >
           <span className="sr-only">Remove Filter</span>
           <TrashIcon className="block h-4 w-4" />

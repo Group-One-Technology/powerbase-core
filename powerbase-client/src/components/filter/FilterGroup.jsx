@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -17,12 +17,20 @@ export function FilterGroup({
   updateTableRecords,
 }) {
   const id = `filterGroup${level}`;
+  const filterGroupRef = useRef();
   const [logicalOperator, setLogicalOperator] = useState(filterGroup.operator);
 
   const handleChildLogicalOpChange = (evt) => setLogicalOperator(evt.target.value);
+  const handleRemoveFilterGroup = () => {
+    if (filterGroupRef.current) {
+      filterGroupRef.current.remove();
+      updateTableRecords();
+    }
+  };
 
   return (
     <div
+      ref={filterGroupRef}
       data-level={level}
       data-operator={parentOperator}
       className={cn('filter', !root, 'flex gap-2')}
@@ -93,6 +101,7 @@ export function FilterGroup({
           <button
             type="button"
             className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+            onClick={handleRemoveFilterGroup}
           >
             <span className="sr-only">Remove Filter</span>
             <TrashIcon className="block h-4 w-4" />
