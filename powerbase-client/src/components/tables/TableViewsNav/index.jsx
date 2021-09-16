@@ -9,9 +9,9 @@ import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 
+import { Filter } from '@components/filter/Filter';
 import { Badge } from '@components/ui/Badge';
 import { TableViewsSelect } from './TableViewsSelect';
-import { TableViewsFilter } from './TableViewsFilter';
 
 export function TableViewsNav({
   baseId,
@@ -41,7 +41,7 @@ export function TableViewsNav({
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-2">
-          <TableViewsFilter view={currentView} fields={fields} />
+          <Filter fields={fields} view={currentView} />
           <button
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
