@@ -8,10 +8,12 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { OPERATOR } from '@lib/constants/filter';
 
 export function SingleFilter({
+  id,
   first,
   fields,
-  logicalOperator = 'and',
   filter,
+  logicalOperator = 'and',
+  handleLogicalOpChange,
 }) {
   const filterRef = useRef();
   const { data: fieldTypes } = useFieldTypes();
@@ -49,13 +51,28 @@ export function SingleFilter({
 
   return (
     <div ref={filterRef} className="flex gap-2 items-center">
-      <p className="inline-block w-12 text-right capitalize">
-        {first ? 'where' : logicalOperator}
-      </p>
+      <div className="inline-block w-16 text-right capitalize">
+        {handleLogicalOpChange
+          ? (
+            <>
+              <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
+              <select
+                id={`filter${id}-logicalOperato}`}
+                name="logical_operator"
+                className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
+                value={logicalOperator}
+                onChange={handleLogicalOpChange}
+              >
+                <option value="and">and</option>
+                <option value="or">or</option>
+              </select>
+            </>
+          ) : <p>{first ? 'where' : logicalOperator}</p>}
+      </div>
       <div className="flex-1 flex gap-2 items-center">
-        <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
+        <label htmlFor={`filter${id}-firstOperand`} className="sr-only">First Operand (Field)</label>
         <select
-          id="firstOperand"
+          id={`filter${id}-firstOperand`}
           name="first_operand"
           className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={field?.id}
@@ -67,9 +84,9 @@ export function SingleFilter({
             </option>
           ))}
         </select>
-        <label htmlFor="operator" className="sr-only">Operator</label>
+        <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
         <select
-          id="operator"
+          id={`filter${id}-operator`}
           name="operator"
           className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={operator}
@@ -77,9 +94,9 @@ export function SingleFilter({
         >
           {operators?.map((op) => <option key={op} value={op}>{op}</option>)}
         </select>
-        <label htmlFor="secondOperand" className="sr-only">Second Operand (Value)</label>
+        <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <input
-          id="secondOperand"
+          id={`filter${id}-secondOperand`}
           type="text"
           aria-label="Second Operand"
           name="second_operand"
@@ -101,8 +118,10 @@ export function SingleFilter({
 }
 
 SingleFilter.propTypes = {
+  id: PropTypes.string.isRequired,
   first: PropTypes.bool,
   fields: PropTypes.arrayOf(IViewField),
-  logicalOperator: PropTypes.string,
   filter: PropTypes.object,
+  logicalOperator: PropTypes.string,
+  handleLogicalOpChange: PropTypes.func,
 };
