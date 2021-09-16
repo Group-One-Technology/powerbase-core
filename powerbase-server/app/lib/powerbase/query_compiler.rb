@@ -1,7 +1,7 @@
 module Powerbase
   class QueryCompiler
     PARENTHESIS = ['(', ')']
-    RELATIONAL_OPERATORS = ['<', '>', '==', '<=', '>=', '!=', 'is', 'is not', 'contains']
+    RELATIONAL_OPERATORS = ['<', '>', '==', '<=', '>=', '!=', 'is', 'is not', 'contains', 'does not contain']
     LOGICAL_OPERATORS = ['and', 'or', 'not']
     TOKEN = {
       number: 'NUMBER',
@@ -262,17 +262,13 @@ module Powerbase
 
           relational_op = filter[:filter][:operator]
           field = filter[:field]
-          value = if filter[:filter][:value].is_a?(String)
-              "\"#{filter[:filter][:value]}\""
-            else
-              filter[:filter][:value]
-            end
+          value = filter[:filter][:value]
 
           case relational_op
           when "=="
             "#{field}:#{value}"
           when "is"
-            "#{field}:#{value}"
+            "#{field}:\"#{value}\""
           when "!="
             "(NOT #{field}:#{value})"
           when "is not"
@@ -287,10 +283,12 @@ module Powerbase
             "#{field}:<=#{value}"
           when "contains"
             "#{field}:#{value}"
+          when "does not contain"
+            "(NOT #{field}:#{value})"
           end
         end
 
-        query_string = elasticsearch_filter.join(" #{logical_op} ")
+        query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
         "(#{query_string})"
       end
   end
