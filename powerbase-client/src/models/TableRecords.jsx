@@ -32,7 +32,13 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
       })
       : null),
     (url) => ((id && authUser && viewId)
-      ? getTableRecords({ url, filters: filters?.value, viewId })
+      ? getTableRecords({
+        url,
+        filters: filters?.id
+          ? filters?.value
+          : undefined,
+        viewId,
+      })
       : undefined),
   );
 
