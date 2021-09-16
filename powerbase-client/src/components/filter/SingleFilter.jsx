@@ -7,21 +7,36 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
 import { OPERATOR } from '@lib/constants/filter';
 
-export function SingleFilter({ fields }) {
+export function SingleFilter({
+  first,
+  fields,
+  logicalOperator = 'and',
+  filter,
+}) {
   const filterRef = useRef();
-  const fieldTypes = useFieldTypes();
+  const { data: fieldTypes } = useFieldTypes();
+  const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
 
-  const [field, setField] = useState(fields[0]);
-  const [operator, setOperator] = useState(OPERATOR.NUMBER[0]);
-  const [value, setValue] = useState('');
+  const [field, setField] = useState(fields.find((item) => item.name === filter.field) || fields[0]);
+  const [operator, setOperator] = useState(filter.filter.operator);
+  const [operators, setOperators] = useState(field.fieldTypeId === numberFieldTypeId
+    ? OPERATOR.NUMBER
+    : OPERATOR.TEXT);
+  const [value, setValue] = useState(filter.filter.value);
 
-  console.log({ fieldTypes });
+  const updateField = (selectedField) => {
+    const isNumber = selectedField.fieldTypeId === numberFieldTypeId;
+    setField(selectedField);
+    setOperators(isNumber ? OPERATOR.NUMBER : OPERATOR.TEXT);
+    setOperator(isNumber ? OPERATOR.NUMBER[0] : OPERATOR.TEXT[0]);
+    setValue('');
+  };
 
   const handleFieldChange = (evt) => {
     const selectedField = fields?.find((item) => (
       item.id.toString() === evt.target.value.toString()
     ));
-    setField(selectedField);
+    updateField(selectedField);
   };
 
   const handleOperatorChange = (evt) => {
@@ -34,7 +49,7 @@ export function SingleFilter({ fields }) {
 
   return (
     <div ref={filterRef} className="flex gap-2 items-center">
-      <p className="inline-block w-12 text-right">Where</p>
+      <p className="inline-block w-12 text-right capitalize">{first ? 'where' : logicalOperator}</p>
       <div className="flex-1 flex gap-2 items-center">
         <label htmlFor="firstOperand" className="sr-only">First Operand (Field)</label>
         <select
@@ -58,7 +73,7 @@ export function SingleFilter({ fields }) {
           value={operator}
           onChange={handleOperatorChange}
         >
-          {OPERATOR.NUMBER?.map((op) => <option key={op} value={op}>{op}</option>)}
+          {operators?.map((op) => <option key={op} value={op}>{op}</option>)}
         </select>
         <label htmlFor="secondOperand" className="sr-only">Second Operand (Value)</label>
         <input
@@ -84,5 +99,8 @@ export function SingleFilter({ fields }) {
 }
 
 SingleFilter.propTypes = {
+  first: PropTypes.bool,
   fields: PropTypes.arrayOf(IViewField),
+  logicalOperator: PropTypes.string,
+  filter: PropTypes.object,
 };

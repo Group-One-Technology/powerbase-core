@@ -8,9 +8,21 @@ import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter({ view, fields }) {
-  console.log({ fields });
+const FILTERS = {
+  operator: 'and',
+  filters: [
+    {
+      filter: { operator: '>', value: 3 },
+      field: 'id',
+    },
+    {
+      filter: { operator: '==', value: 'Percy' },
+      field: 'title',
+    },
+  ],
+};
 
+export function Filter({ view, fields, filters = FILTERS }) {
   return (
     <Popover className="relative">
       {({ open }) => (
@@ -42,7 +54,7 @@ export function Filter({ view, fields }) {
                       {view.name}
                     </strong>
                   </h4>
-                  <FilterGroup root fields={fields} />
+                  <FilterGroup root filterGroup={filters} fields={fields} />
                 </div>
               </div>
             </Popover.Panel>
@@ -55,5 +67,6 @@ export function Filter({ view, fields }) {
 
 Filter.propTypes = {
   view: IView.isRequired,
+  filters: PropTypes.object,
   fields: PropTypes.arrayOf(IViewField),
 };
