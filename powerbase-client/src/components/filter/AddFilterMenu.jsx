@@ -10,7 +10,7 @@ export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
       <button
         type="button"
         className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100"
-        onClick={handleAddFilter}
+        onClick={() => handleAddFilter()}
       >
         <PlusIcon className="mr-1 h-4 w-4" />
         Add a filter
@@ -41,7 +41,7 @@ export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
           as="button"
           type="button"
           className="w-full px-3 py-2 flex items-center text-left hover:bg-gray-200"
-          onClick={handleAddFilter}
+          onClick={() => handleAddFilter()}
         >
           <PlusIcon className="inline mr-1 h-4 w-4" />
           Add a filter
@@ -50,6 +50,7 @@ export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
           as="button"
           type="button"
           className="w-full px-3 py-2 flex items-center text-left hover:bg-gray-200"
+          onClick={() => handleAddFilter(true)}
         >
           <ViewGridAddIcon className="inline mr-1 h-4 w-4" />
           Add a filter group

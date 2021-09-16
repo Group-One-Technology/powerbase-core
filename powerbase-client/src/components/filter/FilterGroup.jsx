@@ -33,15 +33,23 @@ export function FilterGroup({
     setLogicalOperator(evt.target.value);
     updateTableRecords();
   };
-  const handleAddFilter = () => {
+  const handleAddFilter = (isGroup) => {
+    const newFilterItem = ({
+      id: `${id}-${fields[0].name}-filter-${newFilterCount}`,
+      field: fields[0].name,
+    });
+    const newFilter = isGroup
+      ? ({
+        operator: 'and',
+        filters: [newFilterItem],
+      })
+      : newFilterItem;
+
     setFilterGroup((prevFilterGroup) => ({
       operator: prevFilterGroup.operator,
       filters: [
         ...(prevFilterGroup.filters || []),
-        {
-          id: `${id}-${fields[0].name}-filter-${newFilterCount}`,
-          field: fields[0].name,
-        },
+        newFilter,
       ],
     }));
     setNewFilterCount((prevCount) => prevCount + 1);
