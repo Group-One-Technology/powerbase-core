@@ -10,6 +10,7 @@ import { useRecordsFilter } from '@models/views/RecordsFilter';
 import { updateTableView } from '@lib/api/views';
 import { IView } from '@lib/propTypes/view';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
+import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
@@ -22,27 +23,6 @@ const FILTERS = {
     },
   ],
 };
-
-function buildFilterTree(curFilter, filters) {
-  const childFilters = filters.filter((item) => item.level === curFilter.level + 1)
-    .map((item) => (item.operator
-      ? buildFilterTree(item, filters)
-      : {
-        level: item.level,
-        field: item.filter.field,
-        filter: item.filter.filter,
-      }));
-
-  Object.keys(curFilter)
-    .forEach((key) => (curFilter[key] === undefined
-      ? delete curFilter[key]
-      : {}));
-
-  return {
-    ...curFilter,
-    filters: childFilters,
-  };
-}
 
 export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
   const filterRef = useRef();
