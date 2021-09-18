@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -28,6 +28,12 @@ export function FilterGroup({
     fields,
   }));
   const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
+
+  useEffect(() => {
+    if (initialFilterGroup?.filters.length > 0) {
+      setNewFilterCount(initialFilterGroup.filters.length);
+    }
+  }, [initialFilterGroup]);
 
   const newFilterItem = ({
     id: `${filterGroupId}-${fields[0].name}-filter-${newFilterCount}`,
@@ -103,7 +109,7 @@ export function FilterGroup({
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {
-              const logicalOperatorChange = root
+              const logicalOperatorChange = root && !index === 1
                 ? handleLogicalOpChange
                 : handleChildLogicalOpChange;
 
