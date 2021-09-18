@@ -12,8 +12,8 @@ logger.level = Logger::FATAL if Rails.env.production?
 connection_hash = {
   url: elasticsearch_url,
   reload_connections: true,
-  retry_on_failure: 2,
-  request_timeout: 60,
+  retry_on_failure: 3,
+  request_timeout: 250,
   logger: logger,
 }
 

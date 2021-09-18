@@ -348,20 +348,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       @database_tables.each do |table|
         # Table Records Migration
         if !table.is_migrated
-          begin
-            table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
-            table_model.index_records
+          table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
+          table_model.index_records
 
-            table.is_migrated = true
-            table.save
-          rescue => exception
-            @base_migration.logs["errors"].push({
-              type: "Elasticsearch",
-              error: "Failed to index #{table.name}'s records",
-              messages: exception,
-            })
-            @base_migration.save
-          end
+          table.is_migrated = true
+          table.save
         end
       end
     end
