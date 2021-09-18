@@ -14,7 +14,7 @@ export function initializeFilterGroup({ id, filterGroup, fields }) {
 
         const filterId = (item.filter && item.filter.operator && item.filter.value)
           ? `${id}-${item.field}:${item.filter.operator}${item.filter.value}-filter${index}`
-          : item.id;
+          : item.id || `${id}-${fields[0].name}-filter-${index}`;
 
         return ({
           ...item,
