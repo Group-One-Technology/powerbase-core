@@ -14,9 +14,9 @@ import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter({ view, fields, filters: initialFilter }) {
+export function Filter({ view, fields }) {
   const filterRef = useRef();
-  const { setFilters } = useRecordsFilter();
+  const { filters: { value: initialFilters }, setFilters } = useRecordsFilter();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateTableRecords = useCallback(debounce(async () => {
@@ -77,7 +77,7 @@ export function Filter({ view, fields, filters: initialFilter }) {
                   <div ref={filterRef}>
                     <FilterGroup
                       root
-                      filterGroup={initialFilter}
+                      filterGroup={initialFilters}
                       fields={fields}
                       updateTableRecords={updateTableRecords}
                     />
@@ -94,6 +94,5 @@ export function Filter({ view, fields, filters: initialFilter }) {
 
 Filter.propTypes = {
   view: IView.isRequired,
-  filters: PropTypes.object,
   fields: PropTypes.arrayOf(IViewField),
 };
