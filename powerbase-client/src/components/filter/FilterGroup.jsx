@@ -76,7 +76,7 @@ export function FilterGroup({
   return (
     <div
       data-level={level}
-      data-operator={parentOperator}
+      data-operator={!root ? parentOperator : logicalOperator}
       className={cn('filter', !root, 'flex gap-2')}
     >
       {!root && (
