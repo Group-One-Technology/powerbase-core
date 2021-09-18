@@ -1,9 +1,8 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
-  DEFAULT_PAGE_SIZE_TURBO = 200
+  DEFAULT_PAGE_SIZE = 40
   NUMBER_FIELD_TYPE = 4
   DATE_FIELD_TYPE = 7
-  DEFAULT_PAGE_SIZE_TURBO = 200
 
   class Model
     # * Initialize the Powerbase::Model
@@ -51,7 +50,7 @@ module Powerbase
           table_select.push(Sequel.lit('ctid'))
         end
 
-        table.select(*table_select).paged_each(:rows_per_fetch => DEFAULT_PAGE_SIZE_TURBO) {|record|
+        table.select(*table_select).paged_each(:rows_per_fetch => DEFAULT_PAGE_SIZE) {|record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
