@@ -46,9 +46,7 @@ export function SingleFilter({
       item.id.toString() === evt.target.value.toString()
     ));
 
-    if (value) {
-      updateField(selectedField);
-    }
+    updateField(selectedField);
   };
 
   const handleOperatorChange = (evt) => {
