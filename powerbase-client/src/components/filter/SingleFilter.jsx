@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
-
-import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
-import { OPERATOR } from '@lib/constants/filter';
+import { useOperator } from '@lib/hooks/useOperator';
 
 export function SingleFilter({
   id,
@@ -18,25 +16,15 @@ export function SingleFilter({
   handleRemoveFilter,
   handleLogicalOpChange,
 }) {
-  const { data: fieldTypes } = useFieldTypes();
-  const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
-
   const [field, setField] = useState(filter?.field
     ? fields.find((item) => item.name === filter.field) || fields[0]
     : fields[0]);
-  const [operator, setOperator] = useState(filter?.filter?.operator || (field.fieldTypeId === numberFieldTypeId
-    ? OPERATOR.NUMBER[0]
-    : OPERATOR.TEXT[0]));
-  const [operators, setOperators] = useState(field.fieldTypeId === numberFieldTypeId
-    ? OPERATOR.NUMBER
-    : OPERATOR.TEXT);
+  const [operator, setOperator, operators, updateOperator] = useOperator({ filter, field });
   const [value, setValue] = useState(filter?.filter?.value || '');
 
   const updateField = (selectedField) => {
-    const isNumber = selectedField.fieldTypeId === numberFieldTypeId;
     setField(selectedField);
-    setOperators(isNumber ? OPERATOR.NUMBER : OPERATOR.TEXT);
-    setOperator(isNumber ? OPERATOR.NUMBER[0] : OPERATOR.TEXT[0]);
+    updateOperator(selectedField.fieldTypeId);
     setValue('');
     updateTableRecords();
   };
@@ -51,6 +39,7 @@ export function SingleFilter({
 
   const handleOperatorChange = (evt) => {
     setOperator(evt.target.value);
+
     if (value !== '') {
       updateTableRecords();
     }
@@ -68,7 +57,6 @@ export function SingleFilter({
         field: field?.name,
         filter: { operator, value },
       })}
-      data-filter-group={false}
       className="filter flex gap-2 items-center"
     >
       <div className="inline-block w-16 text-right capitalize">
