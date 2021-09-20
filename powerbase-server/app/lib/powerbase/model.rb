@@ -17,12 +17,6 @@ module Powerbase
       @is_turbo = @powerbase_database.is_turbo
     end
 
-    # * Save a document of a table to Elasticsearch.
-    def index_record(record)
-      puts "Saving document at index table_records_#{@table_id}..."
-      @esclient.index(index: "table_records_#{@table_id}", body: record)
-    end
-
     # * Save multiple documents of a table to Elasticsearch.
     def index_records
       index = "table_records_#{@table_id}"
@@ -44,10 +38,10 @@ module Powerbase
 
         puts "#{Time.now} Saving #{total_records} documents at index #{index}..."
 
-        table_select = [Sequel.lit('*')]
+        table_select = [Sequel.lit("*")]
 
         if @powerbase_database.adapter == "postgresql"
-          table_select.push(Sequel.lit('ctid'))
+          table_select.push(Sequel.lit("ctid"))
         end
 
         table.select(*table_select).paged_each(:rows_per_fetch => DEFAULT_PAGE_SIZE) {|record|
@@ -131,27 +125,17 @@ module Powerbase
 
       if @is_turbo
         id = options[:id] || options[:primary_keys]
-          .each_key {|key| "#{key}_#{options[:primary_keys][key]}" }
+          .each_key {|key| "#{sanitize(key)}_#{sanitize(options[:primary_keys][key])}" }
           .join("-")
 
         @esclient.get(index: index, id: format_doc_id(id))["_source"]
       else
-        filters = options[:primary_keys]
-          .collect {|key, value| key }
-          .map do |key|
-            value = options[:primary_keys][key]
-            value = "\"#{value}\"" if value.is_a?(String)
-            if @powerbase_database.adapter == "postgresql"
-              "(Sequel[{Sequel.lit('\"#{key}\"') => #{value}}])"
-            else
-              "(Sequel[{Sequel.lit('#{key}') => #{value}}])"
-            end
-          end
-          .join(" & ")
+        query = Powerbase::QueryCompiler.new()
+        query_string = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(filters))
+            .where(eval(query_string))
             .first
         }
       end
@@ -168,10 +152,8 @@ module Powerbase
       limit = options[:limit] || 5
 
       if @is_turbo
-        query_filter = options[:filters]
-          .collect {|key, value| key }
-          .map {|key| "(#{key}:#{options[:filters][key]})" }
-          .join(" AND ")
+        query = Powerbase::QueryCompiler.new()
+        query_string = query.find_by(options[:filters]).to_elasticsearch
 
         result = @esclient.search(
           index: index,
@@ -179,31 +161,19 @@ module Powerbase
             from: (page - 1) * limit,
             size: limit,
             query: {
-              query_string: {
-                query: query_filter
-              }
-            }
+              query_string: { query: query_string },
+            },
           },
         )
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query_filter = options[:filters]
-          .collect {|key, value| key }
-          .map do |key|
-            value = options[:filters][key]
-            value = "\"#{value}\"" if value.is_a?(String)
-            if @powerbase_database.adapter == "postgresql"
-              "(Sequel[{Sequel.lit('\"#{key}\"') => #{value}}])"
-            else
-              "(Sequel[{Sequel.lit('#{key}') => #{value}}])"
-            end
-          end
-          .join(" & ")
+        query = Powerbase::QueryCompiler.new()
+        query_string = query.find_by(options[:filters]).to_sequel
 
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(query_filter))
+            .where(eval(query_string))
             .paginate(page, limit)
             .all
         }
@@ -211,7 +181,6 @@ module Powerbase
     end
 
     # * Get the filtered and paginated table records.
-    # TODO: Refactor Filter
     # Accepts the following options:
     # :filter :: a JSON that contains the filter for the records.
     # :page :: the page number.
@@ -246,9 +215,10 @@ module Powerbase
         }
 
         if options[:filters]
+          query_string = Powerbase::QueryCompiler.new(options[:filters])
           search_params[:query] = {
             query_string: {
-              query: parse_elasticsearch_filter(options[:filters])
+              query: query_string.to_elasticsearch,
             }
           }
         end
@@ -257,10 +227,12 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
+        query_string = Powerbase::QueryCompiler.new(options[:filters])
+
         remote_db() {|db|
           db.from(@table_name)
             .order(order_field.name.to_sym)
-            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .where(options[:filters] ? eval(query_string.to_sequel) : true)
             .paginate(page, limit)
             .all
         }
@@ -274,7 +246,8 @@ module Powerbase
       if @is_turbo
         index = "table_records_#{@table_id}"
         query = if options[:filters]
-            "q=#{parse_elasticsearch_filter(options[:filters])}"
+            query_string = Powerbase::QueryCompiler.new(options[:filters])
+            "q=#{query_string.to_elasticsearch}"
           else
             nil
           end
@@ -282,9 +255,11 @@ module Powerbase
         response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
         response["count"]
       else
+        query_string = Powerbase::QueryCompiler.new(options[:filters])
+
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(parse_sequel_filter(options[:filters])) : true)
+            .where(options[:filters] ? eval(query_string.to_sequel) : true)
             .count
         }
       end
@@ -305,72 +280,8 @@ module Powerbase
           .truncate(ELASTICSEACH_ID_LIMIT)
       end
 
-      def parse_value(value)
-        if value.key?("field")
-          @is_turbo ? value["field"] : "Sequel.lit('\"#{value["field"]}\"')"
-        elsif value.key?("value")
-          if !@is_turbo && value["value"].is_a?(String)
-            "'#{value["value"]}'"
-          else
-            value["value"]
-          end
-        end
-      end
-
-      def parse_sequel_filter(filters)
-        return if !filters&.length
-
-        result = ""
-        filters.each do |key, value|
-          first_val = parse_value(value[0])
-          second_val = parse_value(value[1])
-
-          if key == "eq"
-            result += "(Sequel[{#{first_val} => #{second_val}}])"
-          elsif key == "neq"
-            result += "(Sequel.~(#{first_val} => #{second_val}))"
-          elsif key == "gt"
-            result += "(#{first_val} > #{second_val})"
-          elsif key == "gte"
-            result += "(#{first_val} > #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
-          elsif key == "lt"
-            result += "(#{first_val} < #{second_val})"
-          elsif key == "lte"
-            result += "(#{first_val} < #{second_val}) | (Sequel[{#{first_val} => #{second_val}}])"
-          elsif key == "like"
-            result += "(Sequel.like(#{first_val}, #{second_val}))"
-          end
-        end
-
-        result
-      end
-
-      def parse_elasticsearch_filter(filters)
-        return if !filters&.length
-
-        result = ""
-        filters.each do |key, value|
-          first_val = parse_value(value[0])
-          second_val = parse_value(value[1])
-
-          if key == "eq"
-            result += "(#{first_val}:\"#{second_val}\")"
-          elsif key == "neq"
-            result += "(NOT #{first_val}:\"#{second_val}\")"
-          elsif key == "gt"
-            result += "(#{first_val}:>#{second_val})"
-          elsif key == "gte"
-            result += "(#{first_val}:>=#{second_val})"
-          elsif key == "lt"
-            result += "(#{first_val}:<#{second_val})"
-          elsif key == "lte"
-            result += "(#{first_val}:<=#{second_val})"
-          elsif key == "like"
-            result += "(#{first_val}:#{second_val})"
-          end
-        end
-
-        result
+      def sanitize(string)
+        string.gsub(/['"]/,'')
       end
   end
 end

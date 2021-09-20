@@ -13,7 +13,14 @@ function useTableRecordsCountModel({ id }) {
 
   const response = useSWR(
     (id && authUser && viewId) ? `/tables/${id}/records_count?${filterQuery}` : null,
-    () => getTableRecordsCount({ tableId: id, filters: filters?.value }),
+    () => ((id && authUser && viewId)
+      ? getTableRecordsCount({
+        tableId: id,
+        filters: filters?.id
+          ? filters?.value
+          : undefined,
+      })
+      : undefined),
   );
 
   return {
