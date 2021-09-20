@@ -15,17 +15,22 @@ export function SingleFilter({
   filter,
   logicalOperator = 'and',
   updateTableRecords,
+  handleRemoveFilter,
   handleLogicalOpChange,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const numberFieldTypeId = fieldTypes.find((item) => item.name === 'Number').id;
 
-  const [field, setField] = useState(fields.find((item) => item.name === filter.field) || fields[0]);
-  const [operator, setOperator] = useState(filter.filter.operator);
+  const [field, setField] = useState(filter?.field
+    ? fields.find((item) => item.name === filter.field) || fields[0]
+    : fields[0]);
+  const [operator, setOperator] = useState(filter?.filter?.operator || (field.fieldTypeId === numberFieldTypeId
+    ? OPERATOR.NUMBER[0]
+    : OPERATOR.TEXT[0]));
   const [operators, setOperators] = useState(field.fieldTypeId === numberFieldTypeId
     ? OPERATOR.NUMBER
     : OPERATOR.TEXT);
-  const [value, setValue] = useState(filter.filter.value);
+  const [value, setValue] = useState(filter?.filter?.value || '');
 
   const updateField = (selectedField) => {
     const isNumber = selectedField.fieldTypeId === numberFieldTypeId;
@@ -40,12 +45,15 @@ export function SingleFilter({
     const selectedField = fields?.find((item) => (
       item.id.toString() === evt.target.value.toString()
     ));
+
     updateField(selectedField);
   };
 
   const handleOperatorChange = (evt) => {
     setOperator(evt.target.value);
-    updateTableRecords();
+    if (value !== '') {
+      updateTableRecords();
+    }
   };
 
   const handleValueChange = (evt) => {
@@ -120,6 +128,7 @@ export function SingleFilter({
         <button
           type="button"
           className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+          onClick={() => handleRemoveFilter(id)}
         >
           <span className="sr-only">Remove Filter</span>
           <TrashIcon className="block h-4 w-4" />
@@ -137,5 +146,6 @@ SingleFilter.propTypes = {
   filter: PropTypes.object,
   logicalOperator: PropTypes.string,
   updateTableRecords: PropTypes.func.isRequired,
+  handleRemoveFilter: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
 };

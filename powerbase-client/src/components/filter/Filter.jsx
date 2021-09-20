@@ -14,19 +14,9 @@ import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-const FILTERS = {
-  operator: 'and',
-  filters: [
-    {
-      filter: { operator: '<', value: 3 },
-      field: 'id',
-    },
-  ],
-};
-
-export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
+export function Filter({ view, fields }) {
   const filterRef = useRef();
-  const { setFilters } = useRecordsFilter();
+  const { filters: { value: initialFilters }, setFilters } = useRecordsFilter();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateTableRecords = useCallback(debounce(async () => {
@@ -77,7 +67,7 @@ export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
             <Popover.Panel className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                 <div className="text-sm text-gray-900">
-                  <h4 className="flex m-3 items-center">
+                  <h4 className="flex mx-3 mt-3 items-center">
                     Filters for&nbsp;
                     <strong>
                       <TableIcon className="inline mr-1 h-5 w-5 " />
@@ -87,7 +77,7 @@ export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
                   <div ref={filterRef}>
                     <FilterGroup
                       root
-                      filterGroup={initialFilter}
+                      filterGroup={initialFilters}
                       fields={fields}
                       updateTableRecords={updateTableRecords}
                     />
@@ -104,6 +94,5 @@ export function Filter({ view, fields, filters: initialFilter = FILTERS }) {
 
 Filter.propTypes = {
   view: IView.isRequired,
-  filters: PropTypes.object,
   fields: PropTypes.arrayOf(IViewField),
 };

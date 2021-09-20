@@ -1,11 +1,20 @@
 export function parseQueryString(filter) {
-  const { operator, filters } = filter;
+  const { level, operator, filters } = filter;
 
   const queryString = filters
-    ?.map((item) => (item.operator
-      ? parseQueryString(item)
-      : `${item.field}:${item.filter.operator}${item.filter.value}`))
+    ?.map((item) => {
+      if (item.operator) {
+        return parseQueryString(item);
+      }
+
+      if (item.field && item.filter.operator && (item.filter.value !== '' || typeof item.filter.value !== 'undefined')) {
+        return `${item.field}:${item.filter.operator}${item.filter.value}`;
+      }
+
+      return undefined;
+    })
+    .filter((item) => item)
     .join(` ${operator} `);
 
-  return `(${queryString})`;
+  return level === 0 ? queryString : `(${queryString})`;
 }

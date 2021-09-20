@@ -9,7 +9,7 @@ export function buildFilterTree(curFilter, filters) {
       }));
 
   Object.keys(curFilter)
-    .forEach((key) => (curFilter[key] === undefined
+    .forEach((key) => (curFilter[key] === undefined || curFilter[key] === ''
       ? delete curFilter[key]
       : {}));
 

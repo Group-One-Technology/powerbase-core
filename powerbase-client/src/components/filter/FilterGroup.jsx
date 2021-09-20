@@ -1,30 +1,88 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { IViewField } from '@lib/propTypes/view-field';
+import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
 import { AddFilterMenu } from './AddFilterMenu';
 import { SingleFilter } from './SingleFilter';
 
 export function FilterGroup({
+  id,
   root,
   parentOperator = 'and',
   level = 0,
   fields,
-  filterGroup,
+  filterGroup: initialFilterGroup,
   handleLogicalOpChange,
+  handleRemoveFilter: handleParentRemoveFilter,
   updateTableRecords,
 }) {
-  const id = `filterGroup${level}`;
-  const [logicalOperator, setLogicalOperator] = useState(filterGroup.operator);
+  const filterGroupId = `filterGroup${level}`;
 
-  const handleChildLogicalOpChange = (evt) => setLogicalOperator(evt.target.value);
+  const [newFilterCount, setNewFilterCount] = useState(1);
+  const [filterGroup, setFilterGroup] = useState(initializeFilterGroup({
+    id: filterGroupId,
+    filterGroup: initialFilterGroup,
+    fields,
+  }));
+  const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
+
+  useEffect(() => {
+    if (initialFilterGroup?.filters.length > 0) {
+      setNewFilterCount(initialFilterGroup.filters.length);
+    }
+  }, [initialFilterGroup]);
+
+  const newFilterItem = ({
+    id: `${filterGroupId}-${fields[0].name}-filter-${newFilterCount}`,
+    field: fields[0].name,
+  });
+
+  const handleAddFilter = (isGroup) => {
+    const newFilter = isGroup
+      ? ({
+        id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
+        operator: 'and',
+        filters: [newFilterItem],
+      })
+      : newFilterItem;
+
+    setFilterGroup((prevFilterGroup) => ({
+      operator: prevFilterGroup.operator,
+      filters: [
+        ...(prevFilterGroup.filters || []),
+        newFilter,
+      ],
+    }));
+    setNewFilterCount((prevCount) => prevCount + 1);
+  };
+
+  const handleChildLogicalOpChange = (evt) => {
+    setLogicalOperator(evt.target.value);
+    updateTableRecords();
+  };
+
+  const handleRemoveChildFilter = (filterId) => {
+    setFilterGroup((prevFilterGroup) => ({
+      operator: prevFilterGroup.operator,
+      filters: prevFilterGroup.filters.filter((item) => (
+        item.id !== filterId
+      )),
+    }));
+
+    if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
+      handleParentRemoveFilter(id);
+    }
+
+    updateTableRecords();
+  };
 
   return (
     <div
       data-level={level}
-      data-operator={parentOperator}
+      data-operator={!root ? parentOperator : logicalOperator}
       className={cn('filter', !root, 'flex gap-2')}
     >
       {!root && (
@@ -32,9 +90,9 @@ export function FilterGroup({
           {handleLogicalOpChange
             ? (
               <>
-                <label htmlFor={`${id}-logicalOperator`} className="sr-only">Logical Operator</label>
+                <label htmlFor={`${filterGroupId}-logicalOperator`} className="sr-only">Logical Operator</label>
                 <select
-                  id={`${id}-logicalOperator`}
+                  id={`${filterGroupId}-logicalOperator`}
                   name="logical_operator"
                   className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
                   value={parentOperator}
@@ -51,48 +109,58 @@ export function FilterGroup({
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {
-              const logicalOperatorChange = root
+              const logicalOperatorChange = root && !index === 1
                 ? handleLogicalOpChange
                 : handleChildLogicalOpChange;
 
               return (
                 <FilterGroup
-                  key={`${id}-${item.operator}`}
+                  key={item.id}
+                  id={item.id}
                   level={level + 1}
                   fields={fields}
                   filterGroup={item}
                   parentOperator={logicalOperator}
                   updateTableRecords={updateTableRecords}
+                  handleRemoveFilter={handleRemoveChildFilter}
                   handleLogicalOpChange={index === 1
                     ? logicalOperatorChange
                     : undefined}
                 />
               );
             }
+
             return (
               <SingleFilter
-                key={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
-                id={`${id}-${item.field}:${item.filter.operator}${item.filter.value}`}
+                key={item.id}
+                id={item.id}
                 level={level + 1}
                 first={index === 0}
                 fields={fields}
                 filter={item}
                 logicalOperator={logicalOperator}
                 updateTableRecords={updateTableRecords}
+                handleRemoveFilter={handleRemoveChildFilter}
                 handleLogicalOpChange={index === 1
                   ? handleChildLogicalOpChange
                   : undefined}
               />
             );
           })}
+          {filterGroup.filters.length === 0 && (
+            <p className="ml-3 text-sm text-gray-700">
+              There are no filters for this view.
+            </p>
+          )}
         </div>
-        <AddFilterMenu root={root} level={level} />
+        <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />
       </div>
-      {!root && (
+      {(!root && id && handleParentRemoveFilter) && (
         <div className="mt-2">
           <button
             type="button"
             className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+            onClick={() => handleParentRemoveFilter(id)}
           >
             <span className="sr-only">Remove Filter</span>
             <TrashIcon className="block h-4 w-4" />
@@ -104,11 +172,13 @@ export function FilterGroup({
 }
 
 FilterGroup.propTypes = {
+  id: PropTypes.string,
   root: PropTypes.bool,
   parentOperator: PropTypes.string,
   level: PropTypes.number,
-  filterGroup: PropTypes.object.isRequired,
+  filterGroup: PropTypes.object,
   fields: PropTypes.arrayOf(IViewField),
   updateTableRecords: PropTypes.func.isRequired,
+  handleRemoveFilter: PropTypes.func,
   handleLogicalOpChange: PropTypes.func,
 };
