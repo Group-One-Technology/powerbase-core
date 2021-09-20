@@ -13,9 +13,27 @@ module Powerbase
       close_parenthesis: 'CLOSE_PARENTHESIS',
     }
 
-    def initialize(query, adapter = "postgresql")
+    def initialize(query = nil, adapter = "postgresql")
       @query = query
       @adapter = adapter
+    end
+
+    # * Find records by their fields.
+    # Used in conjunction with to_sequel or to_elasticsearch
+    # Ex: query_string.find_by({ is_completed: true, year: 2001 }).to_sequel
+    def find_by(filters)
+      updated_filters = filters
+        .collect {|key, value| key }
+        .map do |field|
+          next {
+            field: field,
+            filter: { operator: "=", value: filters[field].to_s }
+          }
+        end
+
+      @query = { operator: "and", filters: updated_filters }
+
+      self
     end
 
     # * Transform given query string or hash into sequel query string
@@ -195,10 +213,10 @@ module Powerbase
       # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group)
         logical_op = case filter_group[:operator]
-          when "and"
-            "&"
           when "or"
             "|"
+          else
+            "&"
           end
 
         filters = filter_group[:filters]
@@ -212,15 +230,11 @@ module Powerbase
 
           relational_op = filter[:filter][:operator]
           field = if @adapter == "postgresql"
-              "Sequel.lit(\"#{filter[:field]}\")"
+              "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
             else
-              "Sequel.lit(#{filter[:field]}"
+              "Sequel.lit('#{sanitize(filter[:field])}')"
             end
-          value = if filter[:filter][:value].is_a?(String)
-              "'#{filter[:filter][:value]}'"
-            else
-              filter[:filter][:value]
-            end
+          value = sanitize(filter[:filter][:value])
 
           case relational_op
           when "="
@@ -232,15 +246,17 @@ module Powerbase
           when "is not"
             "Sequel.~(#{field} => '#{value}')"
           when ">"
-            "#{field} > #{value}"
+            "(#{field} > #{value})"
           when ">="
-            "(#{field} > #{value} | Sequel[{#{field} => #{value}}])"
+            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
           when "<"
-            "#{field} < #{value}"
+            "(#{field} < #{value})"
           when "<="
-            "(#{field} < #{value} | Sequel[{#{field} => #{value}}])"
+            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
           when "contains"
-            "Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
+            "Sequel.like(#{field}, '%#{value}%')"
+          when "does not contain"
+            "~Sequel.like(#{field}, '%#{value}%')"
           end
         end
 
@@ -250,7 +266,13 @@ module Powerbase
 
       # * Transforms parsed tokens into elasticsearch query string
       def transform_elasticsearch_filter(filter_group)
-        logical_op = filter_group[:operator]
+        logical_op = case filter_group[:operator]
+          when "or"
+            "OR"
+          else
+            "AND"
+          end
+
         filters = filter_group[:filters]
 
         elasticsearch_filter = filters.map do |filter|
@@ -261,8 +283,8 @@ module Powerbase
           end
 
           relational_op = filter[:filter][:operator]
-          field = filter[:field]
-          value = filter[:filter][:value]
+          field = sanitize(filter[:field])
+          value = sanitize(filter[:filter][:value])
 
           case relational_op
           when "="
@@ -290,6 +312,10 @@ module Powerbase
 
         query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
         "(#{query_string})"
+      end
+
+      def sanitize(string)
+        string.class == Symbol ? string : string.gsub(/['"]/,'')
       end
   end
 end
