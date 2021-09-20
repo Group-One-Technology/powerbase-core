@@ -18,4 +18,5 @@ export const OPERATOR = {
     '<',
     '<=',
   ],
+  [FieldType.CHECKBOX]: ['is', 'is not'],
 };

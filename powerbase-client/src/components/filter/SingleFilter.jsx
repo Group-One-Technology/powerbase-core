@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
+import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/useOperator';
+import { FieldType } from '@lib/constants/field-types';
 
 export function SingleFilter({
   id,
@@ -16,16 +17,25 @@ export function SingleFilter({
   handleRemoveFilter,
   handleLogicalOpChange,
 }) {
+  const { data: fieldTypes } = useFieldTypes();
   const [field, setField] = useState(filter?.field
     ? fields.find((item) => item.name === filter.field) || fields[0]
     : fields[0]);
-  const [operator, setOperator, operators, updateOperator] = useOperator({ filter, field });
+  const [operator, setOperator, operators, updateOperator, fieldType] = useOperator({ filter, field });
   const [value, setValue] = useState(filter?.filter?.value || '');
 
   const updateField = (selectedField) => {
+    const newFieldType = fieldTypes.find((item) => item.id.toString() === selectedField.fieldTypeId.toString());
+
     setField(selectedField);
-    updateOperator(selectedField.fieldTypeId);
-    setValue('');
+    updateOperator(newFieldType);
+
+    if (newFieldType.name === FieldType.CHECKBOX) {
+      setValue(false);
+    } else {
+      setValue('');
+    }
+
     updateTableRecords();
   };
 
@@ -46,7 +56,12 @@ export function SingleFilter({
   };
 
   const handleValueChange = (evt) => {
-    setValue(evt.target.value);
+    if (fieldType?.name === FieldType.CHECKBOX) {
+      setValue(evt.target.checked);
+    } else {
+      setValue(evt.target.value);
+    }
+
     updateTableRecords();
   };
 
@@ -103,16 +118,32 @@ export function SingleFilter({
           {operators?.map((op) => <option key={op} value={op}>{op}</option>)}
         </select>
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
-        <input
-          id={`filter${id}-secondOperand`}
-          type="text"
-          aria-label="Second Operand"
-          name="second_operand"
-          value={value}
-          onChange={handleValueChange}
-          className={cn('appearance-none block w-full px-3 py-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm')}
-          required
-        />
+        {fieldType?.name === FieldType.CHECKBOX
+          ? (
+            <div className="block w-full pr-5">
+              <div className="flex items-center justify-center w-10 px-2 py-1 border rounded-md shadow-sm border-gray-300">
+                <input
+                  id={`filter${id}-secondOperand`}
+                  name="second_operand"
+                  type="checkbox"
+                  className="my-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  checked={value?.toString() === 'true'}
+                  onChange={handleValueChange}
+                />
+              </div>
+            </div>
+          ) : (
+            <input
+              id={`filter${id}-secondOperand`}
+              type="text"
+              aria-label="Second Operand"
+              name="second_operand"
+              value={value}
+              onChange={handleValueChange}
+              className="appearance-none block w-full px-3 py-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              required
+            />
+          )}
         <button
           type="button"
           className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
