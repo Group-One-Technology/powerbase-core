@@ -70,7 +70,12 @@ export function SingleFilter({
       data-level={level}
       data-filter={JSON.stringify({
         field: field?.name,
-        filter: { operator, value },
+        filter: {
+          operator,
+          value: fieldType?.name === FieldType.CHECKBOX
+            ? value.toString() === 'true'
+            : value,
+        },
       })}
       className="filter flex gap-2 items-center"
     >
@@ -120,7 +125,7 @@ export function SingleFilter({
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         {fieldType?.name === FieldType.CHECKBOX
           ? (
-            <div className="block w-full pr-5">
+            <div className="block w-full pr-6">
               <div className="flex items-center justify-center w-10 px-2 py-1 border rounded-md shadow-sm border-gray-300">
                 <input
                   id={`filter${id}-secondOperand`}
