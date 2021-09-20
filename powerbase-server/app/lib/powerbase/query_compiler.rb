@@ -234,11 +234,7 @@ module Powerbase
             else
               "Sequel.lit('#{sanitize(filter[:field])}')"
             end
-          value = if filter[:filter][:value].is_a?(String)
-              "'#{sanitize(filter[:filter][:value])}'"
-            else
-              sanitize(filter[:filter][:value])
-            end
+          value = sanitize(filter[:filter][:value])
 
           case relational_op
           when "="
@@ -252,11 +248,11 @@ module Powerbase
           when ">"
             "#{field} > #{value}"
           when ">="
-            "(#{field} > #{value} | Sequel[{#{field} => #{value}}])"
+            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
           when "<"
             "#{field} < #{value}"
           when "<="
-            "(#{field} < #{value} | Sequel[{#{field} => #{value}}])"
+            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
           when "contains"
             "Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
           end
