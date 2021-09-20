@@ -254,9 +254,9 @@ module Powerbase
           when "<="
             "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
           when "contains"
-            "Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
+            "Sequel.like(#{field}, '%#{value}%')"
           when "does not contain"
-            "~Sequel.like(#{field}, '%#{filter[:filter][:value]}%')"
+            "~Sequel.like(#{field}, '%#{value}%')"
           end
         end
 
