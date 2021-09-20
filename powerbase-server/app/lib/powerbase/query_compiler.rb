@@ -314,8 +314,8 @@ module Powerbase
         "(#{query_string})"
       end
 
-      def sanitize(string)
-        string.class == Symbol ? string : string.gsub(/['"]/,'')
+      def sanitize(value)
+        value.class == String ? value.gsub(/['"]/,'') : value
       end
   end
 end
