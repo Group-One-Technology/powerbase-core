@@ -36,6 +36,8 @@ export function SingleFilter({
 
     if (newFieldType.name === FieldType.CHECKBOX) {
       setValue(false);
+    } else if (newFieldType.name === FieldType.SINGLE_SELECT) {
+      setValue(undefined);
     } else {
       setValue('');
     }
@@ -62,6 +64,8 @@ export function SingleFilter({
   const handleValueChange = (evt) => {
     if (fieldType?.name === FieldType.CHECKBOX) {
       setValue(evt.target.checked);
+    } else if (fieldType?.name === FieldType.SINGLE_SELECT) {
+      setValue(evt);
     } else {
       setValue(evt.target.value);
     }
