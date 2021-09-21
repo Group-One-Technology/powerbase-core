@@ -7,6 +7,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/useOperator';
 import { FieldType } from '@lib/constants/field-types';
 import { FilterField } from './FilterField';
+import { FilterOperator } from './FilterOperator';
 import { FilterValue } from './FilterValue';
 
 export function SingleFilter({
@@ -109,15 +110,12 @@ export function SingleFilter({
           onChange={handleFieldChange}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
-        <select
+        <FilterOperator
           id={`filter${id}-operator`}
-          name="operator"
-          className="block w-full text-sm capitalize h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={operator}
+          options={operators}
           onChange={handleOperatorChange}
-        >
-          {operators?.map((op) => <option key={op} value={op}>{op}</option>)}
-        </select>
+        />
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <FilterValue
           id={`filter${id}-secondOperand`}
