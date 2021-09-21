@@ -7,6 +7,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
 import { AddFilterMenu } from './AddFilterMenu';
 import { SingleFilter } from './SingleFilter';
+import { FilterLogicalOperator } from './FilterLogicalOperator';
 
 export function FilterGroup({
   id,
@@ -59,8 +60,8 @@ export function FilterGroup({
     setNewFilterCount((prevCount) => prevCount + 1);
   };
 
-  const handleChildLogicalOpChange = (evt) => {
-    setLogicalOperator(evt.target.value);
+  const handleChildLogicalOpChange = (value) => {
+    setLogicalOperator(value);
     updateTableRecords();
   };
 
@@ -91,16 +92,11 @@ export function FilterGroup({
             ? (
               <>
                 <label htmlFor={`${filterGroupId}-logicalOperator`} className="sr-only">Logical Operator</label>
-                <select
+                <FilterLogicalOperator
                   id={`${filterGroupId}-logicalOperator`}
-                  name="logical_operator"
-                  className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
                   value={parentOperator}
                   onChange={handleLogicalOpChange}
-                >
-                  <option value="and">and</option>
-                  <option value="or">or</option>
-                </select>
+                />
               </>
             ) : parentOperator}
         </div>
