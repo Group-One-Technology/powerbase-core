@@ -4,12 +4,9 @@ import cn from 'classnames';
 import { SelectorIcon } from '@heroicons/react/solid';
 import { Listbox } from '@headlessui/react';
 
-export function FilterOperator({
-  id,
-  value,
-  options,
-  onChange,
-}) {
+const OPTIONS = ['and', 'or'];
+
+export function FilterLogicalOperator({ id, value, onChange }) {
   return (
     <Listbox value={value} onChange={onChange}>
       <div className="block w-full">
@@ -25,13 +22,13 @@ export function FilterOperator({
             />
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-48 bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-          {options?.map((option) => (
+        <Listbox.Options className="absolute z-10 mt-1 w-auto text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+          {OPTIONS.map((option) => (
             <Listbox.Option
               key={option}
               value={option}
               className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate',
+                'cursor-default select-none relative py-1.5 pl-2 pr-6 text-gray-900 truncate',
                 (active || selected) ? 'bg-gray-100' : 'bg-white',
               )}
             >
@@ -44,9 +41,8 @@ export function FilterOperator({
   );
 }
 
-FilterOperator.propTypes = {
+FilterLogicalOperator.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.string,
-  options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
 };

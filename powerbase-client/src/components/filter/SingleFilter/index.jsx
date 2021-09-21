@@ -9,6 +9,7 @@ import { FieldType } from '@lib/constants/field-types';
 import { FilterField } from './FilterField';
 import { FilterOperator } from './FilterOperator';
 import { FilterValue } from './FilterValue';
+import { FilterLogicalOperator } from '../FilterLogicalOperator';
 
 export function SingleFilter({
   id,
@@ -53,10 +54,10 @@ export function SingleFilter({
     updateField(selectedField);
   };
 
-  const handleOperatorChange = (evt) => {
-    setOperator(evt.target.value);
+  const handleOperatorChange = (selectedOperator) => {
+    setOperator(selectedOperator);
 
-    if (value !== '') {
+    if (selectedOperator !== '') {
       updateTableRecords();
     }
   };
@@ -92,16 +93,11 @@ export function SingleFilter({
           ? (
             <>
               <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
-              <select
-                id={`filter${id}-logicalOperato}`}
-                name="logical_operator"
-                className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
+              <FilterLogicalOperator
+                id={`filter${id}-logicalOperator`}
                 value={logicalOperator}
                 onChange={handleLogicalOpChange}
-              >
-                <option value="and">and</option>
-                <option value="or">or</option>
-              </select>
+              />
             </>
           ) : <p>{first ? 'where' : logicalOperator}</p>}
       </div>
