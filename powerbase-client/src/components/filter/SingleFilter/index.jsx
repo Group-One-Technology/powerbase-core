@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { TrashIcon } from '@heroicons/react/outline';
-import { SelectorIcon } from '@heroicons/react/solid'
-import { Listbox } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/useOperator';
 import { FieldType } from '@lib/constants/field-types';
-
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { FilterField } from './FilterField';
 import { FilterValue } from './FilterValue';
 
 export function SingleFilter({
@@ -106,41 +102,12 @@ export function SingleFilter({
       </div>
       <div className="flex-1 flex gap-2 items-center">
         <label htmlFor={`filter${id}-firstOperand`} className="sr-only">First Operand (Field)</label>
-        <Listbox value={field?.id} onChange={handleFieldChange}>
-          <div className="block w-full">
-            <Listbox.Button
-              id={`filter${id}-firstOperand`}
-              className="block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
-            >
-              <span className="block truncate">{field?.name}</span>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <SelectorIcon
-                  className="w-5 h-5 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
-            </Listbox.Button>
-            <Listbox.Options className="absolute z-10 mt-1 w-auto bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-              {fields?.map((item) => (
-                <Listbox.Option
-                  key={item.name}
-                  value={item.id}
-                  className={({ active, selected }) => cn(
-                    'cursor-default select-none relative py-1.5 pl-10 pr-6 text-gray-900',
-                    (active || selected) ? 'bg-gray-100' : 'bg-white',
-                  )}
-                >
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
-                    <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} />
-                  </span>
-                  <span className="block truncate">
-                    {item.name}
-                  </span>
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </div>
-        </Listbox>
+        <FilterField
+          id={`filter${id}-firstOperand`}
+          value={field}
+          options={fields}
+          onChange={handleFieldChange}
+        />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
         <select
           id={`filter${id}-operator`}
