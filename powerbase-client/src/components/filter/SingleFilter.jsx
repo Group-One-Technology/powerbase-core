@@ -126,6 +126,7 @@ export function SingleFilter({
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <FilterValue
           id={`filter${id}-secondOperand`}
+          field={field}
           value={value}
           onChange={handleValueChange}
           fieldType={fieldType?.name}

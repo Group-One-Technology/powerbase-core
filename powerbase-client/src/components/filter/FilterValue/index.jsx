@@ -2,9 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { FieldType } from '@lib/constants/field-types';
+import { FilterValueSelect } from './FilterValueSelect';
 
 export function FilterValue({
   id,
+  field,
   fieldType,
   value,
   onChange,
@@ -12,7 +14,7 @@ export function FilterValue({
   if (fieldType === FieldType.CHECKBOX) {
     return (
       <div className="block w-full pr-6">
-        <div className="flex items-center justify-center w-10 px-2 py-1 border rounded-md shadow-sm border-gray-300">
+        <div className="flex items-center justify-center w-10 h-8 px-2 py-0.5 border rounded-md shadow-sm border-gray-300">
           <input
             id={id}
             name="second_operand"
@@ -26,6 +28,19 @@ export function FilterValue({
     );
   }
 
+  if (fieldType === FieldType.SINGLE_SELECT) {
+    return (
+      <FilterValueSelect
+        id={id}
+        name="second_operand"
+        fieldId={field.id}
+        value={value}
+        onChange={onChange}
+        className="block w-full text-sm h-8 px-3 py-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
+      />
+    );
+  }
+
   return (
     <input
       id={id}
@@ -34,7 +49,7 @@ export function FilterValue({
       name="second_operand"
       value={value}
       onChange={onChange}
-      className="appearance-none block w-full px-3 py-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      className="appearance-none block w-full h-8 px-3 py-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
       required
     />
   );
@@ -42,6 +57,7 @@ export function FilterValue({
 
 FilterValue.propTypes = {
   id: PropTypes.string.isRequired,
+  field: PropTypes.object,
   fieldType: PropTypes.string,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
