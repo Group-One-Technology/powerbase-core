@@ -46,7 +46,7 @@ export function FilterOperator({
 
 FilterOperator.propTypes = {
   id: PropTypes.string.isRequired,
-  value: PropTypes.object,
+  value: PropTypes.string,
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
 };
