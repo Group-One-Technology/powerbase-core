@@ -1,8 +1,8 @@
 import { FieldType } from './field-types';
 
+const GENERAL_OPERATORS = ['is', 'is not'];
 const TEXT_OPERATORS = [
-  'is',
-  'is not',
+  ...GENERAL_OPERATORS,
   'contains',
   'does not contain',
 ];
@@ -18,5 +18,11 @@ export const OPERATOR = {
     '<',
     '<=',
   ],
-  [FieldType.CHECKBOX]: ['is', 'is not'],
+  [FieldType.CHECKBOX]: GENERAL_OPERATORS,
+  [FieldType.SINGLE_SELECT]: GENERAL_OPERATORS,
+  [FieldType.MULTIPLE_SELECT]: TEXT_OPERATORS,
+  [FieldType.DATE]: TEXT_OPERATORS,
+  [FieldType.EMAIL]: TEXT_OPERATORS,
+  [FieldType.PLUGIN]: TEXT_OPERATORS,
+  [FieldType.OTHERS]: TEXT_OPERATORS,
 };
