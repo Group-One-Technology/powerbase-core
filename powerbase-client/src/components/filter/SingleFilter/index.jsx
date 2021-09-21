@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { TrashIcon } from '@heroicons/react/outline';
+
 import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/useOperator';
 import { FieldType } from '@lib/constants/field-types';
+import { FilterField } from './FilterField';
+import { FilterOperator } from './FilterOperator';
 import { FilterValue } from './FilterValue';
+import { FilterLogicalOperator } from '../FilterLogicalOperator';
 
 export function SingleFilter({
   id,
@@ -33,6 +37,8 @@ export function SingleFilter({
 
     if (newFieldType.name === FieldType.CHECKBOX) {
       setValue(false);
+    } else if (newFieldType.name === FieldType.SINGLE_SELECT) {
+      setValue(undefined);
     } else {
       setValue('');
     }
@@ -40,18 +46,18 @@ export function SingleFilter({
     updateTableRecords();
   };
 
-  const handleFieldChange = (evt) => {
+  const handleFieldChange = (selectedFieldId) => {
     const selectedField = fields?.find((item) => (
-      item.id.toString() === evt.target.value.toString()
+      item.id.toString() === selectedFieldId.toString()
     ));
 
     updateField(selectedField);
   };
 
-  const handleOperatorChange = (evt) => {
-    setOperator(evt.target.value);
+  const handleOperatorChange = (selectedOperator) => {
+    setOperator(selectedOperator);
 
-    if (value !== '') {
+    if (selectedOperator !== '') {
       updateTableRecords();
     }
   };
@@ -59,6 +65,8 @@ export function SingleFilter({
   const handleValueChange = (evt) => {
     if (fieldType?.name === FieldType.CHECKBOX) {
       setValue(evt.target.checked);
+    } else if (fieldType?.name === FieldType.SINGLE_SELECT) {
+      setValue(evt);
     } else {
       setValue(evt.target.value);
     }
@@ -85,44 +93,29 @@ export function SingleFilter({
           ? (
             <>
               <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
-              <select
-                id={`filter${id}-logicalOperato}`}
-                name="logical_operator"
-                className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md capitalize"
+              <FilterLogicalOperator
+                id={`filter${id}-logicalOperator`}
                 value={logicalOperator}
                 onChange={handleLogicalOpChange}
-              >
-                <option value="and">and</option>
-                <option value="or">or</option>
-              </select>
+              />
             </>
           ) : <p>{first ? 'where' : logicalOperator}</p>}
       </div>
       <div className="flex-1 flex gap-2 items-center">
         <label htmlFor={`filter${id}-firstOperand`} className="sr-only">First Operand (Field)</label>
-        <select
+        <FilterField
           id={`filter${id}-firstOperand`}
-          name="first_operand"
-          className="block w-full text-sm h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
-          value={field?.id}
+          value={field}
+          options={fields}
           onChange={handleFieldChange}
-        >
-          {fields?.map((item) => (
-            <option key={item.name} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
-        <select
+        <FilterOperator
           id={`filter${id}-operator`}
-          name="operator"
-          className="block w-full text-sm capitalize h-8 p-1 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
           value={operator}
+          options={operators}
           onChange={handleOperatorChange}
-        >
-          {operators?.map((op) => <option key={op} value={op}>{op}</option>)}
-        </select>
+        />
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <FilterValue
           id={`filter${id}-secondOperand`}

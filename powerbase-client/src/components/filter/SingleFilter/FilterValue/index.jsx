@@ -13,13 +13,13 @@ export function FilterValue({
 }) {
   if (fieldType === FieldType.CHECKBOX) {
     return (
-      <div className="block w-full pr-2">
+      <div className="block w-full">
         <div className="flex items-center justify-center w-10 h-8 p-1 border rounded-md shadow-sm border-gray-300">
           <input
             id={id}
             name="second_operand"
             type="checkbox"
-            className="my-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            className="my-0.5 h-4 w-4 text-sm text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             checked={value?.toString() === 'true'}
             onChange={onChange}
           />
@@ -36,7 +36,6 @@ export function FilterValue({
         fieldId={field.id}
         value={value}
         onChange={onChange}
-        className="block w-full text-sm h-8 p-1 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md"
       />
     );
   }
@@ -49,7 +48,7 @@ export function FilterValue({
       name="second_operand"
       value={value}
       onChange={onChange}
-      className="appearance-none block w-full h-8 p-1 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+      className="appearance-none block w-[95%] h-8 px-2 py-1 text-sm border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
       required
     />
   );
