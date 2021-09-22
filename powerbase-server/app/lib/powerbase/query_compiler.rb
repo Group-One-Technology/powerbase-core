@@ -335,17 +335,17 @@ module Powerbase
           when "<="
             "#{field}:<=#{value}"
           when "is exact date"
-            "#{field}:\"#{format_date(value)}\")"
+            "#{field}:\"#{format_date(value, true)}\""
           when "is not exact date"
-            "(NOT #{field}:\"#{format_date(value)}\")"
+            "(NOT #{field}:\"#{format_date(value, true)}\")"
           when "is before"
-            "(#{field}:<\"#{format_date(value)}\")"
+            "(#{field}:[* TO #{format_date(value, true, -1.seconds)}])"
           when "is after"
-            "(#{field}:>\"#{format_date(value)}\")"
+            "(#{field}:[#{format_date(value, true, 1.seconds)} TO *])"
           when "is on or before"
-            "(#{field}:[* TO \"#{format_date(value)}\"])"
+            "(#{field}:[* TO #{format_date(value, true)}])"
           when "is on or after"
-            "(#{field}:[\"#{format_date(value)}\" TO *])"
+            "(#{field}:[#{format_date(value, true)} TO *])"
           end
         end
 
@@ -359,12 +359,18 @@ module Powerbase
       end
 
       # * Format date to UTC
-      def format_date(value, is_turbo = false)
+      def format_date(value, is_turbo = false, increment = nil)
         date = DateTime.parse(value) rescue nil
 
         if date != nil
           if is_turbo
-            date.utc.strftime("%FT%T.%L%z")
+            if increment != nil
+              (date + increment).strftime("%FT%T.%L%z")
+            else
+              date.strftime("%FT%T.%L%z")
+            end
+          elsif increment != nil
+              (date + increment).utc.strftime("%FT%T")
           else
             date.utc.strftime("%FT%T")
           end
