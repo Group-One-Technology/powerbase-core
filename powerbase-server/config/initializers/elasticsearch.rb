@@ -7,13 +7,13 @@ elasticsearch_url = if Rails.env.production?
   end
 
 logger = Logger.new("#{Rails.root}/log/elasticsearch.log")
-logger.level = Logger::FATAL if Rails.env.production?
+logger.level = Logger::FATAL
 
 connection_hash = {
   url: elasticsearch_url,
   reload_connections: true,
   retry_on_failure: 3,
-  request_timeout: 250,
+  request_timeout: 500,
   logger: logger,
 }
 
