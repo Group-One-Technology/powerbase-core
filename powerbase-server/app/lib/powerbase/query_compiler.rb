@@ -236,6 +236,8 @@ module Powerbase
           relational_op = filter[:filter][:operator]
           field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
               "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
+              "Sequel.lit('#{sanitize(filter[:field])}')"
             elsif @adapter == "postgresql"
               "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
             else
@@ -243,6 +245,8 @@ module Powerbase
             end
           value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
               "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
+              "Sequel.lit(%Q[CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+',SUBSTRING(timediff(now(),convert_tz(now(),@@session.time_zone,'+00:00')), 1, 5)))])"
             else
               sanitize(filter[:filter][:value])
             end
@@ -349,10 +353,12 @@ module Powerbase
         "(#{query_string})"
       end
 
+      # * Remove escaped quotes
       def sanitize(value)
         value.class == String ? value.gsub(/['"]/,'') : value
       end
 
+      # * Format date to UTC
       def format_date(value, is_turbo = false)
         date = DateTime.parse(value) rescue nil
 
