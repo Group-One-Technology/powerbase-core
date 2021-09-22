@@ -1,8 +1,6 @@
 module Powerbase
   ELASTICSEACH_ID_LIMIT = 512
   DEFAULT_PAGE_SIZE = 40
-  NUMBER_FIELD_TYPE = 4
-  DATE_FIELD_TYPE = 7
 
   class Model
     # * Initialize the Powerbase::Model
@@ -22,6 +20,8 @@ module Powerbase
       index = "table_records_#{@table_id}"
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       primary_keys = fields.select {|field| field.is_primary_key }
+      number_field_type = PowerbaseFieldType.find_by(name: "Number")
+      date_field_type = PowerbaseFieldType.find_by(name: "Date")
 
       if !@esclient.indices.exists(index: index)
         @esclient.indices.create(
@@ -82,12 +82,12 @@ module Powerbase
 
             if cur_field
               doc[key] = case cur_field.powerbase_field_type_id
-                when NUMBER_FIELD_TYPE
+                when number_field_type.id
                   record[key]
-                when DATE_FIELD_TYPE
+                when date_field_type.id
                   date = DateTime.parse(record[key]) rescue nil
                   if date
-                    date.utc.strftime("%Y-%m-%dT%jT%RZ")
+                    date.strftime("%FT%T.%L%z")
                   else
                     record[key]
                   end
@@ -130,7 +130,7 @@ module Powerbase
 
         @esclient.get(index: index, id: format_doc_id(id))["_source"]
       else
-        query = Powerbase::QueryCompiler.new()
+        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
         query_string = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
@@ -152,7 +152,7 @@ module Powerbase
       limit = options[:limit] || 5
 
       if @is_turbo
-        query = Powerbase::QueryCompiler.new()
+        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
         query_string = query.find_by(options[:filters]).to_elasticsearch
 
         result = @esclient.search(
@@ -168,7 +168,7 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query = Powerbase::QueryCompiler.new()
+        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
         query_string = query.find_by(options[:filters]).to_sequel
 
         remote_db() {|db|
@@ -193,10 +193,13 @@ module Powerbase
       primary_keys = fields.select {|field| field.is_primary_key }
       order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
 
+      number_field_type = PowerbaseFieldType.find_by(name: "Number")
+      date_field_type = PowerbaseFieldType.find_by(name: "Date")
+
       if @is_turbo
         sort_column = {}
 
-        if order_field.powerbase_field_type_id == NUMBER_FIELD_TYPE
+        if order_field.powerbase_field_type_id == number_field_type.id || order_field.powerbase_field_type_id == date_field_type.id
           sort_column[order_field.name.to_sym] = {
             order: "asc",
             unmapped_type: "long",
@@ -215,7 +218,7 @@ module Powerbase
         }
 
         if options[:filters]
-          query_string = Powerbase::QueryCompiler.new(options[:filters])
+          query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
           search_params[:query] = {
             query_string: {
               query: query_string.to_elasticsearch,
@@ -227,7 +230,7 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query_string = Powerbase::QueryCompiler.new(options[:filters])
+        query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
 
         remote_db() {|db|
           db.from(@table_name)
@@ -246,7 +249,7 @@ module Powerbase
       if @is_turbo
         index = "table_records_#{@table_id}"
         query = if options[:filters]
-            query_string = Powerbase::QueryCompiler.new(options[:filters])
+            query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
             "q=#{query_string.to_elasticsearch}"
           else
             nil
@@ -255,7 +258,7 @@ module Powerbase
         response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
         response["count"]
       else
-        query_string = Powerbase::QueryCompiler.new(options[:filters])
+        query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
 
         remote_db() {|db|
           db.from(@table_name)
