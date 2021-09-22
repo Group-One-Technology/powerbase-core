@@ -87,7 +87,7 @@ module Powerbase
                 when date_field_type.id
                   date = DateTime.parse(record[key]) rescue nil
                   if date
-                    date.utc.strftime("%FT%T.%L%z")
+                    date.strftime("%FT%T.%L%z")
                   else
                     record[key]
                   end
