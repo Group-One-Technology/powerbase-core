@@ -1,7 +1,11 @@
 module Powerbase
   class QueryCompiler
     PARENTHESIS = ['(', ')']
-    RELATIONAL_OPERATORS = ['<', '>', '=', '<=', '>=', '!=', 'is', 'is not', 'contains', 'does not contain']
+    RELATIONAL_OPERATORS = [
+      '<', '>', '=', '<=', '>=', '!=',
+      'is', 'is not', 'contains', 'does not contain',
+      'is exact date', 'is not exact date', 'is before', 'is after', 'is on or before', 'is on or after',
+    ]
     LOGICAL_OPERATORS = ['and', 'or', 'not']
     TOKEN = {
       number: 'NUMBER',
@@ -237,26 +241,38 @@ module Powerbase
           value = sanitize(filter[:filter][:value])
 
           case relational_op
-          when "="
-            "Sequel[{#{field} => #{value}}]"
           when "is"
             "Sequel[{#{field} => '#{value}'}]"
-          when "!="
-            "Sequel.~(#{field} => #{value})"
           when "is not"
             "Sequel.~(#{field} => '#{value}')"
-          when ">"
-            "(#{field} > #{value})"
-          when ">="
-            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
-          when "<"
-            "(#{field} < #{value})"
-          when "<="
-            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
           when "contains"
             "Sequel.like(#{field}, '%#{value}%')"
           when "does not contain"
             "~Sequel.like(#{field}, '%#{value}%')"
+          when "="
+            "Sequel[{#{field} => #{value}}]"
+          when "!="
+            "Sequel.~(#{field} => #{value})"
+          when "<"
+            "(#{field} < #{value})"
+          when ">"
+            "(#{field} > #{value})"
+          when "<="
+            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
+          when ">="
+            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
+          when "is exact date"
+            "Sequel[{#{field} => '#{format_date(value)}'}]"
+          when "is not exact date"
+            "Sequel.~(#{field} => '#{format_date(value)}')"
+          when "is before"
+            "(#{field} < '#{format_date(value)}')"
+          when "is after"
+            "(#{field} > '#{format_date(value)}')"
+          when "is on or before"
+            "((#{field} < '#{format_date(value)}') | Sequel[{#{field} => '#{format_date(value)}'}])"
+          when "is on or after"
+            "((#{field} > '#{format_date(value)}') | Sequel[{#{field} => '#{format_date(value)}'}])"
           end
         end
 
@@ -287,13 +303,17 @@ module Powerbase
           value = sanitize(filter[:filter][:value])
 
           case relational_op
-          when "="
-            "#{field}:#{value}"
           when "is"
             "#{field}:\"#{value}\""
-          when "!="
-            "(NOT #{field}:#{value})"
           when "is not"
+            "(NOT #{field}:#{value})"
+          when "contains"
+            "#{field}:#{value}"
+          when "does not contain"
+            "(NOT #{field}:#{value})"
+          when "="
+            "#{field}:#{value}"
+          when "!="
             "(NOT #{field}:#{value})"
           when ">"
             "#{field}:>#{value}"
@@ -303,10 +323,18 @@ module Powerbase
             "#{field}:<#{value}"
           when "<="
             "#{field}:<=#{value}"
-          when "contains"
-            "#{field}:#{value}"
-          when "does not contain"
-            "(NOT #{field}:#{value})"
+          when "is exact date"
+            "#{field}:\"#{format_date(value)}\")"
+          when "is not exact date"
+            "(NOT #{field}:\"#{format_date(value)}\")"
+          when "is before"
+            "(#{field}:<\"#{format_date(value)}\")"
+          when "is after"
+            "(#{field}:>\"#{format_date(value)}\")"
+          when "is on or before"
+            "(#{field}:[* TO \"#{format_date(value)}\"])"
+          when "is on or after"
+            "(#{field}:[\"#{format_date(value)}\" TO *])"
           end
         end
 
@@ -316,6 +344,20 @@ module Powerbase
 
       def sanitize(value)
         value.class == String ? value.gsub(/['"]/,'') : value
+      end
+
+      def format_date(value, is_turbo = false)
+        date = DateTime.parse(value) rescue nil
+
+        if date != nil
+          if is_turbo
+            date.utc.strftime("%FT%T.%L%z")
+          else
+            date.utc.strftime("%FT%T%z")
+          end
+        else
+          nil
+        end
       end
   end
 end
