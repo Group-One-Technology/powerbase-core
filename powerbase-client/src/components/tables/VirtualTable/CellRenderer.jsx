@@ -8,6 +8,7 @@ import { securedApi } from '@lib/api/index';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { FieldType } from '@lib/constants/field-types';
+import { formatDate } from '@lib/helpers/formatDate';
 
 function CellValue({
   value,
@@ -61,6 +62,14 @@ function CellValue({
             checked={value?.toString() === 'true'}
             readOnly
           />
+        );
+      }
+
+      if (fieldType?.name === FieldType.DATE) {
+        return (
+          <span>
+            {formatDate(value)}
+          </span>
         );
       }
     }
