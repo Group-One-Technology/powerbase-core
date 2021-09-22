@@ -6,6 +6,7 @@ module Powerbase
       'is', 'is not', 'contains', 'does not contain',
       'is exact date', 'is not exact date', 'is before', 'is after', 'is on or before', 'is on or after',
     ]
+    DATE_OPERATORS = ['is exact date', 'is not exact date', 'is before', 'is after', 'is on or before', 'is on or after']
     LOGICAL_OPERATORS = ['and', 'or', 'not']
     TOKEN = {
       number: 'NUMBER',
@@ -233,12 +234,18 @@ module Powerbase
           end
 
           relational_op = filter[:filter][:operator]
-          field = if @adapter == "postgresql"
+          field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
+              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+            elsif @adapter == "postgresql"
               "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
             else
               "Sequel.lit('#{sanitize(filter[:field])}')"
             end
-          value = sanitize(filter[:filter][:value])
+          value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
+              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+            else
+              sanitize(filter[:filter][:value])
+            end
 
           case relational_op
           when "is"
@@ -262,17 +269,17 @@ module Powerbase
           when ">="
             "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
           when "is exact date"
-            "Sequel[{#{field} => '#{format_date(value)}'}]"
+            "Sequel[{#{field} => #{value}}]"
           when "is not exact date"
-            "Sequel.~(#{field} => '#{format_date(value)}')"
+            "Sequel.~(#{field} => #{value})"
           when "is before"
-            "(#{field} < '#{format_date(value)}')"
+            "(#{field} < #{value})"
           when "is after"
-            "(#{field} > '#{format_date(value)}')"
+            "(#{field} > #{value})"
           when "is on or before"
-            "((#{field} < '#{format_date(value)}') | Sequel[{#{field} => '#{format_date(value)}'}])"
+            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
           when "is on or after"
-            "((#{field} > '#{format_date(value)}') | Sequel[{#{field} => '#{format_date(value)}'}])"
+            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
           end
         end
 
@@ -353,7 +360,7 @@ module Powerbase
           if is_turbo
             date.utc.strftime("%FT%T.%L%z")
           else
-            date.utc.strftime("%FT%T%z")
+            date.utc.strftime("%FT%T")
           end
         else
           nil
