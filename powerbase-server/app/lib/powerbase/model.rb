@@ -250,12 +250,19 @@ module Powerbase
         index = "table_records_#{@table_id}"
         query = if options[:filters]
             query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
-            "q=#{query_string.to_elasticsearch}"
+
+            {
+              query: {
+                query_string: {
+                  query: query_string.to_elasticsearch,
+                },
+              },
+            }
           else
             nil
           end
 
-        response = @esclient.perform_request("GET", "#{index}/_count?#{query}").body
+        response = @esclient.perform_request("GET", "#{index}/_count", {}, query).body
         response["count"]
       else
         query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
