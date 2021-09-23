@@ -365,12 +365,12 @@ module Powerbase
         if date != nil
           if is_turbo
             if increment != nil
-              (date + increment).utc.strftime("%Y-%m-%d")
+              (date.utc + increment).strftime("%Y-%m-%d")
             else
               date.utc.strftime("%Y-%m-%d")
             end
           elsif increment != nil
-              (date + increment).utc.strftime("%FT%T")
+              (date.utc + increment).strftime("%FT%T")
           else
             date.utc.strftime("%FT%T")
           end

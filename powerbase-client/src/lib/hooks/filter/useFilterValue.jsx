@@ -15,7 +15,7 @@ export function useFilterValue({ value: initialValue, fieldType }) {
       setValue(initialValue.toString() === 'true');
     } else if (fieldType?.name === FieldType.DATE) {
       const date = new Date(initialValue);
-      setValue(isValidDate(date) ? date : new Date());
+      setValue(isValidDate(date) ? date.toString() : new Date().toString());
     } else {
       setValue(initialValue || '');
     }

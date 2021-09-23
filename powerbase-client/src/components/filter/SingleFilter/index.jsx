@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -7,6 +8,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/filter/useOperator';
 import { useFilterValue } from '@lib/hooks/filter/useFilterValue';
 import { FieldType } from '@lib/constants/field-types';
+import { formatDate } from '@lib/helpers/formatDate';
 import { FilterField } from './FilterField';
 import { FilterOperator } from './FilterOperator';
 import { FilterValue } from './FilterValue';
@@ -41,7 +43,7 @@ export function SingleFilter({
     } else if (newFieldType.name === FieldType.SINGLE_SELECT) {
       setValue(undefined);
     } else if (newFieldType.name === FieldType.DATE) {
-      setValue(new Date());
+      setValue(new Date().toString());
     } else {
       setValue('');
     }
@@ -72,7 +74,7 @@ export function SingleFilter({
         break;
       case FieldType.SINGLE_SELECT:
       case FieldType.DATE:
-        setValue(evt);
+        setValue(evt.toString());
         break;
       default:
         setValue(evt.target.value);
@@ -91,7 +93,9 @@ export function SingleFilter({
           operator,
           value: fieldType?.name === FieldType.CHECKBOX
             ? value.toString() === 'true'
-            : value,
+            : fieldType?.name === FieldType.DATE
+              ? formatDate(value, { dateOnly: true })
+              : value,
         },
       })}
       className="filter flex gap-2 items-center"
