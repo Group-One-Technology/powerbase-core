@@ -8,6 +8,7 @@
       "@lib/*": ["lib/*"],
       "@public/*": ["public/*"],
       "@models/*": ["models/*"],
+      "@css/*": ["css/*"],
     }
   }
 }

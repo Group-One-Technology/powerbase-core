@@ -20,6 +20,7 @@ module.exports = {
       '@lib': path.resolve(__dirname, 'src/lib'),
       '@public': path.resolve(__dirname, 'src/public'),
       '@models': path.resolve(__dirname, 'src/models'),
+      '@css': path.resolve(__dirname, 'src/css'),
     },
     extensions: ['.js', '.jsx'],
   },
