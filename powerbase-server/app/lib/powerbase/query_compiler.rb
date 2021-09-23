@@ -235,18 +235,18 @@ module Powerbase
 
           relational_op = filter[:filter][:operator]
           field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
             elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit('#{sanitize(filter[:field])}')"
+              "Sequel.lit(%Q[DATE_FORMAT('#{sanitize(filter[:field])}', '%Y-%m-%d')])"
             elsif @adapter == "postgresql"
               "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
             else
               "Sequel.lit('#{sanitize(filter[:field])}')"
             end
           value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
             elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+',SUBSTRING(timediff(now(),convert_tz(now(),@@session.time_zone,'+00:00')), 1, 5)))])"
+              "Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+', SUBSTRING(timediff(now(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])"
             else
               sanitize(filter[:filter][:value])
             end
@@ -335,13 +335,13 @@ module Powerbase
           when "<="
             "#{field}:<=#{value}"
           when "is exact date"
-            "#{field}:\"#{format_date(value, true)}\""
+            "#{field}:#{format_date(value, true)}"
           when "is not exact date"
-            "(NOT #{field}:\"#{format_date(value, true)}\")"
+            "(NOT #{field}:#{format_date(value, true)})"
           when "is before"
-            "(#{field}:[* TO #{format_date(value, true, -1.seconds)}])"
+            "(#{field}:[* TO #{format_date(value, true, -1.days)}])"
           when "is after"
-            "(#{field}:[#{format_date(value, true, 1.seconds)} TO *])"
+            "(#{field}:[#{format_date(value, true, 1.days)} TO *])"
           when "is on or before"
             "(#{field}:[* TO #{format_date(value, true)}])"
           when "is on or after"
@@ -365,12 +365,12 @@ module Powerbase
         if date != nil
           if is_turbo
             if increment != nil
-              (date + increment).strftime("%FT%T.%L%z")
+              (date.utc + increment).strftime("%Y-%m-%d")
             else
-              date.strftime("%FT%T.%L%z")
+              date.utc.strftime("%Y-%m-%d")
             end
           elsif increment != nil
-              (date + increment).utc.strftime("%FT%T")
+              (date.utc + increment).strftime("%FT%T")
           else
             date.utc.strftime("%FT%T")
           end

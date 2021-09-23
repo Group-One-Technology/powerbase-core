@@ -66,9 +66,11 @@ function CellValue({
       }
 
       if (fieldType?.name === FieldType.DATE) {
+        const date = formatDate(value);
+
         return (
           <span>
-            {formatDate(value)}
+            {date ? `${date} UTC` : null}
           </span>
         );
       }
