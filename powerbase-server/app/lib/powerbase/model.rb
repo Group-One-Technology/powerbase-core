@@ -87,7 +87,7 @@ module Powerbase
                 when date_field_type.id
                   date = DateTime.parse(record[key]) rescue nil
                   if date
-                    date.strftime("%FT%T.%L%z")
+                    date.utc.strftime("%FT%T.%L%z")
                   else
                     record[key]
                   end
@@ -161,7 +161,10 @@ module Powerbase
             from: (page - 1) * limit,
             size: limit,
             query: {
-              query_string: { query: query_string },
+              query_string: {
+                query: query_string,
+                time_zone: "+00:00"
+              },
             },
           },
         )
@@ -222,6 +225,7 @@ module Powerbase
           search_params[:query] = {
             query_string: {
               query: query_string.to_elasticsearch,
+              time_zone: "+00:00"
             }
           }
         end
@@ -255,6 +259,7 @@ module Powerbase
               query: {
                 query_string: {
                   query: query_string.to_elasticsearch,
+                  time_zone: "+00:00"
                 },
               },
             }

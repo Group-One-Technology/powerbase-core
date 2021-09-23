@@ -335,13 +335,13 @@ module Powerbase
           when "<="
             "#{field}:<=#{value}"
           when "is exact date"
-            "#{field}:\"#{format_date(value, true)}\""
+            "#{field}:#{format_date(value, true)}"
           when "is not exact date"
-            "(NOT #{field}:\"#{format_date(value, true)}\")"
+            "(NOT #{field}:#{format_date(value, true)})"
           when "is before"
-            "(#{field}:[* TO #{format_date(value, true, -1.seconds)}])"
+            "(#{field}:[* TO #{format_date(value, true, -1.days)}])"
           when "is after"
-            "(#{field}:[#{format_date(value, true, 1.seconds)} TO *])"
+            "(#{field}:[#{format_date(value, true, 1.days)} TO *])"
           when "is on or before"
             "(#{field}:[* TO #{format_date(value, true)}])"
           when "is on or after"
@@ -365,9 +365,9 @@ module Powerbase
         if date != nil
           if is_turbo
             if increment != nil
-              (date + increment).strftime("%FT%T.%L%z")
+              (date + increment).utc.strftime("%Y-%m-%d")
             else
-              date.strftime("%FT%T.%L%z")
+              date.utc.strftime("%Y-%m-%d")
             end
           elsif increment != nil
               (date + increment).utc.strftime("%FT%T")
