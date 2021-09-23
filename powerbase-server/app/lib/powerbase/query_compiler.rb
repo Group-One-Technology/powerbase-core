@@ -235,18 +235,18 @@ module Powerbase
 
           relational_op = filter[:filter][:operator]
           field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
             elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit('#{sanitize(filter[:field])}')"
+              "Sequel.lit(%Q[DATE_FORMAT('#{sanitize(filter[:field])}', '%Y-%m-%d')])"
             elsif @adapter == "postgresql"
               "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
             else
               "Sequel.lit('#{sanitize(filter[:field])}')"
             end
           value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP])"
+              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
             elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+',SUBSTRING(timediff(now(),convert_tz(now(),@@session.time_zone,'+00:00')), 1, 5)))])"
+              "Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+', SUBSTRING(timediff(now(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])"
             else
               sanitize(filter[:filter][:value])
             end
