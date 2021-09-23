@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
+import { isValidDate } from '@lib/helpers/isValidDate';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import '@css/react-datepicker.css';
@@ -27,11 +28,15 @@ export function FitlerValueDate({
   onChange,
   ...props
 }) {
+  const selectedDate = (value != null && value !== '' && isValidDate(new Date(value)))
+    ? new Date(value)
+    : new Date();
+
   return (
     <div className="w-full">
       <DatePicker
         id={id}
-        selected={value}
+        selected={selectedDate}
         onChange={(date) => onChange(date)}
         closeOnScroll={(e) => e.target === document}
         customInput={<DateInput />}
