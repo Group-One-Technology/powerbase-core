@@ -11,6 +11,7 @@ const DateInput = React.forwardRef(({ value, className, ...props }, ref) => (
     ref={ref}
     value={value}
     className="appearance-none block w-full h-8 px-2 py-1 text-sm border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    placeholder="MM/DD/YYYY"
     {...props}
   />
 ));
