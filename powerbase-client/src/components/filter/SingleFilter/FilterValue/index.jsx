@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { FieldType } from '@lib/constants/field-types';
 import { FilterValueSelect } from './FilterValueSelect';
+import { FitlerValueDate } from './FilterValueDate';
 
 export function FilterValue({
   id,
@@ -34,6 +35,17 @@ export function FilterValue({
         id={id}
         name="second_operand"
         fieldId={field.id}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
+
+  if (fieldType === FieldType.DATE) {
+    return (
+      <FitlerValueDate
+        id={id}
+        name="second_operand"
         value={value}
         onChange={onChange}
       />
