@@ -8,7 +8,7 @@ import { isValidDate } from '@lib/helpers/isValidDate';
  * @returns [value, setValue]
  */
 export function useFilterValue({ value: initialValue, fieldType }) {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState('');
 
   useEffect(() => {
     if (fieldType?.name === FieldType.CHECKBOX) {
