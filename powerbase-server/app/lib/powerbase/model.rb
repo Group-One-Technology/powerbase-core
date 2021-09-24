@@ -146,7 +146,7 @@ module Powerbase
       end
 
       @powerbase_table.logs["migration"]["indexed_records"] = indexed_records
-      @powerbase_table.end_time = Time.now
+      @powerbase_table.logs["migration"]["end_time"] = Time.now
       @powerbase_table.save
     end
 
