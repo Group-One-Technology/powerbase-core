@@ -1,11 +1,13 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Transition } from '@headlessui/react';
-import { ViewGridIcon, PlusIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import { Menu, Transition } from '@headlessui/react';
+import { ViewGridIcon } from '@heroicons/react/outline';
+
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
+import { AddView } from '@components/views/AddView';
 
 export function TableViewsSelect({
   tableId,
@@ -55,20 +57,8 @@ export function TableViewsSelect({
                     )}
                   </Menu.Item>
                 ))}
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      to={`table/${tableId}/view/create`}
-                      className={cn('flex p-2 text-xs items-center', (
-                        active
-                          ? 'bg-gray-100 text-gray-900'
-                          : 'text-gray-700'
-                      ))}
-                    >
-                      <PlusIcon className="h-3 w-3 mr-1 inline-block" />
-                      Add View
-                    </Link>
-                  )}
+                <Menu.Item className="relative">
+                  {({ active }) => <AddView active={active} />}
                 </Menu.Item>
               </div>
             </Menu.Items>
