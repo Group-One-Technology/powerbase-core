@@ -20,6 +20,7 @@ module Powerbase
       index = "table_records_#{@table_id}"
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       primary_keys = fields.select {|field| field.is_primary_key }
+      order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
       number_field_type = PowerbaseFieldType.find_by(name: "Number")
       date_field_type = PowerbaseFieldType.find_by(name: "Date")
 
@@ -32,19 +33,40 @@ module Powerbase
         )
       end
 
-      records = remote_db() {|db|
-        table = db.from(@table_name)
-        total_records = table.count
+      if !@powerbase_table.logs["migration"]
+        total_records = remote_db() {|db| db.from(@table_name).count }
 
-        puts "#{Time.now} Saving #{total_records} documents at index #{index}..."
+        @powerbase_table.logs["migration"] = {
+          total_records: total_records,
+          offset: 0,
+          indexed_records: 0,
+          start_time: Time.now,
+          end_time: nil,
+          errors: [],
+        }
 
-        table_select = [Sequel.lit("*")]
+        @powerbase_table.save
+      end
 
-        if @powerbase_database.adapter == "postgresql"
-          table_select.push(Sequel.lit("ctid"))
-        end
+      puts "#{Time.now} Saving #{@powerbase_table.logs["migration"]["total_records"]} documents at index #{index}..."
 
-        table.select(*table_select).paged_each(:rows_per_fetch => DEFAULT_PAGE_SIZE) {|record|
+      indexed_records = @powerbase_table.logs["migration"]["indexed_records"] || 0
+
+      while @powerbase_table.logs["migration"]["offset"] < @powerbase_table.logs["migration"]["total_records"]
+        records = remote_db() {|db|
+          table = db.from(@table_name)
+
+          table_select = [Sequel.lit("*")]
+          table_select.push(Sequel.lit("ctid")) if @powerbase_database.adapter == "postgresql"
+
+          table.select(*table_select)
+            .order(order_field.name.to_sym)
+            .limit(DEFAULT_PAGE_SIZE)
+            .offset(@powerbase_table.logs["migration"]["offset"])
+            .all
+        }
+
+        records.each do |record|
           doc_id = if primary_keys.length > 0
               primary_keys
                 .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
@@ -76,8 +98,7 @@ module Powerbase
             end
 
           doc = {}
-          record_keys = record.collect {|key, value| key }
-          record_keys.map do |key|
+          record.collect {|key, value| key }.each do |key|
             cur_field = fields.find {|field| field.name.to_sym == key }
 
             if cur_field
@@ -86,7 +107,7 @@ module Powerbase
                   record[key]
                 when date_field_type.id
                   date = DateTime.parse(record[key]) rescue nil
-                  if date
+                  if date != nil
                     date.utc.strftime("%FT%T.%L%z")
                   else
                     record[key]
@@ -96,6 +117,7 @@ module Powerbase
                 end
             end
           end
+
           doc = doc.slice!(:ctid)
 
           if doc_id != nil
@@ -107,12 +129,25 @@ module Powerbase
                 doc_as_upsert: true
               }
             )
+
+            indexed_records += 1
           else
-            puts "Failed to generate #{doc_id} for record in table with id of #{@table_id}"
-            puts record
+            @powerbase_table.logs["migration"]["errors"].push({
+              type: "Elasticsearch",
+              error: "Failed to generate doc_id for record in table with id of #{@table_id}",
+              record: record,
+            })
+            @powerbase_table.save
           end
-        }
-      }
+        end
+
+        @powerbase_table.logs["migration"]["offset"] = @powerbase_table.logs["migration"]["offset"] + DEFAULT_PAGE_SIZE
+        @powerbase_table.save
+      end
+
+      @powerbase_table.logs["migration"]["indexed_records"] = indexed_records
+      @powerbase_table.logs["migration"]["end_time"] = Time.now
+      @powerbase_table.save
     end
 
     # * Get a document/table record.

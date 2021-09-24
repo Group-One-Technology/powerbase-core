@@ -3,6 +3,7 @@ class PowerbaseTable < ApplicationRecord
   scope :turbo, -> { joins(:powerbase_database).where(powerbase_database: { is_turbo: true }) }
 
   validates :name, presence: true
+  serialize :logs, JSON
 
   belongs_to :powerbase_database
   belongs_to :default_view, class_name: "TableView", optional: true
