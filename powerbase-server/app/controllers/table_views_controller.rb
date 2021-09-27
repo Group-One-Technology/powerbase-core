@@ -82,6 +82,7 @@ class TableViewsController < ApplicationController
         id: view.id,
         name: view.name,
         table_id: view.powerbase_table_id,
+        view_type: view.view_type,
         filters: view.filters,
         created_at: view.created_at,
         updated_at: view.updated_at,
