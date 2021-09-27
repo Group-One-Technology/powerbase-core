@@ -5,9 +5,15 @@ class TableViewsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
-  schema(:show, :update) do
+  schema(:show, :destroy) do
+    required(:id).value(:integer)
+  end
+
+  schema(:update) do
     required(:id).value(:integer)
     optional(:filters)
+    optional(:view_type)
+    optional(:name)
   end
 
   schema(:create) do
@@ -35,7 +41,7 @@ class TableViewsController < ApplicationController
 
     if @view
       render json: { errors: ["View with name of \"#{safe_params[:name]}\" already exists for table \"#{@table.alias || @table.name}\""] }, status: :unprocessable_entity
-      return;
+      return
     end
 
     @view = @table.table_views.create({
@@ -69,11 +75,34 @@ class TableViewsController < ApplicationController
   def update
     view_params = safe_params.output
     @view = TableView.find(view_params[:id])
+
+    if view_params[:name]
+      @existing_view = TableView.find_by(name: view_params[:name], powerbase_table_id: @view.powerbase_table_id)
+
+      if @existing_view && @existing_view.id != @view.id
+        render json: { errors: "View with name of \"#{view_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
+        return
+      end
+    end
+
     if @view.update(view_params)
       render json: format_json(@view)
     else
       render json: @view.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /views/:id
+  def destroy
+    @view = TableView.find(safe_params[:id])
+    @table = @view.powerbase_table
+
+    if @table.default_view_id === @view.id
+      render json: { errors: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
+      return
+    end
+
+    @view.destroy
   end
 
   private
@@ -82,6 +111,7 @@ class TableViewsController < ApplicationController
         id: view.id,
         name: view.name,
         table_id: view.powerbase_table_id,
+        view_type: view.view_type,
         filters: view.filters,
         created_at: view.created_at,
         updated_at: view.updated_at,

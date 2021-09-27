@@ -1,23 +1,28 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Dialog, Transition, RadioGroup } from '@headlessui/react';
+import { TrashIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { createTableView } from '@lib/api/views';
+import { deleteTableView, updateTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
-import { IId } from '@lib/propTypes/common';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 
-export function AddView({ tableId, open, setOpen }) {
+export function EditView({ view, open, setOpen }) {
   const { viewsResponse } = useCurrentView();
-  const [name, setName] = useState('');
-  const [viewType, setViewType] = useState(VIEW_TYPES[0]);
+  const [name, setName] = useState(view.name);
+  const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
+
+  useEffect(() => {
+    setName(view.name);
+    setViewType(VIEW_TYPES.find((item) => item.value === view.viewType));
+  }, [view.id]);
 
   const handleNameChange = (evt) => {
     setName(evt.target.value);
@@ -27,14 +32,30 @@ export function AddView({ tableId, open, setOpen }) {
     setViewType(value);
   };
 
+  const handleDelete = async () => {
+    setLoading(true);
+    setError(undefined);
+
+    try {
+      await deleteTableView({ id: view.id });
+      await viewsResponse.mutate();
+
+      setOpen(false);
+    } catch (err) {
+      setError(err.response.data.errors || err.response.data.exception);
+    }
+
+    setLoading(false);
+  };
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
     setError(undefined);
 
     try {
-      await createTableView({
-        tableId,
+      await updateTableView({
+        id: view.id,
         name,
         viewType: viewType.value,
       });
@@ -138,6 +159,15 @@ export function AddView({ tableId, open, setOpen }) {
                 <div className="mt-4 flex gap-2">
                   <Button
                     type="button"
+                    className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-red-400 bg-white hover:bg-red-300 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                    onClick={handleDelete}
+                    disabled={loading}
+                  >
+                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                  <Button
+                    type="button"
                     className="ml-auto inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
                     disabled={loading}
                     onClick={() => setOpen(false)}
@@ -149,7 +179,7 @@ export function AddView({ tableId, open, setOpen }) {
                     className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     loading={loading}
                   >
-                    Create View
+                    Update View
                   </Button>
                 </div>
               </form>
@@ -161,8 +191,8 @@ export function AddView({ tableId, open, setOpen }) {
   );
 }
 
-AddView.propTypes = {
-  tableId: IId,
+EditView.propTypes = {
+  view: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
 };

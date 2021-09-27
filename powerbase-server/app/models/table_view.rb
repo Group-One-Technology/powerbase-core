@@ -5,5 +5,5 @@ class TableView < ApplicationRecord
   serialize :filters, JSON
 
   belongs_to :powerbase_table
-  has_many :view_field_options
+  has_many :view_field_options, dependent: :destroy
 end

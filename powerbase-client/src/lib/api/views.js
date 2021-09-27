@@ -39,3 +39,13 @@ export async function updateTableView({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function deleteTableView({ id, ...payload }) {
+  const response = await securedApi.delete(`/views/${id}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
