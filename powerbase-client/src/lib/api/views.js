@@ -20,6 +20,16 @@ export async function getTableViews({ tableId }) {
   return undefined;
 }
 
+export async function createTableView({ tableId, ...payload }) {
+  const response = await securedApi.post(`/tables/${tableId}/views`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function updateTableView({ id, ...payload }) {
   const response = await securedApi.put(`/views/${id}`, payload);
 
