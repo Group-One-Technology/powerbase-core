@@ -31,7 +31,7 @@ class TableViewsController < ApplicationController
   # POST /tables/:table_id/views
   def create
     @table = PowerbaseTable.find(safe_params[:table_id])
-    @view = TableView.find_by(name: safe_params[:name])
+    @view = TableView.find_by(name: safe_params[:name], powerbase_table_id: safe_params[:table_id])
 
     if @view
       render json: { errors: ["View with name of \"#{safe_params[:name]}\" already exists for table \"#{@table.alias || @table.name}\""] }, status: :unprocessable_entity
