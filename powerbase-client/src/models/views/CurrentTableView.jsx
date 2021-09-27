@@ -1,8 +1,9 @@
 import useSWR from 'swr';
 import { useState } from 'react';
 import constate from 'constate';
+
 import { useAuthUser } from '@models/AuthUser';
-import { getTables } from '@lib/api/tables';
+import { getTables, updateTableDefaultView } from '@lib/api/tables';
 import { getTableViews } from '@lib/api/views';
 
 function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
@@ -37,7 +38,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     viewsResponse.mutate();
   };
 
-  const handleViewChange = (view) => {
+  const handleViewChange = async (view) => {
     window.history.replaceState(
       null,
       currentTable.defaultViewId === view.id ? currentTable.name : `${currentTable.name} - ${view.name}`,
@@ -45,6 +46,13 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     );
 
     setViewId(view.id);
+
+    try {
+      await updateTableDefaultView({ tableId: view.tableId, viewId: view.id });
+      await tablesResponse.mutate();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return {

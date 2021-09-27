@@ -29,3 +29,13 @@ export async function updateTablesAliases(payload) {
 
   return undefined;
 }
+
+export async function updateTableDefaultView({ tableId, viewId }) {
+  const response = await securedApi.put(`tables/${tableId}/update_default_view`, { viewId });
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

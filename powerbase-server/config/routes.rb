@@ -23,12 +23,12 @@ Rails.application.routes.draw do
         end
       end
 
-
       member do
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
+        put 'update_default_view'
       end
     end
   end
