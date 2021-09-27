@@ -27,8 +27,8 @@ export function InlineRadio({
       disabled={disabled}
     >
       <div className="col-span-3">
-        <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>
-        {props['aria-label'] && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
+        {label && <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>}
+        {(!label && props['aria-label']) && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
       </div>
       <div className="col-span-9 flex space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row">
         {options.map((option) => (

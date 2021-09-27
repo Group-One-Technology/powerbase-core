@@ -11,7 +11,7 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Filter } from '@components/filter/Filter';
 import { Badge } from '@components/ui/Badge';
-import { TableViewsSelect } from './TableViewsSelect';
+import { ViewMenu } from '@components/views/ViewMenu';
 
 export function TableViewsNav({
   baseId,
@@ -27,7 +27,7 @@ export function TableViewsNav({
     <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
       <div className="relative flex  py-1.5 gap-x-2">
         <div className="flex-1 flex items-center gap-x-2">
-          <TableViewsSelect
+          <ViewMenu
             baseId={baseId}
             tableId={table.id}
             currentView={currentView}
