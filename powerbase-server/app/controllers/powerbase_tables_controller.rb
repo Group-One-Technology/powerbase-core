@@ -1,7 +1,7 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :set_database, only: [:index]
-  before_action :set_table, only: [:show, :update]
+  before_action :set_table, only: [:show, :update, :update_default_view]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -16,6 +16,10 @@ class PowerbaseTablesController < ApplicationController
     required(:tables)
   end
 
+  schema(:update_default_view) do
+    required(:id).value(:string)
+    required(:view_id)
+  end
 
   # GET /databases/:database_id/tables
   def index
@@ -48,6 +52,16 @@ class PowerbaseTablesController < ApplicationController
 
     render status: :no_content
   end
+
+  # PUT tables/:id/update_default_view
+  def update_default_view
+    if @table.update(default_view_id: safe_params[:view_id])
+      render json: format_json(@table)
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
+  end
+
 
   private
     def set_database
