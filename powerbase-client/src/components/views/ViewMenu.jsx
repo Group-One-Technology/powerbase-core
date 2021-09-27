@@ -4,21 +4,14 @@ import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, ViewGridIcon } from '@heroicons/react/outline';
 
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
 import { AddView } from './AddView';
 
-export function ViewMenu({
-  tableId,
-  baseId,
-  currentView,
-  views,
-}) {
+export function ViewMenu({ tableId, currentView, views }) {
+  const { handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
-
-  const handleChangeView = (value) => {
-    console.log({ value, baseId });
-  };
 
   const handleAddView = () => {
     setAddViewModalOpen(true);
@@ -43,18 +36,18 @@ export function ViewMenu({
           <Popover.Panel className="z-10 origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <ul>
-                {views.map((grid) => (
-                  <li key={grid.id} className="whitespace-nowrap">
+                {views.map((view) => (
+                  <li key={view.id} className="whitespace-nowrap">
                     <button
                       type="button"
-                      onClick={() => handleChangeView(grid)}
+                      onClick={() => handleViewChange(view)}
                       className={cn(
                         'w-full flex items-center p-2 text-xs hover:bg-gray-100 hover:text-gray-900',
-                        grid.id === currentView.id ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        view.id === currentView.id ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                       )}
                     >
                       <ViewGridIcon className="inline h-4 w-4 mr-1" />
-                      {grid.name}
+                      {view.name}
                     </button>
                   </li>
                 ))}
@@ -80,7 +73,6 @@ export function ViewMenu({
 
 ViewMenu.propTypes = {
   tableId: IId.isRequired,
-  baseId: IId.isRequired,
   currentView: IView.isRequired,
   views: PropTypes.arrayOf(IView).isRequired,
 };
