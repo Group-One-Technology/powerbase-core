@@ -17,7 +17,7 @@ Rails.application.routes.draw do
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
-      resources :table_views, path: 'views', as: 'views', only: [:index, :show, :update], shallow: true do
+      resources :table_views, path: 'views', as: 'views', except: [:new, :destroy], shallow: true do
         member do
           get 'fields', to: 'view_field_options#index', as: 'view_fields'
         end

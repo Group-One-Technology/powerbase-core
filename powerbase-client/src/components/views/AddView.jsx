@@ -3,13 +3,16 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Dialog, Transition, RadioGroup } from '@headlessui/react';
 
+import { useCurrentView } from '@models/views/CurrentTableView';
+import { createTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
+import { IId } from '@lib/propTypes/common';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
-import { IId } from '@lib/propTypes/common';
 
 export function AddView({ tableId, open, setOpen }) {
+  const { viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
 
@@ -24,23 +27,25 @@ export function AddView({ tableId, open, setOpen }) {
     setViewType(value);
   };
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
     setError(undefined);
 
     try {
-      // * TODO: Add Create View API
-      console.log({
+      await createTableView({
         tableId,
         name,
-        viewType,
+        viewType: viewType.value,
       });
+
+      await viewsResponse.mutate();
 
       setOpen(false);
     } catch (err) {
-      setError(err);
+      setError(err.response.data.errors || err.response.data.exception);
     }
+
     setLoading(false);
   };
 

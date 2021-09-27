@@ -44,7 +44,7 @@ export function ViewMenu({
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <ul>
                 {views.map((grid) => (
-                  <li key={grid.id}>
+                  <li key={grid.id} className="whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => handleChangeView(grid)}
