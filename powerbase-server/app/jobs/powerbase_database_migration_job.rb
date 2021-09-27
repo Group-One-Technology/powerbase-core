@@ -79,6 +79,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           powerbase_database_id: @database.id,
         ) || PowerbaseTable.new
         table.name = table_name
+        table.alias = table_name.to_s.titlecase
         table.powerbase_database_id = @database.id
         table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
         if !table.save
