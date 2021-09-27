@@ -135,10 +135,18 @@ export function AddView({ tableId, open, setOpen }) {
                     ))}
                   </div>
                 </RadioGroup>
-                <div className="mt-2">
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    type="button"
+                    className="ml-auto inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+                    disabled={loading}
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     type="submit"
-                    className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     loading={loading}
                   >
                     Create View
