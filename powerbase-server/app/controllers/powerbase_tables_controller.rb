@@ -25,7 +25,7 @@ class PowerbaseTablesController < ApplicationController
   def index
     render json: {
       migrated: @database.is_migrated,
-      tables: @database.powerbase_tables.map {|item| format_json(item)}
+      tables: @database.powerbase_tables.order(name: :asc).map {|item| format_json(item)}
     }
   end
 
