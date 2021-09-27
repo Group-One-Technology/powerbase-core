@@ -5,7 +5,7 @@ import { Dialog, Transition, RadioGroup } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { updateTableView } from '@lib/api/views';
+import { deleteTableView, updateTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
@@ -30,6 +30,22 @@ export function EditView({ view, open, setOpen }) {
 
   const handleViewTypeChange = (value) => {
     setViewType(value);
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    setError(undefined);
+
+    try {
+      await deleteTableView({ id: view.id });
+      await viewsResponse.mutate();
+
+      setOpen(false);
+    } catch (err) {
+      setError(err.response.data.errors || err.response.data.exception);
+    }
+
+    setLoading(false);
   };
 
   const handleSubmit = async (evt) => {
@@ -144,6 +160,7 @@ export function EditView({ view, open, setOpen }) {
                   <Button
                     type="button"
                     className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-red-400 bg-white hover:bg-red-300 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                    onClick={handleDelete}
                     disabled={loading}
                   >
                     <TrashIcon className="h-5 w-5" aria-hidden="true" />

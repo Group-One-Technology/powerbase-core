@@ -5,7 +5,7 @@ class TableViewsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
-  schema(:show) do
+  schema(:show, :destroy) do
     required(:id).value(:integer)
   end
 
@@ -80,7 +80,7 @@ class TableViewsController < ApplicationController
       @existing_view = TableView.find_by(name: view_params[:name], powerbase_table_id: @view.powerbase_table_id)
 
       if @existing_view && @existing_view.id != @view.id
-        render json: { errors: "View with name of \"#{view_params[:name]}\" already exists in this table." }
+        render json: { errors: "View with name of \"#{view_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
         return
       end
     end
@@ -90,6 +90,19 @@ class TableViewsController < ApplicationController
     else
       render json: @view.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /views/:id
+  def destroy
+    @view = TableView.find(safe_params[:id])
+    @table = @view.powerbase_table
+
+    if @table.default_view_id === @view.id
+      render json: { errors: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
+      return
+    end
+
+    @view.destroy
   end
 
   private
