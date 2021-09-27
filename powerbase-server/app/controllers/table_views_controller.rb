@@ -5,9 +5,15 @@ class TableViewsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
-  schema(:show, :update) do
+  schema(:show) do
+    required(:id).value(:integer)
+  end
+
+  schema(:update) do
     required(:id).value(:integer)
     optional(:filters)
+    optional(:view_type)
+    optional(:name)
   end
 
   schema(:create) do
@@ -35,7 +41,7 @@ class TableViewsController < ApplicationController
 
     if @view
       render json: { errors: ["View with name of \"#{safe_params[:name]}\" already exists for table \"#{@table.alias || @table.name}\""] }, status: :unprocessable_entity
-      return;
+      return
     end
 
     @view = @table.table_views.create({
@@ -69,6 +75,16 @@ class TableViewsController < ApplicationController
   def update
     view_params = safe_params.output
     @view = TableView.find(view_params[:id])
+
+    if view_params[:name]
+      @existing_view = TableView.find_by(name: view_params[:name], powerbase_table_id: @view.powerbase_table_id)
+
+      if @existing_view && @existing_view.id != @view.id
+        render json: { errors: "View with name of \"#{view_params[:name]}\" already exists in this table." }
+        return
+      end
+    end
+
     if @view.update(view_params)
       render json: format_json(@view)
     else
