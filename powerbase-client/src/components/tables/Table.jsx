@@ -28,7 +28,6 @@ export function Table({ base }) {
         handleTableChange={handleTableChange}
       />
       <TableContent
-        baseId={base.id}
         table={table}
         tables={tables}
         views={views}

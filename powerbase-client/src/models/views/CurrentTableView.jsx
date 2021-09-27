@@ -22,6 +22,9 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     { revalidateOnFocus: true },
   );
 
+  const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
+  const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
+
   const handleTableChange = ({ table }) => {
     window.history.replaceState(
       null,
@@ -34,16 +37,27 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     viewsResponse.mutate();
   };
 
+  const handleViewChange = (view) => {
+    window.history.replaceState(
+      null,
+      currentTable.defaultViewId === view.id ? currentTable.name : `${currentTable.name} - ${view.name}`,
+      `/base/${baseId}/table/${view.tableId}?view=${view.id}`,
+    );
+
+    setViewId(view.id);
+  };
+
   return {
-    table: tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString()),
+    table: currentTable,
     tables: tablesResponse.data?.tables,
     tablesResponse,
-    view: viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString()),
+    view: currentView,
     views: viewsResponse.data,
     viewsResponse,
     setViewId,
     setTableId,
     handleTableChange,
+    handleViewChange,
   };
 }
 

@@ -4,7 +4,6 @@ import { SearchIcon, SwitchVerticalIcon, ShareIcon } from '@heroicons/react/outl
 
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
@@ -14,7 +13,6 @@ import { Badge } from '@components/ui/Badge';
 import { ViewMenu } from '@components/views/ViewMenu';
 
 export function TableViewsNav({
-  baseId,
   table,
   currentView,
   views,
@@ -28,7 +26,6 @@ export function TableViewsNav({
       <div className="relative flex  py-1.5 gap-x-2">
         <div className="flex-1 flex items-center gap-x-2">
           <ViewMenu
-            baseId={baseId}
             tableId={table.id}
             currentView={currentView}
             views={views}
@@ -72,7 +69,6 @@ export function TableViewsNav({
 }
 
 TableViewsNav.propTypes = {
-  baseId: IId.isRequired,
   table: ITable,
   currentView: IView,
   views: PropTypes.arrayOf(IView),

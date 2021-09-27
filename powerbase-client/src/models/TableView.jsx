@@ -4,12 +4,13 @@ import useSWR from 'swr';
 import { getTableView } from '@lib/api/views';
 import { useAuthUser } from './AuthUser';
 
-function useTableViewModel({ id }) {
+function useTableViewModel({ id, initialData }) {
   const { authUser } = useAuthUser();
 
   const response = useSWR(
     (id && authUser) ? `/views/${id}` : null,
     () => getTableView({ id }),
+    { initialData },
   );
 
   return {

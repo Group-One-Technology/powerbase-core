@@ -9,7 +9,6 @@ import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { FieldTypesProvider } from '@models/FieldTypes';
-import { IId } from '@lib/propTypes/common';
 import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
@@ -18,12 +17,7 @@ import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableContent = React.memo(({
-  views,
-  baseId,
-  table,
-  tables,
-}) => {
+const BaseTableContent = React.memo(({ views, table, tables }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
 
@@ -40,7 +34,6 @@ const BaseTableContent = React.memo(({
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
             <TableViewsNav
-              baseId={baseId}
               table={table}
               currentView={view}
               views={views}
@@ -57,14 +50,12 @@ const BaseTableContent = React.memo(({
 });
 
 BaseTableContent.propTypes = {
-  baseId: IId,
   table: ITable,
   tables: PropTypes.arrayOf(ITable),
   views: PropTypes.arrayOf(IView),
 };
 
 export const TableContent = React.memo(({
-  baseId,
   table,
   tables,
   currentView,
@@ -77,10 +68,9 @@ export const TableContent = React.memo(({
   return (
     <TableConnectionsProvider tableId={table.id}>
       <TableReferencedConnectionsProvider tableId={table.id}>
-        <TableViewProvider id={currentView?.id}>
+        <TableViewProvider id={currentView?.id} initialData={currentView}>
           <ViewFieldsProvider id={currentView?.id}>
             <BaseTableContent
-              baseId={baseId}
               table={table}
               tables={tables}
               views={views}
@@ -93,7 +83,6 @@ export const TableContent = React.memo(({
 });
 
 TableContent.propTypes = {
-  baseId: IId,
   table: ITable,
   tables: PropTypes.arrayOf(ITable),
   currentView: IView,
