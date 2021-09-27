@@ -44,6 +44,21 @@ class TableViewsController < ApplicationController
     })
 
     if @view.save
+      fields = PowerbaseField.where(powerbase_table_id: @table.id)
+      fields.each_with_index do |cur_field, index|
+        view_field = ViewFieldOption.new
+        view_field.width = case cur_field.powerbase_field_type_id
+          when 3
+            cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
+          else
+            300
+          end
+        view_field.order = index + 1
+        view_field.table_view_id = @view.id
+        view_field.powerbase_field_id = cur_field.id
+        view_field.save
+      end
+
       render json: format_json(@view), status: :created
     else
       render json: @view.errors, status: :unprocessable_entity
