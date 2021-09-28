@@ -6,7 +6,7 @@ import debounce from 'lodash.debounce';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
-import { useRecordsFilter } from '@models/views/RecordsFilter';
+import { useViewOptions } from '@models/views/ViewOptions';
 import { updateTableView } from '@lib/api/views';
 import { IView } from '@lib/propTypes/view';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
@@ -16,7 +16,7 @@ import { FilterGroup } from './FilterGroup';
 export function Filter({ view }) {
   const filterRef = useRef();
   const { data: fields } = useViewFields();
-  const { filters: { value: initialFilters }, setFilters } = useRecordsFilter();
+  const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateTableRecords = useCallback(debounce(async () => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import constate from 'constate';
 
-function useRecordsFilterModel({ viewId, initialFilters }) {
+function useViewOptionsModel({ viewId, initialFilters }) {
   const [filters, setFilters] = useState(initialFilters);
 
   useEffect(() => {
@@ -15,4 +15,4 @@ function useRecordsFilterModel({ viewId, initialFilters }) {
   };
 }
 
-export const [RecordsFilterProvider, useRecordsFilter] = constate(useRecordsFilterModel);
+export const [ViewOptionsProvider, useViewOptions] = constate(useViewOptionsModel);
