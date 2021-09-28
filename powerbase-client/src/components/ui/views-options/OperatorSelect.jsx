@@ -4,7 +4,7 @@ import cn from 'classnames';
 import { SelectorIcon } from '@heroicons/react/solid';
 import { Listbox } from '@headlessui/react';
 
-export function FilterOperator({
+export function OperatorSelect({
   id,
   value,
   options,
@@ -44,7 +44,7 @@ export function FilterOperator({
   );
 }
 
-FilterOperator.propTypes = {
+OperatorSelect.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.string,
   options: PropTypes.array,

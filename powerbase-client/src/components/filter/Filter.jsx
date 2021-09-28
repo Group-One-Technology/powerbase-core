@@ -1,21 +1,21 @@
 import React, { Fragment, useRef, useCallback } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
 import debounce from 'lodash.debounce';
 
 import { useTableRecords } from '@models/TableRecords';
 import { useRecordsFilter } from '@models/views/RecordsFilter';
+import { useViewFields } from '@models/ViewFields';
 import { updateTableView } from '@lib/api/views';
 import { IView } from '@lib/propTypes/view';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
-import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter({ view, fields }) {
+export function Filter({ view }) {
   const filterRef = useRef();
+  const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useRecordsFilter();
   const { mutate: mutateTableRecords } = useTableRecords();
 
@@ -95,5 +95,4 @@ export function Filter({ view, fields }) {
 
 Filter.propTypes = {
   view: IView.isRequired,
-  fields: PropTypes.arrayOf(IViewField),
 };

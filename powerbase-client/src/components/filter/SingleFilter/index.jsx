@@ -9,8 +9,8 @@ import { useOperator } from '@lib/hooks/filter/useOperator';
 import { useFilterValue } from '@lib/hooks/filter/useFilterValue';
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
-import { FilterField } from './FilterField';
-import { FilterOperator } from './FilterOperator';
+import { FieldSelect } from '../../ui/views-options/FieldSelect';
+import { OperatorSelect } from '../../ui/views-options/OperatorSelect';
 import { FilterValue } from './FilterValue';
 import { FilterLogicalOperator } from '../FilterLogicalOperator';
 
@@ -115,14 +115,14 @@ export function SingleFilter({
       </div>
       <div className="flex-1 flex gap-2 items-center">
         <label htmlFor={`filter${id}-firstOperand`} className="sr-only">First Operand (Field)</label>
-        <FilterField
+        <FieldSelect
           id={`filter${id}-firstOperand`}
           value={field}
           options={fields}
           onChange={handleFieldChange}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
-        <FilterOperator
+        <OperatorSelect
           id={`filter${id}-operator`}
           value={operator}
           options={operators}
