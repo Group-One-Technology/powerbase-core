@@ -8,7 +8,10 @@ const SORT = [
 
 function useViewOptionsModel({ viewId, initialFilters, initialSort = SORT }) {
   const [filters, setFilters] = useState(initialFilters);
-  const [sort, setSort] = useState(initialSort);
+  const [sort, setSort] = useState(initialSort.map((item, index) => ({
+    ...item,
+    id: `${item.field}-${item.operator}-${index}`,
+  })));
 
   useEffect(() => {
     setFilters(initialFilters);

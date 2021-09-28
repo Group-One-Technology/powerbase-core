@@ -10,7 +10,7 @@ import { SortOperator } from './SortOperator';
 
 const SORT_OPERATORS = ['ascending', 'descending'];
 
-export function SortItem({ id, sort }) {
+export function SortItem({ id, sort, remove }) {
   const { data: fields } = useViewFields();
   const [field, setField] = useState(sort?.field
     ? fields?.find((item) => item.name === sort.field) || fields[0]
@@ -23,10 +23,13 @@ export function SortItem({ id, sort }) {
     ));
 
     setField(selectedField);
+
+    // updateTableRecords();
   };
 
   const handleOperatorChange = (selectedOperator) => {
     setOperator(selectedOperator);
+    // updateTableRecords();
   };
 
   return (
@@ -60,6 +63,7 @@ export function SortItem({ id, sort }) {
         <button
           type="button"
           className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+          onClick={() => remove(sort.id)}
         >
           <span className="sr-only">Remove Sort</span>
           <XIcon className="block h-4 w-4" />
@@ -72,4 +76,5 @@ export function SortItem({ id, sort }) {
 SortItem.propTypes = {
   id: PropTypes.string.isRequired,
   sort: PropTypes.object,
+  remove: PropTypes.func.isRequired,
 };

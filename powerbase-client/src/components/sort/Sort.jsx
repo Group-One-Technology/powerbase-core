@@ -3,13 +3,19 @@ import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 
-import { IView } from '@lib/propTypes/view';
+import { useViewFields } from '@models/ViewFields';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { IView } from '@lib/propTypes/view';
 import { SortItem } from './SortItem';
 
 export function Sort({ view }) {
   const sortRef = useRef();
-  const { sort } = useViewOptions();
+  const { data: fields } = useViewFields();
+  const { sort, setSort } = useViewOptions();
+
+  const handleRemoveSortItem = (sortItemId) => {
+    setSort((prevSort) => prevSort.filter((item) => item.id !== sortItemId));
+  };
 
   return (
     <Popover className="relative">
@@ -44,10 +50,14 @@ export function Sort({ view }) {
                     </strong>
                   </h4>
                   <div ref={sortRef} className="m-3 flex flex-col gap-y-2">
-                    {sort.map((item, index) => {
-                      const id = `${item.field}-${item.operator}-${index}`;
-                      return <SortItem key={id} id={id} sort={item} />;
-                    })}
+                    {sort.map((item) => (
+                      <SortItem
+                        key={item.id}
+                        id={item.id}
+                        sort={item}
+                        remove={handleRemoveSortItem}
+                      />
+                    ))}
                     {sort.length === 0 && (
                       <p className="ml-3 text-sm text-gray-700">
                         There are no sort for this view.
