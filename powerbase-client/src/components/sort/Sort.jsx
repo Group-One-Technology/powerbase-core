@@ -7,6 +7,7 @@ import debounce from 'lodash.debounce';
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { IView } from '@lib/propTypes/view';
 import { SortItem } from './SortItem';
@@ -26,7 +27,7 @@ export function Sort({ view }) {
       }));
 
       setSort(updatedSort);
-      // updateTableView({ id: view.id, filters: updatedFilter });
+      updateTableView({ id: view.id, sort });
       await mutateTableRecords();
     }
   };
