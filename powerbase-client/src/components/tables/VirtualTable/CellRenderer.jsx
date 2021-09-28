@@ -76,11 +76,7 @@ function CellValue({
         {(isHeader && fieldType != null) && (
           <FieldTypeIcon fieldType={fieldType} className="mr-1" />
         )}
-        <span
-          className={cn(
-            isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded',
-          )}
-        >
+        <span className={cn((value?.toString().length && isForeignKey && !isHeader) && 'px-2 py-0.25 bg-blue-50 rounded')}>
           {value?.toString()}
         </span>
       </>
