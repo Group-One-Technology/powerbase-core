@@ -51,6 +51,9 @@ export function SingleRecordModal({
               const primaryKeys = item.isForeignKey && item.foreignKey
                 ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
                 : undefined;
+              const tableName = item.foreignKey && item.value
+                ? tables.find((table) => table.id.toString() === item.foreignKey.referencedTableId.toString())?.name || item.name
+                : item.name;
 
               return (
                 <TableRecordProvider
@@ -64,17 +67,7 @@ export function SingleRecordModal({
                   primaryKeys={primaryKeys}
                 >
                   <RecordItem
-                    item={{
-                      ...item,
-                      name: item.isForeignKey && item.value
-                        ? tables
-                          .find((table) => (
-                            table.id.toString() === item?.foreignKey.referencedTableId.toString()
-                          ))
-                          ?.name
-                            || item.name
-                        : item.name,
-                    }}
+                    item={{ ...item, tableName }}
                     fieldTypes={fieldTypes}
                     handleRecordInputChange={handleRecordInputChange}
                   />

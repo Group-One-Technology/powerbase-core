@@ -21,7 +21,7 @@ export function Dot({ children, color = 'gray', className }) {
 }
 
 Dot.propTypes = {
-  children: PropTypes.any.isRequired,
+  children: PropTypes.any,
   color: PropTypes.oneOf(Object.keys(COLOR)),
   className: PropTypes.string,
 };

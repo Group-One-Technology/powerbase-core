@@ -10,17 +10,20 @@ import { RecordItemSelect } from './RecordItemSelect';
 import { LinkedRecordItem } from './LinkedRecordItem';
 
 export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
-  const { data: linkedRecord } = useTableRecord();
+  const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
 
   const labelContent = (
     <>
       <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} className="mr-1" />
-      <span className="font-normal">{item.name.toUpperCase()}</span>
+      <span className="font-normal">
+        {(!linkedRecordError && item.tableName && item.tableName !== item.name) && `${item.tableName.toUpperCase()} - `}
+        {item.name.toUpperCase()}
+      </span>
     </>
   );
 
-  if (item.isForeignKey && item.value) {
+  if (item.isForeignKey && item.value && !linkedRecordError) {
     return (
       <div className="w-full mb-8">
         <h4 htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
