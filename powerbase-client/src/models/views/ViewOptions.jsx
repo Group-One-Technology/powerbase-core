@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 import constate from 'constate';
 
-const SORT = [
-  { field: 'id', operator: 'ascending' },
-  { field: 'title', operator: 'descending' },
-];
-
-function useViewOptionsModel({ viewId, initialFilters, initialSort = SORT }) {
+function useViewOptionsModel({ viewId, initialFilters, initialSort }) {
   const [filters, setFilters] = useState(initialFilters);
-  const [sort, setSort] = useState(initialSort.map((item, index) => ({
+  const [sort, setSort] = useState(initialSort?.map((item, index) => ({
     ...item,
     id: `${item.field}-${item.operator}-${index}`,
-  })));
+  })) || []);
 
   useEffect(() => {
     setFilters(initialFilters);
