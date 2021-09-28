@@ -12,7 +12,7 @@ export function SortOperator({
 }) {
   return (
     <Listbox value={value} onChange={onChange}>
-      <div className="block w-48">
+      <div className="block w-52">
         <Listbox.Button
           id={id}
           className="block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
