@@ -120,7 +120,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.powerbase_table_id = table.id
 
           column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
-            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
+            .where("? ILIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
             .take
 
           field_type = PowerbaseFieldType.find_by(
