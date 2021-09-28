@@ -18,20 +18,15 @@ function CellValue({
   isHoveredRow,
   isLastRecord,
   isForeignKey,
-  fieldTypeId,
-  fieldTypes,
+  fieldType,
   handleExpandRecord,
 }) {
-  const fieldType = fieldTypeId
-    ? fieldTypes?.find((item) => item.id.toString() === fieldTypeId.toString())
-    : undefined;
-
   if (isHeader || isLoaded) {
     if (!isHeader) {
       if (isRowNo) {
         return (
           <>
-            <span className="flex-1 text-right mr-4">
+            <span className="flex-1 mr-4 text-right truncate">
               {value?.toString()}
             </span>
             <span className="flex-1">
@@ -78,7 +73,7 @@ function CellValue({
 
     return (
       <>
-        {(isHeader && fieldTypeId != null) && (
+        {(isHeader && fieldType != null) && (
           <FieldTypeIcon fieldType={fieldType} className="mr-1" />
         )}
         <span
@@ -103,8 +98,7 @@ CellValue.propTypes = {
   isHoveredRow: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
-  fieldTypeId: PropTypes.number,
-  fieldTypes: PropTypes.array.isRequired,
+  fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
 };
 
@@ -129,6 +123,10 @@ export function CellRenderer({
   mutateViewFields,
   fields,
 }) {
+  const fieldType = fieldTypeId
+    ? fieldTypes?.find((item) => item.id.toString() === fieldTypeId.toString())
+    : undefined;
+
   const handleMouseEnter = () => {
     setHoveredCell({
       row: rowIndex,
@@ -164,12 +162,11 @@ export function CellRenderer({
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2',
+        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2',
         isHeader && !isHoveredRow && 'bg-gray-100',
         isHoveredRow && 'bg-gray-50',
-        isRowNo && 'flex justify-center text-xs text-gray-500',
-        !isRowNo && 'border-r',
-        fieldTypeId !== 3 && 'should-truncate-field',
+        isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
+        (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
       )}
       style={style}
       tabIndex={0}
@@ -197,8 +194,7 @@ export function CellRenderer({
         isHoveredRow={isHoveredRow}
         isLastRecord={isLastRecord}
         isForeignKey={isForeignKey}
-        fieldTypeId={fieldTypeId}
-        fieldTypes={fieldTypes}
+        fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
       />
       {rowIndex === 0 && columnIndex !== 0 && (
