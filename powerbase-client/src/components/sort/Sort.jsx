@@ -2,7 +2,6 @@ import React, { Fragment, useRef } from 'react';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
-import debounce from 'lodash.debounce';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
