@@ -10,10 +10,12 @@ import { SortOperator } from './SortOperator';
 
 const SORT_OPERATORS = ['ascending', 'descending'];
 
-export function SortItem({ id }) {
+export function SortItem({ id, sort }) {
   const { data: fields } = useViewFields();
-  const [field, setField] = useState(fields[0]);
-  const [operator, setOperator] = useState(SORT_OPERATORS[0]);
+  const [field, setField] = useState(sort?.field
+    ? fields?.find((item) => item.name === sort.field) || fields[0]
+    : fields[0]);
+  const [operator, setOperator] = useState(sort?.operator || SORT_OPERATORS[0]);
 
   const handleFieldChange = (selectedFieldId) => {
     const selectedField = fields?.find((item) => (
@@ -69,4 +71,5 @@ export function SortItem({ id }) {
 
 SortItem.propTypes = {
   id: PropTypes.string.isRequired,
+  sort: PropTypes.object,
 };
