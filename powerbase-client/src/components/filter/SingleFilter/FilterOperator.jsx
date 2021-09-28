@@ -31,7 +31,7 @@ export function FilterOperator({
               key={option}
               value={option}
               className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate',
+                'cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate capitalize',
                 (active || selected) ? 'bg-gray-100' : 'bg-white',
               )}
             >
