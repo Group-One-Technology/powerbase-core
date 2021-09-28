@@ -7,7 +7,7 @@ import { Listbox } from '@headlessui/react';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
-export function FieldSelect({
+export function FilterField({
   id,
   value,
   options,
@@ -57,7 +57,7 @@ export function FieldSelect({
   );
 }
 
-FieldSelect.propTypes = {
+FilterField.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.object,
   options: PropTypes.array,
