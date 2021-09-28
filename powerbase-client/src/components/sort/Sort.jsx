@@ -2,8 +2,10 @@ import React, { Fragment, useRef } from 'react';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
+import debounce from 'lodash.debounce';
 
 import { useViewFields } from '@models/ViewFields';
+import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { IView } from '@lib/propTypes/view';
@@ -13,8 +15,23 @@ export function Sort({ view }) {
   const sortRef = useRef();
   const { data: fields } = useViewFields();
   const { sort, setSort } = useViewOptions();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
-  const handleAddSortItem = () => {
+  const updateRecords = async () => {
+    if (sortRef.current) {
+      const updatedSort = Array.from(sortRef.current.querySelectorAll('.sort') || []).map(({ attributes }) => ({
+        id: attributes['data-id']?.nodeValue,
+        field: attributes['data-field']?.nodeValue,
+        operator: attributes['data-operator']?.nodeValue,
+      }));
+
+      setSort(updatedSort);
+      // updateTableView({ id: view.id, filters: updatedFilter });
+      await mutateTableRecords();
+    }
+  };
+
+  const handleAddSortItem = async () => {
     setSort((prevSort) => [
       ...prevSort,
       {
@@ -25,8 +42,10 @@ export function Sort({ view }) {
     ]);
   };
 
-  const handleRemoveSortItem = (sortItemId) => {
+  const handleRemoveSortItem = async (sortItemId) => {
     setSort((prevSort) => prevSort.filter((item) => item.id !== sortItemId));
+
+    await mutateTableRecords();
   };
 
   return (
@@ -68,6 +87,7 @@ export function Sort({ view }) {
                         id={item.id}
                         sort={item}
                         remove={handleRemoveSortItem}
+                        updateRecords={updateRecords}
                       />
                     ))}
                     {sort.length === 0 && (

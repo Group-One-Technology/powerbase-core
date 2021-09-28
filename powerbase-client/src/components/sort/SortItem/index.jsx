@@ -9,7 +9,12 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortField } from './SortField';
 import { SortOperator } from './SortOperator';
 
-export function SortItem({ id, sort, remove }) {
+export function SortItem({
+  id,
+  sort,
+  remove,
+  updateRecords,
+}) {
   const { data: fields } = useViewFields();
   const [field, setField] = useState(sort?.field
     ? fields?.find((item) => item.name === sort.field) || fields[0]
@@ -23,17 +28,18 @@ export function SortItem({ id, sort, remove }) {
 
     setField(selectedField);
 
-    // updateTableRecords();
+    updateRecords();
   };
 
   const handleOperatorChange = (selectedOperator) => {
     setOperator(selectedOperator);
-    // updateTableRecords();
+    updateRecords();
   };
 
   return (
     <div
-      data-field={field}
+      data-id={id}
+      data-field={field.name}
       data-operator={operator}
       className="sort flex gap-2 items-center"
     >
@@ -76,4 +82,5 @@ SortItem.propTypes = {
   id: PropTypes.string.isRequired,
   sort: PropTypes.object,
   remove: PropTypes.func.isRequired,
+  updateRecords: PropTypes.func.isRequired,
 };
