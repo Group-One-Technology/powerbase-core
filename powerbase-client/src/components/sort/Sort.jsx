@@ -5,6 +5,7 @@ import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outlin
 
 import { useViewFields } from '@models/ViewFields';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { SORT_OPERATORS } from '@lib/constants/sort';
 import { IView } from '@lib/propTypes/view';
 import { SortItem } from './SortItem';
 
@@ -12,6 +13,17 @@ export function Sort({ view }) {
   const sortRef = useRef();
   const { data: fields } = useViewFields();
   const { sort, setSort } = useViewOptions();
+
+  const handleAddSortItem = () => {
+    setSort((prevSort) => [
+      ...prevSort,
+      {
+        id: `${fields[0].name}-${SORT_OPERATORS[0]}-${prevSort.length}`,
+        field: fields[0].name,
+        operator: SORT_OPERATORS[0],
+      },
+    ]);
+  };
 
   const handleRemoveSortItem = (sortItemId) => {
     setSort((prevSort) => prevSort.filter((item) => item.id !== sortItemId));
@@ -67,6 +79,7 @@ export function Sort({ view }) {
                   <button
                     type="button"
                     className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100"
+                    onClick={handleAddSortItem}
                   >
                     <PlusIcon className="mr-1 h-4 w-4" />
                     Add a sort

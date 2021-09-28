@@ -4,11 +4,10 @@ import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
+import { SORT_OPERATORS } from '@lib/constants/sort';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortField } from './SortField';
 import { SortOperator } from './SortOperator';
-
-const SORT_OPERATORS = ['ascending', 'descending'];
 
 export function SortItem({ id, sort, remove }) {
   const { data: fields } = useViewFields();
