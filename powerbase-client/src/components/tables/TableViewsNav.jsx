@@ -1,23 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SearchIcon, SwitchVerticalIcon, ShareIcon } from '@heroicons/react/outline';
+import { SearchIcon, ShareIcon } from '@heroicons/react/outline';
 
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { IView } from '@lib/propTypes/view';
-import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 
-import { Filter } from '@components/filter/Filter';
 import { Badge } from '@components/ui/Badge';
 import { ViewMenu } from '@components/views/ViewMenu';
+import { Filter } from '@components/filter/Filter';
+import { Sort } from '@components/sort/Sort';
 
-export function TableViewsNav({
-  table,
-  currentView,
-  views,
-  fields,
-}) {
+export function TableViewsNav({ table, currentView, views }) {
   const { data: records } = useTableRecords();
   const { data: totalRecords } = useTableRecordsCount();
 
@@ -38,14 +33,8 @@ export function TableViewsNav({
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-2">
-          <Filter fields={fields} view={currentView} />
-          <button
-            type="button"
-            className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            <span className="sr-only">Sort fields</span>
-            <SwitchVerticalIcon className="block h-4 w-4" />
-          </button>
+          <Filter view={currentView} />
+          <Sort view={currentView} />
           <button
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -72,5 +61,4 @@ TableViewsNav.propTypes = {
   table: ITable,
   currentView: IView,
   views: PropTypes.arrayOf(IView),
-  fields: PropTypes.arrayOf(IViewField),
 };
