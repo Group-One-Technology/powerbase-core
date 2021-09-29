@@ -229,68 +229,48 @@ module Powerbase
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
-      sort = if options[:sort] != nil && options[:sort].length > 0
-          options[:sort]
-        else
-          primary_keys = fields.select {|field| field.is_primary_key }
-          order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
 
-          [{ field: order_field.name, operator: "asc" }]
-        end
-
-      number_field_type = PowerbaseFieldType.find_by(name: "Number")
-      date_field_type = PowerbaseFieldType.find_by(name: "Date")
+      query = Powerbase::QueryCompiler.new({
+        table_id: @table_id,
+        query: options[:filters],
+        sort: options[:sort],
+        adapter: @powerbase_database.adapter,
+        turbo: @is_turbo
+      })
 
       if @is_turbo
-        sort = sort.map do |sort_item|
-          sort_field = fields.find {|field| field.name == sort_item[:field] }
-          order = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
-              "desc"
-            else
-              "asc"
-            end
-          column_name = if sort_field.powerbase_field_type_id == number_field_type.id || sort_field.powerbase_field_type_id == date_field_type.id
-              sort_field.name
-            else
-              "#{sort_field.name}.keyword"
-            end
-
-          sort_column = {}
-          sort_column[column_name] = { order: order, unmapped_type: "long" } if sort_field
-          sort_column
-        end
-
         search_params = {
           from: (page - 1) * limit,
           size: limit,
-          sort: sort
+          sort: query.sort
         }
 
         if options[:filters]
-          query_string = Powerbase::QueryCompiler.new({
-            query: options[:filters],
-            adapter: @powerbase_database.adapter,
-          })
           search_params[:query] = {
             query_string: {
-              query: query_string.to_elasticsearch,
+              query: query.to_elasticsearch,
               time_zone: "+00:00"
             }
           }
         end
 
         result = @esclient.search(index: index, body: search_params)
-
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query_string = Powerbase::QueryCompiler.new({
-          query: options[:filters],
-          adapter: @powerbase_database.adapter,
-        })
-
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(query_string.to_sequel) : true)
+            .tap do |x|
+              query.sort.each do |sort_item|
+                if sort_item[:operator] == "asc"
+                  x = x.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
+                else
+                  x = x.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+                end
+              end
+
+              break x
+            end
+            .where(options[:filters] ? eval(query.to_sequel) : true)
             .paginate(page, limit)
             .all
         }

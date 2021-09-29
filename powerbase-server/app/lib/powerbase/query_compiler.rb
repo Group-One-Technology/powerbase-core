@@ -19,13 +19,17 @@ module Powerbase
     }
 
     # Accepts the following options:
-    # :query :: a query string for filtering
-    # :sort :: a sort hash
-    # :adapter :: the database adapter used. Can either be mysql2 or postgresql
+    # :table_id :: id of the table to be queried.
+    # :query :: a query string for filtering.
+    # :sort :: a sort hash.
+    # :adapter :: the database adapter used. Can either be mysql2 or postgresql.
+    # :turbo :: a boolean for turbo mode.
     def initialize(options)
+      @table_id = options[:table_id] || nil
       @query = options[:query] || nil
       @sort = options[:sort] || []
       @adapter = options[:adapter] || "postgresql"
+      @turbo = options[:turbo] || false
     end
 
     # * Find records by their fields.
@@ -44,6 +48,50 @@ module Powerbase
       @query = { operator: "and", filters: updated_filters }
 
       self
+    end
+
+    def sort
+      fields = PowerbaseField.where(powerbase_table_id: @table_id)
+      number_field_type = PowerbaseFieldType.find_by(name: "Number")
+      date_field_type = PowerbaseFieldType.find_by(name: "Date")
+
+      sort = if @sort != nil && @sort.length > 0
+          @sort.map do |sort_item|
+            operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
+                "desc"
+              else
+                "asc"
+              end
+
+            { field: sort_item[:field], operator: operator }
+          end
+        else
+          primary_keys = fields.select {|field| field.is_primary_key }
+          order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
+
+          [{ field: order_field.name, operator: "asc" }]
+        end
+
+      if @turbo
+        sort.map do |sort_item|
+          sort_field = fields.find {|field| field.name == sort_item[:field] }
+          sort_column = {}
+
+          if sort_field
+            column_name = if sort_field.powerbase_field_type_id == number_field_type.id || sort_field.powerbase_field_type_id == date_field_type.id
+                sort_field.name
+              else
+                "#{sort_field.name}.keyword"
+              end
+
+            sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
+          end
+
+          sort_column
+        end
+      else
+        sort
+      end
     end
 
     # * Transform given query string or hash into sequel query string
