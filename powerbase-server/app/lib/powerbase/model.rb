@@ -165,7 +165,7 @@ module Powerbase
 
         @esclient.get(index: index, id: format_doc_id(id))["_source"]
       else
-        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
+        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
         query_string = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
@@ -187,7 +187,7 @@ module Powerbase
       limit = options[:limit] || 5
 
       if @is_turbo
-        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
+        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
         query_string = query.find_by(options[:filters]).to_elasticsearch
 
         result = @esclient.search(
@@ -206,7 +206,7 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query = Powerbase::QueryCompiler.new(nil, @powerbase_database.adapter)
+        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
         query_string = query.find_by(options[:filters]).to_sequel
 
         remote_db() {|db|
@@ -267,7 +267,10 @@ module Powerbase
         }
 
         if options[:filters]
-          query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
+          query_string = Powerbase::QueryCompiler.new({
+            query: options[:filters],
+            adapter: @powerbase_database.adapter,
+          })
           search_params[:query] = {
             query_string: {
               query: query_string.to_elasticsearch,
@@ -280,7 +283,10 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
+        query_string = Powerbase::QueryCompiler.new({
+          query: options[:filters],
+          adapter: @powerbase_database.adapter,
+        })
 
         remote_db() {|db|
           db.from(@table_name)
@@ -298,7 +304,10 @@ module Powerbase
       if @is_turbo
         index = "table_records_#{@table_id}"
         query = if options[:filters]
-            query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
+            query_string = Powerbase::QueryCompiler.new({
+              query: options[:filters],
+              adapter: @powerbase_database.adapter
+            })
 
             {
               query: {
@@ -315,7 +324,10 @@ module Powerbase
         response = @esclient.perform_request("GET", "#{index}/_count", {}, query).body
         response["count"]
       else
-        query_string = Powerbase::QueryCompiler.new(options[:filters], @powerbase_database.adapter)
+        query_string = Powerbase::QueryCompiler.new({
+          query: options[:filters],
+          adapter: @powerbase_database.adapter,
+        })
 
         remote_db() {|db|
           db.from(@table_name)

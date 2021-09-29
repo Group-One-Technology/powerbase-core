@@ -18,9 +18,14 @@ module Powerbase
       close_parenthesis: 'CLOSE_PARENTHESIS',
     }
 
-    def initialize(query = nil, adapter = "postgresql")
-      @query = query
-      @adapter = adapter
+    # Accepts the following options:
+    # :query :: a query string for filtering
+    # :sort :: a sort hash
+    # :adapter :: the database adapter used. Can either be mysql2 or postgresql
+    def initialize(options)
+      @query = options[:query] || nil
+      @sort = options[:sort] || []
+      @adapter = options[:adapter] || "postgresql"
     end
 
     # * Find records by their fields.
@@ -355,7 +360,7 @@ module Powerbase
 
       # * Remove escaped quotes
       def sanitize(value)
-        value.class == String ? value.gsub(/['"]/,'') : value
+        value.class == String ? value.gsub(/['"#]/,'') : value
       end
 
       # * Format date to UTC
