@@ -1,9 +1,10 @@
 class TableRecordsController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
     required(:id).value(:integer)
     optional(:filters)
+    optional(:sort)
     optional(:page).value(:integer)
     optional(:limit).value(:integer)
   end
@@ -20,7 +21,8 @@ class TableRecordsController < ApplicationController
     records = model.search({
       page: safe_params[:page],
       limit: safe_params[:limit],
-      filters: safe_params[:filters]
+      filters: safe_params[:filters],
+      sort: safe_params[:sort],
     })
 
     render json: records

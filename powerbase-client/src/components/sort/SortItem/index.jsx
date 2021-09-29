@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
@@ -27,14 +27,15 @@ export function SortItem({
     ));
 
     setField(selectedField);
-
-    updateRecords();
   };
 
   const handleOperatorChange = (selectedOperator) => {
     setOperator(selectedOperator);
-    updateRecords();
   };
+
+  useEffect(() => {
+    updateRecords();
+  }, [field, operator]);
 
   return (
     <div
