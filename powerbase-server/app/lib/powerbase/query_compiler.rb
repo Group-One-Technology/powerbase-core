@@ -50,6 +50,7 @@ module Powerbase
       self
     end
 
+    # Returns a sort hash for elasticsearch and a proc for sequel
     def sort
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
       number_field_type = PowerbaseFieldType.find_by(name: "Number")
@@ -90,7 +91,17 @@ module Powerbase
           sort_column
         end
       else
-        sort
+        -> (db) {
+          sort.each do |sort_item|
+            if sort_item[:operator] == "asc"
+              db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
+            else
+              db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+            end
+          end
+
+          db
+        }
       end
     end
 

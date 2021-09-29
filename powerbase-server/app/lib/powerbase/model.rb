@@ -259,18 +259,8 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .tap do |x|
-              query.sort.each do |sort_item|
-                if sort_item[:operator] == "asc"
-                  x = x.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
-                else
-                  x = x.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
-                end
-              end
-
-              break x
-            end
             .where(options[:filters] ? eval(query.to_sequel) : true)
+            .yield_self(&query.sort)
             .paginate(page, limit)
             .all
         }
