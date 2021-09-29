@@ -2,31 +2,35 @@ import constate from 'constate';
 import { useSWRInfinite } from 'swr';
 
 import { getTableRecords } from '@lib/api/records';
+import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { useAuthUser } from './AuthUser';
 import { useViewOptions } from './views/ViewOptions';
 
 function getKey({
   index,
   tableId,
+  sort,
   filters,
   pageSize,
 }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
   const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
+  const sortQuery = sort?.length ? `&sortId=${parseSortQueryString(sort)}` : '';
 
-  return `/tables/${tableId}/records?${pageQuery}${filterQuery}`;
+  return `/tables/${tableId}/records?${pageQuery}${filterQuery}${sortQuery}`;
 }
 
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
-  const { filters, viewId } = useViewOptions();
+  const { viewId, filters, sort } = useViewOptions();
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)
       ? getKey({
         index,
         tableId: id,
+        sort,
         filters,
         pageSize,
       })
@@ -34,10 +38,11 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     (url) => ((id && authUser && viewId)
       ? getTableRecords({
         url,
+        viewId,
         filters: filters?.id
           ? filters?.value
           : undefined,
-        viewId,
+        sort,
       })
       : undefined),
   );
