@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
-import { RecordsFilterProvider } from '@models/views/RecordsFilter';
+import { ViewOptionsProvider } from '@models/views/ViewOptions';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
@@ -29,7 +29,7 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
   }
 
   return (
-    <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
+    <ViewOptionsProvider viewId={view.id} initialFilters={view.filters}>
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
@@ -45,7 +45,7 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
           </FieldTypesProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
-    </RecordsFilterProvider>
+    </ViewOptionsProvider>
   );
 });
 

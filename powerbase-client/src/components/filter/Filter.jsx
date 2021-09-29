@@ -1,22 +1,22 @@
 import React, { Fragment, useRef, useCallback } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
 import debounce from 'lodash.debounce';
 
+import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
-import { useRecordsFilter } from '@models/views/RecordsFilter';
+import { useViewOptions } from '@models/views/ViewOptions';
 import { updateTableView } from '@lib/api/views';
 import { IView } from '@lib/propTypes/view';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
-import { IViewField } from '@lib/propTypes/view-field';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter({ view, fields }) {
+export function Filter({ view }) {
   const filterRef = useRef();
-  const { filters: { value: initialFilters }, setFilters } = useRecordsFilter();
+  const { data: fields } = useViewFields();
+  const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateTableRecords = useCallback(debounce(async () => {
@@ -48,6 +48,7 @@ export function Filter({ view, fields }) {
       {({ open }) => (
         <>
           <Popover.Button
+            type="button"
             className={cn('inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-offset-2 ring-gray-500', {
               'ring-2': open,
             })}
@@ -94,5 +95,4 @@ export function Filter({ view, fields }) {
 
 Filter.propTypes = {
   view: IView.isRequired,
-  fields: PropTypes.arrayOf(IViewField),
 };

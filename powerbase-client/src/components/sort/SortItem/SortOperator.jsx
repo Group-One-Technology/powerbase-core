@@ -4,7 +4,7 @@ import cn from 'classnames';
 import { SelectorIcon } from '@heroicons/react/solid';
 import { Listbox } from '@headlessui/react';
 
-export function FilterOperator({
+export function SortOperator({
   id,
   value,
   options,
@@ -12,7 +12,7 @@ export function FilterOperator({
 }) {
   return (
     <Listbox value={value} onChange={onChange}>
-      <div className="block w-full">
+      <div className="block w-52">
         <Listbox.Button
           id={id}
           className="block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
@@ -25,7 +25,7 @@ export function FilterOperator({
             />
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-48 bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+        <Listbox.Options className="absolute z-10 mt-1 w-auto bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {options?.map((option) => (
             <Listbox.Option
               key={option}
@@ -44,7 +44,7 @@ export function FilterOperator({
   );
 }
 
-FilterOperator.propTypes = {
+SortOperator.propTypes = {
   id: PropTypes.string.isRequired,
   value: PropTypes.string,
   options: PropTypes.array,

@@ -3,7 +3,7 @@ import { useSWRInfinite } from 'swr';
 
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
-import { useRecordsFilter } from './views/RecordsFilter';
+import { useViewOptions } from './views/ViewOptions';
 
 function getKey({
   index,
@@ -20,7 +20,7 @@ function getKey({
 
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
-  const { filters, viewId } = useRecordsFilter();
+  const { filters, viewId } = useViewOptions();
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)

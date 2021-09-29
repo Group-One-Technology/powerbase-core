@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { TrashIcon } from '@heroicons/react/outline';
+import { XIcon } from '@heroicons/react/outline';
 
 import { IViewField } from '@lib/propTypes/view-field';
 import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
@@ -159,7 +159,7 @@ export function FilterGroup({
             onClick={() => handleParentRemoveFilter(id)}
           >
             <span className="sr-only">Remove Filter</span>
-            <TrashIcon className="block h-4 w-4" />
+            <XIcon className="block h-4 w-4" />
           </button>
         </div>
       )}
