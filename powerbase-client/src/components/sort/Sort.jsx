@@ -26,25 +26,31 @@ export function Sort({ view }) {
       }));
 
       setSort(updatedSort);
-      updateTableView({ id: view.id, sort });
+      updateTableView({ id: view.id, sort: updatedSort });
       await mutateTableRecords();
     }
   };
 
   const handleAddSortItem = async () => {
-    setSort((prevSort) => [
-      ...prevSort,
+    const updatedSort = [
+      ...sort,
       {
-        id: `${fields[0].name}-${SORT_OPERATORS[0]}-${prevSort.length}`,
+        id: `${fields[0].name}-${SORT_OPERATORS[0]}-${sort.length}`,
         field: fields[0].name,
         operator: SORT_OPERATORS[0],
       },
-    ]);
+    ];
+
+    setSort(updatedSort);
+    updateTableView({ id: view.id, sort: updatedSort });
+    await mutateTableRecords();
   };
 
   const handleRemoveSortItem = async (sortItemId) => {
-    setSort((prevSort) => prevSort.filter((item) => item.id !== sortItemId));
+    const updatedSort = sort.filter((item) => item.id !== sortItemId);
 
+    setSort(updatedSort);
+    updateTableView({ id: view.id, sort: updatedSort });
     await mutateTableRecords();
   };
 
