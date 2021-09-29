@@ -221,6 +221,7 @@ module Powerbase
     # * Get the filtered and paginated table records.
     # Accepts the following options:
     # :filter :: a JSON that contains the filter for the records.
+    # :sort :: a JSON that contains the sort for the records.
     # :page :: the page number.
     # :limit :: the page count. No. of records to get per page.
     def search(options)
@@ -228,31 +229,41 @@ module Powerbase
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
-      primary_keys = fields.select {|field| field.is_primary_key }
-      order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
+      sort = if options[:sort] != nil && options[:sort].length > 0
+          options[:sort]
+        else
+          primary_keys = fields.select {|field| field.is_primary_key }
+          order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
+
+          [{ field: order_field.name, operator: "asc" }]
+        end
 
       number_field_type = PowerbaseFieldType.find_by(name: "Number")
       date_field_type = PowerbaseFieldType.find_by(name: "Date")
 
       if @is_turbo
-        sort_column = {}
+        sort = sort.map do |sort_item|
+          sort_field = fields.find {|field| field.name == sort_item[:field] }
+          order = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
+              "desc"
+            else
+              "asc"
+            end
+          column_name = if sort_field.powerbase_field_type_id == number_field_type.id || sort_field.powerbase_field_type_id == date_field_type.id
+              sort_field.name
+            else
+              "#{sort_field.name}.keyword"
+            end
 
-        if order_field.powerbase_field_type_id == number_field_type.id || order_field.powerbase_field_type_id == date_field_type.id
-          sort_column[order_field.name.to_sym] = {
-            order: "asc",
-            unmapped_type: "long",
-          }
-        else
-          sort_column["#{order_field.name}.keyword".to_sym] = {
-            order: "asc",
-            unmapped_type: "long",
-          }
+          sort_column = {}
+          sort_column[column_name] = { order: order, unmapped_type: "long" } if sort_field
+          sort_column
         end
 
         search_params = {
           from: (page - 1) * limit,
           size: limit,
-          sort: [sort_column]
+          sort: sort
         }
 
         if options[:filters]
@@ -273,7 +284,6 @@ module Powerbase
 
         remote_db() {|db|
           db.from(@table_name)
-            .order(order_field.name.to_sym)
             .where(options[:filters] ? eval(query_string.to_sequel) : true)
             .paginate(page, limit)
             .all
