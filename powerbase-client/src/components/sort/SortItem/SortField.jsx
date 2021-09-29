@@ -34,7 +34,7 @@ export function SortField({
             />
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-52 bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+        <Listbox.Options className="absolute z-10 mt-1 w-auto min-w-[13rem] bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {options?.map((item) => (
             <Listbox.Option
               key={item.name}
