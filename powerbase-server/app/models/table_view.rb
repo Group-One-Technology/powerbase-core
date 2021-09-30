@@ -3,6 +3,7 @@ class TableView < ApplicationRecord
   validates :view_type, presence: true
   enum view_type: { grid: "grid" }, _prefix: true
   serialize :filters, JSON
+  serialize :sort, JSON
 
   belongs_to :powerbase_table
   has_many :view_field_options, dependent: :destroy

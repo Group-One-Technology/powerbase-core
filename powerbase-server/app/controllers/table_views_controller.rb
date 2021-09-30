@@ -12,6 +12,7 @@ class TableViewsController < ApplicationController
   schema(:update) do
     required(:id).value(:integer)
     optional(:filters)
+    optional(:sort)
     optional(:view_type)
     optional(:name)
   end
@@ -113,6 +114,7 @@ class TableViewsController < ApplicationController
         table_id: view.powerbase_table_id,
         view_type: view.view_type,
         filters: view.filters,
+        sort: view.sort,
         created_at: view.created_at,
         updated_at: view.updated_at,
       }
