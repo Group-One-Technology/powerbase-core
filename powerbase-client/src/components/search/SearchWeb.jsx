@@ -4,17 +4,13 @@ import { Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { useOutsideClick } from '@lib/hooks/useOutsideClick';
 
-export function SearchWeb({ query, setQuery }) {
+export function SearchWeb({ value, onChange }) {
   const inputRef = useRef(null);
 
   const [focus, setFocus] = useOutsideClick({ ref: inputRef, focus: false });
 
   const handleClick = () => {
     setFocus(true);
-  };
-
-  const handleQueryChange = (evt) => {
-    setQuery(evt.target.value);
   };
 
   return (
@@ -46,8 +42,8 @@ export function SearchWeb({ query, setQuery }) {
               type="text"
               aria-label="Search"
               name="search"
-              value={query}
-              onChange={handleQueryChange}
+              value={value}
+              onChange={onChange}
               className="ml-auto appearance-none block w-52 pl-8 pr-2 py-1 text-sm border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:border-gray-500"
               placeholder="Search..."
             />
@@ -59,6 +55,6 @@ export function SearchWeb({ query, setQuery }) {
 }
 
 SearchWeb.propTypes = {
-  query: PropTypes.string.isRequired,
-  setQuery: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 };

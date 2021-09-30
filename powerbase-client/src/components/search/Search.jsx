@@ -5,12 +5,14 @@ import { SearchMobile } from './SearchMobile';
 export function Search() {
   const [query, setQuery] = useState('');
 
+  const handleQueryChange = (evt) => {
+    setQuery(evt.target.value);
+  };
+
   return (
     <>
-      <div className="block sm:hidden">
-        <SearchMobile query={query} setQuery={setQuery} />
-      </div>
-      <SearchWeb query={query} setQuery={setQuery} />
+      <SearchMobile query={query} onChange={handleQueryChange} />
+      <SearchWeb query={query} onChange={handleQueryChange} />
     </>
   );
 }
