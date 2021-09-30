@@ -19,7 +19,7 @@ export function SearchWeb({ query, setQuery }) {
 
   return (
     <>
-      <Transition show={!focus}>
+      <Transition show={!focus} className="hidden sm:block">
         <button
           type="button"
           className="ml-auto inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -30,7 +30,7 @@ export function SearchWeb({ query, setQuery }) {
         </button>
       </Transition>
 
-      <div className="overflow-hidden">
+      <div className="hidden overflow-hidden sm:block">
         <Transition
           show={focus}
           enter="transition-width duration-75"
