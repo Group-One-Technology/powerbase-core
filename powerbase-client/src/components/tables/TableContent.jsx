@@ -35,7 +35,6 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
           <FieldTypesProvider>
             <TableViewsNav
               table={table}
-              currentView={view}
               views={views}
               fields={fields}
             />

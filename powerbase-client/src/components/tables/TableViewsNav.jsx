@@ -12,7 +12,7 @@ import { ViewMenu } from '@components/views/ViewMenu';
 import { Filter } from '@components/filter/Filter';
 import { Sort } from '@components/sort/Sort';
 
-export function TableViewsNav({ table, currentView, views }) {
+export function TableViewsNav({ table, views }) {
   const { data: records } = useTableRecords();
   const { data: totalRecords } = useTableRecordsCount();
 
@@ -20,11 +20,7 @@ export function TableViewsNav({ table, currentView, views }) {
     <div className="w-full px-4 sm:px-6 lg:px-8 border-solid border-b-2 border-gray-200 text-gray-700">
       <div className="relative flex  py-1.5 gap-x-2">
         <div className="flex-1 flex items-center gap-x-2">
-          <ViewMenu
-            tableId={table.id}
-            currentView={currentView}
-            views={views}
-          />
+          <ViewMenu tableId={table.id} views={views} />
           {!!(records && totalRecords && table.isMigrated) && (
             <p className="text-xs hidden lg:inline">
               {records.length} loaded out of {totalRecords}
@@ -33,8 +29,8 @@ export function TableViewsNav({ table, currentView, views }) {
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-2">
-          <Filter view={currentView} />
-          <Sort view={currentView} />
+          <Filter />
+          <Sort />
           <button
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -59,6 +55,5 @@ export function TableViewsNav({ table, currentView, views }) {
 
 TableViewsNav.propTypes = {
   table: ITable,
-  currentView: IView,
   views: PropTypes.arrayOf(IView),
 };

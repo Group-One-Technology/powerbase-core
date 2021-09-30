@@ -5,12 +5,14 @@ import { Popover, Transition } from '@headlessui/react';
 import { DotsHorizontalIcon, PlusIcon, ViewGridIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
+import { useTableView } from '@models/TableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
 import { AddView } from './AddView';
 import { EditView } from './EditView';
 
-export function ViewMenu({ tableId, currentView, views }) {
+export function ViewMenu({ tableId, views }) {
+  const { data: currentView } = useTableView();
   const { handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [viewOptionModal, setViewOptionModal] = useState({
@@ -102,6 +104,5 @@ export function ViewMenu({ tableId, currentView, views }) {
 
 ViewMenu.propTypes = {
   tableId: IId.isRequired,
-  currentView: IView.isRequired,
   views: PropTypes.arrayOf(IView).isRequired,
 };

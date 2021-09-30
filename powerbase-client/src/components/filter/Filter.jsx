@@ -7,14 +7,15 @@ import debounce from 'lodash.debounce';
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { useTableView } from '@models/TableView';
 import { updateTableView } from '@lib/api/views';
-import { IView } from '@lib/propTypes/view';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter({ view }) {
+export function Filter() {
   const filterRef = useRef();
+  const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
@@ -92,7 +93,3 @@ export function Filter({ view }) {
     </Popover>
   );
 }
-
-Filter.propTypes = {
-  view: IView.isRequired,
-};

@@ -6,13 +6,14 @@ import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outlin
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { useTableView } from '@models/TableView';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
-import { IView } from '@lib/propTypes/view';
 import { SortItem } from './SortItem';
 
-export function Sort({ view }) {
+export function Sort() {
   const sortRef = useRef();
+  const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { sort, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
@@ -119,7 +120,3 @@ export function Sort({ view }) {
     </Popover>
   );
 }
-
-Sort.propTypes = {
-  view: IView.isRequired,
-};
