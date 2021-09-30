@@ -61,9 +61,6 @@ export function FilterValue({
       value={value}
       onChange={onChange}
       className="appearance-none block w-[95%] h-8 px-2 py-1 text-sm border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-      placeholder={fieldType === FieldType.DATE
-        ? 'YYYY-MM-DD HH:MM:SSZ'
-        : undefined}
       required
     />
   );
