@@ -9,14 +9,26 @@ import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
+import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { SortItem } from './SortItem';
 
 export function Sort() {
   const sortRef = useRef();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
-  const { sort, setSort } = useViewOptions();
+  const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
+
+  const updateSort = async (value) => {
+    const updatedSort = {
+      id: encodeURIComponent(parseSortQueryString(value)),
+      value,
+    };
+
+    setSort(updatedSort);
+    updateTableView({ id: view.id, sort: updatedSort });
+    await mutateTableRecords();
+  };
 
   const updateRecords = async () => {
     if (sortRef.current) {
@@ -26,9 +38,7 @@ export function Sort() {
         operator: attributes['data-operator']?.nodeValue,
       }));
 
-      setSort(updatedSort);
-      updateTableView({ id: view.id, sort: updatedSort });
-      await mutateTableRecords();
+      await updateSort(updatedSort);
     }
   };
 
@@ -42,17 +52,12 @@ export function Sort() {
       },
     ];
 
-    setSort(updatedSort);
-    updateTableView({ id: view.id, sort: updatedSort });
-    await mutateTableRecords();
+    await updateSort(updatedSort);
   };
 
   const handleRemoveSortItem = async (sortItemId) => {
     const updatedSort = sort.filter((item) => item.id !== sortItemId);
-
-    setSort(updatedSort);
-    updateTableView({ id: view.id, sort: updatedSort });
-    await mutateTableRecords();
+    await updateSort(updatedSort);
   };
 
   return (

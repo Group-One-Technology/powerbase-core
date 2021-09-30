@@ -29,7 +29,7 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
   }
 
   return (
-    <ViewOptionsProvider viewId={view.id} initialFilters={view.filters}>
+    <ViewOptionsProvider view={view}>
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>

@@ -2,7 +2,6 @@ import constate from 'constate';
 import { useSWRInfinite } from 'swr';
 
 import { getTableRecords } from '@lib/api/records';
-import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { useAuthUser } from './AuthUser';
 import { useViewOptions } from './views/ViewOptions';
 
@@ -15,8 +14,8 @@ function getKey({
 }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
-  const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
-  const sortQuery = sort?.length ? `&sortId=${parseSortQueryString(sort)}` : '';
+  const filterQuery = filters?.id ? `&filterId=${filters.id}` : '';
+  const sortQuery = sort?.id ? `&sortId=${sort.id}` : '';
 
   return `/tables/${tableId}/records?${pageQuery}${filterQuery}${sortQuery}`;
 }
@@ -39,10 +38,12 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
       ? getTableRecords({
         url,
         viewId,
-        filters: filters?.id
-          ? filters?.value
+        filters: filters && filters.id && filters.value
+          ? filters.value
           : undefined,
-        sort,
+        sort: sort && sort.id && sort.value
+          ? sort.value
+          : undefined,
       })
       : undefined),
   );
