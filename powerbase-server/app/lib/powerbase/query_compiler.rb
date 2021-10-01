@@ -116,7 +116,7 @@ module Powerbase
           @filter
         end
 
-      transform_sequel_filter(parsedTokens)
+      transform_sequel_filter(parsedTokens, @query)
     end
 
     # * Transform given query string or hash into elasticsearch query string
@@ -128,7 +128,7 @@ module Powerbase
           @filter
         end
 
-      transform_elasticsearch_filter(parsedTokens)
+      transform_elasticsearch_filter(parsedTokens, @query)
     end
 
     private
@@ -282,7 +282,7 @@ module Powerbase
       end
 
       # * Transforms parsed tokens into a sequel query string
-      def transform_sequel_filter(filter_group)
+      def transform_sequel_filter(filter_group, search_query = nil)
         logical_op = case filter_group[:operator]
           when "or"
             "|"
@@ -358,7 +358,7 @@ module Powerbase
       end
 
       # * Transforms parsed tokens into elasticsearch query string
-      def transform_elasticsearch_filter(filter_group)
+      def transform_elasticsearch_filter(filter_group, search_query = nil)
         logical_op = case filter_group[:operator]
           when "or"
             "OR"
@@ -416,7 +416,12 @@ module Powerbase
         end
 
         query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
-        "(#{query_string})"
+
+        if search_query&.length > 0
+          "*:(#{search_query}) AND (#{query_string})"
+        else
+          "(#{query_string})"
+        end
       end
 
       # * Remove escaped quotes
