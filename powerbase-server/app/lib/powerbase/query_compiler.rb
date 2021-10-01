@@ -288,6 +288,7 @@ module Powerbase
         long_text_field_type = PowerbaseFieldType.find_by(name: "Long Text")
         number_field_type = PowerbaseFieldType.find_by(name: "Number")
         date_field_type = PowerbaseFieldType.find_by(name: "Date")
+        checkbox_field_type = PowerbaseFieldType.find_by(name: "Checkbox")
 
         logical_op = if filter_group != nil && filter_group[:operator]
           if "or"
@@ -388,12 +389,9 @@ module Powerbase
                   nil
                 end
               elsif field.powerbase_field_type_id == date_field_type.id
-                date = format_date(search_value)
-                if date != nil
-                  "Sequel[{#{field.name}: '#{search_value}'}]"
-                else
-                  nil
-                end
+                nil
+              elsif field.powerbase_field_type_id == checkbox_field_type.id
+                nil
               else
                 "Sequel[{#{field.name}: '#{search_value}'}]"
               end
