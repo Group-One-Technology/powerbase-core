@@ -301,15 +301,18 @@ module Powerbase
             next transform_sequel_filter(filter)
           end
 
+          cur_field = fields.find {|item| item.name.to_s == filter[:field].to_s}
+          next if !cur_field
+
           relational_op = filter[:filter][:operator]
           field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
+              "Sequel.lit(%Q[to_char(\"#{cur_field.name}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
             elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[DATE_FORMAT('#{sanitize(filter[:field])}', '%Y-%m-%d')])"
+              "Sequel.lit(%Q[DATE_FORMAT('#{cur_field.name}', '%Y-%m-%d')])"
             elsif @adapter == "postgresql"
-              "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
+              "Sequel.lit('\"#{cur_field.name}\"')"
             else
-              "Sequel.lit('#{sanitize(filter[:field])}')"
+              "Sequel.lit('#{cur_field.name}')"
             end
           value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
               "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
@@ -355,7 +358,9 @@ module Powerbase
           end
         end
 
-        query_string = sequel_filter.join(" #{logical_op} ")
+        query_string = sequel_filter
+          .select {|item| item != nil}
+          .join(" #{logical_op} ")
 
         if search_query&.length > 0
           wildcard_field = fields.map {|field| "#{field.name} ILIKE ?"}.join(" | ")
