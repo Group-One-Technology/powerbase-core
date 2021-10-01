@@ -362,7 +362,7 @@ module Powerbase
           .select {|item| item != nil}
           .join(" #{logical_op} ")
 
-        if search_query&.length > 0
+        if search_query != nil && search_query.length > 0
           wildcard_field = fields.map {|field| "#{field.name} ILIKE ?"}.join(" | ")
           search_query = "Sequel.lit(%Q[#{wildcard_field}], %Q[%#{sanitize(search_query)}%])"
           "(#{search_query}) & (#{query_string})"
@@ -438,7 +438,7 @@ module Powerbase
           .select {|item| item != nil}
           .join(" #{logical_op.upcase} ")
 
-        if search_query&.length > 0
+        if search_query != nil && search_query.length > 0
           "*:(#{sanitize(search_query)}) AND (#{query_string})"
         else
           "(#{query_string})"
