@@ -55,6 +55,6 @@ export function SearchWeb({ value, onChange }) {
 }
 
 SearchWeb.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };
