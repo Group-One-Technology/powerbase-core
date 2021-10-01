@@ -289,14 +289,17 @@ module Powerbase
         number_field_type = PowerbaseFieldType.find_by(name: "Number")
         date_field_type = PowerbaseFieldType.find_by(name: "Date")
 
-        logical_op = case filter_group[:operator]
-          when "or"
+        logical_op = if filter_group != nil && filter_group[:operator]
+          if "or"
             "|"
           else
             "&"
           end
+        else
+          "&"
+        end
 
-        filters = filter_group[:filters]
+        filters = filter_group ? filter_group[:filters] : []
 
         sequel_filter = filters.map do |filter|
           inner_filter_group = filter[:filters]
@@ -365,6 +368,7 @@ module Powerbase
         query_string = sequel_filter
           .select {|item| item != nil}
           .join(" #{logical_op} ")
+        query_string = query_string && query_string.length > 0 ? "(#{query_string})" : ""
 
         if search_query != nil && search_query.length > 0
           search_value = sanitize(search_query)
@@ -396,9 +400,13 @@ module Powerbase
             end
             .select {|item| item != nil}
             .join(" | ")
-          "(#{search_query}) & (#{query_string})"
+          if query_string.length > 0
+            "(#{search_query}) & #{query_string}"
+          else
+            search_query
+          end
         else
-          "(#{query_string})"
+          query_string
         end
       end
 
@@ -406,14 +414,17 @@ module Powerbase
       def transform_elasticsearch_filter(filter_group, search_query = nil)
         fields = PowerbaseField.where(powerbase_table_id: @table_id)
 
-        logical_op = case filter_group[:operator]
-          when "or"
-            "OR"
+        logical_op = if filter_group != nil && filter_group[:operator]
+            if "or"
+              "OR"
+            else
+              "AND"
+            end
           else
             "AND"
           end
 
-        filters = filter_group[:filters]
+        filters = filter_group ? filter_group[:filters] : []
 
         elasticsearch_filter = filters.map do |filter|
           inner_filter_group = filter[:filters]
@@ -468,13 +479,16 @@ module Powerbase
         query_string = elasticsearch_filter
           .select {|item| item != nil}
           .join(" #{logical_op.upcase} ")
+        query_string = query_string && query_string.length > 0 ? "(#{query_string})" : ""
 
         if search_query != nil && search_query.length > 0
-          "*:(#{sanitize(search_query)}) AND (#{query_string})"
-        elsif query_string && query_string.length > 0
-          "(#{query_string})"
+          if query_string.length > 0
+            "*:(#{sanitize(search_query)}) AND (#{query_string})"
+          else
+            "*:(#{sanitize(search_query)})"
+          end
         else
-          ""
+          query_string
         end
       end
 
