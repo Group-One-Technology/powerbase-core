@@ -283,6 +283,8 @@ module Powerbase
 
       # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group, search_query = nil)
+        fields = PowerbaseField.where(powerbase_table_id: @table_id)
+
         logical_op = case filter_group[:operator]
           when "or"
             "|"
@@ -354,6 +356,13 @@ module Powerbase
         end
 
         query_string = sequel_filter.join(" #{logical_op} ")
+
+        if search_query&.length > 0
+          wildcard_field = fields.map {|field| "#{field.name} ILIKE ?"}.join(" | ")
+          search_query = "Sequel.lit(%Q[#{wildcard_field}], %Q[%#{sanitize(search_query)}%])"
+          "(#{search_query}) & (#{query_string})"
+        else
+        end
         "(#{query_string})"
       end
 
@@ -418,7 +427,7 @@ module Powerbase
         query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
 
         if search_query&.length > 0
-          "*:(#{search_query}) AND (#{query_string})"
+          "*:(#{sanitize(search_query)}) AND (#{query_string})"
         else
           "(#{query_string})"
         end
@@ -426,7 +435,7 @@ module Powerbase
 
       # * Remove escaped quotes
       def sanitize(value)
-        value.class == String ? value.gsub(/['"#]/,'') : value
+        value.class == String ? value.gsub(/['"#()]/,' ') : value
       end
 
       # * Format date to UTC
