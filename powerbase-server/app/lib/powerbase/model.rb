@@ -232,7 +232,7 @@ module Powerbase
 
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
-        query: options[:filters],
+        filter: options[:filters],
         sort: options[:sort],
         adapter: @powerbase_database.adapter,
         turbo: @is_turbo
@@ -275,7 +275,7 @@ module Powerbase
         index = "table_records_#{@table_id}"
         query = if options[:filters]
             query_string = Powerbase::QueryCompiler.new({
-              query: options[:filters],
+              filter: options[:filters],
               adapter: @powerbase_database.adapter
             })
 
@@ -295,7 +295,7 @@ module Powerbase
         response["count"]
       else
         query_string = Powerbase::QueryCompiler.new({
-          query: options[:filters],
+          filter: options[:filters],
           adapter: @powerbase_database.adapter,
         })
 

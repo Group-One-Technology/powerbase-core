@@ -20,13 +20,15 @@ module Powerbase
 
     # Accepts the following options:
     # :table_id :: id of the table to be queried.
-    # :query :: a query string for filtering.
+    # :query :: a query string for search.
+    # :filter :: a query string or hash for filtering.
     # :sort :: a sort hash.
     # :adapter :: the database adapter used. Can either be mysql2 or postgresql.
     # :turbo :: a boolean for turbo mode.
     def initialize(options)
       @table_id = options[:table_id] || nil
       @query = options[:query] || nil
+      @filter = options[:filter] || nil
       @sort = options[:sort] || []
       @adapter = options[:adapter] || "postgresql"
       @turbo = options[:turbo] || false
@@ -45,7 +47,7 @@ module Powerbase
           }
         end
 
-      @query = { operator: "and", filters: updated_filters }
+      @filter = { operator: "and", filters: updated_filters }
 
       self
     end
@@ -107,11 +109,11 @@ module Powerbase
 
     # * Transform given query string or hash into sequel query string
     def to_sequel
-      parsedTokens = if @query.is_a?(String)
-          tokens = lexer(@query)
+      parsedTokens = if @filter.is_a?(String)
+          tokens = lexer(@filter)
           parser(tokens)
         else
-          @query
+          @filter
         end
 
       transform_sequel_filter(parsedTokens)
@@ -119,11 +121,11 @@ module Powerbase
 
     # * Transform given query string or hash into elasticsearch query string
     def to_elasticsearch
-      parsedTokens = if @query.is_a?(String)
-          tokens = lexer(@query)
+      parsedTokens = if @filter.is_a?(String)
+          tokens = lexer(@filter)
           parser(tokens)
         else
-          @query
+          @filter
         end
 
       transform_elasticsearch_filter(parsedTokens)
