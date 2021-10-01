@@ -237,7 +237,6 @@ module Powerbase
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
-
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         query: options[:query],
@@ -247,6 +246,8 @@ module Powerbase
         turbo: @is_turbo
       })
 
+      has_filters = options[:filters] != nil || (options[:query] && options[:query].length > 0)
+
       if @is_turbo
         search_params = {
           from: (page - 1) * limit,
@@ -254,7 +255,7 @@ module Powerbase
           sort: query.sort
         }
 
-        if options[:filters] != nil || (options[:query] && options[:query].length > 0)
+        if has_filters
           search_params[:query] = {
             query_string: {
               query: query.to_elasticsearch,
@@ -268,7 +269,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(query.to_sequel) : true)
+            .where(has_filters ? eval(query.to_sequel) : true)
             .yield_self(&query.sort)
             .paginate(page, limit)
             .all
@@ -289,9 +290,11 @@ module Powerbase
         turbo: @is_turbo,
       })
 
+      has_filters = options[:filters] != nil || (options[:query] && options[:query].length > 0)
+
       if @is_turbo
         index = "table_records_#{@table_id}"
-        query_string = if options[:filters] != nil || (options[:query] && options[:query].length > 0)
+        query_string = if has_filters
             {
               query: {
                 query_string: {
@@ -309,7 +312,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(query.to_sequel) : true)
+            .where(has_filters ? eval(query.to_sequel) : true)
             .count
         }
       end
