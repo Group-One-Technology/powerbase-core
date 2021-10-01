@@ -254,7 +254,7 @@ module Powerbase
           sort: query.sort
         }
 
-        if options[:filters]
+        if options[:filters] != nil || (options[:query] && options[:query].length > 0)
           search_params[:query] = {
             query_string: {
               query: query.to_elasticsearch,
@@ -291,7 +291,7 @@ module Powerbase
 
       if @is_turbo
         index = "table_records_#{@table_id}"
-        query_string = if options[:filters]
+        query_string = if options[:filters] != nil || (options[:query] && options[:query].length > 0)
             {
               query: {
                 query_string: {
