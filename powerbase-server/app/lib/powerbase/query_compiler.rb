@@ -172,7 +172,7 @@ module Powerbase
                 next { type: TOKEN[:string], value: token[1, token.length - 2] }
               elsif token[0] == "'" && token[token.length - 1] == "'"
                 next { type: TOKEN[:string], value: token[1, token.length - 1] }
-              elsif Float(token, exception: false)
+              elsif Float(token, exception: false) != nil
                 next { type: TOKEN[:number], value: token.include?(".") ? token.to_f : token.to_i }
               else
                 next { type: TOKEN[:field], value: token };
@@ -284,6 +284,10 @@ module Powerbase
       # * Transforms parsed tokens into a sequel query string
       def transform_sequel_filter(filter_group, search_query = nil)
         fields = PowerbaseField.where(powerbase_table_id: @table_id)
+        single_line_text_field_type = PowerbaseFieldType.find_by(name: "Single Line Text")
+        long_text_field_type = PowerbaseFieldType.find_by(name: "Long Text")
+        number_field_type = PowerbaseFieldType.find_by(name: "Number")
+        date_field_type = PowerbaseFieldType.find_by(name: "Date")
 
         logical_op = case filter_group[:operator]
           when "or"
@@ -332,9 +336,9 @@ module Powerbase
           when "does not contain"
             "~Sequel.ilike(#{field}, '%#{value}%')"
           when "="
-            "Sequel[{#{field} => #{value}}]"
+            "Sequel[{#{field} => '#{value}'}]"
           when "!="
-            "Sequel.~(#{field} => #{value})"
+            "Sequel.~(#{field} => '#{value}')"
           when "<"
             "(#{field} < #{value})"
           when ">"
@@ -363,12 +367,39 @@ module Powerbase
           .join(" #{logical_op} ")
 
         if search_query != nil && search_query.length > 0
-          wildcard_field = fields.map {|field| "#{field.name} ILIKE ?"}.join(" | ")
-          search_query = "Sequel.lit(%Q[#{wildcard_field}], %Q[%#{sanitize(search_query)}%])"
+          search_value = sanitize(search_query)
+          search_query = fields.map do |field|
+              if field.db_type == "uuid"
+                if validate_uuid_format(search_value)
+                  "Sequel[{#{field.name}: '#{search_value}'}]"
+                else
+                  nil
+                end
+              elsif (field.powerbase_field_type_id == single_line_text_field_type.id || field.powerbase_field_type_id == long_text_field_type.id)
+                "Sequel.ilike(:#{field.name}, '%#{search_value}%')"
+              elsif field.powerbase_field_type_id == number_field_type.id
+                if Float(search_value, exception: false) != nil
+                  "Sequel[{#{field.name}: '#{search_value}'}]"
+                else
+                  nil
+                end
+              elsif field.powerbase_field_type_id == date_field_type.id
+                date = format_date(search_value)
+                if date != nil
+                  "Sequel[{#{field.name}: '#{search_value}'}]"
+                else
+                  nil
+                end
+              else
+                "Sequel[{#{field.name}: '#{search_value}'}]"
+              end
+            end
+            .select {|item| item != nil}
+            .join(" | ")
           "(#{search_query}) & (#{query_string})"
         else
+          "(#{query_string})"
         end
-        "(#{query_string})"
       end
 
       # * Transforms parsed tokens into elasticsearch query string
@@ -440,8 +471,10 @@ module Powerbase
 
         if search_query != nil && search_query.length > 0
           "*:(#{sanitize(search_query)}) AND (#{query_string})"
-        else
+        elsif query_string && query_string.length > 0
           "(#{query_string})"
+        else
+          ""
         end
       end
 
@@ -469,6 +502,13 @@ module Powerbase
         else
           nil
         end
+      end
+
+      # * Check if valid uuid
+      def validate_uuid_format(uuid)
+        uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+        return true if uuid_regex.match?(uuid.to_s.downcase)
+        false
       end
   end
 end
