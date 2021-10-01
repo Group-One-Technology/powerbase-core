@@ -373,6 +373,8 @@ module Powerbase
 
       # * Transforms parsed tokens into elasticsearch query string
       def transform_elasticsearch_filter(filter_group, search_query = nil)
+        fields = PowerbaseField.where(powerbase_table_id: @table_id)
+
         logical_op = case filter_group[:operator]
           when "or"
             "OR"
@@ -389,8 +391,11 @@ module Powerbase
             next transform_elasticsearch_filter(filter)
           end
 
+          cur_field = fields.find {|item| item.name.to_s == filter[:field].to_s}
+          next if !cur_field
+
           relational_op = filter[:filter][:operator]
-          field = sanitize(filter[:field])
+          field = cur_field.name
           value = sanitize(filter[:filter][:value])
 
           case relational_op
@@ -429,7 +434,9 @@ module Powerbase
           end
         end
 
-        query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
+        query_string = elasticsearch_filter
+          .select {|item| item != nil}
+          .join(" #{logical_op.upcase} ")
 
         if search_query&.length > 0
           "*:(#{sanitize(search_query)}) AND (#{query_string})"
