@@ -26,9 +26,6 @@ export function initializeFilterGroup({ id, filterGroup, fields }) {
 
   return ({
     operator: 'and',
-    filters: [{
-      id: `${id}-${fields[0].name}-filter-0`,
-      field: fields[0].name,
-    }],
+    filters: [],
   });
 }
