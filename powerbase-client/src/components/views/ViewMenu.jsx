@@ -1,12 +1,7 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-import {
-  sortableContainer,
-  sortableElement,
-  sortableHandle,
-  arrayMove,
-} from 'react-sortable-hoc';
+import { List, arrayMove } from 'react-movable';
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
 
@@ -18,49 +13,6 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { AddView } from './AddView';
 import { EditView } from './EditView';
 
-const DragHandle = sortableHandle(() => (
-  <button
-    type="button"
-    className="w-full flex items-center p-2"
-  >
-    <GripVerticalIcon className="h-3 w-3 text-gray-500" />
-    <span className="sr-only">Reorder View</span>
-  </button>
-));
-
-const SortableItem = sortableElement(({
-  view, active, handleViewOptions, handleViewChange,
-}) => (
-  <li
-    className={cn(
-      'z-10 whitespace-nowrap flex items-center w-auto hover:bg-gray-100 hover:text-gray-900 text-xs',
-      active ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-700',
-    )}
-  >
-    <DragHandle />
-    <button
-      type="button"
-      onClick={() => handleViewChange(view)}
-      className="w-full flex items-center p-2"
-    >
-      <ViewGridIcon className="inline h-4 w-4 mr-1" />
-      {view.name}
-    </button>
-    <div className="p-0.5">
-      <button
-        type="button"
-        className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
-        onClick={() => handleViewOptions(view)}
-      >
-        <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only">View Options</span>
-      </button>
-    </div>
-  </li>
-));
-
-const SortableContainer = sortableContainer(({ children }) => <ul>{children}</ul>);
-
 export function ViewMenu({ tableId, views: initialViews }) {
   const { data: currentView } = useTableView();
   const { handleViewChange } = useCurrentView();
@@ -71,16 +23,16 @@ export function ViewMenu({ tableId, views: initialViews }) {
     view: undefined,
   });
 
+  useEffect(() => {
+    setViews(initialViews);
+  }, [tableId]);
+
   const handleAddView = () => {
     setAddViewModalOpen(true);
   };
 
   const handleViewOptions = (view) => {
     setViewOptionModal({ open: true, view });
-  };
-
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    setViews((prevViews) => arrayMove(prevViews, oldIndex, newIndex));
   };
 
   return (
@@ -101,18 +53,49 @@ export function ViewMenu({ tableId, views: initialViews }) {
         >
           <Popover.Panel className="z-10 origin-top-right absolute left-0 mt-2 w-auto rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-              <SortableContainer onSortEnd={onSortEnd} useDragHandle>
-                {views.map((view, index) => (
-                  <SortableItem
-                    key={view.id}
-                    index={index}
-                    view={view}
-                    active={view.id === currentView.id}
-                    handleViewChange={handleViewChange}
-                    handleViewOptions={handleViewOptions}
-                  />
-                ))}
-              </SortableContainer>
+              <List
+                values={views}
+                onChange={({ oldIndex, newIndex }) => {
+                  setViews((prevViews) => arrayMove(prevViews, oldIndex, newIndex));
+                }}
+                renderList={({ children, props }) => <ul {...props}>{children}</ul>}
+                renderItem={({ value: view, props }) => (
+                  <li
+                    {...props}
+                    className={cn(
+                      'z-10 whitespace-nowrap flex items-center w-auto hover:bg-gray-100 hover:text-gray-900 text-xs',
+                      view.id === currentView.id ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-700',
+                    )}
+                  >
+                    <button
+                      type="button"
+                      data-movable-handle
+                      className="w-full flex items-center p-2"
+                    >
+                      <GripVerticalIcon className="h-3 w-3 text-gray-500" />
+                      <span className="sr-only">Reorder View</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleViewChange(view)}
+                      className="w-full flex items-center p-2"
+                    >
+                      <ViewGridIcon className="inline h-4 w-4 mr-1" />
+                      {view.name}
+                    </button>
+                    <div className="p-0.5">
+                      <button
+                        type="button"
+                        className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
+                        onClick={() => handleViewOptions(view)}
+                      >
+                        <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
+                        <span className="sr-only">View Options</span>
+                      </button>
+                    </div>
+                  </li>
+                )}
+              />
               <div>
                 <button
                   type="button"
