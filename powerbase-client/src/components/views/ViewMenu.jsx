@@ -1,20 +1,71 @@
 import React, { Fragment, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import {
+  sortableContainer,
+  sortableElement,
+  sortableHandle,
+  arrayMove,
+} from 'react-sortable-hoc';
 import { Popover, Transition } from '@headlessui/react';
-import { DotsHorizontalIcon, PlusIcon, ViewGridIcon } from '@heroicons/react/outline';
+import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTableView } from '@models/TableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
+import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { AddView } from './AddView';
 import { EditView } from './EditView';
 
-export function ViewMenu({ tableId, views }) {
+const DragHandle = sortableHandle(() => (
+  <button
+    type="button"
+    className="w-full flex items-center p-2"
+  >
+    <GripVerticalIcon className="h-3 w-3 text-gray-500" />
+    <span className="sr-only">Reorder View</span>
+  </button>
+));
+
+const SortableItem = sortableElement(({
+  view, active, handleViewOptions, handleViewChange,
+}) => (
+  <li
+    className={cn(
+      'z-10 whitespace-nowrap flex items-center w-auto hover:bg-gray-100 hover:text-gray-900 text-xs',
+      active ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-700',
+    )}
+  >
+    <DragHandle />
+    <button
+      type="button"
+      onClick={() => handleViewChange(view)}
+      className="w-full flex items-center p-2"
+    >
+      <ViewGridIcon className="inline h-4 w-4 mr-1" />
+      {view.name}
+    </button>
+    <div className="p-0.5">
+      <button
+        type="button"
+        className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
+        onClick={() => handleViewOptions(view)}
+      >
+        <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">View Options</span>
+      </button>
+    </div>
+  </li>
+));
+
+const SortableContainer = sortableContainer(({ children }) => <ul>{children}</ul>);
+
+export function ViewMenu({ tableId, views: initialViews }) {
   const { data: currentView } = useTableView();
   const { handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
+  const [views, setViews] = useState(initialViews);
   const [viewOptionModal, setViewOptionModal] = useState({
     open: false,
     view: undefined,
@@ -26,6 +77,10 @@ export function ViewMenu({ tableId, views }) {
 
   const handleViewOptions = (view) => {
     setViewOptionModal({ open: true, view });
+  };
+
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    setViews((prevViews) => arrayMove(prevViews, oldIndex, newIndex));
   };
 
   return (
@@ -46,46 +101,28 @@ export function ViewMenu({ tableId, views }) {
         >
           <Popover.Panel className="z-10 origin-top-right absolute left-0 mt-2 w-auto rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-              <ul>
-                {views.map((view) => (
-                  <li
+              <SortableContainer onSortEnd={onSortEnd} useDragHandle>
+                {views.map((view, index) => (
+                  <SortableItem
                     key={view.id}
-                    className={cn(
-                      'whitespace-nowrap flex items-center w-auto hover:bg-gray-100 hover:text-gray-900 text-xs',
-                      view.id === currentView.id ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    )}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => handleViewChange(view)}
-                      className="w-full flex items-center p-2"
-                    >
-                      <ViewGridIcon className="inline h-4 w-4 mr-1" />
-                      {view.name}
-                    </button>
-                    <div className="p-0.5">
-                      <button
-                        type="button"
-                        className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
-                        onClick={() => handleViewOptions(view)}
-                      >
-                        <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
-                        <span className="sr-only">View Options</span>
-                      </button>
-                    </div>
-                  </li>
+                    index={index}
+                    view={view}
+                    active={view.id === currentView.id}
+                    handleViewChange={handleViewChange}
+                    handleViewOptions={handleViewOptions}
+                  />
                 ))}
-                <li>
-                  <button
-                    type="button"
-                    className="w-full flex items-center p-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                    onClick={handleAddView}
-                  >
-                    <PlusIcon className="h-3 w-3 mr-1 inline-block" />
-                    Add View
-                  </button>
-                </li>
-              </ul>
+              </SortableContainer>
+              <div>
+                <button
+                  type="button"
+                  className="w-full flex items-center p-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  onClick={handleAddView}
+                >
+                  <PlusIcon className="h-3 w-3 mr-1 inline-block" />
+                  Add View
+                </button>
+              </div>
             </div>
           </Popover.Panel>
         </Transition>
