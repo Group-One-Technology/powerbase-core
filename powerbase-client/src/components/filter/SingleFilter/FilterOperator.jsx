@@ -25,7 +25,7 @@ export function FilterOperator({
             />
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-48 bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+        <Listbox.Options className="absolute z-10 mt-1 w-auto min-w-[13rem] bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {options?.map((option) => (
             <Listbox.Option
               key={option}

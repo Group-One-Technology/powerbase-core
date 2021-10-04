@@ -170,11 +170,11 @@ module Powerbase
           adapter: @powerbase_database.adapter,
           turbo: @is_turbo
         })
-        query_string = query.find_by(options[:primary_keys]).to_sequel
+        sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(query_string))
+            .yield_self(&sequel_query)
             .first
         }
       end
@@ -196,29 +196,16 @@ module Powerbase
       })
 
       if @is_turbo
-        query_string = query.find_by(options[:filters]).to_elasticsearch
-
-        result = @esclient.search(
-          index: index,
-          body: {
-            from: (page - 1) * limit,
-            size: limit,
-            query: {
-              query_string: {
-                query: query_string,
-                time_zone: "+00:00"
-              },
-            },
-          },
-        )
-
+        search_params = query.find_by(options[:filters]).to_elasticsearch
+        search_params[:from] = (page - 1) * limit
+        search_params[:size] = limit
+        result = @esclient.search(index: index, body: search_params)
         result["hits"]["hits"].map {|result| result["_source"]}
       else
         query_string = query.find_by(options[:filters]).to_sequel
-
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(query_string))
+            .where(&query_string)
             .paginate(page, limit)
             .all
         }
@@ -236,7 +223,6 @@ module Powerbase
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
-      fields = PowerbaseField.where(powerbase_table_id: @table_id)
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         query: options[:query],
@@ -247,29 +233,15 @@ module Powerbase
       })
 
       if @is_turbo
-        search_params = {
-          from: (page - 1) * limit,
-          size: limit,
-          sort: query.sort
-        }
-
-        if options[:filters] != nil || (options[:query] && options[:query].length > 0)
-          search_params[:query] = {
-            query_string: {
-              query: query.to_elasticsearch,
-              time_zone: "+00:00"
-            }
-          }
-        end
-
+        search_params = query.to_elasticsearch
+        search_params[:from] = (page - 1) * limit
+        search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
         result["hits"]["hits"].map {|result| result["_source"]}
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] != nil ? eval(query.to_sequel) : true)
-            .yield_self(&query.search)
-            .yield_self(&query.sort)
+            .yield_self(&query.to_sequel)
             .paginate(page, limit)
             .all
         }
@@ -284,6 +256,7 @@ module Powerbase
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         query: options[:query],
+        sort: false,
         filter: options[:filters],
         adapter: @powerbase_database.adapter,
         turbo: @is_turbo,
@@ -291,26 +264,13 @@ module Powerbase
 
       if @is_turbo
         index = "table_records_#{@table_id}"
-        query_string = if options[:filters] != nil || (options[:query] && options[:query].length > 0)
-            {
-              query: {
-                query_string: {
-                  query: query.to_elasticsearch,
-                  time_zone: "+00:00"
-                },
-              },
-            }
-          else
-            nil
-          end
-
-        response = @esclient.perform_request("GET", "#{index}/_count", {}, query_string).body
+        search_params = query.to_elasticsearch
+        response = @esclient.perform_request("GET", "#{index}/_count", {}, search_params).body
         response["count"]
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] != nil  ? eval(query.to_sequel) : true)
-            .yield_self(&query.search)
+            .yield_self(&query.to_sequel)
             .count
         }
       end
