@@ -19,7 +19,7 @@ function initializeSort(sort) {
 }
 
 function useViewOptionsModel({ view }) {
-  const [query, setQuery] = useState(view.query || '');
+  const [query, setQuery] = useState('');
   const [filters, setFilters] = useState(view.filters);
   const [sort, setSort] = useState(initializeSort(view.sort));
 
@@ -30,6 +30,10 @@ function useViewOptionsModel({ view }) {
   useEffect(() => {
     setSort(initializeSort(view.sort));
   }, [view.id, view.sort]);
+
+  useEffect(() => {
+    setQuery('');
+  }, [view.id]);
 
   return {
     viewId: view.id,
