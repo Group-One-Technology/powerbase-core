@@ -149,7 +149,7 @@ module Powerbase
           @filter
         end
 
-      transform_sequel_filter(parsedTokens, @query)
+      transform_sequel_filter(parsedTokens)
     end
 
     # * Transform given query string or hash into elasticsearch query string
@@ -315,13 +315,8 @@ module Powerbase
       end
 
       # * Transforms parsed tokens into a sequel query string
-      def transform_sequel_filter(filter_group, search_query = nil)
+      def transform_sequel_filter(filter_group)
         fields = PowerbaseField.where(powerbase_table_id: @table_id)
-        single_line_text_field_type = PowerbaseFieldType.find_by(name: "Single Line Text")
-        long_text_field_type = PowerbaseFieldType.find_by(name: "Long Text")
-        number_field_type = PowerbaseFieldType.find_by(name: "Number")
-        date_field_type = PowerbaseFieldType.find_by(name: "Date")
-        checkbox_field_type = PowerbaseFieldType.find_by(name: "Checkbox")
 
         logical_op = if filter_group != nil && filter_group[:operator]
           if "or"
@@ -402,43 +397,8 @@ module Powerbase
         query_string = sequel_filter
           .select {|item| item != nil}
           .join(" #{logical_op} ")
-        query_string = query_string && query_string.length > 0 ? "(#{query_string})" : ""
 
-        if search_query != nil && search_query.length > 0
-          search_value = sanitize(search_query)
-          search_query = fields.map do |field|
-              if field.db_type == "uuid"
-                if validate_uuid_format(search_value)
-                  "Sequel[{#{field.name}: '#{search_value}'}]"
-                else
-                  nil
-                end
-              elsif (field.powerbase_field_type_id == single_line_text_field_type.id || field.powerbase_field_type_id == long_text_field_type.id)
-                "Sequel.ilike(:#{field.name}, '%#{search_value}%')"
-              elsif field.powerbase_field_type_id == number_field_type.id
-                if Float(search_value, exception: false) != nil
-                  "Sequel[{#{field.name}: '#{search_value}'}]"
-                else
-                  nil
-                end
-              elsif field.powerbase_field_type_id == date_field_type.id
-                nil
-              elsif field.powerbase_field_type_id == checkbox_field_type.id
-                nil
-              else
-                "Sequel[{#{field.name}: '#{search_value}'}]"
-              end
-            end
-            .select {|item| item != nil}
-            .join(" | ")
-          if query_string.length > 0
-            "(#{search_query}) & #{query_string}"
-          else
-            search_query
-          end
-        else
-          query_string
-        end
+        (query_string && query_string.length > 0) ? "(#{query_string})" : ""
       end
 
       # * Transforms parsed tokens into elasticsearch query string
