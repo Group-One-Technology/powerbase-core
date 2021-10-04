@@ -165,7 +165,11 @@ module Powerbase
 
         @esclient.get(index: index, id: format_doc_id(id))["_source"]
       else
-        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
+        query = Powerbase::QueryCompiler.new({
+          table_id: @table_id,
+          adapter: @powerbase_database.adapter,
+          turbo: @is_turbo
+        })
         query_string = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
@@ -185,9 +189,13 @@ module Powerbase
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || 5
+      query = Powerbase::QueryCompiler.new({
+        table_id: @table_id,
+        adapter: @powerbase_database.adapter,
+        turbo: @is_turbo,
+      })
 
       if @is_turbo
-        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
         query_string = query.find_by(options[:filters]).to_elasticsearch
 
         result = @esclient.search(
@@ -206,7 +214,6 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query = Powerbase::QueryCompiler.new({ adapter: @powerbase_database.adapter })
         query_string = query.find_by(options[:filters]).to_sequel
 
         remote_db() {|db|
@@ -220,6 +227,7 @@ module Powerbase
 
     # * Get the filtered and paginated table records.
     # Accepts the following options:
+    # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
     # :sort :: a JSON that contains the sort for the records.
     # :page :: the page number.
@@ -229,10 +237,10 @@ module Powerbase
       page = options[:page] || 1
       limit = options[:limit] || @powerbase_table.page_size
       fields = PowerbaseField.where(powerbase_table_id: @table_id)
-
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
-        query: options[:filters],
+        query: options[:query],
+        filter: options[:filters],
         sort: options[:sort],
         adapter: @powerbase_database.adapter,
         turbo: @is_turbo
@@ -245,7 +253,7 @@ module Powerbase
           sort: query.sort
         }
 
-        if options[:filters]
+        if options[:filters] != nil || (options[:query] && options[:query].length > 0)
           search_params[:query] = {
             query_string: {
               query: query.to_elasticsearch,
@@ -259,7 +267,8 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(query.to_sequel) : true)
+            .where(options[:filters] != nil ? eval(query.to_sequel) : true)
+            .yield_self(&query.search)
             .yield_self(&query.sort)
             .paginate(page, limit)
             .all
@@ -269,20 +278,24 @@ module Powerbase
 
     # * Get total table records.
     # Accepts the following options:
+    # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
     def get_count(options)
+      query = Powerbase::QueryCompiler.new({
+        table_id: @table_id,
+        query: options[:query],
+        filter: options[:filters],
+        adapter: @powerbase_database.adapter,
+        turbo: @is_turbo,
+      })
+
       if @is_turbo
         index = "table_records_#{@table_id}"
-        query = if options[:filters]
-            query_string = Powerbase::QueryCompiler.new({
-              query: options[:filters],
-              adapter: @powerbase_database.adapter
-            })
-
+        query_string = if options[:filters] != nil || (options[:query] && options[:query].length > 0)
             {
               query: {
                 query_string: {
-                  query: query_string.to_elasticsearch,
+                  query: query.to_elasticsearch,
                   time_zone: "+00:00"
                 },
               },
@@ -291,17 +304,13 @@ module Powerbase
             nil
           end
 
-        response = @esclient.perform_request("GET", "#{index}/_count", {}, query).body
+        response = @esclient.perform_request("GET", "#{index}/_count", {}, query_string).body
         response["count"]
       else
-        query_string = Powerbase::QueryCompiler.new({
-          query: options[:filters],
-          adapter: @powerbase_database.adapter,
-        })
-
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] ? eval(query_string.to_sequel) : true)
+            .where(options[:filters] != nil  ? eval(query.to_sequel) : true)
+            .yield_self(&query.search)
             .count
         }
       end

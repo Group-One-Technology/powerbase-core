@@ -8,27 +8,35 @@ import { useViewOptions } from './views/ViewOptions';
 function getKey({
   index,
   tableId,
+  query,
   sort,
   filters,
   pageSize,
 }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
+  const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : '';
   const filterQuery = filters?.id ? `&filterId=${filters.id}` : '';
   const sortQuery = sort?.id ? `&sortId=${sort.id}` : '';
 
-  return `/tables/${tableId}/records?${pageQuery}${filterQuery}${sortQuery}`;
+  return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
-  const { viewId, filters, sort } = useViewOptions();
+  const {
+    viewId,
+    query,
+    filters,
+    sort,
+  } = useViewOptions();
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)
       ? getKey({
         index,
         tableId: id,
+        query,
         sort,
         filters,
         pageSize,
@@ -38,6 +46,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
       ? getTableRecords({
         url,
         viewId,
+        query,
         filters: filters && filters.id && filters.value
           ? filters.value
           : undefined,

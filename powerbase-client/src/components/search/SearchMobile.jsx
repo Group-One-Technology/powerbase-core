@@ -53,6 +53,6 @@ export function SearchMobile({ value, onChange }) {
 }
 
 SearchMobile.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };
