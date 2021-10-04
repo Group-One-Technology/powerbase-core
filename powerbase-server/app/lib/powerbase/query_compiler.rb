@@ -73,7 +73,7 @@ module Powerbase
           end
         else
           primary_keys = @fields.select {|field| field.is_primary_key }
-          order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
+          order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
 
           [{ field: order_field.name, operator: "asc" }]
         end
@@ -141,13 +141,12 @@ module Powerbase
           .select {|item| item != nil}
           .inject {|filter, item| Sequel.|(filter, item)}
 
-        binding.pry
         db.where(filters)
       }
     end
 
-    # * Transform given query string or hash into sequel query string
-    def to_sequel
+    # * Transform given query string or hash into sequel proc
+    def filter
       parsedTokens = if @filter.is_a?(String)
           tokens = lexer(@filter)
           parser(tokens)
@@ -155,7 +154,12 @@ module Powerbase
           @filter
         end
 
-      transform_sequel_filter(parsedTokens)
+      -> (db) {
+        return db if @filter == nil
+        filters = transform_sequel_filter(parsedTokens)
+        binding.pry
+        db.where(filters)
+      }
     end
 
     # * Transform given query string or hash into elasticsearch query string
@@ -320,97 +324,90 @@ module Powerbase
         build_tree(root_node, ast)
       end
 
-      # * Transforms parsed tokens into a sequel query string
+      # * Transforms parsed tokens into a sequel value
       def transform_sequel_filter(filter_group)
-        fields = PowerbaseField.where(powerbase_table_id: @table_id)
-
-        logical_op = if filter_group != nil && filter_group[:operator]
-          if "or"
-            "|"
-          else
-            "&"
-          end
-        else
-          "&"
-        end
-
         filters = filter_group ? filter_group[:filters] : []
-
-        sequel_filter = filters.map do |filter|
+        filters = filters.map do |filter|
           inner_filter_group = filter[:filters]
 
           if inner_filter_group && inner_filter_group.length > 0
             next transform_sequel_filter(filter)
           end
 
-          cur_field = fields.find {|item| item.name.to_s == filter[:field].to_s}
-          next if !cur_field
+          field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
+          next if !field
 
+          field_type = @field_type[field.powerbase_field_type_id]
           relational_op = filter[:filter][:operator]
-          field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(\"#{cur_field.name}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
-            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[DATE_FORMAT('#{cur_field.name}', '%Y-%m-%d')])"
-            elsif @adapter == "postgresql"
-              "Sequel.lit('\"#{cur_field.name}\"')"
-            else
-              "Sequel.lit('#{cur_field.name}')"
+          column_field = field.name
+          column_value = sanitize(filter[:filter][:value])
+          column = {}
+
+          if field_type == "Date"
+            column_field = if @adapter == "mysql2"
+                Sequel.lit(%Q[DATE_FORMAT('#{field.name}', '%Y-%m-%d')])
+              else # postgresql
+                Sequel.lit(%Q[to_char("#{field.name}", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])
+              end
+            column_value = if @adapter == "mysql2"
+                Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(value)}', '+00:00', CONCAT('+', SUBSTRING(timediff(NOW(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])
+              else # postgresql
+                Sequel.lit(%Q[to_char(('#{format_date(value)}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])
+              end
+
+            case relational_op
+            when "is exact date"
+              column[column_field] = column_value
+              next Sequel[column]
+            when "is not exact date"
+              column[column_field] = column_value
+              next Sequel.~(column)
+            when "is before"
+              next Sequel::SQL::BooleanExpression.new(:<, column_field, column_value)
+            when "is after"
+              next Sequel::SQL::BooleanExpression.new(:>, column_field, column_value)
+            when "is on or before"
+              next Sequel::SQL::BooleanExpression.new(:<=, column_field, column_value)
+            when "is on or after"
+              next Sequel::SQL::BooleanExpression.new(:>=, column_field, column_value)
             end
-          value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
-            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+', SUBSTRING(timediff(now(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])"
-            else
-              sanitize(filter[:filter][:value])
-            end
+          end
+
+          column[column_field.to_sym] = column_value
 
           case relational_op
           when "is"
-            "Sequel[{#{field} => '#{value}'}]"
+            next Sequel[column]
           when "is not"
-            "Sequel.~(#{field} => '#{value}')"
+            next Sequel.~(column)
           when "contains"
-            "Sequel.ilike(#{field}, '%#{value}%')"
+            next Sequel.ilike(column_field.to_sym, "%#{column_value}%")
           when "does not contain"
-            "~Sequel.ilike(#{field}, '%#{value}%')"
+            next ~Sequel.ilike(column_field.to_sym, "%#{column_value}%")
           when "="
-            "Sequel[{#{field} => '#{value}'}]"
+            next Sequel[column]
           when "!="
-            "Sequel.~(#{field} => '#{value}')"
+            next Sequel.~(column)
           when "<"
-            "(#{field} < #{value})"
+            next Sequel::SQL::BooleanExpression.new(:<, column_field.to_sym, column_value)
           when ">"
-            "(#{field} > #{value})"
+            next Sequel::SQL::BooleanExpression.new(:>, column_field.to_sym, column_value)
           when "<="
-            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
+            next Sequel::SQL::BooleanExpression.new(:<=, column_field.to_sym, column_value)
           when ">="
-            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
-          when "is exact date"
-            "Sequel[{#{field} => #{value}}]"
-          when "is not exact date"
-            "Sequel.~(#{field} => #{value})"
-          when "is before"
-            "(#{field} < #{value})"
-          when "is after"
-            "(#{field} > #{value})"
-          when "is on or before"
-            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
-          when "is on or after"
-            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
+            next Sequel::SQL::BooleanExpression.new(:>=, column_field.to_sym, column_value)
           end
         end
 
-        query_string = sequel_filter
-          .select {|item| item != nil}
-          .join(" #{logical_op} ")
-
-        (query_string && query_string.length > 0) ? "(#{query_string})" : ""
+        filters.select {|item| item != nil}
+          .inject do |filter, item|
+            next Sequel.|(filter, item) if filter_group != nil && filter_group[:operator] == "or"
+            next Sequel.&(filter, item)
+          end
       end
 
       # * Transforms parsed tokens into elasticsearch query string
       def transform_elasticsearch_filter(filter_group, search_query = nil)
-        fields = PowerbaseField.where(powerbase_table_id: @table_id)
-
         logical_op = if filter_group != nil && filter_group[:operator]
             if "or"
               "OR"
@@ -430,7 +427,7 @@ module Powerbase
             next transform_elasticsearch_filter(filter)
           end
 
-          cur_field = fields.find {|item| item.name.to_s == filter[:field].to_s}
+          cur_field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
           next if !cur_field
 
           relational_op = filter[:filter][:operator]

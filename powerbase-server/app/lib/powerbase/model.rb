@@ -170,11 +170,11 @@ module Powerbase
           adapter: @powerbase_database.adapter,
           turbo: @is_turbo
         })
-        query_string = query.find_by(options[:primary_keys]).to_sequel
+        query_string = query.find_by(options[:primary_keys]).filter
 
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(query_string))
+            .yield_self(&query_string)
             .first
         }
       end
@@ -214,11 +214,11 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"]}
       else
-        query_string = query.find_by(options[:filters]).to_sequel
+        query_string = query.find_by(options[:filters]).filter
 
         remote_db() {|db|
           db.from(@table_name)
-            .where(eval(query_string))
+            .where(&query_string)
             .paginate(page, limit)
             .all
         }
@@ -267,7 +267,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] != nil ? eval(query.to_sequel) : true)
+            .yield_self(&query.filter)
             .yield_self(&query.search)
             .yield_self(&query.sort)
             .paginate(page, limit)
@@ -309,7 +309,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(options[:filters] != nil  ? eval(query.to_sequel) : true)
+            .yield_self(&query.filter)
             .yield_self(&query.search)
             .count
         }
