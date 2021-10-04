@@ -414,7 +414,7 @@ module Powerbase
       # * Transforms parsed tokens into elasticsearch query string
       def transform_elasticsearch_filter(filter_group, search_query = nil)
         logical_op = if filter_group != nil && filter_group[:operator]
-            if "or"
+            if filter_group[:operator] == "or"
               "OR"
             else
               "AND"
