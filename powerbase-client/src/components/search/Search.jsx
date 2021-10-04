@@ -4,7 +4,6 @@ import debounce from 'lodash.debounce';
 import { useTableView } from '@models/TableView';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
-import { updateTableView } from '@lib/api/views';
 import { SearchWeb } from './SearchWeb';
 import { SearchMobile } from './SearchMobile';
 
@@ -17,7 +16,6 @@ export function Search() {
 
   const updateTableRecords = useCallback(debounce(async (value) => {
     setRemoteQuery(value);
-    updateTableView({ id: view.id, query });
     await mutateTableRecords();
   }, 500), [view]);
 
