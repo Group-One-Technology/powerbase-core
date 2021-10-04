@@ -132,10 +132,6 @@ module Powerbase
       }
     end
 
-    # * Returns a sort hash for elasticsearch
-    def sort
-    end
-
     # * Returns elasticsearch hash query
     def to_elasticsearch
       search_params = {}
