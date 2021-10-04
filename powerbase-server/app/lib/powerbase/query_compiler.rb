@@ -159,7 +159,7 @@ module Powerbase
       end
 
       # For filtering
-      if @filter != nil
+      if @filter != nil || (@query && @query.length > 0)
         parsedTokens = if @filter.is_a?(String)
             tokens = lexer(@filter)
             parser(tokens)
