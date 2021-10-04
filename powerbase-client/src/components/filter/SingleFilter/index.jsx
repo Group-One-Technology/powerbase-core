@@ -74,7 +74,7 @@ export function SingleFilter({
         break;
       case FieldType.SINGLE_SELECT:
       case FieldType.DATE:
-        setValue(evt.toString());
+        setValue(evt?.toString());
         break;
       default:
         setValue(evt.target.value);

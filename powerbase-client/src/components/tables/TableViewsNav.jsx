@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SearchIcon, ShareIcon } from '@heroicons/react/outline';
+import { ShareIcon } from '@heroicons/react/outline';
 
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
@@ -11,6 +11,7 @@ import { Badge } from '@components/ui/Badge';
 import { ViewMenu } from '@components/views/ViewMenu';
 import { Filter } from '@components/filter/Filter';
 import { Sort } from '@components/sort/Sort';
+import { Search } from '@components/search/Search';
 
 export function TableViewsNav({ table, views }) {
   const { data: records } = useTableRecords();
@@ -40,13 +41,7 @@ export function TableViewsNav({ table, views }) {
           </button>
         </div>
         <div className="flex-1 flex items-center justify-end">
-          <button
-            type="button"
-            className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            <span className="sr-only">Search</span>
-            <SearchIcon className="block h-4 w-4" />
-          </button>
+          <Search />
         </div>
       </div>
     </div>
