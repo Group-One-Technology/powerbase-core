@@ -115,13 +115,18 @@ module Powerbase
       @query = sanitize(@query)
 
       -> (db) {
+        return db if @query == nil || (@query && @query.length == 0)
+
         filters = @fields.map do |field|
           field_type = @field_type[field.powerbase_field_type_id]
 
           column = {}
-          column[field.name] = @query
+          column[field.name.to_sym] = @query
 
-          next if field.db_type == "uuid" && !validate_uuid_format(@query)
+          if field.db_type == "uuid"
+            next if !validate_uuid_format(@query)
+            next Sequel[column]
+          end
           next if field_type == "Number" && Float(@query, exception: false) == nil
           next if field_type == "Date" || field_type == "Checkbox"
 
@@ -134,8 +139,9 @@ module Powerbase
 
         filters = filters
           .select {|item| item != nil}
-          .inject{ |filter, item| Sequel.|(filter, item) }
+          .inject {|filter, item| Sequel.|(filter, item)}
 
+        binding.pry
         db.where(filters)
       }
     end
