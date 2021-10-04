@@ -170,11 +170,11 @@ module Powerbase
           adapter: @powerbase_database.adapter,
           turbo: @is_turbo
         })
-        query_string = query.find_by(options[:primary_keys]).filter
+        sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
           db.from(@table_name)
-            .yield_self(&query_string)
+            .yield_self(&sequel_query)
             .first
         }
       end
@@ -267,9 +267,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .yield_self(&query.filter)
-            .yield_self(&query.search)
-            .yield_self(&query.sort)
+            .yield_self(&query.to_sequel)
             .paginate(page, limit)
             .all
         }
@@ -309,8 +307,7 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .yield_self(&query.filter)
-            .yield_self(&query.search)
+            .yield_self(&query.to_sequel)
             .count
         }
       end

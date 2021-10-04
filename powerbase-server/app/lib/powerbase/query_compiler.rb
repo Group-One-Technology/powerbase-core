@@ -27,7 +27,7 @@ module Powerbase
     # :turbo :: a boolean for turbo mode.
     def initialize(options)
       @table_id = options[:table_id] || nil
-      @query = options[:query] || nil
+      @query = options[:query] ? sanitize(options[:query]) : nil
       @filter = options[:filter] || nil
       @sort = options[:sort] || []
       @adapter = options[:adapter] || "postgresql"
@@ -36,8 +36,23 @@ module Powerbase
       @fields = PowerbaseField.where(powerbase_table_id: @table_id)
       @field_types = PowerbaseFieldType.all
       @field_type = {}
-      @field_types.each do |field_type|
-        @field_type[field_type.id] = field_type.name
+      @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
+
+      @sort = if @sort.length > 0
+        @sort.map do |sort_item|
+          operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
+              "desc"
+            else
+              "asc"
+            end
+
+          { field: sort_item[:field], operator: operator }
+        end
+      else
+        primary_keys = @fields.select {|field| field.is_primary_key }
+        order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
+
+        [{ field: order_field.name, operator: "asc" }]
       end
     end
 
@@ -59,107 +74,80 @@ module Powerbase
       self
     end
 
-    # Returns a sort hash for elasticsearch and a proc for sequel
-    def sort
-      sort = if @sort != nil && @sort.length > 0
-          @sort.map do |sort_item|
-            operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
-                "desc"
-              else
-                "asc"
-              end
+    # * Returns sequel proc query
+    def to_sequel
+      -> (db) {
+        # For full text search
+        if @query != nil && @query.length > 0
+          filters = @fields.map do |field|
+            field_type = @field_type[field.powerbase_field_type_id]
+            column = {}
+            column[field.name.to_sym] = @query
 
-            { field: sort_item[:field], operator: operator }
-          end
-        else
-          primary_keys = @fields.select {|field| field.is_primary_key }
-          order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
-
-          [{ field: order_field.name, operator: "asc" }]
-        end
-
-      if @turbo
-        sort.map do |sort_item|
-          sort_field = @fields.find {|field| field.name == sort_item[:field] }
-          sort_column = {}
-
-          if sort_field
-            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
-                sort_field.name
-              else
-                "#{sort_field.name}.keyword"
-              end
-
-            sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
-          end
-
-          sort_column
-        end
-      else
-        -> (db) {
-          sort.each do |sort_item|
-            if sort_item[:operator] == "asc"
-              db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
-            else
-              db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+            if field.db_type == "uuid"
+              next if !validate_uuid_format(@query)
+              next Sequel[column]
             end
+            next if field_type == "Number" && Float(@query, exception: false) == nil
+            next if field_type == "Date" || field_type == "Checkbox"
+
+            if field_type == "Single Line Text" || field_type == "Long Text"
+              next Sequel.ilike(field.name.to_sym, "%#{@query}%")
+            end
+
+            Sequel[column]
           end
 
-          db
-        }
+          filters = filters.select {|item| item != nil}
+            .inject {|filter, item| Sequel.|(filter, item)}
+
+          db = db.where(filters)
+        end
+
+        # For filtering
+        if @filter != nil
+          parsedTokens = if @filter.is_a?(String)
+              tokens = lexer(@filter)
+              parser(tokens)
+            else
+              @filter
+            end
+
+          filters = transform_sequel_filter(parsedTokens)
+          db = db.where(filters)
+        end
+
+        # For sorting
+        @sort.each do |sort_item|
+          if sort_item[:operator] == "asc"
+            db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
+          else
+            db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+          end
+        end
+
+        db
+      }
+    end
+
+    # * Returns a sort hash for elasticsearch
+    def sort
+      @sort.map do |sort_item|
+        sort_field = @fields.find {|field| field.name == sort_item[:field] }
+        sort_column = {}
+
+        if sort_field
+          column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
+              sort_field.name
+            else
+              "#{sort_field.name}.keyword"
+            end
+
+          sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
+        end
+
+        sort_column
       end
-    end
-
-    # Returns a proc for sequel
-    def search
-      @query = sanitize(@query)
-
-      -> (db) {
-        return db if @query == nil || (@query && @query.length == 0)
-
-        filters = @fields.map do |field|
-          field_type = @field_type[field.powerbase_field_type_id]
-
-          column = {}
-          column[field.name.to_sym] = @query
-
-          if field.db_type == "uuid"
-            next if !validate_uuid_format(@query)
-            next Sequel[column]
-          end
-          next if field_type == "Number" && Float(@query, exception: false) == nil
-          next if field_type == "Date" || field_type == "Checkbox"
-
-          if field_type == "Single Line Text" || field_type == "Long Text"
-            next Sequel.ilike(field.name.to_sym, "%#{@query}%")
-          end
-
-          Sequel[column]
-        end
-
-        filters = filters
-          .select {|item| item != nil}
-          .inject {|filter, item| Sequel.|(filter, item)}
-
-        db.where(filters)
-      }
-    end
-
-    # * Transform given query string or hash into sequel proc
-    def filter
-      parsedTokens = if @filter.is_a?(String)
-          tokens = lexer(@filter)
-          parser(tokens)
-        else
-          @filter
-        end
-
-      -> (db) {
-        return db if @filter == nil
-        filters = transform_sequel_filter(parsedTokens)
-        binding.pry
-        db.where(filters)
-      }
     end
 
     # * Transform given query string or hash into elasticsearch query string
