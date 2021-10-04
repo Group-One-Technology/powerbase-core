@@ -32,6 +32,13 @@ module Powerbase
       @sort = options[:sort] || []
       @adapter = options[:adapter] || "postgresql"
       @turbo = options[:turbo] || false
+
+      @fields = PowerbaseField.where(powerbase_table_id: @table_id)
+      @field_types = PowerbaseFieldType.all
+      @field_type = {}
+      @field_types.each do |field_type|
+        @field_type[field_type.id] = field_type.name
+      end
     end
 
     # * Find records by their fields.
@@ -54,10 +61,6 @@ module Powerbase
 
     # Returns a sort hash for elasticsearch and a proc for sequel
     def sort
-      fields = PowerbaseField.where(powerbase_table_id: @table_id)
-      number_field_type = PowerbaseFieldType.find_by(name: "Number")
-      date_field_type = PowerbaseFieldType.find_by(name: "Date")
-
       sort = if @sort != nil && @sort.length > 0
           @sort.map do |sort_item|
             operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
@@ -69,7 +72,7 @@ module Powerbase
             { field: sort_item[:field], operator: operator }
           end
         else
-          primary_keys = fields.select {|field| field.is_primary_key }
+          primary_keys = @fields.select {|field| field.is_primary_key }
           order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
 
           [{ field: order_field.name, operator: "asc" }]
@@ -77,11 +80,11 @@ module Powerbase
 
       if @turbo
         sort.map do |sort_item|
-          sort_field = fields.find {|field| field.name == sort_item[:field] }
+          sort_field = @fields.find {|field| field.name == sort_item[:field] }
           sort_column = {}
 
           if sort_field
-            column_name = if sort_field.powerbase_field_type_id == number_field_type.id || sort_field.powerbase_field_type_id == date_field_type.id
+            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
                 sort_field.name
               else
                 "#{sort_field.name}.keyword"
@@ -105,6 +108,36 @@ module Powerbase
           db
         }
       end
+    end
+
+    # Returns a proc for sequel
+    def search
+      @query = sanitize(@query)
+
+      -> (db) {
+        filters = @fields.map do |field|
+          field_type = @field_type[field.powerbase_field_type_id]
+
+          column = {}
+          column[field.name] = @query
+
+          next if field.db_type == "uuid" && !validate_uuid_format(@query)
+          next if field_type == "Number" && Float(@query, exception: false) == nil
+          next if field_type == "Date" || field_type == "Checkbox"
+
+          if field_type == "Single Line Text" || field_type == "Long Text"
+            next Sequel.ilike(field.name.to_sym, "%#{@query}%")
+          end
+
+          Sequel[column]
+        end
+
+        filters = filters
+          .select {|item| item != nil}
+          .inject{ |filter, item| Sequel.|(filter, item) }
+
+        db.where(filters)
+      }
     end
 
     # * Transform given query string or hash into sequel query string

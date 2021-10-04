@@ -269,7 +269,8 @@ module Powerbase
       else
         remote_db() {|db|
           db.from(@table_name)
-            .where(has_filters ? eval(query.to_sequel) : true)
+            # .where(has_filters ? eval(query.to_sequel) : true)
+            .yield_self(&query.search)
             .yield_self(&query.sort)
             .paginate(page, limit)
             .all
