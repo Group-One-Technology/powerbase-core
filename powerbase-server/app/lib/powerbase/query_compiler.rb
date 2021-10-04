@@ -29,7 +29,7 @@ module Powerbase
       @table_id = options[:table_id] || nil
       @query = options[:query] ? sanitize(options[:query]) : nil
       @filter = options[:filter] || nil
-      @sort = options[:sort] || []
+      @sort = options[:sort] == nil ? [] : options[:sort]
       @adapter = options[:adapter] || "postgresql"
       @turbo = options[:turbo] || false
 
@@ -38,7 +38,7 @@ module Powerbase
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
 
-      @sort = if @sort.length > 0
+      @sort = if @sort.kind_of?(Array) && @sort.length > 0
         @sort.map do |sort_item|
           operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
               "desc"
@@ -48,7 +48,7 @@ module Powerbase
 
           { field: sort_item[:field], operator: operator }
         end
-      else
+      elsif @sort.kind_of?(Array)
         primary_keys = @fields.select {|field| field.is_primary_key }
         order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
 
@@ -118,11 +118,13 @@ module Powerbase
         end
 
         # For sorting
-        @sort.each do |sort_item|
-          if sort_item[:operator] == "asc"
-            db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
-          else
-            db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+        if @sort.kind_of?(Array) && @sort.length > 0
+          @sort.each do |sort_item|
+            if sort_item[:operator] == "asc"
+              db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
+            else
+              db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+            end
           end
         end
 
@@ -132,34 +134,53 @@ module Powerbase
 
     # * Returns a sort hash for elasticsearch
     def sort
-      @sort.map do |sort_item|
-        sort_field = @fields.find {|field| field.name == sort_item[:field] }
-        sort_column = {}
-
-        if sort_field
-          column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
-              sort_field.name
-            else
-              "#{sort_field.name}.keyword"
-            end
-
-          sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
-        end
-
-        sort_column
-      end
     end
 
-    # * Transform given query string or hash into elasticsearch query string
+    # * Returns elasticsearch hash query
     def to_elasticsearch
-      parsedTokens = if @filter.is_a?(String)
-          tokens = lexer(@filter)
-          parser(tokens)
-        else
-          @filter
+      search_params = {}
+
+      # For sorting
+      if @sort.kind_of?(Array) && @sort.length > 0
+        sort = @sort.map do |sort_item|
+          sort_field = @fields.find {|field| field.name == sort_item[:field] }
+          sort_column = {}
+
+          if sort_field
+            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
+                sort_field.name
+              else
+                "#{sort_field.name}.keyword"
+              end
+
+            sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
+          end
+
+          sort_column
         end
 
-      transform_elasticsearch_filter(parsedTokens, @query)
+        search_params[:sort] = sort
+      end
+
+      # For filtering
+      if @filter != nil
+        parsedTokens = if @filter.is_a?(String)
+            tokens = lexer(@filter)
+            parser(tokens)
+          else
+            @filter
+          end
+        query_string = transform_elasticsearch_filter(parsedTokens, @query)
+
+        search_params[:query] = {
+          query_string: {
+            query: query_string,
+            time_zone: "+00:00"
+          }
+        }
+      end
+
+      search_params
     end
 
     private
