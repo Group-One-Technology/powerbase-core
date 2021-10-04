@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_30_085204) do
+ActiveRecord::Schema.define(version: 2021_10_04_143411) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -105,6 +105,7 @@ ActiveRecord::Schema.define(version: 2021_09_30_085204) do
     t.boolean "is_migrated", default: false
     t.string "alias"
     t.text "logs", default: "{}"
+    t.integer "order"
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
@@ -117,6 +118,7 @@ ActiveRecord::Schema.define(version: 2021_09_30_085204) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "filters", default: "{}"
     t.text "sort", default: "{}"
+    t.integer "order"
     t.index ["powerbase_table_id"], name: "index_table_views_on_powerbase_table_id"
   end
 
