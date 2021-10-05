@@ -17,6 +17,9 @@ class AddOrderToTablesAndViews < ActiveRecord::Migration[6.1]
         end
       end
     end
+
+    change_column :table_views, :order, :integer, null: false
+    change_column :powerbase_tables, :order, :integer, null: false
   end
 
   def down
