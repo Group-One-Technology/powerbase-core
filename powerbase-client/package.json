@@ -29,6 +29,7 @@
     "react-draggable": "^4.4.4",
     "react-gravatar": "^2.6.3",
     "react-helmet": "^6.1.0",
+    "react-movable": "^2.5.4",
     "react-multi-select-component": "^4.1.8",
     "react-router-dom": "^5.2.0",
     "react-virtualized": "^9.22.3",

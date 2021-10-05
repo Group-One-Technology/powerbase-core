@@ -18,6 +18,10 @@ Rails.application.routes.draw do
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :table_views, path: 'views', as: 'views', except: [:new], shallow: true do
+        collection do
+          put 'order', to: 'table_views#update_order', as: 'update_views_order'
+        end
+
         member do
           get 'fields', to: 'view_field_options#index', as: 'view_fields'
         end
