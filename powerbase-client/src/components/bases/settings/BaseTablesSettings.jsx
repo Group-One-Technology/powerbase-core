@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import cn from 'classnames';
 import { List, arrayMove } from 'react-movable';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
@@ -84,6 +85,7 @@ export function BaseTablesSettings() {
         <form onSubmit={handleSubmit}>
           <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
             <List
+              lockVertically
               values={tables}
               onChange={handleTablesOrderChange}
               renderList={({ children, props }) => (
@@ -91,7 +93,7 @@ export function BaseTablesSettings() {
                   {children}
                 </ul>
               )}
-              renderItem={({ value: table, props }) => (
+              renderItem={({ value: table, props, isDragged }) => (
                 <li {...props} key={table.id} className="block hover:bg-gray-50">
                   <div className="grid grid-cols-12 gap-3 items-center p-2 w-full sm:px-6">
                     <div className="col-span-4">
@@ -112,7 +114,10 @@ export function BaseTablesSettings() {
                       <button
                         type="button"
                         data-movable-handle
-                        className="w-full flex items-center p-2"
+                        className={cn(
+                          'w-full flex items-center p-2 cursor-inherit',
+                          isDragged ? 'cursor-grabbing' : 'cursor-grab',
+                        )}
                       >
                         <GripVerticalIcon className="h-4 w-4 text-gray-500" />
                         <span className="sr-only">Reorder Table</span>

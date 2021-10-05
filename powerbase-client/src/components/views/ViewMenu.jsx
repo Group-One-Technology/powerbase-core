@@ -60,10 +60,11 @@ export function ViewMenu({ tableId, views: initialViews }) {
           <Popover.Panel className="z-10 origin-top-right absolute left-0 mt-2 w-auto rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <List
+                lockVertically
                 values={views}
                 onChange={handleViewsOrderChange}
                 renderList={({ children, props }) => <ul {...props}>{children}</ul>}
-                renderItem={({ value: view, props }) => (
+                renderItem={({ value: view, props, isDragged }) => (
                   <li
                     {...props}
                     className={cn(
@@ -74,7 +75,10 @@ export function ViewMenu({ tableId, views: initialViews }) {
                     <button
                       type="button"
                       data-movable-handle
-                      className="w-auto flex items-center p-2"
+                      className={cn(
+                        'w-auto flex items-center p-2 cursor-inherit',
+                        isDragged ? 'cursor-grabbing' : 'cursor-grab',
+                      )}
                     >
                       <GripVerticalIcon className="h-3 w-3 text-gray-500" />
                       <span className="sr-only">Reorder View</span>
