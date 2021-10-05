@@ -76,7 +76,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                     <button
                       type="button"
                       data-movable-handle
-                      className="w-full flex items-center p-2"
+                      className="w-auto flex items-center p-2"
                     >
                       <GripVerticalIcon className="h-3 w-3 text-gray-500" />
                       <span className="sr-only">Reorder View</span>
@@ -84,7 +84,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                     <button
                       type="button"
                       onClick={() => handleViewChange(view)}
-                      className="w-full flex items-center p-2"
+                      className="w-full flex justify-start items-center px-1 py-2"
                     >
                       <ViewGridIcon className="inline h-4 w-4 mr-1" />
                       {view.name}
