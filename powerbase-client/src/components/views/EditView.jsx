@@ -10,9 +10,11 @@ import { VIEW_TYPES } from '@lib/constants/view';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
+import { useTableView } from '@models/TableView';
 
 export function EditView({ view, open, setOpen }) {
   const { viewsResponse } = useCurrentView();
+  const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
 
@@ -39,6 +41,7 @@ export function EditView({ view, open, setOpen }) {
     try {
       await deleteTableView({ id: view.id });
       await viewsResponse.mutate();
+      await mutateView();
 
       setOpen(false);
     } catch (err) {

@@ -6,7 +6,6 @@ import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { useTableView } from '@models/TableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
 import { updateViewsOrder } from '@lib/api/views';
@@ -15,8 +14,7 @@ import { AddView } from './AddView';
 import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
-  const { data: currentView } = useTableView();
-  const { handleViewChange } = useCurrentView();
+  const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [views, setViews] = useState(initialViews);
   const [viewOptionModal, setViewOptionModal] = useState({
