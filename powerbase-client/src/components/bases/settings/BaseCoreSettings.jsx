@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
-import { IBase } from '@lib/propTypes/base';
 import { updateDatabase } from '@lib/api/databases';
 import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
-import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
+import { useBase } from '@models/Base';
+import { useBases } from '@models/Bases';
 
 import { Button } from '@components/ui/Button';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
@@ -33,7 +33,10 @@ const ERROR_ICON = (
   </div>
 );
 
-export function BaseCoreSettings({ base, mutateBase, mutateBases }) {
+export function BaseCoreSettings() {
+  const { data: base, mutate: mutateBase } = useBase();
+  const { mutate: mutateBases } = useBases();
+
   const [name, setName, nameError] = useValidState(base.name, REQUIRED_VALIDATOR);
   const [databaseName, setDatabaseName, databaseNameError] = useValidState(
     base.databaseName,
@@ -212,9 +215,3 @@ export function BaseCoreSettings({ base, mutateBase, mutateBases }) {
     </div>
   );
 }
-
-BaseCoreSettings.propTypes = {
-  base: IBase.isRequired,
-  mutateBase: PropTypes.func.isRequired,
-  mutateBases: PropTypes.func.isRequired,
-};

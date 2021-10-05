@@ -11,9 +11,9 @@ import {
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
-import { BaseTablesProvider, useBaseTables } from '@models/BaseTables';
-import { BasesProvider, useBases } from '@models/Bases';
-import { BaseConnectionsProvider, useBaseConnections } from '@models/BaseConnections';
+import { BaseTablesProvider } from '@models/BaseTables';
+import { BasesProvider } from '@models/Bases';
+import { BaseConnectionsProvider } from '@models/BaseConnections';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -44,10 +44,7 @@ const TABS = [
 function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
-  const { data: base, mutate: mutateBase } = useBase();
-  const { data: bases, mutate: mutateBases } = useBases();
-  const { data: tables } = useBaseTables();
-  const { data: connections } = useBaseConnections();
+  const { data: base } = useBase();
 
   if (base == null || authUser == null) {
     return <Loader className="h-screen" />;
@@ -95,18 +92,13 @@ function BaseSettings() {
                   </Tab.List>
                   <Tab.Panels className="divide-y divide-gray-200 lg:col-span-9">
                     <Tab.Panel>
-                      <BaseCoreSettings base={base} mutateBase={mutateBase} mutateBases={mutateBases} />
+                      <BaseCoreSettings />
                     </Tab.Panel>
                     <Tab.Panel>
-                      <BaseTablesSettings tables={tables} />
+                      <BaseTablesSettings />
                     </Tab.Panel>
                     <Tab.Panel>
-                      <BaseConnectionsSettings
-                        base={base}
-                        bases={bases}
-                        tables={tables}
-                        connections={connections}
-                      />
+                      <BaseConnectionsSettings />
                     </Tab.Panel>
                   </Tab.Panels>
                 </Tab.Group>
