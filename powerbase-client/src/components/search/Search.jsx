@@ -27,8 +27,8 @@ export function Search() {
 
   return (
     <>
-      <SearchMobile query={query} onChange={handleQueryChange} />
-      <SearchWeb query={query} onChange={handleQueryChange} />
+      <SearchMobile value={query} onChange={handleQueryChange} />
+      <SearchWeb value={query} onChange={handleQueryChange} />
     </>
   );
 }
