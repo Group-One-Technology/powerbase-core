@@ -27,16 +27,17 @@ export function VirtualTable({ height, tables }) {
     return <Loader style={{ height }} />;
   }
 
+  const recordCells = records.map((record, index) => {
+    const values = fields.map((field) => record[field.name]);
+    return [index + 1, ...values];
+  });
+  const emptyNewRecord = [records.length + 1, ...new Array(fields.length).fill('')];
+  recordCells.push(emptyNewRecord);
+
   return (
     <TableRenderer
       fields={fields}
-      records={[
-        ...records.map((record, index) => [
-          index + 1,
-          ...Object.values(record),
-        ]),
-        [records.length + 1, ...new Array(fields.length).fill('')],
-      ]}
+      records={recordCells}
       totalRecords={totalRecords}
       loadMoreRows={loadMore}
       isLoading={isLoading}
