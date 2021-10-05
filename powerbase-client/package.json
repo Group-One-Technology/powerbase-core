@@ -10,6 +10,9 @@
     "lint": "eslint \"src/**/*.{js,jsx}\""
   },
   "dependencies": {
+    "@dnd-kit/core": "^4.0.0",
+    "@dnd-kit/sortable": "^5.0.0",
+    "@dnd-kit/utilities": "^3.0.0",
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.1",
     "@tailwindcss/forms": "^0.3.2",
@@ -29,7 +32,6 @@
     "react-draggable": "^4.4.4",
     "react-gravatar": "^2.6.3",
     "react-helmet": "^6.1.0",
-    "react-movable": "^2.5.4",
     "react-multi-select-component": "^4.1.8",
     "react-router-dom": "^5.2.0",
     "react-virtualized": "^9.22.3",
