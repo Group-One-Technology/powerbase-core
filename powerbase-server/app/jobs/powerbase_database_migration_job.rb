@@ -168,9 +168,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
       # Table View and View Fields Migration
       puts "#{Time.now} Migrating table view and view fields of table with id of #{table.id}..."
-      table_view = TableView.new
+      table_view = TableView.find_by(powerbase_table_id: table.id) || TableView.new
       table_view.powerbase_table_id = table.id
-      table_view.name = "Grid View"
+      table_view.name = "Default"
       table_view.view_type = "grid"
       if table_view.save
         table.default_view_id = table_view.id
@@ -178,7 +178,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
         fields = PowerbaseField.where(powerbase_table_id: table.id)
         fields.each_with_index do |cur_field, index|
-          view_field = ViewFieldOption.new
+          view_field = ViewFieldOption.find_by(
+            table_view_id: table_view.id,
+            powerbase_field_id: cur_field.id,
+          ) || ViewFieldOption.new
           view_field.width = case cur_field.powerbase_field_type_id
             when 3
               cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
