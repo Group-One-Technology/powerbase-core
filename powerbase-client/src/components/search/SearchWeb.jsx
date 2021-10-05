@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Transition } from '@headlessui/react';
@@ -46,6 +47,7 @@ export function SearchWeb({ value, onChange }) {
               onChange={onChange}
               className="ml-auto appearance-none block w-52 pl-8 pr-2 py-1 text-sm border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:border-gray-500"
               placeholder="Search..."
+              autoFocus
             />
           </div>
         </Transition>
