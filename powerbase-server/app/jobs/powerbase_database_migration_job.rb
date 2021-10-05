@@ -172,6 +172,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       table_view.powerbase_table_id = table.id
       table_view.name = "Default"
       table_view.view_type = "grid"
+      table_view.order = 0
       if table_view.save
         table.default_view_id = table_view.id
         table.save
