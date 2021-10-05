@@ -26,7 +26,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
 
   useEffect(() => {
     setViews(initialViews);
-  }, [tableId]);
+  }, [tableId, initialViews]);
 
   const handleAddView = () => {
     setAddViewModalOpen(true);

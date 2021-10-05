@@ -50,10 +50,12 @@ class TableViewsController < ApplicationController
       return
     end
 
-    @view = @table.table_views.create({
+    @view = TableView.create(
       name: safe_params[:name],
       view_type: safe_params[:view_type],
-    })
+      order: @table.table_views.count,
+      powerbase_table_id: @table.id,
+    )
 
     if @view.save
       fields = PowerbaseField.where(powerbase_table_id: @table.id)
@@ -109,6 +111,13 @@ class TableViewsController < ApplicationController
     end
 
     @view.destroy
+
+    views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
+
+    views.each_with_index do |view, index|
+      view = TableView.find(view.id)
+      view.update(order: index)
+    end
   end
 
   # PUT /tables/:table_id/views/order
