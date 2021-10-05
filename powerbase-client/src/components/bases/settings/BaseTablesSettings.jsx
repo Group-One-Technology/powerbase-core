@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { List, arrayMove } from 'react-movable';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
-import { ITable } from '@lib/propTypes/table';
-import { updateTablesAliases } from '@lib/api/tables';
+import { updateTables } from '@lib/api/tables';
+import { useBaseTables } from '@models/BaseTables';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 import { Button } from '@components/ui/Button';
 import { StatusModal } from '@components/ui/StatusModal';
+import { useBase } from '@models/Base';
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -18,41 +19,13 @@ const INITIAL_MODAL_VALUE = {
     </div>
   ),
   title: 'Update Successful',
-  content: 'The tables\' aliases have been updated.',
+  content: 'The tables\' aliases and/or order have been updated.',
 };
 
-function BaseTableSettingsItem({ table, handleChange }) {
-  return (
-    <li key={table.id} className="block hover:bg-gray-50">
-      <div className="grid grid-cols-12 gap-3 items-center p-2 w-full sm:px-6">
-        <div className="col-span-4">
-          <p className="text-base text-gray-900">{table.name}</p>
-        </div>
-        <div className="col-span-7 flex items-center">
-          <Input
-            type="text"
-            id={`${table.name}-alias`}
-            name={`${table.name}-alias`}
-            value={table.alias || ''}
-            placeholder="Add Alias"
-            onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
-            className="w-full"
-          />
-        </div>
-        <div className="col-span-1 flex justify-end">
-          <GripVerticalIcon className="h-4 w-4 text-gray-500" />
-        </div>
-      </div>
-    </li>
-  );
-}
+export function BaseTablesSettings() {
+  const { data: base } = useBase();
+  const { data: initialData, mutate: mutateTables } = useBaseTables();
 
-BaseTableSettingsItem.propTypes = {
-  table: ITable.isRequired,
-  handleChange: PropTypes.func.isRequired,
-};
-
-export function BaseTablesSettings({ tables: initialData }) {
   const [tables, setTables] = useState(initialData.map((item) => ({
     ...item,
     updated: false,
@@ -69,7 +42,8 @@ export function BaseTablesSettings({ tables: initialData }) {
     const updatedTables = tables.filter((item) => item.updated);
 
     try {
-      await updateTablesAliases({ tables: updatedTables });
+      await updateTables({ databaseId: base.id, tables: updatedTables });
+      mutateTables();
       setModal((curVal) => ({ ...curVal, open: true }));
     } catch (err) {
       setModal({
@@ -95,6 +69,13 @@ export function BaseTablesSettings({ tables: initialData }) {
     })));
   };
 
+  const handleTablesOrderChange = ({ oldIndex, newIndex }) => {
+    setTables((prevTables) => arrayMove(prevTables, oldIndex, newIndex).map((item) => ({
+      ...item,
+      updated: true,
+    })));
+  };
+
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
       <h2 className="text-xl leading-6 font-medium text-gray-900">Tables</h2>
@@ -102,15 +83,45 @@ export function BaseTablesSettings({ tables: initialData }) {
       {!!tables?.length && (
         <form onSubmit={handleSubmit}>
           <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
-            <ul className="divide-y divide-gray-200">
-              {tables.map((table) => (
-                <BaseTableSettingsItem
-                  key={table.id}
-                  table={table}
-                  handleChange={handleChange}
-                />
-              ))}
-            </ul>
+            <List
+              values={tables}
+              onChange={handleTablesOrderChange}
+              renderList={({ children, props }) => (
+                <ul className="divide-y divide-gray-200" {...props}>
+                  {children}
+                </ul>
+              )}
+              renderItem={({ value: table, props }) => (
+                <li {...props} key={table.id} className="block hover:bg-gray-50">
+                  <div className="grid grid-cols-12 gap-3 items-center p-2 w-full sm:px-6">
+                    <div className="col-span-4">
+                      <p className="text-base text-gray-900">{table.name}</p>
+                    </div>
+                    <div className="col-span-7 flex items-center">
+                      <Input
+                        type="text"
+                        id={`${table.name}-alias`}
+                        name={`${table.name}-alias`}
+                        value={table.alias || ''}
+                        placeholder="Add Alias"
+                        onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <button
+                        type="button"
+                        data-movable-handle
+                        className="w-full flex items-center p-2"
+                      >
+                        <GripVerticalIcon className="h-4 w-4 text-gray-500" />
+                        <span className="sr-only">Reorder Table</span>
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              )}
+            />
           </div>
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
             <Button
@@ -135,7 +146,3 @@ export function BaseTablesSettings({ tables: initialData }) {
     </div>
   );
 }
-
-BaseTablesSettings.propTypes = {
-  tables: PropTypes.arrayOf(ITable),
-};

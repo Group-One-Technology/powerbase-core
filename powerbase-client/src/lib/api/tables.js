@@ -20,8 +20,8 @@ export async function getTables({ databaseId }) {
   return undefined;
 }
 
-export async function updateTablesAliases(payload) {
-  const response = await securedApi.put('tables/update/aliases', payload);
+export async function updateTables({ databaseId, ...payload }) {
+  const response = await securedApi.put(`/databases/${databaseId}/tables/update`, payload);
 
   if (response.statusText === 'OK') {
     return response.data;
