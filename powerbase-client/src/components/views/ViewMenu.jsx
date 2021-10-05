@@ -9,6 +9,7 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTableView } from '@models/TableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
+import { updateViewsOrder } from '@lib/api/views';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { AddView } from './AddView';
 import { EditView } from './EditView';
@@ -35,6 +36,13 @@ export function ViewMenu({ tableId, views: initialViews }) {
     setViewOptionModal({ open: true, view });
   };
 
+  const handleViewsOrderChange = ({ oldIndex, newIndex }) => {
+    const updatedViews = arrayMove(views, oldIndex, newIndex);
+    const viewIds = updatedViews.map((item) => item.id);
+    setViews(updatedViews);
+    updateViewsOrder({ tableId, views: viewIds });
+  };
+
   return (
     <>
       <Popover className="relative">
@@ -55,9 +63,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
             <div className="overflow-hidden text-sm text-gray-900 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
               <List
                 values={views}
-                onChange={({ oldIndex, newIndex }) => {
-                  setViews((prevViews) => arrayMove(prevViews, oldIndex, newIndex));
-                }}
+                onChange={handleViewsOrderChange}
                 renderList={({ children, props }) => <ul {...props}>{children}</ul>}
                 renderItem={({ value: view, props }) => (
                   <li

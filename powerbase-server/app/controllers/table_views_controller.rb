@@ -23,9 +23,14 @@ class TableViewsController < ApplicationController
     required(:view_type)
   end
 
+  schema(:update_order) do
+    required(:table_id)
+    required(:views)
+  end
+
   # GET /tables/:table_id/views
   def index
-    @views = TableView.where(powerbase_table_id: safe_params[:table_id])
+    @views = TableView.where(powerbase_table_id: safe_params[:table_id]).order(order: :asc)
     render json: @views.map {|item| format_json(item)}
   end
 
@@ -106,6 +111,16 @@ class TableViewsController < ApplicationController
     @view.destroy
   end
 
+  # PUT /tables/:table_id/views/order
+  def update_order
+    safe_params[:views].each_with_index do |view_id, index|
+      view = TableView.find(view_id)
+      view.update(order: index)
+    end
+
+    render status: :no_content
+  end
+
   private
     def format_json(view)
       {
@@ -115,6 +130,7 @@ class TableViewsController < ApplicationController
         view_type: view.view_type,
         filters: view.filters,
         sort: view.sort,
+        order: view.order,
         created_at: view.created_at,
         updated_at: view.updated_at,
       }
