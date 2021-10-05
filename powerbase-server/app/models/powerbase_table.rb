@@ -1,5 +1,6 @@
 class PowerbaseTable < ApplicationRecord
   include Elasticsearch::Model
+
   scope :turbo, -> { joins(:powerbase_database).where(powerbase_database: { is_turbo: true }) }
 
   validates :name, presence: true

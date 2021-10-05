@@ -69,6 +69,9 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     @base_migration.save
 
+    # Create Database Change Notifier
+    # @conne
+
     # Table Migration
     puts "#{@base_migration.start_time} Migrating tables of database with id of #{@database.id}..."
 
