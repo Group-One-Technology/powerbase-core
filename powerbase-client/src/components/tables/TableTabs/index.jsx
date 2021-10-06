@@ -22,6 +22,7 @@ import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
 import TableSearchModal from '../TableSearchModal';
 import { TableTabsMobile } from './TableTabsMobile';
+import { TableTabsLoader } from './TableTabsLoader';
 
 export function TableTabs() {
   const { data: base } = useBase();
@@ -81,20 +82,7 @@ export function TableTabs() {
           <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
         </button>
         <nav ref={tabsContainerEl} className="inline-flex space-x-1 overflow-auto scrollbar-none" aria-label="Tabs">
-          {tables == null && (
-            <>
-              <span className="sr-only">Loading the database&apos;s tables.</span>
-              <div className="flex items-center py-2">
-                <span className="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
-              </div>
-              <div className="flex items-center py-2">
-                <span className="h-5 bg-white bg-opacity-40 rounded w-60 animate-pulse" />
-              </div>
-              <div className="flex items-center py-2">
-                <span className="h-5 bg-white bg-opacity-40 rounded w-36 animate-pulse" />
-              </div>
-            </>
-          )}
+          {tables == null && <TableTabsLoader />}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
