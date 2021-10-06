@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import {
   PlusIcon,
   ChevronLeftIcon,
@@ -12,18 +11,21 @@ import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import { useBase } from '@models/Base';
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { BG_COLORS } from '@lib/constants';
-import { IId } from '@lib/propTypes/common';
 import { updateTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+
 import { SortableItem } from '@components/ui/SortableItem';
 import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
-import TableSearchModal from './TableSearchModal';
+import TableSearchModal from '../TableSearchModal';
+import { TableTabsMobile } from './TableTabsMobile';
 
-export function TableTabs({ tableId, tables: initialTables, handleTableChange }) {
+export function TableTabs() {
   const { data: base } = useBase();
+  const { table, tables: initialTables, handleTableChange } = useCurrentView();
   const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
@@ -62,44 +64,13 @@ export function TableTabs({ tableId, tables: initialTables, handleTableChange })
 
   return (
     <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[base.color])}>
-      <div className="pb-2 sm:hidden">
-        <label htmlFor="tabs" className="sr-only">
-          Select a tab
-        </label>
-        <select
-          id="tableTabs"
-          name="table-tabs"
-          className="block w-full bg-white bg-opacity-20 border-current text-white text-sm py-1 border-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-          defaultValue={tables?.find((table) => table.id.toString() === tableId)?.id}
-          onChange={(evt) => {
-            if (tables) {
-              const selectedTableId = evt.target.value;
-              const selectedTable = tables.find((table) => table.id.toString() === selectedTableId);
-              handleTableChange({ table: selectedTable });
-            }
-          }}
-        >
-          {tables?.map((table) => (
-            <option
-              key={table.id}
-              value={table.id}
-              className="text-sm text-white bg-gray-900 bg-opacity-80"
-            >
-              {table.alias || table.name}
-              {!table.isMigrated && ' (Migrating)'}
-            </option>
-          ))}
-          <option onClick={addTable} className="text-sm text-white bg-gray-900 bg-opacity-80">
-            + Add Table
-          </option>
-        </select>
-      </div>
+      <TableTabsMobile addTable={addTable} />
       <div className="hidden sm:flex">
         <button className="outline-none" onClick={() => handleSearchModal()}>
           <TableIcon className="h-6 w-6 text-white mt-1/2 " />
         </button>
         {/* The extra conditional check is meant to prevent weird behavior where async operations run even when the modal has been closed out */}
-        {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={tableId} />}
+        {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={table.id} />}
         <button
           id="tableTabsLeftArrow"
           type="button"
@@ -134,30 +105,30 @@ export function TableTabs({ tableId, tables: initialTables, handleTableChange })
               items={tables}
               strategy={horizontalListSortingStrategy}
             >
-              {tables?.map((table, index) => {
-                const isCurrentTable = table.id.toString() === tableId.toString();
+              {tables?.map((item, index) => {
+                const isCurrentTable = item.id.toString() === table.id.toString();
 
                 const button = (
                   <button
-                    key={table.id}
+                    key={item.id}
                     ref={isCurrentTable ? activeTabEl : undefined}
-                    onClick={() => handleTableChange({ table })}
+                    onClick={() => handleTableChange({ table: item })}
                     className={cn(
                       'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
                       isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
                     )}
                     aria-current={isCurrentTable ? 'page' : undefined}
                   >
-                    {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                    {table.alias || table.name}
+                    {!item.isMigrated && <Dot color="yellow" className="mr-1.5" />}
+                    {item.alias || item.name}
                   </button>
                 );
 
-                if (!table.isMigrated) {
+                if (!item.isMigrated) {
                   return (
-                    <SortableItem key={table.id} id={table.id}>
+                    <SortableItem key={item.id} id={item.id}>
                       <Tooltip
-                        key={table.id}
+                        key={item.id}
                         text="Migrating"
                         position={index > 1 ? 'left' : 'right'}
                         className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
@@ -169,7 +140,7 @@ export function TableTabs({ tableId, tables: initialTables, handleTableChange })
                 }
 
                 return (
-                  <SortableItem key={table.id} id={table.id}>
+                  <SortableItem key={item.id} id={item.id}>
                     {button}
                   </SortableItem>
                 );
@@ -202,9 +173,3 @@ export function TableTabs({ tableId, tables: initialTables, handleTableChange })
     </div>
   );
 }
-
-TableTabs.propTypes = {
-  tableId: IId.isRequired,
-  tables: PropTypes.any,
-  handleTableChange: PropTypes.func.isRequired,
-};

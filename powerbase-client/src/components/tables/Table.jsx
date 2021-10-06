@@ -13,7 +13,6 @@ export function Table() {
     tables,
     views,
     view,
-    handleTableChange,
   } = useCurrentView();
 
   if (base == null || table == null || tables == null) {
@@ -22,11 +21,7 @@ export function Table() {
 
   return (
     <>
-      <TableTabs
-        tables={tables}
-        tableId={table.id}
-        handleTableChange={handleTableChange}
-      />
+      <TableTabs />
       <TableContent
         table={table}
         tables={tables}
