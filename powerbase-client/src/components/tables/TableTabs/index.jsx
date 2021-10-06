@@ -103,10 +103,10 @@ export function TableTabs() {
                     ref={isCurrentTable ? activeTabEl : undefined}
                     onClick={() => handleTableChange({ table: item })}
                     className={cn(
-                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap focus:bg-gray-900 focus:bg-opacity-50 focus:text-white',
+                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
                       isCurrentTable
                         ? 'bg-white text-gray-900  '
-                        : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                        : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white',
                     )}
                     aria-current={isCurrentTable ? 'page' : undefined}
                   >
