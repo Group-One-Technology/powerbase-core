@@ -32,9 +32,10 @@ export function TableTabs() {
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
 
   const sensors = useSensors({
+    keyboard: false,
     pointer: {
       activationConstraint: {
-        delay: 250,
+        delay: 100,
         tolerance: 5,
       },
     },
@@ -102,8 +103,10 @@ export function TableTabs() {
                     ref={isCurrentTable ? activeTabEl : undefined}
                     onClick={() => handleTableChange({ table: item })}
                     className={cn(
-                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
-                      isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap focus:bg-gray-900 focus:bg-opacity-50 focus:text-white',
+                      isCurrentTable
+                        ? 'bg-white text-gray-900  '
+                        : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
                     )}
                     aria-current={isCurrentTable ? 'page' : undefined}
                   >
@@ -114,7 +117,7 @@ export function TableTabs() {
 
                 if (!item.isMigrated) {
                   return (
-                    <SortableItem key={item.id} id={item.id}>
+                    <SortableItem key={item.id} id={item.id} role={undefined} tabIndex={undefined}>
                       <Tooltip
                         key={item.id}
                         text="Migrating"
@@ -128,7 +131,7 @@ export function TableTabs() {
                 }
 
                 return (
-                  <SortableItem key={item.id} id={item.id}>
+                  <SortableItem key={item.id} id={item.id} role={undefined} tabIndex={undefined}>
                     {button}
                   </SortableItem>
                 );
