@@ -20,14 +20,14 @@ function cellRenderer({
   );
 }
 
-export function TableViewFields({ scrollLeft, width }) {
+export function TableViewFields({ scrollLeft, width, hasScrollbar }) {
   const { data: fields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
 
   return (
     <Grid
       scrollLeft={scrollLeft}
-      width={width}
+      width={hasScrollbar ? width - 15 : width}
       cellRenderer={({ columnIndex, ...props }) => cellRenderer({
         ...props,
         columnIndex,

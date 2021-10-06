@@ -115,9 +115,18 @@ export function TableRenderer({
           >
             {({ width }) => (
               <ScrollSync>
-                {({ onScroll, scrollLeft }) => (
+                {({
+                  onScroll,
+                  scrollLeft,
+                  scrollHeight,
+                  clientHeight,
+                }) => (
                   <>
-                    <TableViewFields scrollLeft={scrollLeft} width={width} />
+                    <TableViewFields
+                      scrollLeft={scrollLeft}
+                      width={width}
+                      hasScrollbar={scrollHeight > clientHeight}
+                    />
                     <Grid
                       ref={(instance) => {
                         if (instance) {
