@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Grid, InfiniteLoader, AutoSizer,
+  Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
@@ -8,6 +8,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { TableViewFields } from './TableViewFields';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -113,70 +114,78 @@ export function TableRenderer({
             onResize={() => gridRef.current?.recomputeGridSize()}
           >
             {({ width }) => (
-              <Grid
-                ref={(instance) => {
-                  if (instance) {
-                    gridRef.current = instance;
-                    registerChild(instance);
-                  }
-                }}
-                onSectionRendered={({
-                  columnStartIndex,
-                  columnStopIndex,
-                  rowStartIndex,
-                  rowStopIndex,
-                }) => {
-                  const startIndex = rowStartIndex * columnCount + columnStartIndex;
-                  const stopIndex = rowStopIndex * columnCount + columnStopIndex;
-                  return onRowsRendered({ startIndex, stopIndex });
-                }}
-                onRowsRendered={onRowsRendered}
-                cellRenderer={({ rowIndex, columnIndex, ...props }) => {
-                  const isHeader = rowIndex === 0;
-                  const isRowNo = columnIndex === 0 && rowIndex !== 0;
-                  const isLastRecord = rowIndex >= tableValues.length - 1;
-                  const isHoveredRow = hoveredCell.row === rowIndex;
+              <ScrollSync>
+                {({ onScroll, scrollLeft }) => (
+                  <>
+                    <TableViewFields scrollLeft={scrollLeft} width={width} />
+                    <Grid
+                      ref={(instance) => {
+                        if (instance) {
+                          gridRef.current = instance;
+                          registerChild(instance);
+                        }
+                      }}
+                      onScroll={onScroll}
+                      onSectionRendered={({
+                        columnStartIndex,
+                        columnStopIndex,
+                        rowStartIndex,
+                        rowStopIndex,
+                      }) => {
+                        const startIndex = rowStartIndex * columnCount + columnStartIndex;
+                        const stopIndex = rowStopIndex * columnCount + columnStopIndex;
+                        return onRowsRendered({ startIndex, stopIndex });
+                      }}
+                      onRowsRendered={onRowsRendered}
+                      cellRenderer={({ rowIndex, columnIndex, ...props }) => {
+                        const isHeader = rowIndex === 0;
+                        const isRowNo = columnIndex === 0 && rowIndex !== 0;
+                        const isLastRecord = rowIndex >= tableValues.length - 1;
+                        const isHoveredRow = hoveredCell.row === rowIndex;
 
-                  return CellRenderer({
-                    rowIndex,
-                    columnIndex,
-                    isLoaded: !!tableValues[rowIndex],
-                    value: tableValues[rowIndex][columnIndex],
-                    setHoveredCell,
-                    isHeader,
-                    isHoveredRow,
-                    isRowNo,
-                    isLastRecord,
-                    isForeignKey: connectionsIndices.includes(columnIndex),
-                    fieldTypeId: columnIndex !== 0
-                      ? fields[columnIndex - 1].fieldTypeId
-                      : undefined,
-                    fieldTypes,
-                    handleExpandRecord: isRowNo
-                      ? handleExpandRecord
-                      : undefined,
-                    handleResizeCol,
-                    mutateViewFields,
-                    fields,
-                    columnResized: colResized,
-                    ...props,
-                  });
-                }}
-                columnWidth={({ index }) => {
-                  if (index === 0) {
-                    return ROW_NO_CELL_WIDTH;
-                  }
-                  if (scopedFields && scopedFields[index - 1]?.width) {
-                    return scopedFields[index - 1]?.width;
-                  }
-                  return 300;
-                }}
-                columnCount={columnCount}
-                rowHeight={30}
-                rowCount={rowCount}
-                height={height}
-                width={width}
-              />
+                        return CellRenderer({
+                          rowIndex,
+                          columnIndex,
+                          isLoaded: !!tableValues[rowIndex],
+                          value: tableValues[rowIndex][columnIndex],
+                          setHoveredCell,
+                          isHeader,
+                          isHoveredRow,
+                          isRowNo,
+                          isLastRecord,
+                          isForeignKey: connectionsIndices.includes(columnIndex),
+                          fieldTypeId: columnIndex !== 0
+                            ? fields[columnIndex - 1].fieldTypeId
+                            : undefined,
+                          fieldTypes,
+                          handleExpandRecord: isRowNo
+                            ? handleExpandRecord
+                            : undefined,
+                          handleResizeCol,
+                          mutateViewFields,
+                          fields,
+                          columnResized: colResized,
+                          ...props,
+                        });
+                      }}
+                      columnWidth={({ index }) => {
+                        if (index === 0) {
+                          return ROW_NO_CELL_WIDTH;
+                        }
+                        if (scopedFields && scopedFields[index - 1]?.width) {
+                          return scopedFields[index - 1]?.width;
+                        }
+                        return 300;
+                      }}
+                      columnCount={columnCount}
+                      rowHeight={30}
+                      rowCount={rowCount}
+                      height={height}
+                      width={width}
+                    />
+                  </>
+                )}
+              </ScrollSync>
             )}
           </AutoSizer>
         )}
