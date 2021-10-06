@@ -80,14 +80,19 @@ export function ViewMenu({ tableId, views: initialViews }) {
                         'whitespace-nowrap flex items-center w-auto hover:bg-gray-100 hover:text-gray-900 text-xs',
                         view.id === currentView.id ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-700',
                       )}
+                      handle={{
+                        position: 'left',
+                        component: (
+                          <button
+                            type="button"
+                            className="w-auto flex items-center p-2 cursor-inherit cursor-grabbing"
+                          >
+                            <GripVerticalIcon className="h-3 w-3 text-gray-500" />
+                            <span className="sr-only">Reorder View</span>
+                          </button>
+                        ),
+                      }}
                     >
-                      <button
-                        type="button"
-                        className="w-auto flex items-center p-2 cursor-inherit cursor-grabbing"
-                      >
-                        <GripVerticalIcon className="h-3 w-3 text-gray-500" />
-                        <span className="sr-only">Reorder View</span>
-                      </button>
                       <button
                         type="button"
                         onClick={() => handleViewChange(view)}

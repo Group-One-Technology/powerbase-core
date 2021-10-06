@@ -103,6 +103,16 @@ export function BaseTablesSettings() {
                       as="li"
                       id={table.id}
                       className="grid grid-cols-12 gap-3 items-center p-2 w-full bg-white hover:bg-gray-50 sm:px-6"
+                      handle={{
+                        position: 'right',
+                        className: 'col-span-1 flex justify-end',
+                        component: (
+                          <button type="button" className="col-span-1 flex items-center p-2 cursor-inherit cursor-grabbing">
+                            <GripVerticalIcon className="h-4 w-4 text-gray-500" />
+                            <span className="sr-only">Reorder Table</span>
+                          </button>
+                        ),
+                      }}
                     >
                       <div className="col-span-4">
                         <p className="text-base text-gray-900">{table.name}</p>
@@ -117,16 +127,6 @@ export function BaseTablesSettings() {
                           onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
                           className="w-full"
                         />
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <button
-                          type="button"
-                          data-movable-handle
-                          className="w-full flex items-center p-2 cursor-inherit cursor-grabbing"
-                        >
-                          <GripVerticalIcon className="h-4 w-4 text-gray-500" />
-                          <span className="sr-only">Reorder Table</span>
-                        </button>
                       </div>
                     </SortableItem>
                   ))}
