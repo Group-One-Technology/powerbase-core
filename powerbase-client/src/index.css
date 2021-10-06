@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+.cursor-grab {
+  cursor: grab;
+}
+
 .single-line {
   white-space: nowrap;
   width: 200px;
@@ -34,6 +42,7 @@
   right: 0;
   position: absolute;
 }
+
 .DragHandle:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
