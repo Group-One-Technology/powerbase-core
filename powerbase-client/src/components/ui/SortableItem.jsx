@@ -7,6 +7,7 @@ export function SortableItem({
   as = 'div',
   id,
   children,
+  handle,
   ...props
 }) {
   const {
@@ -26,21 +27,38 @@ export function SortableItem({
     transition,
   };
 
+  const handleComponent = handle && handle.position && handle.component
+    ? (
+      <div {...listeners} className={handle?.className}>
+        {handle?.component}
+      </div>
+    )
+    : null;
+
+  const childNodes = (
+    <>
+      {handle?.position === 'left' && handleComponent}
+      {children}
+      {handle?.position === 'right' && handleComponent}
+    </>
+  );
+
   return React.createElement(
     as,
     {
       ref: setNodeRef,
       style,
       ...attributes,
-      ...listeners,
+      ...(handle?.position ? {} : listeners),
       ...props,
     },
-    children,
+    childNodes,
   );
 }
 
 SortableItem.propTypes = {
   as: PropTypes.string,
   id: PropTypes.any.isRequired,
+  handle: PropTypes.object,
   children: PropTypes.any.isRequired,
 };
