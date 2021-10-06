@@ -6,11 +6,12 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
-export function useSensors() {
+export function useSensors(options) {
   const sensors = useDndSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, options?.pointer),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
+      ...(options?.keyboard || {}),
     }),
   );
 
