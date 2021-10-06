@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import {
@@ -15,19 +15,18 @@ import { useBase } from '@models/Base';
 import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
 import { updateTables } from '@lib/api/tables';
-import { SortableItem } from '@components/ui/SortableItem';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+import { SortableItem } from '@components/ui/SortableItem';
 import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
 import TableSearchModal from './TableSearchModal';
 
-const SCROLL_OFFSET = 100;
 export function TableTabs({ tableId, tables: initialTables, handleTableChange }) {
   const { data: base } = useBase();
-  const tabsContainerEl = useRef();
-  const activeTabEl = useRef();
   const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
+  const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
 
   const sensors = useSensors({
     pointer: {
@@ -37,57 +36,6 @@ export function TableTabs({ tableId, tables: initialTables, handleTableChange })
       },
     },
   });
-
-  useEffect(() => {
-    activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
-
-    if (tabsContainerEl.current) {
-      const leftArrowEl = document.getElementById('tableTabsLeftArrow');
-      const rightArrowEl = document.getElementById('tableTabsRightArrow');
-      const scrollPosition = tabsContainerEl.current.scrollLeft;
-
-      if (scrollPosition <= 0) {
-        leftArrowEl.classList.add('invisible');
-      } else if (scrollPosition >= tabsContainerEl.current.scrollWidth - SCROLL_OFFSET) {
-        rightArrowEl.classList.add('invisible');
-      }
-    }
-  }, []);
-
-  const handleScroll = (position) => {
-    if (tabsContainerEl.current) {
-      const { scrollWidth } = tabsContainerEl.current;
-      const scrollOffsetWidth = tabsContainerEl.current.offsetWidth - SCROLL_OFFSET;
-      const scrollPosition = tabsContainerEl.current.scrollLeft;
-
-      let scrollTo = position === 'right'
-        ? scrollPosition + scrollOffsetWidth
-        : scrollPosition - scrollOffsetWidth;
-
-      if (scrollTo <= 0) {
-        scrollTo = 0;
-      } else if (scrollTo >= scrollWidth - scrollOffsetWidth) {
-        scrollTo = scrollWidth;
-      }
-
-      tabsContainerEl.current.scroll({ left: scrollTo, behavior: 'smooth' });
-
-      const leftArrowEl = document.getElementById('tableTabsLeftArrow');
-      const rightArrowEl = document.getElementById('tableTabsRightArrow');
-
-      if (position === 'left' && scrollTo <= 0) {
-        leftArrowEl.classList.add('invisible');
-      } else {
-        leftArrowEl.classList.remove('invisible');
-      }
-
-      if (position === 'right' && scrollTo >= scrollWidth) {
-        rightArrowEl.classList.add('invisible');
-      } else {
-        rightArrowEl.classList.remove('invisible');
-      }
-    }
-  };
 
   const handleSearchModal = () => {
     setTableSearchModalOpen(true);
