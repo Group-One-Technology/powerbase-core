@@ -41,7 +41,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
           initialTableId={tableId}
           initialViewId={viewId}
         >
-          <Table base={base} />
+          <Table />
         </CurrentViewProvider>
       </PageContent>
     </Page>

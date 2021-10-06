@@ -1,27 +1,42 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  PlusIcon, ChevronLeftIcon, ChevronRightIcon, TableIcon,
-} from '@heroicons/react/solid';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import {
+  PlusIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  TableIcon,
+} from '@heroicons/react/solid';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
+import { useBase } from '@models/Base';
 import { BG_COLORS } from '@lib/constants';
 import { IId } from '@lib/propTypes/common';
+import { updateTables } from '@lib/api/tables';
+import { SortableItem } from '@components/ui/SortableItem';
+import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { Dot } from '@components/ui/Dot';
 import { Tooltip } from '@components/ui/Tooltip';
 import TableSearchModal from './TableSearchModal';
 
 const SCROLL_OFFSET = 100;
-
-export function TableTabs({
-  color,
-  tableId,
-  tables,
-  handleTableChange,
-}) {
+export function TableTabs({ tableId, tables: initialTables, handleTableChange }) {
+  const { data: base } = useBase();
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
+  const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
+
+  const sensors = useSensors({
+    pointer: {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    },
+  });
 
   useEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,8 +97,23 @@ export function TableTabs({
     alert('add new table clicked');
   };
 
+  const handleViewsOrderChange = ({ active, over }) => {
+    if (active.id !== over.id) {
+      setTables((prevViews) => {
+        const oldIndex = prevViews.findIndex((item) => item.id === active.id);
+        const newIndex = prevViews.findIndex((item) => item.id === over.id);
+        const updatedTables = arrayMove(prevViews, oldIndex, newIndex).map((item, index) => ({
+          ...item,
+          order: index,
+        }));
+        updateTables({ databaseId: base.id, tables: updatedTables });
+        return updatedTables;
+      });
+    }
+  };
+
   return (
-    <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[color])}>
+    <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[base.color])}>
       <div className="pb-2 sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
@@ -146,40 +176,58 @@ export function TableTabs({
               </div>
             </>
           )}
-          {tables?.map((table, index) => {
-            const isCurrentTable = table.id.toString() === tableId.toString();
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleViewsOrderChange}
+            modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
+          >
+            <SortableContext
+              items={tables}
+              strategy={horizontalListSortingStrategy}
+            >
+              {tables?.map((table, index) => {
+                const isCurrentTable = table.id.toString() === tableId.toString();
 
-            const button = (
-              <button
-                key={table.id}
-                ref={isCurrentTable ? activeTabEl : undefined}
-                onClick={() => handleTableChange({ table })}
-                className={cn(
-                  'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
-                  isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
-                )}
-                aria-current={isCurrentTable ? 'page' : undefined}
-              >
-                {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                {table.alias || table.name}
-              </button>
-            );
+                const button = (
+                  <button
+                    key={table.id}
+                    ref={isCurrentTable ? activeTabEl : undefined}
+                    onClick={() => handleTableChange({ table })}
+                    className={cn(
+                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
+                      isCurrentTable ? 'bg-white text-gray-900' : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25',
+                    )}
+                    aria-current={isCurrentTable ? 'page' : undefined}
+                  >
+                    {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
+                    {table.alias || table.name}
+                  </button>
+                );
 
-            if (!table.isMigrated) {
-              return (
-                <Tooltip
-                  key={table.id}
-                  text="Migrating"
-                  position={index > 1 ? 'left' : 'right'}
-                  className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
-                >
-                  {button}
-                </Tooltip>
-              );
-            }
+                if (!table.isMigrated) {
+                  return (
+                    <SortableItem key={table.id} id={table.id}>
+                      <Tooltip
+                        key={table.id}
+                        text="Migrating"
+                        position={index > 1 ? 'left' : 'right'}
+                        className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
+                      >
+                        {button}
+                      </Tooltip>
+                    </SortableItem>
+                  );
+                }
 
-            return button;
-          })}
+                return (
+                  <SortableItem key={table.id} id={table.id}>
+                    {button}
+                  </SortableItem>
+                );
+              })}
+            </SortableContext>
+          </DndContext>
           {tables && (
             <div className="my-auto px-2">
               <button
@@ -208,7 +256,6 @@ export function TableTabs({
 }
 
 TableTabs.propTypes = {
-  color: PropTypes.oneOf(Object.keys(BG_COLORS)),
   tableId: IId.isRequired,
   tables: PropTypes.any,
   handleTableChange: PropTypes.func.isRequired,
