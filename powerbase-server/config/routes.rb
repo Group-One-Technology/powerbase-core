@@ -47,5 +47,5 @@ Rails.application.routes.draw do
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
-  put 'fields/:view_field_id/resize', to: 'view_field_options#update_column_size', as: 'update_field'
+  put 'view_fields/:id/resize', to: 'view_field_options#resize', as: 'resize_view_field'
 end

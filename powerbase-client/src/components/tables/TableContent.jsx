@@ -22,7 +22,7 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
   const { data: fields } = useViewFields();
 
   const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 125 : 0;
+  const height = windowSize.height ? windowSize.height - 155 : 0;
 
   if (!view || !fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
