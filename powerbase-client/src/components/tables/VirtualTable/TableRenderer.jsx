@@ -112,6 +112,7 @@ export function TableRenderer({
                   ref={headerGridRef}
                   scrollLeft={scrollLeft}
                   width={width}
+                  height={height}
                   hasScrollbar={scrollHeight > clientHeight}
                   fields={fields}
                   setFields={setFields}
