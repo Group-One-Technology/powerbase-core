@@ -6,12 +6,11 @@ import PropTypes from 'prop-types';
 
 import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
-import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { TableHeader } from './TableHeader';
 import { CellRenderer } from './CellRenderer';
-
-const ROW_NO_CELL_WIDTH = 80;
 
 export function TableRenderer({
   fields,
@@ -182,9 +181,9 @@ export function TableRenderer({
                           return ROW_NO_CELL_WIDTH;
                         }
                         if (scopedFields && scopedFields[index - 1]?.width) {
-                          return scopedFields[index - 1]?.width;
+                          return scopedFields[index - 1].width;
                         }
-                        return 300;
+                        return DEFAULT_CELL_WIDTH;
                       }}
                       columnCount={columnCount}
                       rowHeight={30}

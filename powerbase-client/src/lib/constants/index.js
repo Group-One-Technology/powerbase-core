@@ -5,7 +5,12 @@ export const MAX_SMALL_DATABASE_SIZE = 1000000; // 976.56 KB
 export const DATABASE_TYPES = [
   { name: 'PostgreSQL', value: 'postgresql' },
   { name: 'MySQL', value: 'mysql2' },
-  { name: 'SQLite', value: 'sqlite', description: 'Coming Soon', disabled: true },
+  {
+    name: 'SQLite',
+    value: 'sqlite',
+    description: 'Coming Soon',
+    disabled: true,
+  },
 ];
 
 export const DB_PLATFORMS = [
@@ -30,3 +35,5 @@ export const BG_COLORS = {
 };
 
 export const SCROLLBAR_WIDTH = 15;
+export const ROW_NO_CELL_WIDTH = 80;
+export const DEFAULT_CELL_WIDTH = 300;
