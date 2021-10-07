@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
-
+import Pusher from 'pusher-js';
 import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
@@ -15,17 +15,35 @@ import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function VirtualTable({ height, tables }) {
+export function VirtualTable({ height, tables, table }) {
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records, loadMore, isLoading } = useTableRecords();
+  const { data: records, loadMore, isLoading, mutate: mutateTableRecords } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
+
+  const attachWebhook = function() {
+    Pusher.logToConsole = true;
+
+    const pusher = new Pusher('1fa8e84feca07575f40d', {
+      cluster: 'ap1'
+    });
+
+    const channel = pusher.subscribe(`table.${table.id}`);
+    channel.bind('powerbase-data-listener', mutateCallback);
+  }
+
+  async function mutateCallback() {
+    console.log("MUtated Table")
+    await mutateTableRecords()
+  }
+
+  attachWebhook()
 
   return (
     <TableRenderer

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
@@ -40,7 +39,7 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
               fields={fields}
             />
             {table.isMigrated
-              ? <VirtualTable tables={tables} height={height} />
+              ? <VirtualTable tables={tables} table={table} height={height} />
               : <Loader style={{ height }} />}
           </FieldTypesProvider>
         </TableRecordsProvider>
