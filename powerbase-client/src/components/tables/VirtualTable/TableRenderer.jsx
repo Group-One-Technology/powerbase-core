@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Grid, InfiniteLoader, AutoSizer, ScrollSync,
+  Grid,
+  InfiniteLoader,
+  AutoSizer,
+  ScrollSync,
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
@@ -24,7 +27,7 @@ export function TableRenderer({
   referencedConnections,
 }) {
   const { data: fieldTypes } = useFieldTypes();
-  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
+  const { data: initialFields } = useViewFields();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
@@ -74,7 +77,7 @@ export function TableRenderer({
 
       return ({
         ...item,
-        value: records[rowNo][index + 1],
+        value: records[rowNo - 1][index + 1],
         isForeignKey: !!connection,
         isCompositeKey: connection?.columns.length > 1,
         foreignKey: connection
