@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
 import Draggable from 'react-draggable';
@@ -6,9 +6,9 @@ import { DotsVerticalIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
-import { securedApi } from '@lib/api/index';
-import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants/index';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { resizeViewFields } from '@lib/api/view-fields';
 
 function CellRenderer({
   rowIndex,
@@ -94,32 +94,23 @@ export const TableHeader = React.forwardRef(({
     setFields(updatedColumns);
   };
 
-  const handleResizeStop = () => {
-    const updatedColumn = resizedColumn;
-    let response;
+  const handleResizeStop = async () => {
+    try {
+      await resizeViewFields({
+        viewFieldId: resizedColumn.id,
+        width: resizedColumn.width,
+      });
+      const updatedFields = fields.map((column) => ({
+        ...column,
+        width: column.id === resizedColumn.id
+          ? resizedColumn.width
+          : column.width,
+      }));
 
-    const updateColumnWidth = async () => {
-      try {
-        response = await securedApi.put(
-          `/fields/${updatedColumn.id}/resize`,
-          updatedColumn,
-        );
-      } catch (error) {
-        console.log(error);
-      }
-      if (response.statusText === 'OK') {
-        const mutatedColList = fields.map((column) => ({
-          ...column,
-          width: column.id === updatedColumn.id
-            ? updatedColumn.width
-            : column.width,
-        }));
-
-        mutateViewFields(mutatedColList);
-      }
-    };
-
-    return updateColumnWidth();
+      mutateViewFields(updatedFields);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
