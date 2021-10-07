@@ -1,9 +1,13 @@
+import { isValidDate } from '@lib/helpers/isValidDate';
+
 export function formatDate(value, options = {}) {
   if (value == null || value === '') return null;
 
-  const date = typeof value === 'string'
-    ? new Date(value)
-    : value;
+  const date = new Date(value);
+
+  if (!isValidDate(date)) {
+    return date;
+  }
 
   if (options.dateOnly) {
     const year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
