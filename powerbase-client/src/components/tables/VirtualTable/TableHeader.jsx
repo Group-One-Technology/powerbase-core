@@ -20,7 +20,7 @@ function cellRenderer({
   );
 }
 
-export function TableViewFields({ scrollLeft, width, hasScrollbar }) {
+export function TableHeader({ scrollLeft, width, hasScrollbar }) {
   const { data: fields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
 

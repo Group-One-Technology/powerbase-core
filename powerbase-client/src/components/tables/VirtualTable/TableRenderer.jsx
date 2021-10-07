@@ -8,7 +8,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { TableViewFields } from './TableViewFields';
+import { TableHeader } from './TableHeader';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -122,7 +122,7 @@ export function TableRenderer({
                   clientHeight,
                 }) => (
                   <>
-                    <TableViewFields
+                    <TableHeader
                       scrollLeft={scrollLeft}
                       width={width}
                       hasScrollbar={scrollHeight > clientHeight}
