@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
-import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import Draggable from 'react-draggable';
+import { DotsVerticalIcon } from '@heroicons/react/outline';
+
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
+import { securedApi } from '@lib/api/index';
+import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
-function cellRenderer({
+function CellRenderer({
   rowIndex,
   columnIndex,
   field,
   fieldTypes,
+  handleResizeColumn,
+  handleResizeStop,
   style,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
@@ -33,6 +39,18 @@ function cellRenderer({
     >
       <FieldTypeIcon typeId={field.fieldTypeId} fieldTypes={fieldTypes} className="mr-1" />
       <span>{field.name}</span>
+
+      <Draggable
+        axis="x"
+        defaultClassName="DragHandle"
+        defaultClassNameDragging="DragHandleActive"
+        position={{ x: 0 }}
+        onDrag={(evt, { deltaX }) => handleResizeColumn(columnIndex - 1, deltaX)}
+        onStop={handleResizeStop}
+        zIndex={999}
+      >
+        <span><DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3" /></span>
+      </Draggable>
     </div>
   );
 }
@@ -42,15 +60,71 @@ CellRenderer.propTypes = {
   columnIndex: PropTypes.number.isRequired,
   field: PropTypes.object,
   fieldTypes: PropTypes.array.isRequired,
+  handleResizeColumn: PropTypes.func.isRequired,
+  handleResizeStop: PropTypes.func.isRequired,
   style: PropTypes.object,
 };
 
-export function TableHeader({ scrollLeft, width, hasScrollbar }) {
-  const { data: fields } = useViewFields();
+export const TableHeader = React.forwardRef(({
+  fields,
+  setFields,
+  scrollLeft,
+  width,
+  hasScrollbar,
+}, ref) => {
+  const { mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
+  const [resizedColumn, setResizedColumn] = useState();
+
+  const handleResizeColumn = (columnIndex, deltaX) => {
+    const updatedColumns = fields.map((field, index) => {
+      if (columnIndex === index) {
+        setResizedColumn(field);
+
+        return {
+          ...field,
+          width: Math.max(field.width + deltaX, 10),
+          resized: true,
+        };
+      }
+
+      return field;
+    });
+
+    setFields(updatedColumns);
+  };
+
+  const handleResizeStop = () => {
+    const updatedColumn = resizedColumn;
+    let response;
+
+    const updateColumnWidth = async () => {
+      try {
+        response = await securedApi.put(
+          `/fields/${updatedColumn.id}/resize`,
+          updatedColumn,
+        );
+      } catch (error) {
+        console.log(error);
+      }
+      if (response.statusText === 'OK') {
+        const mutatedColList = fields.map((column) => ({
+          ...column,
+          width: column.id === updatedColumn.id
+            ? updatedColumn.width
+            : column.width,
+        }));
+
+        mutateViewFields(mutatedColList);
+      }
+    };
+
+    return updateColumnWidth();
+  };
 
   return (
     <Grid
+      ref={ref}
       scrollLeft={scrollLeft}
       rowCount={1}
       columnCount={fields.length + 1}
@@ -63,17 +137,21 @@ export function TableHeader({ scrollLeft, width, hasScrollbar }) {
       height={30}
       width={hasScrollbar ? width - SCROLLBAR_WIDTH : width}
       className="scrollbar-none border-gray-200 border-b"
-      cellRenderer={({ columnIndex, ...props }) => cellRenderer({
+      cellRenderer={({ columnIndex, ...props }) => CellRenderer({
         ...props,
         columnIndex,
         field: fields[columnIndex - 1],
         fieldTypes,
+        handleResizeColumn,
+        handleResizeStop,
       })}
     />
   );
-}
+});
 
 TableHeader.propTypes = {
+  fields: PropTypes.array.isRequired,
+  setFields: PropTypes.func.isRequired,
   scrollLeft: PropTypes.number,
   width: PropTypes.number,
   hasScrollbar: PropTypes.bool,

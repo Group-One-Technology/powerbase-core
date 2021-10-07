@@ -1,19 +1,13 @@
-/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon, DotsVerticalIcon } from '@heroicons/react/outline';
-import Draggable from 'react-draggable';
-import { securedApi } from '@lib/api/index';
-
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { ArrowsExpandIcon } from '@heroicons/react/outline';
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
 
 function CellValue({
   value,
   isLoaded,
-  isHeader,
   isRowNo,
   isHoveredRow,
   isLastRecord,
@@ -21,75 +15,67 @@ function CellValue({
   fieldType,
   handleExpandRecord,
 }) {
-  if (isHeader || isLoaded) {
-    if (!isHeader) {
-      if (isRowNo) {
-        return (
-          <>
-            <span className="flex-1 mr-4 text-right truncate">
-              {value?.toString()}
-            </span>
-            <span className="flex-1">
-              {(isHoveredRow && !isLastRecord) && (
-                <button
-                  type="button"
-                  className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
-                  onClick={() => {
-                    if (handleExpandRecord) {
-                      handleExpandRecord(value);
-                    }
-                  }}
-                >
-                  <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
-                  <span className="sr-only">Expand Record</span>
-                </button>
-              )}
-            </span>
-          </>
-        );
-      }
+  if (!isLoaded) {
+    return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
+  }
 
-      if (fieldType?.name === FieldType.CHECKBOX) {
-        return (
-          <input
-            type="checkbox"
-            className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            checked={value?.toString() === 'true'}
-            readOnly
-          />
-        );
-      }
-
-      if (fieldType?.name === FieldType.DATE) {
-        const date = formatDate(value);
-
-        return (
-          <span>
-            {date ? `${date} UTC` : null}
-          </span>
-        );
-      }
-    }
-
+  if (isRowNo) {
     return (
       <>
-        {(isHeader && fieldType != null) && (
-          <FieldTypeIcon fieldType={fieldType} className="mr-1" />
-        )}
-        <span className={cn((value?.toString().length && isForeignKey && !isHeader) && 'px-2 py-0.25 bg-blue-50 rounded')}>
+        <span className="flex-1 mr-4 text-right truncate">
           {value?.toString()}
+        </span>
+        <span className="flex-1">
+          {(isHoveredRow && !isLastRecord) && (
+            <button
+              type="button"
+              className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
+              onClick={() => {
+                if (handleExpandRecord) {
+                  handleExpandRecord(value);
+                }
+              }}
+            >
+              <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Expand Record</span>
+            </button>
+          )}
         </span>
       </>
     );
   }
 
-  return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
+  if (fieldType?.name === FieldType.CHECKBOX) {
+    return (
+      <input
+        type="checkbox"
+        className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+        checked={value?.toString() === 'true'}
+        readOnly
+      />
+    );
+  }
+
+  if (fieldType?.name === FieldType.DATE) {
+    const date = formatDate(value);
+
+    return (
+      <span>
+        {date ? `${date} UTC` : null}
+      </span>
+    );
+  }
+
+  return (
+    <span className={cn((value?.toString().length && isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
+      {value?.toString()}
+    </span>
+  );
 }
 
 CellValue.propTypes = {
   value: PropTypes.any,
   isLoaded: PropTypes.bool.isRequired,
-  isHeader: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
@@ -106,7 +92,6 @@ export function CellRenderer({
   style,
   value,
   setHoveredCell,
-  isHeader,
   isHoveredRow,
   isRowNo,
   isLastRecord,
@@ -114,10 +99,6 @@ export function CellRenderer({
   fieldTypeId,
   fieldTypes,
   handleExpandRecord,
-  handleResizeCol,
-  columnResized,
-  mutateViewFields,
-  fields,
 }) {
   const fieldType = fieldTypeId
     ? fieldTypes?.find((item) => item.id.toString() === fieldTypeId.toString())
@@ -130,28 +111,6 @@ export function CellRenderer({
     });
   };
 
-  const handleResizeStop = (updatedColumn, remoteColumns) => {
-    let response;
-    const updateColumnWidth = async () => {
-      try {
-        response = await securedApi.put(
-          `/fields/${updatedColumn.id}/resize`,
-          updatedColumn,
-        );
-      } catch (error) {
-        console.log(error);
-      }
-      if (response.statusText === 'OK') {
-        const mutatedColList = remoteColumns.map((column) => ({
-          ...column,
-          width: column.id === updatedColumn.id ? updatedColumn.width : column.width,
-        }));
-        mutateViewFields(mutatedColList);
-      }
-    };
-    return updateColumnWidth();
-  };
-
   return (
     <div
       role="button"
@@ -159,7 +118,6 @@ export function CellRenderer({
       key={key}
       className={cn(
         'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2',
-        isHeader && !isHoveredRow && 'bg-gray-100',
         isHoveredRow && 'bg-gray-50',
         isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
         (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
@@ -185,7 +143,6 @@ export function CellRenderer({
       <CellValue
         value={value}
         isLoaded={isLoaded}
-        isHeader={isHeader}
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
         isLastRecord={isLastRecord}
@@ -193,19 +150,6 @@ export function CellRenderer({
         fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
       />
-      {rowIndex === 0 && columnIndex !== 0 && (
-        <Draggable
-          axis="x"
-          defaultClassName="DragHandle"
-          defaultClassNameDragging="DragHandleActive"
-          position={{ x: 0 }}
-          onDrag={(e, { deltaX }) => handleResizeCol(columnIndex - 1, deltaX)}
-          onStop={() => handleResizeStop(columnResized, fields)}
-          zIndex={999}
-        >
-          <span><DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3"/></span>
-        </Draggable>
-      )}
     </div>
   );
 }
@@ -218,7 +162,6 @@ CellRenderer.propTypes = {
   style: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
   setHoveredCell: PropTypes.func.isRequired,
-  isHeader: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isLastRecord: PropTypes.bool.isRequired,
@@ -226,8 +169,4 @@ CellRenderer.propTypes = {
   fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
-  mutateViewFields: PropTypes.func,
-  handleResizeCol: PropTypes.func,
-  fields: PropTypes.array,
-  columnResized: PropTypes.object,
 };

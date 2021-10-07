@@ -4,7 +4,8 @@ import {
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
-import { IViewField } from '@lib/propTypes/view-field';
+import { useViewFields } from '@models/ViewFields';
+import { useFieldTypes } from '@models/FieldTypes';
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
@@ -13,7 +14,6 @@ import { TableHeader } from './TableHeader';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({
-  fields,
   records,
   totalRecords,
   loadMoreRows,
@@ -22,50 +22,36 @@ export function TableRenderer({
   tables,
   connections,
   referencedConnections,
-  fieldTypes,
-  mutateViewFields,
 }) {
-  const [scopedFields, setScopedFields] = useState([]);
+  const { data: fieldTypes } = useFieldTypes();
+  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
+
+  const recordsGridRef = useRef(null);
+  const headerGridRef = useRef(null);
+  const [fields, setFields] = useState(initialFields);
+
   const columnCount = fields && fields.length + 1;
-  const rowCount = fields && records.length + 1;
   const fieldNames = fields.map((field) => field.name);
-  const tableValues = [['', ...fieldNames], ...records];
   const connectionsIndices = connections.map((item) => item.columns).flat()
     .map((item) => fieldNames.indexOf(item) + 1);
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
-  const [colResized, setColResized] = useState();
-  const isRowLoaded = ({ index }) => !!tableValues[index];
-
-  const gridRef = useRef(null);
+  const isRowLoaded = ({ index }) => !!records[index];
 
   useEffect(() => {
-    setScopedFields(fields);
-  }, [fields]);
+    setFields(initialFields);
+  }, [initialFields]);
 
   useDidMountEffect(() => {
-    if (gridRef.current) {
-      gridRef.current.forceUpdate();
-      gridRef.current.recomputeGridSize();
+    if (headerGridRef.current && recordsGridRef.current) {
+      headerGridRef.current.forceUpdate();
+      headerGridRef.current.recomputeGridSize();
+      recordsGridRef.current.forceUpdate();
+      recordsGridRef.current.recomputeGridSize();
     }
-  }, [scopedFields]);
-
-  const handleResizeCol = (columnIndex, deltaX) => {
-    const updatedColumns = scopedFields.map((col, index) => {
-      if (columnIndex === index) {
-        setColResized(col);
-        return {
-          ...col,
-          width: Math.max(col.width + deltaX, 10),
-          resized: true,
-        };
-      }
-      return col;
-    });
-    setScopedFields(updatedColumns);
-  };
+  }, [fields]);
 
   const handleLoadMoreRows = ({ stopIndex }) => {
     const stop = stopIndex / columnCount;
@@ -78,6 +64,7 @@ export function TableRenderer({
       loadMoreRows();
     }
   };
+
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
     setSelectedRecord(fields.map((item, index) => {
@@ -87,7 +74,7 @@ export function TableRenderer({
 
       return ({
         ...item,
-        value: tableValues[rowNo][index + 1],
+        value: records[rowNo][index + 1],
         isForeignKey: !!connection,
         isCompositeKey: connection?.columns.length > 1,
         foreignKey: connection
@@ -102,34 +89,40 @@ export function TableRenderer({
 
   return (
     <div className="w-full overflow-hidden z-0">
-      <InfiniteLoader
-        isRowLoaded={isRowLoaded}
-        loadMoreRows={handleLoadMoreRows}
-        rowCount={totalRecords * columnCount}
+      <AutoSizer
+        disableHeight
+        onResize={() => {
+          headerGridRef.current?.recomputeGridSize();
+          recordsGridRef.current?.recomputeGridSize();
+        }}
       >
-        {({ onRowsRendered, registerChild }) => (
-          <AutoSizer
-            disableHeight
-            onResize={() => gridRef.current?.recomputeGridSize()}
-          >
-            {({ width }) => (
-              <ScrollSync>
-                {({
-                  onScroll,
-                  scrollLeft,
-                  scrollHeight,
-                  clientHeight,
-                }) => (
-                  <>
-                    <TableHeader
-                      scrollLeft={scrollLeft}
-                      width={width}
-                      hasScrollbar={scrollHeight > clientHeight}
-                    />
+        {({ width }) => (
+          <ScrollSync>
+            {({
+              onScroll,
+              scrollLeft,
+              scrollHeight,
+              clientHeight,
+            }) => (
+              <>
+                <TableHeader
+                  ref={headerGridRef}
+                  scrollLeft={scrollLeft}
+                  width={width}
+                  hasScrollbar={scrollHeight > clientHeight}
+                  fields={fields}
+                  setFields={setFields}
+                />
+                <InfiniteLoader
+                  isRowLoaded={isRowLoaded}
+                  loadMoreRows={handleLoadMoreRows}
+                  rowCount={totalRecords * columnCount}
+                >
+                  {({ onRowsRendered, registerChild }) => (
                     <Grid
                       ref={(instance) => {
                         if (instance) {
-                          gridRef.current = instance;
+                          recordsGridRef.current = instance;
                           registerChild(instance);
                         }
                       }}
@@ -146,18 +139,16 @@ export function TableRenderer({
                       }}
                       onRowsRendered={onRowsRendered}
                       cellRenderer={({ rowIndex, columnIndex, ...props }) => {
-                        const isHeader = rowIndex === 0;
-                        const isRowNo = columnIndex === 0 && rowIndex !== 0;
-                        const isLastRecord = rowIndex >= tableValues.length - 1;
+                        const isRowNo = columnIndex === 0;
+                        const isLastRecord = rowIndex >= records.length - 1;
                         const isHoveredRow = hoveredCell.row === rowIndex;
 
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
-                          isLoaded: !!tableValues[rowIndex],
-                          value: tableValues[rowIndex][columnIndex],
+                          isLoaded: !!records[rowIndex],
+                          value: records[rowIndex][columnIndex],
                           setHoveredCell,
-                          isHeader,
                           isHoveredRow,
                           isRowNo,
                           isLastRecord,
@@ -169,10 +160,6 @@ export function TableRenderer({
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
                             : undefined,
-                          handleResizeCol,
-                          mutateViewFields,
-                          fields,
-                          columnResized: colResized,
                           ...props,
                         });
                       }}
@@ -180,24 +167,24 @@ export function TableRenderer({
                         if (index === 0) {
                           return ROW_NO_CELL_WIDTH;
                         }
-                        if (scopedFields && scopedFields[index - 1]?.width) {
-                          return scopedFields[index - 1].width;
+                        if (fields && fields[index - 1]?.width) {
+                          return fields[index - 1].width;
                         }
                         return DEFAULT_CELL_WIDTH;
                       }}
                       columnCount={columnCount}
                       rowHeight={30}
-                      rowCount={rowCount}
+                      rowCount={records.length}
                       height={height}
                       width={width}
                     />
-                  </>
-                )}
-              </ScrollSync>
+                  )}
+                </InfiniteLoader>
+              </>
             )}
-          </AutoSizer>
+          </ScrollSync>
         )}
-      </InfiniteLoader>
+      </AutoSizer>
       {selectedRecord && (
         <SingleRecordModal
           open={isModalOpen}
@@ -214,7 +201,6 @@ export function TableRenderer({
 }
 
 TableRenderer.propTypes = {
-  fields: PropTypes.arrayOf(IViewField).isRequired,
   records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
   totalRecords: PropTypes.number,
   loadMoreRows: PropTypes.func.isRequired,
@@ -223,6 +209,4 @@ TableRenderer.propTypes = {
   tables: PropTypes.arrayOf(ITable),
   connections: PropTypes.array,
   referencedConnections: PropTypes.array,
-  fieldTypes: PropTypes.array.isRequired,
-  mutateViewFields: PropTypes.func,
 };
