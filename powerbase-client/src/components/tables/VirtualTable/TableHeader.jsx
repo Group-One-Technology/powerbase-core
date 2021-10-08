@@ -100,9 +100,10 @@ CellRenderer.propTypes = {
 export const TableHeader = React.forwardRef(({
   fields,
   setFields,
-  scrollLeft,
   height,
   width,
+  onScroll,
+  scrollLeft,
   hasScrollbar,
 }, ref) => {
   const { mutate: mutateViewFields } = useViewFields();
@@ -162,6 +163,7 @@ export const TableHeader = React.forwardRef(({
     >
       <Grid
         ref={ref}
+        onScroll={onScroll}
         scrollLeft={scrollLeft}
         rowCount={1}
         columnCount={fields.length + 1}
@@ -186,7 +188,7 @@ export const TableHeader = React.forwardRef(({
       />
 
       <DragOverlay>
-        {dragging?.active && (
+        {dragging?.active.data.current?.field && (
           <div
             className="bg-gray-900 bg-opacity-10"
             style={{
@@ -203,8 +205,9 @@ export const TableHeader = React.forwardRef(({
 TableHeader.propTypes = {
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
-  scrollLeft: PropTypes.number,
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
+  onScroll: PropTypes.func.isRequired,
+  scrollLeft: PropTypes.number,
   hasScrollbar: PropTypes.bool,
 };

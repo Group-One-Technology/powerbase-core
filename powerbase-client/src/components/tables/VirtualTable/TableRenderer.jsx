@@ -110,12 +110,13 @@ export function TableRenderer({
               <>
                 <TableHeader
                   ref={headerGridRef}
-                  scrollLeft={scrollLeft}
-                  width={width}
-                  height={height}
-                  hasScrollbar={scrollHeight > clientHeight}
                   fields={fields}
                   setFields={setFields}
+                  width={width}
+                  height={height}
+                  onScroll={onScroll}
+                  scrollLeft={scrollLeft}
+                  hasScrollbar={scrollHeight > clientHeight}
                 />
                 <InfiniteLoader
                   isRowLoaded={isRowLoaded}
@@ -131,6 +132,7 @@ export function TableRenderer({
                         }
                       }}
                       onScroll={onScroll}
+                      scrollLeft={scrollLeft}
                       onSectionRendered={({
                         columnStartIndex,
                         columnStopIndex,
