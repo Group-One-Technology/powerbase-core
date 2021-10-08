@@ -31,7 +31,7 @@ function CellRenderer({
   const droppableArea = (
     <DroppableArea
       id={`arearight-${key}`}
-      data={{ columnIndex, accepts: ['column'] }}
+      data={{ index: columnIndex - 1, accepts: ['column'] }}
       className={cn(
         'absolute z-10 rounded-md hover:bg-indigo-400',
         dragging && dragging.active && dragging.over?.id === `arearight-${key}` && 'bg-indigo-400',
@@ -64,7 +64,7 @@ function CellRenderer({
         className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 py-1 px-2 flex items-center truncate text-sm"
         style={style}
       >
-        <DraggableItem id={key} data={{ type: 'column', field }} className="absolute w-full h-full" />
+        <DraggableItem id={key} data={{ type: 'column', index: columnIndex - 1, field }} className="absolute w-full h-full" />
         <FieldTypeIcon typeId={field.fieldTypeId} fieldTypes={fieldTypes} className="mr-1" />
         <span>{field.name}</span>
 
@@ -112,7 +112,7 @@ export const TableHeader = React.forwardRef(({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-  } = useReorderFields();
+  } = useReorderFields({ setFields });
 
   return (
     <DndContext
