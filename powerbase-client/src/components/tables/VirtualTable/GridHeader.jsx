@@ -96,7 +96,7 @@ CellRenderer.propTypes = {
   style: PropTypes.object,
 };
 
-export const TableHeader = React.forwardRef(({
+export const GridHeader = React.forwardRef(({
   table,
   fields,
   setFields,
@@ -164,7 +164,7 @@ export const TableHeader = React.forwardRef(({
   );
 });
 
-TableHeader.propTypes = {
+GridHeader.propTypes = {
   table: PropTypes.object.isRequired,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,

@@ -18,7 +18,7 @@ import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
-import { TableHeader } from './TableHeader';
+import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({ height, table, tables }) {
@@ -109,7 +109,7 @@ export function TableRenderer({ height, table, tables }) {
               clientHeight,
             }) => (
               <>
-                <TableHeader
+                <GridHeader
                   ref={headerGridRef}
                   table={table}
                   fields={fields}
