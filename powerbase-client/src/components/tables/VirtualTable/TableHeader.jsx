@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
@@ -8,13 +8,12 @@ import { DndContext, closestCenter, DragOverlay } from '@dnd-kit/core';
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { useViewFields } from '@models/ViewFields';
-import { resizeViewFields } from '@lib/api/view-fields';
 import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants/index';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { DroppableArea } from '@components/ui/DroppableArea';
 import { DraggableItem } from '@components/ui/DraggableItem';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
+import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
 
 const GRID_HEADER_HEIGHT = 30;
 
@@ -106,52 +105,14 @@ export const TableHeader = React.forwardRef(({
   scrollLeft,
   hasScrollbar,
 }, ref) => {
-  const { mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
-  const [resizedColumn, setResizedColumn] = useState();
+  const { handleResizeColumn, handleResizeStop } = useResizeFields({ fields, setFields });
   const {
     dragging,
     handleDragStart,
     handleDragMove,
     handleDragEnd,
   } = useReorderFields();
-
-  const handleResizeColumn = (columnIndex, deltaX) => {
-    const updatedColumns = fields.map((field, index) => {
-      if (columnIndex === index) {
-        setResizedColumn(field);
-
-        return {
-          ...field,
-          width: Math.max(field.width + deltaX, 10),
-          resized: true,
-        };
-      }
-
-      return field;
-    });
-
-    setFields(updatedColumns);
-  };
-
-  const handleResizeStop = async () => {
-    try {
-      await resizeViewFields({
-        viewFieldId: resizedColumn.id,
-        width: resizedColumn.width,
-      });
-      const updatedFields = fields.map((column) => ({
-        ...column,
-        width: column.id === resizedColumn.id
-          ? resizedColumn.width
-          : column.width,
-      }));
-
-      mutateViewFields(updatedFields);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   return (
     <DndContext
