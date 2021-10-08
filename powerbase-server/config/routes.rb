@@ -22,8 +22,14 @@ Rails.application.routes.draw do
           put 'order', to: 'table_views#update_order', as: 'update_views_order'
         end
 
-        member do
-          get 'fields', to: 'view_field_options#index', as: 'view_fields'
+        resources :view_field_options, path: 'view_fields', as: 'view_fields', only: [:index], shallow: true do
+          collection do
+            put 'order', to: 'view_field_options#update_order', as: 'reorder_view_fields'
+          end
+
+          member do
+            put 'resize', as: 'resize_view_field'
+          end
         end
       end
 
@@ -47,5 +53,4 @@ Rails.application.routes.draw do
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
-  put 'view_fields/:id/resize', to: 'view_field_options#resize', as: 'resize_view_field'
 end

@@ -2,7 +2,7 @@ class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
 
   schema(:index) do
-    required(:id).value(:integer)
+    required(:view_id).value(:integer)
   end
 
   schema(:resize) do
@@ -10,9 +10,14 @@ class ViewFieldOptionsController < ApplicationController
     required(:width).value(:integer)
   end
 
-  # GET /views/:id/fields
+  schema(:update_order) do
+    required(:view_id)
+    required(:view_fields)
+  end
+
+  # GET /views/:view_id/fields
   def index
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:id]).order(:order)
+    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
   end
 
@@ -21,6 +26,16 @@ class ViewFieldOptionsController < ApplicationController
     view_field = ViewFieldOption.find(safe_params[:id])
     view_field.update_attribute(:width, safe_params[:width])
     render json: format_json(view_field) if view_field.save!
+  end
+
+  # PUT /views/:view_id/view_fields/order
+  def update_order
+    safe_params[:view_fields].each_with_index do |view_field_id, index|
+      view_field = ViewFieldOption.find(view_field_id)
+      view_field.update(order: index)
+    end
+
+    render status: :no_content
   end
 
   private
