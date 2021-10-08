@@ -1,4 +1,5 @@
-import React, {useEffect} from 'react';
+/* eslint-disable*/
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Pusher from 'pusher-js';
 import { useViewFields } from '@models/ViewFields';
@@ -10,7 +11,6 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
-// eslint-disable-next-line import/named
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
@@ -27,48 +27,54 @@ export function VirtualTable({ height, tables, table }) {
     return <Loader style={{ height }} />;
   }
 
-  const attachWebhook = function() {
-    Pusher.logToConsole = true;
-
-    const pusher = new Pusher('1fa8e84feca07575f40d', {
-      cluster: 'ap1'
-    });
-
-    const channel = pusher.subscribe(`table.${table.id}`);
-    channel.bind('powerbase-data-listener', mutateCallback);
-  }
-
   async function mutateCallback() {
-    console.log("MUtated Table")
-    await mutateTableRecords()
+    const mutated = await mutateTableRecords();
+    console.log("Table Mutated", mutated)
   }
 
-  attachWebhook()
+  const attachWebsocket = function () {
+    Pusher.logToConsole = true;
+    const pusher = new Pusher('1fa8e84feca07575f40d', {
+      cluster: 'ap1',
+    });
+    const channel = pusher.subscribe(`table.${table.id}`);
+    channel.bind('powerbase-data-listener', () => {
+      mutateCallback()
+    });
+  };
+
+  useEffect(() => {
+    attachWebsocket();
+  }, [])
 
   return (
-    <TableRenderer
-      fields={fields}
-      records={[
-        ...records.map((record, index) => [
-          index + 1,
-          ...Object.values(record),
-        ]),
-        [records.length + 1, ...new Array(fields.length).fill('')],
-      ]}
-      totalRecords={totalRecords}
-      loadMoreRows={loadMore}
-      isLoading={isLoading}
-      height={height}
-      tables={tables}
-      connections={connections}
-      referencedConnections={referencedConnections}
-      fieldTypes={fieldTypes}
-      mutateViewFields={mutateViewFields}
-    />
+    <>
+      <button onClick={mutateCallback}>Mutate Table</button>
+      <TableRenderer
+        fields={fields}
+        records={[
+          ...records.map((record, index) => [
+            index + 1,
+            ...Object.values(record),
+          ]),
+          [records.length + 1, ...new Array(fields.length).fill('')],
+        ]}
+        totalRecords={totalRecords}
+        loadMoreRows={loadMore}
+        isLoading={isLoading}
+        height={height}
+        tables={tables}
+        connections={connections}
+        referencedConnections={referencedConnections}
+        fieldTypes={fieldTypes}
+        mutateViewFields={mutateViewFields}
+      />
+    </>
   );
 }
 
 VirtualTable.propTypes = {
   height: PropTypes.number,
   tables: PropTypes.arrayOf(ITable),
+  table: PropTypes.object,
 };
