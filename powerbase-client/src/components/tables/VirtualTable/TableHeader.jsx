@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
 import Draggable from 'react-draggable';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
-import { DndContext, closestCenter, DragOverlay } from '@dnd-kit/core';
+import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import { useFieldTypes } from '@models/FieldTypes';
@@ -97,6 +97,7 @@ CellRenderer.propTypes = {
 };
 
 export const TableHeader = React.forwardRef(({
+  table,
   fields,
   setFields,
   height,
@@ -112,14 +113,14 @@ export const TableHeader = React.forwardRef(({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-  } = useReorderFields({ setFields });
+  } = useReorderFields({ tableId: table.id, fields, setFields });
 
   return (
     <DndContext
       onDragStart={handleDragStart}
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
     >
       <Grid
@@ -164,6 +165,7 @@ export const TableHeader = React.forwardRef(({
 });
 
 TableHeader.propTypes = {
+  table: PropTypes.object.isRequired,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,

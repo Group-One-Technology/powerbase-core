@@ -12,7 +12,7 @@ import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function VirtualTable({ height, tables }) {
+export function VirtualTable({ height, table, tables }) {
   const { data: fields } = useViewFields();
   const { data: connections } = useTableConnections();
   const { data: records } = useTableRecords();
@@ -22,10 +22,11 @@ export function VirtualTable({ height, tables }) {
     return <Loader style={{ height }} />;
   }
 
-  return <TableRenderer height={height} tables={tables} />;
+  return <TableRenderer height={height} table={table} tables={tables} />;
 }
 
 VirtualTable.propTypes = {
   height: PropTypes.number,
+  table: ITable.isRequired,
   tables: PropTypes.arrayOf(ITable),
 };

@@ -21,7 +21,7 @@ import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { TableHeader } from './TableHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, tables }) {
+export function TableRenderer({ height, table, tables }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
@@ -111,6 +111,7 @@ export function TableRenderer({ height, tables }) {
               <>
                 <TableHeader
                   ref={headerGridRef}
+                  table={table}
                   fields={fields}
                   setFields={setFields}
                   width={width}
@@ -211,5 +212,6 @@ export function TableRenderer({ height, tables }) {
 
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
+  table: ITable.isRequired,
   tables: PropTypes.arrayOf(ITable),
 };
