@@ -73,7 +73,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     puts "#{@base_migration.start_time} Migrating tables of database with id of #{@database.id}..."
 
     connect(@database) {|db|
-      db.tables.each do |table_name|
+      db.tables.each_with_index do |table_name, index|
         table = PowerbaseTable.find_by(
           name: table_name,
           powerbase_database_id: @database.id,
@@ -82,6 +82,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         table.alias = table_name.to_s.titlecase
         table.powerbase_database_id = @database.id
         table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
+        table.order = index
         if !table.save
           @base_migration.logs["errors"].push({
             type: "Active Record",
