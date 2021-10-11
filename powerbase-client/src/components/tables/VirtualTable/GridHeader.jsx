@@ -3,7 +3,6 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
 import Draggable from 'react-draggable';
-import { DotsVerticalIcon } from '@heroicons/react/outline';
 import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
@@ -67,20 +66,18 @@ function CellRenderer({
         <DraggableItem id={key} data={{ type: 'column', index: columnIndex - 1, field }} className="absolute w-full h-full" />
         <FieldTypeIcon typeId={field.fieldTypeId} fieldTypes={fieldTypes} className="mr-1" />
         <span>{field.name}</span>
-
-        <Draggable
-          axis="x"
-          defaultClassName="DragHandle"
-          defaultClassNameDragging="DragHandleActive"
-          position={{ x: 0 }}
-          onDrag={(evt, { deltaX }) => handleResizeColumn(columnIndex - 1, deltaX)}
-          onStop={handleResizeStop}
-          zIndex={999}
-        >
-          <span><DotsVerticalIcon className="DragHandleIcon cursor-x h-3 w-3" /></span>
-        </Draggable>
       </div>
-      {droppableArea}
+      <Draggable
+        axis="x"
+        defaultClassName="cursor-resize"
+        defaultClassNameDragging="cursor-resize"
+        position={{ x: 0 }}
+        onDrag={(evt, { deltaX }) => handleResizeColumn(columnIndex - 1, deltaX)}
+        onStop={handleResizeStop}
+        zIndex={999}
+      >
+        {droppableArea}
+      </Draggable>
     </React.Fragment>
   );
 }
