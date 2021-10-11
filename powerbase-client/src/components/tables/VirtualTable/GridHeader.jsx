@@ -13,6 +13,7 @@ import { DroppableArea } from '@components/ui/DroppableArea';
 import { DraggableItem } from '@components/ui/DraggableItem';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
 import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
+import { GridHeaderOptions } from './GridHeaderOptions';
 
 const GRID_HEADER_HEIGHT = 30;
 
@@ -27,6 +28,12 @@ function CellRenderer({
   style,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
+
+  const handleClick = () => {
+    const trigger = document.getElementsByClassName(`button_field_${field.id}`)[0];
+    trigger.click();
+  };
+
   const droppableArea = (
     <DroppableArea
       id={`arearight-${key}`}
@@ -58,12 +65,16 @@ function CellRenderer({
 
   return (
     <React.Fragment key={key}>
-      <div
-        id={key}
-        className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 py-1 px-2 flex items-center truncate text-sm"
-        style={style}
-      >
-        <DraggableItem id={key} data={{ type: 'column', index: columnIndex - 1, field }} className="absolute w-full h-full" />
+      <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
+        <GridHeaderOptions field={field} />
+
+        <DraggableItem
+          id={key}
+          data={{ type: 'column', index: columnIndex - 1, field }}
+          className="absolute w-full h-full"
+          onClick={handleClick}
+        />
+
         <FieldTypeIcon typeId={field.fieldTypeId} fieldTypes={fieldTypes} className="mr-1" />
         <span>{field.name}</span>
       </div>
@@ -106,6 +117,7 @@ export const GridHeader = React.forwardRef(({
   const { data: fieldTypes } = useFieldTypes();
   const { handleResizeColumn, handleResizeStop } = useResizeFields({ fields, setFields });
   const {
+    sensors,
     dragging,
     handleDragStart,
     handleDragMove,
@@ -114,6 +126,7 @@ export const GridHeader = React.forwardRef(({
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
