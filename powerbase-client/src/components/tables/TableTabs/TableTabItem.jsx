@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -9,18 +9,12 @@ import { Tooltip } from '@components/ui/Tooltip';
 
 export const TableTabItem = React.forwardRef(({ table, index }, activeTabRef) => {
   const { table: activeTable, handleTableChange } = useCurrentView();
-  const buttonRef = useRef();
 
   const isCurrentTable = table.id.toString() === activeTable.id.toString();
 
-  const handleItemClick = () => {
-    buttonRef.current?.focus();
-  };
-
   let component = (
     <button
-      ref={isCurrentTable ? activeTabRef : buttonRef}
-      onClick={() => handleTableChange({ table })}
+      ref={isCurrentTable ? activeTabRef : undefined}
       className={cn(
         'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
         isCurrentTable
@@ -51,7 +45,7 @@ export const TableTabItem = React.forwardRef(({ table, index }, activeTabRef) =>
       id={table.id}
       role={undefined}
       tabIndex={undefined}
-      onClick={handleItemClick}
+      onClick={() => handleTableChange({ table })}
     >
       {component}
     </SortableItem>

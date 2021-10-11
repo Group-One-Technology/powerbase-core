@@ -5,10 +5,9 @@ import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 export function useTableTabsReorder({ base, setTables }) {
   const sensors = useSensors({
     keyboard: false,
-    pointer: {
+    mouse: {
       activationConstraint: {
-        delay: 100,
-        tolerance: 5,
+        distance: 5,
       },
     },
   });
