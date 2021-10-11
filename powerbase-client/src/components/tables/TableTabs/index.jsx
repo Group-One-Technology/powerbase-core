@@ -7,22 +7,19 @@ import {
   TableIcon,
 } from '@heroicons/react/solid';
 import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { BG_COLORS } from '@lib/constants';
-import { updateTables } from '@lib/api/tables';
-import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+import { useTableTabsReorder } from '@lib/hooks/tables/useTableTabsReorder';
 
-import { SortableItem } from '@components/ui/SortableItem';
-import { Dot } from '@components/ui/Dot';
-import { Tooltip } from '@components/ui/Tooltip';
 import TableSearchModal from '../TableSearchModal';
 import { TableTabsMobile } from './TableTabsMobile';
 import { TableTabsLoader } from './TableTabsLoader';
+import { TableTabItem } from './TableTabItem';
 
 export function TableTabs() {
   const { data: base } = useBase();
@@ -30,16 +27,7 @@ export function TableTabs() {
   const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
-
-  const sensors = useSensors({
-    keyboard: false,
-    pointer: {
-      activationConstraint: {
-        delay: 100,
-        tolerance: 5,
-      },
-    },
-  });
+  const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
 
   const handleSearchModal = () => {
     setTableSearchModalOpen(true);
@@ -47,21 +35,6 @@ export function TableTabs() {
 
   const addTable = () => {
     alert('add new table clicked');
-  };
-
-  const handleViewsOrderChange = ({ active, over }) => {
-    if (active.id !== over.id) {
-      setTables((prevViews) => {
-        const oldIndex = prevViews.findIndex((item) => item.id === active.id);
-        const newIndex = prevViews.findIndex((item) => item.id === over.id);
-        const updatedTables = arrayMove(prevViews, oldIndex, newIndex).map((item, index) => ({
-          ...item,
-          order: index,
-        }));
-        updateTables({ databaseId: base.id, tables: updatedTables });
-        return updatedTables;
-      });
-    }
   };
 
   return (
@@ -87,55 +60,14 @@ export function TableTabs() {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragEnd={handleViewsOrderChange}
+            onDragEnd={handleReorderViews}
             modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
           >
             <SortableContext
               items={tables}
               strategy={horizontalListSortingStrategy}
             >
-              {tables?.map((item, index) => {
-                const isCurrentTable = item.id.toString() === table.id.toString();
-
-                const button = (
-                  <button
-                    key={item.id}
-                    ref={isCurrentTable ? activeTabEl : undefined}
-                    onClick={() => handleTableChange({ table: item })}
-                    className={cn(
-                      'px-3 py-2 font-medium text-sm rounded-tl-md rounded-tr-md flex items-center whitespace-nowrap',
-                      isCurrentTable
-                        ? 'bg-white text-gray-900  '
-                        : 'bg-gray-900 bg-opacity-20 text-gray-200 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white',
-                    )}
-                    aria-current={isCurrentTable ? 'page' : undefined}
-                  >
-                    {!item.isMigrated && <Dot color="yellow" className="mr-1.5" />}
-                    {item.alias || item.name}
-                  </button>
-                );
-
-                if (!item.isMigrated) {
-                  return (
-                    <SortableItem key={item.id} id={item.id} role={undefined} tabIndex={undefined}>
-                      <Tooltip
-                        key={item.id}
-                        text="Migrating"
-                        position={index > 1 ? 'left' : 'right'}
-                        className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
-                      >
-                        {button}
-                      </Tooltip>
-                    </SortableItem>
-                  );
-                }
-
-                return (
-                  <SortableItem key={item.id} id={item.id} role={undefined} tabIndex={undefined}>
-                    {button}
-                  </SortableItem>
-                );
-              })}
+              {tables?.map((item, index) => <TableTabItem ref={activeTabEl} key={item.id} table={item} index={index} />)}
             </SortableContext>
           </DndContext>
           {tables && (
