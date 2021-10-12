@@ -9,25 +9,25 @@ import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
+import { useTableRecords } from '@models/TableRecords';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useTableConnections } from '@models/TableConnections';
+import { useTableReferencedConnections } from '@models/TableReferencedConnections';
+
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
-import { TableHeader } from './TableHeader';
+import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({
-  records,
-  totalRecords,
-  loadMoreRows,
-  isLoading,
-  height,
-  tables,
-  connections,
-  referencedConnections,
-}) {
+export function TableRenderer({ height, table, tables }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: initialFields } = useViewFields();
+  const { data: totalRecords } = useTableRecordsCount();
+  const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
+  const { data: connections } = useTableConnections();
+  const { data: referencedConnections } = useTableReferencedConnections();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
@@ -41,6 +41,7 @@ export function TableRenderer({
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
+
   const isRowLoaded = ({ index }) => !!records[index];
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export function TableRenderer({
 
       return ({
         ...item,
-        value: records[rowNo - 1][index + 1],
+        value: records[rowNo - 1][item.name],
         isForeignKey: !!connection,
         isCompositeKey: connection?.columns.length > 1,
         foreignKey: connection
@@ -108,13 +109,16 @@ export function TableRenderer({
               clientHeight,
             }) => (
               <>
-                <TableHeader
+                <GridHeader
                   ref={headerGridRef}
-                  scrollLeft={scrollLeft}
-                  width={width}
-                  hasScrollbar={scrollHeight > clientHeight}
+                  table={table}
                   fields={fields}
                   setFields={setFields}
+                  width={width}
+                  height={height}
+                  onScroll={onScroll}
+                  scrollLeft={scrollLeft}
+                  hasScrollbar={scrollHeight > clientHeight}
                 />
                 <InfiniteLoader
                   isRowLoaded={isRowLoaded}
@@ -130,6 +134,7 @@ export function TableRenderer({
                         }
                       }}
                       onScroll={onScroll}
+                      scrollLeft={scrollLeft}
                       onSectionRendered={({
                         columnStartIndex,
                         columnStopIndex,
@@ -150,7 +155,9 @@ export function TableRenderer({
                           rowIndex,
                           columnIndex,
                           isLoaded: !!records[rowIndex],
-                          value: records[rowIndex][columnIndex],
+                          value: columnIndex === 0
+                            ? rowIndex + 1
+                            : records[rowIndex][fields[columnIndex - 1].name],
                           setHoveredCell,
                           isHoveredRow,
                           isRowNo,
@@ -204,12 +211,7 @@ export function TableRenderer({
 }
 
 TableRenderer.propTypes = {
-  records: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)).isRequired,
-  totalRecords: PropTypes.number,
-  loadMoreRows: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool,
   height: PropTypes.number.isRequired,
+  table: ITable.isRequired,
   tables: PropTypes.arrayOf(ITable),
-  connections: PropTypes.array,
-  referencedConnections: PropTypes.array,
 };

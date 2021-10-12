@@ -10,6 +10,10 @@
   cursor: grab;
 }
 
+.cursor-resize {
+  cursor: col-resize;
+}
+
 .single-line {
   white-space: nowrap;
   width: 200px;
@@ -32,32 +36,4 @@
 
 .scrollbar-none::-webkit-scrollbar {
   display: none;
-}
-
-.DragHandle {
-  flex: 0 0 16px;
-  z-index: 2;
-  cursor: col-resize;
-  color: #0085ff;
-  right: 0;
-  position: absolute;
-}
-
-.DragHandle:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.DragHandleActive,
-.DragHandleActive:hover {
-  color: #0b6fcc;
-  z-index: 3;
-}
-
-.DragHandleIcon {
-  flex: 0 0 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: ew-resize;
 }
