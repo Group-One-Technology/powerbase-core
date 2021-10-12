@@ -13,6 +13,7 @@ import { DroppableArea } from '@components/ui/DroppableArea';
 import { DraggableItem } from '@components/ui/DraggableItem';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
 import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
+import { useFieldOptions } from '@lib/hooks/virtual-table/useFieldOptions';
 import { GridHeaderOptions } from './GridHeaderOptions';
 
 const GRID_HEADER_HEIGHT = 30;
@@ -22,6 +23,8 @@ function CellRenderer({
   columnIndex,
   field,
   fieldTypes,
+  option,
+  setOption,
   dragging,
   handleResizeColumn,
   handleResizeStop,
@@ -29,10 +32,7 @@ function CellRenderer({
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
 
-  const handleClick = () => {
-    const trigger = document.getElementsByClassName(`button_field_${field.id}`)[0];
-    trigger.click();
-  };
+  const handleClick = () => setOption(true);
 
   const droppableArea = (
     <DroppableArea
@@ -51,7 +51,7 @@ function CellRenderer({
     />
   );
 
-  if (columnIndex === 0 || !field) {
+  if (columnIndex === 0 || !field || !option) {
     return (
       <React.Fragment key={key}>
         <div
@@ -66,7 +66,7 @@ function CellRenderer({
   return (
     <React.Fragment key={key}>
       <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
-        <GridHeaderOptions field={field} />
+        <GridHeaderOptions option={option} field={field} setOptionOpen={setOption} />
 
         <DraggableItem
           id={key}
@@ -98,6 +98,8 @@ CellRenderer.propTypes = {
   columnIndex: PropTypes.number.isRequired,
   field: PropTypes.object,
   fieldTypes: PropTypes.array.isRequired,
+  option: PropTypes.object.isRequired,
+  setOption: PropTypes.func.isRequired,
   dragging: PropTypes.object,
   handleResizeColumn: PropTypes.func.isRequired,
   handleResizeStop: PropTypes.func.isRequired,
@@ -123,6 +125,7 @@ export const GridHeader = React.forwardRef(({
     handleDragMove,
     handleDragEnd,
   } = useReorderFields({ tableId: table.id, fields, setFields });
+  const { options, setOption } = useFieldOptions({ fields });
 
   return (
     <DndContext
@@ -148,15 +151,24 @@ export const GridHeader = React.forwardRef(({
         height={GRID_HEADER_HEIGHT}
         width={hasScrollbar ? width - SCROLLBAR_WIDTH : width}
         className="scrollbar-none border-gray-200 border-b"
-        cellRenderer={({ columnIndex, ...props }) => CellRenderer({
-          ...props,
-          columnIndex,
-          field: fields[columnIndex - 1],
-          fieldTypes,
-          dragging,
-          handleResizeColumn,
-          handleResizeStop,
-        })}
+        cellRenderer={({ columnIndex, ...props }) => {
+          const field = fields[columnIndex - 1];
+          const option = field
+            ? options.find((item) => item.id === field.id)
+            : undefined;
+
+          return CellRenderer({
+            ...props,
+            columnIndex,
+            field,
+            fieldTypes,
+            option,
+            setOption: (value) => setOption(field.id, value),
+            dragging,
+            handleResizeColumn,
+            handleResizeStop,
+          });
+        }}
       />
 
       <DragOverlay>

@@ -20,8 +20,28 @@ export async function reorderViewFields({ viewId, ...payload }) {
   return undefined;
 }
 
-export async function resizeViewFields({ viewFieldId, ...payload }) {
-  const response = await securedApi.put(`/view_fields/${viewFieldId}/resize`, payload);
+export async function hideViewField({ id }) {
+  const response = await securedApi.put(`/view_fields/${id}/hide`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function unhideViewField({ id }) {
+  const response = await securedApi.put(`/view_fields/${id}/unhide`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function resizeViewField({ id, ...payload }) {
+  const response = await securedApi.put(`/view_fields/${id}/resize`, payload);
 
   if (response.statusText === 'OK') {
     return response.data;

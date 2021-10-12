@@ -5,6 +5,10 @@ class ViewFieldOptionsController < ApplicationController
     required(:view_id).value(:integer)
   end
 
+  schema(:hide, :unhide) do
+    required(:id).value(:integer)
+  end
+
   schema(:resize) do
     required(:id).value(:integer)
     required(:width).value(:integer)
@@ -19,6 +23,28 @@ class ViewFieldOptionsController < ApplicationController
   def index
     @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
+  end
+
+  # PUT /view_fields/:id/hide
+  def hide
+    @view_field = ViewFieldOption.find(safe_params[:id])
+
+    if @view_field.update(is_hidden: true)
+      render json: format_json(@view_field)
+    else
+      render json: @view_field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /view_fields/:id/unhide
+  def unhide
+    @view_field = ViewFieldOption.find(safe_params[:id])
+
+    if @view_field.update(is_hidden: false)
+      render json: format_json(@view_field)
+    else
+      render json: @view_field.errors, status: :unprocessable_entity
+    end
   end
 
   # PUT /view_fields/:id/resize

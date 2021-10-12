@@ -31,12 +31,10 @@ export function TableRenderer({ height, table, tables }) {
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
-  const [fields, setFields] = useState(initialFields);
+  const [fields, setFields] = useState(initialFields.filter((item) => !item.isHidden));
 
   const columnCount = fields && fields.length + 1;
-  const fieldNames = fields.map((field) => field.name);
-  const connectionsIndices = connections.map((item) => item.columns).flat()
-    .map((item) => fieldNames.indexOf(item) + 1);
+  const connectionFields = connections.map((item) => item.columns).flat();
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,7 +43,7 @@ export function TableRenderer({ height, table, tables }) {
   const isRowLoaded = ({ index }) => !!records[index];
 
   useEffect(() => {
-    setFields(initialFields);
+    setFields(initialFields.filter((item) => !item.isHidden));
   }, [initialFields]);
 
   useDidMountEffect(() => {
@@ -71,8 +69,8 @@ export function TableRenderer({ height, table, tables }) {
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item, index) => {
-      const connection = connectionsIndices.includes(index + 1)
+    setSelectedRecord(initialFields.map((item) => {
+      const connection = connectionFields.includes(item.name)
         ? connections.find((key) => key.columns.includes(item.name))
         : undefined;
 
@@ -147,8 +145,8 @@ export function TableRenderer({ height, table, tables }) {
                       }}
                       onRowsRendered={onRowsRendered}
                       cellRenderer={({ rowIndex, columnIndex, ...props }) => {
+                        const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
-                        const isLastRecord = rowIndex >= records.length - 1;
                         const isHoveredRow = hoveredCell.row === rowIndex;
 
                         return CellRenderer({
@@ -157,14 +155,15 @@ export function TableRenderer({ height, table, tables }) {
                           isLoaded: !!records[rowIndex],
                           value: columnIndex === 0
                             ? rowIndex + 1
-                            : records[rowIndex][fields[columnIndex - 1].name],
+                            : records[rowIndex][field.name],
                           setHoveredCell,
                           isHoveredRow,
                           isRowNo,
-                          isLastRecord,
-                          isForeignKey: connectionsIndices.includes(columnIndex),
-                          fieldTypeId: columnIndex !== 0
-                            ? fields[columnIndex - 1].fieldTypeId
+                          isForeignKey: !isRowNo && field
+                            ? connectionFields.includes(field.name)
+                            : false,
+                          fieldTypeId: !isRowNo && field
+                            ? field.fieldTypeId
                             : undefined,
                           fieldTypes,
                           handleExpandRecord: isRowNo

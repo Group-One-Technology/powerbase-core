@@ -29,6 +29,8 @@ Rails.application.routes.draw do
 
           member do
             put 'resize', as: 'resize_view_field'
+            put 'hide', as: 'hide_view_field'
+            put 'unhide', as: 'unhide_view_field'
           end
         end
       end
