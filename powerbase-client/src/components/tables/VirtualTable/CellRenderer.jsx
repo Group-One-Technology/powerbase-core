@@ -10,7 +10,6 @@ function CellValue({
   isLoaded,
   isRowNo,
   isHoveredRow,
-  isLastRecord,
   isForeignKey,
   fieldType,
   handleExpandRecord,
@@ -26,7 +25,7 @@ function CellValue({
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {(isHoveredRow && !isLastRecord) && (
+          {(isHoveredRow) && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -78,7 +77,6 @@ CellValue.propTypes = {
   isLoaded: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
-  isLastRecord: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
@@ -94,7 +92,6 @@ export function CellRenderer({
   setHoveredCell,
   isHoveredRow,
   isRowNo,
-  isLastRecord,
   isForeignKey,
   fieldTypeId,
   fieldTypes,
@@ -145,7 +142,6 @@ export function CellRenderer({
         isLoaded={isLoaded}
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
-        isLastRecord={isLastRecord}
         isForeignKey={isForeignKey}
         fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
@@ -164,7 +160,6 @@ CellRenderer.propTypes = {
   setHoveredCell: PropTypes.func.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
-  isLastRecord: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
   fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
