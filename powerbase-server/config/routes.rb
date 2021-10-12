@@ -17,6 +17,13 @@ Rails.application.routes.draw do
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
+      resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do
+        member do
+          put 'set_as_pii', as: 'set_as_pii_field'
+          put 'unset_as_pii', as: 'unset_as_pii_field'
+        end
+      end
+
       resources :table_views, path: 'views', as: 'views', except: [:new], shallow: true do
         collection do
           put 'order', to: 'table_views#update_order', as: 'update_views_order'
