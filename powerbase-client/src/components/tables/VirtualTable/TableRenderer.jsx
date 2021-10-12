@@ -12,10 +12,10 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableConnections } from '@models/TableConnections';
-import { useTableReferencedConnections } from '@models/TableReferencedConnections';
 
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -27,24 +27,20 @@ export function TableRenderer({ height, table, tables }) {
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
   const { data: connections } = useTableConnections();
-  const { data: referencedConnections } = useTableReferencedConnections();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
-  const [fields, setFields] = useState(initialFields.filter((item) => !item.isHidden));
 
-  const columnCount = fields && fields.length + 1;
-  const connectionFields = connections.map((item) => item.columns).flat();
-
+  const [fields, setFields] = useState(initializeFields(initialFields, connections));
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
 
-  const isRowLoaded = ({ index }) => !!records[index];
+  const columnCount = fields && fields.length + 1;
 
   useEffect(() => {
-    setFields(initialFields.filter((item) => !item.isHidden));
-  }, [initialFields]);
+    setFields(initializeFields(initialFields, connections));
+  }, [initialFields, connections]);
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
@@ -69,24 +65,10 @@ export function TableRenderer({ height, table, tables }) {
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(initialFields.map((item) => {
-      const connection = connectionFields.includes(item.name)
-        ? connections.find((key) => key.columns.includes(item.name))
-        : undefined;
-
-      return ({
-        ...item,
-        value: records[rowNo - 1][item.name],
-        isForeignKey: !!connection,
-        isCompositeKey: connection?.columns.length > 1,
-        foreignKey: connection
-          ? ({
-            ...connection,
-            columnIndex: connection.columns.indexOf(item.name),
-          })
-          : undefined,
-      });
-    }));
+    setSelectedRecord(fields.map((item) => ({
+      ...item,
+      value: records[rowNo - 1][item.name],
+    })));
   };
 
   return (
@@ -119,7 +101,7 @@ export function TableRenderer({ height, table, tables }) {
                   hasScrollbar={scrollHeight > clientHeight}
                 />
                 <InfiniteLoader
-                  isRowLoaded={isRowLoaded}
+                  isRowLoaded={({ index }) => !!records[index]}
                   loadMoreRows={handleLoadMoreRows}
                   rowCount={totalRecords * columnCount}
                 >
@@ -160,9 +142,6 @@ export function TableRenderer({ height, table, tables }) {
                           isHoveredRow,
                           field,
                           isRowNo,
-                          isForeignKey: !isRowNo && field
-                            ? connectionFields.includes(field.name)
-                            : false,
                           fieldTypes,
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
@@ -198,9 +177,6 @@ export function TableRenderer({ height, table, tables }) {
           setOpen={setIsModalOpen}
           record={selectedRecord}
           tables={tables}
-          connections={connections}
-          referencedConnections={referencedConnections}
-          fieldTypes={fieldTypes}
         />
       )}
     </div>

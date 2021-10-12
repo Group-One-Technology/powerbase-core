@@ -10,7 +10,6 @@ function CellValue({
   isLoaded,
   isRowNo,
   isHoveredRow,
-  isForeignKey,
   field,
   fieldType,
   handleExpandRecord,
@@ -67,7 +66,7 @@ function CellValue({
   }
 
   return (
-    <span className={cn((value?.toString().length && isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
+    <span className={cn((value?.toString().length && field.isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
       {!field.isPii ? value?.toString() : '*****'}
     </span>
   );
@@ -78,7 +77,6 @@ CellValue.propTypes = {
   isLoaded: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
-  isForeignKey: PropTypes.bool.isRequired,
   field: PropTypes.object,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
@@ -95,7 +93,6 @@ export function CellRenderer({
   setHoveredCell,
   isHoveredRow,
   isRowNo,
-  isForeignKey,
   fieldTypes,
   handleExpandRecord,
 }) {
@@ -145,7 +142,6 @@ export function CellRenderer({
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
         field={field}
-        isForeignKey={isForeignKey}
         fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
       />
@@ -164,7 +160,6 @@ CellRenderer.propTypes = {
   setHoveredCell: PropTypes.func.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
-  isForeignKey: PropTypes.bool.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
 };
