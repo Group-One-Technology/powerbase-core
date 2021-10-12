@@ -11,6 +11,7 @@ function CellValue({
   isRowNo,
   isHoveredRow,
   isForeignKey,
+  field,
   fieldType,
   handleExpandRecord,
 }) {
@@ -18,7 +19,7 @@ function CellValue({
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
   }
 
-  if (isRowNo) {
+  if (isRowNo || !field) {
     return (
       <>
         <span className="flex-1 mr-4 text-right truncate">
@@ -67,7 +68,7 @@ function CellValue({
 
   return (
     <span className={cn((value?.toString().length && isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
-      {value?.toString()}
+      {!field.isPii ? value?.toString() : '*****'}
     </span>
   );
 }
@@ -78,6 +79,7 @@ CellValue.propTypes = {
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
+  field: PropTypes.object,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
 };
@@ -89,16 +91,16 @@ export function CellRenderer({
   isLoaded,
   style,
   value,
+  field,
   setHoveredCell,
   isHoveredRow,
   isRowNo,
   isForeignKey,
-  fieldTypeId,
   fieldTypes,
   handleExpandRecord,
 }) {
-  const fieldType = fieldTypeId
-    ? fieldTypes?.find((item) => item.id.toString() === fieldTypeId.toString())
+  const fieldType = field?.fieldTypeId
+    ? fieldTypes?.find((item) => item.id.toString() === field.fieldTypeId.toString())
     : undefined;
 
   const handleMouseEnter = () => {
@@ -142,6 +144,7 @@ export function CellRenderer({
         isLoaded={isLoaded}
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
+        field={field}
         isForeignKey={isForeignKey}
         fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
@@ -157,11 +160,11 @@ CellRenderer.propTypes = {
   isLoaded: PropTypes.bool.isRequired,
   style: PropTypes.string.isRequired,
   value: PropTypes.any.isRequired,
+  field: PropTypes.object,
   setHoveredCell: PropTypes.func.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isForeignKey: PropTypes.bool.isRequired,
-  fieldTypeId: PropTypes.number,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
 };

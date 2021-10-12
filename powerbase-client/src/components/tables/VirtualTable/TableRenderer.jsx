@@ -158,13 +158,11 @@ export function TableRenderer({ height, table, tables }) {
                             : records[rowIndex][field.name],
                           setHoveredCell,
                           isHoveredRow,
+                          field,
                           isRowNo,
                           isForeignKey: !isRowNo && field
                             ? connectionFields.includes(field.name)
                             : false,
-                          fieldTypeId: !isRowNo && field
-                            ? field.fieldTypeId
-                            : undefined,
                           fieldTypes,
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
