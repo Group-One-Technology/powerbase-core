@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useViewFields } from '@models/ViewFields';
-import { resizeViewFields } from '@lib/api/view-fields';
+import { resizeViewField } from '@lib/api/view-fields';
 
+/**
+ * Handles the resizing of field/column logic.
+ * @param {array} fields
+ * @param {function} setFields
+ * @returns { handleResizeColumn, handleResizeStop }
+ */
 export function useResizeFields({ fields, setFields }) {
   const { mutate: mutateViewFields } = useViewFields();
   const [resizedColumn, setResizedColumn] = useState();
@@ -26,8 +32,8 @@ export function useResizeFields({ fields, setFields }) {
 
   const handleResizeStop = async () => {
     try {
-      await resizeViewFields({
-        viewFieldId: resizedColumn.id,
+      await resizeViewField({
+        id: resizedColumn.id,
         width: resizedColumn.width,
       });
       const updatedFields = fields.map((column) => ({
