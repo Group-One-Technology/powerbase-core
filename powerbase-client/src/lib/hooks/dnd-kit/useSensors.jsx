@@ -1,6 +1,6 @@
 import {
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   useSensor,
   useSensors as useDndSensors,
 } from '@dnd-kit/core';
@@ -8,7 +8,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 export function useSensors(options) {
   const sensors = useDndSensors(
-    useSensor(PointerSensor, options?.pointer),
+    useSensor(MouseSensor, options?.mouse),
     (options?.keyboard ?? true)
       ? useSensor(KeyboardSensor, {
         coordinateGetter: sortableKeyboardCoordinates,

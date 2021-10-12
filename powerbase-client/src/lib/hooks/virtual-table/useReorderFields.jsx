@@ -2,10 +2,20 @@ import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useViewFields } from '@models/ViewFields';
 import { reorderViewFields } from '@lib/api/view-fields';
+import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
 export function useReorderFields({ tableId, fields, setFields }) {
   const { mutate: mutateViewFields } = useViewFields();
   const [dragging, setDragging] = useState();
+
+  const sensors = useSensors({
+    keyboard: false,
+    mouse: {
+      activationConstraint: {
+        distance: 5,
+      },
+    },
+  });
 
   const handleDragStart = (evt) => setDragging(evt);
   const handleDragMove = (evt) => setDragging(evt);
@@ -30,6 +40,7 @@ export function useReorderFields({ tableId, fields, setFields }) {
   };
 
   return {
+    sensors,
     dragging,
     handleDragStart,
     handleDragMove,

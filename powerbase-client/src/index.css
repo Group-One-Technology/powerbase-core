@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
 .cursor-grabbing {
   cursor: grabbing;
 }
@@ -24,7 +28,7 @@
   display: none;
 }
 
-.single-line * {
+.single-line *:not(.block) {
   display: inline;
   white-space: nowrap;
 }
