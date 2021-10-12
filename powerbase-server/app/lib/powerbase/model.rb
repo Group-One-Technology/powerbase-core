@@ -205,7 +205,7 @@ module Powerbase
         query_string = query.find_by(options[:filters]).to_sequel
         remote_db() {|db|
           db.from(@table_name)
-            .where(&query_string)
+            .yield_self(&query_string)
             .paginate(page, limit)
             .all
         }
