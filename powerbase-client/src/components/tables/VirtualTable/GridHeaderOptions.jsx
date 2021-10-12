@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Popover from '@radix-ui/react-popover';
 import { useFieldTypes } from '@models/FieldTypes';
@@ -10,17 +10,44 @@ import {
   ArrowLeftIcon,
 } from '@heroicons/react/outline';
 
-export function GridHeaderOptions({ field }) {
+import { useViewFields } from '@models/ViewFields';
+import { hideViewField } from '@lib/api/view-fields';
+
+export function GridHeaderOptions({ option, field, setOptionOpen }) {
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
+
   const [alias, setAlias] = useState(field.name);
+
+  useEffect(() => {
+    setAlias(field.name);
+  }, [field]);
 
   const handleAliasChange = (evt) => {
     setAlias(evt.target.value);
   };
 
+  const handleHideField = async () => {
+    try {
+      await hideViewField({ id: field.id });
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: item.id === field.id
+          ? true
+          : item.isHidden,
+      }));
+
+      mutateViewFields(updatedFields);
+    } catch (err) {
+      console.log(err);
+    }
+
+    setOptionOpen(false);
+  };
+
   return (
-    <Popover.Root>
+    <Popover.Root open={option.open} onOpenChange={setOptionOpen}>
       <Popover.Trigger className={`button_field_${field.id}`} />
       <Popover.Content side="bottom" sideOffset={10} align="start" alignOffset={-10}>
         <div className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
@@ -57,7 +84,11 @@ export function GridHeaderOptions({ field }) {
                 </button>
               </li>
               <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button type="button" className="py-1 w-full flex items-center cursor-not-allowed">
+                <button
+                  type="button"
+                  className="py-1 w-full flex items-center"
+                  onClick={handleHideField}
+                >
                   <EyeOffIcon className="h-4 w-4 mr-1.5" />
                   Hide
                 </button>
@@ -77,5 +108,7 @@ export function GridHeaderOptions({ field }) {
 }
 
 GridHeaderOptions.propTypes = {
+  option: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
+  setOptionOpen: PropTypes.func.isRequired,
 };
