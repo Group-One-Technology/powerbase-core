@@ -55,7 +55,7 @@ function CellValue({
     );
   }
 
-  if (fieldType?.name === FieldType.DATE) {
+  if (fieldType?.name === FieldType.DATE && !field.isPii) {
     const date = formatDate(value);
 
     return (
