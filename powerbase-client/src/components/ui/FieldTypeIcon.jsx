@@ -24,25 +24,25 @@ export const FieldTypeIcon = React.memo(({
 
   switch (fieldType?.name) {
     case FieldType.LONG_TEXT:
-      return <MenuAlt1Icon className={generatedClassName} />;
+      return <MenuAlt1Icon className={generatedClassName} aria-hidden="true" />;
     case FieldType.CHECKBOX:
-      return <CheckCircleIcon className={generatedClassName} />;
+      return <CheckCircleIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.NUMBER:
-      return <HashtagIcon className={generatedClassName} />;
+      return <HashtagIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.SINGLE_SELECT:
-      return <ChevronDownIcon className={generatedClassName} />;
+      return <ChevronDownIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.MULTIPLE_SELECT:
-      return <ChevronDownIcon className={generatedClassName} />;
+      return <ChevronDownIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.DATE:
-      return <CalendarIcon className={generatedClassName} />;
+      return <CalendarIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.EMAIL:
-      return <MailIcon className={generatedClassName} />;
+      return <MailIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.PLUGIN:
-      return <LightningBoltIcon className={generatedClassName} />;
+      return <LightningBoltIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.OTHERS:
-      return <TemplateIcon className={generatedClassName} />;
+      return <TemplateIcon className={generatedClassName} aria-hidden="true" />;
     default:
-      return <span className={cn('text-sm font-medium text-gray-600 flex items-center', className)}>A</span>;
+      return <span className={cn('text-sm w-4 font-medium text-gray-600 flex items-center', className)} aria-hidden="true">A</span>;
   }
 });
 
