@@ -54,8 +54,8 @@ export function Filter() {
               'ring-2': open,
             })}
           >
-            <span className="sr-only">Filter fields</span>
-            <FilterIcon className="block h-4 w-4" />
+            <FilterIcon className="block h-4 w-4 mr-1" />
+            Filter
           </Popover.Button>
           <Transition
             as={Fragment}

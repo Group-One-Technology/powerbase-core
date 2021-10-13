@@ -70,8 +70,8 @@ export function Sort() {
               'ring-2': open,
             })}
           >
-            <span className="sr-only">Sort by fields</span>
-            <SwitchVerticalIcon className="block h-4 w-4" />
+            <SwitchVerticalIcon className="block h-4 w-4 mr-1" />
+            Sort
           </Popover.Button>
           <Transition
             as={Fragment}
