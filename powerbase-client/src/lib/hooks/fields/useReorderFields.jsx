@@ -17,11 +17,15 @@ export function useReorderFields({ tableId, fields, setFields }) {
       }));
 
       setFields(updatedFields);
-      await reorderViewFields({
-        tableId,
-        viewFields: updatedFields.map((item) => item.id),
-      });
-      mutateViewFields(updatedFields);
+      try {
+        await reorderViewFields({
+          tableId,
+          viewFields: updatedFields.map((item) => item.id),
+        });
+        mutateViewFields(updatedFields);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
