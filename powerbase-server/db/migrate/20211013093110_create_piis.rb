@@ -5,7 +5,7 @@ class CreatePiis < ActiveRecord::Migration[6.1]
       t.string :abbreviation
     end
 
-    Pii.create(name: "Full Name", abbreviation: "Name")
+    Pii.create(name: "Full Name")
     Pii.create(name: "Social Security Number", abbreviation: "SSN")
     Pii.create(name: "Driver's License")
     Pii.create(name: "Address")

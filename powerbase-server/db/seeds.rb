@@ -31,7 +31,7 @@ FieldDbTypeMapping.find_or_create_by(db_type: "timestamp", adapter: "sequel", po
 FieldDbTypeMapping.find_or_create_by(db_type: "enum", adapter: "sequel", powerbase_field_type_id: single_select.id)
 
 # * Seed PII...
-Pii.find_or_create_by(name: "Full Name", abbreviation: "Name")
+Pii.find_or_create_by(name: "Full Name")
 Pii.find_or_create_by(name: "Social Security Number", abbreviation: "SSN")
 Pii.find_or_create_by(name: "Driver's License")
 Pii.find_or_create_by(name: "Address")
