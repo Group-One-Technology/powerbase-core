@@ -9,6 +9,7 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Badge } from '@components/ui/Badge';
 import { ViewMenu } from '@components/views/ViewMenu';
+import { Fields } from '@components/fields/Fields';
 import { Filter } from '@components/filter/Filter';
 import { Sort } from '@components/sort/Sort';
 import { Search } from '@components/search/Search';
@@ -29,7 +30,8 @@ export function TableViewsNav({ table, views }) {
           )}
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center gap-x-1">
+          <Fields />
           <Filter />
           <Sort />
           <button
