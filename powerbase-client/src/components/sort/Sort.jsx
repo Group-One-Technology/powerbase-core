@@ -110,7 +110,7 @@ export function Sort() {
                   </div>
                   <button
                     type="button"
-                    className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100"
+                    className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
                     onClick={handleAddSortItem}
                   >
                     <PlusIcon className="mr-1 h-4 w-4" />
