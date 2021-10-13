@@ -74,7 +74,7 @@ export function FieldItem({ field }) {
           )}
           disabled={loading}
         >
-          <span className="sr-only">Show Fields</span>
+          <span className="sr-only">Show Field</span>
           <span
             aria-hidden="true"
             className={cn(
