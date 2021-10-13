@@ -36,7 +36,7 @@ export function TableViewsNav({ table, views }) {
           <Sort />
           <button
             type="button"
-            className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             <ShareIcon className="block h-4 w-4 mr-1" />
             Share
