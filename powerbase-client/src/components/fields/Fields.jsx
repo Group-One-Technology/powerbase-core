@@ -1,15 +1,20 @@
 import React, { Fragment } from 'react';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
+import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
-export function Fields() {
+export function Fields({ tableId }) {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
+  const { sensors, handleReorderFields } = useReorderFields({ tableId, fields });
 
   return (
     <Popover className="relative">
@@ -43,9 +48,13 @@ export function Fields() {
                       {view.name}
                     </strong>
                   </h4>
-                  <ul className="m-3 list-none flex flex-col">
-                    {fields.map((field) => <FieldItem key={field.id} field={field} />)}
-                  </ul>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
+                    <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+                      <ul className="m-3 list-none flex flex-col">
+                        {fields.map((field) => <FieldItem key={field.id} field={field} />)}
+                      </ul>
+                    </SortableContext>
+                  </DndContext>
                   <button
                     type="button"
                     className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
@@ -62,3 +71,7 @@ export function Fields() {
     </Popover>
   );
 }
+
+Fields.propTypes = {
+  tableId: PropTypes.number.isRequired,
+};
