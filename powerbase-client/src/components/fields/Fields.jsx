@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
@@ -16,6 +16,10 @@ export function Fields({ tableId }) {
   const { data: initialFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({ tableId, fields, setFields });
+
+  useEffect(() => {
+    setFields(initialFields);
+  }, [initialFields]);
 
   return (
     <Popover className="relative">

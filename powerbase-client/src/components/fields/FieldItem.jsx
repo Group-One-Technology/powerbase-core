@@ -4,13 +4,41 @@ import PropTypes from 'prop-types';
 import { Switch } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
+import { useViewFields } from '@models/ViewFields';
+import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
 export function FieldItem({ field }) {
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
-  const [visible, setVisible] = useState(!field.isHidden);
+  const [loading, setLoading] = useState(false);
+
+  const handleToggleVisibility = async () => {
+    setLoading(true);
+
+    try {
+      if (!field.isHidden) {
+        await hideViewField({ id: field.id });
+      } else {
+        await unhideViewField({ id: field.id });
+      }
+
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: item.id === field.id
+          ? !field.isHidden
+          : item.isHidden,
+      }));
+
+      mutateViewFields(updatedFields);
+    } catch (err) {
+      console.log(err);
+    }
+
+    setLoading(false);
+  };
 
   return (
     <SortableItem
@@ -38,19 +66,20 @@ export function FieldItem({ field }) {
       </div>
       <div className="block">
         <Switch
-          checked={visible}
-          onChange={setVisible}
+          checked={!field.isHidden}
+          onChange={handleToggleVisibility}
           className={cn(
             'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-            visible ? 'bg-indigo-600' : 'bg-gray-200',
+            !field.isHidden ? 'bg-indigo-600' : 'bg-gray-200',
           )}
+          disabled={loading}
         >
           <span className="sr-only">Show Fields</span>
           <span
             aria-hidden="true"
             className={cn(
               'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
-              visible ? 'translate-x-3' : 'translate-x-0',
+              !field.isHidden ? 'translate-x-3' : 'translate-x-0',
             )}
           />
         </Switch>
