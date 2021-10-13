@@ -8,6 +8,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { Spinner } from '@components/ui/Spinner';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -24,6 +25,7 @@ export function TableRenderer({
   referencedConnections,
   fieldTypes,
   mutateViewFields,
+  isUpdating,
 }) {
   const [scopedFields, setScopedFields] = useState([]);
   const columnCount = fields && fields.length + 1;
@@ -192,6 +194,12 @@ export function TableRenderer({
           fieldTypes={fieldTypes}
         />
       )}
+
+      {/* Update Spinner */}
+      {
+        isUpdating
+        && <span className="absolute bottom-0 right-0 mr-4 text-xs text-gray-800 opacity-80 flex items-center mb-2 font-medium"><Spinner className="w-4 h-4 mr-2" /> Updating</span>
+      }
     </div>
   );
 }
@@ -208,4 +216,5 @@ TableRenderer.propTypes = {
   referencedConnections: PropTypes.array,
   fieldTypes: PropTypes.array.isRequired,
   mutateViewFields: PropTypes.func,
+  isUpdating: PropTypes.bool,
 };

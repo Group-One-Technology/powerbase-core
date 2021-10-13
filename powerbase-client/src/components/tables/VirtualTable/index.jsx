@@ -20,7 +20,7 @@ export function VirtualTable({ height, tables, table }) {
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records, loadMore, isLoading, mutate: mutateTableRecords } = useTableRecords();
+  const { data: records, loadMore, isLoading, mutate: mutateTableRecords, isUpdating, setIsUpdating } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
@@ -29,7 +29,7 @@ export function VirtualTable({ height, tables, table }) {
 
   async function mutateCallback() {
     const mutated = await mutateTableRecords();
-    console.log("Table Mutated", mutated)
+    setIsUpdating(false)
   }
 
   const attachWebsocket = function () {
@@ -39,6 +39,7 @@ export function VirtualTable({ height, tables, table }) {
     });
     const channel = pusher.subscribe(`table.${table.id}`);
     channel.bind('powerbase-data-listener', () => {
+      setIsUpdating(true)
       mutateCallback()
     });
   };
@@ -49,7 +50,6 @@ export function VirtualTable({ height, tables, table }) {
 
   return (
     <>
-      <button onClick={mutateCallback}>Mutate Table</button>
       <TableRenderer
         fields={fields}
         records={[
@@ -68,6 +68,7 @@ export function VirtualTable({ height, tables, table }) {
         referencedConnections={referencedConnections}
         fieldTypes={fieldTypes}
         mutateViewFields={mutateViewFields}
+        isUpdating={isUpdating}
       />
     </>
   );

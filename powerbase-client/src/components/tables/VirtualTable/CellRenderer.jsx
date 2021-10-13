@@ -83,7 +83,7 @@ function CellValue({
         )}
         <span
           className={cn(
-            isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded',
+            isForeignKey && !isHeader && 'px-2 py-0.25 bg-blue-50 rounded'
           )}
         >
           {value?.toString()}

@@ -1,6 +1,6 @@
 import constate from 'constate';
 import { useSWRInfinite } from 'swr';
-
+import { useState } from 'react';
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
 import { useRecordsFilter } from './views/RecordsFilter';
@@ -21,6 +21,7 @@ function getKey({
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
   const { filters, viewId } = useRecordsFilter();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)
@@ -63,6 +64,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     isLoading,
     isReachingEnd,
     loadMore,
+    isUpdating,
+    setIsUpdating,
   };
 }
 
