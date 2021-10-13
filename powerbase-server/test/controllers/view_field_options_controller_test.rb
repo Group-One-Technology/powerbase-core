@@ -12,7 +12,7 @@ class ViewFieldOptionsControllerTest < ApplicationControllerTest
 
   test "should get list of fields of a given view" do
     view = table_views(:one)
-    get view_fields_view_url(id: view.id)
+    get view_view_fields_url(view_id: view.id)
     assert_response :success
   end
 end
