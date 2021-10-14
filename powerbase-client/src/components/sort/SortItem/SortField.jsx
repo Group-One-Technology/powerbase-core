@@ -24,7 +24,12 @@ export function SortField({
           className="block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
         >
           <span className="flex items-center">
-            <FieldTypeIcon fieldTypes={fieldTypes} typeId={value.fieldTypeId} className="mr-1.5" />
+            <FieldTypeIcon
+              fieldTypes={fieldTypes}
+              typeId={value.fieldTypeId}
+              isPrimaryKey={value.isPrimaryKey}
+              className="mr-1.5"
+            />
             {truncateString(value?.name, 20)}
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -45,7 +50,11 @@ export function SortField({
               )}
             >
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
-                <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} />
+                <FieldTypeIcon
+                  fieldTypes={fieldTypes}
+                  typeId={item.fieldTypeId}
+                  isPrimaryKey={item.isPrimaryKey}
+                />
               </span>
               <span className="block truncate">
                 {item.name}

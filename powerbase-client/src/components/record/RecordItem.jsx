@@ -15,7 +15,12 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
 
   const labelContent = (
     <>
-      <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} className="mr-1" />
+      <FieldTypeIcon
+        fieldType={fieldType}
+        isPrimaryKey={item.isPrimaryKey}
+        isForeignKey={item.isForeignKey}
+        className="mr-1"
+      />
       <span className="font-normal">
         {(!linkedRecordError && item.tableName && item.tableName !== item.name) && `${item.tableName.toUpperCase()} - `}
         {item.name.toUpperCase()}
