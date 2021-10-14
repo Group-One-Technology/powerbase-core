@@ -2,6 +2,8 @@ import React, { Fragment, useRef } from 'react';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
@@ -9,6 +11,7 @@ import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
+import { useReorderSort } from '@lib/hooks/sort/useReorderSort';
 import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { SortItem } from './SortItem';
 
@@ -41,6 +44,8 @@ export function Sort() {
       await updateSort(updatedSort);
     }
   };
+
+  const { sensors, handleReorderSort } = useReorderSort({ sort, updateSort });
 
   const handleAddSortItem = async () => {
     const updatedSort = [
@@ -92,22 +97,26 @@ export function Sort() {
                       {view.name}
                     </strong>
                   </h4>
-                  <div ref={sortRef} className="m-3 flex flex-col gap-y-2">
-                    {sort.map((item) => (
-                      <SortItem
-                        key={item.id}
-                        id={item.id}
-                        sort={item}
-                        remove={handleRemoveSortItem}
-                        updateRecords={updateRecords}
-                      />
-                    ))}
+                  <ul ref={sortRef} className="list-none m-3 flex flex-col gap-y-2">
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderSort}>
+                      <SortableContext items={sort} strategy={verticalListSortingStrategy}>
+                        {sort.map((item) => (
+                          <SortItem
+                            key={item.id}
+                            id={item.id}
+                            sort={item}
+                            remove={handleRemoveSortItem}
+                            updateRecords={updateRecords}
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
                     {sort.length === 0 && (
                       <p className="ml-3 text-sm text-gray-700">
                         There are no sort for this view.
                       </p>
                     )}
-                  </div>
+                  </ul>
                   <button
                     type="button"
                     className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
