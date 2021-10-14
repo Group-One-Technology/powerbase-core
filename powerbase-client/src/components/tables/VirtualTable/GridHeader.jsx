@@ -75,7 +75,13 @@ function CellRenderer({
           onClick={handleClick}
         />
 
-        <FieldTypeIcon typeId={field.fieldTypeId} fieldTypes={fieldTypes} className="mr-1" />
+        <FieldTypeIcon
+          typeId={field.fieldTypeId}
+          fieldTypes={fieldTypes}
+          isPrimaryKey={field.isPrimaryKey}
+          isForeignKey={field.isForeignKey}
+          className="mr-1"
+        />
         <span>{field.name}</span>
       </div>
       <Draggable

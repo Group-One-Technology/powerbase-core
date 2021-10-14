@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { KeyIcon as OutlineKeyIcon } from '@heroicons/react/outline';
 import {
   TemplateIcon,
   CheckCircleIcon,
@@ -8,6 +9,7 @@ import {
   LightningBoltIcon,
   MailIcon,
   MenuAlt1Icon,
+  KeyIcon,
   CalendarIcon,
   ChevronDownIcon,
 } from '@heroicons/react/solid';
@@ -15,12 +17,22 @@ import { FieldType } from '@lib/constants/field-types';
 
 export const FieldTypeIcon = React.memo(({
   typeId,
+  isPrimaryKey,
+  isForeignKey,
   fieldType: intialFieldType,
   fieldTypes,
   className,
 }) => {
   const generatedClassName = cn('text-sm text-gray-600 h-4 w-4', className);
   const fieldType = intialFieldType || fieldTypes?.find((item) => item.id === typeId);
+
+  if (isPrimaryKey) {
+    return <KeyIcon className={generatedClassName} aria-hidden="true" />;
+  }
+
+  if (isForeignKey) {
+    return <OutlineKeyIcon className={generatedClassName} aria-hidden="true" />;
+  }
 
   switch (fieldType?.name) {
     case FieldType.LONG_TEXT:
@@ -50,5 +62,7 @@ FieldTypeIcon.propTypes = {
   typeId: PropTypes.number,
   fieldType: PropTypes.object,
   fieldTypes: PropTypes.array,
+  isPrimaryKey: PropTypes.bool,
+  isForeignKey: PropTypes.bool,
   className: PropTypes.string,
 };
