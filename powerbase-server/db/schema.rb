@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_12_080203) do
+ActiveRecord::Schema.define(version: 2021_10_13_093110) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,11 @@ ActiveRecord::Schema.define(version: 2021_10_12_080203) do
     t.string "values", default: [], null: false, array: true
     t.bigint "powerbase_field_id", null: false
     t.index ["powerbase_field_id"], name: "index_field_select_options_on_powerbase_field_id"
+  end
+
+  create_table "piis", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "abbreviation"
   end
 
   create_table "powerbase_databases", force: :cascade do |t|
