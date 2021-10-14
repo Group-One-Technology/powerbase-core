@@ -44,7 +44,7 @@ export function FieldItem({ field }) {
     <SortableItem
       id={field.id}
       as="li"
-      className="sort flex gap-2 items-center"
+      className="flex gap-2 items-center"
       handle={{
         position: 'left',
         component: (
