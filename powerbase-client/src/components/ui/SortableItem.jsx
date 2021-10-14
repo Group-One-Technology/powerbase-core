@@ -8,6 +8,7 @@ export function SortableItem({
   id,
   children,
   handle,
+  dragging,
   ...props
 }) {
   const {
@@ -18,14 +19,16 @@ export function SortableItem({
     transition,
   } = useSortable({ id });
 
-  const style = {
-    transform: CSS.Transform.toString({
-      ...transform,
-      scaleX: 1,
-      scaleY: 1,
-    }),
-    transition,
-  };
+  const style = (dragging == null || dragging)
+    ? {
+      transform: CSS.Transform.toString({
+        ...transform,
+        scaleX: 1,
+        scaleY: 1,
+      }),
+      transition,
+    }
+    : {};
 
   const handleComponent = handle && handle.position && handle.component
     ? (
@@ -60,5 +63,6 @@ SortableItem.propTypes = {
   as: PropTypes.string,
   id: PropTypes.any.isRequired,
   handle: PropTypes.object,
+  dragging: PropTypes.bool,
   children: PropTypes.any.isRequired,
 };

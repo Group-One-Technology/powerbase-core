@@ -45,7 +45,12 @@ export function Sort() {
     }
   };
 
-  const { sensors, handleReorderSort } = useReorderSort({ sort, updateSort });
+  const {
+    dragging,
+    sensors,
+    handleDragStart,
+    handleReorderSort,
+  } = useReorderSort({ sort, updateSort });
 
   const handleAddSortItem = async () => {
     const updatedSort = [
@@ -98,12 +103,18 @@ export function Sort() {
                     </strong>
                   </h4>
                   <ul ref={sortRef} className="list-none m-3 flex flex-col gap-y-2">
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderSort}>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleReorderSort}
+                    >
                       <SortableContext items={sort} strategy={verticalListSortingStrategy}>
                         {sort.map((item) => (
                           <SortItem
                             key={item.id}
                             id={item.id}
+                            dragging={dragging}
                             sort={item}
                             remove={handleRemoveSortItem}
                             updateRecords={updateRecords}

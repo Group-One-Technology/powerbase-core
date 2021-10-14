@@ -13,6 +13,7 @@ import { SortOperator } from './SortOperator';
 export function SortItem({
   id,
   sort,
+  dragging,
   remove,
   updateRecords,
 }) {
@@ -45,6 +46,7 @@ export function SortItem({
       data-id={id}
       data-field={field.name}
       data-operator={operator}
+      dragging={dragging}
       className="sort flex gap-2 items-center"
       handle={{
         position: 'left',
@@ -88,6 +90,7 @@ export function SortItem({
 SortItem.propTypes = {
   id: PropTypes.string.isRequired,
   sort: PropTypes.object,
+  dragging: PropTypes.bool,
   remove: PropTypes.func.isRequired,
   updateRecords: PropTypes.func.isRequired,
 };

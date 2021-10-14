@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
 export function useReorderSort({ sort, updateSort }) {
+  const [dragging, setDragging] = useState(false);
   const sensors = useSensors();
+
+  const handleDragStart = () => setDragging(true);
 
   const handleReorderSort = async ({ active, over }) => {
     if (active.id !== over.id) {
@@ -19,7 +23,14 @@ export function useReorderSort({ sort, updateSort }) {
         console.log(err);
       }
     }
+
+    setDragging(false);
   };
 
-  return { sensors, handleReorderSort };
+  return {
+    dragging,
+    sensors,
+    handleDragStart,
+    handleReorderSort,
+  };
 }
