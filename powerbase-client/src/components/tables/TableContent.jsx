@@ -26,7 +26,6 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
   if (!view || !fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
-
   return (
     <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
       <TableRecordsCountProvider id={table.id}>

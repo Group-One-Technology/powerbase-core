@@ -8,7 +8,6 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { ITable } from '@lib/propTypes/table';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { Spinner } from '@components/ui/Spinner';
 import { CellRenderer } from './CellRenderer';
 
 const ROW_NO_CELL_WIDTH = 80;
@@ -25,7 +24,7 @@ export function TableRenderer({
   referencedConnections,
   fieldTypes,
   mutateViewFields,
-  isUpdating,
+  highlightedCell,
 }) {
   const [scopedFields, setScopedFields] = useState([]);
   const columnCount = fields && fields.length + 1;
@@ -138,10 +137,15 @@ export function TableRenderer({
                   const isRowNo = columnIndex === 0 && rowIndex !== 0;
                   const isLastRecord = rowIndex >= tableValues.length - 1;
                   const isHoveredRow = hoveredCell.row === rowIndex;
+                  const primaryKey = tableValues[rowIndex][tableValues[rowIndex].length - 1];
+                  const isHighlighted = highlightedCell === primaryKey;
+                  console.log(isHighlighted, highlightedCell, primaryKey);
+
 
                   return CellRenderer({
                     rowIndex,
                     columnIndex,
+                    isHighlighted,
                     isLoaded: !!tableValues[rowIndex],
                     value: tableValues[rowIndex][columnIndex],
                     setHoveredCell,
@@ -194,12 +198,6 @@ export function TableRenderer({
           fieldTypes={fieldTypes}
         />
       )}
-
-      {/* Update Spinner */}
-      {
-        isUpdating
-        && <span className="absolute bottom-0 right-0 mr-4 text-xs text-gray-800 opacity-80 flex items-center mb-2 font-medium"><Spinner className="w-4 h-4 mr-2" /> Updating</span>
-      }
     </div>
   );
 }
@@ -217,4 +215,5 @@ TableRenderer.propTypes = {
   fieldTypes: PropTypes.array.isRequired,
   mutateViewFields: PropTypes.func,
   isUpdating: PropTypes.bool,
+  highlightedCell: PropTypes.string,
 };

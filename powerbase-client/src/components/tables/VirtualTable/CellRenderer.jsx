@@ -128,6 +128,7 @@ export function CellRenderer({
   columnResized,
   mutateViewFields,
   fields,
+  isHighlighted,
 }) {
   const handleMouseEnter = () => {
     setHoveredCell({
@@ -165,6 +166,7 @@ export function CellRenderer({
       key={key}
       className={cn(
         'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 flex items-center py-1 px-2',
+        isHighlighted && 'update-highlight',
         isHeader && !isHoveredRow && 'bg-gray-100',
         isHoveredRow && 'bg-gray-50',
         isRowNo && 'flex justify-center text-xs text-gray-500',

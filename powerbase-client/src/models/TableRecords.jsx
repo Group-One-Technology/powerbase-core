@@ -21,7 +21,6 @@ function getKey({
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
   const { filters, viewId } = useRecordsFilter();
-  const [isUpdating, setIsUpdating] = useState(false);
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)
@@ -57,6 +56,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
+  const [highlightedCell, setHighLightedCell] = useState(null);
 
   return {
     ...response,
@@ -64,8 +64,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     isLoading,
     isReachingEnd,
     loadMore,
-    isUpdating,
-    setIsUpdating,
+    highlightedCell,
+    setHighLightedCell,
   };
 }
 

@@ -20,16 +20,11 @@ export function VirtualTable({ height, tables, table }) {
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records, loadMore, isLoading, mutate: mutateTableRecords, isUpdating, setIsUpdating } = useTableRecords();
+  const { data: records, loadMore, isLoading, mutate: mutateTableRecords, highlightedCell, setHighLightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
-  }
-
-  async function mutateCallback() {
-    const mutated = await mutateTableRecords();
-    setIsUpdating(false)
   }
 
   const attachWebsocket = function () {
@@ -38,9 +33,12 @@ export function VirtualTable({ height, tables, table }) {
       cluster: 'ap1',
     });
     const channel = pusher.subscribe(`table.${table.id}`);
-    channel.bind('powerbase-data-listener', () => {
-      setIsUpdating(true)
-      mutateCallback()
+    channel.bind('powerbase-data-listener', async (data) => {
+      const mutated = await mutateTableRecords();
+      setHighLightedCell(data.doc_id)
+      setTimeout(() => {
+        setHighLightedCell(null)
+      }, 3000);
     });
   };
 
@@ -68,7 +66,7 @@ export function VirtualTable({ height, tables, table }) {
         referencedConnections={referencedConnections}
         fieldTypes={fieldTypes}
         mutateViewFields={mutateViewFields}
-        isUpdating={isUpdating}
+        highlightedCell={highlightedCell}
       />
     </>
   );

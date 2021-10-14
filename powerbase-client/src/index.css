@@ -58,3 +58,14 @@
   align-items: center;
   cursor: ew-resize;
 }
+
+.update-highlight {
+  animation-name: bg-fade-out;
+  animation-duration: 2.5s;
+}
+
+@keyframes bg-fade-out {
+  0%   {background: white;}
+  10%  {background: rgba(255, 251, 235, var(--tw-bg-opacity));}
+  100% {background: white;}
+}
