@@ -6,12 +6,14 @@ import { XIcon } from '@heroicons/react/outline';
 import { useViewFields } from '@models/ViewFields';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
+import { SortableItem } from '@components/ui/SortableItem';
 import { SortField } from './SortField';
 import { SortOperator } from './SortOperator';
 
 export function SortItem({
   id,
   sort,
+  dragging,
   remove,
   updateRecords,
 }) {
@@ -38,19 +40,27 @@ export function SortItem({
   }, [field, operator]);
 
   return (
-    <div
+    <SortableItem
+      as="li"
+      id={id}
       data-id={id}
       data-field={field.name}
       data-operator={operator}
+      dragging={dragging}
       className="sort flex gap-2 items-center"
+      handle={{
+        position: 'left',
+        component: (
+          <button
+            type="button"
+            className="inline-flex items-center px-1 py-2 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-offset-2 cursor-grabbing"
+          >
+            <span className="sr-only">Reorder</span>
+            <GripVerticalIcon className="h-3 w-3 text-gray-500" />
+          </button>
+        ),
+      }}
     >
-      <button
-        type="button"
-        className="inline-flex items-center px-1 py-2 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-offset-2"
-      >
-        <span className="sr-only">Reorder</span>
-        <GripVerticalIcon className="h-3 w-3 text-gray-500" />
-      </button>
       <label htmlFor={`sort${id}-firstOperand`} className="sr-only">Field</label>
       <SortField
         id={`sort${id}-field`}
@@ -73,13 +83,14 @@ export function SortItem({
         <span className="sr-only">Remove Sort</span>
         <XIcon className="block h-4 w-4" />
       </button>
-    </div>
+    </SortableItem>
   );
 }
 
 SortItem.propTypes = {
   id: PropTypes.string.isRequired,
   sort: PropTypes.object,
+  dragging: PropTypes.bool,
   remove: PropTypes.func.isRequired,
   updateRecords: PropTypes.func.isRequired,
 };
