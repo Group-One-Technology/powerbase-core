@@ -2,9 +2,13 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
+import { useFieldTypes } from '@models/FieldTypes';
 import { TableRecordProvider } from '@models/TableRecord';
+import { useTableConnections } from '@models/TableConnections';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
+import { useTableReferencedConnections } from '@models/TableReferencedConnections';
 import { ITable } from '@lib/propTypes/table';
+
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
@@ -14,10 +18,10 @@ export function SingleRecordModal({
   setOpen,
   record: initialRecord,
   tables,
-  connections,
-  referencedConnections,
-  fieldTypes,
 }) {
+  const { data: fieldTypes } = useFieldTypes();
+  const { data: connections } = useTableConnections();
+  const { data: referencedConnections } = useTableReferencedConnections();
   const [record, setRecord] = useState(initialRecord);
 
   useEffect(() => {
@@ -160,7 +164,4 @@ SingleRecordModal.propTypes = {
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
   tables: PropTypes.arrayOf(ITable),
-  connections: PropTypes.array,
-  referencedConnections: PropTypes.array,
-  fieldTypes: PropTypes.array.isRequired,
 };

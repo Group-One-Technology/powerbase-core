@@ -12,6 +12,7 @@ import {
 
 import { useViewFields } from '@models/ViewFields';
 import { hideViewField } from '@lib/api/view-fields';
+import { setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { data: fields, mutate: mutateViewFields } = useViewFields();
@@ -36,6 +37,29 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
         isHidden: item.id === field.id
           ? true
           : item.isHidden,
+      }));
+
+      mutateViewFields(updatedFields);
+    } catch (err) {
+      console.log(err);
+    }
+
+    setOptionOpen(false);
+  };
+
+  const handleTogglePII = async () => {
+    try {
+      if (!field.isPii) {
+        await setFieldAsPII({ id: field.fieldId });
+      } else {
+        await unsetFieldAsPII({ id: field.fieldId });
+      }
+
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isPII: item.id === field.id
+          ? !field.isPii
+          : item.isPii,
       }));
 
       mutateViewFields(updatedFields);
@@ -94,9 +118,13 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 </button>
               </li>
               <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button type="button" className="py-1 w-full flex items-center cursor-not-allowed">
+                <button
+                  type="button"
+                  className="py-1 w-full flex items-center"
+                  onClick={handleTogglePII}
+                >
                   <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-                  Set as PII
+                  {!field.isPii ? 'Set as PII' : 'Unset as PII'}
                 </button>
               </li>
             </ul>

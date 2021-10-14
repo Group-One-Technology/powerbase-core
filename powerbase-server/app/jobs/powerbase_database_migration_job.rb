@@ -118,6 +118,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
           field.is_nullable = column_options[:allow_null]
+          field.is_pii = false
           field.powerbase_table_id = table.id
 
           column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
