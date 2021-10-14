@@ -87,11 +87,25 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 required
               />
               <div className="mt-4">
-                <p className="mb-1 uppercase text-gray-500 text-xs">Property Type</p>
-                <div className="pt-1 pb-2 text-sm flex items-center text-gray-900">
-                  <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
-                  {fieldType.name}
-                </div>
+                <p className="mb-1 uppercase text-gray-500 text-xs">Field Type</p>
+                <ul className="pb-1">
+                  <li className="py-1 text-sm flex items-center text-gray-900">
+                    <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
+                    {fieldType.name}
+                  </li>
+                  {field.isPrimaryKey && (
+                    <li className="py-1 text-sm flex items-center text-gray-900">
+                      <FieldTypeIcon className="mr-1.5" isPrimaryKey />
+                      Primary Key
+                    </li>
+                  )}
+                  {field.isForeignKey && (
+                    <li className="py-1 text-sm flex items-center text-gray-900">
+                      <FieldTypeIcon className="mr-1.5" isForeignKey />
+                      Foreign Key
+                    </li>
+                  )}
+                </ul>
               </div>
             </div>
             <ul className="mt-1 text-sm text-gray-900">
