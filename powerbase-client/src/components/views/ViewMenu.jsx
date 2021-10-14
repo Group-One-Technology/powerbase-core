@@ -54,7 +54,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
   return (
     <>
       <Popover className="relative">
-        <Popover.Button type="button" className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+        <Popover.Button type="button" className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
           <ViewGridIcon className="inline h-4 w-4 mr-1" />
           {currentView.name}
         </Popover.Button>
