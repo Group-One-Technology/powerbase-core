@@ -1,5 +1,6 @@
 class PowerbaseTable < ApplicationRecord
   include Elasticsearch::Model
+  alias_attribute :fields, :powerbase_fields
 
   scope :turbo, -> { joins(:powerbase_database).where(powerbase_database: { is_turbo: true }) }
 
@@ -15,5 +16,14 @@ class PowerbaseTable < ApplicationRecord
 
   after_commit on: [:create] do
     logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.powerbase_database.is_turbo
+  end
+
+
+  def index_name
+    "table_records_#{id}"
+  end
+
+  def primary_keys
+    fields.select {|field| field.is_primary_key }
   end
 end

@@ -3,11 +3,12 @@ module Powerbase
 
     attr_accessor :db
 
-    def initialize(db)
-      @db = db
+    def initialize(connection_string)
+      @db = Sequel.connect(connection_string)
     end
 
     def add_trigger(table_name)
+      puts "Injecting Table Update Trigger..."
       db.run("
         CREATE TRIGGER #{table_name}_changed
         AFTER INSERT OR UPDATE OR DELETE
@@ -15,26 +16,60 @@ module Powerbase
         FOR EACH ROW
         EXECUTE PROCEDURE table_update_notify()
       ")
+      puts "Injecting Table Update Trigger...DONE"
+    end
+
+    def add_oid!(table_name)
+      puts "Adding OID Column..."
+      db.run("
+        ALTER TABLE #{table_name}
+        SET WITH OIDS;
+      ")
+      puts "Adding OID Column...DONE"
     end
 
     def create_notifier!
+      puts "Injecting Table Notifier Function..."
       db.run("
         CREATE OR REPLACE FUNCTION table_update_notify() RETURNS trigger AS $$
         DECLARE
-          id bigint;
+          reg_id JSONB; 
+          affected_row JSON;
+          oid JSONB;
         BEGIN
-        CASE TG_OP
+          CASE TG_OP
           WHEN 'INSERT', 'UPDATE' THEN
-            id := NEW.id;
+            affected_row := row_to_json(NEW);
+            oid := json_object_agg('oid', NEW.oid);
           WHEN 'DELETE' THEN
-            id := OLD.id;
+            affected_row := row_to_json(OLD);
+            oid := json_object_agg('oid', OLD.oid);
           END CASE;
 
-          PERFORM pg_notify('table_update', json_build_object('table', TG_TABLE_NAME, 'id', id, 'type', TG_OP)::text);
+          WITH pk_columns (attname) AS (
+            SELECT 
+                CAST(a.attname AS TEXT) 
+            FROM 
+                pg_index i 
+                JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) 
+            WHERE 
+                i.indrelid = TG_RELID 
+                AND i.indisprimary
+          )
+          SELECT 
+              json_object_agg(key, value) INTO reg_id
+          FROM 
+              json_each_text(affected_row)
+          WHERE 
+              key IN(SELECT attname FROM pk_columns);
+          
+          PERFORM pg_notify('powerbase_table_update', json_build_object('table', TG_TABLE_NAME, 'primary_key', COALESCE(reg_id, oid), 'type', TG_OP)::text);
           RETURN NEW;
         END;
         $$ LANGUAGE plpgsql
       ")
+      puts "Injecting Table Notifier Function...DONE"
+
     end
   end
 end

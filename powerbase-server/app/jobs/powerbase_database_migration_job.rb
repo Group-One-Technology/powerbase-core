@@ -349,16 +349,32 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     if @database.is_turbo
+      notifier = Powerbase::Notifier.new @database.connection_string
+
+      notifier_added = false
+      notifier.create_notifier! unless notifier_added
+
       @database_tables.each do |table|
         # Table Records Migration
         if !table.is_migrated
+                    
+          # Add OID Column
+          notifier.add_oid!(table.name)
+
+          # Inject notifier trigger
+          notifier.add_trigger(table.name)
+
           table_model = Powerbase::Model.new(ElasticsearchClient, table.id)
           table_model.index_records
 
           table.is_migrated = true
           table.save
         end
+
       end
+
+      # Initialize Table Listener
+      @database.listen!
     end
 
     unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)

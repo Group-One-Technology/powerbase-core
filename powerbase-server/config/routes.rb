@@ -1,3 +1,4 @@
+
 Rails.application.routes.draw do
   get '/auth/', to: 'users/auth#index'
   post '/refresh/', to: 'users/refresh#create'

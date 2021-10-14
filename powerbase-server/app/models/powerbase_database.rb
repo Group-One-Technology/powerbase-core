@@ -1,6 +1,7 @@
 class PowerbaseDatabase < ApplicationRecord
   include Elasticsearch::Model
   scope :turbo, -> { where(is_turbo: true) }
+  alias_attribute :tables, :powerbase_tables
 
   validates :name, presence: true
   validates :database_name, presence: true
@@ -32,5 +33,16 @@ class PowerbaseDatabase < ApplicationRecord
 
   after_commit on: [:create] do
     logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.is_turbo
+  end
+
+  def listen!
+    con = Powerbase::Listener.new self  
+    thread = Thread.new do
+      loop do
+        con.listen!
+      end
+    end
+
+    thread.name = self.name
   end
 end
