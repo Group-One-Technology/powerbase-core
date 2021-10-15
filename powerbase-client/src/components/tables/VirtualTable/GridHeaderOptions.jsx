@@ -87,6 +87,12 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 required
               />
               <div className="mt-4">
+                <p className="mb-1 uppercase text-gray-500 text-xs">Field Name</p>
+                <p className="py-1 text-sm flex items-center text-gray-900">
+                  {field.name}
+                </p>
+              </div>
+              <div className="mt-2">
                 <p className="mb-1 uppercase text-gray-500 text-xs">Field Type</p>
                 <ul className="pb-1">
                   <li className="py-1 text-sm flex items-center text-gray-900">
