@@ -25,7 +25,8 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
     <>
       <FieldTypeIcon fieldType={fieldType} className="mr-1" />
       <span className="font-normal">
-        {connection.table.name.toUpperCase()} - {connection.columns.join(', ').toUpperCase()}
+        {connection.databaseId !== connection.referencedDatabaseId && `${connection.table.databaseName.toUpperCase()} > `}
+        {connection.table.name.toUpperCase()} &gt; {connection.columns.join(', ').toUpperCase()}
       </span>
       <span className="ml-1">
         <ChevronDownIcon className="h-4 w-4" />
