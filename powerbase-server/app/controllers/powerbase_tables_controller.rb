@@ -88,6 +88,7 @@ class PowerbaseTablesController < ApplicationController
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
+        has_primary_key: table.has_primary_key?,
       }
     end
 end

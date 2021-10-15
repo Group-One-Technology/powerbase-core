@@ -139,8 +139,6 @@ export function TableRenderer({
                   const isHoveredRow = hoveredCell.row === rowIndex;
                   const primaryKey = tableValues[rowIndex][tableValues[rowIndex].length - 1];
                   const isHighlighted = highlightedCell === primaryKey;
-                  console.log(isHighlighted, highlightedCell, primaryKey);
-
 
                   return CellRenderer({
                     rowIndex,

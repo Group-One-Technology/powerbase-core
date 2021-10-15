@@ -45,4 +45,20 @@ class PowerbaseDatabase < ApplicationRecord
 
     thread.name = self.name
   end
+
+  def is_synced?
+    sequel_db_tables.count == self.tables.count
+  end
+
+  def unmigrated_tables
+    sequel_db_tables.reject{|t| self.tables.map{|t| t.name.to_sym}.include? t}
+  end
+
+  def sequel_db_tables
+    sequel_db.tables
+  end
+
+  def sequel_db
+    @sequel_db ||= Sequel.connect self.connection_string
+  end
 end

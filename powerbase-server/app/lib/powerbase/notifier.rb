@@ -8,15 +8,20 @@ module Powerbase
     end
 
     def add_trigger(table_name)
-      puts "Injecting Table Update Trigger..."
-      db.run("
-        CREATE TRIGGER #{table_name}_changed
-        AFTER INSERT OR UPDATE OR DELETE
-        ON #{table_name}
-        FOR EACH ROW
-        EXECUTE PROCEDURE table_update_notify()
-      ")
-      puts "Injecting Table Update Trigger...DONE"
+      # Wrap in a rescuer since this command will return an error if the table already has the same trigger fucntion
+      begin
+        puts "Injecting Table Update Trigger..."
+        db.run("
+          CREATE TRIGGER #{table_name}_changed
+          AFTER INSERT OR UPDATE OR DELETE
+          ON #{table_name}
+          FOR EACH ROW
+          EXECUTE PROCEDURE table_update_notify()
+        ")
+        puts "Injecting Table Update Trigger...DONE"
+      rescue => exception
+        puts exception
+      end
     end
 
     def add_oid!(table_name)

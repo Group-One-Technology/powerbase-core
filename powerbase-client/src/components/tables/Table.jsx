@@ -5,6 +5,7 @@ import { IBase } from '@lib/propTypes/base';
 import { TableTabs } from '@components/tables/TableTabs';
 import { TableContent } from '@components/tables/TableContent';
 import { Loader } from '@components/ui/Loader';
+import { CustomModal } from '@components/ui/CustomModal';
 
 export function Table({ base }) {
   const {
@@ -21,6 +22,12 @@ export function Table({ base }) {
 
   return (
     <>
+      {
+        !table.hasPrimaryKey && false
+        && <CustomModal>
+            "This table doesn't have a primary key, would like us to add one?"
+        </CustomModal>
+      }
       <TableTabs
         color={base.color}
         tables={tables}
