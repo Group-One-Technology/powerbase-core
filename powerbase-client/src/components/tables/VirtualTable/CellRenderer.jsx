@@ -10,11 +10,12 @@ function CellValue({
   isLoaded,
   isRowNo,
   isHoveredRow,
+  isLastRow,
   field,
   fieldType,
   handleExpandRecord,
 }) {
-  if (!isLoaded) {
+  if (!isLastRow && !isLoaded) {
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
   }
 
@@ -25,7 +26,7 @@ function CellValue({
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {(isHoveredRow) && (
+          {(isHoveredRow && !isLastRow) && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -44,7 +45,7 @@ function CellValue({
     );
   }
 
-  if (fieldType?.name === FieldType.CHECKBOX) {
+  if (fieldType?.name === FieldType.CHECKBOX && !field.isPii) {
     return (
       <input
         type="checkbox"
@@ -77,6 +78,7 @@ CellValue.propTypes = {
   isLoaded: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
+  isLastRow: PropTypes.bool.isRequired,
   field: PropTypes.object,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
@@ -92,6 +94,7 @@ export function CellRenderer({
   field,
   setHoveredCell,
   isHoveredRow,
+  isLastRow,
   isRowNo,
   fieldTypes,
   handleExpandRecord,
@@ -141,6 +144,7 @@ export function CellRenderer({
         isLoaded={isLoaded}
         isRowNo={isRowNo}
         isHoveredRow={isHoveredRow}
+        isLastRow={isLastRow}
         field={field}
         fieldType={fieldType}
         handleExpandRecord={handleExpandRecord}
@@ -159,6 +163,7 @@ CellRenderer.propTypes = {
   field: PropTypes.object,
   setHoveredCell: PropTypes.func.isRequired,
   isHoveredRow: PropTypes.bool.isRequired,
+  isLastRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,

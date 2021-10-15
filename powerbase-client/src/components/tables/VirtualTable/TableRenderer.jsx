@@ -130,14 +130,21 @@ export function TableRenderer({ height, table, tables }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
+                        const isLastRow = rowIndex >= records.length;
+                        let value = columnIndex !== 0 && !isLastRow
+                          ? records[rowIndex][field.name]
+                          : null;
+
+                        if (columnIndex === 0) {
+                          value = rowIndex + 1;
+                        }
 
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
+                          isLastRow,
                           isLoaded: !!records[rowIndex],
-                          value: columnIndex === 0
-                            ? rowIndex + 1
-                            : records[rowIndex][field.name],
+                          value,
                           setHoveredCell,
                           isHoveredRow,
                           field,
@@ -160,7 +167,7 @@ export function TableRenderer({ height, table, tables }) {
                       }}
                       columnCount={columnCount}
                       rowHeight={30}
-                      rowCount={records.length}
+                      rowCount={records.length + 1}
                       height={height}
                       width={width}
                     />
