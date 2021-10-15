@@ -7,18 +7,12 @@ import { TableRecordProvider } from '@models/TableRecord';
 import { useTableConnections } from '@models/TableConnections';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useTableReferencedConnections } from '@models/TableReferencedConnections';
-import { ITable } from '@lib/propTypes/table';
 
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
 
-export function SingleRecordModal({
-  open,
-  setOpen,
-  record: initialRecord,
-  tables,
-}) {
+export function SingleRecordModal({ open, setOpen, record: initialRecord }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
@@ -56,8 +50,11 @@ export function SingleRecordModal({
                 ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
                 : undefined;
               const tableName = item.foreignKey && item.value
-                ? tables.find((table) => table.id.toString() === item.foreignKey.referencedTableId.toString())?.name || item.name
-                : item.name;
+                ? item.foreignKey.referencedTable.name
+                : undefined;
+              const databaseName = item.foreignKey && item.value
+                ? item.foreignKey.referencedTable.databaseName
+                : undefined;
 
               return (
                 <TableRecordProvider
@@ -71,7 +68,7 @@ export function SingleRecordModal({
                   primaryKeys={primaryKeys}
                 >
                   <RecordItem
-                    item={{ ...item, tableName }}
+                    item={{ ...item, tableName, databaseName }}
                     fieldTypes={fieldTypes}
                     handleRecordInputChange={handleRecordInputChange}
                   />
@@ -94,9 +91,7 @@ export function SingleRecordModal({
 
               const item = {
                 isForeignKey: true,
-                name: tables
-                  .find((table) => table.id.toString() === foreignKey.referencedTableId.toString())
-                  ?.name,
+                name: foreignKey.referencedTable.name,
                 fieldTypeId: fieldTypes.find(((key) => key.name === 'Single Line Text')).id,
                 value: primaryKeys,
               };
@@ -163,5 +158,4 @@ SingleRecordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
-  tables: PropTypes.arrayOf(ITable),
 };

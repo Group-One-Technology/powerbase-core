@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { useBase } from '@models/Base';
 import { useTableRecord } from '@models/TableRecord';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
@@ -10,8 +11,13 @@ import { RecordItemSelect } from './RecordItemSelect';
 import { LinkedRecordItem } from './LinkedRecordItem';
 
 export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
+  const { data: base } = useBase();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
+  const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
+  const isForeignDatabase = isLinkedRecord
+    ? item.databaseName !== base.name
+    : undefined;
 
   const labelContent = (
     <>
@@ -22,7 +28,8 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
         className="mr-1"
       />
       <span className="font-normal">
-        {(!linkedRecordError && item.tableName && item.tableName !== item.name) && `${item.tableName.toUpperCase()} - `}
+        {(isLinkedRecord && isForeignDatabase) && `${item.databaseName.toUpperCase()} > `}
+        {(isLinkedRecord && (item.tableName !== item.name || isForeignDatabase)) && `${item.tableName.toUpperCase()} > `}
         {item.name.toUpperCase()}
       </span>
     </>

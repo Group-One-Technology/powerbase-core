@@ -21,7 +21,7 @@ import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, table, tables }) {
+export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
@@ -178,14 +178,7 @@ export function TableRenderer({ height, table, tables }) {
           </ScrollSync>
         )}
       </AutoSizer>
-      {selectedRecord && (
-        <SingleRecordModal
-          open={isModalOpen}
-          setOpen={setIsModalOpen}
-          record={selectedRecord}
-          tables={tables}
-        />
-      )}
+      {selectedRecord && <SingleRecordModal open={isModalOpen} setOpen={setIsModalOpen} record={selectedRecord} />}
     </div>
   );
 }
@@ -193,5 +186,4 @@ export function TableRenderer({ height, table, tables }) {
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
-  tables: PropTypes.arrayOf(ITable),
 };
