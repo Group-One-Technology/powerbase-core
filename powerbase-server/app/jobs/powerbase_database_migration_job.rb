@@ -114,6 +114,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
             powerbase_table_id: table.id,
           ) || PowerbaseField.new
           field.name = column_name
+          field.alias = column_name.to_s.titlecase
           field.oid = column_options[:oid]
           field.db_type = column_options[:db_type]
           field.default_value = column_options[:default] || nil

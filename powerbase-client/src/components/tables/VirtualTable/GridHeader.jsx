@@ -82,7 +82,7 @@ function CellRenderer({
           isForeignKey={field.isForeignKey}
           className="mr-1"
         />
-        <span>{field.name}</span>
+        <span>{field.alias || field.name}</span>
       </div>
       <Draggable
         axis="x"

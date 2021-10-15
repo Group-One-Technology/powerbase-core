@@ -19,10 +19,10 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { data: fieldTypes } = useFieldTypes();
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
-  const [alias, setAlias] = useState(field.name);
+  const [alias, setAlias] = useState(field.alias || field.name);
 
   useEffect(() => {
-    setAlias(field.name);
+    setAlias(field.alias || field.name);
   }, [field]);
 
   const handleAliasChange = (evt) => {
