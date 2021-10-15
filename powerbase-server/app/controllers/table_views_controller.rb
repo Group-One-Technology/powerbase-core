@@ -12,6 +12,7 @@ class TableViewsController < ApplicationController
   schema(:update) do
     required(:id).value(:integer)
     optional(:filters)
+    optional(:sort)
     optional(:view_type)
     optional(:name)
   end
@@ -22,9 +23,14 @@ class TableViewsController < ApplicationController
     required(:view_type)
   end
 
+  schema(:update_order) do
+    required(:table_id)
+    required(:views)
+  end
+
   # GET /tables/:table_id/views
   def index
-    @views = TableView.where(powerbase_table_id: safe_params[:table_id])
+    @views = TableView.where(powerbase_table_id: safe_params[:table_id]).order(order: :asc)
     render json: @views.map {|item| format_json(item)}
   end
 
@@ -44,10 +50,12 @@ class TableViewsController < ApplicationController
       return
     end
 
-    @view = @table.table_views.create({
+    @view = TableView.create(
       name: safe_params[:name],
       view_type: safe_params[:view_type],
-    })
+      order: @table.table_views.count,
+      powerbase_table_id: @table.id,
+    )
 
     if @view.save
       fields = PowerbaseField.where(powerbase_table_id: @table.id)
@@ -103,6 +111,23 @@ class TableViewsController < ApplicationController
     end
 
     @view.destroy
+
+    views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
+
+    views.each_with_index do |view, index|
+      view = TableView.find(view.id)
+      view.update(order: index)
+    end
+  end
+
+  # PUT /tables/:table_id/views/order
+  def update_order
+    safe_params[:views].each_with_index do |view_id, index|
+      view = TableView.find(view_id)
+      view.update(order: index)
+    end
+
+    render status: :no_content
   end
 
   private
@@ -113,6 +138,8 @@ class TableViewsController < ApplicationController
         table_id: view.powerbase_table_id,
         view_type: view.view_type,
         filters: view.filters,
+        sort: view.sort,
+        order: view.order,
         created_at: view.created_at,
         updated_at: view.updated_at,
       }

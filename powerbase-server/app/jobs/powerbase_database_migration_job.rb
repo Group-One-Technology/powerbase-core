@@ -76,7 +76,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     puts "#{@base_migration.start_time} Migrating tables of database with id of #{@database.id}..."
 
     connect(@database) {|db|
-      db.tables.each do |table_name|
+      db.tables.each_with_index do |table_name, index|
         table = PowerbaseTable.find_by(
           name: table_name,
           powerbase_database_id: @database.id,
@@ -85,6 +85,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         table.alias = table_name.to_s.titlecase
         table.powerbase_database_id = @database.id
         table.page_size = @database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
+        table.order = index
         if !table.save
           @base_migration.logs["errors"].push({
             type: "Active Record",
@@ -97,6 +98,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     }
 
     @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
+    @piis = Pii.all
 
     @database_tables.each do |table|
       next if table.is_migrated
@@ -120,10 +122,11 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
           field.is_nullable = column_options[:allow_null]
+          field.is_pii = is_pii(column_name, @piis)
           field.powerbase_table_id = table.id
 
           column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
-            .where("? LIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
+            .where("? ILIKE CONCAT('%', db_type, '%')", "%#{column_options[:db_type]}%")
             .take
 
           field_type = PowerbaseFieldType.find_by(
@@ -171,17 +174,21 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
       # Table View and View Fields Migration
       puts "#{Time.now} Migrating table view and view fields of table with id of #{table.id}..."
-      table_view = TableView.new
+      table_view = TableView.find_by(powerbase_table_id: table.id) || TableView.new
       table_view.powerbase_table_id = table.id
-      table_view.name = "Grid View"
+      table_view.name = "Default"
       table_view.view_type = "grid"
+      table_view.order = 0
       if table_view.save
         table.default_view_id = table_view.id
         table.save
 
         fields = PowerbaseField.where(powerbase_table_id: table.id)
         fields.each_with_index do |cur_field, index|
-          view_field = ViewFieldOption.new
+          view_field = ViewFieldOption.find_by(
+            table_view_id: table_view.id,
+            powerbase_field_id: cur_field.id,
+          ) || ViewFieldOption.new
           view_field.width = case cur_field.powerbase_field_type_id
             when 3
               cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
@@ -399,5 +406,15 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         connection_string: db.connection_string,
         is_turbo: db.is_turbo,
       }, &block)
+    end
+
+    def is_pii(data, piis)
+      data = data.to_s.downcase.gsub("_"," ")
+      piis.each do |pii|
+        return true if data.include?(pii.name.downcase)
+        return true if pii.abbreviation != nil && pii.abbreviation.length > 0 && data.include?(pii.abbreviation.downcase)
+      end
+
+      false
     end
 end

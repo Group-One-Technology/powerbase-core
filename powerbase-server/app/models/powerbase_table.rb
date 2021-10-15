@@ -5,6 +5,7 @@ class PowerbaseTable < ApplicationRecord
   scope :turbo, -> { joins(:powerbase_database).where(powerbase_database: { is_turbo: true }) }
 
   validates :name, presence: true
+  validates :order, presence: true
   serialize :logs, JSON
 
   belongs_to :powerbase_database

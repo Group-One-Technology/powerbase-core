@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { ArrowRightIcon } from '@heroicons/react/outline';
 
-import { ITable } from '@lib/propTypes/table';
-import { IBase } from '@lib/propTypes/base';
+import { useBase } from '@models/Base';
+import { useBases } from '@models/Bases';
+import { useBaseTables } from '@models/BaseTables';
+import { useBaseConnections } from '@models/BaseConnections';
 import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 import { Loader } from '@components/ui/Loader';
 import { Badge } from '@components/ui/Badge';
 import { DeleteConnectionModal } from '@components/connections/DeleteConnectionModal';
 
-export function BaseConnectionsSettings({
-  base,
-  bases,
-  tables,
-  connections: initialConnections,
-}) {
+export function BaseConnectionsSettings() {
+  const { data: base } = useBase();
+  const { data: bases } = useBases();
+  const { data: tables } = useBaseTables();
+  const { data: initialConnections } = useBaseConnections();
+
   const connections = initialConnections.map((connection) => ({
     ...connection,
     base: bases.find((item) => item.id === connection.databaseId),
@@ -125,10 +126,3 @@ export function BaseConnectionsSettings({
     </div>
   );
 }
-
-BaseConnectionsSettings.propTypes = {
-  base: IBase.isRequired,
-  bases: PropTypes.arrayOf(IBase),
-  tables: PropTypes.arrayOf(ITable),
-  connections: PropTypes.arrayOf(PropTypes.object),
-};

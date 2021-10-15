@@ -3,26 +3,29 @@
 one:
   id: 1
   name: users
-  alias:
+  alias: Users
   description: "Users of Powerbase"
   powerbase_database_id: 1
   default_view_id: 1
+  order: 0
   logs:
 
 two:
   id: 2
   name: projects
-  alias:
+  alias: Projects
   description: "Projects owned by a user"
   powerbase_database_id: 1
   default_view_id: 2
+  order: 1
   logs:
 
 three:
   id: 3
   name: permissions
-  alias:
+  alias: Permissions
   description: "List of who has access for a project"
   powerbase_database_id: 1
   default_view_id: 3
+  order: 2
   logs:

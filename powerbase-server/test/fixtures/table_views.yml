@@ -3,20 +3,26 @@
 one:
   id: 1
   powerbase_table_id: 1
-  name: Grid View
+  name: Default
   view_type: grid
+  order: 0
   filters:
+  sort:
 
 two:
   id: 2
   powerbase_table_id: 2
-  name: Grid View
+  name: Default
   view_type: grid
+  order: 0
   filters:
+  sort:
 
 three:
   id: 3
   powerbase_table_id: 3
-  name: Grid View
+  name: Default
   view_type: grid
+  order: 0
   filters:
+  sort:

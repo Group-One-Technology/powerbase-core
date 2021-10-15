@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
-import { RecordsFilterProvider } from '@models/views/RecordsFilter';
+import { ViewOptionsProvider } from '@models/views/ViewOptions';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
@@ -21,29 +21,28 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
   const { data: fields } = useViewFields();
 
   const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 125 : 0;
+  const height = windowSize.height ? windowSize.height - 155 : 0;
 
   if (!view || !fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
   return (
-    <RecordsFilterProvider viewId={view.id} initialFilters={view.filters}>
+    <ViewOptionsProvider view={view}>
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
             <TableViewsNav
               table={table}
-              currentView={view}
               views={views}
               fields={fields}
             />
             {table.isMigrated
-              ? <VirtualTable tables={tables} table={table} height={height} />
+              ? <VirtualTable table={table} tables={tables} height={height} />
               : <Loader style={{ height }} />}
           </FieldTypesProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
-    </RecordsFilterProvider>
+    </ViewOptionsProvider>
   );
 });
 

@@ -1,9 +1,11 @@
 class TableRecordsController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
     required(:id).value(:integer)
+    optional(:query)
     optional(:filters)
+    optional(:sort)
     optional(:page).value(:integer)
     optional(:limit).value(:integer)
   end
@@ -18,9 +20,11 @@ class TableRecordsController < ApplicationController
   def index
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
     records = model.search({
+      query: safe_params[:query],
+      filters: safe_params[:filters],
+      sort: safe_params[:sort],
       page: safe_params[:page],
       limit: safe_params[:limit],
-      filters: safe_params[:filters]
     })
 
     render json: records
@@ -53,6 +57,7 @@ class TableRecordsController < ApplicationController
   def count
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
     total_records = model.get_count({
+      query: safe_params[:query],
       filters: safe_params[:filters]
     })
 

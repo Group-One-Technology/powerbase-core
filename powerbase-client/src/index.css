@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-resize {
+  cursor: col-resize;
+}
+
 .single-line {
   white-space: nowrap;
   width: 200px;
@@ -12,7 +28,7 @@
   display: none;
 }
 
-.single-line * {
+.single-line *:not(.block) {
   display: inline;
   white-space: nowrap;
 }
@@ -26,39 +42,6 @@
   display: none;
 }
 
-.should-truncate-field {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline;
-}
-.DragHandle {
-  flex: 0 0 16px;
-  z-index: 2;
-  cursor: col-resize;
-  color: #0085ff;
-  right: 0;
-  position: absolute;
-}
-.DragHandle:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.DragHandleActive,
-.DragHandleActive:hover {
-  color: #0b6fcc;
-  z-index: 3;
-}
-
-.DragHandleIcon {
-  flex: 0 0 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: ew-resize;
-}
-
 .update-highlight {
   animation-name: bg-fade-out;
   animation-duration: 2.5s;
@@ -66,6 +49,6 @@
 
 @keyframes bg-fade-out {
   0%   {background: white;}
-  10%  {background: rgba(255, 251, 235, var(--tw-bg-opacity));}
+  10%  {background: rgba(255, 251, 235, 1);}
   100% {background: white;}
 }

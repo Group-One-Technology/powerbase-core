@@ -61,29 +61,18 @@ export function BaseMenu({ base, otherBases }) {
                   {otherBases.map((item, index) => (
                     <Menu.Item key={item.id}>
                       {({ active }) => (
-                        item.isMigrated
-                          ? (
-                            <Link
-                              to={`/base/${item.id}`}
-                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
-                                'border-b': index !== otherBases.length - 1,
-                                'bg-gray-100': active,
-                              })}
-                            >
-                              {item.name}
-                              <ChevronRightIcon className="h-6 w-6" />
-                            </Link>
-                          )
-                          : (
-                            <p
-                              className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
-                                'border-b': index !== otherBases.length - 1,
-                              })}
-                            >
-                              {item.name}
-                              <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>
-                            </p>
-                          )
+                        <Link
+                          to={`/base/${item.id}`}
+                          className={cn('flex justify-between items-center pl-8 pr-4 py-2 text-sm text-gray-600 border-solid border-gray-200', {
+                            'border-b': index !== otherBases.length - 1,
+                            'bg-gray-100': active,
+                          })}
+                        >
+                          {item.name}
+                          {item.isMigrated
+                            ? <ChevronRightIcon className="h-6 w-6" />
+                            : <Badge className="ml-2 text-white bg-yellow-400">Migrating</Badge>}
+                        </Link>
                       )}
                     </Menu.Item>
                   ))}

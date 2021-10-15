@@ -23,7 +23,7 @@ export function FilterField({
           className="block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
         >
           <span className="flex items-center truncate">
-            <FieldTypeIcon fieldTypes={fieldTypes} typeId={value.fieldTypeId} className="mr-1.5" />
+            <FieldTypeIcon isPrimaryKey={value.isPrimaryKey} fieldTypes={fieldTypes} typeId={value.fieldTypeId} className="mr-1.5" />
             {value?.name}
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -33,7 +33,7 @@ export function FilterField({
             />
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-48 bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+        <Listbox.Options className="absolute z-10 mt-1 w-auto min-w-[13rem] bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {options?.map((item) => (
             <Listbox.Option
               key={item.name}
@@ -44,7 +44,7 @@ export function FilterField({
               )}
             >
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
-                <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} />
+                <FieldTypeIcon fieldTypes={fieldTypes} typeId={item.fieldTypeId} isPrimaryKey={item.isPrimaryKey} />
               </span>
               <span className="block truncate">
                 {item.name}

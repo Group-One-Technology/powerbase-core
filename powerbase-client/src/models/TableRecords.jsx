@@ -3,30 +3,41 @@ import { useSWRInfinite } from 'swr';
 import { useState } from 'react';
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
-import { useRecordsFilter } from './views/RecordsFilter';
+import { useViewOptions } from './views/ViewOptions';
 
 function getKey({
   index,
   tableId,
+  query,
+  sort,
   filters,
   pageSize,
 }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
-  const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
+  const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : '';
+  const filterQuery = filters?.id ? `&filterId=${filters.id}` : '';
+  const sortQuery = sort?.id ? `&sortId=${sort.id}` : '';
 
-  return `/tables/${tableId}/records?${pageQuery}${filterQuery}`;
+  return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
-  const { filters, viewId } = useRecordsFilter();
+  const {
+    viewId,
+    query,
+    filters,
+    sort,
+  } = useViewOptions();
 
   const response = useSWRInfinite(
     (index) => ((id && authUser && viewId)
       ? getKey({
         index,
         tableId: id,
+        query,
+        sort,
         filters,
         pageSize,
       })
@@ -34,10 +45,14 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     (url) => ((id && authUser && viewId)
       ? getTableRecords({
         url,
-        filters: filters?.id
-          ? filters?.value
-          : undefined,
         viewId,
+        query,
+        filters: filters && filters.id && filters.value
+          ? filters.value
+          : undefined,
+        sort: sort && sort.id && sort.value
+          ? sort.value
+          : undefined,
       })
       : undefined),
   );

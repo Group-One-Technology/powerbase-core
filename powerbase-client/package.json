@@ -10,8 +10,13 @@
     "lint": "eslint \"src/**/*.{js,jsx}\""
   },
   "dependencies": {
+    "@dnd-kit/core": "^4.0.0",
+    "@dnd-kit/modifiers": "^4.0.0",
+    "@dnd-kit/sortable": "^5.0.0",
+    "@dnd-kit/utilities": "^3.0.0",
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.1",
+    "@radix-ui/react-popover": "^0.1.0",
     "@tailwindcss/forms": "^0.3.2",
     "axios": "^0.21.1",
     "classnames": "^2.3.1",

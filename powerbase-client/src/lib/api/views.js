@@ -49,3 +49,13 @@ export async function deleteTableView({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function updateViewsOrder({ tableId, ...payload }) {
+  const response = await securedApi.put(`/tables/${tableId}/views/order`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

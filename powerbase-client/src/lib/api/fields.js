@@ -9,3 +9,23 @@ export async function getTableFields({ tableId }) {
 
   return undefined;
 }
+
+export async function setFieldAsPII({ id }) {
+  const response = await securedApi.put(`/fields/${id}/set_as_pii`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function unsetFieldAsPII({ id }) {
+  const response = await securedApi.put(`/fields/${id}/unset_as_pii`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

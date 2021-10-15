@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
-import { ITable } from '@lib/propTypes/table';
-import { updateTablesAliases } from '@lib/api/tables';
+import { updateTables } from '@lib/api/tables';
+import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { useBase } from '@models/Base';
+import { useBaseTables } from '@models/BaseTables';
+
+import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
@@ -18,41 +23,14 @@ const INITIAL_MODAL_VALUE = {
     </div>
   ),
   title: 'Update Successful',
-  content: 'The tables\' aliases have been updated.',
+  content: 'The tables\' aliases and/or order have been updated.',
 };
 
-function BaseTableSettingsItem({ table, handleChange }) {
-  return (
-    <li key={table.id} className="block hover:bg-gray-50">
-      <div className="grid grid-cols-12 gap-3 items-center p-2 w-full sm:px-6">
-        <div className="col-span-4">
-          <p className="text-base text-gray-900">{table.name}</p>
-        </div>
-        <div className="col-span-7 flex items-center">
-          <Input
-            type="text"
-            id={`${table.name}-alias`}
-            name={`${table.name}-alias`}
-            value={table.alias || ''}
-            placeholder="Add Alias"
-            onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
-            className="w-full"
-          />
-        </div>
-        <div className="col-span-1 flex justify-end">
-          <GripVerticalIcon className="h-4 w-4 text-gray-500" />
-        </div>
-      </div>
-    </li>
-  );
-}
+export function BaseTablesSettings() {
+  const { data: base } = useBase();
+  const { data: initialData, mutate: mutateTables } = useBaseTables();
+  const sensors = useSensors();
 
-BaseTableSettingsItem.propTypes = {
-  table: ITable.isRequired,
-  handleChange: PropTypes.func.isRequired,
-};
-
-export function BaseTablesSettings({ tables: initialData }) {
   const [tables, setTables] = useState(initialData.map((item) => ({
     ...item,
     updated: false,
@@ -69,7 +47,8 @@ export function BaseTablesSettings({ tables: initialData }) {
     const updatedTables = tables.filter((item) => item.updated);
 
     try {
-      await updateTablesAliases({ tables: updatedTables });
+      await updateTables({ databaseId: base.id, tables: updatedTables });
+      mutateTables();
       setModal((curVal) => ({ ...curVal, open: true }));
     } catch (err) {
       setModal({
@@ -95,6 +74,19 @@ export function BaseTablesSettings({ tables: initialData }) {
     })));
   };
 
+  const handleTablesOrderChange = ({ active, over }) => {
+    if (active.id !== over.id) {
+      setTables((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex).map((item) => ({
+          ...item,
+          updated: true,
+        }));
+      });
+    }
+  };
+
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
       <h2 className="text-xl leading-6 font-medium text-gray-900">Tables</h2>
@@ -103,13 +95,43 @@ export function BaseTablesSettings({ tables: initialData }) {
         <form onSubmit={handleSubmit}>
           <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
             <ul className="divide-y divide-gray-200">
-              {tables.map((table) => (
-                <BaseTableSettingsItem
-                  key={table.id}
-                  table={table}
-                  handleChange={handleChange}
-                />
-              ))}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTablesOrderChange}>
+                <SortableContext items={tables} strategy={verticalListSortingStrategy}>
+                  {tables.map((table) => (
+                    <SortableItem
+                      key={table.id}
+                      as="li"
+                      id={table.id}
+                      className="grid grid-cols-12 gap-3 items-center p-2 w-full bg-white hover:bg-gray-50 sm:px-6"
+                      handle={{
+                        position: 'right',
+                        className: 'col-span-1 flex justify-end',
+                        component: (
+                          <button type="button" className="col-span-1 flex items-center p-2 cursor-inherit cursor-grabbing">
+                            <GripVerticalIcon className="h-4 w-4 text-gray-500" />
+                            <span className="sr-only">Reorder Table</span>
+                          </button>
+                        ),
+                      }}
+                    >
+                      <div className="col-span-4">
+                        <p className="text-base text-gray-900">{table.name}</p>
+                      </div>
+                      <div className="col-span-7 flex items-center">
+                        <Input
+                          type="text"
+                          id={`${table.name}-alias`}
+                          name={`${table.name}-alias`}
+                          value={table.alias || ''}
+                          placeholder="Add Alias"
+                          onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
+                          className="w-full"
+                        />
+                      </div>
+                    </SortableItem>
+                  ))}
+                </SortableContext>
+              </DndContext>
             </ul>
           </div>
           <div className="mt-4 py-4 border-t border-solid flex justify-end">
@@ -135,7 +157,3 @@ export function BaseTablesSettings({ tables: initialData }) {
     </div>
   );
 }
-
-BaseTablesSettings.propTypes = {
-  tables: PropTypes.arrayOf(ITable),
-};

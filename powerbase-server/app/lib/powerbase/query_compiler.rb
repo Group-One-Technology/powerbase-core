@@ -18,9 +18,42 @@ module Powerbase
       close_parenthesis: 'CLOSE_PARENTHESIS',
     }
 
-    def initialize(query = nil, adapter = "postgresql")
-      @query = query
-      @adapter = adapter
+    # Accepts the following options:
+    # :table_id :: id of the table to be queried.
+    # :query :: a query string for search.
+    # :filter :: a query string or hash for filtering.
+    # :sort :: a sort hash.
+    # :adapter :: the database adapter used. Can either be mysql2 or postgresql.
+    # :turbo :: a boolean for turbo mode.
+    def initialize(options)
+      @table_id = options[:table_id] || nil
+      @query = options[:query] ? sanitize(options[:query]) : nil
+      @filter = options[:filter] || nil
+      @sort = options[:sort] == nil ? [] : options[:sort]
+      @adapter = options[:adapter] || "postgresql"
+      @turbo = options[:turbo] || false
+
+      @fields = PowerbaseField.where(powerbase_table_id: @table_id)
+      @field_types = PowerbaseFieldType.all
+      @field_type = {}
+      @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
+
+      @sort = if @sort.kind_of?(Array) && @sort.length > 0
+        @sort.map do |sort_item|
+          operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
+              "desc"
+            else
+              "asc"
+            end
+
+          { field: sort_item[:field], operator: operator }
+        end
+      elsif @sort.kind_of?(Array)
+        primary_keys = @fields.select {|field| field.is_primary_key }
+        order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
+
+        [{ field: order_field.name, operator: "asc" }]
+      end
     end
 
     # * Find records by their fields.
@@ -36,33 +69,114 @@ module Powerbase
           }
         end
 
-      @query = { operator: "and", filters: updated_filters }
+      @filter = { operator: "and", filters: updated_filters }
 
       self
     end
 
-    # * Transform given query string or hash into sequel query string
+    # * Returns sequel proc query
     def to_sequel
-      parsedTokens = if @query.is_a?(String)
-          tokens = lexer(@query)
-          parser(tokens)
-        else
-          @query
+      -> (db) {
+        # For full text search
+        if @query != nil && @query.length > 0
+          filters = @fields.map do |field|
+            field_type = @field_type[field.powerbase_field_type_id]
+            column = {}
+            column[field.name.to_sym] = @query
+
+            if field.db_type == "uuid"
+              next if !validate_uuid_format(@query)
+              next Sequel[column]
+            end
+            next if field_type == "Number" && Float(@query, exception: false) == nil
+            next if field_type == "Date" || field_type == "Checkbox"
+
+            if field_type == "Single Line Text" || field_type == "Long Text"
+              next Sequel.ilike(field.name.to_sym, "%#{@query}%")
+            end
+
+            Sequel[column]
+          end
+
+          filters = filters.select {|item| item != nil}
+            .inject {|filter, item| Sequel.|(filter, item)}
+
+          db = db.where(filters)
         end
 
-      transform_sequel_filter(parsedTokens)
+        # For filtering
+        if @filter != nil
+          parsedTokens = if @filter.is_a?(String)
+              tokens = lexer(@filter)
+              parser(tokens)
+            else
+              @filter
+            end
+
+          filters = transform_sequel_filter(parsedTokens)
+          db = db.where(filters)
+        end
+
+        # For sorting
+        if @sort.kind_of?(Array) && @sort.length > 0
+          @sort.each do |sort_item|
+            if sort_item[:operator] == "asc"
+              db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
+            else
+              db = db.order_append(Sequel.desc(sort_item[:field].to_sym, :nulls => :last))
+            end
+          end
+        end
+
+        db
+      }
     end
 
-    # * Transform given query string or hash into elasticsearch query string
+    # * Returns elasticsearch hash query
     def to_elasticsearch
-      parsedTokens = if @query.is_a?(String)
-          tokens = lexer(@query)
-          parser(tokens)
-        else
-          @query
+      search_params = {}
+
+      # For sorting
+      if @sort.kind_of?(Array) && @sort.length > 0
+        sort = @sort.map do |sort_item|
+          sort_field = @fields.find {|field| field.name == sort_item[:field] }
+          sort_column = {}
+
+          if sort_field
+            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
+                sort_field.name
+              else
+                "#{sort_field.name}.keyword"
+              end
+
+            sort_column[column_name] = { order: sort_item[:operator], unmapped_type: "long" }
+          end
+
+          sort_column
         end
 
-      transform_elasticsearch_filter(parsedTokens)
+        search_params[:sort] = sort
+      end
+
+      # For filtering
+      if @filter != nil || (@query && @query.length > 0)
+        parsedTokens = if @filter.is_a?(String)
+            tokens = lexer(@filter)
+            parser(tokens)
+          else
+            @filter
+          end
+        query_string = transform_elasticsearch_filter(parsedTokens, @query)
+
+        search_params[:query] = {
+          query_string: {
+            query: query_string,
+            time_zone: "+00:00"
+          }
+        }
+      end
+
+      search_params
     end
 
     private
@@ -106,7 +220,7 @@ module Powerbase
                 next { type: TOKEN[:string], value: token[1, token.length - 2] }
               elsif token[0] == "'" && token[token.length - 1] == "'"
                 next { type: TOKEN[:string], value: token[1, token.length - 1] }
-              elsif Float(token, exception: false)
+              elsif Float(token, exception: false) != nil
                 next { type: TOKEN[:number], value: token.include?(".") ? token.to_f : token.to_i }
               else
                 next { type: TOKEN[:field], value: token };
@@ -215,92 +329,101 @@ module Powerbase
         build_tree(root_node, ast)
       end
 
-      # * Transforms parsed tokens into a sequel query string
+      # * Transforms parsed tokens into a sequel value
       def transform_sequel_filter(filter_group)
-        logical_op = case filter_group[:operator]
-          when "or"
-            "|"
-          else
-            "&"
-          end
-
-        filters = filter_group[:filters]
-
-        sequel_filter = filters.map do |filter|
+        filters = filter_group ? filter_group[:filters] : []
+        filters = filters.map do |filter|
           inner_filter_group = filter[:filters]
 
           if inner_filter_group && inner_filter_group.length > 0
             next transform_sequel_filter(filter)
           end
 
+          field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
+          next if !field
+
+          field_type = @field_type[field.powerbase_field_type_id]
           relational_op = filter[:filter][:operator]
-          field = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(\"#{sanitize(filter[:field])}\", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
-            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[DATE_FORMAT('#{sanitize(filter[:field])}', '%Y-%m-%d')])"
-            elsif @adapter == "postgresql"
-              "Sequel.lit('\"#{sanitize(filter[:field])}\"')"
-            else
-              "Sequel.lit('#{sanitize(filter[:field])}')"
+          column_field = field.name
+          column_value = sanitize(filter[:filter][:value])
+          column = {}
+
+          if field_type == "Date"
+            column_field = if @adapter == "mysql2"
+                Sequel.lit(%Q[DATE_FORMAT('#{field.name}', '%Y-%m-%d')])
+              else # postgresql
+                Sequel.lit(%Q[to_char("#{field.name}", 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])
+              end
+            column_value = if @adapter == "mysql2"
+                Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(value)}', '+00:00', CONCAT('+', SUBSTRING(timediff(NOW(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])
+              else # postgresql
+                Sequel.lit(%Q[to_char(('#{format_date(value)}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])
+              end
+
+            case relational_op
+            when "is exact date"
+              column[column_field] = column_value
+              next Sequel[column]
+            when "is not exact date"
+              column[column_field] = column_value
+              next Sequel.~(column)
+            when "is before"
+              next Sequel::SQL::BooleanExpression.new(:<, column_field, column_value)
+            when "is after"
+              next Sequel::SQL::BooleanExpression.new(:>, column_field, column_value)
+            when "is on or before"
+              next Sequel::SQL::BooleanExpression.new(:<=, column_field, column_value)
+            when "is on or after"
+              next Sequel::SQL::BooleanExpression.new(:>=, column_field, column_value)
             end
-          value = if DATE_OPERATORS.include?(relational_op) && @adapter == "postgresql"
-              "Sequel.lit(%Q[to_char(('#{format_date(sanitize(filter[:filter][:value]))}'::TIMESTAMP at TIME ZONE 'UTC' at TIME ZONE current_setting('TIMEZONE')), 'YYYY-MM-DDThh:mm:ss')::TIMESTAMP::DATE])"
-            elsif DATE_OPERATORS.include?(relational_op) && @adapter == "mysql2"
-              "Sequel.lit(%Q[DATE_FORMAT(CONVERT_TZ('#{format_date(sanitize(filter[:filter][:value]))}', '+00:00', CONCAT('+', SUBSTRING(timediff(now(), CONVERT_TZ(now(),@@session.time_zone,'+00:00')), 1, 5))), '%Y-%m-%d')])"
-            else
-              sanitize(filter[:filter][:value])
-            end
+          end
+
+          column[column_field.to_sym] = column_value
 
           case relational_op
           when "is"
-            "Sequel[{#{field} => '#{value}'}]"
+            next Sequel[column]
           when "is not"
-            "Sequel.~(#{field} => '#{value}')"
+            next Sequel.~(column)
           when "contains"
-            "Sequel.like(#{field}, '%#{value}%')"
+            next Sequel.ilike(column_field.to_sym, "%#{column_value}%")
           when "does not contain"
-            "~Sequel.like(#{field}, '%#{value}%')"
+            next ~Sequel.ilike(column_field.to_sym, "%#{column_value}%")
           when "="
-            "Sequel[{#{field} => #{value}}]"
+            next Sequel[column]
           when "!="
-            "Sequel.~(#{field} => #{value})"
+            next Sequel.~(column)
           when "<"
-            "(#{field} < #{value})"
+            next Sequel::SQL::BooleanExpression.new(:<, column_field.to_sym, column_value)
           when ">"
-            "(#{field} > #{value})"
+            next Sequel::SQL::BooleanExpression.new(:>, column_field.to_sym, column_value)
           when "<="
-            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
+            next Sequel::SQL::BooleanExpression.new(:<=, column_field.to_sym, column_value)
           when ">="
-            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
-          when "is exact date"
-            "Sequel[{#{field} => #{value}}]"
-          when "is not exact date"
-            "Sequel.~(#{field} => #{value})"
-          when "is before"
-            "(#{field} < #{value})"
-          when "is after"
-            "(#{field} > #{value})"
-          when "is on or before"
-            "((#{field} < #{value}) | Sequel[{#{field} => #{value}}])"
-          when "is on or after"
-            "((#{field} > #{value}) | Sequel[{#{field} => #{value}}])"
+            next Sequel::SQL::BooleanExpression.new(:>=, column_field.to_sym, column_value)
           end
         end
 
-        query_string = sequel_filter.join(" #{logical_op} ")
-        "(#{query_string})"
+        filters.select {|item| item != nil}
+          .inject do |filter, item|
+            next Sequel.|(filter, item) if filter_group != nil && filter_group[:operator] == "or"
+            next Sequel.&(filter, item)
+          end
       end
 
       # * Transforms parsed tokens into elasticsearch query string
-      def transform_elasticsearch_filter(filter_group)
-        logical_op = case filter_group[:operator]
-          when "or"
-            "OR"
+      def transform_elasticsearch_filter(filter_group, search_query = nil)
+        logical_op = if filter_group != nil && filter_group[:operator]
+            if filter_group[:operator] == "or"
+              "OR"
+            else
+              "AND"
+            end
           else
             "AND"
           end
 
-        filters = filter_group[:filters]
+        filters = filter_group ? filter_group[:filters] : []
 
         elasticsearch_filter = filters.map do |filter|
           inner_filter_group = filter[:filters]
@@ -309,8 +432,11 @@ module Powerbase
             next transform_elasticsearch_filter(filter)
           end
 
+          cur_field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
+          next if !cur_field
+
           relational_op = filter[:filter][:operator]
-          field = sanitize(filter[:field])
+          field = cur_field.name
           value = sanitize(filter[:filter][:value])
 
           case relational_op
@@ -349,13 +475,25 @@ module Powerbase
           end
         end
 
-        query_string = elasticsearch_filter.join(" #{logical_op.upcase} ")
-        "(#{query_string})"
+        query_string = elasticsearch_filter
+          .select {|item| item != nil}
+          .join(" #{logical_op.upcase} ")
+        query_string = query_string && query_string.length > 0 ? "(#{query_string})" : ""
+
+        if search_query != nil && search_query.length > 0
+          if query_string.length > 0
+            "*:(#{sanitize(search_query)}) AND (#{query_string})"
+          else
+            "*:(#{sanitize(search_query)})"
+          end
+        else
+          query_string
+        end
       end
 
       # * Remove escaped quotes
       def sanitize(value)
-        value.class == String ? value.gsub(/['"]/,'') : value
+        value.class == String ? value.gsub(/['"#()]/,' ') : value
       end
 
       # * Format date to UTC
@@ -377,6 +515,13 @@ module Powerbase
         else
           nil
         end
+      end
+
+      # * Check if valid uuid
+      def validate_uuid_format(uuid)
+        uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+        return true if uuid_regex.match?(uuid.to_s.downcase)
+        false
       end
   end
 end

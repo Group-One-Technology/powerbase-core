@@ -1,19 +1,19 @@
 import React from 'react';
 
+import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { IBase } from '@lib/propTypes/base';
 import { TableTabs } from '@components/tables/TableTabs';
 import { TableContent } from '@components/tables/TableContent';
 import { Loader } from '@components/ui/Loader';
 import { CustomModal } from '@components/ui/CustomModal';
 
-export function Table({ base }) {
+export function Table() {
+  const { data: base } = useBase();
   const {
     table,
     tables,
     views,
     view,
-    handleTableChange,
   } = useCurrentView();
 
   if (base == null || table == null || tables == null) {
@@ -28,12 +28,7 @@ export function Table({ base }) {
             "This table doesn't have a primary key, would like us to add one?"
         </CustomModal>
       }
-      <TableTabs
-        color={base.color}
-        tables={tables}
-        tableId={table.id}
-        handleTableChange={handleTableChange}
-      />
+      <TableTabs />
       <TableContent
         table={table}
         tables={tables}
@@ -43,7 +38,3 @@ export function Table({ base }) {
     </>
   );
 }
-
-Table.propTypes = {
-  base: IBase.isRequired,
-};

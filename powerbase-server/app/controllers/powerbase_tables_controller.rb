@@ -12,7 +12,8 @@ class PowerbaseTablesController < ApplicationController
     optional(:alias).value(:string)
   end
 
-  schema(:update_aliases) do
+  schema(:update_tables) do
+    required(:database_id)
     required(:tables)
   end
 
@@ -25,7 +26,7 @@ class PowerbaseTablesController < ApplicationController
   def index
     render json: {
       migrated: @database.is_migrated,
-      tables: @database.powerbase_tables.order(name: :asc).map {|item| format_json(item)}
+      tables: @database.powerbase_tables.order(order: :asc).map {|item| format_json(item)}
     }
   end
 
@@ -43,11 +44,11 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  # PUT /tables/update/aliases
-  def update_aliases
-    safe_params[:tables].each do |table|
+  # PUT /databases/:database_id/tables/update
+  def update_tables
+    safe_params[:tables].each_with_index do |table, index|
       @table = PowerbaseTable.find(table[:id])
-      @table.update(alias: table[:alias])
+      @table.update(alias: table[:alias], order: index)
     end
 
     render status: :no_content
@@ -84,6 +85,7 @@ class PowerbaseTablesController < ApplicationController
         description: table.description,
         default_view_id: table.default_view_id,
         page_size: table.page_size,
+        order: table.order,
         is_migrated: table.is_migrated,
         created_at: table.created_at,
         updated_at: table.updated_at,

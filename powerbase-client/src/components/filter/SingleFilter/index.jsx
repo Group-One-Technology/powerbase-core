@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { TrashIcon } from '@heroicons/react/outline';
+import { XIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { IViewField } from '@lib/propTypes/view-field';
@@ -74,7 +74,7 @@ export function SingleFilter({
         break;
       case FieldType.SINGLE_SELECT:
       case FieldType.DATE:
-        setValue(evt.toString());
+        setValue(evt?.toString());
         break;
       default:
         setValue(evt.target.value);
@@ -142,7 +142,7 @@ export function SingleFilter({
           onClick={() => handleRemoveFilter(id)}
         >
           <span className="sr-only">Remove Filter</span>
-          <TrashIcon className="block h-4 w-4" />
+          <XIcon className="block h-4 w-4" />
         </button>
       </div>
     </div>

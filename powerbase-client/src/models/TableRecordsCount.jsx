@@ -3,19 +3,21 @@ import useSWR from 'swr';
 
 import { getTableRecordsCount } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
-import { useRecordsFilter } from './views/RecordsFilter';
+import { useViewOptions } from './views/ViewOptions';
 
 function useTableRecordsCountModel({ id }) {
   const { authUser } = useAuthUser();
-  const { filters, viewId } = useRecordsFilter();
+  const { query, filters, viewId } = useViewOptions();
 
-  const filterQuery = filters?.id ? `filterId=${filters?.id}` : '';
+  const searchQuery = query?.length ? `q=${encodeURIComponent(query)}` : '';
+  const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
 
   const response = useSWR(
-    (id && authUser && viewId) ? `/tables/${id}/records_count?${filterQuery}` : null,
+    (id && authUser && viewId) ? `/tables/${id}/records_count?${searchQuery}${filterQuery}` : null,
     () => ((id && authUser && viewId)
       ? getTableRecordsCount({
         tableId: id,
+        query,
         filters: filters?.id
           ? filters?.value
           : undefined,
