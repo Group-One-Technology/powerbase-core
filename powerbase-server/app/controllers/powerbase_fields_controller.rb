@@ -6,6 +6,11 @@ class PowerbaseFieldsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
+  schema(:alias) do
+    required(:id).value(:integer)
+    required(:alias).value(:string)
+  end
+
   schema(:set_as_pii, :unset_as_pii) do
     required(:id).value(:integer)
   end
@@ -13,6 +18,17 @@ class PowerbaseFieldsController < ApplicationController
   # GET /tables/:id/fields
   def index
     render json: @table.powerbase_fields.map {|item| format_json(item)}
+  end
+
+  # PUT /fields/:id/alias
+  def alias
+    @field = PowerbaseField.find(safe_params[:id])
+
+    if @field.update(alias: safe_params[:alias])
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
   end
 
   # PUT /fields/:id/set_as_pii

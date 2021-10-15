@@ -62,7 +62,7 @@ export function FieldItem({ field }) {
         <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
           <FieldTypeIcon isPrimaryKey={field.isPrimaryKey} typeId={field.fieldTypeId} fieldTypes={fieldTypes} />
         </div>
-        <span className="pl-6">{field.name}</span>
+        <span className="pl-6">{field.alias || field.name}</span>
       </div>
       <div className="block">
         <Switch

@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do
         member do
+          put 'alias', as: 'update_field_alias'
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
         end

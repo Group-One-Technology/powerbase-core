@@ -12,7 +12,7 @@ import {
 
 import { useViewFields } from '@models/ViewFields';
 import { hideViewField } from '@lib/api/view-fields';
-import { setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
+import { updateFieldAlias, setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { data: fields, mutate: mutateViewFields } = useViewFields();
@@ -24,6 +24,27 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   useEffect(() => {
     setAlias(field.alias || field.name);
   }, [field]);
+
+  const handleOpenChange = async (value) => {
+    if (!value && alias !== field.alias) {
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        alias: item.id === field.id
+          ? alias
+          : item.alias,
+      }));
+
+      try {
+        await updateFieldAlias({ id: field.id, alias });
+        mutateViewFields(updatedFields);
+        setOptionOpen(value);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      setOptionOpen(value);
+    }
+  };
 
   const handleAliasChange = (evt) => {
     setAlias(evt.target.value);
@@ -71,7 +92,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   return (
-    <Popover.Root open={option.open} onOpenChange={setOptionOpen}>
+    <Popover.Root open={option.open} onOpenChange={handleOpenChange}>
       <Popover.Trigger className={`button_field_${field.id}`} />
       <Popover.Content side="bottom" sideOffset={10} align="start" alignOffset={-10}>
         <div className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
