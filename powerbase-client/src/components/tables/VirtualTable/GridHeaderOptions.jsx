@@ -86,33 +86,33 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 className="appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
-              <div className="mt-4">
-                <p className="mb-1 uppercase text-gray-500 text-xs">Field Name</p>
-                <p className="py-1 text-sm flex items-center text-gray-900">
+              <dl className="mt-4">
+                <dt className="mb-1 uppercase text-gray-500 text-xs">Field Name</dt>
+                <dd className="py-1 text-sm flex items-center text-gray-900">
                   {field.name}
-                </p>
-              </div>
-              <div className="mt-2">
-                <p className="mb-1 uppercase text-gray-500 text-xs">Field Type</p>
-                <ul className="pb-1">
-                  <li className="py-1 text-sm flex items-center text-gray-900">
-                    <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
-                    {fieldType.name}
-                  </li>
-                  {field.isPrimaryKey && (
+                </dd>
+                <dt className="my-1 uppercase text-gray-500 text-xs">Field Type</dt>
+                <dd className="pb-1">
+                  <ul>
                     <li className="py-1 text-sm flex items-center text-gray-900">
-                      <FieldTypeIcon className="mr-1.5" isPrimaryKey />
-                      Primary Key
+                      <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
+                      {fieldType.name}
                     </li>
-                  )}
-                  {field.isForeignKey && (
-                    <li className="py-1 text-sm flex items-center text-gray-900">
-                      <FieldTypeIcon className="mr-1.5" isForeignKey />
-                      Foreign Key
-                    </li>
-                  )}
-                </ul>
-              </div>
+                    {field.isPrimaryKey && (
+                      <li className="py-1 text-sm flex items-center text-gray-900">
+                        <FieldTypeIcon className="mr-1.5" isPrimaryKey />
+                        Primary Key
+                      </li>
+                    )}
+                    {field.isForeignKey && (
+                      <li className="py-1 text-sm flex items-center text-gray-900">
+                        <FieldTypeIcon className="mr-1.5" isForeignKey />
+                        Foreign Key
+                      </li>
+                    )}
+                  </ul>
+                </dd>
+              </dl>
             </div>
             <ul className="mt-1 text-sm text-gray-900">
               <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
