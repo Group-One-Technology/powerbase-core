@@ -50,9 +50,11 @@ export function Filter() {
         <>
           <Popover.Button
             type="button"
-            className={cn('inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500', {
-              'ring-2': open,
-            })}
+            className={cn(
+              'inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
+              open && 'ring-2',
+              initialFilters?.filters?.length ? 'text-indigo-700' : 'text-gray-700',
+            )}
           >
             <FilterIcon className="block h-4 w-4 mr-1" />
             Filter
