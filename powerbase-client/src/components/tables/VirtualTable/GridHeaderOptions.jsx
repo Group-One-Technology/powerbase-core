@@ -35,7 +35,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
       }));
 
       try {
-        await updateFieldAlias({ id: field.id, alias });
+        await updateFieldAlias({ id: field.fieldId, alias });
         mutateViewFields(updatedFields);
         setOptionOpen(value);
       } catch (err) {
