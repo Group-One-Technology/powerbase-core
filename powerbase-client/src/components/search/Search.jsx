@@ -12,7 +12,7 @@ export function Search() {
   const { query: initialQuery, setQuery: setRemoteQuery } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery] = useState(initialQuery || '');
 
   const updateTableRecords = useCallback(debounce(async (value) => {
     setRemoteQuery(value);

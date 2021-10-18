@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { useRef } from 'react';
+import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
@@ -19,7 +20,10 @@ export function SearchWeb({ value, onChange }) {
       <Transition show={!focus} className="hidden sm:block">
         <button
           type="button"
-          className="ml-auto inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          className={cn(
+            'ml-auto inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500',
+            value.length ? 'text-indigo-700' : 'text-gray-700',
+          )}
           onClick={handleClick}
         >
           <span className="sr-only">Search</span>
