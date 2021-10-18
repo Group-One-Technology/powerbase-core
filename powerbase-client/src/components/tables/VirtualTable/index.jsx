@@ -16,7 +16,7 @@ import 'react-virtualized/styles.css';
 export function VirtualTable({ height, table, tables }) {
   const { data: fields } = useViewFields();
   const { data: connections } = useTableConnections();
-  const { data: records, highlightedCell, setHighLightedCell } = useTableRecords();
+  const { data: records, highlightedCell, setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {

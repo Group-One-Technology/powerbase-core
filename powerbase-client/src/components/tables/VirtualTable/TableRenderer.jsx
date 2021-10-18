@@ -130,11 +130,12 @@ export function TableRenderer({ height, table, tables, highlightedCell }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
+                        const isHighlighted  = records[rowIndex]["doc_id"] === highlightedCell
 
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
-                          highlightedCell,
+                          isHighlighted,
                           isLoaded: !!records[rowIndex],
                           value: columnIndex === 0
                             ? rowIndex + 1

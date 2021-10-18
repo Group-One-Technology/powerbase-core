@@ -91,6 +91,7 @@ class PowerbaseTablesController < ApplicationController
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
         has_primary_key: table.has_primary_key?,
+        in_synced: table.in_synced?,
       }
     end
 end

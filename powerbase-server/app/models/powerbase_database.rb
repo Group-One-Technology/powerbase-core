@@ -22,6 +22,7 @@ class PowerbaseDatabase < ApplicationRecord
 
   belongs_to :user
   has_one :base_migration
+  has_many :tasks, as: :taskable
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
   has_many :base_connections
@@ -47,7 +48,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def is_synced?
-    sequel_db_tables.count == self.tables.count
+    unmigrated_tables.empty?
   end
 
   def unmigrated_tables
@@ -55,10 +56,14 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def sequel_db_tables
-    sequel_db.tables
+    _sequel.tables
   end
 
-  def sequel_db
-    @sequel_db ||= Sequel.connect self.connection_string
+  def _sequel
+    @_sequel ||= Sequel.connect self.connection_string
+  end
+
+  def pending_tasks
+    tasks.pending
   end
 end
