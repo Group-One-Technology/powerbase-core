@@ -58,6 +58,7 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
