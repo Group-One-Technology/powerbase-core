@@ -5,17 +5,22 @@ import { Switch } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useMounted } from '@lib/hooks/useMounted';
 import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
 export function FieldItem({ field }) {
+  const { mounted } = useMounted();
+  const { saving, saved, catchError } = useSaveStatus();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
   const [loading, setLoading] = useState(false);
 
   const handleToggleVisibility = async () => {
+    saving();
     setLoading(true);
 
     try {
@@ -32,12 +37,14 @@ export function FieldItem({ field }) {
           : item.isHidden,
       }));
 
-      mutateViewFields(updatedFields);
-    } catch (err) {
-      console.log(err);
-    }
+      mounted(() => setLoading(false));
 
-    setLoading(false);
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err);
+      mounted(() => setLoading(false));
+    }
   };
 
   return (
