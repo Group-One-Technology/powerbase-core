@@ -1,6 +1,7 @@
-client: ""
+client: "http://localhost:4000"
 encryption_key: ""
 jwt_encryption_key: ""
 redis_url: "redis://localhost:6379/0"
 elasticsearch_url_development: "http://localhost:9200"
+hubspot_api_key: ""
 elasticsearch_url: ""
