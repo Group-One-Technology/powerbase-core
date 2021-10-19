@@ -5,6 +5,7 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
+import { SaveStatusProvider, useSaveStatus } from '@models/SaveStatus';
 import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
 
@@ -23,6 +24,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
+  const { saveStatus, error: saveStatusError } = useSaveStatus();
 
   if (base == null || bases == null || authUser == null) {
     return <Loader className="h-screen" />;
@@ -34,7 +36,10 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   }
 
   return (
-    <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white">
+    <Page
+      navbar={<Navbar base={base} bases={bases} saveStatus={saveStatus} saveStatusError={saveStatusError} />}
+      className="!bg-white"
+    >
       <PageContent className="!px-0 max-w-full">
         <CurrentViewProvider
           baseId={baseId}
@@ -61,7 +66,9 @@ export function TablePage() {
       <BaseProvider id={baseId}>
         <BaseTableProvider id={id}>
           <AuthOnly>
-            <BaseTable id={id} baseId={baseId} />
+            <SaveStatusProvider>
+              <BaseTable id={id} baseId={baseId} />
+            </SaveStatusProvider>
           </AuthOnly>
         </BaseTableProvider>
       </BaseProvider>
