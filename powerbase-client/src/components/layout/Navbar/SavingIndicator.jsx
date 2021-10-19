@@ -1,8 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Icon, SaveStatus } from '@models/SaveStatus';
+import { Icon, SaveStatus, useSaveStatus } from '@models/SaveStatus';
 
-export function SavingIndicator({ status, error }) {
+export function SavingIndicator() {
+  const { saveStatus: status, error } = useSaveStatus();
+
   const className = 'h-4 w-4';
 
   let SaveStatusIcon = null;
@@ -30,8 +31,3 @@ export function SavingIndicator({ status, error }) {
 
   return null;
 }
-
-SavingIndicator.propTypes = {
-  status: PropTypes.string,
-  error: PropTypes.object,
-};

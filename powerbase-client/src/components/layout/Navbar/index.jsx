@@ -21,12 +21,7 @@ export const NAVIGATION = [
   { name: 'Settings', href: '/settings' },
 ];
 
-export function Navbar({
-  base,
-  bases,
-  saveStatus,
-  saveStatusError,
-}) {
+export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
 
@@ -56,7 +51,7 @@ export function Navbar({
                   <Link to="/">
                     <Logo white={!!base} className="block h-5 w-auto" />
                   </Link>
-                  <SavingIndicator status={saveStatus} error={saveStatusError} />
+                  <SavingIndicator />
                 </div>
               </div>
               <div className={cn('hidden sm:col-span-2 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
@@ -113,6 +108,4 @@ export function Navbar({
 Navbar.propTypes = {
   base: IBase,
   bases: PropTypes.arrayOf(IBase),
-  saveStatus: PropTypes.string,
-  saveStatusError: PropTypes.object,
 };
