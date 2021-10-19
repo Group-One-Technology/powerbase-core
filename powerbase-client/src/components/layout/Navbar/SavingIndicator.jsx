@@ -4,7 +4,7 @@ import { Icon, SaveStatus, useSaveStatus } from '@models/SaveStatus';
 export function SavingIndicator() {
   const { saveStatus: status, error } = useSaveStatus();
 
-  const className = 'h-4 w-4';
+  const className = 'h-4 w-4 mr-1';
 
   let SaveStatusIcon = null;
 
@@ -18,13 +18,17 @@ export function SavingIndicator() {
 
   if (SaveStatusIcon) {
     return (
-      <div className="ml-4 flex gap-x-1 text-xs">
+      <div className="ml-4 flex text-xs">
         <SaveStatusIcon className={className} aria-hidden="true" />
         <span className="capitalize">
           {status}
           {status === SaveStatus.SAVING && '...'}
-          {(status === SaveStatus.ERROR && error) && `: ${error.message}`}
         </span>
+        {(status === SaveStatus.ERROR && error) && (
+          <span>
+            : {error.message}
+          </span>
+        )}
       </div>
     );
   }
