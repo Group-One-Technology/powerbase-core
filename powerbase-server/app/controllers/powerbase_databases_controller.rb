@@ -1,5 +1,6 @@
 class PowerbaseDatabasesController < ApplicationController
-  before_action :authorize_access_request!
+  before_action :authorize_access_request!, except: [:connect_hubspot]
+  before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
 
   schema(:show, :clear_logs) do
     required(:id).value(:integer)
@@ -27,6 +28,17 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:color).value(:string)
     optional(:is_turbo).value(:bool)
     optional(:connection_string).value(:string)
+  end
+
+  schema(:connect_hubspot) do
+    required(:api_key).value(:string)
+    required(:host).value(:string)
+    required(:port).value(:integer)
+    required(:username).value(:string)
+    required(:password).value(:string)
+    required(:database).value(:string)
+    required(:database_size).value(:integer)
+    required(:user_id).value(:integer)
   end
 
   # GET /databases/
@@ -166,6 +178,31 @@ class PowerbaseDatabasesController < ApplicationController
     render json: { connected: true, database: format_json(@database), db_size: @db_size }
   end
 
+  # POST /databases/connect/hubspot
+  def connect_hubspot
+    @hb_database = HubspotDatabase.new({
+      name: safe_params[:database],
+      connection_string: Powerbase.connection_string({
+        adapter: "postgresql",
+        host: safe_params[:host],
+        port: safe_params[:port],
+        user: safe_params[:username],
+        password: safe_params[:password],
+        database: safe_params[:database],
+      }),
+      adapter: "postgresql",
+      is_migrated: false,
+      database_size: safe_params[:database_size],
+      user_id: safe_params[:user_id],
+    })
+
+    if @hb_database.save
+      render json: { id: @hb_database.id, name: @hb_database.name }
+    else
+      render json: @hb_database.errors, status: :unprocessable_entity
+    end
+  end
+
   # PUT /databases/:id/clear_logs
   def clear_logs
     @database = PowerbaseDatabase.find(safe_params[:id])
@@ -178,6 +215,12 @@ class PowerbaseDatabasesController < ApplicationController
   end
 
   private
+    def authorize_acesss_hubspot
+      if safe_params[:api_key] != ENV["hubspot_api_key"]
+        raise StandardError.new "Invalid Hubspot API Key. Access denied."
+      end
+    end
+
     def format_json(database)
       {
         id: database.id,

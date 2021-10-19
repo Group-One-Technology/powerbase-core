@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show, :update], shallow: true do
     collection do
       post 'connect'
+      post 'connect/hubspot', to: 'powerbase_databases#connect_hubspot'
     end
 
     member do
