@@ -5,7 +5,8 @@ import useSWR from 'swr';
 import { getDatabases } from '@lib/api/databases';
 import { useAuthUser } from './AuthUser';
 
-const REFRESH_INTERVAL = 5000; // milliseconds = 5 seconds
+const NON_TURBO_REFRESH_INTERVAL = 5000; // milliseconds = 5 seconds
+const TURBO_REFRESH_INTERVAL = 600000; // milliseconds = 10 minutes
 
 function useBasesModel() {
   const { authUser } = useAuthUser();
@@ -18,10 +19,14 @@ function useBasesModel() {
   );
 
   useEffect(() => {
-    const migratingNonTurboBases = response.data?.filter((item) => !item.isMigrated && !item.isTurbo);
+    const migratingBases = response.data?.filter((item) => !item.isMigrated);
+    const hasNonTurboBases = migratingBases?.some((item) => !item.isTurbo) || false;
+    const updatedRefreshInterval = hasNonTurboBases
+      ? NON_TURBO_REFRESH_INTERVAL
+      : TURBO_REFRESH_INTERVAL;
 
-    if (migratingNonTurboBases?.length > 0 && refreshInterval === 0) {
-      setRefeshInterval(REFRESH_INTERVAL);
+    if (migratingBases?.length > 0 && refreshInterval !== updatedRefreshInterval) {
+      setRefeshInterval(updatedRefreshInterval);
     } else if (refreshInterval > 0) {
       setRefeshInterval(0);
     }
