@@ -8,6 +8,7 @@ import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { register } from '@lib/api/auth';
+import { useMounted } from '@lib/hooks/useMounted';
 
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
@@ -17,6 +18,7 @@ import { Logo } from '@components/ui/Logo';
 
 export function RegisterPage() {
   const history = useHistory();
+  const { mounted } = useMounted();
   const { authUser, mutate: refetchAuthUser } = useAuthUser();
 
   const [firstName, setFirstName, { error: firstNameError }] = useValidState('', REQUIRED_VALIDATOR);
@@ -62,7 +64,7 @@ export function RegisterPage() {
       }
     }
 
-    setLoading(false);
+    mounted(() => setLoading(false));
   };
 
   useEffect(() => {
