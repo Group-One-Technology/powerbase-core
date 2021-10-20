@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
-import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
+/* eslint-disable */
+import React, { useState } from "react";
+import cn from "classnames";
+import { CheckIcon, ExclamationIcon } from "@heroicons/react/outline";
 
-import { useValidState } from '@lib/hooks/useValidState';
-import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
-import { updateDatabase } from '@lib/api/databases';
-import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
-import { useBase } from '@models/Base';
-import { useBases } from '@models/Bases';
+import { useValidState } from "@lib/hooks/useValidState";
+import { REQUIRED_VALIDATOR } from "@lib/validators/REQUIRED_VALIDATOR";
+import { SQL_IDENTIFIER_VALIDATOR } from "@lib/validators/SQL_IDENTIFIER_VALIDATOR";
+import { updateDatabase } from "@lib/api/databases";
+import { DATABASE_TYPES, POWERBASE_TYPE } from "@lib/constants";
+import { useBase } from "@models/Base";
+import { useBases } from "@models/Bases";
 
-import { Button } from '@components/ui/Button';
-import { InlineColorRadio } from '@components/ui/InlineColorRadio';
-import { InlineInput } from '@components/ui/InlineInput';
-import { InlineRadio } from '@components/ui/InlineRadio';
-import { InlineSelect } from '@components/ui/InlineSelect';
-import { StatusModal } from '@components/ui/StatusModal';
+import { Button } from "@components/ui/Button";
+import { InlineColorRadio } from "@components/ui/InlineColorRadio";
+import { InlineInput } from "@components/ui/InlineInput";
+import { InlineRadio } from "@components/ui/InlineRadio";
+import { InlineSelect } from "@components/ui/InlineSelect";
+import { StatusModal } from "@components/ui/StatusModal";
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -23,8 +25,8 @@ const INITIAL_MODAL_VALUE = {
       <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
     </div>
   ),
-  title: 'Update Successful',
-  content: 'The database\'s information has been updated.',
+  title: "Update Successful",
+  content: "The database's information has been updated.",
 };
 
 const ERROR_ICON = (
@@ -37,17 +39,22 @@ export function BaseCoreSettings() {
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
 
-  const [name, setName, nameError] = useValidState(base.name, REQUIRED_VALIDATOR);
+  const [name, setName, nameError] = useValidState(
+    base.name,
+    REQUIRED_VALIDATOR
+  );
   const [databaseName, setDatabaseName, databaseNameError] = useValidState(
     base.databaseName,
-    SQL_IDENTIFIER_VALIDATOR,
+    SQL_IDENTIFIER_VALIDATOR
   );
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
-  const [host, setHost] = useState('');
-  const [port, setPort] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[base.isTurbo ? 0 : 1]);
+  const [host, setHost] = useState("");
+  const [port, setPort] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [powerbaseType, setPowerbaseType] = useState(
+    POWERBASE_TYPE[base.isTurbo ? 0 : 1]
+  );
   const [color, setColor, colorError] = useValidState(base.color);
 
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
@@ -59,7 +66,7 @@ export function BaseCoreSettings() {
     setModal(INITIAL_MODAL_VALUE);
 
     if (!color.length) {
-      colorError.setError(new Error('Required'));
+      colorError.setError(new Error("Required"));
       setLoading(false);
       return;
     }
@@ -80,7 +87,7 @@ export function BaseCoreSettings() {
         setModal({
           open: true,
           icon: ERROR_ICON,
-          title: 'Update Failed',
+          title: "Update Failed",
           content: response.isExisting
             ? `Database with name of "${response.database.name}" already exists in this account.`
             : `Couldn't connect to "${name}". Please check the information given if they are correct.`,
@@ -94,8 +101,10 @@ export function BaseCoreSettings() {
       setModal({
         open: true,
         icon: ERROR_ICON,
-        title: 'Update Failed',
-        content: err?.response?.data.exception || 'Something went wrong. Please try again later.',
+        title: "Update Failed",
+        content:
+          err?.response?.data.exception ||
+          "Something went wrong. Please try again later.",
       });
     }
 
@@ -104,7 +113,9 @@ export function BaseCoreSettings() {
 
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
-      <h2 className="text-xl leading-6 font-medium text-gray-900">Core Settings</h2>
+      <h2 className="text-xl leading-6 font-medium text-gray-900">
+        Core Settings
+      </h2>
       <form onSubmit={handleSubmit}>
         <h3 className="mt-4 text-lg font-medium text-gray-900">General Info</h3>
         <InlineInput
@@ -141,11 +152,19 @@ export function BaseCoreSettings() {
           setError={colorError.setError}
           className="my-6"
         />
-        <h3 className="mt-4 text-lg font-medium text-gray-900">Connection String</h3>
+        <h3 className="mt-4 text-lg font-medium text-gray-900">
+          Connection String
+        </h3>
         <p className="text-sm text-gray-500 my-1">
-          You may leave this section blank if you do not wish to update the connection.
+          You may leave this section blank if you do not wish to update the
+          connection.
           <br />
-          {base.isTurbo && <>Updating the connection string is an <strong>irreversible</strong> action. Please check your inputs carefully.</>}
+          {base.isTurbo && (
+            <>
+              Updating the connection string is an <strong>irreversible</strong>{" "}
+              action. Please check your inputs carefully.
+            </>
+          )}
         </p>
         <InlineInput
           type="text"
@@ -196,8 +215,13 @@ export function BaseCoreSettings() {
         <div className="mt-4 py-4 border-t border-solid flex justify-end">
           <Button
             type="submit"
-            className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+            className={cn(
+              "bg-sky-700 ml-5 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500",
+              databaseName.length && "hover:bg-sky-800",
+              !databaseName.length && "cursor-not-allowed"
+            )}
             loading={loading}
+            disabled={!databaseName.length}
           >
             Update Database
           </Button>
