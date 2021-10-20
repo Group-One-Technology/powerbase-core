@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function LinkedRecordItem({ record }) {
+export function LinkedRecordItem({ record, openRecord }) {
   return (
-    <div className="p-2 border border-gray-300 rounded-lg">
+    <div role="button" className="p-2 border border-gray-300 rounded-lg" tabIndex={0} onClick={openRecord} onKeyPress={openRecord}>
       <p className="mb-2 text-sm font-medium text-gray-900 truncate">
         {Object.keys(record)[0].toUpperCase()}: {record[Object.keys(record)[0]]}
       </p>
@@ -33,4 +33,5 @@ export function LinkedRecordItem({ record }) {
 
 LinkedRecordItem.propTypes = {
   record: PropTypes.object.isRequired,
+  openRecord: PropTypes.func.isRequired,
 };

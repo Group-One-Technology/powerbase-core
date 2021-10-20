@@ -7,16 +7,29 @@ import { TableRecordProvider } from '@models/TableRecord';
 import { useTableConnections } from '@models/TableConnections';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useTableReferencedConnections } from '@models/TableReferencedConnections';
+import { TableFieldsProvider } from '@models/TableFields';
 
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
 
-export function SingleRecordModal({ open, setOpen, record: initialRecord }) {
+export function SingleRecordModal({
+  table,
+  open,
+  setOpen,
+  record: initialRecord,
+  rootTable,
+}) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const [record, setRecord] = useState(initialRecord);
+
+  const [linkedRecord, setLinkedRecord] = useState({
+    open: false,
+    record: undefined,
+    table: undefined,
+  });
 
   useEffect(() => {
     setRecord(initialRecord);
@@ -38,7 +51,7 @@ export function SingleRecordModal({ open, setOpen, record: initialRecord }) {
       <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
         <form onSubmit={handleSubmit} className="sm:px-4 sm:mt-5">
           <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
-            {record[0].value}
+            {table.name.toUpperCase()}
           </Dialog.Title>
           <div className="mt-8 flex flex-col gap-x-6 w-full text-gray-900">
             {record.map((item) => {
@@ -132,10 +145,20 @@ export function SingleRecordModal({ open, setOpen, record: initialRecord }) {
                   tableId={connection.tableId}
                   filters={filters}
                 >
-                  <LinkedRecordsItem
-                    connection={connection}
-                    fieldTypes={fieldTypes}
-                  />
+                  <TableFieldsProvider id={connection.tableId}>
+                    <LinkedRecordsItem
+                      connection={connection}
+                      fieldTypes={fieldTypes}
+                      openRecord={(value) => {
+                        setLinkedRecord((prevVal) => ({
+                          ...prevVal,
+                          table: connection.table,
+                          record: value,
+                          open: true,
+                        }));
+                      }}
+                    />
+                  </TableFieldsProvider>
                 </TableLinkedRecordsProvider>
               );
             })}
@@ -149,12 +172,26 @@ export function SingleRecordModal({ open, setOpen, record: initialRecord }) {
             </button>
           </div>
         </form>
+        {(!rootTable && linkedRecord.open && linkedRecord.record) && (
+          <SingleRecordModal
+            table={linkedRecord.table}
+            record={linkedRecord.record}
+            open={linkedRecord.open}
+            setOpen={(value) => setLinkedRecord((prevVal) => ({
+              ...prevVal,
+              open: value,
+            }))}
+            rootTable={table}
+          />
+        )}
       </div>
     </Modal>
   );
 }
 
 SingleRecordModal.propTypes = {
+  table: PropTypes.object.isRequired,
+  rootTable: PropTypes.object,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,

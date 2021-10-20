@@ -178,7 +178,14 @@ export function TableRenderer({ height, table }) {
           </ScrollSync>
         )}
       </AutoSizer>
-      {selectedRecord && <SingleRecordModal open={isModalOpen} setOpen={setIsModalOpen} record={selectedRecord} />}
+      {selectedRecord && (
+        <SingleRecordModal
+          table={table}
+          open={isModalOpen}
+          setOpen={setIsModalOpen}
+          record={selectedRecord}
+        />
+      )}
     </div>
   );
 }
