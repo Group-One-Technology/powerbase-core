@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import useSWR from 'swr';
 import { Link } from 'react-router-dom';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 
-import { useAuthUser } from '@models/AuthUser';
-import { getDatabases } from '@lib/api/databases';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
@@ -12,14 +9,10 @@ import { EmptyBase } from '@components/bases/EmptyBase';
 import { BaseItem } from '@components/bases/BaseItem';
 import { BaseErrorModal } from '@components/bases/BaseErrorModal';
 import { Loader } from '@components/ui/Loader';
+import { BasesProvider, useBases } from '@models/Bases';
 
-export function BasesPage() {
-  const authUser = useAuthUser();
-  const { data: bases, mutate: mutateBases } = useSWR(
-    authUser ? '/databases' : null,
-    getDatabases,
-    { revalidateOnFocus: true },
-  );
+function BasesContentPage() {
+  const { data: bases, mutate: mutateBases } = useBases();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBase, setSelectedBase] = useState();
@@ -73,5 +66,13 @@ export function BasesPage() {
         </PageContent>
       </div>
     </Page>
+  );
+}
+
+export function BasesPage() {
+  return (
+    <BasesProvider>
+      <BasesContentPage />
+    </BasesProvider>
   );
 }
