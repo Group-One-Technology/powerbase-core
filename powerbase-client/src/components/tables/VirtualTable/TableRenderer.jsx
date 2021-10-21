@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
+import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableConnections } from '@models/TableConnections';
@@ -179,12 +180,14 @@ export function TableRenderer({ height, table }) {
         )}
       </AutoSizer>
       {selectedRecord && (
-        <SingleRecordModal
-          table={table}
-          open={isModalOpen}
-          setOpen={setIsModalOpen}
-          record={selectedRecord}
-        />
+        <RecordsModalStateProvider rootTable={table}>
+          <SingleRecordModal
+            table={table}
+            open={isModalOpen}
+            setOpen={setIsModalOpen}
+            record={selectedRecord}
+          />
+        </RecordsModalStateProvider>
       )}
     </div>
   );

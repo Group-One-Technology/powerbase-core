@@ -4,6 +4,7 @@ import { Dialog } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { TableRecordProvider } from '@models/TableRecord';
+import { useRecordsModalState } from '@models/record/RecordsModalState';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
@@ -22,6 +23,7 @@ export function SingleRecordModal({
   const { data: fieldTypes } = useFieldTypes();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
+  const { setOpenedTables } = useRecordsModalState();
   const [record, setRecord] = useState(initialRecord);
 
   const [linkedRecord, setLinkedRecord] = useState({
@@ -39,6 +41,11 @@ export function SingleRecordModal({
       ...item,
       value: item.id === fieldId ? value : item.value,
     })));
+  };
+
+  const handleOpenRecord = (curTable, value) => {
+    setLinkedRecord(value);
+    setOpenedTables((prevTables) => [...prevTables, curTable]);
   };
 
   const handleSubmit = (evt) => {
@@ -93,7 +100,7 @@ export function SingleRecordModal({
                       fieldTypes={fieldTypes}
                       handleRecordInputChange={handleRecordInputChange}
                       openRecord={(value) => {
-                        setLinkedRecord((prevVal) => ({
+                        handleOpenRecord(referencedTable, (prevVal) => ({
                           ...prevVal,
                           table: referencedTable,
                           record: value,
@@ -167,7 +174,7 @@ export function SingleRecordModal({
                       connection={connection}
                       fieldTypes={fieldTypes}
                       openRecord={(value) => {
-                        setLinkedRecord((prevVal) => ({
+                        handleOpenRecord(connection.table, (prevVal) => ({
                           ...prevVal,
                           table: connection.table,
                           record: value,
@@ -196,10 +203,16 @@ export function SingleRecordModal({
                 table={linkedRecord.table}
                 record={linkedRecord.record}
                 open={linkedRecord.open}
-                setOpen={(value) => setLinkedRecord((prevVal) => ({
-                  ...prevVal,
-                  open: value,
-                }))}
+                setOpen={(value) => {
+                  if (!value) {
+                    setOpenedTables((prevTables) => prevTables.filter((item) => item.id !== linkedRecord.table.id));
+                  }
+
+                  setLinkedRecord((prevVal) => ({
+                    ...prevVal,
+                    open: value,
+                  }));
+                }}
               />
             </TableReferencedConnectionsProvider>
           </TableConnectionsProvider>
