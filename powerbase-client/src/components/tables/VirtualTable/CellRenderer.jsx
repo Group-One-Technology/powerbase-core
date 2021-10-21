@@ -1,9 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
-import { FieldType } from '@lib/constants/field-types';
-import { formatDate } from '@lib/helpers/formatDate';
+/* eslint-disable */
+import React from "react";
+import PropTypes from "prop-types";
+import cn from "classnames";
+import { ArrowsExpandIcon } from "@heroicons/react/outline";
+import { FieldType } from "@lib/constants/field-types";
+import { formatDate } from "@lib/helpers/formatDate";
 
 function CellValue({
   value,
@@ -26,7 +27,7 @@ function CellValue({
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {(isHoveredRow && !isLastRow) && (
+          {isHoveredRow && !isLastRow && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -45,12 +46,12 @@ function CellValue({
     );
   }
 
-  if (fieldType?.name === FieldType.CHECKBOX && !field.isPii) {
+  if (fieldType?.name === FieldType.CHECKBOX && !field.isPii && !isLastRow) {
     return (
       <input
         type="checkbox"
         className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-        checked={value?.toString() === 'true'}
+        checked={value?.toString() === "true"}
         readOnly
       />
     );
@@ -59,16 +60,18 @@ function CellValue({
   if (fieldType?.name === FieldType.DATE && !field.isPii) {
     const date = formatDate(value);
 
-    return (
-      <span>
-        {date ? `${date} UTC` : null}
-      </span>
-    );
+    return <span>{date ? `${date} UTC` : null}</span>;
   }
 
   return (
-    <span className={cn((value?.toString().length && field.isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
-      {!field.isPii ? value?.toString() : '*****'}
+    <span
+      className={cn(
+        value?.toString().length &&
+          field.isForeignKey &&
+          "px-2 py-0.25 bg-blue-50 rounded"
+      )}
+    >
+      {!field.isPii ? value?.toString() : "*****"}
     </span>
   );
 }
@@ -100,7 +103,9 @@ export function CellRenderer({
   handleExpandRecord,
 }) {
   const fieldType = field?.fieldTypeId
-    ? fieldTypes?.find((item) => item.id.toString() === field.fieldTypeId.toString())
+    ? fieldTypes?.find(
+        (item) => item.id.toString() === field.fieldTypeId.toString()
+      )
     : undefined;
 
   const handleMouseEnter = () => {
@@ -116,18 +121,18 @@ export function CellRenderer({
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2',
-        isHoveredRow && 'bg-gray-50',
-        isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
-        (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
+        "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2",
+        isHoveredRow && "bg-gray-50",
+        isRowNo ? "justify-center text-xs text-gray-500" : "border-r",
+        !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? "inline" : "flex"
       )}
       style={style}
       tabIndex={0}
       onKeyDown={(evt) => {
         const el = evt.target;
 
-        if (evt.code === 'Enter' && !isRowNo) {
-          el.contentEditable = el.contentEditable !== 'true';
+        if (evt.code === "Enter" && !isRowNo) {
+          el.contentEditable = el.contentEditable !== "true";
         }
       }}
       onDoubleClick={(evt) => {
