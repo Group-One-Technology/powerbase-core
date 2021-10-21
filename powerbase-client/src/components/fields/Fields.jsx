@@ -93,7 +93,7 @@ export function Fields({ tableId }) {
                   </div>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
-                      <ul className="m-3 list-none flex flex-col">
+                      <ul className="mx-3 mb-3 list-none flex flex-col">
                         {fields.map((field) => <FieldItem key={field.id} field={field} />)}
                       </ul>
                     </SortableContext>
