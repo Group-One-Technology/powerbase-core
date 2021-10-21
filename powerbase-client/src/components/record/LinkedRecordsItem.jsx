@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/outline';
 
 import { useTableFields } from '@models/TableFields';
+import { useTableConnections } from '@models/TableConnections';
 import { useTableLinkedRecords } from '@models/TableLinkedRecords';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Button } from '@components/ui/Button';
@@ -17,9 +19,10 @@ export function LinkedRecordsItem({ connection, fieldTypes, openRecord }) {
     isReachingEnd,
   } = useTableLinkedRecords();
   const { data: fields } = useTableFields();
+  const { data: connections } = useTableConnections();
   const fieldType = fieldTypes?.find((type) => type.name === FieldType.OTHERS);
 
-  if (linkedRecords == null || linkedRecords?.length === 0 || fields == null || fields?.length === 0) {
+  if (linkedRecords == null || linkedRecords?.length === 0 || fields == null || connections == null) {
     return null;
   }
 
@@ -45,7 +48,7 @@ export function LinkedRecordsItem({ connection, fieldTypes, openRecord }) {
         {linkedRecords.map((record, index) => {
           const recordKey = `${index}-${record[0]}`;
 
-          const recordArr = fields.map((field) => ({
+          const recordArr = initializeFields(fields, connections).map((field) => ({
             ...field,
             value: record[field.name],
           }));

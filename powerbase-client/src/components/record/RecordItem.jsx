@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { useBase } from '@models/Base';
 import { useTableFields } from '@models/TableFields';
 import { useTableRecord } from '@models/TableRecord';
+import { useTableConnections } from '@models/TableConnections';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
@@ -19,6 +21,7 @@ export function RecordItem({
 }) {
   const { data: base } = useBase();
   const { data: fields } = useTableFields();
+  const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
@@ -43,8 +46,8 @@ export function RecordItem({
   );
 
   if (item.isForeignKey && item.value && !linkedRecordError) {
-    const recordArr = (fields && linkedRecord)
-      ? fields.map((field) => ({
+    const recordArr = (fields && linkedRecord && connections)
+      ? initializeFields(fields, connections).map((field) => ({
         ...field,
         value: linkedRecord[field.name],
       }))

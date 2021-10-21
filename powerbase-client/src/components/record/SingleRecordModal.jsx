@@ -134,11 +134,23 @@ export function SingleRecordModal({
                     : undefined}
                   primaryKeys={primaryKeys}
                 >
-                  <RecordItem
-                    item={item}
-                    fieldTypes={fieldTypes}
-                    handleRecordInputChange={handleRecordInputChange}
-                  />
+                  <TableFieldsProvider id={foreignKey.referencedTableId}>
+                    <TableConnectionsProvider tableId={foreignKey.referencedTableId}>
+                      <RecordItem
+                        item={item}
+                        fieldTypes={fieldTypes}
+                        handleRecordInputChange={handleRecordInputChange}
+                        openRecord={(value) => {
+                          handleOpenRecord(value, (prevVal) => ({
+                            ...prevVal,
+                            table: foreignKey.referencedTable,
+                            record: value,
+                            open: true,
+                          }));
+                        }}
+                      />
+                    </TableConnectionsProvider>
+                  </TableFieldsProvider>
                 </TableRecordProvider>
               );
             })}
@@ -160,18 +172,20 @@ export function SingleRecordModal({
                   filters={filters}
                 >
                   <TableFieldsProvider id={connection.tableId}>
-                    <LinkedRecordsItem
-                      connection={connection}
-                      fieldTypes={fieldTypes}
-                      openRecord={(value) => {
-                        handleOpenRecord(value, (prevVal) => ({
-                          ...prevVal,
-                          table: connection.table,
-                          record: value,
-                          open: true,
-                        }));
-                      }}
-                    />
+                    <TableConnectionsProvider tableId={connection.tableId}>
+                      <LinkedRecordsItem
+                        connection={connection}
+                        fieldTypes={fieldTypes}
+                        openRecord={(value) => {
+                          handleOpenRecord(value, (prevVal) => ({
+                            ...prevVal,
+                            table: connection.table,
+                            record: value,
+                            open: true,
+                          }));
+                        }}
+                      />
+                    </TableConnectionsProvider>
                   </TableFieldsProvider>
                 </TableLinkedRecordsProvider>
               );
