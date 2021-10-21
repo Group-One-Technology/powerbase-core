@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { RadioGroup } from "@headlessui/react";
 
 const fieldTypes = [
@@ -9,7 +9,7 @@ const fieldTypes = [
   },
   {
     name: "Long Text",
-    description: "A long line of text.",
+    description: "A long text field.",
   },
   {
     name: "Number",
@@ -23,6 +23,16 @@ function classNames(...classes) {
 
 export default function NewField() {
   const [selected, setSelected] = useState(fieldTypes[0]);
+  const [fieldName, setFieldName] = useState("");
+  const fieldInputRef = useRef(null);
+
+  useEffect(() => {
+    fieldInputRef.current?.focus();
+  }, []);
+
+  const handleChange = (e) => {
+    setFieldName(e.target.value);
+  };
 
   return (
     <div className="m-4">
@@ -36,17 +46,14 @@ export default function NewField() {
           id="new-field-name"
           className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
           placeholder="Enter field name (required)"
+          autoComplete="off"
+          ref={fieldInputRef}
+          onChange={handleChange}
         />
       </div>
 
       <div className="mt-2">
         <RadioGroup value={selected} onChange={setSelected}>
-          {/* <RadioGroup.Label>
-            <p className="text-gray-800 mt-2 mb-2 text-sm">
-              {" "}
-              Select a Field Type{" "}
-            </p>
-          </RadioGroup.Label> */}
           <div className="bg-white rounded-md -space-y-px">
             {fieldTypes.map((fieldType, fieldTypeIdx) => (
               <RadioGroup.Option
