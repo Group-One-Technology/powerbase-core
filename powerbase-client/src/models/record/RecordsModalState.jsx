@@ -1,16 +1,16 @@
 import constate from 'constate';
 import { useEffect, useState } from 'react';
 
-function useRecordsModalStateModel({ rootTable }) {
-  const [openedTables, setOpenedTables] = useState([rootTable]);
+function useRecordsModalStateModel({ rootRecord }) {
+  const [openedRecords, setOpenedRecords] = useState([rootRecord]);
 
   useEffect(() => {
-    setOpenedTables([rootTable]);
-  }, [rootTable]);
+    setOpenedRecords([rootRecord]);
+  }, [rootRecord]);
 
   return {
-    openedTables,
-    setOpenedTables,
+    openedRecords,
+    setOpenedRecords,
   };
 }
 

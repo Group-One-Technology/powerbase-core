@@ -180,7 +180,7 @@ export function TableRenderer({ height, table }) {
         )}
       </AutoSizer>
       {selectedRecord && (
-        <RecordsModalStateProvider rootTable={table}>
+        <RecordsModalStateProvider rootRecord={selectedRecord}>
           <SingleRecordModal
             table={table}
             open={isModalOpen}
