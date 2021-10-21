@@ -22,5 +22,5 @@ export function GlobalProviders({ children }) {
 }
 
 GlobalProviders.propTypes = {
-  children: PropTypes.element.isRequired,
+  children: PropTypes.any.isRequired,
 };
