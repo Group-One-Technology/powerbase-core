@@ -6,20 +6,48 @@ import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
+import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
+import { useMounted } from '@lib/hooks/useMounted';
+import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
 export function Fields({ tableId }) {
+  const { mounted } = useMounted();
   const { data: view } = useTableView();
-  const { data: initialFields } = useViewFields();
+  const { saving, saved, catchError } = useSaveStatus();
+  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({ tableId, fields, setFields });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setFields(initialFields);
   }, [initialFields]);
+
+  const handleHideAll = async () => {
+    saving();
+    setLoading(true);
+
+    try {
+      await hideAllViewFields({ viewId: view.id });
+
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: true,
+      }));
+
+      mounted(() => setLoading(false));
+
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err);
+      mounted(() => setLoading(false));
+    }
+  };
 
   return (
     <Popover className="relative">
@@ -53,6 +81,16 @@ export function Fields({ tableId }) {
                       {view.name}
                     </strong>
                   </h4>
+                  <div className="mx-2 flex justify-end">
+                    <button
+                      type="button"
+                      className="p-1 text-indigo-500"
+                      onClick={handleHideAll}
+                      disabled={loading}
+                    >
+                      Hide all
+                    </button>
+                  </div>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
                       <ul className="m-3 list-none flex flex-col">
