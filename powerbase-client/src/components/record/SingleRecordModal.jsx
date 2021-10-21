@@ -4,9 +4,9 @@ import { Dialog } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { TableRecordProvider } from '@models/TableRecord';
-import { useTableConnections } from '@models/TableConnections';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
-import { useTableReferencedConnections } from '@models/TableReferencedConnections';
+import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
+import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 
 import { Modal } from '@components/ui/Modal';
@@ -18,7 +18,6 @@ export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
-  rootTable,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: connections } = useTableConnections();
@@ -46,6 +45,10 @@ export function SingleRecordModal({
     evt.preventDefault();
   };
 
+  if (connections == null || referencedConnections == null) {
+    return null;
+  }
+
   return (
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
@@ -59,32 +62,46 @@ export function SingleRecordModal({
                 return null;
               }
 
-              const primaryKeys = item.isForeignKey && item.foreignKey
+              const isForeignKey = !!(item.isForeignKey && item.foreignKey && item.value);
+              const primaryKeys = isForeignKey
                 ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
                 : undefined;
-              const tableName = item.foreignKey && item.value
+              const tableName = isForeignKey
                 ? item.foreignKey.referencedTable.name
                 : undefined;
-              const databaseName = item.foreignKey && item.value
+              const databaseName = isForeignKey
                 ? item.foreignKey.referencedTable.databaseName
+                : undefined;
+              const referencedTable = isForeignKey
+                ? item.foreignKey.referencedTable
                 : undefined;
 
               return (
                 <TableRecordProvider
                   key={item.id}
-                  tableId={(item.isForeignKey && item.value) ? item.foreignKey.referencedTableId : undefined}
-                  recordId={primaryKeys && item.value
+                  tableId={referencedTable?.id}
+                  recordId={primaryKeys
                     ? Object.entries(primaryKeys)
                       .map(([key, value]) => `${key}_${value}`)
                       .join('-')
                     : undefined}
                   primaryKeys={primaryKeys}
                 >
-                  <RecordItem
-                    item={{ ...item, tableName, databaseName }}
-                    fieldTypes={fieldTypes}
-                    handleRecordInputChange={handleRecordInputChange}
-                  />
+                  <TableFieldsProvider id={referencedTable?.id}>
+                    <RecordItem
+                      item={{ ...item, tableName, databaseName }}
+                      fieldTypes={fieldTypes}
+                      handleRecordInputChange={handleRecordInputChange}
+                      openRecord={(value) => {
+                        setLinkedRecord((prevVal) => ({
+                          ...prevVal,
+                          table: referencedTable,
+                          record: value,
+                          open: true,
+                        }));
+                      }}
+                    />
+                  </TableFieldsProvider>
                 </TableRecordProvider>
               );
             })}
@@ -172,17 +189,20 @@ export function SingleRecordModal({
             </button>
           </div>
         </form>
-        {(!rootTable && linkedRecord.open && linkedRecord.record) && (
-          <SingleRecordModal
-            table={linkedRecord.table}
-            record={linkedRecord.record}
-            open={linkedRecord.open}
-            setOpen={(value) => setLinkedRecord((prevVal) => ({
-              ...prevVal,
-              open: value,
-            }))}
-            rootTable={table}
-          />
+        {(linkedRecord.open && linkedRecord.record) && (
+          <TableConnectionsProvider tableId={linkedRecord.table.id}>
+            <TableReferencedConnectionsProvider tableId={linkedRecord.table.id}>
+              <SingleRecordModal
+                table={linkedRecord.table}
+                record={linkedRecord.record}
+                open={linkedRecord.open}
+                setOpen={(value) => setLinkedRecord((prevVal) => ({
+                  ...prevVal,
+                  open: value,
+                }))}
+              />
+            </TableReferencedConnectionsProvider>
+          </TableConnectionsProvider>
         )}
       </div>
     </Modal>
@@ -191,7 +211,6 @@ export function SingleRecordModal({
 
 SingleRecordModal.propTypes = {
   table: PropTypes.object.isRequired,
-  rootTable: PropTypes.object,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,

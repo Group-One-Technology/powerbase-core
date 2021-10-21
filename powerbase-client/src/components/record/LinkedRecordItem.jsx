@@ -32,6 +32,6 @@ export function LinkedRecordItem({ record, openRecord }) {
 }
 
 LinkedRecordItem.propTypes = {
-  record: PropTypes.object.isRequired,
+  record: PropTypes.object,
   openRecord: PropTypes.func.isRequired,
 };
