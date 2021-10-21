@@ -34,7 +34,10 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   }
 
   return (
-    <Page navbar={<Navbar base={base} bases={bases} />} className="!bg-white">
+    <Page
+      navbar={<Navbar base={base} bases={bases} />}
+      className="!bg-white"
+    >
       <PageContent className="!px-0 max-w-full">
         <CurrentViewProvider
           baseId={baseId}

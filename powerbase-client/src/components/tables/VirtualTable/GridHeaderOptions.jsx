@@ -11,10 +11,14 @@ import {
 } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useMounted } from '@lib/hooks/useMounted';
 import { hideViewField } from '@lib/api/view-fields';
 import { updateFieldAlias, setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
+  const { mounted } = useMounted();
+  const { saving, catchError, saved } = useSaveStatus();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
@@ -26,6 +30,8 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   }, [field]);
 
   const handleOpenChange = async (value) => {
+    saving();
+
     if (!value && alias !== field.alias) {
       const updatedFields = fields.map((item) => ({
         ...item,
@@ -36,13 +42,15 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
 
       try {
         await updateFieldAlias({ id: field.fieldId, alias });
-        mutateViewFields(updatedFields);
-        setOptionOpen(value);
+        mounted(() => setOptionOpen(value));
+
+        await mutateViewFields(updatedFields);
+        saved();
       } catch (err) {
-        console.log(err);
+        catchError(err);
       }
     } else {
-      setOptionOpen(value);
+      mounted(() => setOptionOpen(value));
     }
   };
 
@@ -51,6 +59,8 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   const handleHideField = async () => {
+    saving();
+
     try {
       await hideViewField({ id: field.id });
       const updatedFields = fields.map((item) => ({
@@ -60,15 +70,18 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           : item.isHidden,
       }));
 
-      mutateViewFields(updatedFields);
+      mounted(() => setOptionOpen(false));
+      await mutateViewFields(updatedFields);
+      saved();
     } catch (err) {
-      console.log(err);
+      catchError(err);
+      mounted(() => setOptionOpen(false));
     }
-
-    setOptionOpen(false);
   };
 
   const handleTogglePII = async () => {
+    saving();
+
     try {
       if (!field.isPii) {
         await setFieldAsPII({ id: field.fieldId });
@@ -83,12 +96,13 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           : item.isPii,
       }));
 
-      mutateViewFields(updatedFields);
+      mounted(() => setOptionOpen(false));
+      await mutateViewFields(updatedFields);
+      saved();
     } catch (err) {
-      console.log(err);
+      mounted(() => setOptionOpen(false));
+      catchError(err);
     }
-
-    setOptionOpen(false);
   };
 
   return (

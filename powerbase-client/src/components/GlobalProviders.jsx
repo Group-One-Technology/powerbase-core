@@ -2,6 +2,7 @@ import React from 'react';
 import { SWRConfig } from 'swr';
 import PropTypes from 'prop-types';
 import { AuthUserProvider } from '@models/AuthUser';
+import { SaveStatusProvider } from '@models/SaveStatus';
 
 export function GlobalProviders({ children }) {
   return (
@@ -12,7 +13,9 @@ export function GlobalProviders({ children }) {
       }}
     >
       <AuthUserProvider>
-        {children}
+        <SaveStatusProvider>
+          {children}
+        </SaveStatusProvider>
       </AuthUserProvider>
     </SWRConfig>
   );

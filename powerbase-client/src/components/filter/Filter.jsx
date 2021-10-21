@@ -7,6 +7,7 @@ import debounce from 'lodash.debounce';
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
+import { useSaveStatus } from '@models/SaveStatus';
 import { useTableView } from '@models/TableView';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
@@ -15,6 +16,7 @@ import { FilterGroup } from './FilterGroup';
 
 export function Filter() {
   const filterRef = useRef();
+  const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
@@ -22,6 +24,8 @@ export function Filter() {
 
   const updateTableRecords = useCallback(debounce(async () => {
     if (filterRef.current) {
+      saving();
+
       const filters = Array.from(filterRef.current.querySelectorAll('.filter') || []).map(({ attributes }) => ({
         level: +attributes['data-level'].nodeValue,
         operator: attributes['data-operator']?.nodeValue,
@@ -39,8 +43,13 @@ export function Filter() {
       };
 
       setFilters(updatedFilter);
-      updateTableView({ id: view.id, filters: updatedFilter });
-      await mutateTableRecords();
+      try {
+        updateTableView({ id: view.id, filters: updatedFilter });
+        await mutateTableRecords();
+        saved();
+      } catch (err) {
+        catchError(err);
+      }
     }
   }, 500), [view]);
 
