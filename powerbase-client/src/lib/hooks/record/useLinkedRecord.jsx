@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useRecordsModalState } from '@models/record/RecordsModalState';
 
 function isRecordsEqual(x, y) {
@@ -7,7 +8,7 @@ function isRecordsEqual(x, y) {
 }
 
 export function useLinkedRecord() {
-  const { setOpenedRecords } = useRecordsModalState();
+  const { openedRecords, setOpenedRecords } = useRecordsModalState();
   const [linkedRecord, setLinkedRecord] = useState({
     open: false,
     record: undefined,
@@ -15,6 +16,16 @@ export function useLinkedRecord() {
   });
 
   const handleOpenRecord = (record, value) => {
+    const isAlreadyOpen = openedRecords.find((item) => isRecordsEqual(item, record));
+
+    if (isAlreadyOpen) {
+      toast('This record is already open.', {
+        icon: '⚠️',
+        className: 'bg-gray-800 text-sm text-white rounded-md',
+      });
+      return;
+    }
+
     setLinkedRecord(value);
     setOpenedRecords((prevRecords) => [...prevRecords, record]);
   };
