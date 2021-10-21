@@ -1,9 +1,10 @@
-import { securedApi } from './index';
+/* eslint-disable  */
+import { securedApi } from "./index";
 
 export async function getViewFields({ viewId }) {
   const response = await securedApi.get(`/views/${viewId}/view_fields`);
 
-  if (response.statusText === 'OK') {
+  if (response.statusText === "OK") {
     return response.data;
   }
 
@@ -11,9 +12,12 @@ export async function getViewFields({ viewId }) {
 }
 
 export async function reorderViewFields({ viewId, ...payload }) {
-  const response = await securedApi.put(`/views/${viewId}/view_fields/order`, payload);
+  const response = await securedApi.put(
+    `/views/${viewId}/view_fields/order`,
+    payload
+  );
 
-  if (response.statusText === 'OK') {
+  if (response.statusText === "OK") {
     return response.data;
   }
 
@@ -23,7 +27,7 @@ export async function reorderViewFields({ viewId, ...payload }) {
 export async function hideViewField({ id }) {
   const response = await securedApi.put(`/view_fields/${id}/hide`);
 
-  if (response.statusText === 'OK') {
+  if (response.statusText === "OK") {
     return response.data;
   }
 
@@ -33,7 +37,7 @@ export async function hideViewField({ id }) {
 export async function unhideViewField({ id }) {
   const response = await securedApi.put(`/view_fields/${id}/unhide`);
 
-  if (response.statusText === 'OK') {
+  if (response.statusText === "OK") {
     return response.data;
   }
 
@@ -43,7 +47,7 @@ export async function unhideViewField({ id }) {
 export async function resizeViewField({ id, ...payload }) {
   const response = await securedApi.put(`/view_fields/${id}/resize`, payload);
 
-  if (response.statusText === 'OK') {
+  if (response.statusText === "OK") {
     return response.data;
   }
 
