@@ -10,6 +10,16 @@ export async function getViewFields({ viewId }) {
   return undefined;
 }
 
+export async function hideAllViewFields({ viewId }) {
+  const response = await securedApi.put(`/views/${viewId}/view_fields/hide_all`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function reorderViewFields({ viewId, ...payload }) {
   const response = await securedApi.put(`/views/${viewId}/view_fields/order`, payload);
 
