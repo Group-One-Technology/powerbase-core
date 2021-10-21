@@ -20,6 +20,12 @@ class PowerbaseFieldsController < ApplicationController
     render json: @table.powerbase_fields.map {|item| format_json(item)}
   end
 
+  # POST /tables/:id/field
+  def add
+    field = PowerbaseField.new()
+    puts 'New Field!' if field.save!
+  end
+
   # PUT /fields/:id/alias
   def alias
     @field = PowerbaseField.find(safe_params[:id])
