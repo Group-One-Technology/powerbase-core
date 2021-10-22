@@ -70,7 +70,8 @@ export function TableRenderer({ height, table }) {
         ...item,
         value: records[rowNo - 1][item.name],
       }))
-      .sort((x, y) => x.order > y.order);
+      .sort((x, y) => x.order > y.order)
+      .sort((x) => x.isHidden);
 
     setIsModalOpen(true);
     setSelectedRecord(updatedFields);
