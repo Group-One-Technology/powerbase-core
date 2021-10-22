@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Dialog } from '@headlessui/react';
+import cn from 'classnames';
+import { Dialog, Disclosure } from '@headlessui/react';
+import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { TableRecordProvider } from '@models/TableRecord';
@@ -9,6 +11,7 @@ import { useTableConnections, TableConnectionsProvider } from '@models/TableConn
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
+import { pluralize } from '@lib/helpers/pluralize';
 
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
@@ -26,6 +29,7 @@ export function SingleRecordModal({
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
 
   const [record, setRecord] = useState(initialRecord);
+  const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
     setRecord(initialRecord);
@@ -54,54 +58,16 @@ export function SingleRecordModal({
             {table.name.toUpperCase()}
           </Dialog.Title>
           <div className="mt-8 flex flex-col gap-x-6 w-full text-gray-900">
-            {record.map((item) => {
-              if (item.foreignKey?.columns.length > 1) {
-                return null;
-              }
-
-              const isForeignKey = !!(item.isForeignKey && item.foreignKey && item.value);
-              const primaryKeys = isForeignKey
-                ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
-                : undefined;
-              const tableName = isForeignKey
-                ? item.foreignKey.referencedTable.name
-                : undefined;
-              const databaseName = isForeignKey
-                ? item.foreignKey.referencedTable.databaseName
-                : undefined;
-              const referencedTable = isForeignKey
-                ? item.foreignKey.referencedTable
-                : undefined;
-
-              return (
-                <TableRecordProvider
+            {record.filter((item) => !(item.isHidden || item.foreignKey?.columns.length > 1))
+              .map((item) => (
+                <RecordItem
                   key={item.id}
-                  tableId={referencedTable?.id}
-                  recordId={primaryKeys
-                    ? Object.entries(primaryKeys)
-                      .map(([key, value]) => `${key}_${value}`)
-                      .join('-')
-                    : undefined}
-                  primaryKeys={primaryKeys}
-                >
-                  <TableFieldsProvider id={referencedTable?.id}>
-                    <RecordItem
-                      item={{ ...item, tableName, databaseName }}
-                      fieldTypes={fieldTypes}
-                      handleRecordInputChange={handleRecordInputChange}
-                      openRecord={(value) => {
-                        handleOpenRecord(value, (prevVal) => ({
-                          ...prevVal,
-                          table: referencedTable,
-                          record: value,
-                          open: true,
-                        }));
-                      }}
-                    />
-                  </TableFieldsProvider>
-                </TableRecordProvider>
-              );
-            })}
+                  item={item}
+                  fieldTypes={fieldTypes}
+                  handleOpenRecord={handleOpenRecord}
+                  handleRecordInputChange={handleRecordInputChange}
+                />
+              ))}
             {connections.map((foreignKey) => {
               if (foreignKey?.columns.length <= 1) {
                 return null;
@@ -154,6 +120,37 @@ export function SingleRecordModal({
                 </TableRecordProvider>
               );
             })}
+            {hiddenFields.length > 0 && (
+              <Disclosure as="div">
+                {({ open: disclosureOpen }) => (
+                  <>
+                    <Disclosure.Button
+                      type="button"
+                      className={cn(
+                        'w-full flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500',
+                        disclosureOpen ? 'mb-4' : 'mb-8',
+                      )}
+                    >
+                      {disclosureOpen
+                        ? <ChevronDownIcon className="w-3 h-3 mr-1" aria-hidden="true" />
+                        : <ChevronRightIcon className="w-3 h-3 mr-1" aria-hidden="true" />}
+                      {pluralize('hidden field', hiddenFields.length)}
+                    </Disclosure.Button>
+                    <Disclosure.Panel>
+                      {hiddenFields.map((item) => (
+                        <RecordItem
+                          key={item.id}
+                          item={item}
+                          fieldTypes={fieldTypes}
+                          handleOpenRecord={handleOpenRecord}
+                          handleRecordInputChange={handleRecordInputChange}
+                        />
+                      ))}
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
+            )}
             {referencedConnections?.map((connection) => {
               const filters = {};
 

@@ -34,6 +34,7 @@ Rails.application.routes.draw do
         resources :view_field_options, path: 'view_fields', as: 'view_fields', only: [:index], shallow: true do
           collection do
             put 'order', to: 'view_field_options#update_order', as: 'reorder_view_fields'
+            put 'hide_all', to: 'view_field_options#hide_all', as: 'hide_all_view_fields'
           end
 
           member do

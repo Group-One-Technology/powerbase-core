@@ -1,7 +1,7 @@
 class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
 
-  schema(:index) do
+  schema(:index, :hide_all) do
     required(:view_id).value(:integer)
   end
 
@@ -23,6 +23,27 @@ class ViewFieldOptionsController < ApplicationController
   def index
     @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
+  end
+
+  # PUT /views/:view_id/fields/hide_all
+  def hide_all
+    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id])
+
+    @view_fields.each do |field|
+      field.update(is_hidden: true)
+    end
+
+    render status: :no_content
+  end
+
+  # PUT /views/:view_id/view_fields/order
+  def update_order
+    safe_params[:view_fields].each_with_index do |view_field_id, index|
+      view_field = ViewFieldOption.find(view_field_id)
+      view_field.update(order: index)
+    end
+
+    render status: :no_content
   end
 
   # PUT /view_fields/:id/hide
@@ -52,16 +73,6 @@ class ViewFieldOptionsController < ApplicationController
     view_field = ViewFieldOption.find(safe_params[:id])
     view_field.update_attribute(:width, safe_params[:width])
     render json: format_json(view_field) if view_field.save!
-  end
-
-  # PUT /views/:view_id/view_fields/order
-  def update_order
-    safe_params[:view_fields].each_with_index do |view_field_id, index|
-      view_field = ViewFieldOption.find(view_field_id)
-      view_field.update(order: index)
-    end
-
-    render status: :no_content
   end
 
   private

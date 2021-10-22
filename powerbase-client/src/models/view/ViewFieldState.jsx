@@ -19,6 +19,7 @@ function useViewFieldStateModel() {
   };
 
   return {
+    initialFields,
     fields,
     setFields: updateFields,
   };
