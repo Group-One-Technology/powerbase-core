@@ -7,13 +7,13 @@
  * @returns fields
  */
 export function initializeFields(intialFields, connections, options = { hidden: true }) {
-  const connectionFields = connections.map((item) => item.columns).flat();
+  const connectionFields = connections?.map((item) => item.columns).flat();
   const fields = options.hidden
     ? intialFields.filter((field) => !field.isHidden)
     : intialFields;
 
   return fields.map((field) => {
-    const connection = connectionFields.includes(field.name)
+    const connection = connectionFields?.includes(field.name)
       ? connections.find((key) => key.columns.includes(field.name))
       : undefined;
 

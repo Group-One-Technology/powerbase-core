@@ -9,15 +9,15 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
-import { useMounted } from '@lib/hooks/useMounted';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
 export function Fields({ tableId }) {
-  const { mounted } = useMounted();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
+  const { setFields: setRecordFields } = useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({ tableId, fields, setFields });
@@ -31,21 +31,21 @@ export function Fields({ tableId }) {
     saving();
     setLoading(true);
 
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isHidden: true,
+    }));
+
+    setFields(updatedFields);
+    setRecordFields(updatedFields);
+    setLoading(false);
+
     try {
       await hideAllViewFields({ viewId: view.id });
-
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isHidden: true,
-      }));
-
-      mounted(() => setLoading(false));
-
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
       catchError(err);
-      mounted(() => setLoading(false));
     }
   };
 
@@ -93,8 +93,8 @@ export function Fields({ tableId }) {
                   </div>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
-                      <ul className="mx-3 mb-3 list-none flex flex-col">
-                        {fields.map((field) => <FieldItem key={field.id} field={field} />)}
+                      <ul className="m-3 list-none flex flex-col">
+                        {fields.map((field) => <FieldItem key={field.id} field={field} setFields={setFields} />)}
                       </ul>
                     </SortableContext>
                   </DndContext>

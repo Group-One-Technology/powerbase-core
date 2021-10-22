@@ -6,6 +6,7 @@ import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { ViewOptionsProvider } from '@models/views/ViewOptions';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
+import { ViewFieldStateProvider } from '@models/view/ViewFieldState';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { FieldTypesProvider } from '@models/FieldTypes';
@@ -33,14 +34,16 @@ const BaseTableContent = React.memo(({ views, table }) => {
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
-            <TableViewsNav
-              table={table}
-              views={views}
-              fields={fields}
-            />
-            {table.isMigrated
-              ? <VirtualTable table={table} height={height} />
-              : <Loader style={{ height }} />}
+            <ViewFieldStateProvider>
+              <TableViewsNav
+                table={table}
+                views={views}
+                fields={fields}
+              />
+              {table.isMigrated
+                ? <VirtualTable table={table} height={height} />
+                : <Loader style={{ height }} />}
+            </ViewFieldStateProvider>
           </FieldTypesProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
