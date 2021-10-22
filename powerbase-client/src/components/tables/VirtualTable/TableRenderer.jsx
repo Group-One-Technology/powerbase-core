@@ -10,12 +10,14 @@ import PropTypes from 'prop-types';
 import { useFieldTypes } from '@models/FieldTypes';
 import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
+import { useTableConnections } from '@models/TableConnections';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
@@ -23,8 +25,9 @@ import { CellRenderer } from './CellRenderer';
 export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
+  const { data: connections } = useTableConnections();
   const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
-  const { fields, setFields } = useViewFieldState();
+  const { initialFields, fields, setFields } = useViewFieldState();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
