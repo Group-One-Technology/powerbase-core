@@ -1,6 +1,5 @@
 class PowerbaseTable < ApplicationRecord
   include Elasticsearch::Model
-  include ::Taskable
 
   alias_attribute :fields, :powerbase_fields
   alias_attribute :db, :powerbase_database
@@ -18,28 +17,9 @@ class PowerbaseTable < ApplicationRecord
   has_many :base_connections, foreign_key: :referenced_table_id
   has_many :table_views
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
-  has_many :tasks, through: :powerbase_database
 
   after_commit on: [:create] do
     logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.powerbase_database.is_turbo
-  end
-
-  after_find do |table|
-    unless has_pending_task?
-      unmigrated_columns_count = table.unmigrated_columns.count
-      if unmigrated_columns_count > 0
-        add_task(
-          name: "#{unmigrated_columns_count} unmigrated #{'column'.pluralize(unmigrated_columns_count)} in '#{table.name}' table",
-          identifier: "PendingColumnMigration##{table.id}",
-          object: Task.create_object(class_name: table.class.name, id: table.id),
-          db: self.powerbase_database
-        )
-      end
-    end
-  end
-
-  def has_pending_task?
-    tasks.pending.exists? identifier: "PendingColumnMigration##{self.id}"
   end
 
   def index_name
@@ -55,7 +35,7 @@ class PowerbaseTable < ApplicationRecord
   end
 
   def unmigrated_columns
-    columns = _sequel_table.columns.reject{|t| self.fields.map{|t| t.name.to_sym}.include? t}
+    columns = _sequel.schema(self.name.to_sym).reject{|t| self.fields.map{|t| t.name.to_sym}.include? t[0]}
     # Disconnect after query
     self._sequel.disconnect
     columns
@@ -69,7 +49,20 @@ class PowerbaseTable < ApplicationRecord
     db._sequel
   end
 
-  def migrate!
-
+  def sync!
+    SyncTableWorker.perform_async(self.id)
   end
+
+  def migration_worker_name
+    "PendingColumnMigration##{self.id}"
+  end
+
+  def reindex!
+    migrator.index!
+  end
+
+  def migrator
+    @migrator ||= Tables::Migrator.new self
+  end
+
 end

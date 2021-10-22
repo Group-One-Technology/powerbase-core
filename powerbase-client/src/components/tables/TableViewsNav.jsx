@@ -45,7 +45,7 @@ export function TableViewsNav({ table, views }) {
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />
-          <Task />
+          {/* <Task /> */}
         </div>
       </div>
     </div>

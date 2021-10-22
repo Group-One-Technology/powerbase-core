@@ -23,6 +23,7 @@ export function Table() {
   return (
     <>
       {
+        // TODO: TBC - JEN
         !table.hasPrimaryKey && false
         && <CustomModal>
             "This table doesn't have a primary key, would like us to add one?"

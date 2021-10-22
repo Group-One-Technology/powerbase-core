@@ -14,15 +14,9 @@ module Powerbase
 
 
     def listen!
-      begin
-        @db = powerbase_db._sequel 
-
-        @db.listen("powerbase_table_update") do |ev, pid, payload| 
-          notifier_callback(@db, ev, pid, payload)
-        end
-      rescue => exception
-        puts "Powerbase::Listener -> Ended"
-        puts exception
+      @db = powerbase_db._sequel 
+      @db.listen("powerbase_table_update") do |ev, pid, payload| 
+        notifier_callback(@db, ev, pid, payload)
       end
     end
 
@@ -65,6 +59,8 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
       end
+
+      powerbase_table.sync!
     end
   end
 end

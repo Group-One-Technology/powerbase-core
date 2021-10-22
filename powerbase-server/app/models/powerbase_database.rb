@@ -22,7 +22,6 @@ class PowerbaseDatabase < ApplicationRecord
 
   belongs_to :user
   has_one :base_migration
-  has_many :tasks, as: :taskable
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
   has_many :base_connections
@@ -44,7 +43,15 @@ class PowerbaseDatabase < ApplicationRecord
       end
     end
 
-    thread.name = self.name
+    thread.name = thread_name
+  end
+
+  def listener_thread
+    Thread.list.find{|t| t.name == self.thread_name}
+  end
+
+  def thread_name
+    "#{self.name}##{self.id}"
   end
 
   def is_synced?
@@ -52,18 +59,27 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def unmigrated_tables
-    sequel_db_tables.reject{|t| self.tables.map{|t| t.name.to_sym}.include? t}
-  end
-
-  def sequel_db_tables
-    _sequel.tables
+    tb = _sequel.tables.reject{|t| self.tables.map{|t| t.name.to_sym}.include? t}
+    _sequel.disconnect
+    tb
   end
 
   def _sequel
     @_sequel ||= Sequel.connect self.connection_string
   end
 
-  def pending_tasks
-    tasks.pending
+  def migration_name
+    "PendingTableMigration##{self.id}"
+  end
+  
+  def sync!
+    # unmigrated_tables_count = self.unmigrated_tables.count
+
+    # if unmigrated_tables_count > 0
+    #   SyncDatabaseWorker.perform_async(
+    #     name: migration_name,
+    #     arg: {database_id: self.id}
+    #   )
+    # end
   end
 end

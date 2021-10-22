@@ -98,7 +98,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     }
 
     @database_tables = PowerbaseTable.where(powerbase_database_id: @database.id)
-    @piis = Pii.all
 
     @database_tables.each do |table|
       next if table.is_migrated
@@ -122,7 +121,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           field.default_value = column_options[:default] || nil
           field.is_primary_key = column_options[:primary_key]
           field.is_nullable = column_options[:allow_null]
-          field.is_pii = is_pii(column_name, @piis)
+          field.is_pii = Pii.is_pii?(column_name)
           field.powerbase_table_id = table.id
 
           column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
@@ -406,15 +405,5 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         connection_string: db.connection_string,
         is_turbo: db.is_turbo,
       }, &block)
-    end
-
-    def is_pii(data, piis)
-      data = data.to_s.downcase.gsub("_"," ")
-      piis.each do |pii|
-        return true if data.include?(pii.name.downcase)
-        return true if pii.abbreviation != nil && pii.abbreviation.length > 0 && data.include?(pii.abbreviation.downcase)
-      end
-
-      false
     end
 end

@@ -14,7 +14,15 @@ module ElasticsearchHelper
   end
 
   def update_record(index, doc_id, body)
-    client.update(index: index, id: format_doc_id(doc_id), body: {doc: body}, refresh: true )
+    client.update(
+      index: index,
+      id: format_doc_id(doc_id),
+      body: {
+        doc: body,
+        doc_as_upsert: true
+      },
+      refresh: true
+    )
   end
 
   def delete_record(index, doc_id)
@@ -25,6 +33,17 @@ module ElasticsearchHelper
     value
       .parameterize(separator: "_")
       .truncate(ELASTICSEACH_ID_LIMIT)
+  end
+
+  def create_index!(index_name)
+    if !client.indices.exists(index: index_name)
+      client.indices.create(
+        index: index_name,
+        body: {
+          settings: { "index.mapping.ignore_malformed": true },
+        }
+      )
+    end
   end
 
   def get_doc_id(primary_keys, record, fields, adapter)

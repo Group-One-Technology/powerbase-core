@@ -25,6 +25,10 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :tasks do
+        post :start
+      end
+
       resources :table_views, path: 'views', as: 'views', except: [:new], shallow: true do
         collection do
           put 'order', to: 'table_views#update_order', as: 'update_views_order'
