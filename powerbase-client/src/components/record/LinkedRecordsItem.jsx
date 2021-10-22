@@ -50,6 +50,7 @@ export function LinkedRecordsItem({ connection, fieldTypes, openRecord }) {
 
           const recordArr = initializeFields(fields, connections).map((field) => ({
             ...field,
+            fieldId: field.id,
             value: record[field.name],
           }));
 

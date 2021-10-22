@@ -49,6 +49,7 @@ export function RecordItemValue({
     const recordArr = (fields && linkedRecord && connections)
       ? initializeFields(fields, connections).map((field) => ({
         ...field,
+        fieldId: field.id,
         value: linkedRecord[field.name],
       }))
       : undefined;
