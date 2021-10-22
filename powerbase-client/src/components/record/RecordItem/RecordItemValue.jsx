@@ -11,9 +11,9 @@ import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 import { RecordItemSelect } from './RecordItemSelect';
-import { LinkedRecordItem } from './LinkedRecordItem';
+import { LinkedRecordItem } from '../LinkedRecordItem';
 
-export function RecordItem({
+export function RecordItemValue({
   item,
   fieldTypes,
   handleRecordInputChange,
@@ -125,7 +125,7 @@ export function RecordItem({
   }
 }
 
-RecordItem.propTypes = {
+RecordItemValue.propTypes = {
   item: PropTypes.object.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
