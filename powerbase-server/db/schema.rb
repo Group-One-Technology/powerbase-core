@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_15_051304) do
+ActiveRecord::Schema.define(version: 2021_10_19_182952) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,22 @@ ActiveRecord::Schema.define(version: 2021_10_15_051304) do
     t.string "values", default: [], null: false, array: true
     t.bigint "powerbase_field_id", null: false
     t.index ["powerbase_field_id"], name: "index_field_select_options_on_powerbase_field_id"
+  end
+
+  create_table "hubspot_databases", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "encrypted_connection_string", null: false
+    t.string "adapter", default: "postgresql"
+    t.string "database_size", null: false
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.boolean "is_migrated", default: false
+    t.bigint "user_id", null: false
+    t.bigint "powerbase_database_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["powerbase_database_id"], name: "index_hubspot_databases_on_powerbase_database_id"
+    t.index ["user_id"], name: "index_hubspot_databases_on_user_id"
   end
 
   create_table "piis", force: :cascade do |t|
@@ -158,6 +174,8 @@ ActiveRecord::Schema.define(version: 2021_10_15_051304) do
   add_foreign_key "base_migrations", "powerbase_databases"
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "field_select_options", "powerbase_fields"
+  add_foreign_key "hubspot_databases", "powerbase_databases"
+  add_foreign_key "hubspot_databases", "users"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

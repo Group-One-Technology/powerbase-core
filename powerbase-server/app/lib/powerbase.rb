@@ -19,7 +19,6 @@ module Powerbase
 
   mattr_accessor :database
   mattr_accessor :adapter
-  mattr_accessor :connection_string
   mattr_accessor :is_turbo
 
   # * Connect to a given database.
@@ -44,9 +43,7 @@ module Powerbase
           options[:adapter]
         end
       @@database = options[:database]
-      user = "#{options[:username]}:#{options[:password]}"
-      server = "#{options[:host]}:#{options[:port]}"
-      @@connection_string = "#{@@adapter}://#{user}@#{server}/#{@@database}"
+      @@connection_string = self.connection_string(options)
     elsif options[:connection_string]
       @@connection_string = options[:connection_string]
       @@adapter, connection_string = options[:connection_string].split('://')
@@ -63,18 +60,40 @@ module Powerbase
 
       @@connection_string = "#{@@adapter}://#{connection_string}"
     else
-      raise StandardError.new('Missing connection credentials to connect to Powerbase.')
+      raise StandardError.new('Missing connection credentials to connect to database.')
     end
 
     @@is_turbo = options[:is_turbo]
 
-    Sequel.extension :pg_enum if options[:adapter] == "postgresql"
+    Sequel.extension :pg_enum if @@adapter == "postgresql"
 
     if block_given?
       Sequel.connect(@@connection_string, :keep_reference => false, &block)
     else
       @@DB = Sequel.connect(@@connection_string, :keep_reference => false)
       @@DB
+    end
+  end
+
+  def self.connection_string(options = nil)
+    return @@connection_string if options == nil
+
+    if options[:adapter] && options[:database]
+      adapter = case options[:adapter]
+        when "postgres"
+          "postgresql"
+        when "mysql"
+          "mysql2"
+        else
+          options[:adapter]
+        end
+      database = options[:database]
+      user = "#{options[:username]}:#{options[:password]}"
+      server = "#{options[:host]}:#{options[:port]}"
+
+      "#{adapter}://#{user}@#{server}/#{database}"
+    else
+      raise StandardError.new('Missing connection credentials to connect to database.')
     end
   end
 
