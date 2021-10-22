@@ -12,14 +12,14 @@ import {
 
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
-import { useMounted } from '@lib/hooks/useMounted';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 import { hideViewField } from '@lib/api/view-fields';
 import { updateFieldAlias, setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
-  const { mounted } = useMounted();
   const { saving, catchError, saved } = useSaveStatus();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
+  const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
@@ -30,9 +30,8 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   }, [field]);
 
   const handleOpenChange = async (value) => {
-    saving();
-
     if (!value && alias !== field.alias) {
+      saving();
       const updatedFields = fields.map((item) => ({
         ...item,
         alias: item.id === field.id
@@ -40,17 +39,18 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           : item.alias,
       }));
 
+      setFields(updatedFields);
+      setOptionOpen(value);
+
       try {
         await updateFieldAlias({ id: field.fieldId, alias });
-        mounted(() => setOptionOpen(value));
-
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
         catchError(err);
       }
     } else {
-      mounted(() => setOptionOpen(value));
+      setOptionOpen(value);
     }
   };
 
@@ -61,26 +61,37 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const handleHideField = async () => {
     saving();
 
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isHidden: item.id === field.id
+        ? true
+        : item.isHidden,
+    }));
+
+    setFields(updatedFields);
+    setOptionOpen(false);
+
     try {
       await hideViewField({ id: field.id });
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isHidden: item.id === field.id
-          ? true
-          : item.isHidden,
-      }));
-
-      mounted(() => setOptionOpen(false));
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
       catchError(err);
-      mounted(() => setOptionOpen(false));
     }
   };
 
   const handleTogglePII = async () => {
     saving();
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isPII: item.id === field.id
+        ? !field.isPii
+        : item.isPii,
+    }));
+
+    setFields(updatedFields);
+    setOptionOpen(false);
 
     try {
       if (!field.isPii) {
@@ -89,18 +100,9 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
         await unsetFieldAsPII({ id: field.fieldId });
       }
 
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isPII: item.id === field.id
-          ? !field.isPii
-          : item.isPii,
-      }));
-
-      mounted(() => setOptionOpen(false));
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      mounted(() => setOptionOpen(false));
       catchError(err);
     }
   };

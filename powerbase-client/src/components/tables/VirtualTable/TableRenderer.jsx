@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Grid,
   InfiniteLoader,
@@ -7,16 +7,14 @@ import {
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
-import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
 import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { useTableConnections } from '@models/TableConnections';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -24,24 +22,18 @@ import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
-  const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
-  const { data: connections } = useTableConnections();
+  const { fields, setFields } = useViewFieldState();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
 
-  const [fields, setFields] = useState(initializeFields(initialFields, connections));
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
 
   const columnCount = fields && fields.length + 1;
-
-  useEffect(() => {
-    setFields(initializeFields(initialFields, connections));
-  }, [initialFields, connections]);
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
