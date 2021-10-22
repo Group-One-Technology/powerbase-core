@@ -22,7 +22,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function NewField() {
+export default function NewField({ tableId }) {
   const [selected, setSelected] = useState(fieldTypes[0]);
   const [fieldName, setFieldName] = useState("");
   const fieldInputRef = useRef(null);
@@ -46,19 +46,22 @@ export default function NewField() {
 
   const addNewField = async () => {
     const payload = {
-      name: toSnakeCase(fieldName.toLowerCase()),
-      description: null,
-      oid: 1043,
-      db_type: "character varying",
-      default_value: "",
-      is_primary_key: false,
-      is_nullable: false,
-      powerbase_table_id: 30,
-      powerbase_field_type_id: 1,
-      is_pii: false,
-      alias: fieldName,
+      field: {
+        name: toSnakeCase(fieldName.toLowerCase()),
+        description: null,
+        oid: 1043,
+        db_type: "character varying",
+        default_value: " ",
+        is_primary_key: false,
+        is_nullable: false,
+        powerbase_table_id: 30,
+        powerbase_field_type_id: 1,
+        is_pii: false,
+        alias: fieldName,
+      },
+      option: {},
     };
-    const response = await securedApi.post(`/tables/30/field`, payload);
+    const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
       return response.data;
     }

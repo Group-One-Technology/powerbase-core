@@ -6,6 +6,10 @@ class PowerbaseFieldsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
+  # schema(:add) do
+  #   required(:table_id).value(:integer)
+  # end
+
   schema(:alias) do
     required(:id).value(:integer)
     required(:alias).value(:string)
@@ -22,8 +26,29 @@ class PowerbaseFieldsController < ApplicationController
 
   # POST /tables/:id/field
   def add
-    field = PowerbaseField.new()
-    puts 'New Field!' if field.save!
+    puts params
+    # field = PowerbaseField.create({
+    #   name: "OOPS",
+    #   description: "",
+    #   oid: 1043,
+    #   db_type: "character varying",
+    #   default_value: " ",
+    #   is_primary_key: false,
+    #   is_nullable: false,
+    #   powerbase_table_id: 59,
+    #   powerbase_field_type_id: 1,
+    #   is_pii: false,
+    #   alias: "OOPS",
+    # })
+
+    type = ViewFieldOption.create({
+      width: 300,
+      is_frozen: false,
+      is_hidden: false,
+      order: 2,
+      table_view_id: 59,
+      powerbase_field_id: 919
+    })
   end
 
   # PUT /fields/:id/alias

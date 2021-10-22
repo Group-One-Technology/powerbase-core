@@ -63,4 +63,5 @@ Rails.application.routes.draw do
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
+  post 'tables/:table_id/field', to: 'powerbase_fields#add', as: 'new_field'
 end
