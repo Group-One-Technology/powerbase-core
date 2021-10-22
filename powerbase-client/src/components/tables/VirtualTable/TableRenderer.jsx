@@ -65,11 +65,15 @@ export function TableRenderer({ height, table }) {
   };
 
   const handleExpandRecord = (rowNo) => {
+    const updatedFields = initializeFields(initialFields, connections, { hidden: false })
+      .map((item) => ({
+        ...item,
+        value: records[rowNo - 1][item.name],
+      }))
+      .sort((x, y) => x.order > y.order);
+
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item) => ({
-      ...item,
-      value: records[rowNo - 1][item.name],
-    })));
+    setSelectedRecord(updatedFields);
   };
 
   return (
