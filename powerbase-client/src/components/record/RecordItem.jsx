@@ -2,7 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { useBase } from '@models/Base';
+import { useTableFields } from '@models/TableFields';
 import { useTableRecord } from '@models/TableRecord';
+import { useTableConnections } from '@models/TableConnections';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
@@ -10,8 +13,15 @@ import { Loader } from '@components/ui/Loader';
 import { RecordItemSelect } from './RecordItemSelect';
 import { LinkedRecordItem } from './LinkedRecordItem';
 
-export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
+export function RecordItem({
+  item,
+  fieldTypes,
+  handleRecordInputChange,
+  openRecord,
+}) {
   const { data: base } = useBase();
+  const { data: fields } = useTableFields();
+  const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
@@ -36,13 +46,20 @@ export function RecordItem({ item, fieldTypes, handleRecordInputChange }) {
   );
 
   if (item.isForeignKey && item.value && !linkedRecordError) {
+    const recordArr = (fields && linkedRecord && connections)
+      ? initializeFields(fields, connections).map((field) => ({
+        ...field,
+        value: linkedRecord[field.name],
+      }))
+      : undefined;
+
     return (
       <div className="w-full mb-8">
         <h4 htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
           {labelContent}
         </h4>
-        {linkedRecord == null && <Loader />}
-        {linkedRecord && <LinkedRecordItem record={linkedRecord} />}
+        {(linkedRecord == null || fields == null) && <Loader />}
+        {(linkedRecord && fields) && <LinkedRecordItem record={linkedRecord} openRecord={() => openRecord(recordArr)} />}
       </div>
     );
   }
@@ -112,4 +129,5 @@ RecordItem.propTypes = {
   item: PropTypes.object.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
+  openRecord: PropTypes.func.isRequired,
 };

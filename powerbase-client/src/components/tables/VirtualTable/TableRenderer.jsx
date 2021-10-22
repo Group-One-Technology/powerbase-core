@@ -8,6 +8,7 @@ import {
 import PropTypes from 'prop-types';
 
 import { useFieldTypes } from '@models/FieldTypes';
+import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
@@ -170,7 +171,16 @@ export function TableRenderer({ height, table }) {
           </ScrollSync>
         )}
       </AutoSizer>
-      {selectedRecord && <SingleRecordModal open={isModalOpen} setOpen={setIsModalOpen} record={selectedRecord} />}
+      {selectedRecord && (
+        <RecordsModalStateProvider rootRecord={selectedRecord}>
+          <SingleRecordModal
+            table={table}
+            open={isModalOpen}
+            setOpen={setIsModalOpen}
+            record={selectedRecord}
+          />
+        </RecordsModalStateProvider>
+      )}
     </div>
   );
 }
