@@ -6,11 +6,12 @@
  * @returns string
  */
 export function formatCurrency(value, options = {}) {
-  if (value == null || value === '') return null;
+  if (value == null || value === '' || Number.isNaN(+value)) return null;
 
-  return value.toLocaleString('de-DE', {
+  return Number(value).toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
+    currencyDisplay: 'symbol',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     ...options,

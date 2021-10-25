@@ -103,7 +103,6 @@ function CellValue({
 
     return (
       <span className={className}>
-        {currency != null && '$'}
         {currency}
       </span>
     );
