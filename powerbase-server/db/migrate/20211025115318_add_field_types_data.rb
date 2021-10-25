@@ -22,7 +22,7 @@ class AddFieldTypesData < ActiveRecord::Migration[6.1]
     if field_type
       field_type.name = "Long Text"
       field_type.description = "A long string."
-      field_type.data_type = "text"
+      field_type.data_type = "string"
       field_type.save
     end
 
@@ -30,7 +30,7 @@ class AddFieldTypesData < ActiveRecord::Migration[6.1]
     if field_type
       field_type.name = "JSON Text"
       field_type.description = "A JSON in a form of a string."
-      field_type.data_type = "text"
+      field_type.data_type = "string"
       field_type.save
     end
 

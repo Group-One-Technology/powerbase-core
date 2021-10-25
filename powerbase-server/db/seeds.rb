@@ -3,7 +3,7 @@
 #
 # * Seed PowerbaseFieldTypes...
 single_line_text = PowerbaseFieldType.find_or_create_by(name: "Single Line Text", description: "A short string.", data_type: "string")
-long_text = PowerbaseFieldType.find_or_create_by(name: "Long Text", description: "A long string.", data_type: "text")
+long_text = PowerbaseFieldType.find_or_create_by(name: "Long Text", description: "A long string.", data_type: "string")
 json_text = PowerbaseFieldType.find_or_create_by(name: "JSON Text", description: "A JSON in a form of a string.", data_type: "text")
 checkbox = PowerbaseFieldType.find_or_create_by(name: "Checkbox", description: "A binary choice.", data_type: "boolean")
 number = PowerbaseFieldType.find_or_create_by(name: "Number", description: "Can either be an integer or decimal. Depends on the user.", data_type: "number")
