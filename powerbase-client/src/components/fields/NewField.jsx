@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
 import { RadioGroup } from "@headlessui/react";
+import useConstant from "use-constant";
+import debounceResolve from "@lib/helpers/promises/debounceResolver";
 
 const fieldTypes = [
   {
@@ -17,6 +19,37 @@ const fieldTypes = [
     description: "An integer or a decimal number.",
   },
 ];
+
+const useDebouncedInput = () => {
+  const [inputText, setInputText] = useState("");
+  const searchPowerbase = async (text) => {
+    try {
+      const response = await securedApi.get(`/fields/${text}`);
+      console.log(response.data);
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const debouncedSearchPowerbase = useConstant(() =>
+    debounceResolve(searchPowerbase, 300)
+  );
+
+  const search = useAsync(async () => {
+    if (inputText.length === 0) {
+      return [];
+    } else {
+      return debouncedSearchPowerbase(inputText);
+    }
+  }, [inputText]);
+
+  return {
+    inputText,
+    setInputText,
+    search,
+  };
+};
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
