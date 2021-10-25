@@ -39,6 +39,7 @@ export function TableRenderer({ height, table }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
   const [isEditing, setIsEditing] = useState(false);
+  const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
 
   const columnCount = fields && fields.length + 1;
 
@@ -160,6 +161,8 @@ export function TableRenderer({ height, table }) {
                           inputRef,
                           isEditing,
                           setIsEditing,
+                          cellToEdit,
+                          setCellToEdit,
                           ...props,
                         });
                       }}

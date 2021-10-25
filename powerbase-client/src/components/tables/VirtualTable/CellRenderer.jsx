@@ -105,6 +105,8 @@ export function CellRenderer({
   inputRef,
   isEditing,
   setIsEditing,
+  cellToEdit,
+  setCellToEdit,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -144,6 +146,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={(evt) => {
+        setIsEditing(true);
         if (!isRowNo) evt.target.contentEditable = true;
       }}
       onBlur={(evt) => {
@@ -152,10 +155,10 @@ export function CellRenderer({
       onMouseEnter={handleMouseEnter}
       suppressContentEditableWarning
     >
-      {true ? (
+      {isEditing ? (
         <EditCell
           value={value}
-          isEditing={true}
+          isEditing={isEditing}
           ref={inputRef}
           onChange={onChange}
         />
