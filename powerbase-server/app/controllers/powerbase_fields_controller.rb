@@ -56,7 +56,7 @@ class PowerbaseFieldsController < ApplicationController
       return
     end
 
-    if @field.update(powerbase_field_type_id: @field_type.id)
+    if @field.update(powerbase_field_type_id: @field_type.id, options: {})
       render json: format_json(@field)
     else
       render json: @field.errors, status: :unprocessable_entity
