@@ -25,7 +25,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { data: fieldTypes } = useFieldTypes();
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
-  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && field.dbType !== 'uuid' && field.dbType !== 'integer' && field.dbType !== 'int';
+  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
