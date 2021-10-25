@@ -2,9 +2,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
 import { RadioGroup } from "@headlessui/react";
-import debounceResolve from "@lib/helpers/promises/debounceResolver";
+import AwesomeDebouncePromise from "awesome-debounce-promise";
+// import debounceResolve from "@lib/helpers/promises/debounceResolver";
 import useConstant from "@lib/hooks/useConstant";
 import { useAsync } from "react-async-hook";
+
+const debounceResolve = AwesomeDebouncePromise;
 
 const fieldTypes = [
   {

@@ -40,9 +40,9 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /field/:name
   def get_single_field
-    field = PowerbaseField.find_by(name: name)
+    field = PowerbaseField.find_by(name: params[:name])
     if field
-      render json: format_json(@field)
+      render json: format_json(field)
     else
       render json: { message: "Field does not exist" }
     end
