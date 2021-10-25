@@ -107,6 +107,8 @@ export function CellRenderer({
   setIsEditing,
   cellToEdit,
   setCellToEdit,
+  editCellInput,
+  setEditCellInput,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -121,8 +123,8 @@ export function CellRenderer({
     });
   };
 
-  const onChange = () => {
-    return;
+  const onChange = (e) => {
+    setEditCellInput(e.target.value);
   };
 
   return (
@@ -146,8 +148,14 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={(evt) => {
-        setIsEditing(true);
-        if (!isRowNo) evt.target.contentEditable = true;
+        if (!isRowNo) {
+          setIsEditing(true);
+          setEditCellInput(value);
+          setCellToEdit({
+            row: rowIndex,
+            column: columnIndex,
+          });
+        }
       }}
       onBlur={(evt) => {
         if (!isRowNo) evt.target.contentEditable = false;
@@ -155,9 +163,11 @@ export function CellRenderer({
       onMouseEnter={handleMouseEnter}
       suppressContentEditableWarning
     >
-      {isEditing ? (
+      {isEditing &&
+      rowIndex === cellToEdit?.row &&
+      columnIndex === cellToEdit?.column ? (
         <EditCell
-          value={value}
+          value={editCellInput}
           isEditing={isEditing}
           ref={inputRef}
           onChange={onChange}

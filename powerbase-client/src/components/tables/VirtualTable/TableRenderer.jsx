@@ -40,6 +40,7 @@ export function TableRenderer({ height, table }) {
   const [selectedRecord, setSelectedRecord] = useState();
   const [isEditing, setIsEditing] = useState(false);
   const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
+  const [editCellInput, setEditCellInput] = useState(null);
 
   const columnCount = fields && fields.length + 1;
 
@@ -139,7 +140,6 @@ export function TableRenderer({ height, table }) {
                           columnIndex !== 0 && !isLastRow
                             ? records[rowIndex][field.name]
                             : null;
-
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
                         }
@@ -163,6 +163,8 @@ export function TableRenderer({ height, table }) {
                           setIsEditing,
                           cellToEdit,
                           setCellToEdit,
+                          editCellInput,
+                          setEditCellInput,
                           ...props,
                         });
                       }}
