@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
 import { RadioGroup } from "@headlessui/react";
-import useConstant from "use-constant";
 import debounceResolve from "@lib/helpers/promises/debounceResolver";
+import useConstant from "@lib/hooks/useConstant";
+import { useAsync } from "react-async-hook";
 
 const fieldTypes = [
   {
@@ -21,11 +22,11 @@ const fieldTypes = [
 ];
 
 const useDebouncedInput = () => {
-  const [inputText, setInputText] = useState("");
+  const [fieldName, setFieldName] = useState("");
   const searchPowerbase = async (text) => {
     try {
       const response = await securedApi.get(`/fields/${text}`);
-      console.log(response.data);
+      console.log(response);
       return response;
     } catch (error) {
       console.log(error);
@@ -33,20 +34,20 @@ const useDebouncedInput = () => {
   };
 
   const debouncedSearchPowerbase = useConstant(() =>
-    debounceResolve(searchPowerbase, 300)
+    debounceResolve(searchPowerbase, 100)
   );
 
   const search = useAsync(async () => {
-    if (inputText.length === 0) {
+    if (fieldName.length === 0) {
       return [];
     } else {
-      return debouncedSearchPowerbase(inputText);
+      return debouncedSearchPowerbase(fieldName);
     }
-  }, [inputText]);
+  }, [fieldName]);
 
   return {
-    inputText,
-    setInputText,
+    fieldName,
+    setFieldName,
     search,
   };
 };
@@ -62,7 +63,8 @@ export default function NewField({
   setIsCreatingField,
 }) {
   const [selected, setSelected] = useState(fieldTypes[0]);
-  const [fieldName, setFieldName] = useState("");
+  // const [fieldName, setFieldName] = useState("");
+  const { fieldName, setFieldName, search } = useDebouncedInput();
   const fieldInputRef = useRef(null);
 
   useEffect(() => {
