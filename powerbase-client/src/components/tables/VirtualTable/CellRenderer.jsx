@@ -6,6 +6,7 @@ import { ArrowsExpandIcon } from "@heroicons/react/outline";
 import { FieldType } from "@lib/constants/field-types";
 import { formatDate } from "@lib/helpers/formatDate";
 import EditCell from "./EditCell";
+import OutsideCellClick from "./OutsideCellClick";
 
 function CellValue({
   value,
@@ -166,12 +167,14 @@ export function CellRenderer({
       {isEditing &&
       rowIndex === cellToEdit?.row &&
       columnIndex === cellToEdit?.column ? (
-        <EditCell
-          value={editCellInput}
-          isEditing={isEditing}
-          ref={inputRef}
-          onChange={onChange}
-        />
+        <OutsideCellClick onClickOutside={onClickOutsideEditingCell}>
+          <EditCell
+            value={editCellInput}
+            isEditing={isEditing}
+            ref={inputRef}
+            onChange={onChange}
+          />
+        </OutsideCellClick>
       ) : (
         <CellValue
           value={value}

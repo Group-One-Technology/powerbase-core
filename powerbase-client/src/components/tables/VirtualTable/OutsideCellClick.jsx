@@ -4,24 +4,23 @@ import React, { useRef, useEffect } from "react";
 const OutsideCellClick = (props) => {
   let clickCaptured = false;
   let focusCaptured = false;
-  const wrapperRef = useRef();
 
-  innerClick = () => {
+  const innerClick = () => {
     clickCaptured = true;
   };
 
-  innerFocus = () => {
+  const innerFocus = () => {
     focusCaptured = true;
   };
 
-  documentClick = (event) => {
+  const documentClick = (event) => {
     if (!clickCaptured && props.onClickOutside) {
       props.onClickOutside(event);
     }
     clickCaptured = false;
   };
 
-  documentFocus = (event) => {
+  const documentFocus = (event) => {
     if (!focusCaptured && props.onFocusOutside) {
       props.onFocusOutside(event);
     }
