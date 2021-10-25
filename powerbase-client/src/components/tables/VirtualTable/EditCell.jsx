@@ -10,7 +10,7 @@ function getValue(value) {
   return value;
 }
 
-export default function TextCell({ isEditing, onChange, value }, ref) {
+function TextCell({ isEditing, onChange, value }, ref) {
   const cellInnerEl = isEditing ? (
     <input
       value={getValue(value)}
@@ -25,3 +25,5 @@ export default function TextCell({ isEditing, onChange, value }, ref) {
   );
   return cellInnerEl;
 }
+
+export default React.forwardRef(TextCell);

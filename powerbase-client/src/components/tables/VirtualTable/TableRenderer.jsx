@@ -1,40 +1,44 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  Grid,
-  InfiniteLoader,
-  AutoSizer,
-  ScrollSync,
-} from 'react-virtualized';
-import PropTypes from 'prop-types';
+/* eslint-disable */
+import React, { useState, useRef, useEffect } from "react";
+import { Grid, InfiniteLoader, AutoSizer, ScrollSync } from "react-virtualized";
+import PropTypes from "prop-types";
 
-import { useViewFields } from '@models/ViewFields';
-import { useFieldTypes } from '@models/FieldTypes';
-import { useTableRecords } from '@models/TableRecords';
-import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { useTableConnections } from '@models/TableConnections';
+import { useViewFields } from "@models/ViewFields";
+import { useFieldTypes } from "@models/FieldTypes";
+import { useTableRecords } from "@models/TableRecords";
+import { useTableRecordsCount } from "@models/TableRecordsCount";
+import { useTableConnections } from "@models/TableConnections";
 
-import { ITable } from '@lib/propTypes/table';
-import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { initializeFields } from '@lib/helpers/fields/initializeFields';
-import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
-import { SingleRecordModal } from '@components/record/SingleRecordModal';
-import { GridHeader } from './GridHeader';
-import { CellRenderer } from './CellRenderer';
+import { ITable } from "@lib/propTypes/table";
+import { useDidMountEffect } from "@lib/hooks/useDidMountEffect";
+import { initializeFields } from "@lib/helpers/fields/initializeFields";
+import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from "@lib/constants";
+import { SingleRecordModal } from "@components/record/SingleRecordModal";
+import { GridHeader } from "./GridHeader";
+import { CellRenderer } from "./CellRenderer";
 
 export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
+  const {
+    data: records,
+    loadMore: loadMoreRows,
+    isLoading,
+  } = useTableRecords();
   const { data: connections } = useTableConnections();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
+  const inputRef = useRef();
 
-  const [fields, setFields] = useState(initializeFields(initialFields, connections));
+  const [fields, setFields] = useState(
+    initializeFields(initialFields, connections)
+  );
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
+  const [isEditing, setIsEditing] = useState(false);
 
   const columnCount = fields && fields.length + 1;
 
@@ -55,9 +59,9 @@ export function TableRenderer({ height, table }) {
     const stop = stopIndex / columnCount;
 
     if (
-      !isLoading
-      && stop + 100 > records.length
-      && records.length - 1 !== totalRecords
+      !isLoading &&
+      stop + 100 > records.length &&
+      records.length - 1 !== totalRecords
     ) {
       loadMoreRows();
     }
@@ -65,10 +69,12 @@ export function TableRenderer({ height, table }) {
 
   const handleExpandRecord = (rowNo) => {
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item) => ({
-      ...item,
-      value: records[rowNo - 1][item.name],
-    })));
+    setSelectedRecord(
+      fields.map((item) => ({
+        ...item,
+        value: records[rowNo - 1][item.name],
+      }))
+    );
   };
 
   return (
@@ -82,12 +88,7 @@ export function TableRenderer({ height, table }) {
       >
         {({ width }) => (
           <ScrollSync>
-            {({
-              onScroll,
-              scrollLeft,
-              scrollHeight,
-              clientHeight,
-            }) => (
+            {({ onScroll, scrollLeft, scrollHeight, clientHeight }) => (
               <>
                 <GridHeader
                   ref={headerGridRef}
@@ -121,8 +122,10 @@ export function TableRenderer({ height, table }) {
                         rowStartIndex,
                         rowStopIndex,
                       }) => {
-                        const startIndex = rowStartIndex * columnCount + columnStartIndex;
-                        const stopIndex = rowStopIndex * columnCount + columnStopIndex;
+                        const startIndex =
+                          rowStartIndex * columnCount + columnStartIndex;
+                        const stopIndex =
+                          rowStopIndex * columnCount + columnStopIndex;
                         return onRowsRendered({ startIndex, stopIndex });
                       }}
                       onRowsRendered={onRowsRendered}
@@ -131,9 +134,10 @@ export function TableRenderer({ height, table }) {
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isLastRow = rowIndex >= records.length;
-                        let value = columnIndex !== 0 && !isLastRow
-                          ? records[rowIndex][field.name]
-                          : null;
+                        let value =
+                          columnIndex !== 0 && !isLastRow
+                            ? records[rowIndex][field.name]
+                            : null;
 
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
@@ -153,6 +157,9 @@ export function TableRenderer({ height, table }) {
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
                             : undefined,
+                          inputRef,
+                          isEditing,
+                          setIsEditing,
                           ...props,
                         });
                       }}
@@ -178,7 +185,13 @@ export function TableRenderer({ height, table }) {
           </ScrollSync>
         )}
       </AutoSizer>
-      {selectedRecord && <SingleRecordModal open={isModalOpen} setOpen={setIsModalOpen} record={selectedRecord} />}
+      {selectedRecord && (
+        <SingleRecordModal
+          open={isModalOpen}
+          setOpen={setIsModalOpen}
+          record={selectedRecord}
+        />
+      )}
     </div>
   );
 }
