@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable comma-dangle */
 /* eslint-disable quotes */
 function getWait(wait) {

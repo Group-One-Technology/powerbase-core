@@ -11,8 +11,7 @@ export default function onlyResolvesLast(asyncFunction) {
     cancelPrevious && cancelPrevious();
     const initialPromise = asyncFunction.apply(void 0, args);
     const imperativePromise = createImperativePromise(initialPromise);
-    const { promise } = imperativePromise;
-    const { cancel } = imperativePromise;
+    const { promise, cancel } = imperativePromise;
     cancelPrevious = cancel;
     return promise;
   };
