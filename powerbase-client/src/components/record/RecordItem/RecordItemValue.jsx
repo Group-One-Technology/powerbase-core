@@ -107,12 +107,20 @@ export function RecordItemValue({
           />
         </div>
       );
-    default:
+    default: {
+      let type = fieldType.name === FieldType.NUMBER
+        ? 'number'
+        : 'text';
+
+      if (fieldType.name === FieldType.URL) {
+        type = 'url';
+      } else if (fieldType.name === FieldType.EMAIL) {
+        type = 'email';
+      }
+
       return (
         <Input
-          type={fieldType.name === FieldType.NUMBER
-            ? 'number'
-            : 'text'}
+          type={type}
           id={item.name}
           label={labelContent}
           name={item.name}
@@ -123,6 +131,7 @@ export function RecordItemValue({
           required
         />
       );
+    }
   }
 }
 
