@@ -16,12 +16,14 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { hideViewField } from '@lib/api/view-fields';
+import { FieldType } from '@lib/constants/field-types';
 import {
   updateFieldAlias,
   updateFieldType,
   setFieldAsPII,
   unsetFieldAsPII,
 } from '@lib/api/fields';
+import { FormatCurrencyOption } from './FormatCurrencyOption';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { saving, catchError, saved } = useSaveStatus();
@@ -151,7 +153,6 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
               onChange={handleAliasChange}
               placeholder="Field Alias"
               className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              required
             />
           </div>
 
@@ -179,7 +180,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           {isFieldTypeConvertable
             ? (
               <DropdownMenu.Root>
-                <DropdownMenu.TriggerItem className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                <DropdownMenu.TriggerItem textValue={false} className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                   <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                   {fieldType.name}
                   <ChevronRightIcon className="ml-auto h-4 w-4" />
@@ -188,6 +189,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                   {relatedFieldTypes.map((item) => (
                     <DropdownMenu.Item
                       key={item.id}
+                      textValue={false}
                       className={cn(
                         'px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100',
                         item.id === field.fieldTypeId ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer',
@@ -202,20 +204,20 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
             ) : (
-              <DropdownMenu.Item className="px-4 py-1 text-sm flex items-center text-gray-900">
+              <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
                 <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                 {fieldType.name}
               </DropdownMenu.Item>
             )}
 
           {field.isPrimaryKey && (
-            <DropdownMenu.Item className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isPrimaryKey />
               Primary Key
             </DropdownMenu.Item>
           )}
           {field.isForeignKey && (
-            <DropdownMenu.Item className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isForeignKey />
               Foreign Key
             </DropdownMenu.Item>
@@ -223,19 +225,23 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
 
           <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />
 
+          {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption />}
           <DropdownMenu.Item
+            textValue={false}
             className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
           >
             <ArrowRightIcon className="h-4 w-4 mr-1.5" />
             Insert right
           </DropdownMenu.Item>
           <DropdownMenu.Item
+            textValue={false}
             className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
             Insert left
           </DropdownMenu.Item>
           <DropdownMenu.Item
+            textValue={false}
             className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
             onSelect={handleHideField}
           >
@@ -243,6 +249,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
             Hide
           </DropdownMenu.Item>
           <DropdownMenu.Item
+            textValue={false}
             className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
             onSelect={handleTogglePII}
           >
