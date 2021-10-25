@@ -99,7 +99,12 @@ export function Fields({ tableId }) {
                 )}
                 {isCreatingField && (
                   <div className="text-sm text-gray-900">
-                    <NewField tableId={tableId} fields={fields} view={view} />
+                    <NewField
+                      tableId={tableId}
+                      fields={fields}
+                      view={view}
+                      setIsCreatingField={setIsCreatingField}
+                    />
                   </div>
                 )}
               </div>

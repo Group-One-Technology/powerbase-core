@@ -22,7 +22,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function NewField({ tableId }) {
+export default function NewField({
+  tableId,
+  view,
+  fields,
+  setIsCreatingField,
+}) {
   const [selected, setSelected] = useState(fieldTypes[0]);
   const [fieldName, setFieldName] = useState("");
   const fieldInputRef = useRef(null);
@@ -46,23 +51,23 @@ export default function NewField({ tableId }) {
 
   const addNewField = async () => {
     const payload = {
-      field: {
-        name: toSnakeCase(fieldName.toLowerCase()),
-        description: null,
-        oid: 1043,
-        db_type: "character varying",
-        default_value: " ",
-        is_primary_key: false,
-        is_nullable: false,
-        powerbase_table_id: 30,
-        powerbase_field_type_id: 1,
-        is_pii: false,
-        alias: fieldName,
-      },
-      option: {},
+      name: toSnakeCase(fieldName.toLowerCase()),
+      description: null,
+      oid: 1043,
+      db_type: "character varying",
+      default_value: " ",
+      is_primary_key: false,
+      is_nullable: false,
+      powerbase_table_id: 30,
+      powerbase_field_type_id: 1,
+      is_pii: false,
+      alias: fieldName,
+      view_id: view.id,
+      order: fields.length ? fields.length : 0,
     };
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
+      setIsCreatingField(false);
       return response.data;
     }
   };

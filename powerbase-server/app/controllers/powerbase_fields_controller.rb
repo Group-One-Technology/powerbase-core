@@ -26,29 +26,16 @@ class PowerbaseFieldsController < ApplicationController
 
   # POST /tables/:id/field
   def add
-    puts params
-    # field = PowerbaseField.create({
-    #   name: "OOPS",
-    #   description: "",
-    #   oid: 1043,
-    #   db_type: "character varying",
-    #   default_value: " ",
-    #   is_primary_key: false,
-    #   is_nullable: false,
-    #   powerbase_table_id: 59,
-    #   powerbase_field_type_id: 1,
-    #   is_pii: false,
-    #   alias: "OOPS",
-    # })
-
-    type = ViewFieldOption.create({
-      width: 300,
-      is_frozen: false,
-      is_hidden: false,
-      order: 2,
-      table_view_id: 59,
-      powerbase_field_id: 919
-    })
+    options = construct_field(params)
+    field_params = options[:field]
+    view_field_params = options[:view_field]
+    @field = PowerbaseField.create(field_params)
+    if @field
+      view_field_params[:powerbase_field_id] = @field.id
+      view_field = ViewFieldOption.create(view_field_params)
+      puts view_field
+      render json: format_json(@field)
+    end
   end
 
   # PUT /fields/:id/alias
@@ -82,6 +69,31 @@ class PowerbaseFieldsController < ApplicationController
     else
       render json: @field.errors, status: :unprocessable_entity
     end
+  end
+
+  def construct_field(payload)
+    field = {
+      name: payload[:name],
+      description: payload[:description],
+      oid: payload[:oid],
+      db_type: payload[:db_type],
+      default_value: payload[:default_value],
+      is_primary_key: payload[:is_primary_key],
+      is_nullable: payload[:is_nullable],
+      powerbase_table_id: payload[:powerbase_table_id],
+      powerbase_field_type_id: payload[:powerbase_field_type_id],
+      is_pii: payload[:is_pii],
+      alias: payload[:alias]
+    }
+
+    view_field = {
+      width: 300,
+      is_frozen: false,
+      is_hidden: false,
+      order: payload[:order],
+      table_view_id: payload[:view_id]
+    }
+    { field: field, view_field: view_field }
   end
 
   private
