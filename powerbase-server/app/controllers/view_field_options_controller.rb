@@ -84,6 +84,7 @@ class ViewFieldOptionsController < ApplicationController
         field_id: view_field.powerbase_field_id,
         name: field.name,
         alias: field.alias,
+        db_type: field.db_type,
         description: field.description,
         default_value: field.default_value,
         is_primary_key: field.is_primary_key,

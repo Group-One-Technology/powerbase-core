@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { KeyIcon as OutlineKeyIcon } from '@heroicons/react/outline';
+import {
+  AtSymbolIcon,
+  CodeIcon,
+  CurrencyDollarIcon,
+  KeyIcon as OutlineKeyIcon,
+  LinkIcon,
+} from '@heroicons/react/outline';
 import {
   TemplateIcon,
   CheckCircleIcon,
   HashtagIcon,
   LightningBoltIcon,
-  MailIcon,
   MenuAlt1Icon,
   KeyIcon,
   CalendarIcon,
@@ -37,6 +42,8 @@ export const FieldTypeIcon = React.memo(({
   switch (fieldType?.name) {
     case FieldType.LONG_TEXT:
       return <MenuAlt1Icon className={generatedClassName} aria-hidden="true" />;
+    case FieldType.JSON_TEXT:
+      return <CodeIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.CHECKBOX:
       return <CheckCircleIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.NUMBER:
@@ -48,7 +55,13 @@ export const FieldTypeIcon = React.memo(({
     case FieldType.DATE:
       return <CalendarIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.EMAIL:
-      return <MailIcon className={generatedClassName} aria-hidden="true" />;
+      return <AtSymbolIcon className={generatedClassName} aria-hidden="true" />;
+    case FieldType.URL:
+      return <LinkIcon className={generatedClassName} aria-hidden="true" />;
+    case FieldType.CURRENCY:
+      return <CurrencyDollarIcon className={generatedClassName} aria-hidden="true" />;
+    case FieldType.PERCENT:
+      return <HashtagIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.PLUGIN:
       return <LightningBoltIcon className={generatedClassName} aria-hidden="true" />;
     case FieldType.OTHERS:
