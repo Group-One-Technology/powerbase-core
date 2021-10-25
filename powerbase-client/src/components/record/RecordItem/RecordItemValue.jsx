@@ -91,6 +91,7 @@ export function RecordItemValue({
           handleRecordInputChange={handleRecordInputChange}
         />
       );
+    case FieldType.JSON_TEXT:
     case FieldType.LONG_TEXT:
       return (
         <div className="w-full mb-8">

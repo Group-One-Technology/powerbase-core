@@ -6,6 +6,7 @@ import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
 import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
 import { isValidEmail } from '@lib/helpers/isValidEmail';
+import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 
 function CellValue({
   value,
@@ -70,6 +71,10 @@ function CellValue({
 
   if (field.isPii) {
     return <span>*****</span>;
+  }
+
+  if (fieldType?.name === FieldType.JSON_TEXT && isValidJSONString(value)) {
+    return <span>{'{}'}</span>;
   }
 
   if (fieldType?.name === FieldType.EMAIL && isValidEmail(value)) {
