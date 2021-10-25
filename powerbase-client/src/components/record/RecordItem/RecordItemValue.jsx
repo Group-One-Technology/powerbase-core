@@ -109,11 +109,11 @@ export function RecordItemValue({
         </div>
       );
     default: {
-      let type = fieldType.name === FieldType.NUMBER
-        ? 'number'
-        : 'text';
+      let type = 'text';
 
-      if (fieldType.name === FieldType.URL) {
+      if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
+        type = 'number';
+      } else if (fieldType.name === FieldType.URL) {
         type = 'url';
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
