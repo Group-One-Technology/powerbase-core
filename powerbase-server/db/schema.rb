@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_15_051304) do
+ActiveRecord::Schema.define(version: 2021_10_25_174634) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,18 @@ ActiveRecord::Schema.define(version: 2021_10_15_051304) do
     t.string "values", default: [], null: false, array: true
     t.bigint "powerbase_field_id", null: false
     t.index ["powerbase_field_id"], name: "index_field_select_options_on_powerbase_field_id"
+  end
+
+  create_table "magic_records", force: :cascade do |t|
+    t.integer "table_id"
+    t.integer "record_id"
+    t.integer "database_id"
+    t.boolean "is_magic_cell"
+    t.integer "field_id"
+    t.string "data_type"
+    t.text "text_value"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "piis", force: :cascade do |t|

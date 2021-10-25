@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  table_id: 1
+  record_id: 1
+  database_id: 1
+  is_magic_cell: false
+  field_id: 1
+  data_type: MyString
+  text_value: MyText
+
+two:
+  table_id: 1
+  record_id: 1
+  database_id: 1
+  is_magic_cell: false
+  field_id: 1
+  data_type: MyString
+  text_value: MyText
