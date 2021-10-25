@@ -16,6 +16,11 @@ class PowerbaseFieldsController < ApplicationController
     required(:field_type_id).value(:string)
   end
 
+  schema(:options) do
+    required(:id).value(:integer)
+    required(:options)
+  end
+
   schema(:set_as_pii, :unset_as_pii) do
     required(:id).value(:integer)
   end
@@ -52,6 +57,17 @@ class PowerbaseFieldsController < ApplicationController
     end
 
     if @field.update(powerbase_field_type_id: @field_type.id)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/options
+  def options
+    @field = PowerbaseField.find(safe_params[:id])
+
+    if @field.update(options: safe_params[:options])
       render json: format_json(@field)
     else
       render json: @field.errors, status: :unprocessable_entity
@@ -99,6 +115,7 @@ class PowerbaseFieldsController < ApplicationController
         is_primary_key: field.is_primary_key,
         is_nullable: field.is_nullable,
         is_pii: field.is_pii,
+        options: field.options,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,
         created_at: field.created_at,

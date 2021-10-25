@@ -94,6 +94,7 @@ class ViewFieldOptionsController < ApplicationController
         is_frozen: view_field.is_frozen,
         is_hidden: view_field.is_hidden,
         is_pii: field.is_pii,
+        options: field.options,
         view_id: view_field.table_view_id,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,

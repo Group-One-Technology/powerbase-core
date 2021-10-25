@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_25_115318) do
+ActiveRecord::Schema.define(version: 2021_10_25_200414) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -112,6 +112,7 @@ ActiveRecord::Schema.define(version: 2021_10_25_115318) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_pii", default: false, null: false
     t.string "alias"
+    t.text "options"
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
   end
