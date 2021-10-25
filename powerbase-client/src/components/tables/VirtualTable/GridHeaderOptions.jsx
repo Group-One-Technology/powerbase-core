@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import * as Popover from '@radix-ui/react-popover';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import {
@@ -108,87 +108,78 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   return (
-    <Popover.Root open={option.open} onOpenChange={handleOpenChange}>
-      <Popover.Trigger className={`button_field_${field.id}`} />
-      <Popover.Content side="bottom" sideOffset={10} align="start" alignOffset={-10}>
+    <DropdownMenu.Root open={option.open} onOpenChange={handleOpenChange}>
+      <DropdownMenu.Trigger />
+      <DropdownMenu.Content side="bottom" sideOffset={10} align="start" alignOffset={-10}>
         <div className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
-          <div className="py-4 border border-b border-gray-100">
-            <div className="px-4 w-auto border-b border-gray-200">
+          <div className="py-2">
+            <div className="px-4 w-auto">
               <input
                 type="text"
                 aria-label="Field Name"
                 value={alias}
                 onChange={handleAliasChange}
                 placeholder="Field Name"
-                className="appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
-              <dl className="mt-4">
-                <dt className="mb-1 uppercase text-gray-500 text-xs">Field Name</dt>
-                <dd className="py-1 text-sm flex items-center text-gray-900">
-                  {field.name}
-                </dd>
-                <dt className="my-1 uppercase text-gray-500 text-xs">Field Type</dt>
-                <dd className="pb-1">
-                  <ul>
-                    <li className="py-1 text-sm flex items-center text-gray-900">
-                      <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
-                      {fieldType.name}
-                    </li>
-                    {field.isPrimaryKey && (
-                      <li className="py-1 text-sm flex items-center text-gray-900">
-                        <FieldTypeIcon className="mr-1.5" isPrimaryKey />
-                        Primary Key
-                      </li>
-                    )}
-                    {field.isForeignKey && (
-                      <li className="py-1 text-sm flex items-center text-gray-900">
-                        <FieldTypeIcon className="mr-1.5" isForeignKey />
-                        Foreign Key
-                      </li>
-                    )}
-                  </ul>
-                </dd>
-              </dl>
             </div>
-            <ul className="mt-1 text-sm text-gray-900">
-              <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button type="button" className="py-1 w-full flex items-center cursor-not-allowed">
-                  <ArrowRightIcon className="h-4 w-4 mr-1.5" />
-                  Insert right
-                </button>
-              </li>
-              <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button type="button" className="py-1 w-full flex items-center cursor-not-allowed">
-                  <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
-                  Insert left
-                </button>
-              </li>
-              <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button
-                  type="button"
-                  className="py-1 w-full flex items-center"
-                  onClick={handleHideField}
-                >
-                  <EyeOffIcon className="h-4 w-4 mr-1.5" />
-                  Hide
-                </button>
-              </li>
-              <li className="px-4 hover:bg-gray-100 focus:bg-gray-100">
-                <button
-                  type="button"
-                  className="py-1 w-full flex items-center"
-                  onClick={handleTogglePII}
-                >
-                  <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-                  {!field.isPii ? 'Set as PII' : 'Unset as PII'}
-                </button>
-              </li>
-            </ul>
+            <DropdownMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+              Field Name
+            </DropdownMenu.Label>
+            <DropdownMenu.Item className="my-1 px-4 text-sm flex items-center text-gray-900">
+              {field.name}
+            </DropdownMenu.Item>
+            <DropdownMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+              Field Type
+            </DropdownMenu.Label>
+            <DropdownMenu.Item className="my-1 px-4 text-sm flex items-center text-gray-900">
+              <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
+              {fieldType.name}
+            </DropdownMenu.Item>
+            {field.isPrimaryKey && (
+              <DropdownMenu.Item className="my-1 px-4 text-sm flex items-center text-gray-900">
+                <FieldTypeIcon className="mr-1.5" isPrimaryKey />
+                Primary Key
+              </DropdownMenu.Item>
+            )}
+            {field.isForeignKey && (
+              <DropdownMenu.Item className="my-1 px-4 text-sm flex items-center text-gray-900">
+                <FieldTypeIcon className="mr-1.5" isForeignKey />
+                Foreign Key
+              </DropdownMenu.Item>
+            )}
+            <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />
+            <DropdownMenu.Item
+              className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100 "
+            >
+              <ArrowRightIcon className="h-4 w-4 mr-1.5" />
+              Insert right
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100 "
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
+              Insert left
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleHideField}
+            >
+              <EyeOffIcon className="h-4 w-4 mr-1.5" />
+              Hide
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleTogglePII}
+            >
+              <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
+              {!field.isPii ? 'Set as PII' : 'Unset as PII'}
+            </DropdownMenu.Item>
           </div>
         </div>
-      </Popover.Content>
-    </Popover.Root>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   );
 }
 
