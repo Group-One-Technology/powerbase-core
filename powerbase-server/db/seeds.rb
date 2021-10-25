@@ -29,6 +29,7 @@ FieldDbTypeMapping.find_or_create_by(db_type: "int", adapter: "sequel", powerbas
 FieldDbTypeMapping.find_or_create_by(db_type: "integer", adapter: "sequel", powerbase_field_type_id: number.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "tinyint", adapter: "sequel", powerbase_field_type_id: number.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "decimal", adapter: "sequel", powerbase_field_type_id: number.id)
+FieldDbTypeMapping.find_or_create_by(db_type: "numeric", adapter: "sequel", powerbase_field_type_id: number.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "date", adapter: "sequel", powerbase_field_type_id: date.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "time", adapter: "sequel", powerbase_field_type_id: date.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "timestamp", adapter: "sequel", powerbase_field_type_id: date.id)
