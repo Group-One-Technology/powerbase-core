@@ -1,10 +1,20 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CogIcon, ChevronRightIcon } from '@heroicons/react/outline';
-import { CURRENCY_OPTIONS } from '@lib/constants/index';
 
-export function FormatCurrencyOption() {
+import { useSaveStatus } from '@models/SaveStatus';
+import { useViewFields } from '@models/ViewFields';
+import { useViewFieldState } from '@models/view/ViewFieldState';
+import { CURRENCY_OPTIONS } from '@lib/constants/index';
+import { updateFieldOptions } from '@lib/api/fields';
+
+export function FormatCurrencyOption({ field }) {
+  const { saving, catchError, saved } = useSaveStatus();
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
+  const { setFields } = useViewFieldState();
+
   const [query, setQuery] = useState('');
   const options = query.length
     ? CURRENCY_OPTIONS.filter(
@@ -16,8 +26,27 @@ export function FormatCurrencyOption() {
     setQuery(evt.target.value);
   };
 
-  const handleSelectCurrency = (value) => {
-    alert(value.name);
+  const handleSelectCurrency = async (selectedCurrency) => {
+    saving();
+
+    const fieldOptions = { style: 'currency', currency: selectedCurrency.code };
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      options: item.id === field.id
+        ? fieldOptions
+        : item.options,
+    }));
+
+    setFields(updatedFields);
+
+    try {
+      await updateFieldOptions({ id: field.fieldId, options: fieldOptions });
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err.response.data.errors || err.response.data.exception);
+    }
   };
 
   return (
@@ -42,8 +71,8 @@ export function FormatCurrencyOption() {
         {options.map((item, index) => index < 10 && (
           <DropdownMenu.Item
             key={item.code}
-            textValue={false}
-            className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
+            textValue="\t"
+            className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
             onSelect={() => handleSelectCurrency(item)}
           >
             {item.name}
@@ -51,10 +80,7 @@ export function FormatCurrencyOption() {
           </DropdownMenu.Item>
         ))}
         {options.length >= 10 && (
-          <div
-            textValue={undefined}
-            className="px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100"
-          >
+          <div className="px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100">
             ...
           </div>
         )}
@@ -62,3 +88,7 @@ export function FormatCurrencyOption() {
     </DropdownMenu.Root>
   );
 }
+
+FormatCurrencyOption.propTypes = {
+  field: PropTypes.object.isRequired,
+};

@@ -30,6 +30,16 @@ export async function updateFieldType({ id, ...payload }) {
   return undefined;
 }
 
+export async function updateFieldOptions({ id, ...payload }) {
+  const response = await securedApi.put(`/fields/${id}/options`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function setFieldAsPII({ id }) {
   const response = await securedApi.put(`/fields/${id}/set_as_pii`);
 

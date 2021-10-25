@@ -99,7 +99,7 @@ function CellValue({
   }
 
   if (fieldType?.name === FieldType.CURRENCY) {
-    const currency = formatCurrency(value);
+    const currency = formatCurrency(value, field?.options);
 
     return (
       <span className={className}>

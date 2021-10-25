@@ -180,7 +180,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           {isFieldTypeConvertable
             ? (
               <DropdownMenu.Root>
-                <DropdownMenu.TriggerItem textValue={false} className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+                <DropdownMenu.TriggerItem textValue="\t" className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                   <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                   {fieldType.name}
                   <ChevronRightIcon className="ml-auto h-4 w-4" />
@@ -189,7 +189,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                   {relatedFieldTypes.map((item) => (
                     <DropdownMenu.Item
                       key={item.id}
-                      textValue={false}
+                      textValue="\t"
                       className={cn(
                         'px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100',
                         item.id === field.fieldTypeId ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer',
@@ -204,20 +204,20 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
             ) : (
-              <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
+              <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
                 <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                 {fieldType.name}
               </DropdownMenu.Item>
             )}
 
           {field.isPrimaryKey && (
-            <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isPrimaryKey />
               Primary Key
             </DropdownMenu.Item>
           )}
           {field.isForeignKey && (
-            <DropdownMenu.Item textValue={false} className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isForeignKey />
               Foreign Key
             </DropdownMenu.Item>
@@ -225,23 +225,23 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
 
           <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />
 
-          {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption />}
+          {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
           <DropdownMenu.Item
-            textValue={false}
+            textValue="\t"
             className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
           >
             <ArrowRightIcon className="h-4 w-4 mr-1.5" />
             Insert right
           </DropdownMenu.Item>
           <DropdownMenu.Item
-            textValue={false}
+            textValue="\t"
             className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
             Insert left
           </DropdownMenu.Item>
           <DropdownMenu.Item
-            textValue={false}
+            textValue="\t"
             className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
             onSelect={handleHideField}
           >
@@ -249,7 +249,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
             Hide
           </DropdownMenu.Item>
           <DropdownMenu.Item
-            textValue={false}
+            textValue="\t"
             className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
             onSelect={handleTogglePII}
           >
