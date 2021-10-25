@@ -6,6 +6,7 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 // import debounceResolve from "@lib/helpers/promises/debounceResolver";
 import useConstant from "@lib/hooks/useConstant";
 import { useAsync } from "react-async-hook";
+import cn from "classnames";
 
 const debounceResolve = AwesomeDebouncePromise;
 
@@ -24,12 +25,15 @@ const fieldTypes = [
   },
 ];
 
-const useDebouncedInput = () => {
+const useDebouncedInput = (setNameExists) => {
   const [fieldName, setFieldName] = useState("");
   const searchPowerbase = async (text) => {
     try {
       const response = await securedApi.get(`/fields/${text}`);
-      console.log(response);
+      const { data } = response;
+      console.log(data);
+      if (data?.message) setNameExists(false);
+      else if (data?.id) setNameExists(true);
       return response;
     } catch (error) {
       console.log(error);
@@ -67,7 +71,8 @@ export default function NewField({
 }) {
   const [selected, setSelected] = useState(fieldTypes[0]);
   // const [fieldName, setFieldName] = useState("");
-  const { fieldName, setFieldName, search } = useDebouncedInput();
+  const [nameExists, setNameExists] = useState(false);
+  const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
 
   useEffect(() => {
@@ -120,12 +125,22 @@ export default function NewField({
           type="text"
           name="field-name"
           id="new-field-name"
-          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+          className={cn(
+            "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md",
+            nameExists && "focus:ring-red-500 focus:border-red-500",
+            !nameExists && "focus:ring-indigo-500 focus:border-indigo-500"
+          )}
           placeholder="Enter field name (required)"
           autoComplete="off"
           ref={fieldInputRef}
           onChange={handleChange}
         />
+      </div>
+
+      <div>
+        <p className="text-red-500">
+          {nameExists ? "Field name already exists." : <br />}
+        </p>
       </div>
 
       <div className="mt-2">
@@ -200,8 +215,13 @@ export default function NewField({
 
         <button
           type="button"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className={cn(
+            `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
+            nameExists && "cursor-not-allowed",
+            !nameExists && "hover:bg-indigo-700"
+          )}
           onClick={() => addNewField()}
+          disabled={nameExists}
         >
           Add Field
         </button>
