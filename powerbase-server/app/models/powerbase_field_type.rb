@@ -5,6 +5,11 @@ class PowerbaseFieldType < ApplicationRecord
     text: "text",
     number: "number",
     boolean: "boolean",
+    enums: "enums",
+    array: "array",
+    date: "date",
+    plugin: "plugin",
+    others: "others",
   }, _prefix: true
 
   has_many :powerbase_fields

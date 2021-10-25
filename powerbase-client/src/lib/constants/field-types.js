@@ -7,6 +7,10 @@ export const FieldType = {
   MULTIPLE_SELECT: 'Multiple Select',
   DATE: 'Date',
   EMAIL: 'Email',
+  URL: 'URL',
+  CURRENCY: 'Currency',
+  PERCENT: 'Percent',
+  JSON_TEXT: 'JSON Text',
   PLUGIN: 'Plugin',
   OTHERS: 'Others',
 };
