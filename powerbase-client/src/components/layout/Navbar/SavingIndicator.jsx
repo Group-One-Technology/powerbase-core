@@ -26,7 +26,7 @@ export function SavingIndicator() {
         </span>
         {(status === SaveStatus.ERROR && error) && (
           <span>
-            : {error.message}
+            : {Array.isArray(error) ? error.join('. ') : error.message}
           </span>
         )}
       </div>
