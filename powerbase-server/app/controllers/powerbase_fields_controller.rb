@@ -11,6 +11,11 @@ class PowerbaseFieldsController < ApplicationController
     required(:alias).value(:string)
   end
 
+  schema(:field_type) do
+    required(:id).value(:integer)
+    required(:field_type_id).value(:string)
+  end
+
   schema(:set_as_pii, :unset_as_pii) do
     required(:id).value(:integer)
   end
@@ -25,6 +30,28 @@ class PowerbaseFieldsController < ApplicationController
     @field = PowerbaseField.find(safe_params[:id])
 
     if @field.update(alias: safe_params[:alias])
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/field_type
+  def field_type
+    @field = PowerbaseField.find(safe_params[:id])
+    @field_type = PowerbaseFieldType.find(safe_params[:field_type_id])
+
+    if @field.powerbase_field_type.data_type != @field_type.data_type
+      render json: { errors: ["Could not convert field of type '#{@field.powerbase_field_type.name}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      return
+    end
+
+    if @field.db_type.include?("uuid") || @field.db_type.include?("int")
+      render json: { errors: ["Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      return
+    end
+
+    if @field.update(powerbase_field_type_id: @field_type.id)
       render json: format_json(@field)
     else
       render json: @field.errors, status: :unprocessable_entity

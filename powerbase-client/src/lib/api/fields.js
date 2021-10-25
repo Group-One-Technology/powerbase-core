@@ -20,6 +20,16 @@ export async function updateFieldAlias({ id, ...payload }) {
   return undefined;
 }
 
+export async function updateFieldType({ id, ...payload }) {
+  const response = await securedApi.put(`/fields/${id}/field_type`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function setFieldAsPII({ id }) {
   const response = await securedApi.put(`/fields/${id}/set_as_pii`);
 

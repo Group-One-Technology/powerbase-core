@@ -16,7 +16,12 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { hideViewField } from '@lib/api/view-fields';
-import { updateFieldAlias, setFieldAsPII, unsetFieldAsPII } from '@lib/api/fields';
+import {
+  updateFieldAlias,
+  updateFieldType,
+  setFieldAsPII,
+  unsetFieldAsPII,
+} from '@lib/api/fields';
 
 export function GridHeaderOptions({ option, field, setOptionOpen }) {
   const { saving, catchError, saved } = useSaveStatus();
@@ -62,8 +67,26 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
     setAlias(evt.target.value);
   };
 
-  const handleFieldTypeChange = (selectedFieldType) => {
-    alert(selectedFieldType.name);
+  const handleFieldTypeChange = async (selectedFieldType) => {
+    saving();
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      fieldTypeId: item.id === field.id
+        ? selectedFieldType.id
+        : item.fieldTypeId,
+    }));
+
+    setFields(updatedFields);
+    setOptionOpen(false);
+
+    try {
+      await updateFieldType({ id: field.fieldId, fieldTypeId: selectedFieldType.id });
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err.response.data.errors || err.response.data.exception);
+    }
   };
 
   const handleHideField = async () => {
