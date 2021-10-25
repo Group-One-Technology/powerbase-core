@@ -4,6 +4,8 @@ import cn from 'classnames';
 import { ArrowsExpandIcon } from '@heroicons/react/outline';
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
+import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
+import { isValidEmail } from '@lib/helpers/isValidEmail';
 
 function CellValue({
   value,
@@ -66,9 +68,29 @@ function CellValue({
     );
   }
 
+  if (field.isPii) {
+    return <span>*****</span>;
+  }
+
+  if (fieldType?.name === FieldType.EMAIL && isValidEmail(value)) {
+    return (
+      <a href={`mailto:${value.toString()}`} className="underline text-gray-500">
+        {value.toString()}
+      </a>
+    );
+  }
+
+  if (fieldType?.name === FieldType.URL && isValidHttpUrl(value)) {
+    return (
+      <a href={value.toString()} target="_blank" rel="noreferrer" className="underline text-gray-500">
+        {value.toString()}
+      </a>
+    );
+  }
+
   return (
     <span className={cn((value?.toString().length && field.isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
-      {!field.isPii ? value?.toString() : '*****'}
+      {value?.toString()}
     </span>
   );
 }
