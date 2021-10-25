@@ -1,10 +1,11 @@
 /* eslint-disable */
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import cn from "classnames";
 import { ArrowsExpandIcon } from "@heroicons/react/outline";
 import { FieldType } from "@lib/constants/field-types";
 import { formatDate } from "@lib/helpers/formatDate";
+import EditCell from "./EditCell";
 
 function CellValue({
   value,
@@ -101,6 +102,9 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
+  inputRef,
+  isEditing,
+  setIsEditing,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -113,6 +117,10 @@ export function CellRenderer({
       row: rowIndex,
       column: columnIndex,
     });
+  };
+
+  const onChange = () => {
+    return;
   };
 
   return (
@@ -144,16 +152,25 @@ export function CellRenderer({
       onMouseEnter={handleMouseEnter}
       suppressContentEditableWarning
     >
-      <CellValue
-        value={value}
-        isLoaded={isLoaded}
-        isRowNo={isRowNo}
-        isHoveredRow={isHoveredRow}
-        isLastRow={isLastRow}
-        field={field}
-        fieldType={fieldType}
-        handleExpandRecord={handleExpandRecord}
-      />
+      {true ? (
+        <EditCell
+          value={value}
+          isEditing={true}
+          ref={inputRef}
+          onChange={onChange}
+        />
+      ) : (
+        <CellValue
+          value={value}
+          isLoaded={isLoaded}
+          isRowNo={isRowNo}
+          isHoveredRow={isHoveredRow}
+          isLastRow={isLastRow}
+          field={field}
+          fieldType={fieldType}
+          handleExpandRecord={handleExpandRecord}
+        />
+      )}
     </div>
   );
 }
