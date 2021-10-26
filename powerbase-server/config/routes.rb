@@ -65,4 +65,6 @@ Rails.application.routes.draw do
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
   post 'tables/:table_id/field', to: 'powerbase_fields#add', as: 'new_field'
   get 'fields/:name', to: 'powerbase_fields#get_single_field', as: 'get_field'
+  post 'magic_records', to: 'table_records#add_or_update_magic_record', as: 'change_magic_record'
+  get 'tables/:id/magic_records', to: 'table_records#magic_records', as: 'magic_records'
 end

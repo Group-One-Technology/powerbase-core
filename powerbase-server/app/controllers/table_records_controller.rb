@@ -55,6 +55,27 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
+  # POST /magic_records/:record_id
+  def add_or_update_magic_record
+    new_magic_record = nil
+    record_id = params[:record_id]
+    magic_record = MagicRecord.find_by(record_id: record_id, table_id: params[:table_id])
+    if magic_record
+      magic_record.update(text_value: params[:text_value])
+    else
+      new_magic_record = MagicRecord.create({table_id: params[:table_id], record_id: params[:record_id], text_value: params[:text_value], field_name: params[:field_name]})
+    end
+    render json: {} if new_magic_record
+  end
+
+  # GET /tables/:id/magic_records
+  def magic_records
+    magic_records = MagicRecord.where(table_id: params[:id])
+    formatted_records = magic_records.map { |record| format_json(record) }
+    puts magic_records
+    render json: formatted_records
+  end
+
   # GET /tables/:id/records_count
   def count
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
@@ -65,4 +86,16 @@ class TableRecordsController < ApplicationController
 
     render json: { count: total_records }
   end
+
+  def format_json(field)
+    {
+      id: field.id,
+      field_name: field.field_name,
+      text_value: field.text_value,
+      record_id: field.record_id,
+      table_id: field.table_id,
+    }
+  end
+
 end
+
