@@ -48,6 +48,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   );
 
   const { data, error, size, setSize } = response;
+  console.log(data);
 
   const parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   const isLoadingInitialData = !data && !error;

@@ -2,6 +2,7 @@
 import { securedApi } from "./index";
 
 export async function getTableRecords({ url, ...payload }) {
+  console.log(url);
   const response = await securedApi.post(url, payload);
 
   if (response.statusText === "OK") {

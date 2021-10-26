@@ -7,6 +7,7 @@ import { FieldType } from "@lib/constants/field-types";
 import { formatDate } from "@lib/helpers/formatDate";
 import EditCell from "./EditCell";
 import OutsideCellClick from "./OutsideCellClick";
+import { securedApi } from "@lib/api";
 
 function CellValue({
   value,
@@ -110,6 +111,7 @@ export function CellRenderer({
   setCellToEdit,
   editCellInput,
   setEditCellInput,
+  records,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -126,6 +128,21 @@ export function CellRenderer({
 
   const onChange = (e) => {
     setEditCellInput(e.target.value);
+  };
+
+  const onClickOutsideEditingCell = async () => {
+    const payload = {
+      field_name: field.name,
+      table_id: field.tableId,
+      field_id: field?.id,
+      text_value: inputRef.current?.value,
+      record_id: records[rowIndex]?.id,
+    };
+    console.log("payload ", payload);
+    const response = await securedApi.post(`/magic_records`, payload);
+    if (response.statusText === "OK") {
+      console.log(response);
+    }
   };
 
   return (

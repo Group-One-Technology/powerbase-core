@@ -165,6 +165,7 @@ export function TableRenderer({ height, table }) {
                           setCellToEdit,
                           editCellInput,
                           setEditCellInput,
+                          records,
                           ...props,
                         });
                       }}
