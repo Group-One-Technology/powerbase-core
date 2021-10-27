@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/outline';
 
 import { useAuthUser } from '@models/AuthUser';
+import { GuestsSettings } from '@components/settings/GuestsSettings';
 import { Page } from '@components/layout/Page';
 import { PageContent } from '@components/layout/PageContent';
 
@@ -17,22 +18,21 @@ const TABS = [
   {
     name: 'General',
     icon: CogIcon,
-    current: true,
+    disabled: true,
   },
   {
     name: 'Guests',
     icon: UserGroupIcon,
-    current: false,
   },
   {
     name: 'Email',
     icon: MailIcon,
-    current: false,
+    disabled: true,
   },
   {
     name: 'Billings & Plans',
     icon: CreditCardIcon,
-    current: false,
+    disabled: true,
   },
 ];
 
@@ -72,8 +72,9 @@ function BaseSettingsPage() {
                       selected
                         ? 'bg-indigo-50 border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-700'
                         : 'border-transparent text-gray-900 hover:bg-gray-50 hover:text-gray-900',
+                      item.disabled && 'cursor-not-allowed',
                     )}
-                    aria-current={({ selected }) => (selected ? 'page' : undefined)}
+                    disabled={item.disabled}
                   >
                     <item.icon className="flex-shrink-0 -ml-1 mr-3 h-6 w-6" aria-hidden="true" />
                     <span className="truncate">{item.name}</span>
@@ -82,6 +83,9 @@ function BaseSettingsPage() {
               </Tab.List>
               <Tab.Panels className="divide-y divide-gray-200 lg:col-span-9">
                 <Tab.Panel />
+                <Tab.Panel>
+                  <GuestsSettings />
+                </Tab.Panel>
               </Tab.Panels>
             </Tab.Group>
           </div>
