@@ -14,22 +14,31 @@ const fieldTypes = [
   {
     name: "Single Line Text",
     description: "A short line of text.",
+    powerbase_field_type_id: "1",
+    db_type: "character varying",
   },
   {
     name: "Long Text",
     description: "A long text field.",
+    powerbase_field_type_id: "2",
+    db_type: "text",
   },
   {
     name: "Number",
     description: "An integer or a decimal number.",
+    powerbase_field_type_id: "4",
   },
   {
     name: "Email",
     description: "An email address.",
+    powerbase_field_type_id: "8",
+    db_type: "character varying",
   },
   {
     name: "Checkbox",
     description: "A binary choice.",
+    powerbase_field_type_id: "3",
+    db_type: "bolean",
   },
 ];
 
