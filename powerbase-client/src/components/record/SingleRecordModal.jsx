@@ -15,6 +15,7 @@ import { pluralize } from '@lib/helpers/pluralize';
 
 import { Modal } from '@components/ui/Modal';
 import { RecordItem } from './RecordItem';
+import { RecordItemValue } from './RecordItem/RecordItemValue';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
 
 export function SingleRecordModal({
@@ -102,7 +103,7 @@ export function SingleRecordModal({
                 >
                   <TableFieldsProvider id={foreignKey.referencedTableId}>
                     <TableConnectionsProvider tableId={foreignKey.referencedTableId}>
-                      <RecordItem
+                      <RecordItemValue
                         item={item}
                         fieldTypes={fieldTypes}
                         handleRecordInputChange={handleRecordInputChange}

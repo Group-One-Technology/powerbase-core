@@ -37,3 +37,28 @@ export const BG_COLORS = {
 export const SCROLLBAR_WIDTH = 15;
 export const ROW_NO_CELL_WIDTH = 80;
 export const DEFAULT_CELL_WIDTH = 300;
+
+export const CURRENCY_OPTIONS = [
+  { name: 'US Dollar', code: 'USD' },
+  { name: 'Euro', code: 'EUR' },
+  { name: 'Australian Dollar', code: 'AUD' },
+  { name: 'Indian Rupee', code: 'INR' },
+  { name: 'Norwegian Krone', code: 'NOK' },
+  { name: 'Brazilian Real', code: 'BRL' },
+  { name: 'Riel', code: 'KHR' },
+  { name: 'Canadian Dollar', code: 'CAD' },
+  { name: 'Colombian Peso', code: 'COP' },
+  { name: 'New Zealand Dollar', code: 'NZD' },
+  { name: 'Danish Krone', code: 'DKK' },
+  { name: 'Egyptian Pound', code: 'EGP' },
+  { name: 'Lari', code: 'GEL' },
+  { name: 'Hong Kong Dollar', code: 'HKD' },
+  { name: 'Rupiah', code: 'IDR' },
+  { name: 'Yen', code: 'JPY' },
+  { name: 'Pound Sterling', code: 'GBP' },
+  { name: 'Won', code: 'KRW' },
+  { name: 'Mexican Peso', code: 'MXN' },
+  { name: 'Pakistan Rupee', code: 'PKR' },
+  { name: 'Philippine Peso', code: 'PHP' },
+  { name: 'Baht', code: 'THB' },
+];

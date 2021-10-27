@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { TableFieldsProvider } from '@models/TableFields';
 import { TableRecordProvider } from '@models/TableRecord';
+import { TableConnectionsProvider } from '@models/TableConnections';
 import { RecordItemValue } from './RecordItemValue';
 
 export function RecordItem({
@@ -39,19 +40,21 @@ export function RecordItem({
       primaryKeys={primaryKeys}
     >
       <TableFieldsProvider id={referencedTable?.id}>
-        <RecordItemValue
-          item={{ ...item, ...foreignKey }}
-          fieldTypes={fieldTypes}
-          handleRecordInputChange={handleRecordInputChange}
-          openRecord={(value) => {
-            handleOpenRecord(value, (prevVal) => ({
-              ...prevVal,
-              table: referencedTable,
-              record: value,
-              open: true,
-            }));
-          }}
-        />
+        <TableConnectionsProvider tableId={referencedTable?.id}>
+          <RecordItemValue
+            item={{ ...item, ...foreignKey }}
+            fieldTypes={fieldTypes}
+            handleRecordInputChange={handleRecordInputChange}
+            openRecord={(value) => {
+              handleOpenRecord(value, (prevVal) => ({
+                ...prevVal,
+                table: referencedTable,
+                record: value,
+                open: true,
+              }));
+            }}
+          />
+        </TableConnectionsProvider>
       </TableFieldsProvider>
     </TableRecordProvider>
   );

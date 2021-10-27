@@ -91,6 +91,7 @@ export function RecordItemValue({
           handleRecordInputChange={handleRecordInputChange}
         />
       );
+    case FieldType.JSON_TEXT:
     case FieldType.LONG_TEXT:
       return (
         <div className="w-full mb-8">
@@ -107,12 +108,20 @@ export function RecordItemValue({
           />
         </div>
       );
-    default:
+    default: {
+      let type = 'text';
+
+      if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
+        type = 'number';
+      } else if (fieldType.name === FieldType.URL) {
+        type = 'url';
+      } else if (fieldType.name === FieldType.EMAIL) {
+        type = 'email';
+      }
+
       return (
         <Input
-          type={fieldType.name === FieldType.NUMBER
-            ? 'number'
-            : 'text'}
+          type={type}
           id={item.name}
           label={labelContent}
           name={item.name}
@@ -123,6 +132,7 @@ export function RecordItemValue({
           required
         />
       );
+    }
   }
 }
 
