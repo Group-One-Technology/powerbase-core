@@ -20,7 +20,7 @@ export function BaseItem({ base, handleErrorClick }) {
       <div className="absolute top-1 right-1 flex gap-1.5">
         {base.isTurbo && (
           <Tooltip.Root delayDuration={0}>
-            <Tooltip.Trigger className="py-[1px] px-0.5 bg-gray-100 rounded text-gray-500">
+            <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-gray-500">
               <span className="sr-only">Turbo Mode</span>
               <LightningBoltIcon className="h-4 w-4" />
             </Tooltip.Trigger>

@@ -1,14 +1,26 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDownIcon, ChevronRightIcon, CogIcon } from '@heroicons/react/solid';
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CogIcon,
+  ShareIcon,
+} from '@heroicons/react/outline';
 import { Menu, Transition } from '@headlessui/react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
+import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
+  const { setOpen: setShareModalOpen } = useShareBaseModal();
+
+  const handleShareBase = () => {
+    setShareModalOpen(true);
+  };
+
   return (
     <Menu as="div" className="ml-3 relative z-10">
       {({ open }) => (
@@ -37,6 +49,15 @@ export function BaseMenu({ base, otherBases }) {
             >
               <Menu.Item>
                 <p className="text-lg font-medium text-center mb-2">{base.name}</p>
+              </Menu.Item>
+              <Menu.Item
+                as="button"
+                type="button"
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={handleShareBase}
+              >
+                <ShareIcon className="h-4 w-4 mr-2" />
+                Share Base
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (
