@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_26_014325) do
+ActiveRecord::Schema.define(version: 2021_10_27_201042) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -65,6 +65,10 @@ ActiveRecord::Schema.define(version: 2021_10_26_014325) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "field_name"
+    t.string "string_value"
+    t.float "float_value"
+    t.boolean "boolean_value"
+    t.integer "integer_value"
   end
 
   create_table "piis", force: :cascade do |t|
