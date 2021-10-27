@@ -14,6 +14,7 @@ function TextCell({ isEditing, onChange, value }, ref) {
   const cellInnerEl = isEditing ? (
     <input
       value={getValue(value)}
+      className="w-full h-full focus:outline-none"
       onChange={(newVal) => {
         if (isObject(value)) onChange(JSON.parse(newVal));
         else onChange(newVal);

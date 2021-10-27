@@ -1,10 +1,11 @@
 /* eslint-disable */
 import constate from "constate";
-import { useSWRInfinite } from "swr";
+import useSWR, { useSWRInfinite } from "swr";
 
-import { getTableRecords } from "@lib/api/records";
+import { getTableRecords, getMagicRecords } from "@lib/api/records";
 import { useAuthUser } from "./AuthUser";
 import { useViewOptions } from "./views/ViewOptions";
+import { securedApi } from "@lib/api";
 
 function getKey({ index, tableId, query, sort, filters, pageSize }) {
   const page = index + 1;
@@ -37,6 +38,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
         ? getTableRecords({
             url,
             viewId,
+            tableId: id,
             query,
             filters:
               filters && filters.id && filters.value
@@ -48,9 +50,27 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   );
 
   const { data, error, size, setSize } = response;
-  console.log(data);
 
-  const parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
+  const magicRecordsResponse = useSWR(
+    `/tables/${id}/magic_records`,
+    getMagicRecords
+  );
+
+  const { data: magicData } = magicRecordsResponse;
+
+  let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
+  let magicRecords = magicData;
+
+  let mergedData = parsedData;
+  parsedData?.forEach((record, idx) =>
+    magicRecords?.forEach((magicRecord) => {
+      if (magicRecord?.recordId === record?.id) {
+        let remoteRecord = record;
+        remoteRecord[magicRecord?.fieldName] = magicRecord["textValue"];
+        mergedData[idx] = remoteRecord;
+      }
+    })
+  );
   const isLoadingInitialData = !data && !error;
   const isLoading =
     isLoadingInitialData ||
@@ -62,7 +82,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
 
   return {
     ...response,
-    data: parsedData,
+    data: mergedData,
     isLoading,
     isReachingEnd,
     loadMore,

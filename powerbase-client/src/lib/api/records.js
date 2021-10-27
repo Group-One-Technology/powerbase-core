@@ -2,13 +2,20 @@
 import { securedApi } from "./index";
 
 export async function getTableRecords({ url, ...payload }) {
-  console.log(url);
   const response = await securedApi.post(url, payload);
 
   if (response.statusText === "OK") {
     return response.data;
   }
 
+  return undefined;
+}
+
+export async function getMagicRecords(url) {
+  const response = await securedApi.get(url);
+  if (response.statusText === "OK") {
+    return response.data;
+  }
   return undefined;
 }
 

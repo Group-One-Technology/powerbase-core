@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 
 const OutsideCellClick = (props) => {
   let clickCaptured = false;

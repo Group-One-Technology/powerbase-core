@@ -101,7 +101,7 @@ export default function NewField({
       default_value: " ",
       is_primary_key: false,
       is_nullable: false,
-      powerbase_table_id: 30,
+      powerbase_table_id: tableId,
       powerbase_field_type_id: 1,
       is_pii: false,
       alias: fieldName,
