@@ -75,12 +75,14 @@ export function MobileNav({ base, bases, navigation }) {
           <div className="flex-shrink-0">
             <Gravatar
               email={authUser.email}
-              className="h-6 w-6 rounded-full"
+              className="h-10 w-10 rounded-full"
               alt={`${authUser.firstName}'s profile picture`}
             />
           </div>
           <div className="ml-3">
-            <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>{authUser.name}</div>
+            <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>
+              {authUser.firstName} {authUser.lastName}
+            </div>
             <div className={cn('text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>{authUser.email}</div>
           </div>
         </div>
