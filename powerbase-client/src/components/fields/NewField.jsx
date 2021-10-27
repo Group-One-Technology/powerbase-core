@@ -14,31 +14,31 @@ const fieldTypes = [
   {
     name: "Single Line Text",
     description: "A short line of text.",
-    powerbase_field_type_id: "1",
-    db_type: "character varying",
+    powerBaseFieldTypeId: "1",
+    dbType: "character varying",
   },
   {
     name: "Long Text",
     description: "A long text field.",
-    powerbase_field_type_id: "2",
-    db_type: "text",
+    powerBaseFieldTypeId: "2",
+    dbType: "text",
   },
   {
     name: "Number",
     description: "An integer or a decimal number.",
-    powerbase_field_type_id: "4",
+    powerBaseFieldTypeId: "4",
   },
   {
     name: "Email",
     description: "An email address.",
-    powerbase_field_type_id: "8",
-    db_type: "character varying",
+    powerBaseFieldTypeId: "8",
+    dbType: "character varying",
   },
   {
     name: "Checkbox",
     description: "A binary choice.",
-    powerbase_field_type_id: "3",
-    db_type: "bolean",
+    powerBaseFieldTypeId: "3",
+    dbType: "bolean",
   },
 ];
 
@@ -87,7 +87,7 @@ export default function NewField({
   setIsCreatingField,
 }) {
   const [selected, setSelected] = useState(fieldTypes[0]);
-  // const [fieldName, setFieldName] = useState("");
+  const [selectedNumberType, setSelectedNumberType] = useState(null);
   const [nameExists, setNameExists] = useState(false);
   const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
@@ -114,12 +114,12 @@ export default function NewField({
       name: toSnakeCase(fieldName.toLowerCase()),
       description: null,
       oid: 1043,
-      db_type: "character varying",
+      db_type: selected.dbType,
       default_value: " ",
       is_primary_key: false,
       is_nullable: false,
       powerbase_table_id: tableId,
-      powerbase_field_type_id: 1,
+      powerbase_field_type_id: selected.powerBaseFieldTypeId,
       is_pii: false,
       alias: fieldName,
       view_id: view.id,
