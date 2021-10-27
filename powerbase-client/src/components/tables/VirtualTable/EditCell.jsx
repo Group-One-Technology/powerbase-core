@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React from "react";
 import isObject from "lodash/isObject";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 function getValue(value) {
   if (isObject(value)) return JSON.stringify(value);

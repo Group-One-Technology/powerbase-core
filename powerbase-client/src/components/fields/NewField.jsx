@@ -38,7 +38,7 @@ const fieldTypes = [
     name: "Checkbox",
     description: "A binary choice.",
     powerBaseFieldTypeId: "3",
-    dbType: "bolean",
+    dbType: "boolean",
   },
 ];
 
@@ -124,6 +124,7 @@ export default function NewField({
       alias: fieldName,
       view_id: view.id,
       order: fields.length ? fields.length : 0,
+      is_virtual: true,
     };
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {

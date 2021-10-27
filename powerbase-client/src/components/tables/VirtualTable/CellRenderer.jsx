@@ -131,6 +131,7 @@ export function CellRenderer({
   };
 
   const onClickOutsideEditingCell = async () => {
+    setIsEditing(false);
     const payload = {
       field_name: field.name,
       table_id: field.tableId,

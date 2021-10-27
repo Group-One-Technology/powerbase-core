@@ -17,6 +17,7 @@
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.1",
     "@radix-ui/react-popover": "^0.1.0",
+    "@radix-ui/react-tooltip": "^0.1.1",
     "@tailwindcss/forms": "^0.3.2",
     "awesome-debounce-promise": "^2.1.0",
     "axios": "^0.21.1",
