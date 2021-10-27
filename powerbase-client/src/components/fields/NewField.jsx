@@ -23,6 +23,14 @@ const fieldTypes = [
     name: "Number",
     description: "An integer or a decimal number.",
   },
+  {
+    name: "Email",
+    description: "An email address.",
+  },
+  {
+    name: "Checkbox",
+    description: "A binary choice.",
+  },
 ];
 
 const useDebouncedInput = (setNameExists) => {
