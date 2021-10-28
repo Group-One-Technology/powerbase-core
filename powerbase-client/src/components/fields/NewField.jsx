@@ -9,6 +9,7 @@ import { useAsync } from "react-async-hook";
 import cn from "classnames";
 import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 import { useFieldTypes } from "@models/FieldTypes";
+import { useViewFields } from "@models/ViewFields";
 import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
 
 const debounceResolve = AwesomeDebouncePromise;
@@ -57,7 +58,6 @@ const useDebouncedInput = (setNameExists) => {
     try {
       const response = await securedApi.get(`/fields/${text}`);
       const { data } = response;
-      console.log(data);
       if (data?.message) setNameExists(false);
       else if (data?.id) setNameExists(true);
       return response;
@@ -153,6 +153,7 @@ export default function NewField({
   const [numberPrecision, setNumberPrecision] = useState(null);
   const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
+  const { mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
 
   useEffect(() => {
@@ -196,6 +197,7 @@ export default function NewField({
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
       setIsCreatingField(false);
+      mutateViewFields();
       return response.data;
     }
   };
