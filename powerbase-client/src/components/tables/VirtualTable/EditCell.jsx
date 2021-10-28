@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React from "react";
+import React, { useState } from "react";
 import isObject from "lodash/isObject";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
@@ -34,9 +34,15 @@ const TooltipContent = () => {
   );
 };
 
-function TextCell({ isEditing, onChange, value }, ref) {
+function TextCell({ isEditing, onChange, value, validationToolTip }, ref) {
+  const validateEmail = () => {
+    const pattern =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return pattern.test(email);
+  };
+
   const cellInnerEl = isEditing ? (
-    <TooltipPrimitive.Root delayDuration={0} open={true}>
+    <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
         <input
           value={getValue(value)}

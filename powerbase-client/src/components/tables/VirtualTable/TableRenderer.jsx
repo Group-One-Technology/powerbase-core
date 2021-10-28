@@ -41,6 +41,7 @@ export function TableRenderer({ height, table }) {
   const [isEditing, setIsEditing] = useState(false);
   const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
   const [editCellInput, setEditCellInput] = useState(null);
+  const [validationToolTip, setValidationToolTip] = useState(false);
 
   const columnCount = fields && fields.length + 1;
 
@@ -166,6 +167,8 @@ export function TableRenderer({ height, table }) {
                           editCellInput,
                           setEditCellInput,
                           records,
+                          validationToolTip,
+                          setValidationToolTip,
                           ...props,
                         });
                       }}

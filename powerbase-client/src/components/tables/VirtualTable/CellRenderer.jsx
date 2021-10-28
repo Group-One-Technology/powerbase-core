@@ -112,6 +112,8 @@ export function CellRenderer({
   editCellInput,
   setEditCellInput,
   records,
+  validationToolTip,
+  setValidationToolTip,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -126,11 +128,19 @@ export function CellRenderer({
     });
   };
 
-  const onChange = (e) => {
-    setEditCellInput(e.target.value);
+  const validateEmail = (email) => {
+    const pattern =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return pattern.test(email);
   };
 
-  console.log(recordInputRef);
+  const onChange = (e) => {
+    setEditCellInput(e.target.value);
+    if (validateEmail(e.target.value)) setValidationToolTip(false);
+    else setValidationToolTip(true);
+  };
+
+  console.log(field);
   const onClickOutsideEditingCell = async () => {
     const payload = {
       field_name: field.name,
@@ -191,6 +201,7 @@ export function CellRenderer({
             isEditing={isEditing}
             ref={recordInputRef}
             onChange={onChange}
+            validationToolTip={validationToolTip}
           />
         </OutsideCellClick>
       ) : (
