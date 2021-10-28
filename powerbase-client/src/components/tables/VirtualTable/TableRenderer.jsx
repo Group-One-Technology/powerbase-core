@@ -30,7 +30,7 @@ export function TableRenderer({ height, table }) {
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
-  const inputRef = useRef();
+  const recordInputRef = useRef();
 
   const [fields, setFields] = useState(
     initializeFields(initialFields, connections)
@@ -158,7 +158,7 @@ export function TableRenderer({ height, table }) {
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
                             : undefined,
-                          inputRef,
+                          recordInputRef,
                           isEditing,
                           setIsEditing,
                           cellToEdit,

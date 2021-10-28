@@ -104,7 +104,7 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
-  inputRef,
+  recordInputRef,
   isEditing,
   setIsEditing,
   cellToEdit,
@@ -130,13 +130,13 @@ export function CellRenderer({
     setEditCellInput(e.target.value);
   };
 
+  console.log(recordInputRef);
   const onClickOutsideEditingCell = async () => {
-    setIsEditing(false);
     const payload = {
       field_name: field.name,
       table_id: field.tableId,
       field_id: field?.id,
-      text_value: inputRef.current?.value,
+      text_value: recordInputRef.current?.value,
       record_id: records[rowIndex]?.id,
     };
     console.log("payload ", payload);
@@ -189,7 +189,7 @@ export function CellRenderer({
           <EditCell
             value={editCellInput}
             isEditing={isEditing}
-            ref={inputRef}
+            ref={recordInputRef}
             onChange={onChange}
           />
         </OutsideCellClick>
