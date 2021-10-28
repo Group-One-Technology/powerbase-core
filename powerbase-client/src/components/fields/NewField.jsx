@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
 import { RadioGroup } from "@headlessui/react";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-// import debounceResolve from "@lib/helpers/promises/debounceResolver";
+import { XIcon } from "@heroicons/react/outline";
 import useConstant from "@lib/hooks/useConstant";
 import { useAsync } from "react-async-hook";
 import cn from "classnames";
@@ -88,12 +88,16 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const FieldTypeComponent = ({ type, fieldTypes }) => {
+const FieldTypeComponent = ({ type, fieldTypes, setSelected }) => {
+  const collapseSelectedField = () => {
+    setSelected(null);
+  };
+
   return (
     <div className="mt-2">
       <div
         className="bg-indigo-200 hover:bg-indigo-300 cursor-default flex p-2 mb-2 rounded-md hover:rounded-md"
-        onClick={() => handleFieldTypeClick(type)}
+        onClick={collapseSelectedField}
       >
         <div>
           <FieldTypeIcon
@@ -101,10 +105,11 @@ const FieldTypeComponent = ({ type, fieldTypes }) => {
             fieldTypes={fieldTypes}
             isPrimaryKey={false}
             isForeignKey={false}
-            className="mr-1 mt-0.5"
+            className="mr-1"
           />
         </div>
         <p className="font-medium text-gray-900 cursor-default">{type.name}</p>
+        <XIcon className="h-4 w-4 ml-auto my-auto" aria-hidden="true" />
       </div>
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
@@ -224,7 +229,11 @@ export default function NewField({
       )}
 
       {selected && (
-        <FieldTypeComponent type={selected} fieldTypes={fieldTypes} />
+        <FieldTypeComponent
+          type={selected}
+          fieldTypes={fieldTypes}
+          setSelected={setSelected}
+        />
       )}
 
       <div className="mt-2 flex justify-end items-baseline">
