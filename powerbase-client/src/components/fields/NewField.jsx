@@ -9,6 +9,7 @@ import { useAsync } from "react-async-hook";
 import cn from "classnames";
 import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 import { useFieldTypes } from "@models/FieldTypes";
+import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
 
 const debounceResolve = AwesomeDebouncePromise;
 
@@ -88,7 +89,14 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const FieldTypeComponent = ({ type, fieldTypes, setSelected }) => {
+const FieldTypeComponent = ({
+  type,
+  fieldTypes,
+  setSelected,
+  setNumberSubtype,
+  setNumberPrecision,
+  numberSubtype,
+}) => {
   const collapseSelectedField = () => {
     setSelected(null);
   };
@@ -114,6 +122,20 @@ const FieldTypeComponent = ({ type, fieldTypes, setSelected }) => {
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
       </div>
+      {type.id === 4 && (
+        <div className="mt-4 mb-6">
+          <NumberFieldSelectOptions
+            isPrecision={false}
+            setNumberSubtype={setNumberSubtype}
+          />
+          {numberSubtype?.id === 2 && (
+            <NumberFieldSelectOptions
+              isPrecision={true}
+              setNumberPrecision={setNumberPrecision}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -127,6 +149,8 @@ export default function NewField({
   const [selected, setSelected] = useState(null);
   const [selectedNumberType, setSelectedNumberType] = useState(null);
   const [nameExists, setNameExists] = useState(false);
+  const [numberSubtype, setNumberSubtype] = useState(null);
+  const [numberPrecision, setNumberPrecision] = useState(null);
   const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
   const { data: fieldTypes } = useFieldTypes();
@@ -233,6 +257,9 @@ export default function NewField({
           type={selected}
           fieldTypes={fieldTypes}
           setSelected={setSelected}
+          setNumberPrecision={setNumberPrecision}
+          setNumberSubtype={setNumberSubtype}
+          numberSubtype={numberSubtype}
         />
       )}
 
