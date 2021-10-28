@@ -7,38 +7,46 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 import useConstant from "@lib/hooks/useConstant";
 import { useAsync } from "react-async-hook";
 import cn from "classnames";
+import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
+import { useFieldTypes } from "@models/FieldTypes";
 
 const debounceResolve = AwesomeDebouncePromise;
 
-const fieldTypes = [
+const mockFieldTypes = [
   {
     name: "Single Line Text",
     description: "A short line of text.",
-    powerBaseFieldTypeId: "1",
+    id: 1,
     dbType: "character varying",
   },
   {
     name: "Long Text",
     description: "A long text field.",
-    powerBaseFieldTypeId: "2",
+    id: 2,
     dbType: "text",
   },
   {
     name: "Number",
     description: "An integer or a decimal number.",
-    powerBaseFieldTypeId: "4",
+    id: 4,
   },
   {
     name: "Email",
     description: "An email address.",
-    powerBaseFieldTypeId: "8",
+    id: 8,
     dbType: "character varying",
   },
   {
     name: "Checkbox",
     description: "A binary choice.",
-    powerBaseFieldTypeId: "3",
+    id: 3,
     dbType: "boolean",
+  },
+  {
+    name: "Date",
+    description: "A date.",
+    id: 7,
+    dbType: "character varying",
   },
 ];
 
@@ -80,17 +88,41 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+const FieldTypeComponent = ({ type, fieldTypes }) => {
+  return (
+    <div className="mt-2">
+      <div
+        className="hover:bg-indigo-200 cursor-default flex p-2 mb-2"
+        onClick={() => handleFieldTypeClick(type)}
+      >
+        <div>
+          <FieldTypeIcon
+            typeId={type.id}
+            fieldTypes={fieldTypes}
+            isPrimaryKey={false}
+            isForeignKey={false}
+            className="mr-3 mt-0.5"
+          />
+        </div>
+        <p className="font-medium text-gray-900 cursor-default">{type.name}</p>
+      </div>
+      <div>{type.description}</div>
+    </div>
+  );
+};
+
 export default function NewField({
   tableId,
   view,
   fields,
   setIsCreatingField,
 }) {
-  const [selected, setSelected] = useState(fieldTypes[0]);
+  const [selected, setSelected] = useState(null);
   const [selectedNumberType, setSelectedNumberType] = useState(null);
   const [nameExists, setNameExists] = useState(false);
   const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
+  const { data: fieldTypes } = useFieldTypes();
 
   useEffect(() => {
     fieldInputRef.current?.focus();
@@ -98,6 +130,10 @@ export default function NewField({
 
   const handleChange = (e) => {
     setFieldName(e.target.value);
+  };
+
+  const handleFieldTypeClick = (fieldType) => {
+    setSelected(fieldType);
   };
 
   const toSnakeCase = (str) =>
@@ -119,7 +155,7 @@ export default function NewField({
       is_primary_key: false,
       is_nullable: false,
       powerbase_table_id: tableId,
-      powerbase_field_type_id: selected.powerBaseFieldTypeId,
+      powerbase_field_type_id: selected.id,
       is_pii: false,
       alias: fieldName,
       view_id: view.id,
@@ -162,65 +198,25 @@ export default function NewField({
       </div>
 
       <div className="mt-2">
-        <RadioGroup value={selected} onChange={setSelected}>
-          <div className="bg-white rounded-md -space-y-px">
-            {fieldTypes.map((fieldType, fieldTypeIdx) => (
-              <RadioGroup.Option
-                key={fieldType.name}
-                value={fieldType}
-                className={({ checked }) =>
-                  classNames(
-                    fieldTypeIdx === 0 ? "rounded-tl-md rounded-tr-md" : "",
-                    fieldTypeIdx === fieldTypes.length - 1
-                      ? "rounded-bl-md rounded-br-md"
-                      : "",
-                    checked
-                      ? "bg-indigo-50 border-indigo-200 z-10"
-                      : "border-gray-200",
-                    "relative border p-4 flex cursor-pointer focus:outline-none"
-                  )
-                }
-              >
-                {({ active, checked }) => (
-                  <>
-                    <span
-                      className={classNames(
-                        checked
-                          ? "bg-indigo-600 border-transparent"
-                          : "bg-white border-gray-300",
-                        active ? "ring-2 ring-offset-2 ring-indigo-500" : "",
-                        "h-4 w-4 mt-0.5 cursor-pointer rounded-full border flex items-center justify-center"
-                      )}
-                      aria-hidden="true"
-                    >
-                      <span className="rounded-full bg-white w-1.5 h-1.5" />
-                    </span>
-                    <div className="ml-3 flex flex-col">
-                      <RadioGroup.Label
-                        as="span"
-                        className={classNames(
-                          checked ? "text-indigo-900" : "text-gray-900",
-                          "block text-sm font-normal"
-                        )}
-                      >
-                        {fieldType.name}
-                      </RadioGroup.Label>
-                      <RadioGroup.Description
-                        as="span"
-                        className={classNames(
-                          checked ? "text-indigo-700" : "text-gray-500",
-                          "block text-xs"
-                        )}
-                      >
-                        {fieldType.description}
-                      </RadioGroup.Description>
-                    </div>
-                  </>
-                )}
-              </RadioGroup.Option>
-            ))}
+        {mockFieldTypes.map((type) => (
+          <div
+            className="hover:bg-indigo-200 cursor-default flex p-2 mb-2"
+            onClick={() => handleFieldTypeClick(type)}
+          >
+            <div>
+              <FieldTypeIcon
+                typeId={type.id}
+                fieldTypes={fieldTypes}
+                isPrimaryKey={false}
+                isForeignKey={false}
+                className="mr-3 mt-0.5"
+              />
+            </div>
+            <p className="font-medium text-gray-900 cursor-default">
+              {type.name}
+            </p>
           </div>
-        </RadioGroup>
+        ))}
       </div>
 
       <div className="mt-2 flex justify-end items-baseline">
@@ -231,18 +227,20 @@ export default function NewField({
           Cancel
         </button>
 
-        <button
-          type="button"
-          className={cn(
-            `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
-            nameExists && "cursor-not-allowed",
-            !nameExists && "hover:bg-indigo-700"
-          )}
-          onClick={() => addNewField()}
-          disabled={nameExists}
-        >
-          Add Field
-        </button>
+        {selected && (
+          <button
+            type="button"
+            className={cn(
+              `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
+              nameExists && "cursor-not-allowed",
+              !nameExists && "hover:bg-indigo-700"
+            )}
+            onClick={() => addNewField()}
+            disabled={nameExists}
+          >
+            Add Field
+          </button>
+        )}
       </div>
     </div>
   );
