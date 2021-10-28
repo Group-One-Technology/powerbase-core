@@ -92,7 +92,7 @@ const FieldTypeComponent = ({ type, fieldTypes }) => {
   return (
     <div className="mt-2">
       <div
-        className="hover:bg-indigo-200 cursor-default flex p-2 mb-2"
+        className="bg-indigo-200 hover:bg-indigo-300 cursor-default flex p-2 mb-2 rounded-md hover:rounded-md"
         onClick={() => handleFieldTypeClick(type)}
       >
         <div>
@@ -101,12 +101,14 @@ const FieldTypeComponent = ({ type, fieldTypes }) => {
             fieldTypes={fieldTypes}
             isPrimaryKey={false}
             isForeignKey={false}
-            className="mr-3 mt-0.5"
+            className="mr-1 mt-0.5"
           />
         </div>
         <p className="font-medium text-gray-900 cursor-default">{type.name}</p>
       </div>
-      <div>{type.description}</div>
+      <div>
+        <p className="text-xs text-gray-600 ml-2">{type.description}</p>
+      </div>
     </div>
   );
 };
@@ -197,27 +199,33 @@ export default function NewField({
         </p>
       </div>
 
-      <div className="mt-2">
-        {mockFieldTypes.map((type) => (
-          <div
-            className="hover:bg-indigo-200 cursor-default flex p-2 mb-2"
-            onClick={() => handleFieldTypeClick(type)}
-          >
-            <div>
-              <FieldTypeIcon
-                typeId={type.id}
-                fieldTypes={fieldTypes}
-                isPrimaryKey={false}
-                isForeignKey={false}
-                className="mr-3 mt-0.5"
-              />
+      {!selected && (
+        <div className="mt-2">
+          {mockFieldTypes.map((type) => (
+            <div
+              className="hover:bg-indigo-200 cursor-default flex p-2 mb-2 hover:rounded-md"
+              onClick={() => handleFieldTypeClick(type)}
+            >
+              <div>
+                <FieldTypeIcon
+                  typeId={type.id}
+                  fieldTypes={fieldTypes}
+                  isPrimaryKey={false}
+                  isForeignKey={false}
+                  className="mr-3 mt-0.5"
+                />
+              </div>
+              <p className="font-medium text-gray-900 cursor-default">
+                {type.name}
+              </p>
             </div>
-            <p className="font-medium text-gray-900 cursor-default">
-              {type.name}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <FieldTypeComponent type={selected} fieldTypes={fieldTypes} />
+      )}
 
       <div className="mt-2 flex justify-end items-baseline">
         <button
