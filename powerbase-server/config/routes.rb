@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       put 'clear_logs'
     end
 
+    resources :guests, only: [:create], shallow: true
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
@@ -64,6 +65,7 @@ Rails.application.routes.draw do
   resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
+  get 'guest_databases', to: 'guests#guest_databases'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
