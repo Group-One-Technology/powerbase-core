@@ -7,4 +7,8 @@ class User < ApplicationRecord
 
   has_many :powerbase_databases
   has_many :guests
+
+  def guest_databases
+    self.guests.map {|guest| guest.powerbase_database}
+  end
 end
