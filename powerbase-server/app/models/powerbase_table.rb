@@ -1,5 +1,6 @@
 class PowerbaseTable < ApplicationRecord
-  include Elasticsearch::Model
+  include PusherHelper
+  include Notifier
 
   alias_attribute :fields, :powerbase_fields
   alias_attribute :db, :powerbase_database
@@ -18,12 +19,34 @@ class PowerbaseTable < ApplicationRecord
   has_many :table_views
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
 
-  after_commit on: [:create] do
-    logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.powerbase_database.is_turbo
+  after_create :add_migration_attributes
+
+  def add_migration_attributes
+    self.logs["migration"] = {
+      total_records: 0,
+      offset: 0,
+      indexed_records: 0,
+      start_time: Time.now,
+      end_time: Time.now,
+      errors: []
+    }
+    self.save
+  end
+
+  def default_view
+    super || table_views.first
+  end
+
+  def default_view_id
+    super || table_views.try(:first).try(:id)
   end
 
   def index_name
     "table_records_#{id}"
+  end
+
+  def connection_string
+    db.connection_string
   end
 
   def has_primary_key?
@@ -31,14 +54,25 @@ class PowerbaseTable < ApplicationRecord
   end
 
   def in_synced?
-    unmigrated_columns.empty?
+    unmigrated_columns.empty? && deleted_columns.empty?
   end
 
   def unmigrated_columns
-    columns = _sequel.schema(self.name.to_sym).reject{|t| self.fields.map{|t| t.name.to_sym}.include? t[0]}
+    schema = _sequel.schema(self.name.to_sym)
+    columns = schema.map(&:first) - self.fields.map{|t| t.name.to_sym}
+
     # Disconnect after query
     self._sequel.disconnect
-    columns
+
+    schema.select{|col| columns.include? col.first}
+  end
+
+  def deleted_columns
+    columns = self.fields.map{|t| t.name.to_sym} - _sequel.schema(self.name.to_sym).map(&:first)
+
+    self._sequel.disconnect
+
+    fields.where(name: columns.map(&:to_s))
   end
   
   def _sequel_table
@@ -46,11 +80,11 @@ class PowerbaseTable < ApplicationRecord
   end
 
   def _sequel
-    db._sequel
+    @_sequel = db._sequel(refresh: true)
   end
 
   def sync!
-    SyncTableWorker.perform_async(self.id)
+    SyncTableWorker.perform_async(self.id) unless in_synced?
   end
 
   def migration_worker_name

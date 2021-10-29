@@ -54,18 +54,29 @@ class PowerbaseDatabase < ApplicationRecord
     "#{self.name}##{self.id}"
   end
 
-  def is_synced?
-    unmigrated_tables.empty?
+  def in_synced?
+    unmigrated_tables.empty? && deleted_tables.empty?
   end
 
   def unmigrated_tables
-    tb = _sequel.tables.reject{|t| self.tables.map{|t| t.name.to_sym}.include? t}
+    tb = _sequel.tables - self.tables.map{|t| t.name.to_sym}
     _sequel.disconnect
     tb
   end
 
-  def _sequel
-    @_sequel ||= Sequel.connect self.connection_string
+  def deleted_tables
+    tb = self.tables.map{|t| t.name.to_sym} - _sequel.tables
+    _sequel.disconnect
+    tables.where(name: tb.map(&:to_s))
+  end
+
+  def _sequel(refresh: false)
+    if refresh
+      @_sequel.try(:disconnect)
+      @_sequel = Sequel.connect self.connection_string
+    else
+      @_sequel ||= Sequel.connect self.connection_string
+    end
   end
 
   def migration_name
@@ -73,13 +84,6 @@ class PowerbaseDatabase < ApplicationRecord
   end
   
   def sync!
-    # unmigrated_tables_count = self.unmigrated_tables.count
-
-    # if unmigrated_tables_count > 0
-    #   SyncDatabaseWorker.perform_async(
-    #     name: migration_name,
-    #     arg: {database_id: self.id}
-    #   )
-    # end
+    SyncDatabaseWorker.perform_async(self.id) unless in_synced?
   end
 end

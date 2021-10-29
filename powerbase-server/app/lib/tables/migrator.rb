@@ -2,18 +2,21 @@ class Tables::Migrator
   include ElasticsearchHelper
   include SequelHelper
   include FieldTypeHelper
+  include PusherHelper
   
   attr_accessor :table, :index_name, :primary_keys, 
                 :order_field, :adapter, :fields, :offset,
-                :indexed_records, :total_records, :records
+                :indexed_records, :total_records, :records,
+                :powerbase_database
 
   def initialize(table)
     @table = table
     @index_name = table.index_name
-    @fields = table.fields
+    @fields = table.fields.reload
     @primary_keys = table.primary_keys
     @order_field = primary_keys.first || fields.first
     @adapter = table.db.adapter
+    @powerbase_database = table.db
     @offset = 0
     @indexed_records = 0
   end
@@ -22,9 +25,13 @@ class Tables::Migrator
     create_index!(index_name)
     fetch_table_records!
 
+    if records.empty?
+      puts "No record found"
+      return 
+    end
+
     # Reset all migration counter logs
     write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
-
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
     progressbar = ProgressBar.create(title: "Indexing", total: total_records)
     while offset < total_records
@@ -74,24 +81,23 @@ class Tables::Migrator
       write_table_migration_logs!(offset: offset, indexed_records: indexed_records, end_time: Time.now)
     end
 
-    db.disconnect
-  end
+    table.is_migrated = true
+    table.save
 
-  def fetch_table_records!
-    @total_records = db.from(table.name).count
-    table_query = db.from(table.name)
-    @records = table_query.select(*default_table_select(adapter.to_sym))
-      .order(order_field.name.to_sym)
-      .limit(DEFAULT_PAGE_SIZE)
-      .offset(offset)
-      .all
+    pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end
-  
-
 
   private
-  def write_migration_logs!
-    @powerbase_table.save
+  def fetch_table_records!
+    sequel_connect(powerbase_database) do |db|
+      @total_records = db.from(table.name).count
+      table_query = db.from(table.name)
+      @records = table_query.select(*default_table_select(adapter.to_sym))
+        .order(order_field.name.to_sym)
+        .limit(DEFAULT_PAGE_SIZE)
+        .offset(offset)
+        .all
+    end
   end
 
   def write_table_migration_logs!(total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
@@ -102,9 +108,5 @@ class Tables::Migrator
     table.logs["migration"]["end_time"] = end_time if end_time.present?
     table.logs["migration"]["errors"] << error if error.present?
     table.save
-  end
-
-  def db
-    @db ||= table._sequel
   end
 end

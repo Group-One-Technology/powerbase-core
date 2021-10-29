@@ -5,11 +5,10 @@ module Powerbase
     include SequelHelper
     include PusherHelper
 
-    attr_accessor :connection_string, :db, :powerbase_db
+    attr_accessor :db, :powerbase_db
 
     def initialize(powerbase_db)
       @powerbase_db = powerbase_db
-      @connection_string = powerbase_db.connection_string
     end
 
 
@@ -27,9 +26,15 @@ module Powerbase
       event_type = payload_hash["type"]
       adapter = database.adapter_scheme
       table = database.from(table_name.to_sym)
-      powerbase_table = powerbase_db.tables.find_by name: table_name
+      powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
       index_name = powerbase_table.index_name
       doc_id = format_doc_id("#{primary_key_value.keys.first.to_s}_#{primary_key_value.values.first}")
+
+      # Just run sync and reindex if there's unmigrated columns
+      unless powerbase_table.in_synced?
+        powerbase_table.sync!
+        return
+      end
 
       case event_type
       when "INSERT"
@@ -38,6 +43,7 @@ module Powerbase
         # Index new elasticsearch record
         create_new_record(index_name, row, doc_id)
 
+        # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", row.merge(doc_id: doc_id))
       when "UPDATE"
         # Query get record
@@ -60,7 +66,6 @@ module Powerbase
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
       end
 
-      powerbase_table.sync!
     end
   end
 end

@@ -1,5 +1,11 @@
 
+require 'sidekiq/web'
+Sidekiq::Web.use ActionDispatch::Cookies
+Sidekiq::Web.use ActionDispatch::Session::CookieStore, key: "_interslice_session"
+
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/sidekiq' if Rails.env.development?
+
   get '/auth/', to: 'users/auth#index'
   post '/refresh/', to: 'users/refresh#create'
   post '/login/', to: 'users/login#create'

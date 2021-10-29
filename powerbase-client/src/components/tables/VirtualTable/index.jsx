@@ -14,7 +14,7 @@ import { TableRenderer } from './TableRenderer';
 import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, table, tables }) {
-  const { data: fields } = useViewFields();
+  const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell, setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
@@ -31,9 +31,10 @@ export function VirtualTable({ height, table, tables }) {
     const channel = pusher.subscribe(`table.${table.id}`);
     channel.bind('powerbase-data-listener', async (data) => {
       const mutated = await mutateTableRecords();
+      await mutateViewFields();
       setHighLightedCell(data.doc_id)
       setTimeout(() => {
-        setHighLightedCell(null)
+        setHighLightedCell(null);
       }, 3000);
     });
   };

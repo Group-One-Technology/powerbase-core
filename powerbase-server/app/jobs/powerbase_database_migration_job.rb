@@ -355,7 +355,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     if @database.is_turbo
-      notifier = Powerbase::Notifier.new @database.connection_string
+      notifier = Powerbase::Notifier.new @database
 
       notifier_added = false
       notifier.create_notifier! unless notifier_added
@@ -376,11 +376,13 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
           table.is_migrated = true
           table.save
         end
-
       end
 
-      # Initialize Table Listener
-      @database.listen!
+      # Include new db to poller & start listening
+      poller = Sidekiq::Cron::Job.find("Database Listeners")
+      poller.args << @database.id
+      poller.save
+      poller.enque!
     end
 
     unmigrated_tables = PowerbaseTable.where(powerbase_database_id: @database.id, is_migrated: false)

@@ -4,7 +4,7 @@ class PollWorker
 
   attr_accessor :ids, :dbs
 
-  def perform(ids)
+  def perform(*ids)
     @ids = ids
     @dbs = PowerbaseDatabase.where id: ids
     
