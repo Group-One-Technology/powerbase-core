@@ -8,9 +8,9 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
-  # GET /guest_databases
-  def guest_databases
-    render json: current_user.guest_databases.map {|item| database_format_json(item)}
+  # GET /shared_databases
+  def shared_databases
+    render json: current_user.shared_databases.map {|item| database_format_json(item)}
   end
 
   # POST /databases/:database_id/guests
