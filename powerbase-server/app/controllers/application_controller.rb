@@ -9,5 +9,21 @@ class ApplicationController < ActionController::API
   private
     def not_authorized
       render json: { error: "Not authorized" }, status: :unauthorized
+      return
+    end
+
+    def check_database_access(database_id, user_id, allowed_access = ["owner"])
+      @database = PowerbaseDatabase.find(database_id)
+
+      if !@database
+        render json: { error: "Could not find database with id of '#{database_id}'." }, status: :not_found
+        return
+      end
+
+      if @database.user_id != current_user.id
+        @guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
+
+        not_authorized if !(allowed_access.include?(@guest.access) || @guest.permissions["invite_users"] == true)
+      end
     end
 end
