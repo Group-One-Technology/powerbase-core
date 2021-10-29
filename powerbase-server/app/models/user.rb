@@ -6,4 +6,5 @@ class User < ApplicationRecord
   validates :email, presence: true
 
   has_many :powerbase_databases
+  has_many :guests
 end
