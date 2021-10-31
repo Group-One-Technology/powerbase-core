@@ -1,4 +1,7 @@
-/* eslint-disable */
+/* eslint-disable comma-dangle */
+/* eslint-disable quotes */
+/* eslint-disable no-unused-vars */
+/* eslint-disabl */
 import React, { Fragment, useEffect, useState } from "react";
 import cn from "classnames";
 import PropTypes from "prop-types";
@@ -10,22 +13,28 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
+import { useSaveStatus } from "@models/SaveStatus";
 import { useViewFields } from "@models/ViewFields";
 import { useTableView } from "@models/TableView";
+import { useViewFieldState } from "@models/view/ViewFieldState";
+import { hideAllViewFields } from "@lib/api/view-fields";
 import { useReorderFields } from "@lib/hooks/fields/useReorderFields";
 import { FieldItem } from "./FieldItem";
 import NewField from "./NewField";
 
 export function Fields({ tableId }) {
   const { data: view } = useTableView();
-  const { data: initialFields } = useViewFields();
+  const { saving, saved, catchError } = useSaveStatus();
+  const { setFields: setRecordFields } = useViewFieldState();
+  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
-  const [isCreatingField, setIsCreatingField] = useState(false);
   const { sensors, handleReorderFields } = useReorderFields({
     tableId,
     fields,
     setFields,
   });
+  const [loading, setLoading] = useState(false);
+  const [isCreatingField, setIsCreatingField] = useState(false);
 
   useEffect(() => {
     setFields(initialFields);
@@ -33,6 +42,28 @@ export function Fields({ tableId }) {
 
   const handleAddNewField = () => {
     setIsCreatingField(!isCreatingField);
+  };
+
+  const handleHideAll = async () => {
+    saving();
+    setLoading(true);
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isHidden: true,
+    }));
+
+    setFields(updatedFields);
+    setRecordFields(updatedFields);
+    setLoading(false);
+
+    try {
+      await hideAllViewFields({ viewId: view.id });
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err);
+    }
   };
 
   return (
@@ -71,6 +102,16 @@ export function Fields({ tableId }) {
                         {view.name}
                       </strong>
                     </h4>
+                    <div className="mx-2 flex justify-end">
+                      <button
+                        type="button"
+                        className="p-1 text-indigo-500"
+                        onClick={handleHideAll}
+                        disabled={loading}
+                      >
+                        Hide all
+                      </button>
+                    </div>
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
@@ -82,7 +123,11 @@ export function Fields({ tableId }) {
                       >
                         <ul className="m-3 list-none flex flex-col">
                           {fields.map((field) => (
-                            <FieldItem key={field.id} field={field} />
+                            <FieldItem
+                              key={field.id}
+                              field={field}
+                              setFields={setFields}
+                            />
                           ))}
                         </ul>
                       </SortableContext>

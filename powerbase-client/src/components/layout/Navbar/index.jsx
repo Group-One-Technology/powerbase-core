@@ -14,6 +14,7 @@ import { Logo } from "@components/ui/Logo";
 import { UserMenu } from "./UserMenu";
 import { BaseMenu } from "./BaseMenu";
 import { MobileNav } from "./MobileNav";
+import { SavingIndicator } from "./SavingIndicator";
 
 export const NAVIGATION = [
   { name: "Bases", href: "/" },
@@ -25,6 +26,7 @@ export const NAVIGATION = [
 export function Navbar({ base, bases }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
+
   const otherBases =
     base && bases ? bases.filter((item) => item.id !== base.id) : undefined;
 
@@ -53,6 +55,7 @@ export function Navbar({ base, bases }) {
                   <Link to="/">
                     <Logo white={!!base} className="block h-5 w-auto" />
                   </Link>
+                  <SavingIndicator />
                 </div>
               </div>
               <div

@@ -11,6 +11,7 @@ one:
   is_pii: false
   powerbase_field_type_id: 4
   powerbase_table_id: 1
+  options:
 
 two:
   id: 2
@@ -23,6 +24,7 @@ two:
   is_pii: false
   powerbase_field_type_id: 1
   powerbase_table_id: 1
+  options:
 
 three:
   id: 3
@@ -47,6 +49,7 @@ four:
   is_pii: false
   powerbase_field_type_id: 4
   powerbase_table_id: 2
+  options:
 
 five:
   id: 5
@@ -59,6 +62,7 @@ five:
   is_pii: false
   powerbase_field_type_id: 4
   powerbase_table_id: 2
+  options:
 
 six:
   id: 6
@@ -71,3 +75,4 @@ six:
   is_pii: false
   powerbase_field_type_id: 5
   powerbase_table_id: 1
+  options:

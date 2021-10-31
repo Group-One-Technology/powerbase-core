@@ -91,6 +91,9 @@ function CellRenderer({
           id={key}
           data={{ type: "column", index: columnIndex - 1, field }}
           className="absolute w-full h-full"
+          onKeyDown={(evt) => {
+            if (evt.key === 'Enter') handleClick(evt);
+          }}
           onClick={handleClick}
         />
 

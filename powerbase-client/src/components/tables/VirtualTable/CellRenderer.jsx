@@ -1,12 +1,16 @@
 /* eslint-disable */
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import cn from "classnames";
 import { ArrowsExpandIcon } from "@heroicons/react/outline";
 import { FieldType } from "@lib/constants/field-types";
 import { formatDate } from "@lib/helpers/formatDate";
-import EditCell from "./EditCell";
-import OutsideCellClick from "./OutsideCellClick";
+import { formatCurrency } from "@lib/helpers/formatCurrency";
+import { isValidHttpUrl } from "@lib/helpers/isValidHttpUrl";
+import { isValidEmail } from "@lib/helpers/isValidEmail";
+import { isValidJSONString } from "@lib/helpers/isValidJSONString";
+import OutsideCellClick from "./OutsideCellClick.jsx";
+import EditCell from "./EditCell.jsx";
 import { securedApi } from "@lib/api";
 
 function CellValue({
@@ -19,6 +23,11 @@ function CellValue({
   fieldType,
   handleExpandRecord,
 }) {
+  const className =
+    value?.toString().length && field?.isForeignKey
+      ? "px-2 py-0.25 bg-blue-50 rounded"
+      : "";
+
   if (!isLastRow && !isLoaded) {
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
   }
@@ -49,7 +58,11 @@ function CellValue({
     );
   }
 
-  if (fieldType?.name === FieldType.CHECKBOX && !field.isPii && !isLastRow) {
+  if (field.isPii) {
+    return <span>*****</span>;
+  }
+
+  if (fieldType?.name === FieldType.CHECKBOX && !field.isPii) {
     return (
       <input
         type="checkbox"
@@ -63,7 +76,41 @@ function CellValue({
   if (fieldType?.name === FieldType.DATE && !field.isPii) {
     const date = formatDate(value);
 
-    return <span>{date ? `${date} UTC` : null}</span>;
+    return <span className={className}>{date ? `${date} UTC` : null}</span>;
+  }
+
+  if (fieldType?.name === FieldType.JSON_TEXT && isValidJSONString(value)) {
+    return <span className={className}>{"{}"}</span>;
+  }
+
+  if (fieldType?.name === FieldType.EMAIL && isValidEmail(value)) {
+    return (
+      <a
+        href={`mailto:${value.toString()}`}
+        className={cn("underline text-gray-500", className)}
+      >
+        {value.toString()}
+      </a>
+    );
+  }
+
+  if (fieldType?.name === FieldType.URL && isValidHttpUrl(value)) {
+    return (
+      <a
+        href={value.toString()}
+        target="_blank"
+        rel="noreferrer"
+        className={cn("underline text-gray-500", className)}
+      >
+        {value.toString()}
+      </a>
+    );
+  }
+
+  if (fieldType?.name === FieldType.CURRENCY) {
+    const currency = formatCurrency(value, field?.options);
+
+    return <span className={className}>{currency}</span>;
   }
 
   return (
@@ -74,7 +121,8 @@ function CellValue({
           "px-2 py-0.25 bg-blue-50 rounded"
       )}
     >
-      {!field.isPii ? value?.toString() : "*****"}
+      {value?.toString()}
+      {fieldType?.name === FieldType.PERCENT && "%"}
     </span>
   );
 }

@@ -14,7 +14,6 @@ class PowerbaseFieldTypesController < ApplicationController
         name: field_type.name,
         description: field_type.description,
         data_type: field_type.data_type,
-        is_virtual: field_type.is_virtual,
         created_at: field_type.created_at,
         updated_at: field_type.updated_at,
       }

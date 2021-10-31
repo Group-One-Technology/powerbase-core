@@ -1,7 +1,7 @@
 class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
 
-  schema(:index) do
+  schema(:index, :hide_all) do
     required(:view_id).value(:integer)
   end
 
@@ -23,6 +23,27 @@ class ViewFieldOptionsController < ApplicationController
   def index
     @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
     render json: @view_fields.map {|item| format_json(item)}
+  end
+
+  # PUT /views/:view_id/fields/hide_all
+  def hide_all
+    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id])
+
+    @view_fields.each do |field|
+      field.update(is_hidden: true)
+    end
+
+    render status: :no_content
+  end
+
+  # PUT /views/:view_id/view_fields/order
+  def update_order
+    safe_params[:view_fields].each_with_index do |view_field_id, index|
+      view_field = ViewFieldOption.find(view_field_id)
+      view_field.update(order: index)
+    end
+
+    render status: :no_content
   end
 
   # PUT /view_fields/:id/hide
@@ -54,16 +75,6 @@ class ViewFieldOptionsController < ApplicationController
     render json: format_json(view_field) if view_field.save!
   end
 
-  # PUT /views/:view_id/view_fields/order
-  def update_order
-    safe_params[:view_fields].each_with_index do |view_field_id, index|
-      view_field = ViewFieldOption.find(view_field_id)
-      view_field.update(order: index)
-    end
-
-    render status: :no_content
-  end
-
   private
     def format_json(view_field)
       field = view_field.powerbase_field
@@ -73,6 +84,7 @@ class ViewFieldOptionsController < ApplicationController
         field_id: view_field.powerbase_field_id,
         name: field.name,
         alias: field.alias,
+        db_type: field.db_type,
         description: field.description,
         default_value: field.default_value,
         is_primary_key: field.is_primary_key,
@@ -82,6 +94,7 @@ class ViewFieldOptionsController < ApplicationController
         is_frozen: view_field.is_frozen,
         is_hidden: view_field.is_hidden,
         is_pii: field.is_pii,
+        options: field.options,
         view_id: view_field.table_view_id,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,

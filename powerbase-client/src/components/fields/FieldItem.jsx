@@ -5,18 +5,34 @@ import { Switch } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
-import { hideViewField, unhideViewField } from '@lib/api/view-fields';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 
-export function FieldItem({ field }) {
+export function FieldItem({ field, setFields }) {
+  const { saving, saved, catchError } = useSaveStatus();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
+  const { setFields: setRecordFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
   const [loading, setLoading] = useState(false);
 
   const handleToggleVisibility = async () => {
+    saving();
     setLoading(true);
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isHidden: item.id === field.id
+        ? !field.isHidden
+        : item.isHidden,
+    }));
+
+    setFields(updatedFields);
+    setRecordFields(updatedFields);
+    setLoading(false);
 
     try {
       if (!field.isHidden) {
@@ -25,19 +41,11 @@ export function FieldItem({ field }) {
         await unhideViewField({ id: field.id });
       }
 
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isHidden: item.id === field.id
-          ? !field.isHidden
-          : item.isHidden,
-      }));
-
-      mutateViewFields(updatedFields);
+      await mutateViewFields(updatedFields);
+      saved();
     } catch (err) {
-      console.log(err);
+      catchError(err);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -90,4 +98,5 @@ export function FieldItem({ field }) {
 
 FieldItem.propTypes = {
   field: PropTypes.object.isRequired,
+  setFields: PropTypes.func.isRequired,
 };

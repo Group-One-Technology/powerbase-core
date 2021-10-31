@@ -1,16 +1,17 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+/* eslint-disable */
+import React from "react";
+import PropTypes from "prop-types";
 
-import { useViewFields } from '@models/ViewFields';
-import { useTableConnections } from '@models/TableConnections';
-import { useTableRecords } from '@models/TableRecords';
-import { useFieldTypes } from '@models/FieldTypes';
-import { ITable } from '@lib/propTypes/table';
+import { useViewFields } from "@models/ViewFields";
+import { useTableConnections } from "@models/TableConnections";
+import { useTableRecords } from "@models/TableRecords";
+import { useFieldTypes } from "@models/FieldTypes";
+import { ITable } from "@lib/propTypes/table";
 
-import { Loader } from '@components/ui/Loader';
-import { TableRenderer } from './TableRenderer';
+import { Loader } from "@components/ui/Loader";
+import { TableRenderer } from "./TableRenderer";
 
-import 'react-virtualized/styles.css';
+import "react-virtualized/styles.css";
 
 export function VirtualTable({ height, table }) {
   const { data: fields } = useViewFields();
@@ -18,7 +19,12 @@ export function VirtualTable({ height, table }) {
   const { data: records } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
 
-  if (fields == null || connections == null || records == null || fieldTypes == null) {
+  if (
+    fields == null ||
+    connections == null ||
+    records == null ||
+    fieldTypes == null
+  ) {
     return <Loader style={{ height }} />;
   }
 
