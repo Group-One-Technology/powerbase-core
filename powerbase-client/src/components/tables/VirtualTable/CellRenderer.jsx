@@ -136,8 +136,10 @@ export function CellRenderer({
 
   const onChange = (e) => {
     setEditCellInput(e.target.value);
-    if (validateEmail(e.target.value)) setValidationToolTip(false);
-    else setValidationToolTip(true);
+    if (field?.fieldTypeId === 8) {
+      if (validateEmail(e.target.value)) setValidationToolTip(false);
+      else setValidationToolTip(true);
+    }
   };
 
   console.log(field);
