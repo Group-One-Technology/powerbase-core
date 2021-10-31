@@ -162,6 +162,7 @@ export function CellRenderer({
   records,
   validationToolTip,
   setValidationToolTip,
+  singleCellRef,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -182,6 +183,10 @@ export function CellRenderer({
     return pattern.test(email);
   };
 
+  const focusRecordInputRef = () => {
+    console.log("RF", recordInputRef);
+    // recordInputRef.current.focus();
+  };
   const onChange = (e) => {
     setEditCellInput(e.target.value);
     if (field?.fieldTypeId === 8) {
@@ -190,7 +195,6 @@ export function CellRenderer({
     }
   };
 
-  console.log(field);
   const onClickOutsideEditingCell = async () => {
     const payload = {
       field_name: field.name,
@@ -228,6 +232,7 @@ export function CellRenderer({
       }}
       onDoubleClick={(evt) => {
         if (!isRowNo) {
+          focusRecordInputRef();
           setIsEditing(true);
           setEditCellInput(value);
           setCellToEdit({
@@ -252,6 +257,7 @@ export function CellRenderer({
             ref={recordInputRef}
             onChange={onChange}
             validationToolTip={validationToolTip}
+            cellToEdit={cellToEdit}
           />
         </OutsideCellClick>
       ) : (
