@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import cn from 'classnames';
-import Gravatar from 'react-gravatar';
-import { Listbox } from '@headlessui/react';
+import { Listbox, Dialog } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
@@ -13,14 +12,21 @@ import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
+import { GuestCard } from '@components/guest/GuestCard';
 
 export function ShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
   const { catchError } = useSaveStatus();
-  const { data: guests } = useBaseGuests();
+  const { data: initialGuests } = useBaseGuests();
+
+  const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
+
+  useEffect(() => {
+    setGuests(initialGuests);
+  }, [initialGuests]);
 
   const handleQueryChange = (evt) => {
     setQuery(evt.target.value);
@@ -40,8 +46,8 @@ export function ShareBaseModal() {
 
   return (
     <Modal open={open} setOpen={setOpen}>
-      <div className="inline-block align-bottom bg-white min-h-[400px] rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-        <h3 className="sr-only">Share {base.name}</h3>
+      <div className="inline-block align-bottom bg-white min-h-[400px] rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <Dialog.Title className="sr-only">Share {base.name}</Dialog.Title>
         <form onSubmit={submit} className="relative w-full mt-1 flex rounded-md shadow-sm">
           <input
             type="text"
@@ -71,7 +77,7 @@ export function ShareBaseModal() {
                     {item.name}
                     {item.disabled && <Badge color="gray" className="ml-2">Coming Soon</Badge>}
                   </div>
-                  <p className="text-xs">{item.description}</p>
+                  <p className="text-xs text-gray-500">{item.description}</p>
                 </Listbox.Option>
               ))}
             </Listbox.Options>
@@ -86,24 +92,8 @@ export function ShareBaseModal() {
 
         <ul className="my-4 bg-white divide-y divide-gray-200">
           {guests?.map((guest) => (
-            <li key={guest.email} className="p-2 flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                <Gravatar
-                  email={guest.email}
-                  className="h-8 w-8 rounded-full"
-                  alt={`${guest.firstName}'s profile picture`}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {guest.firstName} {guest.lastName}
-                </p>
-                <p className="text-sm text-gray-500 truncate">{guest.email}</p>
-              </div>
-              <button className="inline-flex items-center text-sm text-gray-900 capitalize">
-                {guest.access}
-                <ChevronDownIcon className="h-4 w-4 ml-1" />
-              </button>
+            <li key={guest.email} className="p-2">
+              <GuestCard guest={guest} setGuests={setGuests} />
             </li>
           ))}
         </ul>
