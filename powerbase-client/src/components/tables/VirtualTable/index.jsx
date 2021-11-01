@@ -6,6 +6,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
 import { useFieldTypes } from '@models/FieldTypes';
+import { useMounted } from '@lib/hooks/useMounted';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
@@ -18,19 +19,20 @@ export function VirtualTable({ height, table }) {
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell, setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
+  const { mounted } = useMounted();
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
   
   const attachWebsocket = function () {
-    Pusher.logToConsole = true;
+    Pusher.logToConsole = fasle;
     const pusher = new Pusher('1fa8e84feca07575f40d', {
       cluster: 'ap1',
     });
     const channel = pusher.subscribe(`table.${table.id}`);
     channel.bind('powerbase-data-listener', async (data) => {
-      const mutated = await mutateTableRecords();
+      await mutateTableRecords();
       await mutateViewFields();
       setHighLightedCell(data.doc_id)
       setTimeout(() => {
@@ -39,9 +41,7 @@ export function VirtualTable({ height, table }) {
     });
   };
 
-  useEffect(() => {
-    attachWebsocket();
-  }, [])
+  mounted(() => attachWebsocket());
   return <TableRenderer height={height} table={table} highlightedCell={highlightedCell}/>;
 }
 

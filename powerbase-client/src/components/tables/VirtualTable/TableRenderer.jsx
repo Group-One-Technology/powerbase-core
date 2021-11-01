@@ -130,7 +130,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
-                        const isHighlighted = records[rowIndex].doc_id === highlightedCell;
+                        const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
