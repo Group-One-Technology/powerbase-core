@@ -33,7 +33,6 @@ module Powerbase
       # Just run sync and reindex if there's unmigrated columns
       unless powerbase_table.in_synced?
         powerbase_table.sync!
-        return
       end
 
       case event_type

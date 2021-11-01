@@ -7,7 +7,11 @@ class TableViews::Creator
     initialize_table_view!
   end
 
-  def initialize_table_view!!
+  def object
+    table_view
+  end
+
+  def initialize_table_view!
     puts "#{Time.now} Saving table view table with id of #{table.id}..."
     @table_view = TableView.find_by(powerbase_table_id: table.id) || TableView.new
     table_view.powerbase_table_id = table.id

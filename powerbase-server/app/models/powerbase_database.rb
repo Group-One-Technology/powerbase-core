@@ -1,5 +1,5 @@
 class PowerbaseDatabase < ApplicationRecord
-  include Elasticsearch::Model
+  include SequelHelper
   scope :turbo, -> { where(is_turbo: true) }
   alias_attribute :tables, :powerbase_tables
 

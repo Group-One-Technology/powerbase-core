@@ -12,11 +12,11 @@ class PowerbaseTable < ApplicationRecord
   serialize :logs, JSON
 
   belongs_to :powerbase_database
-  belongs_to :default_view, class_name: "TableView", optional: true
-  has_many :powerbase_fields
+  has_many :powerbase_fields, dependent: :destroy
   has_many :base_connections
   has_many :base_connections, foreign_key: :referenced_table_id
-  has_many :table_views
+  has_many :table_views, dependent: :destroy
+  belongs_to :default_view, class_name: "TableView", optional: true
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
 
   after_create :add_migration_attributes
@@ -54,6 +54,10 @@ class PowerbaseTable < ApplicationRecord
   end
 
   def in_synced?
+    # check if table still exist if not return true this table will be deleted eventually no need to re-sync
+    return true if !_sequel.tables.include?(self.name.to_sym)
+    _sequel.disconnect
+
     unmigrated_columns.empty? && deleted_columns.empty?
   end
 

@@ -7,5 +7,5 @@ class TableView < ApplicationRecord
   serialize :sort, JSON
 
   belongs_to :powerbase_table
-  has_many :view_field_options, dependent: :destroy
+  has_many :view_field_options
 end

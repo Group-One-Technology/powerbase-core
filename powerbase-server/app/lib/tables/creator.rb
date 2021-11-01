@@ -22,6 +22,10 @@ class Tables::Creator
     table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
     table.order = order
   end
+  
+  def object
+    table
+  end
 
   def save
     if table.save
