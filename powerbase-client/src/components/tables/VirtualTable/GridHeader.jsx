@@ -72,6 +72,9 @@ function CellRenderer({
           id={key}
           data={{ type: 'column', index: columnIndex - 1, field }}
           className="absolute w-full h-full"
+          onKeyDown={(evt) => {
+            if (evt.key === 'Enter') handleClick(evt);
+          }}
           onClick={handleClick}
         />
 
@@ -82,7 +85,7 @@ function CellRenderer({
           isForeignKey={field.isForeignKey}
           className="mr-1"
         />
-        <span>{field.name}</span>
+        <span>{field.alias || field.name}</span>
       </div>
       <Draggable
         axis="x"

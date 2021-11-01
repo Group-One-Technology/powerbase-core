@@ -13,7 +13,7 @@ import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
 
-export function VirtualTable({ height, table, tables }) {
+export function VirtualTable({ height, table }) {
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell, setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
@@ -42,12 +42,10 @@ export function VirtualTable({ height, table, tables }) {
   useEffect(() => {
     attachWebsocket();
   }, [])
-  return <TableRenderer height={height} table={table} tables={tables} highlightedCell={highlightedCell}/>;
+  return <TableRenderer height={height} table={table} highlightedCell={highlightedCell}/>;
 }
 
 VirtualTable.propTypes = {
   height: PropTypes.number,
   table: ITable.isRequired,
-  tables: PropTypes.arrayOf(ITable),
-  table: PropTypes.object,
 };

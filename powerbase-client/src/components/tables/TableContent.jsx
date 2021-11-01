@@ -5,6 +5,7 @@ import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { ViewOptionsProvider } from '@models/views/ViewOptions';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
+import { ViewFieldStateProvider } from '@models/view/ViewFieldState';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { FieldTypesProvider } from '@models/FieldTypes';
@@ -16,7 +17,7 @@ import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableContent = React.memo(({ views, table, tables }) => {
+const BaseTableContent = React.memo(({ views, table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
 
@@ -31,14 +32,16 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
       <TableRecordsCountProvider id={table.id}>
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
-            <TableViewsNav
-              table={table}
-              views={views}
-              fields={fields}
-            />
-            {table.isMigrated
-              ? <VirtualTable table={table} tables={tables} height={height} />
-              : <Loader style={{ height }} />}
+            <ViewFieldStateProvider>
+              <TableViewsNav
+                table={table}
+                views={views}
+                fields={fields}
+              />
+              {table.isMigrated
+                ? <VirtualTable table={table} height={height} />
+                : <Loader style={{ height }} />}
+            </ViewFieldStateProvider>
           </FieldTypesProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
@@ -48,7 +51,6 @@ const BaseTableContent = React.memo(({ views, table, tables }) => {
 
 BaseTableContent.propTypes = {
   table: ITable,
-  tables: PropTypes.arrayOf(ITable),
   views: PropTypes.arrayOf(IView),
 };
 
@@ -67,11 +69,7 @@ export const TableContent = React.memo(({
       <TableReferencedConnectionsProvider tableId={table.id}>
         <TableViewProvider id={currentView?.id} initialData={currentView}>
           <ViewFieldsProvider id={currentView?.id}>
-            <BaseTableContent
-              table={table}
-              tables={tables}
-              views={views}
-            />
+            <BaseTableContent table={table} views={views} />
           </ViewFieldsProvider>
         </TableViewProvider>
       </TableReferencedConnectionsProvider>

@@ -9,6 +9,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
+import { useSaveStatus } from '@models/SaveStatus';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { useReorderSort } from '@lib/hooks/sort/useReorderSort';
@@ -17,20 +18,29 @@ import { SortItem } from './SortItem';
 
 export function Sort() {
   const sortRef = useRef();
+  const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateSort = async (value) => {
+    saving();
+
     const updatedSort = {
       id: encodeURIComponent(parseSortQueryString(value)),
       value,
     };
 
     setSort(updatedSort);
-    updateTableView({ id: view.id, sort: updatedSort });
-    await mutateTableRecords();
+
+    try {
+      updateTableView({ id: view.id, sort: updatedSort });
+      await mutateTableRecords();
+      saved();
+    } catch (err) {
+      catchError(err);
+    }
   };
 
   const updateRecords = async () => {
@@ -76,9 +86,11 @@ export function Sort() {
         <>
           <Popover.Button
             type="button"
-            className={cn('inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500', {
-              'ring-2': open,
-            })}
+            className={cn(
+              'inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
+              open && 'ring-2',
+              sort.length ? 'text-indigo-700' : 'text-gray-700',
+            )}
           >
             <SwitchVerticalIcon className="block h-4 w-4 mr-1" />
             Sort

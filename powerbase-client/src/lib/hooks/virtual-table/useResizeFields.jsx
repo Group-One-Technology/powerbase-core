@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useViewFields } from '@models/ViewFields';
 import { resizeViewField } from '@lib/api/view-fields';
+import { useSaveStatus } from '@models/SaveStatus';
 
 /**
  * Handles the resizing of field/column logic.
@@ -9,6 +10,7 @@ import { resizeViewField } from '@lib/api/view-fields';
  * @returns { handleResizeColumn, handleResizeStop }
  */
 export function useResizeFields({ fields, setFields }) {
+  const { saving, saved, catchError } = useSaveStatus();
   const { mutate: mutateViewFields } = useViewFields();
   const [resizedColumn, setResizedColumn] = useState();
 
@@ -31,6 +33,8 @@ export function useResizeFields({ fields, setFields }) {
   };
 
   const handleResizeStop = async () => {
+    saving();
+
     try {
       await resizeViewField({
         id: resizedColumn.id,
@@ -43,9 +47,10 @@ export function useResizeFields({ fields, setFields }) {
           : column.width,
       }));
 
-      mutateViewFields(updatedFields);
+      await mutateViewFields(updatedFields);
+      saved();
     } catch (err) {
-      console.log(err);
+      catchError(err);
     }
   };
 

@@ -3,6 +3,8 @@ import { ExclamationIcon } from '@heroicons/react/outline';
 import { Dialog } from '@headlessui/react';
 import PropTypes from 'prop-types';
 
+import { useSaveStatus } from '@models/SaveStatus';
+import { useMounted } from '@lib/hooks/useMounted';
 import { clearBaseLogs } from '@lib/api/base-migrations';
 import { IBase } from '@lib/propTypes/base';
 import { ErrorType } from '@lib/constants/base-migrations';
@@ -16,21 +18,28 @@ export function BaseErrorModal({
   mutateBases,
 }) {
   const cancelButtonRef = useRef();
-  const closeModal = () => setOpen(false);
+  const { mounted } = useMounted();
+  const { saving, saved, catchError } = useSaveStatus();
   const [loading, setLoading] = useState(false);
+
+  const closeModal = () => setOpen(false);
 
   const handleClearLogs = async () => {
     setLoading(true);
+    saving();
 
     try {
       await clearBaseLogs({ databaseId: base.id });
       await mutateBases();
+      saved();
     } catch (err) {
-      console.log(err);
+      catchError(err);
     }
 
-    setOpen(false);
-    setLoading(false);
+    mounted(() => {
+      setOpen(false);
+      setLoading(false);
+    });
   };
 
   return (

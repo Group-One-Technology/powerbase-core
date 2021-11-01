@@ -2,22 +2,27 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/outline';
 
+import { useTableFields } from '@models/TableFields';
+import { useTableConnections } from '@models/TableConnections';
 import { useTableLinkedRecords } from '@models/TableLinkedRecords';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Button } from '@components/ui/Button';
 import { LinkedRecordItem } from './LinkedRecordItem';
 
-export function LinkedRecordsItem({ connection, fieldTypes }) {
+export function LinkedRecordsItem({ connection, fieldTypes, openRecord }) {
   const {
     data: linkedRecords,
     isLoading,
     loadMore,
     isReachingEnd,
   } = useTableLinkedRecords();
+  const { data: fields } = useTableFields();
+  const { data: connections } = useTableConnections();
   const fieldType = fieldTypes?.find((type) => type.name === FieldType.OTHERS);
 
-  if (linkedRecords == null || linkedRecords?.length === 0) {
+  if (linkedRecords == null || linkedRecords?.length === 0 || fields == null || connections == null) {
     return null;
   }
 
@@ -25,7 +30,8 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
     <>
       <FieldTypeIcon fieldType={fieldType} className="mr-1" />
       <span className="font-normal">
-        {connection.table.name.toUpperCase()} - {connection.columns.join(', ').toUpperCase()}
+        {connection.databaseId !== connection.referencedDatabaseId && `${connection.table.databaseName.toUpperCase()} > `}
+        {connection.table.name.toUpperCase()} &gt; {connection.columns.join(', ').toUpperCase()}
       </span>
       <span className="ml-1">
         <ChevronDownIcon className="h-4 w-4" />
@@ -42,9 +48,15 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
         {linkedRecords.map((record, index) => {
           const recordKey = `${index}-${record[0]}`;
 
+          const recordArr = initializeFields(fields, connections).map((field) => ({
+            ...field,
+            fieldId: field.id,
+            value: record[field.name],
+          }));
+
           return (
             <li key={recordKey}>
-              <LinkedRecordItem record={record} />
+              <LinkedRecordItem record={record} openRecord={() => openRecord(recordArr)} />
             </li>
           );
         })}
@@ -75,4 +87,5 @@ export function LinkedRecordsItem({ connection, fieldTypes }) {
 LinkedRecordsItem.propTypes = {
   connection: PropTypes.object,
   fieldTypes: PropTypes.array,
+  openRecord: PropTypes.func,
 };

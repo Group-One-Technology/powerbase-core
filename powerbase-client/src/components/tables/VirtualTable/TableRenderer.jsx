@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Grid,
   InfiniteLoader,
@@ -7,45 +7,36 @@ import {
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
 
-import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
+import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
-import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableConnections } from '@models/TableConnections';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({
-  height,
-  table,
-  tables,
-  highlightedCell,
-}) {
+export function TableRenderer({ height, table, highlightedCell }) {
   const { data: fieldTypes } = useFieldTypes();
-  const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
-  const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
   const { data: connections } = useTableConnections();
+  const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
+  const { initialFields, fields, setFields } = useViewFieldState();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
 
-  const [fields, setFields] = useState(initializeFields(initialFields, connections));
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
 
   const columnCount = fields && fields.length + 1;
-
-  useEffect(() => {
-    setFields(initializeFields(initialFields, connections));
-  }, [initialFields, connections]);
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
@@ -69,11 +60,15 @@ export function TableRenderer({
   };
 
   const handleExpandRecord = (rowNo) => {
+    const updatedFields = initializeFields(initialFields, connections, { hidden: false })
+      .map((item) => ({
+        ...item,
+        value: records[rowNo - 1][item.name],
+      }))
+      .sort((x, y) => x.order > y.order);
+
     setIsModalOpen(true);
-    setSelectedRecord(fields.map((item) => ({
-      ...item,
-      value: records[rowNo - 1][item.name],
-    })));
+    setSelectedRecord(updatedFields);
   };
 
   return (
@@ -136,15 +131,22 @@ export function TableRenderer({
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex].doc_id === highlightedCell;
+                        const isLastRow = rowIndex >= records.length;
+                        let value = columnIndex !== 0 && !isLastRow
+                          ? records[rowIndex][field.name]
+                          : null;
+
+                        if (columnIndex === 0) {
+                          value = rowIndex + 1;
+                        }
 
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
                           isHighlighted,
+                          isLastRow,
                           isLoaded: !!records[rowIndex],
-                          value: columnIndex === 0
-                            ? rowIndex + 1
-                            : records[rowIndex][field.name],
+                          value,
                           setHoveredCell,
                           isHoveredRow,
                           field,
@@ -167,7 +169,7 @@ export function TableRenderer({
                       }}
                       columnCount={columnCount}
                       rowHeight={30}
-                      rowCount={records.length}
+                      rowCount={records.length + 1}
                       height={height}
                       width={width}
                     />
@@ -179,12 +181,14 @@ export function TableRenderer({
         )}
       </AutoSizer>
       {selectedRecord && (
-        <SingleRecordModal
-          open={isModalOpen}
-          setOpen={setIsModalOpen}
-          record={selectedRecord}
-          tables={tables}
-        />
+        <RecordsModalStateProvider rootRecord={selectedRecord}>
+          <SingleRecordModal
+            table={table}
+            open={isModalOpen}
+            setOpen={setIsModalOpen}
+            record={selectedRecord}
+          />
+        </RecordsModalStateProvider>
       )}
     </div>
   );
@@ -193,6 +197,5 @@ export function TableRenderer({
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
-  tables: PropTypes.arrayOf(ITable),
   highlightedCell: PropTypes.string,
 };

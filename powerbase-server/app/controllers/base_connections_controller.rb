@@ -169,6 +169,7 @@ class BaseConnectionsController < ApplicationController
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
+        database_name: table.powerbase_database.name,
       }
     end
 end

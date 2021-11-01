@@ -5,6 +5,7 @@ import {
   useRouteMatch,
   BrowserRouter as Router,
 } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 import { GlobalProviders } from '@components/GlobalProviders';
 import { LoginPage } from '@pages/login';
@@ -37,6 +38,7 @@ export function App() {
           <Route path="*" component={Error404Page} />
         </Switch>
       </Router>
+      <Toaster position="bottom-left" />
     </GlobalProviders>
   );
 }

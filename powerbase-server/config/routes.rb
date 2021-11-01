@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show, :update], shallow: true do
     collection do
       post 'connect'
+      post 'connect/hubspot', to: 'powerbase_databases#connect_hubspot'
     end
 
     member do
@@ -26,6 +27,9 @@ Rails.application.routes.draw do
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do
         member do
+          put 'alias', as: 'update_field_alias'
+          put 'options', as: 'update_field_options'
+          put 'field_type', as: 'update_field_field_type'
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
         end
@@ -43,6 +47,7 @@ Rails.application.routes.draw do
         resources :view_field_options, path: 'view_fields', as: 'view_fields', only: [:index], shallow: true do
           collection do
             put 'order', to: 'view_field_options#update_order', as: 'reorder_view_fields'
+            put 'hide_all', to: 'view_field_options#hide_all', as: 'hide_all_view_fields'
           end
 
           member do
@@ -67,6 +72,7 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
