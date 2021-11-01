@@ -164,4 +164,5 @@ CellRenderer.propTypes = {
   isRowNo: PropTypes.bool.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
+  isHighlighted: PropTypes.bool,
 };

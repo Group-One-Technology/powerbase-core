@@ -17,8 +17,6 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     { revalidateOnFocus: true },
   );
 
-  console.log(tablesResponse)
-
   const viewsResponse = useSWR(
     (tableId && authUser) ? `/tables/${tableId}/views` : null,
     () => getTableViews({ tableId }),

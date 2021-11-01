@@ -6,7 +6,7 @@ import { useAuthUser } from './AuthUser';
 
 function useTableViewModel({ id, initialData }) {
   const { authUser } = useAuthUser();
-  console.log('tableview', id, authUser)
+
   const response = useSWR(
     (id && authUser) ? `/views/${id}` : null,
     () => getTableView({ id }),

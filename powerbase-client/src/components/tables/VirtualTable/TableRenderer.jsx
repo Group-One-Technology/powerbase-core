@@ -21,7 +21,12 @@ import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, table, tables, highlightedCell }) {
+export function TableRenderer({
+  height,
+  table,
+  tables,
+  highlightedCell,
+}) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: initialFields } = useViewFields();
   const { data: totalRecords } = useTableRecordsCount();
@@ -130,7 +135,7 @@ export function TableRenderer({ height, table, tables, highlightedCell }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
-                        const isHighlighted  = records[rowIndex]["doc_id"] === highlightedCell
+                        const isHighlighted = records[rowIndex].doc_id === highlightedCell;
 
                         return CellRenderer({
                           rowIndex,

@@ -13,7 +13,6 @@ import { Fields } from '@components/fields/Fields';
 import { Filter } from '@components/filter/Filter';
 import { Sort } from '@components/sort/Sort';
 import { Search } from '@components/search/Search';
-import { Task } from '@components/task/Task';
 
 export function TableViewsNav({ table, views }) {
   const { data: records } = useTableRecords();
@@ -45,7 +44,6 @@ export function TableViewsNav({ table, views }) {
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />
-          {/* <Task /> */}
         </div>
       </div>
     </div>
