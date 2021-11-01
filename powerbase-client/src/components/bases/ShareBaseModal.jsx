@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import cn from 'classnames';
+import Gravatar from 'react-gravatar';
 import { Listbox } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
+import { useBaseGuests } from '@models/BaseGuests';
+import { useSaveStatus } from '@models/SaveStatus';
+import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
-import { MOCK_PEOPLE } from '@lib/constants/index';
+
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
+import { Button } from '@components/ui/Button';
 
 export function ShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
+  const { catchError } = useSaveStatus();
+  const { data: guests } = useBaseGuests();
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
@@ -19,11 +26,23 @@ export function ShareBaseModal() {
     setQuery(evt.target.value);
   };
 
+  const submit = async (evt) => {
+    evt.preventDefault();
+    const email = query;
+    setQuery('');
+
+    try {
+      await inviteGuest({ databaseId: base.id, email, access: access.name });
+    } catch (err) {
+      catchError(err.response.data.error || err.response.data.exception);
+    }
+  };
+
   return (
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-block align-bottom bg-white min-h-[400px] rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
         <h3 className="sr-only">Share {base.name}</h3>
-        <div className="relative w-full mt-1 flex rounded-md shadow-sm">
+        <form onSubmit={submit} className="relative w-full mt-1 flex rounded-md shadow-sm">
           <input
             type="text"
             value={query}
@@ -57,26 +76,32 @@ export function ShareBaseModal() {
               ))}
             </Listbox.Options>
           </Listbox>
-          <button
-            type="button"
+          <Button
+            type="submit"
             className="relative inline-flex items-center justify-center space-x-2 px-4 py-1 border border-indigo-700 text-sm rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Invite
-          </button>
-        </div>
+          </Button>
+        </form>
 
         <ul className="my-4 bg-white divide-y divide-gray-200">
-          {MOCK_PEOPLE.map((person) => (
-            <li key={person.email} className="p-2 flex items-center space-x-4">
+          {guests?.map((guest) => (
+            <li key={guest.email} className="p-2 flex items-center space-x-4">
               <div className="flex-shrink-0">
-                <img className="h-8 w-8 rounded-full" src={person.imageUrl} alt="" />
+                <Gravatar
+                  email={guest.email}
+                  className="h-8 w-8 rounded-full"
+                  alt={`${guest.firstName}'s profile picture`}
+                />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{person.name}</p>
-                <p className="text-sm text-gray-500 truncate">{person.email}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {guest.firstName} {guest.lastName}
+                </p>
+                <p className="text-sm text-gray-500 truncate">{guest.email}</p>
               </div>
-              <button className="inline-flex items-center text-sm text-gray-900">
-                Editor
+              <button className="inline-flex items-center text-sm text-gray-900 capitalize">
+                {guest.access}
                 <ChevronDownIcon className="h-4 w-4 ml-1" />
               </button>
             </li>
