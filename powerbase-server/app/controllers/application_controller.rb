@@ -12,7 +12,7 @@ class ApplicationController < ActionController::API
       return
     end
 
-    def check_database_access(database_id, user_id, allowed_access = ["owner"])
+    def check_database_access(database_id, allowed_access = ["everyone"])
       @database = PowerbaseDatabase.find(database_id)
 
       if !@database
@@ -21,9 +21,9 @@ class ApplicationController < ActionController::API
       end
 
       if @database.user_id != current_user.id
-        @guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
+        @current_guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
 
-        not_authorized if !(allowed_access.include?(@guest.access) || @guest.permissions["invite_users"] == true)
+        not_authorized if !(allowed_access.include?("everyone") || allowed_access.include?(@guest.access))
       end
     end
 end
