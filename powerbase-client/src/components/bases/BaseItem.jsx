@@ -13,8 +13,6 @@ import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
 export function BaseItem({ base, mutate, handleErrorClick }) {
-  const totalCollaborators = 0;
-
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
       <div className="absolute top-1 right-1 flex gap-1.5">
@@ -30,12 +28,12 @@ export function BaseItem({ base, mutate, handleErrorClick }) {
             </Tooltip.Content>
           </Tooltip.Root>
         )}
-        {totalCollaborators > 0 && (
+        {base.totalCollaborators > 1 && (
           <button
             type="button"
-            className="py-[1px] px-0.5 flex items-center bg-gray-100 rounded text-sm text-gray-500"
+            className="py-[1px] px-0.5 flex items-center bg-gray-100 rounded text-xs text-gray-500"
           >
-            {totalCollaborators}
+            {base.totalCollaborators}
             <UserIcon className="h-4 w-4" />
           </button>
         )}
