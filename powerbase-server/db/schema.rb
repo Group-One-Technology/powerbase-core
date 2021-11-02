@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_183713) do
+ActiveRecord::Schema.define(version: 2021_11_02_192251) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -131,6 +131,8 @@ ActiveRecord::Schema.define(version: 2021_11_02_183713) do
     t.string "alias"
     t.boolean "is_virtual"
     t.text "options"
+    t.integer "precision"
+    t.boolean "allow_dirty_value"
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
   end
