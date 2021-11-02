@@ -25,6 +25,7 @@ export function TableRenderer({ height, table }) {
     data: records,
     loadMore: loadMoreRows,
     isLoading,
+    mutate: mutateTableRecords
   } = useTableRecords();
   const { initialFields, fields, setFields } = useViewFieldState();
 
@@ -42,8 +43,6 @@ export function TableRenderer({ height, table }) {
   const [validationToolTip, setValidationToolTip] = useState(false);
 
   const columnCount = fields && fields.length + 1;
-
-  console.log(totalRecords);
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
@@ -170,6 +169,7 @@ export function TableRenderer({ height, table }) {
                           validationToolTip,
                           setValidationToolTip,
                           singleCellRef,
+                          mutateTableRecords,
                           ...props,
                         });
                       }}

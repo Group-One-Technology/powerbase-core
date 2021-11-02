@@ -49,28 +49,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
         : undefined
   );
 
-  const { data, error, size, setSize } = response;
-
-  const magicRecordsResponse = useSWR(
-    `/tables/${id}/magic_records`,
-    getMagicRecords
-  );
-
-  const { data: magicData, mutate: mutateMagicRecords } = magicRecordsResponse;
-
+  const { data, mutate, error, size, setSize } = response;
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-  let magicRecords = magicData;
-
-  let mergedData = parsedData;
-  parsedData?.forEach((record, idx) =>
-    magicRecords?.forEach((magicRecord) => {
-      if (magicRecord?.recordId === record?.id) {
-        let remoteRecord = record;
-        remoteRecord[magicRecord?.fieldName] = magicRecord["textValue"];
-        mergedData[idx] = remoteRecord;
-      }
-    })
-  );
   const isLoadingInitialData = !data && !error;
   const isLoading =
     isLoadingInitialData ||
@@ -82,7 +62,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
 
   return {
     ...response,
-    data: mergedData,
+    data: parsedData,
+    mutate,
     isLoading,
     isReachingEnd,
     loadMore,

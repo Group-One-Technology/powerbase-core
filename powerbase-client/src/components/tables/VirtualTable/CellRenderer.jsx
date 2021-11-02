@@ -163,6 +163,7 @@ export function CellRenderer({
   validationToolTip,
   setValidationToolTip,
   singleCellRef,
+  mutateTableRecords,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -183,10 +184,6 @@ export function CellRenderer({
     return pattern.test(email);
   };
 
-  const focusRecordInputRef = () => {
-    console.log("RF", recordInputRef);
-    // recordInputRef.current.focus();
-  };
   const onChange = (e) => {
     setEditCellInput(e.target.value);
     if (field?.fieldTypeId === 8) {
@@ -206,7 +203,9 @@ export function CellRenderer({
     console.log("payload ", payload);
     const response = await securedApi.post(`/magic_records`, payload);
     if (response.statusText === "OK") {
-      console.log(response);
+      mutateTableRecords();
+      recordInputRef?.current.blur();
+      setIsEditing(false);
     }
   };
 
@@ -233,7 +232,6 @@ export function CellRenderer({
       }}
       onDoubleClick={(evt) => {
         if (!isRowNo) {
-          focusRecordInputRef();
           setIsEditing(true);
           setEditCellInput(value);
           setCellToEdit({
