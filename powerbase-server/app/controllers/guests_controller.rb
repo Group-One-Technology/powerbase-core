@@ -26,7 +26,7 @@ class GuestsController < ApplicationController
 
   # GET /databases/:database_id/guests
   def index
-    check_database_access(safe_params[:database_id])
+    check_database_access(safe_params[:database_id]) or return
     @guests = Guest.where(powerbase_database_id: safe_params[:database_id])
     render json: @guests.map {|item| user_format_json(item)}
   end
@@ -39,7 +39,7 @@ class GuestsController < ApplicationController
   # PUT /guests/:id/change_access
   def change_access
     @guest = Guest.find(safe_params[:id])
-    check_database_access(@guest.powerbase_database_id, ["owner"])
+    check_database_access(@guest.powerbase_database_id, ["owner"]) or return
 
     if @guest.update(access: safe_params[:access])
       render json: format_json(@guest)
@@ -50,7 +50,7 @@ class GuestsController < ApplicationController
 
   # POST /databases/:database_id/guests
   def create
-    check_database_access(safe_params[:database_id], ["owner"])
+    check_database_access(safe_params[:database_id], ["owner"]) or return
 
     @user = User.find_by(email: safe_params[:email])
 
@@ -88,7 +88,7 @@ class GuestsController < ApplicationController
   # DELETE /guests/:id
   def destroy
     @guest = Guest.find(safe_params[:id])
-    check_database_access(@guest.powerbase_database_id, ["owner"])
+    check_database_access(@guest.powerbase_database_id, ["owner"]) or return
     @guest.destroy
   end
 
