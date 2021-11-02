@@ -56,7 +56,18 @@ function useSaveStateModel() {
     });
   };
 
-  const saved = () => mounted(() => setSaveStatus(SaveStatus.SAVED));
+  const saved = (message) => {
+    mounted(() => {
+      setSaveStatus(SaveStatus.SAVED);
+
+      if (message?.length) {
+        toast(message, {
+          icon: '✅',
+          className: 'bg-gray-800 text-sm text-white rounded-md',
+        });
+      }
+    });
+  };
 
   const catchError = (err) => {
     mounted(() => {
