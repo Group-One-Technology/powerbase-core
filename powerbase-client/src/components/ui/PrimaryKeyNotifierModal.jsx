@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function CustomModal() {
+export function PrimaryKeyNotifierModal() {
 
   return (
 <div class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
