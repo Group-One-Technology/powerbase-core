@@ -56,7 +56,7 @@ export function ShareBaseModal() {
         catchError(err.response.data.error || err.response.data.exception);
       }
 
-      mounted(() => setLoading(true));
+      mounted(() => setLoading(false));
     }
   };
 
