@@ -16,8 +16,13 @@ import { GuestCard } from '@components/guest/GuestCard';
 
 export function ShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
-  const { catchError } = useSaveStatus();
-  const { data: initialGuests } = useBaseGuests();
+  const {
+    saving,
+    saved,
+    catchError,
+    loading,
+  } = useSaveStatus();
+  const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
 
   const [guests, setGuests] = useState(initialGuests);
 
@@ -35,12 +40,18 @@ export function ShareBaseModal() {
   const submit = async (evt) => {
     evt.preventDefault();
     const email = query;
-    setQuery('');
 
-    try {
-      await inviteGuest({ databaseId: base.id, email, access: access.name });
-    } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+    if (email.length) {
+      saving();
+      setQuery('');
+
+      try {
+        await inviteGuest({ databaseId: base.id, email, access: access.name });
+        await mutateGuests();
+        saved(`Successfully invited guest with email of ${email}.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 
@@ -85,6 +96,7 @@ export function ShareBaseModal() {
           <Button
             type="submit"
             className="relative inline-flex items-center justify-center space-x-2 px-4 py-1 border border-indigo-700 text-sm rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            loading={loading}
           >
             Invite
           </Button>
