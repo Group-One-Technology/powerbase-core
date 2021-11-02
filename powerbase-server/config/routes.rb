@@ -15,8 +15,12 @@ Rails.application.routes.draw do
       put 'clear_logs'
     end
 
-    resources :guests, only: [:index, :create, :destroy], shallow: true
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
+    resources :guests, only: [:index, :create, :destroy], shallow: true do
+      member do
+        put 'change_access'
+      end
+    end
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do

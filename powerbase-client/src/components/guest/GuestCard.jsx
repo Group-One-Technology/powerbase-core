@@ -4,28 +4,39 @@ import Gravatar from 'react-gravatar';
 
 import { useBaseGuests } from '@models/BaseGuests';
 import { useSaveStatus } from '@models/SaveStatus';
-import { removeGuest } from '@lib/api/guests';
+import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
 
 export function GuestCard({ guest, setGuests, owner }) {
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
-  const handleChangeAccess = (value) => {
+  const handleChangeAccess = async (value) => {
     if (!owner) {
-      setGuests((prevGuests) => prevGuests.map((item) => ({
+      saving();
+
+      const updatedGuests = guests.map((item) => ({
         ...item,
         access: item.id === guest.id
           ? value
           : item.access,
-      })));
+      }));
+      setGuests(updatedGuests);
+
+      try {
+        await changeGuestAccess({ id: guest.id, access: value });
+        await mutateGuests(updatedGuests);
+        saved(`Successfully changed guest ${guest.firstName}'s access to '${value}'.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 
   const removeGuestAccess = async () => {
-    saving();
-
     if (!owner) {
+      saving();
+
       const updatedGuests = guests.filter((item) => item.id !== guest.id);
       setGuests(updatedGuests);
 

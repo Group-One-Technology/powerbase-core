@@ -8,6 +8,7 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useSaveStatus } from '@models/SaveStatus';
 import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
+import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
@@ -15,19 +16,16 @@ import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
 
 export function ShareBaseModal() {
+  const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const {
-    saving,
-    saved,
-    catchError,
-    loading,
-  } = useSaveStatus();
+  const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
 
   const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setGuests(initialGuests);
@@ -43,6 +41,7 @@ export function ShareBaseModal() {
 
     if (email.length) {
       saving();
+      setLoading(true);
       setQuery('');
 
       try {
@@ -52,6 +51,8 @@ export function ShareBaseModal() {
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
       }
+
+      mounted(() => setLoading(true));
     }
   };
 

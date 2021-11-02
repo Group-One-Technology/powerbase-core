@@ -20,6 +20,16 @@ export async function inviteGuest({ databaseId, ...payload }) {
   return undefined;
 }
 
+export async function changeGuestAccess({ id, ...payload }) {
+  const response = await securedApi.put(`/guests/${id}/change_access`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function removeGuest({ id }) {
   const response = await securedApi.delete(`/guests/${id}`);
 

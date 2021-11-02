@@ -8,6 +8,11 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
+  schema(:change_access) do
+    required(:id)
+    required(:access)
+  end
+
   schema(:create) do
     required(:database_id)
     required(:email)
@@ -29,6 +34,18 @@ class GuestsController < ApplicationController
   # GET /shared_databases
   def shared_databases
     render json: current_user.shared_databases.map {|item| database_format_json(item)}
+  end
+
+  # PUT /guests/:id/change_access
+  def change_access
+    @guest = Guest.find(safe_params[:id])
+    check_database_access(@guest.powerbase_database_id, ["owner"])
+
+    if @guest.update(access: safe_params[:access])
+      render json: format_json(@guest)
+    else
+      render json: @guest.errors, status: :unprocessable_entity
+    end
   end
 
   # POST /databases/:database_id/guests
