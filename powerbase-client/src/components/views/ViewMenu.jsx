@@ -28,7 +28,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
   });
 
   const sensors = useSensors();
-  const hasViewAccess = !['viewer', 'commentor'].includes(baseUser.access);
+  const hasViewAccess = !['editor', 'viewer', 'commentor'].includes(baseUser.access);
 
   useEffect(() => {
     setViews(initialViews);
