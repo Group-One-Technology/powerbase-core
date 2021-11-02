@@ -1,5 +1,5 @@
 
-if defined? Rails::Server
+if defined? Rails::Server && ENV["ENABLE_LISTENER"]
   ids = PowerbaseDatabase.turbo.ids
   
   # Destroy existing cron job to avoid duplicate

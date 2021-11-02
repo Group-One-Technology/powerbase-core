@@ -355,8 +355,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     if @database.is_turbo
       notifier = Powerbase::Notifier.new @database
 
-      notifier_added = false
-      notifier.create_notifier! unless notifier_added
+      notifier.create_notifier!
 
       @database_tables.each do |table|
         # Table Records Migration
