@@ -56,7 +56,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     getMagicRecords
   );
 
-  const { data: magicData } = magicRecordsResponse;
+  const { data: magicData, mutate: mutateMagicRecords } = magicRecordsResponse;
 
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   let magicRecords = magicData;

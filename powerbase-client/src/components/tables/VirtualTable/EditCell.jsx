@@ -46,7 +46,7 @@ function TextCell(
 
   useEffect(() => {
     ref.current.focus();
-  }, [cellToEdit]);
+  }, []);
 
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>

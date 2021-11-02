@@ -31,7 +31,7 @@ export function TableRenderer({ height, table }) {
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
   const recordInputRef = useRef();
-  const singleCellRef = useRef()
+  const singleCellRef = useRef();
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,6 +42,8 @@ export function TableRenderer({ height, table }) {
   const [validationToolTip, setValidationToolTip] = useState(false);
 
   const columnCount = fields && fields.length + 1;
+
+  console.log(totalRecords);
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {

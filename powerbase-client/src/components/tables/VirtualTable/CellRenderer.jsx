@@ -228,6 +228,7 @@ export function CellRenderer({
 
         if (evt.code === "Enter" && !isRowNo) {
           el.contentEditable = el.contentEditable !== "true";
+          if (isEditing && cellToEdit) onClickOutsideEditingCell();
         }
       }}
       onDoubleClick={(evt) => {
