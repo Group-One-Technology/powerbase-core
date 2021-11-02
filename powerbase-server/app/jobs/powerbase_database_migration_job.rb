@@ -69,9 +69,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
     @base_migration.save
 
-    # Create Database Change Notifier
-    # @conne
-
     # Table Migration
     puts "#{@base_migration.start_time} Migrating tables of database with id of #{@database.id}..."
 
@@ -366,7 +363,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
         if !table.is_migrated
                     
           # Add OID Column
-          notifier.add_oid!(table.name)
+          notifier.add_oid!(table.name) if @database.has_row_oid_support?
 
           # Inject notifier trigger
           notifier.add_trigger(table.name)

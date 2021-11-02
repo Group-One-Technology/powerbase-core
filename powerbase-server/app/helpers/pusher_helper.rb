@@ -1,7 +1,7 @@
 module PusherHelper
   def pusher
     @pusher ||= Pusher::Client.new(
-      app_id: '1277145',
+      app_id: ENV["PUSHER_APP_ID"],
       key: ENV["PUSHER_KEY"],
       secret: ENV["PUSHER_SECRET"],
       cluster: 'ap1',

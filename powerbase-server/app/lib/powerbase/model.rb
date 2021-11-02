@@ -57,7 +57,7 @@ module Powerbase
         records = remote_db() {|db|
           table = db.from(@table_name)
           table_select = [ Sequel.lit("*") ]
-          table_select << Sequel.lit("oid") if adapter == "postgresql"
+          table_select << Sequel.lit("oid") if adapter == "postgresql" && @powerbase_database.has_row_oid_support?
           table.select(*table_select)
             .order(order_field.name.to_sym)
             .limit(DEFAULT_PAGE_SIZE)
@@ -256,7 +256,9 @@ module Powerbase
           is_turbo: @powerbase_database.is_turbo,
         })
 
-        yield(@remote_db)
+        result = yield(@remote_db) if block.present?
+
+        result || @remote_db
       end
 
       def sanitize(string)

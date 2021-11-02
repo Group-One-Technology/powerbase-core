@@ -6,7 +6,7 @@ class PowerbaseDatabase < ApplicationRecord
   validates :name, presence: true
   validates :database_name, presence: true
   validates :connection_string, presence: true
-  enum adapter: { postgresql: "postgresql", mysql2: "mysql2" }, _prefix: true
+  enum adapter: { postgresql: "postgresql", mysql2: "mysql2" }
   enum color: {
     gray: "gray",
     red: "red",
@@ -85,5 +85,18 @@ class PowerbaseDatabase < ApplicationRecord
   
   def sync!
     SyncDatabaseWorker.perform_async(self.id) unless in_synced?
+  end
+
+  def has_row_oid_support?
+    db_version < 12
+  end
+
+  def db_version
+    if postgresql?
+      sequel_connect(self) {|db| db.server_version/10000 }
+    elsif mysql2?
+      # TODO: check mysql version
+      nil
+    end
   end
 end

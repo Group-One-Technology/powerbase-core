@@ -26,7 +26,7 @@ export function VirtualTable({ height, table }) {
   }
   
   const attachWebsocket = function () {
-    Pusher.logToConsole = fasle;
+    Pusher.logToConsole = false;
     const pusher = new Pusher('1fa8e84feca07575f40d', {
       cluster: 'ap1',
     });

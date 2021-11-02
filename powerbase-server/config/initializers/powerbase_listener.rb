@@ -8,7 +8,7 @@ if defined? Rails::Server
   job = Sidekiq::Cron::Job.new(
     name: "Database Listeners",
     args: ids,
-    cron: '*/5 * * * *',
+    cron: '*/5 * * * *', # Run The job every 5 mins
     class: 'PollWorker'
   )
 

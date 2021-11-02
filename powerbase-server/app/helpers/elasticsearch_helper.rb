@@ -47,7 +47,7 @@ module ElasticsearchHelper
   end
 
   def get_doc_id(primary_keys, record, fields, adapter)
-    doc_id = if primary_keys.length > 0
+    if primary_keys.length > 0
       primary_keys
         .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
         .join("-")
