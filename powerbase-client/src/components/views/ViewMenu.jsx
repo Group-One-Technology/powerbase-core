@@ -6,6 +6,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
 
+import { useBaseUser } from '@models/bases/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
@@ -17,6 +18,7 @@ import { AddView } from './AddView';
 import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
+  const { baseUser } = useBaseUser();
   const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [views, setViews] = useState(initialViews);
@@ -26,21 +28,26 @@ export function ViewMenu({ tableId, views: initialViews }) {
   });
 
   const sensors = useSensors();
+  const hasViewAccess = !['viewer', 'commentor'].includes(baseUser.access);
 
   useEffect(() => {
     setViews(initialViews);
   }, [tableId, initialViews]);
 
   const handleAddView = () => {
-    setAddViewModalOpen(true);
+    if (hasViewAccess) {
+      setAddViewModalOpen(true);
+    }
   };
 
   const handleViewOptions = (view) => {
-    setViewOptionModal({ open: true, view });
+    if (hasViewAccess) {
+      setViewOptionModal({ open: true, view });
+    }
   };
 
   const handleViewsOrderChange = ({ active, over }) => {
-    if (active.id !== over.id) {
+    if (active.id !== over.id && hasViewAccess) {
       setViews((prevViews) => {
         const oldIndex = prevViews.findIndex((item) => item.id === active.id);
         const newIndex = prevViews.findIndex((item) => item.id === over.id);
@@ -82,49 +89,54 @@ export function ViewMenu({ tableId, views: initialViews }) {
                       )}
                       handle={{
                         position: 'left',
-                        component: (
-                          <button
-                            type="button"
-                            className="w-auto flex items-center p-2 cursor-inherit cursor-grabbing"
-                          >
-                            <GripVerticalIcon className="h-3 w-3 text-gray-500" />
-                            <span className="sr-only">Reorder View</span>
-                          </button>
-                        ),
+                        component: hasViewAccess
+                          ? (
+                            <button
+                              type="button"
+                              className="w-auto flex items-center p-2 cursor-inherit cursor-grabbing"
+                            >
+                              <GripVerticalIcon className="h-3 w-3 text-gray-500" />
+                              <span className="sr-only">Reorder View</span>
+                            </button>
+                          ) : undefined,
                       }}
                     >
                       <button
                         type="button"
                         onClick={() => handleViewChange(view)}
-                        className="w-full flex justify-start items-center px-1 py-2"
+                        className="w-full flex justify-start items-center p-2"
                       >
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
-                      <div className="p-0.5">
-                        <button
-                          type="button"
-                          className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
-                          onClick={() => handleViewOptions(view)}
-                        >
-                          <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
-                          <span className="sr-only">View Options</span>
-                        </button>
-                      </div>
+                      {hasViewAccess && (
+                        <div className="p-0.5">
+                          <button
+                            type="button"
+                            className="inline-flex items-center p-1.5 rounded-md text-gray-900 hover:bg-gray-200"
+                            onClick={() => handleViewOptions(view)}
+                          >
+                            <DotsHorizontalIcon className="h-4 w-4" aria-hidden="true" />
+                            <span className="sr-only">View Options</span>
+                          </button>
+                        </div>
+                      )}
                     </SortableItem>
                   ))}
                 </SortableContext>
               </DndContext>
-              <li>
-                <button
-                  type="button"
-                  className="w-full flex items-center p-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  onClick={handleAddView}
-                >
-                  <PlusIcon className="h-3 w-3 mr-1 inline-block" />
-                  Add View
-                </button>
-              </li>
+              {hasViewAccess && (
+                <li>
+                  <button
+                    type="button"
+                    className="w-full flex items-center p-2 text-xs text-gray-700 whitespace-nowrap hover:bg-gray-100 hover:text-gray-900"
+                    onClick={handleAddView}
+                  >
+                    <PlusIcon className="h-3 w-3 mr-1 inline-block" />
+                    Add View
+                  </button>
+                </li>
+              )}
             </ul>
           </Popover.Panel>
         </Transition>

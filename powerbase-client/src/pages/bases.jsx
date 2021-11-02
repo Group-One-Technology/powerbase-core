@@ -44,7 +44,7 @@ function BasesContentPage() {
             <ul
               className={cn(
                 'flex flex-col sm:flex-row flex-wrap gap-6',
-                sharedBases.length === 0 ? 'mt-20 px-4 justify-center' : 'mt-4',
+                sharedBases?.length === 0 ? 'mt-20 px-4 justify-center' : 'mt-4',
               )}
             >
               {bases?.map((base) => (
