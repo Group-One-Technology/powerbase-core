@@ -31,6 +31,7 @@ const mockFieldTypes = [
     name: "Number",
     description: "An integer or a decimal number.",
     id: 4,
+    dbType: "integer",
   },
   {
     name: "Email",

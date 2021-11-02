@@ -200,7 +200,6 @@ export function CellRenderer({
       text_value: recordInputRef.current?.value,
       record_id: records[rowIndex]?.id,
     };
-    console.log("payload ", payload);
     const response = await securedApi.post(`/magic_records`, payload);
     if (response.statusText === "OK") {
       mutateTableRecords();
