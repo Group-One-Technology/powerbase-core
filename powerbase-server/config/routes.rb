@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       put 'clear_logs'
     end
 
-    resources :guests, only: [:index, :create], shallow: true
+    resources :guests, only: [:index, :create, :destroy], shallow: true
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do

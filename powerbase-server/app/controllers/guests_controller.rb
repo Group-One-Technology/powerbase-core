@@ -15,6 +15,10 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
+  schema(:destroy) do
+    required(:id)
+  end
+
   # GET /databases/:database_id/guests
   def index
     check_database_access(safe_params[:database_id])
@@ -47,7 +51,7 @@ class GuestsController < ApplicationController
     @guest = Guest.find_by(powerbase_database_id: safe_params[:database_id], user_id: @user.id)
 
     if @guest
-      render json: { error: "User with email of '#{user.email}' is already a guest of this database." }, status: :unprocessable_entity
+      render json: { error: "User with email of '#{@user.email}' is already a guest of this database." }, status: :unprocessable_entity
       return
     end
 
@@ -63,6 +67,12 @@ class GuestsController < ApplicationController
     else
       render json: @guest.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /guests/:id
+  def destroy
+    @guest = Guest.find(safe_params[:id])
+    @guest.destroy
   end
 
   private

@@ -19,3 +19,13 @@ export async function inviteGuest({ databaseId, ...payload }) {
 
   return undefined;
 }
+
+export async function removeGuest({ id }) {
+  const response = await securedApi.delete(`/guests/${id}`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
