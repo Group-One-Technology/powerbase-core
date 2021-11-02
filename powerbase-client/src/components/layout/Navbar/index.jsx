@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 
 import { useAuthUser } from '@models/AuthUser';
 import { ShareBaseModalProvider } from '@models/modals/ShareBaseModal';
-import { BaseGuestsProvider } from '@models/BaseGuests';
 import { IBase } from '@lib/propTypes/base';
 import { BG_COLORS } from '@lib/constants';
 
@@ -116,11 +115,9 @@ BaseNavbar.propTypes = {
 
 export function Navbar({ base, bases }) {
   return (
-    <BaseGuestsProvider id={base?.id}>
-      <ShareBaseModalProvider base={base}>
-        <BaseNavbar base={base} bases={bases} />
-      </ShareBaseModalProvider>
-    </BaseGuestsProvider>
+    <ShareBaseModalProvider base={base}>
+      <BaseNavbar base={base} bases={bases} />
+    </ShareBaseModalProvider>
   );
 }
 

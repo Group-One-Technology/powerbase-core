@@ -5,6 +5,7 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
+import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
 import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
 
@@ -23,14 +24,19 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
+  const { data: guests } = useBaseGuests();
 
-  if (base == null || bases == null || authUser == null) {
+  if (base == null || bases == null || authUser == null || guests == null) {
     return <Loader className="h-screen" />;
   }
 
   if (base.userId !== authUser.id) {
-    history.push('/login');
-    return <Loader className="h-screen" />;
+    const guest = guests.find((item) => item.userId === authUser.id);
+
+    if (!guest) {
+      history.push('/login');
+      return <Loader className="h-screen" />;
+    }
   }
 
   return (
@@ -62,11 +68,13 @@ export function TablePage() {
   return (
     <BasesProvider>
       <BaseProvider id={baseId}>
-        <BaseTableProvider id={id}>
-          <AuthOnly>
-            <BaseTable id={id} baseId={baseId} />
-          </AuthOnly>
-        </BaseTableProvider>
+        <BaseGuestsProvider id={baseId}>
+          <BaseTableProvider id={id}>
+            <AuthOnly>
+              <BaseTable id={id} baseId={baseId} />
+            </AuthOnly>
+          </BaseTableProvider>
+        </BaseGuestsProvider>
       </BaseProvider>
     </BasesProvider>
   );
