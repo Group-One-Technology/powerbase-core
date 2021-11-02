@@ -136,7 +136,10 @@ class PowerbaseFieldsController < ApplicationController
       powerbase_table_id: payload[:powerbase_table_id],
       powerbase_field_type_id: payload[:powerbase_field_type_id],
       is_pii: payload[:is_pii],
-      alias: payload[:alias]
+      alias: payload[:alias],
+      is_virtual: payload[:is_virtual],
+      precision: payload[:precision],
+      allow_dirty_value: payload[:allow_dirty_value]
     }
 
     view_field = {
