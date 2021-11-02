@@ -35,7 +35,6 @@ class GuestsController < ApplicationController
   def create
     check_database_access(safe_params[:database_id], ["owner"])
 
-
     @user = User.find_by(email: safe_params[:email])
 
     if !@user
@@ -72,6 +71,7 @@ class GuestsController < ApplicationController
   # DELETE /guests/:id
   def destroy
     @guest = Guest.find(safe_params[:id])
+    check_database_access(@guest.powerbase_database_id, ["owner"])
     @guest.destroy
   end
 
