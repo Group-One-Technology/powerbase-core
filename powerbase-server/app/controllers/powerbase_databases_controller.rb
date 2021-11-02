@@ -243,6 +243,7 @@ class PowerbaseDatabasesController < ApplicationController
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
+        total_collaborators: database.guests.length + 1,
         logs: database.base_migration.logs,
       }
     end
