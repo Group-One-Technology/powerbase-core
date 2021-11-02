@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import cn from 'classnames';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 
+import { BasesProvider, useBases } from '@models/Bases';
+import { SharedBasesProvider, useSharedBases } from '@models/SharedBases';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
@@ -10,18 +12,23 @@ import { EmptyBase } from '@components/bases/EmptyBase';
 import { BaseItem } from '@components/bases/BaseItem';
 import { BaseErrorModal } from '@components/bases/BaseErrorModal';
 import { Loader } from '@components/ui/Loader';
-import { BasesProvider, useBases } from '@models/Bases';
 
 function BasesContentPage() {
   const { data: bases, mutate: mutateBases } = useBases();
-  const sharedBases = bases;
+  const { data: sharedBases, mutate: mutateSharedBases } = useSharedBases();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedBase, setSelectedBase] = useState();
+  const [errorModal, setErrorModal] = useState({
+    base: undefined,
+    mutate: undefined,
+    open: false,
+  });
 
-  const handleErrorClick = (value) => {
-    setSelectedBase(value);
-    setModalOpen(true);
+  const handleErrorClick = (value, mutate) => {
+    setErrorModal({
+      base: value,
+      mutate,
+      open: true,
+    });
   };
 
   return (
@@ -40,12 +47,12 @@ function BasesContentPage() {
                 sharedBases.length === 0 ? 'mt-20 px-4 justify-center' : 'mt-4',
               )}
             >
-              {bases.map((base) => (
+              {bases?.map((base) => (
                 <li
                   key={base.id}
                   className="sm:w-40 sm:h-40 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
                 >
-                  <BaseItem base={base} handleErrorClick={handleErrorClick} />
+                  <BaseItem base={base} handleErrorClick={handleErrorClick} mutate={mutateBases} />
                 </li>
               ))}
               <li className="sm:w-40 sm:h-40 text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
@@ -67,12 +74,12 @@ function BasesContentPage() {
                 Shared Bases
               </h2>
               <ul className="mt-4 flex flex-col sm:flex-row flex-wrap gap-6">
-                {bases.map((base) => (
+                {sharedBases.map((base) => (
                   <li
                     key={base.id}
                     className="sm:w-40 sm:h-40 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
                   >
-                    <BaseItem base={base} handleErrorClick={handleErrorClick} />
+                    <BaseItem base={base} handleErrorClick={handleErrorClick} mutate={mutateSharedBases} />
                   </li>
                 ))}
               </ul>
@@ -81,12 +88,12 @@ function BasesContentPage() {
 
           {(bases == null && sharedBases == null) && <Loader className="h-80" />}
           {(bases?.length === 0 && sharedBases?.length === 0) && <EmptyBase />}
-          {(selectedBase && selectedBase.logs?.errors) && (
+          {(errorModal.base && errorModal.base.logs?.errors) && (
             <BaseErrorModal
-              open={modalOpen}
-              setOpen={setModalOpen}
-              base={selectedBase}
-              mutateBases={mutateBases}
+              open={errorModal.open}
+              setOpen={(value) => setErrorModal((prevVal) => ({ ...prevVal, open: value }))}
+              base={errorModal.base}
+              mutateBases={errorModal.mutate}
             />
           )}
         </PageContent>
@@ -98,7 +105,9 @@ function BasesContentPage() {
 export function BasesPage() {
   return (
     <BasesProvider>
-      <BasesContentPage />
+      <SharedBasesProvider>
+        <BasesContentPage />
+      </SharedBasesProvider>
     </BasesProvider>
   );
 }

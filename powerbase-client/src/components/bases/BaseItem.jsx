@@ -12,7 +12,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
-export function BaseItem({ base, handleErrorClick }) {
+export function BaseItem({ base, mutate, handleErrorClick }) {
   const totalCollaborators = 0;
 
   return (
@@ -61,7 +61,7 @@ export function BaseItem({ base, handleErrorClick }) {
         <button
           type="button"
           className="mt-1 font-medium text-sm text-red-600 hover:text-red-500 flex justify-center items-center"
-          onClick={() => handleErrorClick(base)}
+          onClick={() => handleErrorClick(base, mutate)}
         >
           <ExclamationCircleIcon className="-ml-2 mr-1 h-4 w-4" />
           Errors
@@ -73,5 +73,6 @@ export function BaseItem({ base, handleErrorClick }) {
 
 BaseItem.propTypes = {
   base: IBase.isRequired,
+  mutate: PropTypes.func.isRequired,
   handleErrorClick: PropTypes.func.isRequired,
 };
