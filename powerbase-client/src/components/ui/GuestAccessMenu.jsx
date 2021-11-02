@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/outline';
 
+import { useBaseUser } from '@models/bases/BaseUser';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { Badge } from './Badge';
 
@@ -13,16 +14,21 @@ export function GuestAccessMenu({
   remove,
   owner,
 }) {
+  const { baseUser } = useBaseUser();
+  const hasInviteAccess = baseUser.access === 'owner';
+
+  if (owner || !hasInviteAccess) {
+    return (
+      <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
+        {owner ? 'owner' : access}
+      </span>
+    );
+  }
+
   return (
     <Menu>
-      <Menu.Button
-        className={cn(
-          'py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded hover:bg-gray-100',
-          owner && 'cursor-not-allowed',
-        )}
-        disabled={owner}
-      >
-        {owner ? 'owner' : access}
+      <Menu.Button className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded hover:bg-gray-100">
+        {access}
         <ChevronDownIcon className="h-4 w-4 ml-1" />
       </Menu.Button>
       <Menu.Items as="div" className="absolute top-8 right-0 py-2 block rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">

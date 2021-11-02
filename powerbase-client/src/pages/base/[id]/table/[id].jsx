@@ -5,6 +5,7 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
+import { BaseUserProvider, useBaseUser } from '@models/bases/BaseUser';
 import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
 import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
@@ -25,18 +26,15 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: guests } = useBaseGuests();
+  const { baseUser } = useBaseUser();
 
-  if (base == null || bases == null || authUser == null || guests == null) {
+  if (base == null || bases == null || authUser == null || guests == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
   }
 
-  if (base.userId !== authUser.id) {
-    const guest = guests.find((item) => item.userId === authUser.id);
-
-    if (!guest) {
-      history.push('/login');
-      return <Loader className="h-screen" />;
-    }
+  if (!baseUser) {
+    history.push('/login');
+    return <Loader className="h-screen" />;
   }
 
   return (
@@ -66,16 +64,18 @@ export function TablePage() {
   const { id, baseId } = useParams();
 
   return (
-    <BasesProvider>
-      <BaseProvider id={baseId}>
-        <BaseGuestsProvider id={baseId}>
-          <BaseTableProvider id={id}>
-            <AuthOnly>
-              <BaseTable id={id} baseId={baseId} />
-            </AuthOnly>
-          </BaseTableProvider>
-        </BaseGuestsProvider>
-      </BaseProvider>
-    </BasesProvider>
+    <AuthOnly>
+      <BasesProvider>
+        <BaseProvider id={baseId}>
+          <BaseGuestsProvider id={baseId}>
+            <BaseUserProvider>
+              <BaseTableProvider id={id}>
+                <BaseTable id={id} baseId={baseId} />
+              </BaseTableProvider>
+            </BaseUserProvider>
+          </BaseGuestsProvider>
+        </BaseProvider>
+      </BasesProvider>
+    </AuthOnly>
   );
 }

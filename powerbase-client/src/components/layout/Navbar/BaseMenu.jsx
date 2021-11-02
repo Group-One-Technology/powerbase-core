@@ -5,17 +5,21 @@ import {
   ChevronRightIcon,
   CogIcon,
   ShareIcon,
+  UsersIcon,
 } from '@heroicons/react/outline';
 import { Menu, Transition } from '@headlessui/react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
   const { setOpen: setShareModalOpen } = useShareBaseModal();
+  const { baseUser } = useBaseUser();
+  const hasInviteAccess = baseUser.access === 'owner';
 
   const handleShareBase = () => {
     setShareModalOpen(true);
@@ -56,8 +60,18 @@ export function BaseMenu({ base, otherBases }) {
                 className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={handleShareBase}
               >
-                <ShareIcon className="h-4 w-4 mr-2" />
-                Share Base
+                {hasInviteAccess
+                  ? (
+                    <>
+                      <ShareIcon className="h-4 w-4 mr-2" />
+                      Share Base
+                    </>
+                  ) : (
+                    <>
+                      <UsersIcon className="h-4 w-4 mr-2" />
+                      Members
+                    </>
+                  )}
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (

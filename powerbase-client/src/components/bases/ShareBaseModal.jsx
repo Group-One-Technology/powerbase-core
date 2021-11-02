@@ -5,6 +5,7 @@ import { ChevronDownIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBaseGuests } from '@models/BaseGuests';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
@@ -20,12 +21,15 @@ export function ShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
+  const { baseUser } = useBaseUser();
 
   const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
   const [loading, setLoading] = useState(false);
+
+  const hasInviteAccess = baseUser.access === 'owner';
 
   useEffect(() => {
     setGuests(initialGuests);
@@ -39,7 +43,7 @@ export function ShareBaseModal() {
     evt.preventDefault();
     const email = query;
 
-    if (email.length) {
+    if (email.length && hasInviteAccess) {
       saving();
       setLoading(true);
       setQuery('');
@@ -66,10 +70,20 @@ export function ShareBaseModal() {
             value={query}
             onChange={handleQueryChange}
             placeholder="Search by name or email."
-            className="py-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300"
+            className={cn(
+              'py-1 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300',
+              hasInviteAccess ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
+            )}
+            disabled={!hasInviteAccess}
           />
-          <Listbox value={access} onChange={setAccess}>
-            <Listbox.Button className="py-0 p-2 flex items-center border-t border-b border-gray-300 text-gray-500 text-sm capitalize hover:bg-gray-100 focus:bg-gray-100">
+          <Listbox value={access} onChange={setAccess} disabled={!hasInviteAccess}>
+            <Listbox.Button
+              type="button"
+              className={cn(
+                'py-0 p-2 flex items-center border-t border-b border-gray-300 text-gray-500 text-sm capitalize',
+                hasInviteAccess ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
+              )}
+            >
               {access.name}
               <ChevronDownIcon className="h-4 w-4 ml-1" />
             </Listbox.Button>
@@ -96,7 +110,12 @@ export function ShareBaseModal() {
           </Listbox>
           <Button
             type="submit"
-            className="relative inline-flex items-center justify-center space-x-2 px-4 py-1 border border-indigo-700 text-sm rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className={cn(
+              'relative inline-flex items-center justify-center space-x-2 px-4 py-1 border text-sm rounded-r-md text-white',
+              hasInviteAccess
+                ? 'bg-indigo-600 border-indigo-700 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                : 'cursor-not-allowed bg-gray-500 border-gray-900',
+            )}
             loading={loading}
           >
             Invite
