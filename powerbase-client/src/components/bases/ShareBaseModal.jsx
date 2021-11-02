@@ -103,6 +103,9 @@ export function ShareBaseModal() {
         </form>
 
         <ul className="my-4 bg-white divide-y divide-gray-200">
+          <li className="p-2">
+            <GuestCard guest={base.owner} setGuests={setGuests} owner />
+          </li>
           {guests?.map((guest) => (
             <li key={guest.email} className="p-2">
               <GuestCard guest={guest} setGuests={setGuests} />

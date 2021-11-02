@@ -7,15 +7,26 @@ import { ChevronDownIcon } from '@heroicons/react/outline';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { Badge } from './Badge';
 
-export function GuestAccessMenu({ access, change, remove }) {
+export function GuestAccessMenu({
+  access,
+  change,
+  remove,
+  owner,
+}) {
   return (
     <Menu>
-      <Menu.Button className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded hover:bg-gray-100">
-        {access}
+      <Menu.Button
+        className={cn(
+          'py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded hover:bg-gray-100',
+          owner && 'cursor-not-allowed',
+        )}
+        disabled={owner}
+      >
+        {owner ? 'owner' : access}
         <ChevronDownIcon className="h-4 w-4 ml-1" />
       </Menu.Button>
       <Menu.Items as="div" className="absolute top-8 right-0 py-2 block rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
-        {ACCESS_LEVEL.map((item) => (
+        {change && ACCESS_LEVEL.map((item) => (
           <Menu.Item
             key={item.name}
             as="button"
@@ -49,7 +60,8 @@ export function GuestAccessMenu({ access, change, remove }) {
 }
 
 GuestAccessMenu.propTypes = {
-  access: PropTypes.string.isRequired,
-  change: PropTypes.func.isRequired,
+  access: PropTypes.string,
+  change: PropTypes.func,
   remove: PropTypes.func,
+  owner: PropTypes.bool,
 };
