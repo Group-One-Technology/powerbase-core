@@ -23,6 +23,7 @@ export const SaveStatus = {
 function useSaveStateModel() {
   const [saveStatus, setSaveStatus] = useState(SaveStatus.IDLE);
   const [error, setError] = useState();
+  const [loading, setLoading] = useState();
   const { mounted } = useMounted();
 
   const saveStatusRef = useRef(saveStatus);
@@ -51,6 +52,7 @@ function useSaveStateModel() {
 
   const saving = () => {
     mounted(() => {
+      setLoading(true);
       setError(undefined);
       setSaveStatus(SaveStatus.SAVING);
     });
@@ -59,6 +61,7 @@ function useSaveStateModel() {
   const saved = (message) => {
     mounted(() => {
       setSaveStatus(SaveStatus.SAVED);
+      setLoading(false);
 
       if (message?.length) {
         toast(message, {
@@ -72,6 +75,7 @@ function useSaveStateModel() {
   const catchError = (err) => {
     mounted(() => {
       setError(new Error('Something went wrong.'));
+      setLoading(false);
       setSaveStatus(SaveStatus.ERROR);
       toast(Array.isArray(err) ? err.join('. ') : err, {
         icon: '⚠️',
@@ -89,6 +93,8 @@ function useSaveStateModel() {
     resetSaveStatus,
     error,
     setError,
+    loading,
+    setLoading,
   };
 }
 
