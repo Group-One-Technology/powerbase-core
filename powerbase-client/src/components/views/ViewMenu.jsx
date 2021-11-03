@@ -8,10 +8,12 @@ import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/out
 
 import { useBaseUser } from '@models/bases/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
+import { useSaveStatus } from '@models/SaveStatus';
 import { IView } from '@lib/propTypes/view';
 import { IId } from '@lib/propTypes/common';
 import { updateViewsOrder } from '@lib/api/views';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { AddView } from './AddView';
@@ -19,6 +21,7 @@ import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
   const { access: { manageView } } = useBaseUser();
+  const { saving, saved, catchError } = useSaveStatus();
   const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [views, setViews] = useState(initialViews);
@@ -45,15 +48,21 @@ export function ViewMenu({ tableId, views: initialViews }) {
     }
   };
 
-  const handleViewsOrderChange = ({ active, over }) => {
+  const handleViewsOrderChange = async ({ active, over }) => {
     if (active.id !== over.id && manageView) {
-      setViews((prevViews) => {
-        const oldIndex = prevViews.findIndex((item) => item.id === active.id);
-        const newIndex = prevViews.findIndex((item) => item.id === over.id);
-        const updatedViews = arrayMove(prevViews, oldIndex, newIndex);
-        updateViewsOrder({ tableId, views: updatedViews.map((item) => item.id) });
-        return updatedViews;
-      });
+      saving();
+
+      const oldIndex = views.findIndex((item) => item.id === active.id);
+      const newIndex = views.findIndex((item) => item.id === over.id);
+      const updatedViews = arrayMove(views, oldIndex, newIndex);
+      setViews(updatedViews);
+
+      try {
+        await updateViewsOrder({ tableId, views: updatedViews.map((item) => item.id) });
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 

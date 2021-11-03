@@ -43,6 +43,14 @@ class TableViewsController < ApplicationController
   # POST /tables/:table_id/views
   def create
     @table = PowerbaseTable.find(safe_params[:table_id])
+
+    if !@table
+      render json: { error: "Couldn't find table with id of \"#{safe_params[:table_id]}\"." }, status: :unprocessable_entity
+      return
+    end
+
+    check_database_access(@table.powerbase_database_id, ["owner", "admin"]) or return
+
     @view = TableView.find_by(name: safe_params[:name], powerbase_table_id: safe_params[:table_id])
 
     if @view
@@ -84,11 +92,13 @@ class TableViewsController < ApplicationController
     view_params = safe_params.output
     @view = TableView.find(view_params[:id])
 
+    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
+
     if view_params[:name]
       @existing_view = TableView.find_by(name: view_params[:name], powerbase_table_id: @view.powerbase_table_id)
 
       if @existing_view && @existing_view.id != @view.id
-        render json: { errors: "View with name of \"#{view_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
+        render json: { error: "View with name of \"#{view_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
         return
       end
     end
@@ -105,8 +115,10 @@ class TableViewsController < ApplicationController
     @view = TableView.find(safe_params[:id])
     @table = @view.powerbase_table
 
+    check_database_access(@table.powerbase_database_id, ["owner", "admin"]) or return
+
     if @table.default_view_id === @view.id
-      render json: { errors: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
+      render json: { error: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
       return
     end
 
@@ -122,6 +134,9 @@ class TableViewsController < ApplicationController
 
   # PUT /tables/:table_id/views/order
   def update_order
+    @table = PowerbaseTable.find(safe_params[:table_id])
+    check_database_access(@table.powerbase_database_id, ["owner", "admin"]) or return
+
     safe_params[:views].each_with_index do |view_id, index|
       view = TableView.find(view_id)
       view.update(order: index)
