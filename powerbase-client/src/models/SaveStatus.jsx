@@ -46,7 +46,7 @@ function useSaveStateModel() {
   const resetSaveStatus = () => {
     mounted(() => {
       setError(undefined);
-      setSaveStatus(SaveStatus.IDLE);
+      updateState(SaveStatus.IDLE);
     });
   };
 
@@ -54,13 +54,13 @@ function useSaveStateModel() {
     mounted(() => {
       setLoading(true);
       setError(undefined);
-      setSaveStatus(SaveStatus.SAVING);
+      updateState(SaveStatus.SAVING);
     });
   };
 
   const saved = (message) => {
     mounted(() => {
-      setSaveStatus(SaveStatus.SAVED);
+      updateState(SaveStatus.SAVED);
       setLoading(false);
 
       if (message?.length) {
@@ -76,7 +76,7 @@ function useSaveStateModel() {
     mounted(() => {
       setError(new Error('Something went wrong.'));
       setLoading(false);
-      setSaveStatus(SaveStatus.ERROR);
+      updateState(SaveStatus.ERROR);
       toast(Array.isArray(err) ? err.join('. ') : err, {
         icon: '⚠️',
         className: 'bg-gray-800 text-sm text-white rounded-md',
