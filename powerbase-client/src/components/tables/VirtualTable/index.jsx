@@ -5,7 +5,6 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
 import { useFieldTypes } from '@models/FieldTypes';
-import { useMounted } from '@lib/hooks/useMounted';
 import { useWebsocket } from '@lib/hooks/useWebsocket';
 import { ITable } from '@lib/propTypes/table';
 
@@ -19,14 +18,16 @@ export function VirtualTable({ height, table }) {
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
-  const { mounted } = useMounted();
   const { dataListener } = useWebsocket();
+
+  useEffect(() => {
+    dataListener(table.id);
+  }, [table.id])
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
-  
-  mounted(() => dataListener(table.id));
+
   return <TableRenderer height={height} table={table} highlightedCell={highlightedCell}/>;
 }
 
