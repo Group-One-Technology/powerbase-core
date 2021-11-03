@@ -26,7 +26,8 @@ module Powerbase
       event_type = payload_hash["type"]
       adapter = database.adapter_scheme
       table = database.from(table_name.to_sym)
-      powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+      powerbase_table = powerbase_db.tables.turbo.where name: table_name
+
       index_name = powerbase_table.index_name
       doc_id = format_doc_id("#{primary_key_value.keys.first.to_s}_#{primary_key_value.values.first}")
 

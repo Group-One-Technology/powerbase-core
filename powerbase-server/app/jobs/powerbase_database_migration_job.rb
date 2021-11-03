@@ -67,16 +67,14 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       @base_migration.start_time = Time.now
     end
 
-    @database.sync!
+    @database.sync!(true)
 
     @base_migration.logs["errors"].push({
       type: "Status",
       error: "Some tables hasn't finished migrating yet.",
     })
     @base_migration.save
-
     @database.update(is_migrated: true)
-    @base_migration.end_time = Time.now
     @base_migration.save
   end
 

@@ -12,7 +12,7 @@ class SyncTableWorker
         puts "Saving #{unmigrated_columns.count} additional column(s)..."
 
         unmigrated_columns.each do |column|
-          # Create new column field
+          # Create field
           field = Fields::Creator.new column, table
           field.save
         end

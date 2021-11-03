@@ -1,6 +1,6 @@
 
 if defined? Rails::Server && ENV["ENABLE_LISTENER"]
-  ids = PowerbaseDatabase.turbo.ids
+  ids = PowerbaseDatabase.turbo.select(&:has_row_oid_support?).map(&:id)
   
   # Destroy existing cron job to avoid duplicate
   Sidekiq::Cron::Job.destroy_all!

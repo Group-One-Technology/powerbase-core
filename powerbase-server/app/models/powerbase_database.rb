@@ -79,8 +79,8 @@ class PowerbaseDatabase < ApplicationRecord
     "PendingTableMigration##{self.id}"
   end
   
-  def sync!
-    SyncDatabaseWorker.perform_async(self.id) unless in_synced?
+  def sync!(new_connection = false)
+    SyncDatabaseWorker.perform_async(self.id, new_connection) unless in_synced?
   end
 
   def has_row_oid_support?
