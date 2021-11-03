@@ -55,13 +55,15 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_records/:record_id
   def add_or_update_magic_record
+    type = params[:key_type]
     new_magic_record = nil
     record_id = params[:record_id]
-    magic_record = MagicRecord.find_by(record_id: record_id, table_id: params[:table_id])
+    magic_record = MagicRecord.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
     if magic_record
-      magic_record.update(text_value: params[:text_value])
+      magic_record.update(type => params[type])
     else
-      new_magic_record = MagicRecord.create({table_id: params[:table_id], record_id: params[:record_id], text_value: params[:text_value], field_name: params[:field_name]})
+      puts "WHOOP"
+      new_magic_record = MagicRecord.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id]})
     end
     render json: {} if new_magic_record
   end
@@ -70,7 +72,6 @@ class TableRecordsController < ApplicationController
   def magic_records
     magic_records = MagicRecord.where(table_id: params[:id])
     formatted_records = magic_records.map { |record| format_json(record) }
-    puts magic_records
     render json: formatted_records
   end
 
@@ -85,13 +86,19 @@ class TableRecordsController < ApplicationController
     render json: { count: total_records }
   end
 
-  def format_json(field)
+  def format_json(record)
     {
-      id: field.id,
-      field_name: field.field_name,
-      text_value: field.text_value,
-      record_id: field.record_id,
-      table_id: field.table_id,
+      id: record.id,
+      field_name: record.field_name,
+      text_value: record.text_value,
+      string_value: record.string_value,
+      decimal_value: record.decimal_value,
+      integer_value: record.integer_value,
+      record_id: record.record_id,
+      table_id: record.table_id,
+      has_precision: record.has_precision,
+      field_id: record.field_id,
+      field_type_id: record.field_type_id
     }
   end
 
