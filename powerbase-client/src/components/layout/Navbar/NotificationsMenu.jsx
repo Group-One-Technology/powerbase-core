@@ -91,7 +91,7 @@ function BaseNotificationsMenu({ colored }) {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Popover.Panel className="absolute z-10 w-60 p-2 rounded shadow-lg bg-white mt-3 transform -translate-x-1/2 left-1/2">
+            <Popover.Panel className="absolute z-10 w-64 p-2 rounded shadow-lg bg-white mt-3 transform -translate-x-1/2 left-1/2">
               {guestInvitations?.length > 0 && (
                 <ul className="bg-white divide-y divide-gray-200">
                   {guestInvitations.map((item) => (
