@@ -18,6 +18,7 @@ class SyncDatabaseWorker
           table_view.save
           table.object.default_view_id = table_view.object.id
           table.object.sync!
+          table.create_base_connection!
         end
       end
 

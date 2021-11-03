@@ -255,6 +255,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     )
 
     @database_tables.each do |table|
+      # TODO: Use Tables::Creator
       # Scan for possible base connections migration
       puts "#{Time.now} Scanning and migrating possible base connections for table with id of #{table.id}..."
       table.powerbase_fields.each do |field|
