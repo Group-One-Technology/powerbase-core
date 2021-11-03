@@ -91,7 +91,6 @@ export function TableRenderer({ height, table }) {
               <>
                 <GridHeader
                   ref={headerGridRef}
-                  table={table}
                   fields={fields}
                   setFields={setFields}
                   width={width}

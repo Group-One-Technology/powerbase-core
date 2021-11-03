@@ -116,7 +116,6 @@ CellRenderer.propTypes = {
 };
 
 export const GridHeader = React.forwardRef(({
-  table,
   fields,
   setFields,
   height,
@@ -133,7 +132,7 @@ export const GridHeader = React.forwardRef(({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-  } = useReorderFields({ tableId: table.id, fields, setFields });
+  } = useReorderFields({ fields, setFields });
   const { options, setOption } = useFieldOptions({ fields });
 
   return (
@@ -196,7 +195,6 @@ export const GridHeader = React.forwardRef(({
 });
 
 GridHeader.propTypes = {
-  table: PropTypes.object.isRequired,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,

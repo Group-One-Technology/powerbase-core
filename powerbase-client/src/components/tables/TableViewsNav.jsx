@@ -31,7 +31,7 @@ export function TableViewsNav({ table, views }) {
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
-          <Fields tableId={table.id} />
+          <Fields />
           <Filter />
           <Sort />
           <button

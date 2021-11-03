@@ -3,9 +3,11 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { useTableView } from '@models/TableView';
 
-export function useReorderFields({ tableId, fields, setFields }) {
+export function useReorderFields({ fields, setFields }) {
   const { saving, saved, catchError } = useSaveStatus();
+  const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
   const sensors = useSensors();
 
@@ -23,7 +25,7 @@ export function useReorderFields({ tableId, fields, setFields }) {
       setFields(updatedFields);
       try {
         await reorderViewFields({
-          tableId,
+          viewId: view.id,
           viewFields: updatedFields.map((item) => item.id),
         });
         await mutateViewFields(updatedFields);

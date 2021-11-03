@@ -5,6 +5,7 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useMounted } from '@lib/hooks/useMounted';
+import { useTableView } from '@models/TableView';
 
 /**
  * Handles the reordering logic of the fields/columns.
@@ -13,9 +14,10 @@ import { useMounted } from '@lib/hooks/useMounted';
  * @param {function} setFields
  * @returns { sensors, dragging, handleDragStart, handleDragMove, handleDragEnd }
  */
-export function useReorderFields({ tableId, fields, setFields }) {
+export function useReorderFields({ fields, setFields }) {
   const { mounted } = useMounted();
   const { saving, saved, catchError } = useSaveStatus();
+  const { data: view } = useTableView();
   const { data: remoteFields, mutate: mutateViewFields } = useViewFields();
   const [dragging, setDragging] = useState();
 
@@ -44,7 +46,7 @@ export function useReorderFields({ tableId, fields, setFields }) {
       try {
         setFields(updatedFields);
         await reorderViewFields({
-          tableId,
+          viewId: view.id,
           viewFields: [...updatedFields.map((item) => item.id), ...hiddenFields.map((item) => item.id)],
         });
         mounted(() => setDragging(null));
