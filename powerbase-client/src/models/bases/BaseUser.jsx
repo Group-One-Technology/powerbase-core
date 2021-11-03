@@ -13,7 +13,14 @@ function useBaseUserModel() {
   const [owner, setOwner] = useState(false);
   const [guest, setGuest] = useState();
 
-  const baseUser = owner ? { ...authUser, access: 'owner', isAccepted: true } : guest;
+  const baseUser = owner
+    ? {
+      ...authUser,
+      userId: authUser.id,
+      access: 'owner',
+      isAccepted: true,
+    } : guest;
+
   const access = {
     inviteGuests: baseUser?.access === 'owner',
     manageView: ['owner', 'admin', 'editor'].includes(baseUser?.access),
@@ -29,6 +36,8 @@ function useBaseUserModel() {
       } else {
         setGuest(null);
       }
+    } else {
+      setGuest(undefined);
     }
   }, [base, guests, authUser]);
 

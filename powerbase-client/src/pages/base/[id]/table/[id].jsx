@@ -32,7 +32,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
     return <Loader className="h-screen" />;
   }
 
-  if (!baseUser.isAccepted) {
+  if (!baseUser) {
     history.push('/404');
     return <Loader className="h-screen" />;
   }
