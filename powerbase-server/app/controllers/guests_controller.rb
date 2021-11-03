@@ -118,6 +118,8 @@ class GuestsController < ApplicationController
     end
 
     def database_format_json(database)
+      owner = database.user
+
       {
         id: database.id,
         user_id: database.user_id,
@@ -125,12 +127,19 @@ class GuestsController < ApplicationController
         name: database.name,
         database_name: database.database_name,
         description: database.description,
+        owner: {
+          user_id: owner.id,
+          first_name: owner.first_name,
+          last_name: owner.last_name,
+          email: owner.email,
+        },
         color: database.color,
         is_migrated: database.is_migrated,
         is_turbo: database.is_turbo,
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
+        total_collaborators: database.guests.length + 1,
         logs: database.base_migration.logs,
       }
     end
