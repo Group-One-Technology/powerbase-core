@@ -33,6 +33,7 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/alias
   def alias
     @field = PowerbaseField.find(safe_params[:id])
+    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
 
     if @field.update(alias: safe_params[:alias])
       render json: format_json(@field)
@@ -44,15 +45,17 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/field_type
   def field_type
     @field = PowerbaseField.find(safe_params[:id])
+    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
+
     @field_type = PowerbaseFieldType.find(safe_params[:field_type_id])
 
     if @field.powerbase_field_type.data_type != @field_type.data_type
-      render json: { errors: ["Could not convert field of type '#{@field.powerbase_field_type.name}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      render json: { error: "Could not convert field of type '#{@field.powerbase_field_type.name}' to '#{@field_type.name}'" }, status: :unprocessable_entity
       return
     end
 
     if @field.db_type.include?("uuid") || @field.db_type.include?("int")
-      render json: { errors: ["Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      render json: { error: "Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'" }, status: :unprocessable_entity
       return
     end
 
@@ -66,6 +69,7 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/options
   def options
     @field = PowerbaseField.find(safe_params[:id])
+    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
 
     if @field.update(options: safe_params[:options])
       render json: format_json(@field)
@@ -77,6 +81,7 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/set_as_pii
   def set_as_pii
     @field = PowerbaseField.find(safe_params[:id])
+    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
 
     if @field.update(is_pii: true)
       render json: format_json(@field)
@@ -88,6 +93,7 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/unset_as_pii
   def unset_as_pii
     @field = PowerbaseField.find(safe_params[:id])
+    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
 
     if @field.update(is_pii: false)
       render json: format_json(@field)

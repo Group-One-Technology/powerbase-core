@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useTableView } from '@models/TableView';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useMounted } from '@lib/hooks/useMounted';
-import { useTableView } from '@models/TableView';
 
 /**
  * Handles the reordering logic of the fields/columns.
@@ -16,6 +17,7 @@ import { useTableView } from '@models/TableView';
  */
 export function useReorderFields({ fields, setFields }) {
   const { mounted } = useMounted();
+  const { access: { manageView } } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { data: remoteFields, mutate: mutateViewFields } = useViewFields();
@@ -37,7 +39,7 @@ export function useReorderFields({ fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && manageView) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);
@@ -53,7 +55,7 @@ export function useReorderFields({ fields, setFields }) {
         await mutateViewFields();
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.error || err.response.data.exception);
         mounted(() => setDragging(null));
       }
     }

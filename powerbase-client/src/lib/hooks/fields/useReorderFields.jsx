@@ -1,18 +1,20 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseUser } from '@models/bases/BaseUser';
+import { useTableView } from '@models/TableView';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
-import { useTableView } from '@models/TableView';
 
 export function useReorderFields({ fields, setFields }) {
+  const { access: { manageView } } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
-    if (active.id !== over.id) {
+    if (active.id !== over.id && manageView) {
       saving();
 
       const oldIndex = fields.findIndex((item) => item.id === active.id);
@@ -31,7 +33,7 @@ export function useReorderFields({ fields, setFields }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };
