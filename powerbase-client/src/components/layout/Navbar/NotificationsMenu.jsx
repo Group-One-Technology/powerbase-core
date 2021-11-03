@@ -15,8 +15,8 @@ function BaseNotificationsMenu({ colored }) {
         <>
           <Popover.Button
             className={cn(
-              'relative p-1 bg-transparent flex items-center text-sm text-gray-900 rounded hover:ring-2 hover:ring-current focus:outline-none focus:ring-2 focus:ring-current',
-              !colored && 'focus:ring-offset-2',
+              'relative p-1 bg-transparent flex items-center text-sm rounded hover:ring-2 hover:ring-current focus:outline-none focus:ring-2 focus:ring-current',
+              colored ? 'text-white' : 'text-gray-900 focus:ring-offset-2',
             )}
           >
             <span className="sr-only">Notifications</span>
