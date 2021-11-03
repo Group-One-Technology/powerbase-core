@@ -11,6 +11,7 @@ import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 import { useFieldTypes } from "@models/FieldTypes";
 import { useViewFields } from "@models/ViewFields";
 import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
+import Checkbox from "./FieldCheckbox";
 
 const debounceResolve = AwesomeDebouncePromise;
 
@@ -97,6 +98,8 @@ const FieldTypeComponent = ({
   setNumberSubtype,
   setNumberPrecision,
   numberSubtype,
+  setIsChecked,
+  isChecked,
 }) => {
   const collapseSelectedField = () => {
     setSelected(null);
@@ -122,6 +125,9 @@ const FieldTypeComponent = ({
       </div>
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
+      </div>
+      <div>
+        <Checkbox setIsChecked={setIsChecked} isChecked={isChecked} />
       </div>
       {type.id === 4 && (
         <div className="mt-4 mb-6">
@@ -152,6 +158,7 @@ export default function NewField({
   const [nameExists, setNameExists] = useState(false);
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
   const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
   const { mutate: mutateViewFields } = useViewFields();
@@ -184,7 +191,7 @@ export default function NewField({
       description: null,
       oid: 1043,
       db_type: selected.dbType,
-      default_value: " ",
+      default_value: "",
       is_primary_key: false,
       is_nullable: false,
       powerbase_table_id: tableId,
@@ -194,7 +201,10 @@ export default function NewField({
       view_id: view.id,
       order: fields.length ? fields.length : 0,
       is_virtual: true,
+      allow_dirty_value: isChecked,
+      precision: numberPrecision ? numberPrecision.precision : null,
     };
+
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
       setIsCreatingField(false);
@@ -237,6 +247,7 @@ export default function NewField({
             <div
               className="hover:bg-indigo-200 cursor-default flex p-2 mb-2 hover:rounded-md"
               onClick={() => handleFieldTypeClick(type)}
+              key={type.id}
             >
               <div>
                 <FieldTypeIcon
@@ -263,6 +274,8 @@ export default function NewField({
           setNumberPrecision={setNumberPrecision}
           setNumberSubtype={setNumberSubtype}
           numberSubtype={numberSubtype}
+          setIsChecked={setIsChecked}
+          isChecked={isChecked}
         />
       )}
 

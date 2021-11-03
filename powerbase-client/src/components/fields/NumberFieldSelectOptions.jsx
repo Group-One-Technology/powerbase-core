@@ -10,11 +10,10 @@ const options = [
 ];
 
 const points = [
-  { id: 1, name: "0.01" },
-  { id: 2, name: "0.001" },
-  { id: 2, name: "0.0001" },
-  { id: 2, name: "0.00001" },
-  { id: 2, name: "0.000001" },
+  { id: 1, name: "0.01", precision: 2 },
+  { id: 2, name: "0.001", precision: 3 },
+  { id: 3, name: "0.0001", precision: 4 },
+  { id: 4, name: "0.00001", precision: 5 },
 ];
 
 function classNames(...classes) {
@@ -42,7 +41,8 @@ export default function NumberFieldSelectOptions({
 
   useEffect(() => {
     if (!isPrecision) setNumberSubtype(selected);
-  }, []);
+    if (isPrecision) setNumberPrecision(selected);
+  }, [selected]);
 
   return (
     <Listbox value={selected} onChange={(item) => handleSelect(item)}>

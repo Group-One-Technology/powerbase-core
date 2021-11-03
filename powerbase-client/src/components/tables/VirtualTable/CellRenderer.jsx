@@ -208,6 +208,8 @@ export function CellRenderer({
     }
   };
 
+  console.log("FIELD", field);
+
   return (
     <div
       role="button"
