@@ -30,7 +30,7 @@ export function GuestAccessMenu({
         {access}
         <ChevronDownIcon className="h-4 w-4 ml-1" />
       </Menu.Button>
-      <Menu.Items as="div" className="absolute top-8 right-0 py-2 block rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
+      <Menu.Items as="div" className="z-10 absolute top-8 right-0 py-2 block rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
         {change && ACCESS_LEVEL.map((item) => (
           <Menu.Item
             key={item.name}
