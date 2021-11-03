@@ -22,7 +22,7 @@ class ApplicationController < ActionController::API
       if @database.user_id != current_user.id
         @current_guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
 
-        if !(allowed_access.include?("everyone") || allowed_access.include?(@guest.access))
+        if !(allowed_access.include?("everyone") || allowed_access.include?(@current_guest.access))
           render json: { error: "Not authorized" }, status: :unauthorized and return
         end
       end
