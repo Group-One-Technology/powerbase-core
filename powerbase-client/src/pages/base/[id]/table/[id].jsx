@@ -32,8 +32,8 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
     return <Loader className="h-screen" />;
   }
 
-  if (!baseUser) {
-    history.push('/login');
+  if (!baseUser.isAccepted) {
+    history.push('/404');
     return <Loader className="h-screen" />;
   }
 

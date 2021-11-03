@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Switch,
   Route,
+  Redirect,
   useRouteMatch,
   BrowserRouter as Router,
 } from 'react-router-dom';
@@ -20,7 +21,7 @@ import { ConnectURLBasePage } from '@pages/base/connect-url';
 import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
 import { BaseSettingsPage } from '@pages/base/[id]/settings';
 import { TablePage } from '@pages/base/[id]/table/[id]';
-import { Error404Page } from '@pages/Error404';
+import { Error404Page } from '@pages/404';
 
 import './index.css';
 
@@ -37,7 +38,8 @@ export function App() {
           <Route path="/base">
             <BasesRoute />
           </Route>
-          <Route path="*" component={Error404Page} />
+          <Route path="/404" component={Error404Page} />
+          <Redirect from="*" to="/404" />
         </Switch>
       </Router>
       <Toaster position="bottom-left" />
@@ -58,7 +60,7 @@ function BasesRoute() {
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route exact path={`${path}/:id/settings`} component={BaseSettingsPage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
-      <Route path="*" component={Error404Page} />
+      <Redirect from="*" to="/404" />
     </Switch>
   );
 }
