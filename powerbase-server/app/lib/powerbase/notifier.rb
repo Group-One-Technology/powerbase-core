@@ -23,7 +23,7 @@ module Powerbase
         end
         puts "Injecting Table Update Trigger...DONE"
       rescue => exception
-        puts exception
+        puts "Notification trigger for #{table_name} already exist"
       end
     end
 

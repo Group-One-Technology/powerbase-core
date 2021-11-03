@@ -31,10 +31,6 @@ class PowerbaseDatabase < ApplicationRecord
     as_json(except: [:encrypted_connection_string, :connection_string, :is_turbo])
   end
 
-  after_commit on: [:create] do
-    logger.debug ["Saving document... ", __elasticsearch__.index_document ].join if self.is_turbo
-  end
-
   def listen!
     con = Powerbase::Listener.new self  
     thread = Thread.new do

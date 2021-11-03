@@ -45,9 +45,7 @@ class Tables::Creator
     sequel_connect(database) do |db|
       table_foreign_keys = db.foreign_key_list(table.name)
       table_foreign_keys.each do |foreign_key|
-        referenced_table = database.tables
-          .select { |item| item.name == foreign_key[:table].to_s }
-          .first
+        referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
         if referenced_table
           base_connection = BaseConnection.find_by(
