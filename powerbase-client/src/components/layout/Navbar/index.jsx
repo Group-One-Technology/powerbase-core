@@ -82,7 +82,8 @@ function BaseNavbar({ base, bases }) {
                 <NotificationsMenu colored={!!base} />
                 <UserMenu colored={!!base} />
               </div>
-              <div className="-mr-2 flex items-center sm:hidden">
+              <div className="-mr-2 flex items-center gap-1 sm:hidden">
+                <NotificationsMenu colored={!!base} />
                 {/* Mobile menu button */}
                 <Disclosure.Button
                   className={cn(

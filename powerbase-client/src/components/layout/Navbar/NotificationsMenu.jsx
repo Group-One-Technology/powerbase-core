@@ -64,7 +64,7 @@ function BaseNotificationsMenu({ colored }) {
   };
 
   return (
-    <Popover className="ml-3 relative z-10">
+    <Popover className="ml-3 sm:relative">
       {({ open }) => (
         <>
           <Popover.Button
