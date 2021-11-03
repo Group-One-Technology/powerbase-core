@@ -19,6 +19,8 @@ Rails.application.routes.draw do
     resources :guests, only: [:index, :create, :destroy], shallow: true do
       member do
         put 'change_access'
+        put 'accept_invite'
+        put 'reject_invite'
       end
     end
 

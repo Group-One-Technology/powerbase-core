@@ -20,7 +20,7 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
-  schema(:destroy) do
+  schema(:accept_invite, :reject_invite, :destroy) do
     required(:id)
   end
 
@@ -34,6 +34,35 @@ class GuestsController < ApplicationController
   # GET /base_invitations
   def base_invitations
     render json: current_user.guest_invitations.map {|item| format_json(item)}
+  end
+
+  # PUT /guests/:id/accept_invite
+  def accept_invite
+    @guest = Guest.find(safe_params[:id])
+
+    if @guest.user_id != current_user.id
+      render json: { error: "Not Authorized." }, status: :unprocessable_entity
+      return
+    end
+
+    if @guest.update(is_accepted: true)
+      render json: format_json(@guest)
+    else
+      render json: @guest.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /guests/:id/reject_invite
+  def reject_invite
+    @guest = Guest.find(safe_params[:id])
+
+    if @guest.user_id != current_user.id
+      render json: { error: "Not Authorized." }, status: :unprocessable_entity
+      return
+    end
+
+    @guest.destroy
+    render status: :no_content
   end
 
   # PUT /guests/:id/change_access
@@ -90,6 +119,8 @@ class GuestsController < ApplicationController
     @guest = Guest.find(safe_params[:id])
     check_database_access(@guest.powerbase_database_id, ["owner"]) or return
     @guest.destroy
+
+    render status: :no_content
   end
 
   private

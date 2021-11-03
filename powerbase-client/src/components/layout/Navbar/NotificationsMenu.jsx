@@ -1,13 +1,67 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { BellIcon, CheckIcon, XIcon } from '@heroicons/react/outline';
+
+import { useSharedBases } from '@models/SharedBases';
+import { useSaveStatus } from '@models/SaveStatus';
 import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitationsProvider';
 import { startsWithVowel } from '@lib/helpers/startsWithVowel';
+import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
+import { Button } from '@components/ui/Button';
 
 function BaseNotificationsMenu({ colored }) {
-  const { data: guestInvitations } = useBaseInvitations();
+  const { mutate: mutateSharedBases } = useSharedBases();
+  const { data: initialGuestInvitations, mutate: mutateGuestInvitations } = useBaseInvitations();
+  const {
+    saving,
+    saved,
+    catchError,
+    loading,
+  } = useSaveStatus();
+
+  const [guestInvitations, setGuestInvitations] = useState(initialGuestInvitations);
+
+  useEffect(() => {
+    setGuestInvitations(initialGuestInvitations);
+  }, [initialGuestInvitations]);
+
+  const handleAcceptInvitation = async (guest) => {
+    if (guest) {
+      saving();
+
+      const updatedGuestInvitations = guestInvitations.filter((item) => item.id !== guest.id);
+      setGuestInvitations(updatedGuestInvitations);
+
+      try {
+        await acceptGuestInvitation({ id: guest.id });
+        await mutateSharedBases();
+        mutateGuestInvitations(updatedGuestInvitations);
+        saved(`Successfully accepted invite to ${guest.databaseName} base.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
+  };
+
+  const handleRejectInvitation = async (guest) => {
+    if (guest) {
+      saving();
+
+      const updatedGuestInvitations = guestInvitations.filter((item) => item.id !== guest.id);
+      setGuestInvitations(updatedGuestInvitations);
+
+      try {
+        await rejectGuestInvitation({ id: guest.id });
+        await mutateSharedBases();
+        mutateGuestInvitations(updatedGuestInvitations);
+        saved(`Successfully rejected invite to ${guest.databaseName} base.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
+  };
 
   return (
     <Popover className="ml-3 relative z-10">
@@ -46,26 +100,30 @@ function BaseNotificationsMenu({ colored }) {
                         You have been invited to <strong className="capitalize">{item.databaseName}</strong> base {startsWithVowel(item.access) ? 'an' : 'a'} <strong className="capitalize">{item.access}</strong>.
                       </div>
                       <div className="flex gap-1">
-                        <button
+                        <Button
                           type="button"
                           className="rounded-md border border-transparent shadow-sm p-1 bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                          onClick={() => handleAcceptInvitation(item)}
+                          loading={loading}
                         >
                           <span className="sr-only">Accept Invite</span>
                           <CheckIcon className="h-4 w-4" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           className="rounded-md border border-transparent shadow-sm p-1 bg-red-600 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+                          onClick={() => handleRejectInvitation(item)}
+                          loading={loading}
                         >
                           <span className="sr-only">Reject Invite</span>
                           <XIcon className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </li>
                   ))}
                 </ul>
               )}
-              {guestInvitations?.length === 0 && (
+              {(guestInvitations == null || guestInvitations?.length === 0) && (
                 <p className="my-4 flex items-center justify-center text-sm text-gray-700">
                   You have no notifications.
                 </p>
