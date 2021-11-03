@@ -6,7 +6,8 @@ class User < ApplicationRecord
   validates :email, presence: true
 
   has_many :powerbase_databases
-  has_many :guests
+  has_many :guests, -> { where is_accepted: true }
+  has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"
 
   def shared_databases
     self.guests.map {|guest| guest.powerbase_database}

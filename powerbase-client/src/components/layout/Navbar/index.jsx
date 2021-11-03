@@ -12,6 +12,7 @@ import { BG_COLORS } from '@lib/constants';
 
 import { Logo } from '@components/ui/Logo';
 import { ShareBaseModal } from '@components/bases/ShareBaseModal';
+import { NotificationsMenu } from './NotificationsMenu';
 import { UserMenu } from './UserMenu';
 import { BaseMenu } from './BaseMenu';
 import { MobileNav } from './MobileNav';
@@ -78,6 +79,7 @@ function BaseNavbar({ base, bases }) {
                 })}
               </div>
               <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
+                <NotificationsMenu colored={!!base} />
                 <UserMenu colored={!!base} />
               </div>
               <div className="-mr-2 flex items-center sm:hidden">

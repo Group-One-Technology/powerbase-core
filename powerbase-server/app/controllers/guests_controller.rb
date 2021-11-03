@@ -27,13 +27,13 @@ class GuestsController < ApplicationController
   # GET /databases/:database_id/guests
   def index
     check_database_access(safe_params[:database_id]) or return
-    @guests = Guest.where(powerbase_database_id: safe_params[:database_id])
+    @guests = Guest.where(powerbase_database_id: safe_params[:database_id], is_accepted: true)
     render json: @guests.map {|item| user_format_json(item)}
   end
 
-  # GET /shared_databases
-  def shared_databases
-    render json: current_user.shared_databases.map {|item| database_format_json(item)}
+  # GET /base_invitations
+  def base_invitations
+    render json: current_user.guest_invitations.map {|item| format_json(item)}
   end
 
   # PUT /guests/:id/change_access
@@ -99,7 +99,9 @@ class GuestsController < ApplicationController
         access: guest.access,
         permissions: guest.permissions,
         user_id: guest.user_id,
+        user: user_format_json(guest),
         database_id: guest.powerbase_database_id,
+        database_name: guest.powerbase_database.name,
       }
     end
 
@@ -114,33 +116,6 @@ class GuestsController < ApplicationController
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-      }
-    end
-
-    def database_format_json(database)
-      owner = database.user
-
-      {
-        id: database.id,
-        user_id: database.user_id,
-        adapter: database.adapter,
-        name: database.name,
-        database_name: database.database_name,
-        description: database.description,
-        owner: {
-          user_id: owner.id,
-          first_name: owner.first_name,
-          last_name: owner.last_name,
-          email: owner.email,
-        },
-        color: database.color,
-        is_migrated: database.is_migrated,
-        is_turbo: database.is_turbo,
-        created_at: database.created_at,
-        updated_at: database.updated_at,
-        total_tables: database.powerbase_tables.length,
-        total_collaborators: database.guests.length + 1,
-        logs: database.base_migration.logs,
       }
     end
 end
