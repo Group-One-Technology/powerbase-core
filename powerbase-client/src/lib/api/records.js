@@ -1,6 +1,21 @@
 /* eslint-disable */
 import { securedApi } from "./index";
 
+const determineCellValueKey = (fieldTypeId, precision) => {
+  switch (fieldTypeId) {
+    case 1:
+    case 8:
+      return "stringValue";
+    case 2:
+      return "textValue";
+    case 4:
+      if (precision) return "decimalValue";
+      else return "integerValue";
+    default:
+      console.log("Unknown field type");
+  }
+};
+
 export async function getTableRecords({ url, ...payload }) {
   let magicData;
   const tableId = payload?.tableId;
@@ -19,9 +34,14 @@ export async function getTableRecords({ url, ...payload }) {
       let mergedData = parsedData;
       parsedData?.forEach((record, idx) =>
         magicData?.forEach((magicRecord) => {
+          const key = determineCellValueKey(
+            magicRecord.fieldTypeId,
+            magicRecord.hasPrecision
+          );
+          console.log(key);
           if (magicRecord?.recordId === record?.id) {
             let remoteRecord = record;
-            remoteRecord[magicRecord?.fieldName] = magicRecord["textValue"];
+            remoteRecord[magicRecord?.fieldName] = magicRecord[key];
             mergedData[idx] = remoteRecord;
           }
         })
