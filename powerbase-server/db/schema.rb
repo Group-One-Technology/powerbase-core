@@ -62,6 +62,8 @@ ActiveRecord::Schema.define(version: 2021_11_03_080759) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_accepted", default: false
+    t.bigint "inviter_id"
+    t.index ["inviter_id"], name: "index_guests_on_inviter_id"
     t.index ["powerbase_database_id"], name: "index_guests_on_powerbase_database_id"
     t.index ["user_id"], name: "index_guests_on_user_id"
   end
@@ -188,6 +190,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_080759) do
   add_foreign_key "field_select_options", "powerbase_fields"
   add_foreign_key "guests", "powerbase_databases"
   add_foreign_key "guests", "users"
+  add_foreign_key "guests", "users", column: "inviter_id"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
   add_foreign_key "powerbase_databases", "users"

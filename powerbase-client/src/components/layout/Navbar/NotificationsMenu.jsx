@@ -95,9 +95,9 @@ function BaseNotificationsMenu({ colored }) {
               {guestInvitations?.length > 0 && (
                 <ul className="bg-white divide-y divide-gray-200">
                   {guestInvitations.map((item) => (
-                    <li key={item.id} className="p-1 flex items-center gap-1 text-xs text-gray-900">
+                    <li key={item.id} className="p-1 flex items-center gap-2 text-xs text-gray-900">
                       <div>
-                        You have been invited to <strong className="capitalize">{item.databaseName}</strong> base {startsWithVowel(item.access) ? 'an' : 'a'} <strong className="capitalize">{item.access}</strong>.
+                        <strong>{item.inviter.firstName}</strong> has invited you to <strong className="capitalize">{item.databaseName}</strong> base as {startsWithVowel(item.access) ? 'an' : 'a'} <strong className="capitalize">{item.access}</strong>.
                       </div>
                       <div className="flex gap-1">
                         <Button

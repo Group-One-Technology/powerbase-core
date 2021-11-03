@@ -27,7 +27,7 @@ class GuestsController < ApplicationController
   # GET /databases/:database_id/guests
   def index
     check_database_access(safe_params[:database_id]) or return
-    @guests = Guest.where(powerbase_database_id: safe_params[:database_id], is_accepted: true)
+    @guests = Guest.where(powerbase_database_id: safe_params[:database_id])
     render json: @guests.map {|item| user_format_json(item)}
   end
 
@@ -105,6 +105,7 @@ class GuestsController < ApplicationController
       powerbase_database_id: safe_params[:database_id],
       access: safe_params[:access],
       permissions: safe_params[:permissions],
+      inviter_id: current_user.id,
     })
 
     if @guest.save
@@ -131,8 +132,11 @@ class GuestsController < ApplicationController
         permissions: guest.permissions,
         user_id: guest.user_id,
         user: user_format_json(guest),
+        inviter_id: guest.inviter_id,
+        inviter: inviter_format_json(guest.inviter),
         database_id: guest.powerbase_database_id,
         database_name: guest.powerbase_database.name,
+        is_accepted: guest.is_accepted,
       }
     end
 
@@ -144,6 +148,16 @@ class GuestsController < ApplicationController
         access: guest.access,
         permissions: guest.permissions,
         user_id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        is_accepted: guest.is_accepted,
+      }
+    end
+
+    def inviter_format_json(user)
+      {
+        id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,

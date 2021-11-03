@@ -11,5 +11,6 @@ class Guest < ApplicationRecord
   serialize :permissions, JSON
 
   belongs_to :user
+  belongs_to :inviter, class_name: "User"
   belongs_to :powerbase_database
 end

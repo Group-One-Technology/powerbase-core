@@ -6,6 +6,7 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useSaveStatus } from '@models/SaveStatus';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
+import { Badge } from '@components/ui/Badge';
 
 export function GuestCard({ guest, setGuests, owner }) {
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
@@ -62,6 +63,7 @@ export function GuestCard({ guest, setGuests, owner }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">
           {guest.firstName} {guest.lastName}
+          {(!owner && !guest.isAccepted) && <Badge color="yellow" className="ml-1">Pending</Badge>}
         </p>
         <p className="text-sm text-gray-500 truncate">{guest.email}</p>
       </div>
