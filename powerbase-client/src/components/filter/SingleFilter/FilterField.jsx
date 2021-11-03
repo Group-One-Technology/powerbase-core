@@ -12,15 +12,19 @@ export function FilterField({
   value,
   options,
   onChange,
+  disabled,
 }) {
   const { data: fieldTypes } = useFieldTypes();
 
   return (
-    <Listbox value={value?.id} onChange={onChange}>
+    <Listbox value={value?.id} onChange={onChange} disabled={disabled}>
       <div className="block w-full">
         <Listbox.Button
           id={id}
-          className="block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
+          className={cn(
+            'block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm',
+            disabled ? 'cursor-not-allowed bg-gray-100' : 'cursor-default bg-white',
+          )}
         >
           <span className="flex items-center truncate">
             <FieldTypeIcon isPrimaryKey={value.isPrimaryKey} fieldTypes={fieldTypes} typeId={value.fieldTypeId} className="mr-1.5" />
@@ -62,4 +66,5 @@ FilterField.propTypes = {
   value: PropTypes.object,
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };
