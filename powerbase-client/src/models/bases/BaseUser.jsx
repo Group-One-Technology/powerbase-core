@@ -13,6 +13,12 @@ function useBaseUserModel() {
   const [owner, setOwner] = useState(false);
   const [guest, setGuest] = useState();
 
+  const baseUser = owner ? { ...authUser, access: 'owner' } : guest;
+  const access = {
+    manageView: !['editor', 'viewer', 'commentor'].includes(baseUser.access),
+    inviteGuests: baseUser.access === 'owner',
+  };
+
   useEffect(() => {
     if (base && authUser && guests) {
       if (base.userId === authUser.id) {
@@ -27,15 +33,12 @@ function useBaseUserModel() {
 
   return {
     authUser,
-    baseUser: owner
-      ? {
-        ...authUser,
-        access: 'owner',
-      } : guest,
+    baseUser,
     owner,
     setOwner,
     guest,
     setGuest,
+    access,
   };
 }
 

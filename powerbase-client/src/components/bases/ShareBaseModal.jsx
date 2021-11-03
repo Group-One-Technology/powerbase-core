@@ -21,15 +21,13 @@ export function ShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
-  const { baseUser } = useBaseUser();
+  const { access: { inviteGuests } } = useBaseUser();
 
   const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
   const [loading, setLoading] = useState(false);
-
-  const hasInviteAccess = baseUser.access === 'owner';
 
   useEffect(() => {
     setGuests(initialGuests);
@@ -43,7 +41,7 @@ export function ShareBaseModal() {
     evt.preventDefault();
     const email = query;
 
-    if (email.length && hasInviteAccess) {
+    if (email.length && inviteGuests) {
       saving();
       setLoading(true);
       setQuery('');
@@ -72,16 +70,16 @@ export function ShareBaseModal() {
             placeholder="Search by name or email."
             className={cn(
               'py-1 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300',
-              hasInviteAccess ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
+              inviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
             )}
-            disabled={!hasInviteAccess}
+            disabled={!inviteGuests}
           />
-          <Listbox value={access} onChange={setAccess} disabled={!hasInviteAccess}>
+          <Listbox value={access} onChange={setAccess} disabled={!inviteGuests}>
             <Listbox.Button
               type="button"
               className={cn(
                 'py-0 p-2 flex items-center border-t border-b border-gray-300 text-gray-500 text-sm capitalize',
-                hasInviteAccess ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
+                inviteGuests ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
               )}
             >
               {access.name}
@@ -112,7 +110,7 @@ export function ShareBaseModal() {
             type="submit"
             className={cn(
               'relative inline-flex items-center justify-center space-x-2 px-4 py-1 border text-sm rounded-r-md text-white',
-              hasInviteAccess
+              inviteGuests
                 ? 'bg-indigo-600 border-indigo-700 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                 : 'cursor-not-allowed bg-gray-500 border-gray-900',
             )}

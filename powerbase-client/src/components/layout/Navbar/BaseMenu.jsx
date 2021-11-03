@@ -18,8 +18,7 @@ import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
   const { setOpen: setShareModalOpen } = useShareBaseModal();
-  const { baseUser } = useBaseUser();
-  const hasInviteAccess = baseUser.access === 'owner';
+  const { access: { inviteGuests } } = useBaseUser();
 
   const handleShareBase = () => {
     setShareModalOpen(true);
@@ -60,7 +59,7 @@ export function BaseMenu({ base, otherBases }) {
                 className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={handleShareBase}
               >
-                {hasInviteAccess
+                {inviteGuests
                   ? (
                     <>
                       <ShareIcon className="h-4 w-4 mr-2" />

@@ -18,7 +18,7 @@ import { AddView } from './AddView';
 import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
-  const { baseUser } = useBaseUser();
+  const { access: { manageView } } = useBaseUser();
   const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [views, setViews] = useState(initialViews);
@@ -28,26 +28,25 @@ export function ViewMenu({ tableId, views: initialViews }) {
   });
 
   const sensors = useSensors();
-  const hasViewAccess = !['editor', 'viewer', 'commentor'].includes(baseUser.access);
 
   useEffect(() => {
     setViews(initialViews);
   }, [tableId, initialViews]);
 
   const handleAddView = () => {
-    if (hasViewAccess) {
+    if (manageView) {
       setAddViewModalOpen(true);
     }
   };
 
   const handleViewOptions = (view) => {
-    if (hasViewAccess) {
+    if (manageView) {
       setViewOptionModal({ open: true, view });
     }
   };
 
   const handleViewsOrderChange = ({ active, over }) => {
-    if (active.id !== over.id && hasViewAccess) {
+    if (active.id !== over.id && manageView) {
       setViews((prevViews) => {
         const oldIndex = prevViews.findIndex((item) => item.id === active.id);
         const newIndex = prevViews.findIndex((item) => item.id === over.id);
@@ -89,7 +88,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                       )}
                       handle={{
                         position: 'left',
-                        component: hasViewAccess
+                        component: manageView
                           ? (
                             <button
                               type="button"
@@ -109,7 +108,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
-                      {hasViewAccess && (
+                      {manageView && (
                         <div className="p-0.5">
                           <button
                             type="button"
@@ -125,7 +124,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                   ))}
                 </SortableContext>
               </DndContext>
-              {hasViewAccess && (
+              {manageView && (
                 <li>
                   <button
                     type="button"

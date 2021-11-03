@@ -14,10 +14,9 @@ export function GuestAccessMenu({
   remove,
   owner,
 }) {
-  const { baseUser } = useBaseUser();
-  const hasInviteAccess = baseUser.access === 'owner';
+  const { access: { inviteGuests } } = useBaseUser();
 
-  if (owner || !hasInviteAccess) {
+  if (owner || !inviteGuests) {
     return (
       <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
         {owner ? 'owner' : access}
