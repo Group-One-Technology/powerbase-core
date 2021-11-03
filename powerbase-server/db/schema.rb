@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_192251) do
+ActiveRecord::Schema.define(version: 2021_11_03_060310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -85,6 +85,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_192251) do
     t.float "float_value"
     t.boolean "boolean_value"
     t.integer "integer_value"
+    t.decimal "decimal_value"
   end
 
   create_table "piis", force: :cascade do |t|
