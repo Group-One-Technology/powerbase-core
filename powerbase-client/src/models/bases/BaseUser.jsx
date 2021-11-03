@@ -15,8 +15,9 @@ function useBaseUserModel() {
 
   const baseUser = owner ? { ...authUser, access: 'owner' } : guest;
   const access = {
-    manageView: !['editor', 'viewer', 'commentor'].includes(baseUser?.access),
     inviteGuests: baseUser?.access === 'owner',
+    manageView: ['owner', 'admin', 'editor'].includes(baseUser?.access),
+    manageFields: ['owner', 'admin'].includes(baseUser?.access),
   };
 
   useEffect(() => {
