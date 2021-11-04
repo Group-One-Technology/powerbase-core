@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::API
+  include PermissionsHelper
   include JWTSessions::RailsAuthorization
   rescue_from JWTSessions::Errors::Unauthorized, with: :not_authorized
+  rescue_from PermissionsHelper::AccessDenied, with: :not_authorized
 
   def current_user
     @current_user || User.find(payload['user_id'])
@@ -8,8 +10,7 @@ class ApplicationController < ActionController::API
 
   private
     def not_authorized
-      render json: { error: "Not authorized" }, status: :unauthorized
-      return
+      render json: { error: "You are not authorized to perform this action." }, status: :unauthorized
     end
 
     def check_database_access(database_id, allowed_access = ["everyone"])
