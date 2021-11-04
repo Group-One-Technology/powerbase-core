@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_03_075106) do
+ActiveRecord::Schema.define(version: 2021_11_04_143808) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,7 +70,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_075106) do
     t.index ["user_id"], name: "index_hubspot_databases_on_user_id"
   end
 
-  create_table "magic_records", force: :cascade do |t|
+  create_table "magic_values", force: :cascade do |t|
     t.integer "table_id"
     t.integer "record_id"
     t.integer "database_id"
