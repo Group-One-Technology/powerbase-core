@@ -53,26 +53,25 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /magic_records/:record_id
-  def add_or_update_magic_record
+  # POST /magic_values/:record_id
+  def add_or_update_magic_value
     type = params[:key_type]
-    new_magic_record = nil
+    new_magic_value = nil
     record_id = params[:record_id]
-    magic_record = MagicRecord.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
-    if magic_record
-      magic_record.update(type => params[type])
+    magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
+    if magic_value
+      magic_value.update(type => params[type])
     else
-      puts "WHOOP"
-      new_magic_record = MagicRecord.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id]})
+      new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id]})
     end
-    render json: {} if new_magic_record
+    render json: {} if new_magic_value
   end
 
-  # GET /tables/:id/magic_records
-  def magic_records
-    magic_records = MagicRecord.where(table_id: params[:id])
-    formatted_records = magic_records.map { |record| format_json(record) }
-    render json: formatted_records
+  # GET /tables/:id/magic_values
+  def magic_values
+    magic_values = MagicValue.where(table_id: params[:id])
+    formatted_values = magic_values.map { |value| format_json(value) }
+    render json: formatted_values
   end
 
   # GET /tables/:id/records_count
