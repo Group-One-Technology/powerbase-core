@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, :except [:index]
+  before_action :check_field_access, except: [:index]
 
   schema(:index) do
     required(:table_id).value(:integer)

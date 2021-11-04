@@ -1,7 +1,7 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
-  before_action :check_database_access, :only [:update, :clear_logs]
+  before_action :check_database_access, only: [:update, :clear_logs]
 
   schema(:show, :clear_logs) do
     required(:id).value(:integer)

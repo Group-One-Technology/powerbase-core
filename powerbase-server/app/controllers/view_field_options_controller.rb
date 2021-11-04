@@ -1,7 +1,7 @@
 class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
   before_action :check_view_access, only: [:hide_all, :update_order]
-  before_action :check_view_field_access, except: [:hide, :unhide, :resize]
+  before_action :check_view_field_access, only: [:hide, :unhide, :resize]
 
   schema(:index, :hide_all) do
     required(:view_id).value(:integer)
@@ -73,7 +73,7 @@ class ViewFieldOptionsController < ApplicationController
   private
     def check_view_access
       @view = TableView.find(safe_params[:view_id]);
-      raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view_field
+      raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
       can?(:manage_view, @view)
     end
 
