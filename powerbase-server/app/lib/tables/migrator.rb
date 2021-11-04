@@ -7,7 +7,7 @@ class Tables::Migrator
   attr_accessor :table, :index_name, :primary_keys, 
                 :order_field, :adapter, :fields, :offset,
                 :indexed_records, :total_records, :records,
-                :powerbase_database
+                :powerbase_database, :has_row_oid_support
 
   def initialize(table)
     @table = table
@@ -17,6 +17,7 @@ class Tables::Migrator
     @order_field = primary_keys.first || fields.first
     @adapter = table.db.adapter
     @powerbase_database = table.db
+    @has_row_oid_support = powerbase_database.has_row_oid_support?
     @offset = 0
     @indexed_records = 0
   end
@@ -36,7 +37,8 @@ class Tables::Migrator
     progressbar = ProgressBar.create(title: "Indexing", total: total_records)
     while offset < total_records
       records.each do |record|
-        doc_id = get_doc_id(primary_keys, record, fields, adapter)
+        oid = record.try(:[], :oid)
+        doc_id = oid.present? ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
 
         doc = {}
         record.collect {|key, value| key }.each do |key|
@@ -63,6 +65,7 @@ class Tables::Migrator
 
         if doc_id.present?
           update_record(index_name, doc_id, doc) 
+          pusher_trigger!("table.#{table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
           @indexed_records += 1
         else
           write_table_migration_logs!(
@@ -92,7 +95,7 @@ class Tables::Migrator
     sequel_connect(powerbase_database) do |db|
       @total_records = db.from(table.name).count
       table_query = db.from(table.name)
-      @records = table_query.select(*default_table_select(adapter.to_sym))
+      @records = table_query.select(*default_table_select(adapter.to_sym, has_row_oid_support))
         .order(order_field.name.to_sym)
         .limit(DEFAULT_PAGE_SIZE)
         .offset(offset)

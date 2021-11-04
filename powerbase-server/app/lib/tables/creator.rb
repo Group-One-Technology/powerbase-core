@@ -21,6 +21,7 @@ class Tables::Creator
     table.powerbase_database_id = database.id
     table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
     table.order = order
+    table.is_migrated = true
   end
   
   def object
@@ -29,7 +30,7 @@ class Tables::Creator
 
   def save
     if table.save
-      table.inject_oid
+      table.inject_oid if database.has_row_oid_support?
       table.inject_notifier_trigger
     else
       base_migration.logs["errors"].push({

@@ -12,9 +12,9 @@ module SequelHelper
     @db
   end
   
-  def default_table_select(adapter = @db.try(:adapter))
+  def default_table_select(adapter = @db.try(:adapter), has_row_oid_support = false)
     table_select = [ Sequel.lit("*") ]
-    table_select << Sequel.lit("oid") if adapter.to_s.include?("postgres")
+    table_select << Sequel.lit("oid") if adapter.to_s.include?("postgres") && has_row_oid_support
     table_select
   end
 
