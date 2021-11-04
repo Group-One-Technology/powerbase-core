@@ -47,7 +47,7 @@ export function Fields() {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };
