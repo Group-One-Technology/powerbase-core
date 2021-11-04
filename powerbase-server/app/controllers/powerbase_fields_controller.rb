@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :set_table, only: [:index]
+  before_action :check_field_access, :except [:index]
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -27,14 +27,13 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /tables/:id/fields
   def index
-    render json: @table.powerbase_fields.map {|item| format_json(item)}
+    can?(:view_table, safe_params[:table_id])
+    @fields = PowerbaseField.where(powerbase_table_id: safe_params[:table_id])
+    render json: @fields.map {|item| format_json(item)}
   end
 
   # PUT /fields/:id/alias
   def alias
-    @field = PowerbaseField.find(safe_params[:id])
-    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
-
     if @field.update(alias: safe_params[:alias])
       render json: format_json(@field)
     else
@@ -44,9 +43,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/field_type
   def field_type
-    @field = PowerbaseField.find(safe_params[:id])
-    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
-
     @field_type = PowerbaseFieldType.find(safe_params[:field_type_id])
 
     if @field.powerbase_field_type.data_type != @field_type.data_type
@@ -68,9 +64,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/options
   def options
-    @field = PowerbaseField.find(safe_params[:id])
-    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
-
     if @field.update(options: safe_params[:options])
       render json: format_json(@field)
     else
@@ -80,9 +73,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/set_as_pii
   def set_as_pii
-    @field = PowerbaseField.find(safe_params[:id])
-    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
-
     if @field.update(is_pii: true)
       render json: format_json(@field)
     else
@@ -92,9 +82,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/unset_as_pii
   def unset_as_pii
-    @field = PowerbaseField.find(safe_params[:id])
-    check_database_access(@field.powerbase_table.powerbase_database_id, ["owner", "admin"]) or return
-
     if @field.update(is_pii: false)
       render json: format_json(@field)
     else
@@ -103,12 +90,10 @@ class PowerbaseFieldsController < ApplicationController
   end
 
   private
-    def set_table
-      @table = PowerbaseTable.find(safe_params[:table_id])
-
-      if !@table
-        raise StandardError.new("Could not find table with id of '#{safe_params[:table_id]}'")
-      end
+    def check_field_access
+      @field = PowerbaseField.find(safe_params[:id])
+      raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
+      can?(:manage_field, @field)
     end
 
     def format_json(field)

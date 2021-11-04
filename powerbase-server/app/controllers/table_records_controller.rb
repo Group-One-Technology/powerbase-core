@@ -18,8 +18,12 @@ class TableRecordsController < ApplicationController
 
   # POST /tables/:id/records
   def index
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
-    records = model.search({
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    @records = model.search({
       query: safe_params[:query],
       filters: safe_params[:filters],
       sort: safe_params[:sort],
@@ -27,12 +31,16 @@ class TableRecordsController < ApplicationController
       limit: safe_params[:limit],
     })
 
-    render json: records
+    render json: @records
   end
 
   # POST /tables/:table_id/records/:id
   def show
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+    @table = PowerbaseTable.find(safe_params[:table_id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
     record = model.get({
       id: safe_params[:id],
       primary_keys: safe_params[:primary_keys],
@@ -44,7 +52,11 @@ class TableRecordsController < ApplicationController
   # POST /tables/:id/linked_records
   # TODO: Refactor - to combine with index method / model.search
   def linked_records
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
     records = model.where({
       page: safe_params[:page],
       limit: safe_params[:limit],
@@ -55,7 +67,11 @@ class TableRecordsController < ApplicationController
 
   # GET /tables/:id/records_count
   def count
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
     total_records = model.get_count({
       query: safe_params[:query],
       filters: safe_params[:filters]

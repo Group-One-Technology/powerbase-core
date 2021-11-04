@@ -1,7 +1,6 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
-  before_action :set_database, only: [:index]
-  before_action :set_table, only: [:show, :update, :update_default_view]
+  before_action :check_table_access, only: [:update, :update_default_view]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -24,6 +23,9 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /databases/:database_id/tables
   def index
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+
     render json: {
       migrated: @database.is_migrated,
       tables: @database.powerbase_tables.order(order: :asc).map {|item| format_json(item)}
@@ -32,6 +34,8 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /tables/:id
   def show
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     render json: format_json(@table)
   end
 
@@ -46,6 +50,10 @@ class PowerbaseTablesController < ApplicationController
 
   # PUT /databases/:database_id/tables/update
   def update_tables
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    can?(:manage_base, @database)
+
     safe_params[:tables].each_with_index do |table, index|
       @table = PowerbaseTable.find(table[:id])
       @table.update(alias: table[:alias], order: index)
@@ -63,18 +71,11 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-
   private
-    def set_database
-      @database = PowerbaseDatabase.find(safe_params[:database_id])
-
-      if !@database
-        raise StandardError.new("Must establish a database connection first to execute this action.")
-      end
-    end
-
-    def set_table
+    def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
+      raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+      can?(:manage_table, @table)
     end
 
     def format_json(table)
