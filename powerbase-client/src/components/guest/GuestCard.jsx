@@ -40,22 +40,22 @@ export function GuestCard({ guest, setGuests, owner }) {
 
   const removeGuestAccess = async () => {
     if (!owner) {
-      if (baseUser.userId === guest.userId) {
-        await removeGuest({ id: guest.id });
-        history.push('/');
-      } else {
-        saving();
+      try {
+        if (baseUser.userId === guest.userId) {
+          await removeGuest({ id: guest.id });
+          history.push('/');
+        } else {
+          saving();
 
-        const updatedGuests = guests.filter((item) => item.id !== guest.id);
-        setGuests(updatedGuests);
+          const updatedGuests = guests.filter((item) => item.id !== guest.id);
+          setGuests(updatedGuests);
 
-        try {
           await removeGuest({ id: guest.id });
           await mutateGuests(updatedGuests);
           saved(`Successfully removed guest '${guest.firstName}'`);
-        } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
         }
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };
