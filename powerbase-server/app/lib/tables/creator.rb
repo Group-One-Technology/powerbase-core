@@ -29,7 +29,7 @@ class Tables::Creator
 
   def save
     if table.save
-      table.inject_oid
+      table.inject_oid if database.has_row_oid_support?
       table.inject_notifier_trigger
     else
       base_migration.logs["errors"].push({

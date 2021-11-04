@@ -84,7 +84,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def has_row_oid_support?
-    db_version < 12
+    db_version < 12 && postgresql?
   end
 
   def db_version

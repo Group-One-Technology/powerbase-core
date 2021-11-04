@@ -51,8 +51,6 @@ module ElasticsearchHelper
       primary_keys
         .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
         .join("-")
-    elsif adapter == "postgresql"
-      "oid_#{record[:oid]}"
     else
       field_ids = fields.select {|field|
         field.name.downcase.include?("id") || field.name.downcase.include?("identifier")

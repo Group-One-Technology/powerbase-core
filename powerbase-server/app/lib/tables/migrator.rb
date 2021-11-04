@@ -36,7 +36,8 @@ class Tables::Migrator
     progressbar = ProgressBar.create(title: "Indexing", total: total_records)
     while offset < total_records
       records.each do |record|
-        doc_id = get_doc_id(primary_keys, record, fields, adapter)
+        oid = record.try(:[], :oid)
+        doc_id =  oid.present? ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
 
         doc = {}
         record.collect {|key, value| key }.each do |key|
