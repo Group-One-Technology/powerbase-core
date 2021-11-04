@@ -192,14 +192,43 @@ export function CellRenderer({
     }
   };
 
+  const determineCellValueKey = (field) => {
+    const { fieldTypeId, precision } = field;
+    switch (fieldTypeId) {
+      case 1:
+      case 8:
+        return "string_value";
+      case 2:
+        return "text_value";
+      case 4:
+        if (precision) return "decimal_value";
+        else return "integer_value";
+      default:
+        console.log("Unknown field type");
+    }
+  };
+
   const onClickOutsideEditingCell = async () => {
+    let num;
+    const key = determineCellValueKey(field);
+    if (field.fieldTypeId === 4 && field.precision && !field.allowDirtyValue) {
+      const value = recordInputRef.current?.value;
+      num = parseInt(value).toFixed(field.precision);
+      console.log("num: ", num);
+    }
+    console.log(field.precision);
+
     const payload = {
       field_name: field.name,
+      field_type_id: field.fieldTypeId,
       table_id: field.tableId,
       field_id: field?.id,
-      text_value: recordInputRef.current?.value,
+      [key]: num ? num : recordInputRef.current?.value,
       record_id: records[rowIndex]?.id,
+      key_type: key,
+      has_precision: field?.precision ? true : false,
     };
+    console.log(payload);
     const response = await securedApi.post(`/magic_records`, payload);
     if (response.statusText === "OK") {
       mutateTableRecords();
@@ -207,8 +236,6 @@ export function CellRenderer({
       setIsEditing(false);
     }
   };
-
-  console.log("FIELD", field);
 
   return (
     <div
@@ -249,6 +276,7 @@ export function CellRenderer({
     >
       {isEditing &&
       rowIndex === cellToEdit?.row &&
+      field?.isVirtual &&
       columnIndex === cellToEdit?.column ? (
         <OutsideCellClick onClickOutside={onClickOutsideEditingCell}>
           <EditCell
