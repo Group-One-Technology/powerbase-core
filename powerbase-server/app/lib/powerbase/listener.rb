@@ -31,7 +31,7 @@ module Powerbase
       index_name = powerbase_table.index_name
       doc_id = format_doc_id("#{primary_key_value.keys.first.to_s}_#{primary_key_value.values.first}")
       
-      puts "Data changes detect on table #{table_name}"
+      puts "-- Data changes detect on table #{table_name}"
 
       # Just run sync and reindex if there's unmigrated columns
       unless powerbase_table.in_synced?
