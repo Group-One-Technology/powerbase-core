@@ -23,10 +23,13 @@ export default function NewTableModal({ open, setOpen }) {
       ...newFields,
       { id: currentCount + 1, fieldName: "", fieldTypeId: 1 },
     ]);
+    setCurrentCount(currentCount + 1);
   };
 
   const getValue = (id) => {
-    console.log("");
+    alert("dd");
+    const curr = newFields.find((field) => field.id === id);
+    return curr.fieldName;
   };
 
   return (
@@ -72,6 +75,9 @@ export default function NewTableModal({ open, setOpen }) {
                   newFields={newFields}
                   newField={field}
                   count={index}
+                  setNewFields={setNewFields}
+                  id={field.id}
+                  getValue={getValue}
                 />
               ))}
 

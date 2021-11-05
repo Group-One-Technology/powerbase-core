@@ -5,7 +5,13 @@ import { ArrowRightIcon, TrashIcon } from "@heroicons/react/solid";
 import NewTableFieldInput from "./NewTableFieldInput";
 import NewTableFieldSelect from "./NewTableFieldSelect";
 
-export default function Field({ newFields, count }) {
+export default function Field({
+  id,
+  getValue,
+  newFields,
+  setNewFields,
+  count,
+}) {
   function classNames(...classes) {
     return classes.filter(Boolean).join(" ");
   }
@@ -32,7 +38,12 @@ export default function Field({ newFields, count }) {
           {/* <div className="hidden text-sm font-medium text-gray-700 mb-2 font-semibold sm:flex">
             Field Name
           </div> */}
-          <NewTableFieldInput />
+          <NewTableFieldInput
+            newFields={newFields}
+            setNewFields={setNewFields}
+            getValue={getValue}
+            id={id}
+          />
         </div>
 
         <div className={`flex flex-col justify-center`}>
