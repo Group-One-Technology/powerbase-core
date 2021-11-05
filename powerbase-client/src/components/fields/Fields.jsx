@@ -9,7 +9,7 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
 import { useViewFieldState } from '@models/view/ViewFieldState';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';

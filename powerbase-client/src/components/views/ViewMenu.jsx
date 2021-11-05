@@ -6,7 +6,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
 
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useSaveStatus } from '@models/SaveStatus';
 import { IView } from '@lib/propTypes/view';

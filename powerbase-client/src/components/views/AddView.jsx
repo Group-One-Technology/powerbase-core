@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Dialog, Transition, RadioGroup } from '@headlessui/react';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { createTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { IId } from '@lib/propTypes/common';
@@ -16,7 +16,7 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function AddView({ tableId, open, setOpen }) {
   const { mounted } = useMounted();
-  const { access: { manageView } } = useBaseUser();
+  const { access: { addViews } } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
@@ -35,7 +35,7 @@ export function AddView({ tableId, open, setOpen }) {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (manageView) {
+    if (addViews) {
       setLoading(true);
       setError(undefined);
 

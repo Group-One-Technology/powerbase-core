@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { XIcon } from '@heroicons/react/outline';
 
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { IViewField } from '@lib/propTypes/view-field';
 import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
 import { AddFilterMenu } from './AddFilterMenu';

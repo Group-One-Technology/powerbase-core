@@ -5,7 +5,7 @@ import { BasesProvider, useBases } from '@models/Bases';
 import { BaseProvider, useBase } from '@models/Base';
 import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
-import { BaseUserProvider, useBaseUser } from '@models/bases/BaseUser';
+import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
 import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
@@ -26,7 +26,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: guests } = useBaseGuests();
-  const { baseUser } = useBaseUser();
+  const { data: baseUser } = useBaseUser();
 
   if (base == null || bases == null || authUser == null || guests == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;

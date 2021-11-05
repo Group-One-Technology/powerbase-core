@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';

@@ -9,7 +9,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableView } from '@models/TableView';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';

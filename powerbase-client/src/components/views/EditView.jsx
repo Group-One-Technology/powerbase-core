@@ -6,7 +6,7 @@ import { TrashIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTableView } from '@models/TableView';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { deleteTableView, updateTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { useMounted } from '@lib/hooks/useMounted';
