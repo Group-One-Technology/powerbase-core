@@ -3,11 +3,12 @@ module PermissionsHelper
   TABLE_PERMISSIONS = [:view_table, :manage_table, :add_views, :add_fields, :add_records, :delete_records, :comment_records]
   FIELD_PERMISSIONS = [:view_field, :manage_field, :edit_field_data]
   VIEW_PERMISSIONS = [:see_view, :manage_view]
+  PERMISSIONS = [*BASE_PERMISSIONS, *TABLE_PERMISSIONS, *FIELD_PERMISSIONS, *VIEW_PERMISSIONS]
 
   ROLES = {
     :owner => [:all],
     :admin => [:view_base, *TABLE_PERMISSIONS, *FIELD_PERMISSIONS, *VIEW_PERMISSIONS],
-    :editor => [:view_base, :add_views, *VIEW_PERMISSIONS, :view_table, :view_field, :see_view],
+    :editor => [:view_base, :add_views, *VIEW_PERMISSIONS, :view_table, :view_field, :see_view, :add_records, :delete_records, :comment_records],
     :commenter => [:view_base, :view_table, :view_field, :see_view, :comment_records],
     :viewer => [:view_base, :view_table, :view_field, :see_view],
   }
@@ -88,25 +89,5 @@ module PermissionsHelper
     end
 
     raise AccessDenied
-  end
-
-  # * Retrieves the current_user's permissions (object/hash)
-  def get_permissions(database_id)
-    database = PowerbaseDatabase.find(id)
-    raise NotFound.new("Could not find database with id of #{id}") if !database
-    return { :all => true } if database.user_id == current_user.id
-
-    guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: database_id)
-    raise AccessDenied if !guest
-
-    if guest.access.to_sym != :custom
-      permissions = {}
-      ROLES[guest.access.to_sym].each do |permission|
-        permissions[permission] = true
-      end
-      permissions
-    else
-      guest.permissions
-    end
   end
 end
