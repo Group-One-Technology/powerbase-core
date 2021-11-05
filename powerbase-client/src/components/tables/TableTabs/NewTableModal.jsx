@@ -16,6 +16,19 @@ const types = [];
 
 export default function NewTableModal({ open, setOpen }) {
   const [newFields, setNewFields] = useState(initial);
+  const [currentCount, setCurrentCount] = useState(1);
+
+  const handleAddNewField = () => {
+    setNewFields([
+      ...newFields,
+      { id: currentCount + 1, fieldName: "", fieldTypeId: 1 },
+    ]);
+  };
+
+  const getValue = (id) => {
+    console.log("");
+  };
+
   return (
     <Transition.Root show={true} as={Fragment}>
       <Dialog
@@ -55,6 +68,7 @@ export default function NewTableModal({ open, setOpen }) {
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
               {newFields?.map((field, index) => (
                 <NewTableField
+                  key={index}
                   newFields={newFields}
                   newField={field}
                   count={index}
@@ -62,7 +76,10 @@ export default function NewTableModal({ open, setOpen }) {
               ))}
 
               <div className="flex flex-row justify-center mt-2">
-                <p className="flex flex-row cursor-pointer">
+                <p
+                  className="flex flex-row cursor-pointer"
+                  onClick={handleAddNewField}
+                >
                   <span className="flex-row">
                     <PlusCircleIcon className="text-indigo-400 w-6 h-6" />
                   </span>

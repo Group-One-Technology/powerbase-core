@@ -52,14 +52,14 @@ export default function Field({ newFields, count }) {
           >
             <TrashIcon
               onClick={() => removeField(field.id)}
-              className={`w-5 h-5  sm:hidden cursor-pointer`}
+              className={`w-5 h-5  cursor-pointer`}
             />
-            <p
+            {/* <p
               onClick={() => removeField(field.id)}
               className="text-sm text-red-500 mt-1 self-center cursor-pointer hidden sm:flex"
             >
               Unlink
-            </p>
+            </p> */}
           </div>
         )}
       </div>
