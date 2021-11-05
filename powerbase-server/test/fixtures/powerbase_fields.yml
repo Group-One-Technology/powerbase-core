@@ -1,0 +1,78 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 1
+  name: id
+  oid: 1
+  db_type: bigint
+  default_value: null
+  is_primary_key: true
+  is_nullable: false
+  is_pii: false
+  powerbase_field_type_id: 4
+  powerbase_table_id: 1
+  options:
+
+two:
+  id: 2
+  name: name
+  oid: 2
+  db_type: character varying
+  default_value: null
+  is_primary_key: false
+  is_nullable: false
+  is_pii: false
+  powerbase_field_type_id: 1
+  powerbase_table_id: 1
+  options:
+
+three:
+  id: 3
+  name: description
+  oid: 3
+  db_type: text
+  default_value: null
+  is_primary_key: false
+  is_nullable: true
+  is_pii: false
+  powerbase_field_type_id: 2
+  powerbase_table_id: 1
+
+four:
+  id: 4
+  name: id
+  oid: 4
+  db_type: bigint
+  default_value: null
+  is_primary_key: true
+  is_nullable: false
+  is_pii: false
+  powerbase_field_type_id: 4
+  powerbase_table_id: 2
+  options:
+
+five:
+  id: 5
+  name: user_id
+  oid: 5
+  db_type: bigint
+  default_value: null
+  is_primary_key: false
+  is_nullable: false
+  is_pii: false
+  powerbase_field_type_id: 4
+  powerbase_table_id: 2
+  options:
+
+six:
+  id: 6
+  name: user_role
+  oid: 6
+  db_type: user_userrole_enum
+  default_value: "'basic'::user_userrole_enum"
+  is_primary_key: false
+  is_nullable: true
+  is_pii: false
+  powerbase_field_type_id: 5
+  powerbase_table_id: 1
+  options:

@@ -1,0 +1,1 @@
+Sequel::Database.extension :pagination
