@@ -1,12 +1,12 @@
+import Pusher from 'pusher-js';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewFields } from '@models/ViewFields';
 import { useMounted } from './useMounted';
 
-import Pusher from 'pusher-js';
 const { PUSHER_KEY } = process.env;
 const pusher = new Pusher(PUSHER_KEY, {
   cluster: 'ap1',
-})
+});
 
 export function useWebsocket(logging = false) {
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
@@ -17,7 +17,6 @@ export function useWebsocket(logging = false) {
     Pusher.logToConsole = logging;
     const channel = pusher.subscribe(`table.${tableId}`);
 
-    console.log("subscribed");
     channel.bind('powerbase-data-listener', async (data) => {
       await mutateTableRecords();
       await mutateViewFields();
@@ -31,7 +30,7 @@ export function useWebsocket(logging = false) {
       }, 3000);
     });
   };
-  
+
   return {
     dataListener,
     pusher,
