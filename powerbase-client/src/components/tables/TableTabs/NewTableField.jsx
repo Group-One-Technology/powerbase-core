@@ -16,6 +16,11 @@ export default function Field({
     return classes.filter(Boolean).join(" ");
   }
 
+  const removeField = (id) => {
+    const updatedFields = newFields.filter((field) => field.id !== id);
+    setNewFields(updatedFields);
+  };
+
   return (
     <>
       {count < 1 && (
@@ -66,15 +71,9 @@ export default function Field({
         }`}
           >
             <TrashIcon
-              onClick={() => removeField(field.id)}
+              onClick={() => removeField(id)}
               className={`w-5 h-5  cursor-pointer`}
             />
-            {/* <p
-              onClick={() => removeField(field.id)}
-              className="text-sm text-red-500 mt-1 self-center cursor-pointer hidden sm:flex"
-            >
-              Unlink
-            </p> */}
           </div>
         )}
       </div>
