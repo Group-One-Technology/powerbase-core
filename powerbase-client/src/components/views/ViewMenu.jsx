@@ -20,7 +20,7 @@ import { AddView } from './AddView';
 import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
-  const { access: { manageView } } = useBaseUser();
+  const { access } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
@@ -37,19 +37,19 @@ export function ViewMenu({ tableId, views: initialViews }) {
   }, [tableId, initialViews]);
 
   const handleAddView = () => {
-    if (manageView) {
+    if (access?.addViews) {
       setAddViewModalOpen(true);
     }
   };
 
   const handleViewOptions = (view) => {
-    if (manageView) {
+    if (access?.manageView) {
       setViewOptionModal({ open: true, view });
     }
   };
 
   const handleViewsOrderChange = async ({ active, over }) => {
-    if (active.id !== over.id && manageView) {
+    if (active.id !== over.id && access?.manageView) {
       saving();
 
       const oldIndex = views.findIndex((item) => item.id === active.id);
@@ -97,7 +97,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                       )}
                       handle={{
                         position: 'left',
-                        component: manageView
+                        component: access?.manageView
                           ? (
                             <button
                               type="button"
@@ -117,7 +117,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
-                      {manageView && (
+                      {access?.manageView && (
                         <div className="p-0.5">
                           <button
                             type="button"
@@ -133,7 +133,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                   ))}
                 </SortableContext>
               </DndContext>
-              {manageView && (
+              {access?.addViews && (
                 <li>
                   <button
                     type="button"
