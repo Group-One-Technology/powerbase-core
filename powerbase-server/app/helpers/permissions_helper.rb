@@ -28,7 +28,7 @@ module PermissionsHelper
   # Accepts the following options:
   # :permission :: a given ability to check whether the current_user can do or not.
   # :resource :: the resource to check the given permission against.
-  # :database :: the database or the database_id in which the resource belongs to.
+  # :guest :: (optional) the guest object or guest_id
   def can?(permission, resource, guest = nil)
     resource_type = nil
     database = nil
