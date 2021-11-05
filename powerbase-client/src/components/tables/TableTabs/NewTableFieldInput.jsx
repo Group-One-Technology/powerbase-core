@@ -45,11 +45,11 @@ export default function NewTableFieldInput({
   return (
     <div className="mt-1 w-full">
       <input
-        type="email"
-        name="email"
-        id="email"
+        type="text"
+        name="field"
+        id={`field-${id}`}
         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-        placeholder="you@example.com"
+        placeholder="Field name"
         value={value}
         onChange={handleChange}
       />

@@ -1,24 +1,44 @@
 /* eslint-disable */
 
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 
 const people = [
-  { id: 1, name: "Short Text" },
+  { id: 1, name: "Single Line Text" },
   { id: 2, name: "Long Text" },
-  { id: 3, name: "Email" },
+  { id: 8, name: "Email" },
 ];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function NewTableFieldSelect() {
+export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
   const [selected, setSelected] = useState(people[0]);
 
+  const handleSelect = (item) => {
+    setSelected(item);
+
+    const updatedFields = newFields.map((field) => {
+      if (field.id === id) {
+        return {
+          id: field.id,
+          fieldName: field.fieldName,
+          fieldTypeId: item.id,
+        };
+      }
+      return field;
+    });
+    setNewFields(updatedFields);
+  };
+
+  useEffect(() => {
+    console.log("DD", newFields);
+  }, [newFields]);
+
   return (
-    <Listbox value={selected} onChange={setSelected}>
+    <Listbox value={selected} onChange={(item) => handleSelect(item)}>
       <div className="mt-1 relative">
         <Listbox.Button className="bg-white relative w-full border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
           <span className="block truncate">{selected.name}</span>

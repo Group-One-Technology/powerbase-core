@@ -54,7 +54,11 @@ export default function Field({
           {/* <div className="hidden text-sm font-medium text-gray-700 mb-2 font-semibold sm:flex">
             Field Type
           </div> */}
-          <NewTableFieldSelect />
+          <NewTableFieldSelect
+            newFields={newFields}
+            setNewFields={setNewFields}
+            id={id}
+          />
         </div>
         {newFields.length > 1 && (
           <div

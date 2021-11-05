@@ -3,6 +3,7 @@ import React, { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon, PlusCircleIcon } from "@heroicons/react/outline";
 import NewTableField from "./NewTableField";
+import cn from "classnames";
 
 const initial = [
   {
@@ -94,6 +95,25 @@ export default function NewTableModal({ open, setOpen }) {
                     Add a New Field{" "}
                   </span>
                 </p>
+              </div>
+
+              <div className="mt-5 flex justify-end items-baseline">
+                <button
+                  type="button"
+                  className="mr-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className={cn(
+                    `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
+                    true && "hover:bg-indigo-700"
+                  )}
+                >
+                  Add Table
+                </button>
               </div>
             </div>
           </Transition.Child>
