@@ -1,6 +1,7 @@
 class PowerbaseTable < ApplicationRecord
   include PusherHelper
   include Notifier
+  include Indexable
 
   alias_attribute :fields, :powerbase_fields
   alias_attribute :db, :powerbase_database
@@ -95,12 +96,17 @@ class PowerbaseTable < ApplicationRecord
     "PendingColumnMigration##{self.id}"
   end
 
-  def reindex!
-    migrator.index!
-  end
-
   def migrator
     @migrator ||= Tables::Migrator.new self
   end
 
+  def notifier
+    @notifier ||= Powerbase::Notifier.new self.db
+  end
+  
+  def remove
+    table.default_view_id = nil
+    table.save
+    table.destroy
+  end
 end

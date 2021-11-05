@@ -95,4 +95,12 @@ class PowerbaseDatabase < ApplicationRecord
       nil
     end
   end
+
+  def notifier
+    @notifier ||= Powerbase::Notifier.new self
+  end
+
+  def create_notifier_function!
+    notifier.create_notifier!
+  end
 end

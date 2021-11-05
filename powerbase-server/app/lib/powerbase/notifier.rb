@@ -51,10 +51,14 @@ module Powerbase
             CASE TG_OP
             WHEN 'INSERT', 'UPDATE' THEN
               affected_row := row_to_json(NEW);
-              oid := json_object_agg('oid', NEW.oid);
+              IF to_jsonb(NEW) ? 'oid' THEN
+                oid := json_object_agg('oid', NEW.oid);
+              END IF;
             WHEN 'DELETE' THEN
               affected_row := row_to_json(OLD);
-              oid := json_object_agg('oid', OLD.oid);
+              IF to_jsonb(OLD) ? 'oid' THEN
+                oid := json_object_agg('oid', OLD.oid);
+              END IF;
             END CASE;
 
             WITH pk_columns (attname) AS (

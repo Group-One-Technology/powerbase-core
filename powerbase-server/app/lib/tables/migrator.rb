@@ -34,12 +34,11 @@ class Tables::Migrator
     # Reset all migration counter logs
     write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
-    progressbar = ProgressBar.create(title: "Indexing", total: total_records)
     while offset < total_records
       records.each do |record|
         oid = record.try(:[], :oid)
-        doc_id = oid.present? ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
-
+        doc_id = has_row_oid_support ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
+        puts "--- DOC_ID: #{doc_id}"
         doc = {}
         record.collect {|key, value| key }.each do |key|
           cur_field = fields.find {|field| field.name.to_sym == key }
@@ -65,7 +64,6 @@ class Tables::Migrator
 
         if doc_id.present?
           update_record(index_name, doc_id, doc) 
-          pusher_trigger!("table.#{table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
           @indexed_records += 1
         else
           write_table_migration_logs!(
@@ -76,8 +74,6 @@ class Tables::Migrator
             }
           )
         end
-
-        progressbar.increment
       end
 
       @offset += DEFAULT_PAGE_SIZE

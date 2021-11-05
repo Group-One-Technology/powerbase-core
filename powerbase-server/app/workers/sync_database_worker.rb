@@ -12,6 +12,11 @@ class SyncDatabaseWorker
       @deleted_tables = @database.deleted_tables
 
       puts "Migrating unmigrated tables of database with id of #{@database.id}..."
+
+      if new_connection
+        notifier = Powerbase::Notifier.new database
+        notifier.create_notifier!
+      end
   
       if unmigrated_tables.any?
         table_creators = []
@@ -39,15 +44,14 @@ class SyncDatabaseWorker
 
       if deleted_tables.any?
         deleted_tables.each do |table|
-          table.default_view_id = nil
-          table.save
-          table.destroy
+          table.remove
         end
       end
       
       if new_connection
         @base_migration.end_time = Time.now
         @base_migration.save
+        
         poller = Sidekiq::Cron::Job.find("Database Listeners")
         poller.args << database.id
         poller.save

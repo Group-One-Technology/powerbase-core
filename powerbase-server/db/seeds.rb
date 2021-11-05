@@ -46,10 +46,3 @@ Pii.find_or_create_by(name: "Mobile Number")
 Pii.find_or_create_by(name: "Date of Birth", abbreviation: "Birthdate")
 Pii.find_or_create_by(name: "Debit Card")
 Pii.find_or_create_by(name: "Credit Card")
-
-# Import Elastic Search indices and data
-PowerbaseDatabase.__elasticsearch__.create_index!
-PowerbaseDatabase.import(scope: "turbo")
-
-PowerbaseTable.__elasticsearch__.create_index!
-PowerbaseTable.import(scope: "turbo")
