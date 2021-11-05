@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon, PlusCircleIcon } from "@heroicons/react/outline";
 import NewTableField from "./NewTableField";
 import cn from "classnames";
+import TableNameInput from "./TableNameInput";
 
 const initial = [
   {
@@ -70,17 +71,24 @@ export default function NewTableModal({ open, setOpen }) {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
-              {newFields?.map((field, index) => (
-                <NewTableField
-                  key={index}
-                  newFields={newFields}
-                  newField={field}
-                  count={index}
-                  setNewFields={setNewFields}
-                  id={field.id}
-                  getValue={getValue}
-                />
-              ))}
+              <div className="px-2 mb-6">
+                <p className="text-gray-600">TABLE</p>
+                <TableNameInput />
+              </div>
+              <div>
+                <p className="text-gray-600 px-2 mb-2">FIELDS</p>
+                {newFields?.map((field, index) => (
+                  <NewTableField
+                    key={index}
+                    newFields={newFields}
+                    newField={field}
+                    count={index}
+                    setNewFields={setNewFields}
+                    id={field.id}
+                    getValue={getValue}
+                  />
+                ))}
+              </div>
 
               <div className="flex flex-row justify-center mt-2">
                 <p

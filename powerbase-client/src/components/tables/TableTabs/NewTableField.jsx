@@ -20,12 +20,12 @@ export default function Field({
     <>
       {count < 1 && (
         <div className="grid grid-cols-2 px-2">
-          <div className=" text-sm font-medium text-gray-700 mb-1 font-semibold">
+          <div className=" text-sm font-medium text-gray-600 mb-1 ">
             Field Name
           </div>
           <div
             className={classNames(
-              `text-sm font-medium text-gray-700 mb-1 font-semibold justify-self-start ml-2`,
+              `text-sm font-medium text-gray-600 mb-1  justify-self-start ml-2`,
               newFields.length === 1 && `ml-6 pl-0.5`
             )}
           >
