@@ -1,6 +1,6 @@
 import constate from 'constate';
 import { useSWRInfinite } from 'swr';
-
+import { useState } from 'react';
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
 import { useViewOptions } from './views/ViewOptions';
@@ -71,6 +71,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
+  const [highlightedCell, setHighLightedCell] = useState(null);
 
   return {
     ...response,
@@ -78,6 +79,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     isLoading,
     isReachingEnd,
     loadMore,
+    highlightedCell,
+    setHighLightedCell,
   };
 }
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
@@ -28,7 +27,6 @@ const BaseTableContent = React.memo(({ views, table }) => {
   if (!view || !fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
-
   return (
     <ViewOptionsProvider view={view}>
       <TableRecordsCountProvider id={table.id}>

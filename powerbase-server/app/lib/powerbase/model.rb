@@ -1,8 +1,8 @@
+include ElasticsearchHelper
 module Powerbase
-  ELASTICSEACH_ID_LIMIT = 512
-  DEFAULT_PAGE_SIZE = 40
-
   class Model
+    DEFAULT_PAGE_SIZE = 40
+
     # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
     def initialize(esclient, table_id)
@@ -17,12 +17,13 @@ module Powerbase
 
     # * Save multiple documents of a table to Elasticsearch.
     def index_records
-      index = "table_records_#{@table_id}"
-      fields = PowerbaseField.where(powerbase_table_id: @table_id)
-      primary_keys = fields.select {|field| field.is_primary_key }
+      index = @powerbase_table.index_name
+      fields = @powerbase_table.fields
+      primary_keys = @powerbase_table.primary_keys
       order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
       number_field_type = PowerbaseFieldType.find_by(name: "Number")
       date_field_type = PowerbaseFieldType.find_by(name: "Date")
+      adapter = @powerbase_database.adapter
 
       if !@esclient.indices.exists(index: index)
         @esclient.indices.create(
@@ -55,47 +56,17 @@ module Powerbase
       while @powerbase_table.logs["migration"]["offset"] < @powerbase_table.logs["migration"]["total_records"]
         records = remote_db() {|db|
           table = db.from(@table_name)
-
-          table_select = [Sequel.lit("*")]
-          table_select.push(Sequel.lit("ctid")) if @powerbase_database.adapter == "postgresql"
-
+          table_select = [ Sequel.lit("*") ]
+          table_select << Sequel.lit("oid") if adapter == "postgresql" && @powerbase_database.has_row_oid_support?
           table.select(*table_select)
             .order(order_field.name.to_sym)
             .limit(DEFAULT_PAGE_SIZE)
             .offset(@powerbase_table.logs["migration"]["offset"])
             .all
         }
-
+        
         records.each do |record|
-          doc_id = if primary_keys.length > 0
-              primary_keys
-                .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                .join("-")
-            elsif @powerbase_database.adapter == "postgresql"
-              "ctid_#{record[:ctid]}"
-            else
-              field_ids = fields.select {|field|
-                field.name.downcase.include?("id") || field.name.downcase.include?("identifier")
-              }
-
-              if field_ids.length > 0
-                field_ids
-                  .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                  .join("-")
-              else
-                not_nullable_fields = fields.select {|field| !field.is_nullable }
-
-                if not_nullable_fields.length > 0
-                  not_nullable_fields
-                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                    .join("-")
-                else
-                  fields
-                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                    .join("-")
-                end
-              end
-            end
+          doc_id = get_doc_id(primary_keys, record, fields, adapter)
 
           doc = {}
           record.collect {|key, value| key }.each do |key|
@@ -118,7 +89,7 @@ module Powerbase
             end
           end
 
-          doc = doc.slice!(:ctid)
+          doc = doc.slice!(:oid)
 
           if doc_id != nil
             @esclient.update(
@@ -237,7 +208,8 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
-        result["hits"]["hits"].map {|result| result["_source"]}
+
+        result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
       else
         remote_db() {|db|
           db.from(@table_name)
@@ -278,17 +250,15 @@ module Powerbase
 
     private
       def remote_db(&block)
-        Powerbase.connect({
+        @remote_db ||= Powerbase.connect({
           adapter: @powerbase_database.adapter,
           connection_string: @powerbase_database.connection_string,
           is_turbo: @powerbase_database.is_turbo,
-        }, &block)
-      end
+        })
 
-      def format_doc_id(value)
-        value
-          .parameterize(separator: "_")
-          .truncate(ELASTICSEACH_ID_LIMIT)
+        result = yield(@remote_db) if block.present?
+
+        result || @remote_db
       end
 
       def sanitize(string)

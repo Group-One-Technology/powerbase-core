@@ -75,6 +75,7 @@ module.exports = {
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         API: JSON.stringify(process.env.API),
+        PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
       },
     }),
     new webpack.HotModuleReplacementPlugin(),

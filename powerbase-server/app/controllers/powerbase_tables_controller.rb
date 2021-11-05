@@ -89,7 +89,7 @@ class PowerbaseTablesController < ApplicationController
         is_migrated: table.is_migrated,
         created_at: table.created_at,
         updated_at: table.updated_at,
-        database_id: table.powerbase_database_id,
+        database_id: table.powerbase_database_id
       }
     end
 end

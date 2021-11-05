@@ -22,7 +22,7 @@ import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, table }) {
+export function TableRenderer({ height, table, highlightedCell }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
@@ -130,6 +130,7 @@ export function TableRenderer({ height, table }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
+                        const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
@@ -142,6 +143,7 @@ export function TableRenderer({ height, table }) {
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
+                          isHighlighted,
                           isLastRow,
                           isLoaded: !!records[rowIndex],
                           value,
@@ -195,4 +197,5 @@ export function TableRenderer({ height, table }) {
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
+  highlightedCell: PropTypes.string,
 };

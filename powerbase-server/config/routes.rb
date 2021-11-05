@@ -1,4 +1,11 @@
+
+require 'sidekiq/web'
+Sidekiq::Web.use ActionDispatch::Cookies
+Sidekiq::Web.use ActionDispatch::Session::CookieStore, key: "_interslice_session"
+
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/sidekiq' if Rails.env.development?
+
   get '/auth/', to: 'users/auth#index'
   post '/refresh/', to: 'users/refresh#create'
   post '/login/', to: 'users/login#create'
@@ -26,6 +33,10 @@ Rails.application.routes.draw do
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
         end
+      end
+
+      resources :tasks do
+        post :start
       end
 
       resources :table_views, path: 'views', as: 'views', except: [:new], shallow: true do
