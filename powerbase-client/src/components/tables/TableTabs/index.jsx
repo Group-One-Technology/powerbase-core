@@ -40,6 +40,7 @@ export function TableTabs() {
     base,
     setTables,
   });
+  const [isUploadAction, setIsUploadAction] = useState(false);
 
   const handleSearchModal = () => {
     setTableSearchModalOpen(true);
@@ -113,7 +114,13 @@ export function TableTabs() {
           </DndContext>
           {tables && base && (
             <div className="my-auto px-2">
-              <AddTable table={table} base={base} tables={tables} />
+              <AddTable
+                table={table}
+                base={base}
+                tables={tables}
+                isUploadAction={isUploadAction}
+                setIsUploadAction={setIsUploadAction}
+              />
             </div>
           )}
         </nav>

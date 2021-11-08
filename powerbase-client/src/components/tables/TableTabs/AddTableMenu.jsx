@@ -4,10 +4,20 @@ import { PlusIcon } from "@heroicons/react/solid";
 import * as Popover from "@radix-ui/react-popover";
 import NewTableModal from "./NewTableModal";
 
-const AddTable = ({ table, base, tables }) => {
+const AddTable = ({
+  table,
+  base,
+  tables,
+  isUploadAction,
+  setIsUploadAction,
+}) => {
   const [open, setOpen] = useState(false);
   const handleAddTable = () => {
     setOpen(!open);
+  };
+
+  const handleImportCSV = () => {
+    setIsUploadAction(true);
   };
   return (
     <>
@@ -17,6 +27,7 @@ const AddTable = ({ table, base, tables }) => {
         table={table}
         tables={tables}
         base={base}
+        isUploadAction={isUploadAction}
       />
       <Popover.Root>
         <Popover.Trigger className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white">
@@ -34,7 +45,10 @@ const AddTable = ({ table, base, tables }) => {
             <div className="mt-1 py-2 px-1">
               <div className="text-xs text-gray-500 px-1">IMPORT FROM</div>
               <div className="text-xs text-gray-800 mt-1 font-medium">
-                <div className="mt-2 cursor-pointer hover:bg-gray-200 py-2 px-1">
+                <div
+                  className="mt-2 cursor-pointer hover:bg-gray-200 py-2 px-1"
+                  onClick={handleImportCSV}
+                >
                   CSV File
                 </div>
               </div>
