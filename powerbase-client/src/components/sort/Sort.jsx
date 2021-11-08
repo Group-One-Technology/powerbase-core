@@ -10,7 +10,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
 import { useSaveStatus } from '@models/SaveStatus';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { useReorderSort } from '@lib/hooks/sort/useReorderSort';

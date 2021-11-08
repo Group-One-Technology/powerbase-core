@@ -12,7 +12,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 

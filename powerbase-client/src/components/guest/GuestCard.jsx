@@ -4,7 +4,7 @@ import Gravatar from 'react-gravatar';
 import { useHistory } from 'react-router-dom';
 
 import { useBaseGuests } from '@models/BaseGuests';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
@@ -12,12 +12,12 @@ import { Badge } from '@components/ui/Badge';
 
 export function GuestCard({ guest, setGuests, owner }) {
   const history = useHistory();
-  const { baseUser } = useBaseUser();
+  const { data: baseUser, access, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
   const handleChangeAccess = async (value) => {
-    if (!owner) {
+    if (!owner && access.changeGuestAccess) {
       saving();
 
       const updatedGuests = guests.map((item) => ({
@@ -30,6 +30,9 @@ export function GuestCard({ guest, setGuests, owner }) {
 
       try {
         await changeGuestAccess({ id: guest.id, access: value });
+        if (guest.userId === baseUser.userId) {
+          await mutateBaseUser();
+        }
         await mutateGuests(updatedGuests);
         saved(`Successfully changed guest ${guest.firstName}'s access to '${value}'.`);
       } catch (err) {
@@ -39,23 +42,24 @@ export function GuestCard({ guest, setGuests, owner }) {
   };
 
   const removeGuestAccess = async () => {
-    if (!owner) {
-      if (baseUser.userId === guest.userId) {
-        await removeGuest({ id: guest.id });
-        history.push('/');
-      } else {
-        saving();
+    if (!owner && baseUser && access.removeGuests) {
+      try {
+        if (baseUser.userId === guest.userId) {
+          await removeGuest({ id: guest.id });
+          await mutateBaseUser();
+          history.push('/');
+        } else {
+          saving();
 
-        const updatedGuests = guests.filter((item) => item.id !== guest.id);
-        setGuests(updatedGuests);
+          const updatedGuests = guests.filter((item) => item.id !== guest.id);
+          setGuests(updatedGuests);
 
-        try {
           await removeGuest({ id: guest.id });
           await mutateGuests(updatedGuests);
           saved(`Successfully removed guest '${guest.firstName}'`);
-        } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
         }
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };

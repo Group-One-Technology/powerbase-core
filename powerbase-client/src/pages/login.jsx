@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 
+import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
-import { useAuthUser } from '@models/AuthUser';
+import { useMounted } from '@lib/hooks/useMounted';
+
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
 import { login } from '@lib/api/auth';
@@ -15,6 +17,7 @@ import { Logo } from '@components/ui/Logo';
 
 export function LoginPage() {
   const history = useHistory();
+  const { mounted } = useMounted();
   const { authUser, mutate: refetchAuthUser } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
@@ -44,7 +47,7 @@ export function LoginPage() {
       }
     }
 
-    setLoading(false);
+    mounted(() => setLoading(false));
   };
 
   useEffect(() => {

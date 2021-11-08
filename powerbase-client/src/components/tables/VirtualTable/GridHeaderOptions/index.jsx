@@ -15,7 +15,7 @@ import {
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
 import {

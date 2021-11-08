@@ -1,6 +1,7 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
+  before_action :check_database_access, only: [:update, :clear_logs]
 
   schema(:show, :clear_logs) do
     required(:id).value(:integer)
@@ -56,22 +57,15 @@ class PowerbaseDatabasesController < ApplicationController
   # GET /databases/:id
   def show
     @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    current_user.can?(:view_base, @database)
 
-    if @database
-      render json: format_json(@database)
-    end
+    render json: format_json(@database)
   end
 
   # PUT /databases/:id
   def update
     options = safe_params.output
-    @database = PowerbaseDatabase.find(safe_params[:id])
-
-    if !@database
-      render status: :not_found
-      return
-    end
-
     options[:adapter] = @database.adapter
     options[:is_turbo] = @database.is_turbo
     is_connection_updated = false
@@ -210,8 +204,6 @@ class PowerbaseDatabasesController < ApplicationController
 
   # PUT /databases/:id/clear_logs
   def clear_logs
-    @database = PowerbaseDatabase.find(safe_params[:id])
-
     if @database.base_migration.update(logs: { errors: [] })
       render status: :no_content
     else
@@ -220,6 +212,12 @@ class PowerbaseDatabasesController < ApplicationController
   end
 
   private
+    def check_database_access
+      @database = PowerbaseDatabase.find(safe_params[:id])
+      raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+      current_user.can?(:manage_base, @database)
+    end
+
     def authorize_acesss_hubspot
       if safe_params[:api_key] != ENV["hubspot_api_key"]
         raise StandardError.new "Invalid Hubspot API Key. Access denied."

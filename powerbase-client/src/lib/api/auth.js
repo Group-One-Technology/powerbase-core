@@ -67,3 +67,13 @@ export async function register({
 
   return undefined;
 }
+
+export async function getAuthGuestByDatabase({ databaseId }) {
+  const response = await securedApi.get(`/auth/databases/${databaseId}/guest`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

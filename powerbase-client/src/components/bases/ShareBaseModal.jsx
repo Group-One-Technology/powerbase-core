@@ -5,7 +5,7 @@ import { ChevronDownIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBaseGuests } from '@models/BaseGuests';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';

@@ -1,5 +1,7 @@
 class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
+  before_action :check_view_access, only: [:hide_all, :update_order]
+  before_action :check_view_field_access, only: [:hide, :unhide, :resize]
 
   schema(:index, :hide_all) do
     required(:view_id).value(:integer)
@@ -27,9 +29,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /views/:view_id/fields/hide_all
   def hide_all
-    @view = TableView.find(safe_params[:view_id]);
-    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
     @view.view_field_options.each do |field|
       field.update(is_hidden: true)
     end
@@ -39,9 +38,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /views/:view_id/view_fields/order
   def update_order
-    @view = TableView.find(safe_params[:view_id]);
-    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
     safe_params[:view_fields].each_with_index do |view_field_id, index|
       view_field = ViewFieldOption.find(view_field_id)
       view_field.update(order: index)
@@ -52,9 +48,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/hide
   def hide
-    @view_field = ViewFieldOption.find(safe_params[:id])
-    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
     if @view_field.update(is_hidden: true)
       render json: format_json(@view_field)
     else
@@ -64,9 +57,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/unhide
   def unhide
-    @view_field = ViewFieldOption.find(safe_params[:id])
-    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
     if @view_field.update(is_hidden: false)
       render json: format_json(@view_field)
     else
@@ -76,14 +66,23 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/resize
   def resize
-    @view_field = ViewFieldOption.find(safe_params[:id])
-    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
     @view_field.update_attribute(:width, safe_params[:width])
     render json: format_json(@view_field) if @view_field.save!
   end
 
   private
+    def check_view_access
+      @view = TableView.find(safe_params[:view_id]);
+      raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
+      current_user.can?(:manage_view, @view)
+    end
+
+    def check_view_field_access
+      @view_field = ViewFieldOption.find(safe_params[:id])
+      raise NotFound.new("Could not find view field with id of #{safe_params[:id]}") if !@view_field
+      current_user.can?(:manage_view, @view_field.table_view)
+    end
+
     def format_json(view_field)
       field = view_field.powerbase_field
 

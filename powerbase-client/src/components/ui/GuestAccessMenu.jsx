@@ -4,7 +4,7 @@ import cn from 'classnames';
 import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/outline';
 
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { Badge } from './Badge';
 
@@ -14,9 +14,9 @@ export function GuestAccessMenu({
   remove,
   owner,
 }) {
-  const { baseUser, access: { inviteGuests } } = useBaseUser();
+  const { baseUser, access: { changeGuestAccess, removeGuests } } = useBaseUser();
 
-  if (owner || !inviteGuests) {
+  if (owner || !changeGuestAccess) {
     return (
       <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
         {owner ? 'owner' : guest.access}
@@ -50,13 +50,13 @@ export function GuestAccessMenu({
             <p className="text-xs text-gray-500">{item.description}</p>
           </Menu.Item>
         ))}
-        {remove && (
+        {(remove && removeGuests) && (
           <Menu.Item
             as="button"
             className="px-4 py-1 w-full text-left text-sm font-medium text-red-600  capitalize cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
             onClick={remove}
           >
-            {baseUser.userId === guest.userId ? 'Leave Base' : 'Remove Access'}
+            {baseUser?.userId === guest.userId ? 'Leave Base' : 'Remove Access'}
           </Menu.Item>
         )}
       </Menu.Items>

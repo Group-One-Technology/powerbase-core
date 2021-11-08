@@ -3,7 +3,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
-import { useBaseUser } from '@models/bases/BaseUser';
+import { useBaseUser } from '@models/BaseUser';
 
 export function useReorderSort({ sort, updateSort }) {
   const { mounted } = useMounted();

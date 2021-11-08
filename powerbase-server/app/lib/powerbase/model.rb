@@ -5,11 +5,10 @@ module Powerbase
 
     # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
-    def initialize(esclient, table_id)
-      @table_id = table_id
+    def initialize(esclient, table)
       @esclient = esclient
-
-      @powerbase_table = PowerbaseTable.find(table_id)
+      @powerbase_table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
+      @table_id = @powerbase_table.id
       @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
       @table_name = @powerbase_table.name
       @is_turbo = @powerbase_database.is_turbo

@@ -30,6 +30,7 @@ class TableViewsController < ApplicationController
 
   # GET /tables/:table_id/views
   def index
+    current_user.can?(:view_table, safe_params[:table_id])
     @views = TableView.where(powerbase_table_id: safe_params[:table_id]).order(order: :asc)
     render json: @views.map {|item| format_json(item)}
   end
@@ -37,21 +38,18 @@ class TableViewsController < ApplicationController
   # GET /views/:id
   def show
     @view = TableView.find(safe_params[:id])
+    raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
+    current_user.can?(:see_view, @view)
     render json: format_json(@view)
   end
 
   # POST /tables/:table_id/views
   def create
     @table = PowerbaseTable.find(safe_params[:table_id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    current_user.can?(:add_views, @table)
 
-    if !@table
-      render json: { error: "Couldn't find table with id of \"#{safe_params[:table_id]}\"." }, status: :unprocessable_entity
-      return
-    end
-
-    check_database_access(@table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
-    @view = TableView.find_by(name: safe_params[:name], powerbase_table_id: safe_params[:table_id])
+    @view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @table.id)
 
     if @view
       render json: { errors: ["View with name of \"#{safe_params[:name]}\" already exists for table \"#{@table.alias || @table.name}\""] }, status: :unprocessable_entity
@@ -89,20 +87,20 @@ class TableViewsController < ApplicationController
 
   # PUT /views/:id
   def update
-    view_params = safe_params.output
-    @view = TableView.find(view_params[:id])
+    @view = TableView.find(safe_params[:id])
+    raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
+    current_user.can?(:manage_view, @view)
 
-    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
-    if view_params[:name]
-      @existing_view = TableView.find_by(name: view_params[:name], powerbase_table_id: @view.powerbase_table_id)
+    if safe_params[:name]
+      @existing_view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @view.powerbase_table_id)
 
       if @existing_view && @existing_view.id != @view.id
-        render json: { error: "View with name of \"#{view_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
+        render json: { error: "View with name of \"#{safe_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
         return
       end
     end
 
+    view_params = safe_params.output
     if @view.update(view_params)
       render json: format_json(@view)
     else
@@ -113,19 +111,17 @@ class TableViewsController < ApplicationController
   # DELETE /views/:id
   def destroy
     @view = TableView.find(safe_params[:id])
-    @table = @view.powerbase_table
+    raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
+    current_user.can?(:manage_view, @view)
 
-    check_database_access(@table.powerbase_database_id, ["owner", "admin", "editor"]) or return
-
-    if @table.default_view_id === @view.id
+    if @view.powerbase_table.default_view_id === @view.id
       render json: { error: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
       return
     end
 
     @view.destroy
 
-    views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
-
+    views = TableView.where(powerbase_table_id: @view.powerbase_table_id).order(order: :asc)
     views.each_with_index do |view, index|
       view = TableView.find(view.id)
       view.update(order: index)
@@ -135,7 +131,8 @@ class TableViewsController < ApplicationController
   # PUT /tables/:table_id/views/order
   def update_order
     @table = PowerbaseTable.find(safe_params[:table_id])
-    check_database_access(@table.powerbase_database_id, ["owner", "admin", "editor"]) or return
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    current_user.can?(:manage_table, @table)
 
     safe_params[:views].each_with_index do |view_id, index|
       view = TableView.find(view_id)
