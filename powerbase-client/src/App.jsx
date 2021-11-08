@@ -11,6 +11,7 @@ import { GlobalProviders } from '@components/GlobalProviders';
 import { LoginPage } from '@pages/login';
 import { RegisterPage } from '@pages/register';
 import { BasesPage } from '@pages/bases';
+import { SettingsPage } from '@pages/settings';
 import { BasePage } from '@pages/base/[id]';
 import { AddBasePage } from '@pages/base/add-base';
 import { CreateBasePage } from '@pages/base/create';
@@ -32,6 +33,7 @@ export function App() {
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/register" component={RegisterPage} />
           <Route exact path="/bases" component={BasesPage} />
+          <Route exact path="/settings" component={SettingsPage} />
           <Route path="/base">
             <BasesRoute />
           </Route>

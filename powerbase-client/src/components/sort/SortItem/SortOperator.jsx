@@ -9,13 +9,17 @@ export function SortOperator({
   value,
   options,
   onChange,
+  disabled,
 }) {
   return (
-    <Listbox value={value} onChange={onChange}>
+    <Listbox value={value} onChange={onChange} disabled={disabled}>
       <div className="block w-52">
         <Listbox.Button
           id={id}
-          className="block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
+          className={cn(
+            'block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm',
+            disabled ? 'cursor-not-allowed bg-gray-100' : 'cursor-default bg-white',
+          )}
         >
           <span className="block truncate">{value}</span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -49,4 +53,5 @@ SortOperator.propTypes = {
   value: PropTypes.string,
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };

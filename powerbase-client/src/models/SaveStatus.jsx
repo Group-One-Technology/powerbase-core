@@ -23,6 +23,7 @@ export const SaveStatus = {
 function useSaveStateModel() {
   const [saveStatus, setSaveStatus] = useState(SaveStatus.IDLE);
   const [error, setError] = useState();
+  const [loading, setLoading] = useState();
   const { mounted } = useMounted();
 
   const saveStatusRef = useRef(saveStatus);
@@ -45,23 +46,37 @@ function useSaveStateModel() {
   const resetSaveStatus = () => {
     mounted(() => {
       setError(undefined);
-      setSaveStatus(SaveStatus.IDLE);
+      updateState(SaveStatus.IDLE);
     });
   };
 
   const saving = () => {
     mounted(() => {
+      setLoading(true);
       setError(undefined);
-      setSaveStatus(SaveStatus.SAVING);
+      updateState(SaveStatus.SAVING);
     });
   };
 
-  const saved = () => mounted(() => setSaveStatus(SaveStatus.SAVED));
+  const saved = (message) => {
+    mounted(() => {
+      updateState(SaveStatus.SAVED);
+      setLoading(false);
+
+      if (message?.length) {
+        toast(message, {
+          icon: '✅',
+          className: 'bg-gray-800 text-sm text-white rounded-md',
+        });
+      }
+    });
+  };
 
   const catchError = (err) => {
     mounted(() => {
       setError(new Error('Something went wrong.'));
-      setSaveStatus(SaveStatus.ERROR);
+      setLoading(false);
+      updateState(SaveStatus.ERROR);
       toast(Array.isArray(err) ? err.join('. ') : err, {
         icon: '⚠️',
         className: 'bg-gray-800 text-sm text-white rounded-md',
@@ -78,6 +93,8 @@ function useSaveStateModel() {
     resetSaveStatus,
     error,
     setError,
+    loading,
+    setLoading,
   };
 }
 

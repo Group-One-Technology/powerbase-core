@@ -9,6 +9,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableView } from '@models/TableView';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
@@ -17,13 +18,14 @@ import { FilterGroup } from './FilterGroup';
 export function Filter() {
   const filterRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
+  const { access: { manageView } } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateTableRecords = useCallback(debounce(async () => {
-    if (filterRef.current) {
+    if (filterRef.current && manageView) {
       saving();
 
       const filters = Array.from(filterRef.current.querySelectorAll('.filter') || []).map(({ attributes }) => ({

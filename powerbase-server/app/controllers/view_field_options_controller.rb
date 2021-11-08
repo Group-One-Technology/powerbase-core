@@ -27,9 +27,10 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /views/:view_id/fields/hide_all
   def hide_all
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id])
+    @view = TableView.find(safe_params[:view_id]);
+    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
 
-    @view_fields.each do |field|
+    @view.view_field_options.each do |field|
       field.update(is_hidden: true)
     end
 
@@ -38,6 +39,9 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /views/:view_id/view_fields/order
   def update_order
+    @view = TableView.find(safe_params[:view_id]);
+    check_database_access(@view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
+
     safe_params[:view_fields].each_with_index do |view_field_id, index|
       view_field = ViewFieldOption.find(view_field_id)
       view_field.update(order: index)
@@ -49,6 +53,7 @@ class ViewFieldOptionsController < ApplicationController
   # PUT /view_fields/:id/hide
   def hide
     @view_field = ViewFieldOption.find(safe_params[:id])
+    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
 
     if @view_field.update(is_hidden: true)
       render json: format_json(@view_field)
@@ -60,6 +65,7 @@ class ViewFieldOptionsController < ApplicationController
   # PUT /view_fields/:id/unhide
   def unhide
     @view_field = ViewFieldOption.find(safe_params[:id])
+    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
 
     if @view_field.update(is_hidden: false)
       render json: format_json(@view_field)
@@ -70,9 +76,11 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/resize
   def resize
-    view_field = ViewFieldOption.find(safe_params[:id])
-    view_field.update_attribute(:width, safe_params[:width])
-    render json: format_json(view_field) if view_field.save!
+    @view_field = ViewFieldOption.find(safe_params[:id])
+    check_database_access(@view_field.table_view.powerbase_table.powerbase_database_id, ["owner", "admin", "editor"]) or return
+
+    @view_field.update_attribute(:width, safe_params[:width])
+    render json: format_json(@view_field) if @view_field.save!
   end
 
   private

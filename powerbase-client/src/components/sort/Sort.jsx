@@ -10,6 +10,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { useReorderSort } from '@lib/hooks/sort/useReorderSort';
@@ -19,32 +20,35 @@ import { SortItem } from './SortItem';
 export function Sort() {
   const sortRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
+  const { access: { manageView } } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const updateSort = async (value) => {
-    saving();
+    if (manageView) {
+      saving();
 
-    const updatedSort = {
-      id: encodeURIComponent(parseSortQueryString(value)),
-      value,
-    };
+      const updatedSort = {
+        id: encodeURIComponent(parseSortQueryString(value)),
+        value,
+      };
 
-    setSort(updatedSort);
+      setSort(updatedSort);
 
-    try {
-      updateTableView({ id: view.id, sort: updatedSort });
-      await mutateTableRecords();
-      saved();
-    } catch (err) {
-      catchError(err);
+      try {
+        updateTableView({ id: view.id, sort: updatedSort });
+        await mutateTableRecords();
+        saved();
+      } catch (err) {
+        catchError(err);
+      }
     }
   };
 
   const updateRecords = async () => {
-    if (sortRef.current) {
+    if (sortRef.current && manageView) {
       const updatedSort = Array.from(sortRef.current.querySelectorAll('.sort') || []).map(({ attributes }) => ({
         id: attributes['data-id']?.nodeValue,
         field: attributes['data-field']?.nodeValue,
@@ -63,21 +67,25 @@ export function Sort() {
   } = useReorderSort({ sort, updateSort });
 
   const handleAddSortItem = async () => {
-    const updatedSort = [
-      ...sort,
-      {
-        id: `${fields[0].name}-${SORT_OPERATORS[0]}-${sort.length}`,
-        field: fields[0].name,
-        operator: SORT_OPERATORS[0],
-      },
-    ];
+    if (manageView) {
+      const updatedSort = [
+        ...sort,
+        {
+          id: `${fields[0].name}-${SORT_OPERATORS[0]}-${sort.length}`,
+          field: fields[0].name,
+          operator: SORT_OPERATORS[0],
+        },
+      ];
 
-    await updateSort(updatedSort);
+      await updateSort(updatedSort);
+    }
   };
 
   const handleRemoveSortItem = async (sortItemId) => {
-    const updatedSort = sort.filter((item) => item.id !== sortItemId);
-    await updateSort(updatedSort);
+    if (manageView) {
+      const updatedSort = sort.filter((item) => item.id !== sortItemId);
+      await updateSort(updatedSort);
+    }
   };
 
   return (
@@ -140,14 +148,16 @@ export function Sort() {
                       </p>
                     )}
                   </ul>
-                  <button
-                    type="button"
-                    className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                    onClick={handleAddSortItem}
-                  >
-                    <PlusIcon className="mr-1 h-4 w-4" />
-                    Add a sort
-                  </button>
+                  {manageView && (
+                    <button
+                      type="button"
+                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                      onClick={handleAddSortItem}
+                    >
+                      <PlusIcon className="mr-1 h-4 w-4" />
+                      Add a sort
+                    </button>
+                  )}
                 </div>
               </div>
             </Popover.Panel>

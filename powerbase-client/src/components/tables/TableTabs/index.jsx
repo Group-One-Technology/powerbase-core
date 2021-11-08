@@ -67,7 +67,7 @@ export function TableTabs() {
               items={tables}
               strategy={horizontalListSortingStrategy}
             >
-              {tables?.map((item, index) => <TableTabItem ref={activeTabEl} key={item.id} table={item} index={index} />)}
+              {tables?.map((item) => <TableTabItem ref={activeTabEl} key={item.id} table={item} />)}
             </SortableContext>
           </DndContext>
           {tables && (

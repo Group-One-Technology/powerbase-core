@@ -31,7 +31,7 @@ export function TableViewsNav({ table, views }) {
           {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
-          <Fields tableId={table.id} />
+          <Fields />
           <Filter />
           <Sort />
           <button
@@ -39,7 +39,7 @@ export function TableViewsNav({ table, views }) {
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             <ShareIcon className="block h-4 w-4 mr-1" />
-            Share
+            Share View
           </button>
         </div>
         <div className="flex-1 flex items-center justify-end">

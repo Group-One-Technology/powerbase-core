@@ -23,6 +23,11 @@ Rails.application.routes.draw do
     end
 
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
+    resources :guests, only: [:index, :create, :destroy], shallow: true do
+      member do
+        put 'change_access'
+      end
+    end
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do
@@ -75,6 +80,7 @@ Rails.application.routes.draw do
   resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
+  get 'shared_databases', to: 'guests#shared_databases'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'

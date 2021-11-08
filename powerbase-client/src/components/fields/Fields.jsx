@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -10,17 +9,19 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
 import { useViewFieldState } from '@models/view/ViewFieldState';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
-export function Fields({ tableId }) {
+export function Fields() {
+  const { access: { manageView, manageFields } } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
   const { setFields: setRecordFields } = useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({ tableId, fields, setFields });
+  const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -28,24 +29,26 @@ export function Fields({ tableId }) {
   }, [initialFields]);
 
   const handleHideAll = async () => {
-    saving();
-    setLoading(true);
+    if (manageView) {
+      saving();
+      setLoading(true);
 
-    const updatedFields = fields.map((item) => ({
-      ...item,
-      isHidden: true,
-    }));
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: true,
+      }));
 
-    setFields(updatedFields);
-    setRecordFields(updatedFields);
-    setLoading(false);
+      setFields(updatedFields);
+      setRecordFields(updatedFields);
+      setLoading(false);
 
-    try {
-      await hideAllViewFields({ viewId: view.id });
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err);
+      try {
+        await hideAllViewFields({ viewId: view.id });
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err);
+      }
     }
   };
 
@@ -81,16 +84,18 @@ export function Fields({ tableId }) {
                       {view.name}
                     </strong>
                   </h4>
-                  <div className="mx-2 flex justify-end">
-                    <button
-                      type="button"
-                      className="p-1 text-indigo-500"
-                      onClick={handleHideAll}
-                      disabled={loading}
-                    >
-                      Hide all
-                    </button>
-                  </div>
+                  {manageView && (
+                    <div className="mx-2 flex justify-end">
+                      <button
+                        type="button"
+                        className="p-1 text-indigo-500"
+                        onClick={handleHideAll}
+                        disabled={loading}
+                      >
+                        Hide all
+                      </button>
+                    </div>
+                  )}
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
                       <ul className="m-3 list-none flex flex-col">
@@ -98,13 +103,15 @@ export function Fields({ tableId }) {
                       </ul>
                     </SortableContext>
                   </DndContext>
-                  <button
-                    type="button"
-                    className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
-                  >
-                    <PlusIcon className="mr-1 h-4 w-4" />
-                    Add a field
-                  </button>
+                  {manageFields && (
+                    <button
+                      type="button"
+                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
+                    >
+                      <PlusIcon className="mr-1 h-4 w-4" />
+                      Add a field
+                    </button>
+                  )}
                 </div>
               </div>
             </Popover.Panel>
@@ -114,7 +121,3 @@ export function Fields({ tableId }) {
     </Popover>
   );
 }
-
-Fields.propTypes = {
-  tableId: PropTypes.number.isRequired,
-};

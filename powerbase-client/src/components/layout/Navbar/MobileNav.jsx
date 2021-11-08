@@ -4,8 +4,10 @@ import { Disclosure } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { CogIcon, ShareIcon } from '@heroicons/react/outline';
 
 import { useAuthUser } from '@models/AuthUser';
+import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 import { UserMenu } from './UserMenu';
@@ -13,6 +15,11 @@ import { UserMenu } from './UserMenu';
 export function MobileNav({ base, bases, navigation }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
+  const { setOpen: setShareModalOpen } = useShareBaseModal();
+
+  const handleShareBase = () => {
+    setShareModalOpen(true);
+  };
 
   return (
     <Disclosure.Panel className="sm:hidden pb-3">
@@ -26,6 +33,21 @@ export function MobileNav({ base, bases, navigation }) {
             >
               {base.name}
             </p>
+            <button
+              type="button"
+              className="w-full pl-3 pr-4 py-2 border-l-4 flex items-center text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+              onClick={handleShareBase}
+            >
+              <ShareIcon className="h-4 w-4 mr-2" />
+              Share Base
+            </button>
+            <Link
+              to={`/base/${base.id}/settings`}
+              className="pl-3 pr-4 py-2 border-l-4 flex items-center text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+            >
+              <CogIcon className="h-4 w-4 mr-2" />
+              Settings
+            </Link>
             <p className="text-xs px-4 py-2 text-white text-opacity-80 uppercase">
               Other Bases
             </p>
@@ -75,12 +97,14 @@ export function MobileNav({ base, bases, navigation }) {
           <div className="flex-shrink-0">
             <Gravatar
               email={authUser.email}
-              className="h-6 w-6 rounded-full"
+              className="h-10 w-10 rounded-full"
               alt={`${authUser.firstName}'s profile picture`}
             />
           </div>
           <div className="ml-3">
-            <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>{authUser.name}</div>
+            <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>
+              {authUser.firstName} {authUser.lastName}
+            </div>
             <div className={cn('text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>{authUser.email}</div>
           </div>
         </div>

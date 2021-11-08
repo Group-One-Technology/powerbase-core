@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/outline';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -18,12 +20,19 @@ export function AddBasePage() {
             {BASE_SOURCES.map((source) => (
               <li
                 key={source.name}
-                className="sm:w-56 sm:h-60 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
+                className="sm:w-56 sm:h-56 text-center bg-white rounded-lg shadow"
               >
                 <BaseSourceItem source={source} />
               </li>
             ))}
           </ul>
+
+          <div className="w-max mx-auto mt-8">
+            <Link to="/" className="flex items-center p-2 bg-white rounded-lg shadow">
+              <ArrowLeftIcon className="h-4 w-4 mr-1" />
+              Return
+            </Link>
+          </div>
         </PageContent>
       </div>
     </Page>
