@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import cn from 'classnames';
 import { Listbox, Dialog } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, CogIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
+import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { inviteGuest } from '@lib/api/guests';
-import { ACCESS_LEVEL, CUSTOM_SIMPLE_PERMISSIONS } from '@lib/constants/permissions';
+import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
+import { PermissionsModal } from '@components/guest/PermissionsModal';
 import { CustomPermissions } from './CustomPermissions';
 
-export function ShareBaseModal() {
+function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
+  const { openModal, permissions, setPermissions } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { access: { inviteGuests } } = useBaseUser();
 
   const [guests, setGuests] = useState(initialGuests);
-  const [permissions, setPermissions] = useState(CUSTOM_SIMPLE_PERMISSIONS.map((item) => ({
-    ...item,
-    enabled: false,
-  })));
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
@@ -41,6 +40,8 @@ export function ShareBaseModal() {
   const handleQueryChange = (evt) => {
     setQuery(evt.target.value);
   };
+
+  const handleConfigurePermissions = () => openModal();
 
   const submit = async (evt) => {
     evt.preventDefault();
@@ -143,7 +144,22 @@ export function ShareBaseModal() {
           </form>
         </div>
 
-        {access.name === 'custom' && <CustomPermissions permissions={permissions} setPermissions={setPermissions} loading={loading} />}
+        {access.name === 'custom' && (
+          <div className="px-6 py-2 border-b border-gray-200">
+            <CustomPermissions permissions={permissions} setPermissions={setPermissions} loading={loading} />
+
+            <div className="text-sm text-gray-900">
+              <button
+                type="button"
+                className="ml-auto p-1 px-2 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 focus:bg-gray-200"
+                onClick={handleConfigurePermissions}
+              >
+                <CogIcon className="h-4 w-4 mr-1" />
+                Configure More Permissions
+              </button>
+            </div>
+          </div>
+        )}
 
         <ul className="m-4 bg-white divide-y divide-gray-200">
           <li className="p-2">
@@ -155,7 +171,16 @@ export function ShareBaseModal() {
             </li>
           ))}
         </ul>
+        <PermissionsModal />
       </div>
     </Modal>
+  );
+}
+
+export function ShareBaseModal() {
+  return (
+    <PermissionsStateModalProvider>
+      <BaseShareBaseModal />
+    </PermissionsStateModalProvider>
   );
 }

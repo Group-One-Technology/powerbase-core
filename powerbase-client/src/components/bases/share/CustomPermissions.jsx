@@ -2,14 +2,20 @@ import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Switch } from '@headlessui/react';
-import { useBaseUser } from '@models/BaseUser';
-import { CogIcon } from '@heroicons/react/outline';
 
-export function CustomPermissions({ permissions, setPermissions, loading }) {
-  const { access: { inviteGuests } } = useBaseUser();
+import { useBaseUser } from '@models/BaseUser';
+
+export function CustomPermissions({
+  guest,
+  permissions,
+  setPermissions,
+  loading,
+}) {
+  const { access: { changeGuestAccess, inviteGuests } } = useBaseUser();
+  const canToggleAccess = guest ? changeGuestAccess : inviteGuests;
 
   const handlePermissionToggle = (selectedItem) => {
-    setPermissions((prevVal) => prevVal.map((item) => ({
+    setPermissions(permissions.map((item) => ({
       ...item,
       enabled: item.name === selectedItem.name
         ? !item.enabled
@@ -18,7 +24,7 @@ export function CustomPermissions({ permissions, setPermissions, loading }) {
   };
 
   return (
-    <ul className="px-6 py-4 border-b border-gray-200">
+    <ul>
       {permissions.map((item) => {
         const itemKey = item.name.split(' ').join('_');
 
@@ -34,9 +40,9 @@ export function CustomPermissions({ permissions, setPermissions, loading }) {
               className={cn(
                 'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
                 item.enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                (loading || !inviteGuests) ? 'cursor-not-allowed' : 'cursor-pointer',
+                (loading || !canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
               )}
-              disabled={loading || !inviteGuests}
+              disabled={loading || !canToggleAccess}
             >
               <span className="sr-only">Show Field</span>
               <span
@@ -50,20 +56,12 @@ export function CustomPermissions({ permissions, setPermissions, loading }) {
           </li>
         );
       })}
-      <li className="text-sm text-gray-900">
-        <button
-          type="button"
-          className="ml-auto p-1 px-2 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 focus:bg-gray-200"
-        >
-          <CogIcon className="h-4 w-4 mr-1" />
-          Configure More Permissions
-        </button>
-      </li>
     </ul>
   );
 }
 
 CustomPermissions.propTypes = {
+  guest: PropTypes.object,
   permissions: PropTypes.array.isRequired,
   setPermissions: PropTypes.func.isRequired,
   loading: PropTypes.bool,

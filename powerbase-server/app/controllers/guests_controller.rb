@@ -13,6 +13,11 @@ class GuestsController < ApplicationController
     required(:access)
   end
 
+  schema(:update_permissions) do
+    required(:id)
+    required(:permissions)
+  end
+
   schema(:create) do
     required(:database_id)
     required(:email)
@@ -66,19 +71,6 @@ class GuestsController < ApplicationController
     render status: :no_content
   end
 
-  # PUT /guests/:id/change_access
-  def change_access
-    @guest = Guest.find(safe_params[:id])
-    raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
-
-    if @guest.update(access: safe_params[:access])
-      render json: format_json(@guest)
-    else
-      render json: @guest.errors, status: :unprocessable_entity
-    end
-  end
-
   # POST /databases/:database_id/guests
   def create
     current_user.can?(:invite_guests, safe_params[:database_id])
@@ -111,6 +103,32 @@ class GuestsController < ApplicationController
 
     if @guest.save
       render json: format_json(@guest), status: :created
+    else
+      render json: @guest.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /guests/:id/change_access
+  def change_access
+    @guest = Guest.find(safe_params[:id])
+    raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
+    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+
+    if @guest.update(access: safe_params[:access])
+      render json: format_json(@guest)
+    else
+      render json: @guest.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /guests/:id/update_permissions
+  def update_permissions
+    @guest = Guest.find(safe_params[:id])
+    raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
+    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+
+    if @guest.update(permissions: safe_params[:permissions])
+      render json: format_json(@guest)
     else
       render json: @guest.errors, status: :unprocessable_entity
     end

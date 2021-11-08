@@ -5,6 +5,7 @@ import { Menu } from '@headlessui/react';
 import { ChevronDownIcon, CogIcon } from '@heroicons/react/outline';
 
 import { useBaseUser } from '@models/BaseUser';
+import { usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { Badge } from './Badge';
 
@@ -15,6 +16,9 @@ export function GuestAccessMenu({
   owner,
 }) {
   const { baseUser, access: { changeGuestAccess, removeGuests } } = useBaseUser();
+  const { openModal } = usePermissionsStateModal();
+
+  const handleConfigurePermissions = () => openModal(guest);
 
   if (owner || !changeGuestAccess) {
     return (
@@ -32,10 +36,11 @@ export function GuestAccessMenu({
           <ChevronDownIcon className="h-4 w-4 ml-1" />
         </Menu.Button>
 
-        {guest.access === 'custom' && (
+        {(guest.access === 'custom' && changeGuestAccess) && (
           <button
             type="button"
             className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
+            onClick={handleConfigurePermissions}
           >
             <CogIcon className="h-4 w-4 mr-1" />
             Configure Permissions
