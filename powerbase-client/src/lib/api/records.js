@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { func } from "prop-types";
 import { securedApi } from "./index";
 
 const determineCellValueKey = (fieldTypeId, precision) => {
@@ -19,6 +20,7 @@ const determineCellValueKey = (fieldTypeId, precision) => {
 
 export async function getTableRecords({ url, ...payload }) {
   let magicData;
+  if (payload.isVirtual) return [];
   const tableId = payload?.tableId;
   const magicResponse = await securedApi.get(
     `/tables/${tableId}/magic_records`
@@ -39,7 +41,6 @@ export async function getTableRecords({ url, ...payload }) {
             magicRecord.fieldTypeId,
             magicRecord.hasPrecision
           );
-          console.log(key);
           if (magicRecord?.recordId === record?.id) {
             let remoteRecord = record;
             remoteRecord[magicRecord?.fieldName] = magicRecord[key];
@@ -97,6 +98,7 @@ export async function getTableRecord({ tableId, recordId, ...payload }) {
 // );
 
 export async function getTableRecordsCount({ tableId, ...payload }) {
+  if (payload.isVirtual) return [];
   const response = await securedApi.post(
     `/tables/${tableId}/records_count`,
     payload

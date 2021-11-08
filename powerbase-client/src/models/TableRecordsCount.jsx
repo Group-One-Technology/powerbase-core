@@ -1,28 +1,31 @@
-import constate from 'constate';
-import useSWR from 'swr';
+/* eslint-disable */
+import constate from "constate";
+import useSWR from "swr";
 
-import { getTableRecordsCount } from '@lib/api/records';
-import { useAuthUser } from './AuthUser';
-import { useViewOptions } from './views/ViewOptions';
+import { getTableRecordsCount } from "@lib/api/records";
+import { useAuthUser } from "./AuthUser";
+import { useViewOptions } from "./views/ViewOptions";
 
-function useTableRecordsCountModel({ id }) {
+function useTableRecordsCountModel({ id, isVirtual }) {
   const { authUser } = useAuthUser();
   const { query, filters, viewId } = useViewOptions();
 
-  const searchQuery = query?.length ? `q=${encodeURIComponent(query)}` : '';
-  const filterQuery = filters?.id ? `&filterId=${filters?.id}` : '';
+  const searchQuery = query?.length ? `q=${encodeURIComponent(query)}` : "";
+  const filterQuery = filters?.id ? `&filterId=${filters?.id}` : "";
 
   const response = useSWR(
-    (id && authUser && viewId) ? `/tables/${id}/records_count?${searchQuery}${filterQuery}` : null,
-    () => ((id && authUser && viewId)
-      ? getTableRecordsCount({
-        tableId: id,
-        query,
-        filters: filters?.id
-          ? filters?.value
-          : undefined,
-      })
-      : undefined),
+    id && authUser && viewId
+      ? `/tables/${id}/records_count?${searchQuery}${filterQuery}`
+      : null,
+    () =>
+      id && authUser && viewId
+        ? getTableRecordsCount({
+            tableId: id,
+            query,
+            filters: filters?.id ? filters?.value : undefined,
+            isVirtual,
+          })
+        : undefined
   );
 
   return {
@@ -31,7 +34,6 @@ function useTableRecordsCountModel({ id }) {
   };
 }
 
-export const [
-  TableRecordsCountProvider,
-  useTableRecordsCount,
-] = constate(useTableRecordsCountModel);
+export const [TableRecordsCountProvider, useTableRecordsCount] = constate(
+  useTableRecordsCountModel
+);

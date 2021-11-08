@@ -17,7 +17,7 @@ function getKey({ index, tableId, query, sort, filters, pageSize }) {
   return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
-function useTableRecordsModel({ id, pageSize = 40 }) {
+function useTableRecordsModel({ id, pageSize = 40, isVirtual }) {
   const { authUser } = useAuthUser();
   const { viewId, query, filters, sort } = useViewOptions();
 
@@ -45,6 +45,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
                 ? filters.value
                 : undefined,
             sort: sort && sort.id && sort.value ? sort.value : undefined,
+            isVirtual,
           })
         : undefined
   );
