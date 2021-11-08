@@ -1,5 +1,5 @@
 class TableViewsController < ApplicationController
-  before_action :authorize_access_request!
+  # before_action :authorize_access_request!
 
   schema(:index) do
     required(:table_id).value(:integer)

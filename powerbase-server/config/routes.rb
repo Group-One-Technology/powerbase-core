@@ -65,6 +65,7 @@ Rails.application.routes.draw do
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
+  post 'tables/virtual_tables', to: 'powerbase_tables#create_virtual_table', as: 'virtual_table' 
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'

@@ -12,7 +12,8 @@ const determineCellValueKey = (fieldTypeId, precision) => {
       if (precision) return "decimalValue";
       else return "integerValue";
     default:
-      console.log("Unknown field type");
+      // console.log("Unknown field type");
+      return;
   }
 };
 

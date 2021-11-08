@@ -15,14 +15,20 @@ import NewTableModal from "./NewTableModal";
 //   animation: `${scaleIn} 0.5s ease-out`,
 // });
 
-const AddTable = () => {
+const AddTable = ({ table, base, tables }) => {
   const [open, setOpen] = useState(false);
   const handleAddTable = () => {
     setOpen(!open);
   };
   return (
     <>
-      <NewTableModal open={open} setOpen={setOpen} />
+      <NewTableModal
+        open={open}
+        setOpen={setOpen}
+        table={table}
+        tables={tables}
+        base={base}
+      />
       <Popover.Root>
         <Popover.Trigger className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white">
           <span className="sr-only">Add Table</span>

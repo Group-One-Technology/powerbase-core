@@ -5,6 +5,42 @@ import { CheckIcon, PlusCircleIcon } from "@heroicons/react/outline";
 import NewTableField from "./NewTableField";
 import cn from "classnames";
 import TableNameInput from "./TableNameInput";
+import { securedApi } from "@lib/api";
+
+const toSnakeCase = (str) =>
+  str &&
+  str
+    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+    .map((x) => x.toLowerCase())
+    .join("_");
+
+// const addNewField = async () => {
+//   const payload = {
+//     name: toSnakeCase(fieldName.toLowerCase()),
+//     description: null,
+//     oid: 1043,
+//     db_type: selected.dbType,
+//     default_value: "",
+//     is_primary_key: false,
+//     is_nullable: false,
+//     powerbase_table_id: tableId,
+//     powerbase_field_type_id: selected.id,
+//     is_pii: false,
+//     alias: fieldName,
+//     view_id: view.id,
+//     order: fields.length ? fields.length : 0,
+//     is_virtual: true,
+//     allow_dirty_value: isChecked,
+//     precision: numberPrecision ? numberPrecision.precision : null,
+//   };
+
+//   const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+//   if (response.statusText === "OK") {
+//     setIsCreatingField(false);
+//     mutateViewFields();
+//     return response.data;
+//   }
+// };
 
 const initial = [
   {
@@ -16,9 +52,10 @@ const initial = [
 
 const types = [];
 
-export default function NewTableModal({ open, setOpen }) {
+export default function NewTableModal({ open, setOpen, table, tables, base }) {
   const [newFields, setNewFields] = useState(initial);
   const [currentCount, setCurrentCount] = useState(1);
+  const [tableName, setTableName] = useState("");
 
   const handleAddNewField = () => {
     setNewFields([
@@ -28,14 +65,58 @@ export default function NewTableModal({ open, setOpen }) {
     setCurrentCount(currentCount + 1);
   };
 
-  const getValue = (id) => {
-    alert("dd");
-    const curr = newFields.find((field) => field.id === id);
-    return curr.fieldName;
+  const addTable = async () => {
+    const standardizeFields = () => {
+      const standardized = newFields.map((field, idx) => {
+        const { fieldName, fieldTypeId } = field;
+        return {
+          name: toSnakeCase(fieldName.toLowerCase()),
+          description: null,
+          oid: 1043,
+          db_type: "character varying",
+          default_value: "",
+          is_primary_key: false,
+          is_nullable: false,
+          powerbase_field_type_id: fieldTypeId,
+          is_pii: false,
+          alias: fieldName,
+          // view_id: view.id,
+          order: idx,
+          is_virtual: true,
+          allow_dirty_value: true,
+          precision: null,
+        };
+      });
+      return standardized;
+    };
+
+    const standardizeTable = () => {
+      return {
+        name: toSnakeCase(tableName.toLowerCase()),
+        description: null,
+        powerbase_database_id: base.id,
+        is_migrated: false,
+        logs: null,
+        is_virtual: true,
+        page_size: 40,
+        alias: tableName,
+        order: tables.length,
+      };
+    };
+
+    const payload = {
+      table: standardizeTable(),
+      fields: standardizeFields(),
+    };
+
+    console.log("PAYLOAD: ", payload);
+
+    const response = await securedApi.post(`/tables/virtual_tables`, payload);
+    console.log("NT: ", response.data);
   };
 
   return (
-    <Transition.Root show={true} as={Fragment}>
+    <Transition.Root show={false} as={Fragment}>
       <Dialog
         as="div"
         className="fixed z-10 inset-0 overflow-y-auto"
@@ -73,7 +154,10 @@ export default function NewTableModal({ open, setOpen }) {
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
               <div className="px-2 mb-6">
                 <p className="text-gray-600">TABLE</p>
-                <TableNameInput />
+                <TableNameInput
+                  tableName={tableName}
+                  setTableName={setTableName}
+                />
               </div>
               <div>
                 <p className="text-gray-600 px-2 mb-2">FIELDS</p>
@@ -85,7 +169,6 @@ export default function NewTableModal({ open, setOpen }) {
                     count={index}
                     setNewFields={setNewFields}
                     id={field.id}
-                    getValue={getValue}
                   />
                 ))}
               </div>
@@ -119,6 +202,7 @@ export default function NewTableModal({ open, setOpen }) {
                     `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
                     true && "hover:bg-indigo-700"
                   )}
+                  onClick={addTable}
                 >
                   Add Table
                 </button>

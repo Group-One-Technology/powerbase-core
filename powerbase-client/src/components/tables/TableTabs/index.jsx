@@ -49,6 +49,8 @@ export function TableTabs() {
     alert("add new table clicked");
   };
 
+  console.log("base: ", base);
+
   return (
     <div
       className={cn(
@@ -109,7 +111,7 @@ export function TableTabs() {
               ))}
             </SortableContext>
           </DndContext>
-          {tables && (
+          {tables && base && (
             <div className="my-auto px-2">
               {/* <button
                 type="button"
@@ -119,7 +121,7 @@ export function TableTabs() {
                 <span className="sr-only">Add Table</span>
                 <PlusIcon className="h-5 w-5" />
               </button> */}
-              <AddTable />
+              <AddTable table={table} base={base} tables={tables} />
             </div>
           )}
         </nav>

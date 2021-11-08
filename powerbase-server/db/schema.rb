@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_04_143808) do
+ActiveRecord::Schema.define(version: 2021_11_08_134827) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -152,6 +152,7 @@ ActiveRecord::Schema.define(version: 2021_11_04_143808) do
     t.string "alias"
     t.text "logs", default: "{}"
     t.integer "order", null: false
+    t.boolean "is_virtual", default: false
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end

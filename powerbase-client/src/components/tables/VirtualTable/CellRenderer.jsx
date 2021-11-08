@@ -204,7 +204,8 @@ export function CellRenderer({
         if (precision) return "decimal_value";
         else return "integer_value";
       default:
-        console.log("Unknown field type");
+        // console.log("Unknown field type");
+        return;
     }
   };
 
@@ -214,9 +215,7 @@ export function CellRenderer({
     if (field.fieldTypeId === 4 && field.precision && !field.allowDirtyValue) {
       const value = recordInputRef.current?.value;
       num = parseInt(value).toFixed(field.precision);
-      console.log("num: ", num);
     }
-    console.log(field.precision);
 
     const payload = {
       field_name: field.name,

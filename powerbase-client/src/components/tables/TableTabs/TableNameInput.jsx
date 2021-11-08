@@ -1,12 +1,12 @@
 /* eslint-disable */
 import React, { Fragment, useEffect, useState, ReactDOM } from "react";
 
-export default function TableNameInput() {
+export default function TableNameInput({ tableName, setTableName }) {
   const handleChange = (e) => {
-    setValue(e.target.value);
+    setTableName(e.target.value);
   };
 
-  const [value, setValue] = useState("");
+  //   const [value, setValue] = useState("");
 
   return (
     <div className="mt-1 mb-2 w-full">
@@ -16,7 +16,7 @@ export default function TableNameInput() {
         id={`new-table`}
         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
         placeholder="Table name"
-        value={value}
+        value={tableName}
         onChange={handleChange}
       />
     </div>

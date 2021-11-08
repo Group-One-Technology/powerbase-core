@@ -63,6 +63,78 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
+  def create_virtual_table
+    table_params = params[:table]
+    fields_params = params[:fields]
+    standardized_table_params = standardize_table_params(table_params)
+    puts standardized_table_params
+    table = PowerbaseTable.create(standardized_table_params)
+    if table
+      @view = TableView.create(
+        name: "Default",
+        view_type: "grid",
+        order: table.table_views.count,
+        powerbase_table_id: table.id,
+      )
+      if @view
+        table.default_view_id = @view.id
+        table.save!
+        fields_params.each_with_index do |field_param, index|
+          puts "HEYYYYYYY"
+          standardized_field_params = standardize_field_params(field_param, table)
+          cur_field = PowerbaseField.create(standardized_field_params)
+          view_field = ViewFieldOption.new
+          view_field.width = case cur_field.powerbase_field_type_id
+            when 3
+              cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
+            else
+              300
+          end
+          view_field.order = index + 1
+          view_field.table_view_id = @view.id
+          view_field.powerbase_field_id = cur_field.id
+          view_field.save!
+        end
+      end
+    end
+    render json: format_json(table)
+
+  end
+
+
+
+
+  def standardize_table_params(params)
+    {
+      powerbase_database_id: params[:powerbase_database_id],
+      is_migrated: params[:is_migrated],
+      is_virtual: params[:is_virtual],
+      alias: params[:alias],
+      name: params[:name],
+      order: params[:order],
+      page_size: params[:page_size]
+    }
+  end
+
+  def standardize_field_params(params, table)
+   {
+      name: params[:name],
+      description: params[:description],
+      oid: params[:oid],
+      db_type: params[:db_type],
+      default_value: params[:default_value],
+      is_primary_key: params[:is_primary_key],
+      is_nullable: params[:is_nullable],
+      powerbase_table_id: table.id,
+      powerbase_field_type_id: params[:powerbase_field_type_id],
+      is_pii: params[:is_pii],
+      alias: params[:alias],
+      is_virtual: params[:is_virtual],
+      precision: params[:precision],
+      allow_dirty_value: params[:allow_dirty_value]
+    }
+  end
+
 
   private
     def set_database
