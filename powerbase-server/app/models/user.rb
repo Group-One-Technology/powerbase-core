@@ -75,8 +75,7 @@ class User < ApplicationRecord
       return true if permissions.include?(:all)
       return true if permissions.include? permission
     else
-      # TODO: Add custom permissions checker
-      # - Pass the database_id/table_id/view_id for checking.
+      return true if guest.permissions[permission.to_s] == true
     end
 
     raise AccessDenied

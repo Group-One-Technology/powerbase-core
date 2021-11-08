@@ -8,7 +8,7 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { inviteGuest } from '@lib/api/guests';
-import { ACCESS_LEVEL } from '@lib/constants/permissions';
+import { ACCESS_LEVEL, CUSTOM_SIMPLE_PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
@@ -25,6 +25,10 @@ export function ShareBaseModal() {
   const { access: { inviteGuests } } = useBaseUser();
 
   const [guests, setGuests] = useState(initialGuests);
+  const [permissions, setPermissions] = useState(CUSTOM_SIMPLE_PERMISSIONS.map((item) => ({
+    ...item,
+    enabled: false,
+  })));
 
   const [query, setQuery] = useState('');
   const [access, setAccess] = useState(ACCESS_LEVEL[2]);
@@ -47,8 +51,24 @@ export function ShareBaseModal() {
       setLoading(true);
       setQuery('');
 
+      const configuredPermissions = access.name === 'custom'
+        ? permissions.reduce((acc, cur) => (cur.enabled
+          ? { ...acc, ...cur.value }
+          : acc
+        ), {})
+        : undefined;
+
       try {
-        await inviteGuest({ databaseId: base.id, email, access: access.name });
+        await inviteGuest({
+          databaseId: base.id,
+          email,
+          access: access.name,
+          permissions: access.name === 'custom'
+            ? {
+              ...configuredPermissions,
+              ...ACCESS_LEVEL.find((item) => item.name === 'viewer')?.value,
+            } : undefined,
+        });
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);
       } catch (err) {
@@ -123,7 +143,7 @@ export function ShareBaseModal() {
           </form>
         </div>
 
-        {access.name === 'custom' && <CustomPermissions />}
+        {access.name === 'custom' && <CustomPermissions permissions={permissions} setPermissions={setPermissions} loading={loading} />}
 
         <ul className="m-4 bg-white divide-y divide-gray-200">
           <li className="p-2">

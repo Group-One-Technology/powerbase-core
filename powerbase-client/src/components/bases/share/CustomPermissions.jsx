@@ -1,29 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 import { Switch } from '@headlessui/react';
 import { useBaseUser } from '@models/BaseUser';
-import { CUSTOM_SIMPLE_PERMISSIONS } from '@lib/constants/permissions';
 import { CogIcon } from '@heroicons/react/outline';
 
-export function CustomPermissions() {
+export function CustomPermissions({ permissions, setPermissions, loading }) {
   const { access: { inviteGuests } } = useBaseUser();
 
-  const [permissions, setPermissions] = useState(CUSTOM_SIMPLE_PERMISSIONS.map((item) => ({
-    ...item,
-    enabled: false,
-  })));
-
-  const [loading, setLoading] = useState(false);
-
   const handlePermissionToggle = (selectedItem) => {
-    setLoading(true);
     setPermissions((prevVal) => prevVal.map((item) => ({
       ...item,
       enabled: item.name === selectedItem.name
         ? !item.enabled
         : item.enabled,
     })));
-    setLoading(false);
   };
 
   return (
@@ -71,3 +62,9 @@ export function CustomPermissions() {
     </ul>
   );
 }
+
+CustomPermissions.propTypes = {
+  permissions: PropTypes.array.isRequired,
+  setPermissions: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+};
