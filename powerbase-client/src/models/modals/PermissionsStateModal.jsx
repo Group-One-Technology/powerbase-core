@@ -27,7 +27,7 @@ function usePermissionsStateModalModel() {
   useEffect(() => {
     setUserPermissions(CUSTOM_SIMPLE_PERMISSIONS.map((item) => ({
       ...item,
-      enabled: guest
+      enabled: guest?.permission
         ? Object.keys(item.value).every((permission) => guest.permissions[permission])
         : item.enabled,
     })));
