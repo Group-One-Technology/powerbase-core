@@ -26,7 +26,6 @@ class TableRecordsController < ApplicationController
       page: safe_params[:page],
       limit: safe_params[:limit],
     })
-
     render json: records
   end
 

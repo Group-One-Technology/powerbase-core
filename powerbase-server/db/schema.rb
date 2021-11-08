@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_08_134827) do
+ActiveRecord::Schema.define(version: 2021_11_08_180914) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -68,6 +68,16 @@ ActiveRecord::Schema.define(version: 2021_11_08_134827) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["powerbase_database_id"], name: "index_hubspot_databases_on_powerbase_database_id"
     t.index ["user_id"], name: "index_hubspot_databases_on_user_id"
+  end
+
+  create_table "magic_records", force: :cascade do |t|
+    t.integer "powerbase_record_order"
+    t.bigint "powerbase_database_id", null: false
+    t.bigint "powerbase_table_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["powerbase_database_id"], name: "index_magic_records_on_powerbase_database_id"
+    t.index ["powerbase_table_id"], name: "index_magic_records_on_powerbase_table_id"
   end
 
   create_table "magic_values", force: :cascade do |t|
@@ -200,6 +210,8 @@ ActiveRecord::Schema.define(version: 2021_11_08_134827) do
   add_foreign_key "field_select_options", "powerbase_fields"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
+  add_foreign_key "magic_records", "powerbase_databases"
+  add_foreign_key "magic_records", "powerbase_tables"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

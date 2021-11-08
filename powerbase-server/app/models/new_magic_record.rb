@@ -1,0 +1,2 @@
+class NewMagicRecord < ApplicationRecord
+end
