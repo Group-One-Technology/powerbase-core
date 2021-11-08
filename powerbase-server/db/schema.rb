@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_08_180914) do
+ActiveRecord::Schema.define(version: 2021_11_08_193546) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -98,6 +98,8 @@ ActiveRecord::Schema.define(version: 2021_11_08_180914) do
     t.decimal "decimal_value"
     t.boolean "has_precision", default: false
     t.integer "field_type_id"
+    t.bigint "magic_record_id"
+    t.index ["magic_record_id"], name: "index_magic_values_on_magic_record_id"
   end
 
   create_table "piis", force: :cascade do |t|
@@ -212,6 +214,7 @@ ActiveRecord::Schema.define(version: 2021_11_08_180914) do
   add_foreign_key "hubspot_databases", "users"
   add_foreign_key "magic_records", "powerbase_databases"
   add_foreign_key "magic_records", "powerbase_tables"
+  add_foreign_key "magic_values", "magic_records"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

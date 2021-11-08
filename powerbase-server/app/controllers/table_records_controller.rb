@@ -52,16 +52,24 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /magic_values/:record_id
+  # POST /magic_values
   def add_or_update_magic_value
     type = params[:key_type]
+    magic_value = nil
     new_magic_value = nil
     record_id = params[:record_id]
-    magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
+    magic_record_id = params[:magic_record_id]
+    # table_type_id = params[:table_type_id])
+    if magic_record_id
+      magic_value = MagicValue.find_by(magic_record_id: params[:magic_record_id], table_id: params[:table_id], field_id: params[:field_id])
+    else
+      magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
+    end
+
     if magic_value
       magic_value.update(type => params[type])
     else
-      new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id]})
+      new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id], magic_record_id: params[:magic_record_id]})
     end
     render json: {} if new_magic_value
   end
@@ -71,6 +79,12 @@ class TableRecordsController < ApplicationController
     magic_values = MagicValue.where(table_id: params[:id])
     formatted_values = magic_values.map { |value| format_json(value) }
     render json: formatted_values
+  end
+
+  # POST /magic_records
+  def create_magic_record
+    new_magic_record = MagicRecord.create({powerbase_table_id: params[:powerbase_table_id], powerbase_database_id: params[:powerbase_database_id], powerbase_record_order: params[:powerbase_record_order]})
+    render json: new_magic_record
   end
 
   # GET /tables/:id/records_count
