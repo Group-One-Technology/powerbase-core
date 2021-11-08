@@ -33,7 +33,7 @@ class GuestsController < ApplicationController
   def index
     current_user.can?(:view_base, safe_params[:database_id])
 
-    @guests = Guest.where(powerbase_database_id: safe_params[:database_id])
+    @guests = Guest.where(powerbase_database_id: safe_params[:database_id]).order(:created_at)
     render json: @guests.map {|item| user_format_json(item)}
   end
 

@@ -2,11 +2,13 @@ import constate from 'constate';
 import { useEffect, useState } from 'react';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseGuests } from '@models/BaseGuests';
 import { updateGuestPermissions } from '@lib/api/guests';
 import { ACCESS_LEVEL, CUSTOM_SIMPLE_PERMISSIONS } from '@lib/constants/permissions';
 
 function usePermissionsStateModalModel() {
-  const { baseUser, access: { changeGuestAccess }, mutate: mutateBaseUser } = useBaseUser();
+  const { data: baseUser, access: { changeGuestAccess }, mutate: mutateBaseUser } = useBaseUser();
+  const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
@@ -27,7 +29,7 @@ function usePermissionsStateModalModel() {
   useEffect(() => {
     setUserPermissions(CUSTOM_SIMPLE_PERMISSIONS.map((item) => ({
       ...item,
-      enabled: guest?.permission
+      enabled: guest?.permissions
         ? Object.keys(item.value).every((permission) => guest.permissions[permission])
         : item.enabled,
     })));
@@ -50,11 +52,19 @@ function usePermissionsStateModalModel() {
           id: guest.id,
           permissions: configuredPermissions,
         });
-        await mutateBaseUser({
-          ...baseUser,
-          permissions: configuredPermissions,
-        });
-        saved(`Successfully updated ${guest.firstName}'s permissions.'`);
+        if (baseUser.userId === guest.userId) {
+          mutateBaseUser({
+            ...baseUser,
+            permissions: configuredPermissions,
+          });
+        }
+        await mutateGuests(guests.map((item) => ({
+          ...item,
+          permissions: item.id === guest.id
+            ? configuredPermissions
+            : item.permissions,
+        })));
+        saved(`Successfully updated ${guest.firstName}'s permissions.`);
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
       }
