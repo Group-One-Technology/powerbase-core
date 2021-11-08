@@ -113,14 +113,6 @@ export function TableTabs() {
           </DndContext>
           {tables && base && (
             <div className="my-auto px-2">
-              {/* <button
-                type="button"
-                onClick={addTable}
-                className="mt-0.5 p-0.5 font-medium text-sm rounded-md text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
-              >
-                <span className="sr-only">Add Table</span>
-                <PlusIcon className="h-5 w-5" />
-              </button> */}
               <AddTable table={table} base={base} tables={tables} />
             </div>
           )}

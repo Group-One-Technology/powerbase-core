@@ -1,19 +1,8 @@
 /* eslint-disable */
 import React, { Fragment, useEffect, useState, ReactDOM } from "react";
 import { PlusIcon } from "@heroicons/react/solid";
-// import { styled, keyframes } from '@stitches/react';
 import * as Popover from "@radix-ui/react-popover";
 import NewTableModal from "./NewTableModal";
-
-// const scaleIn = keyframes({
-//   '0%': { opacity: 0, transform: 'scale(0)' },
-//   '100%': { opacity: 1, transform: 'scale(1)' },
-// });
-
-// const StyledContent = styled(Popover.Content, {
-//   transformOrigin: 'var(--radix-popover-content-transform-origin)',
-//   animation: `${scaleIn} 0.5s ease-out`,
-// });
 
 const AddTable = ({ table, base, tables }) => {
   const [open, setOpen] = useState(false);
@@ -37,14 +26,18 @@ const AddTable = ({ table, base, tables }) => {
         <Popover.Content className="w-60 mt-3 transform sm:px-0 absolute z-10">
           <div className="shadow-lg bg-white ring-1 ring-black ring-opacity-5 mt-2 p-2">
             <div
-              className="text-xs text-gray-700 mt-2 cursor-pointer"
+              className="text-xs font-medium text-gray-800 mt-2 cursor-pointer hover:bg-gray-200 p-2"
               onClick={handleAddTable}
             >
               Create a new table
             </div>
-            <div className="mt-2">
-              <div className="text-xs text-gray-500">QUICK ADD AS</div>
-              <div></div>
+            <div className="mt-1 py-2 px-1">
+              <div className="text-xs text-gray-500 px-1">IMPORT FROM</div>
+              <div className="text-xs text-gray-800 mt-1 font-medium">
+                <div className="mt-2 cursor-pointer hover:bg-gray-200 py-2 px-1">
+                  CSV File
+                </div>
+              </div>
             </div>
           </div>
         </Popover.Content>

@@ -110,8 +110,6 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
       fields: standardizeFields(),
     };
 
-    console.log("PAYLOAD: ", payload);
-
     const response = await securedApi.post(`/tables/virtual_tables`, payload);
     if (response.data) {
       setOpen(false);
