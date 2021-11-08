@@ -52,7 +52,7 @@ class PowerbaseTablesController < ApplicationController
   def update_tables
     @database = PowerbaseDatabase.find(safe_params[:database_id])
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
-    can?(:manage_base, @database)
+    current_user.can?(:manage_base, @database)
 
     safe_params[:tables].each_with_index do |table, index|
       @table = PowerbaseTable.find(table[:id])
@@ -75,7 +75,7 @@ class PowerbaseTablesController < ApplicationController
     def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
       raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-      can?(:manage_table, @table)
+      current_user.can?(:manage_table, @table)
     end
 
     def format_json(table)

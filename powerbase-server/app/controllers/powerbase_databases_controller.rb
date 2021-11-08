@@ -58,7 +58,7 @@ class PowerbaseDatabasesController < ApplicationController
   def show
     @database = PowerbaseDatabase.find(safe_params[:id])
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
-    can?(:view_base, @database)
+    current_user.can?(:view_base, @database)
 
     render json: format_json(@database)
   end
@@ -215,7 +215,7 @@ class PowerbaseDatabasesController < ApplicationController
     def check_database_access
       @database = PowerbaseDatabase.find(safe_params[:id])
       raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
-      can?(:manage_base, @database)
+      current_user.can?(:manage_base, @database)
     end
 
     def authorize_acesss_hubspot

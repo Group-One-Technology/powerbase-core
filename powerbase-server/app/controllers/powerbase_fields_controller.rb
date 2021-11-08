@@ -27,7 +27,7 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /tables/:id/fields
   def index
-    can?(:view_table, safe_params[:table_id])
+    current_user.can?(:view_table, safe_params[:table_id])
     @fields = PowerbaseField.where(powerbase_table_id: safe_params[:table_id])
     render json: @fields.map {|item| format_json(item)}
   end
@@ -93,7 +93,7 @@ class PowerbaseFieldsController < ApplicationController
     def check_field_access
       @field = PowerbaseField.find(safe_params[:id])
       raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
-      can?(:manage_field, @field)
+      current_user.can?(:manage_field, @field)
     end
 
     def format_json(field)

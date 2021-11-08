@@ -26,7 +26,7 @@ class GuestsController < ApplicationController
 
   # GET /databases/:database_id/guests
   def index
-    can?(:view_base, safe_params[:database_id])
+    current_user.can?(:view_base, safe_params[:database_id])
 
     @guests = Guest.where(powerbase_database_id: safe_params[:database_id])
     render json: @guests.map {|item| user_format_json(item)}
@@ -70,7 +70,7 @@ class GuestsController < ApplicationController
   def change_access
     @guest = Guest.find(safe_params[:id])
     raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    can?(:change_guest_access, @guest.powerbase_database, @guest)
+    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
 
     if @guest.update(access: safe_params[:access])
       render json: format_json(@guest)
@@ -81,7 +81,7 @@ class GuestsController < ApplicationController
 
   # POST /databases/:database_id/guests
   def create
-    can?(:invite_guests, safe_params[:database_id])
+    current_user.can?(:invite_guests, safe_params[:database_id])
     @user = User.find_by(email: safe_params[:email])
 
     if !@user
@@ -120,7 +120,7 @@ class GuestsController < ApplicationController
   def destroy
     @guest = Guest.find(safe_params[:id])
     raise AccessDenied if !@guest
-    can?(:remove_guests, @guest.powerbase_database, @guest)
+    current_user.can?(:remove_guests, @guest.powerbase_database, @guest)
     @guest.destroy
 
     render status: :no_content

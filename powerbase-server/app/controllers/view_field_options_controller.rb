@@ -74,13 +74,13 @@ class ViewFieldOptionsController < ApplicationController
     def check_view_access
       @view = TableView.find(safe_params[:view_id]);
       raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
-      can?(:manage_view, @view)
+      current_user.can?(:manage_view, @view)
     end
 
     def check_view_field_access
       @view_field = ViewFieldOption.find(safe_params[:id])
       raise NotFound.new("Could not find view field with id of #{safe_params[:id]}") if !@view_field
-      can?(:manage_view, @view_field.table_view)
+      current_user.can?(:manage_view, @view_field.table_view)
     end
 
     def format_json(view_field)
