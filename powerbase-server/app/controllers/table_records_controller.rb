@@ -78,6 +78,7 @@ class TableRecordsController < ApplicationController
   def magic_values
     magic_values = MagicValue.where(table_id: params[:id])
     formatted_values = magic_values.map { |value| format_json(value) }
+    puts formatted_values
     render json: formatted_values
   end
 
@@ -107,6 +108,7 @@ class TableRecordsController < ApplicationController
       decimal_value: record.decimal_value,
       integer_value: record.integer_value,
       record_id: record.record_id,
+      magic_record_id: record.magic_record_id,
       table_id: record.table_id,
       has_precision: record.has_precision,
       field_id: record.field_id,

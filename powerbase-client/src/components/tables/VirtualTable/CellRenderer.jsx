@@ -12,6 +12,7 @@ import { isValidJSONString } from "@lib/helpers/isValidJSONString";
 import OutsideCellClick from "./OutsideCellClick.jsx";
 import EditCell from "./EditCell.jsx";
 import { securedApi } from "@lib/api";
+import { PlusIcon } from "@heroicons/react/solid";
 
 function CellValue({
   value,
@@ -22,11 +23,28 @@ function CellValue({
   field,
   fieldType,
   handleExpandRecord,
+  table,
+  rowIndex,
+  columnIndex,
+  setIsEditing,
+  setEditCellInput,
+  setCellToEdit,
+  setIsNewRecord,
 }) {
   const className =
     value?.toString().length && field?.isForeignKey
       ? "px-2 py-0.25 bg-blue-50 rounded"
       : "";
+
+  const addNewRecord = () => {
+    setIsEditing(true);
+    setEditCellInput("");
+    setCellToEdit({
+      row: rowIndex,
+      column: columnIndex + 1,
+    });
+    setIsNewRecord(true);
+  };
 
   if (!isLastRow && !isLoaded) {
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
@@ -35,9 +53,11 @@ function CellValue({
   if (isRowNo || !field) {
     return (
       <>
-        <span className="flex-1 mr-4 text-right truncate">
-          {value?.toString()}
-        </span>
+        {table.isVirtual && !isLastRow && (
+          <span className="flex-1 mr-4 text-right truncate">
+            {value?.toString()}
+          </span>
+        )}
         <span className="flex-1">
           {isHoveredRow && !isLastRow && (
             <button
@@ -51,6 +71,16 @@ function CellValue({
             >
               <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">Expand Record</span>
+            </button>
+          )}{" "}
+          {isHoveredRow && isLastRow && isRowNo && (
+            <button
+              type="button"
+              className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
+              onClick={addNewRecord}
+            >
+              <PlusIcon className="h-5 w-5 ml-2 p-0.5" />
+              <span className="sr-only">Add New Record</span>
             </button>
           )}
         </span>
@@ -164,6 +194,9 @@ export function CellRenderer({
   setValidationToolTip,
   singleCellRef,
   mutateTableRecords,
+  table,
+  isNewRecord,
+  setIsNewRecord,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -209,13 +242,30 @@ export function CellRenderer({
     }
   };
 
+  console.log("records: ", records);
+
   const onClickOutsideEditingCell = async () => {
-    let num;
+    let num, newRecordId;
     const key = determineCellValueKey(field);
     if (field.fieldTypeId === 4 && field.precision && !field.allowDirtyValue) {
       const value = recordInputRef.current?.value;
       num = parseInt(value).toFixed(field.precision);
     }
+
+    if (table.isVirtual) {
+      const recordParams = {
+        powerbase_table_id: table.id,
+        powerbase_database_id: table.databaseId,
+        powerbase_record_order: records.length,
+      };
+      const newRecordResponse = await securedApi.post(
+        `/magic_records`,
+        recordParams
+      );
+      newRecordId = newRecordResponse.data?.id;
+    }
+    mutateTableRecords();
+    console.log("IDX: ", records[rowIndex - 1]);
 
     const payload = {
       field_name: field.name,
@@ -223,14 +273,21 @@ export function CellRenderer({
       table_id: field.tableId,
       field_id: field?.id,
       [key]: num ? num : recordInputRef.current?.value,
-      record_id: records[rowIndex]?.id,
+      record_id: !table.isVirtual ? records[rowIndex]?.id : null,
+      magic_record_id: table.isVirtual
+        ? !isNewRecord
+          ? records[rowIndex].id
+          : newRecordId
+        : null,
       key_type: key,
+      table_type_id: table.isVirtual ? "magic_record_id" : "record_id",
       has_precision: field?.precision ? true : false,
     };
-    console.log(payload);
-    const response = await securedApi.post(`/magic_records`, payload);
+    console.log("payload: ", payload);
+    const response = await securedApi.post(`/magic_values`, payload);
     if (response.statusText === "OK") {
       mutateTableRecords();
+      setIsNewRecord(false);
       recordInputRef?.current.blur();
       setIsEditing(false);
     }
@@ -297,6 +354,14 @@ export function CellRenderer({
           field={field}
           fieldType={fieldType}
           handleExpandRecord={handleExpandRecord}
+          table={table}
+          rowIndex={rowIndex}
+          columnIndex={columnIndex}
+          setIsEditing={setIsEditing}
+          setEditCellInput={setEditCellInput}
+          setCellToEdit={setCellToEdit}
+          isNewRecord={isNewRecord}
+          setIsNewRecord={setIsNewRecord}
         />
       )}
     </div>

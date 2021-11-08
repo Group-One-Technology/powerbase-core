@@ -17,6 +17,7 @@ import { initializeFields } from "@lib/helpers/fields/initializeFields";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
+import { useBaseTable } from "@models/BaseTable";
 export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
@@ -25,7 +26,7 @@ export function TableRenderer({ height, table }) {
     data: records,
     loadMore: loadMoreRows,
     isLoading,
-    mutate: mutateTableRecords
+    mutate: mutateTableRecords,
   } = useTableRecords();
   const { initialFields, fields, setFields } = useViewFieldState();
 
@@ -41,6 +42,7 @@ export function TableRenderer({ height, table }) {
   const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
   const [editCellInput, setEditCellInput] = useState(null);
   const [validationToolTip, setValidationToolTip] = useState(false);
+  const [isNewRecord, setIsNewRecord] = useState(false);
 
   const columnCount = fields && fields.length + 1;
 
@@ -170,6 +172,9 @@ export function TableRenderer({ height, table }) {
                           setValidationToolTip,
                           singleCellRef,
                           mutateTableRecords,
+                          table,
+                          isNewRecord,
+                          setIsNewRecord,
                           ...props,
                         });
                       }}

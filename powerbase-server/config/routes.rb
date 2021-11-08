@@ -73,5 +73,5 @@ Rails.application.routes.draw do
   get 'fields/:name', to: 'powerbase_fields#get_single_field', as: 'get_field'
   post 'magic_values', to: 'table_records#add_or_update_magic_value', as: 'change_magic_value'
   post 'magic_records', to: 'table_records#create_magic_record', as: 'new_magic_records'
-  get 'tables/:id/magic_records', to: 'table_records#magic_values', as: 'magic_values'
+  get 'tables/:id/magic_values', to: 'table_records#magic_values', as: 'magic_values'
 end

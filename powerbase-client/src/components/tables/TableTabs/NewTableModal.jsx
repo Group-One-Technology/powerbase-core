@@ -6,6 +6,7 @@ import NewTableField from "./NewTableField";
 import cn from "classnames";
 import TableNameInput from "./TableNameInput";
 import { securedApi } from "@lib/api";
+import { useCurrentView } from "@models/views/CurrentTableView";
 
 const toSnakeCase = (str) =>
   str &&
@@ -56,6 +57,7 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
   const [newFields, setNewFields] = useState(initial);
   const [currentCount, setCurrentCount] = useState(1);
   const [tableName, setTableName] = useState("");
+  const { handleTableChange, mutateTables } = useCurrentView();
 
   const handleAddNewField = () => {
     setNewFields([
@@ -80,7 +82,6 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
           powerbase_field_type_id: fieldTypeId,
           is_pii: false,
           alias: fieldName,
-          // view_id: view.id,
           order: idx,
           is_virtual: true,
           allow_dirty_value: true,
@@ -112,7 +113,11 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
     console.log("PAYLOAD: ", payload);
 
     const response = await securedApi.post(`/tables/virtual_tables`, payload);
-    console.log("NT: ", response.data);
+    if (response.data) {
+      setOpen(false);
+      mutateTables();
+      handleTableChange({ table: response.data });
+    }
   };
 
   return (

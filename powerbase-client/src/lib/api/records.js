@@ -20,11 +20,39 @@ const determineCellValueKey = (fieldTypeId, precision) => {
 
 export async function getTableRecords({ url, ...payload }) {
   let magicData;
-  if (payload.isVirtual) return [];
+  let options = {};
+  let mad = [];
+  if (payload.isVirtual) {
+    const res = await securedApi.get(`/tables/${payload.tableId}/magic_values`);
+    const magicValues = res.data;
+    magicValues?.forEach((value) => {
+      if (value.magicRecordId) options[value.magicRecordId] = {};
+    });
+    magicValues.forEach((value) => {
+      if (options[value.magicRecordId]) {
+        const key = determineCellValueKey(
+          value.fieldTypeId,
+          value.hasPrecision
+        );
+        const entry = {
+          [value.fieldName]: value[key],
+          id: value.magicRecordId,
+        };
+        options[value.magicRecordId] = Object.assign(
+          options[value.magicRecordId],
+          entry
+        );
+      }
+    });
+    if (options) {
+      for (const key in options) {
+        mad.push(options[key]);
+      }
+    }
+    return mad;
+  }
   const tableId = payload?.tableId;
-  const magicResponse = await securedApi.get(
-    `/tables/${tableId}/magic_records`
-  );
+  const magicResponse = await securedApi.get(`/tables/${tableId}/magic_values`);
   if (magicResponse.statusText === "OK" && magicResponse.data?.length) {
     magicData = magicResponse.data;
   }
