@@ -95,7 +95,7 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
         name: toSnakeCase(tableName.toLowerCase()),
         description: null,
         powerbase_database_id: base.id,
-        is_migrated: false,
+        is_migrated: true,
         logs: null,
         is_virtual: true,
         page_size: 40,
@@ -116,7 +116,7 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
   };
 
   return (
-    <Transition.Root show={false} as={Fragment}>
+    <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
         className="fixed z-10 inset-0 overflow-y-auto"

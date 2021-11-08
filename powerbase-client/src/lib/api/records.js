@@ -49,7 +49,9 @@ export async function getTableRecords({ url, ...payload }) {
         })
       );
       return mergedData;
-    } else return data;
+    } else {
+      return data;
+    }
   }
 
   return undefined;
