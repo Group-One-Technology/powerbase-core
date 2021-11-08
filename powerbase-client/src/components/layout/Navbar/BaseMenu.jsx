@@ -18,7 +18,7 @@ import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
   const { setOpen: setShareModalOpen } = useShareBaseModal();
-  const { access: { inviteGuests } } = useBaseUser();
+  const { access: { inviteGuests, manageBase } } = useBaseUser();
 
   const handleShareBase = () => {
     setShareModalOpen(true);
@@ -72,19 +72,21 @@ export function BaseMenu({ base, otherBases }) {
                     </>
                   )}
               </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <Link
-                    to={`/base/${base.id}/settings`}
-                    className={cn('flex items-center px-4 py-2 text-sm text-gray-700', {
-                      'bg-gray-100': active,
-                    })}
-                  >
-                    <CogIcon className="h-4 w-4 mr-2" />
-                    Settings
-                  </Link>
-                )}
-              </Menu.Item>
+              {manageBase && (
+                <Menu.Item>
+                  {({ active }) => (
+                    <Link
+                      to={`/base/${base.id}/settings`}
+                      className={cn('flex items-center px-4 py-2 text-sm text-gray-700', {
+                        'bg-gray-100': active,
+                      })}
+                    >
+                      <CogIcon className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  )}
+                </Menu.Item>
+              )}
               {!!otherBases?.length && (
                 <>
                   <Menu.Item>

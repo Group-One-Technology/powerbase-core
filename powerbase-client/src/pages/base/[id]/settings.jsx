@@ -14,6 +14,7 @@ import { useAuthUser } from '@models/AuthUser';
 import { BaseTablesProvider } from '@models/BaseTables';
 import { BasesProvider } from '@models/Bases';
 import { BaseConnectionsProvider } from '@models/BaseConnections';
+import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -27,17 +28,14 @@ const TABS = [
   {
     name: 'Core Settings',
     icon: CogIcon,
-    current: true,
   },
   {
     name: 'Tables',
     icon: TableIcon,
-    current: false,
   },
   {
     name: 'Connections',
     icon: ViewGridAddIcon,
-    current: false,
   },
 ];
 
@@ -45,13 +43,14 @@ function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base } = useBase();
+  const { access } = useBaseUser();
 
-  if (base == null || authUser == null) {
+  if (base == null || authUser == null || typeof access === 'undefined') {
     return <Loader className="h-screen" />;
   }
 
-  if (base.userId !== authUser.id) {
-    history.push('/login');
+  if (!access.manageBase) {
+    history.push('/404');
     return <Loader className="h-screen" />;
   }
 
@@ -117,11 +116,13 @@ export function BaseSettingsPage() {
   return (
     <BaseProvider id={id}>
       <BasesProvider>
-        <BaseTablesProvider id={id}>
-          <BaseConnectionsProvider baseId={id}>
-            <BaseSettings />
-          </BaseConnectionsProvider>
-        </BaseTablesProvider>
+        <BaseUserProvider>
+          <BaseTablesProvider id={id}>
+            <BaseConnectionsProvider baseId={id}>
+              <BaseSettings />
+            </BaseConnectionsProvider>
+          </BaseTablesProvider>
+        </BaseUserProvider>
       </BasesProvider>
     </BaseProvider>
   );
