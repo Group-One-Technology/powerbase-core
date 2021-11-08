@@ -22,7 +22,7 @@ export const CUSTOM_SIMPLE_PERMISSIONS = [
     value: { inviteGuests: true, removeAccess: true, changeGuestAccess: true },
   },
   {
-    name: 'Can configure base, tables, fields.',
+    name: 'Can configure base, tables, and fields.',
     value: {
       manageBase: true,
       addTable: true,
