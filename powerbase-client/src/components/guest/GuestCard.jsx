@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Gravatar from 'react-gravatar';
+import { useHistory } from 'react-router-dom';
 
 import { useBaseGuests } from '@models/BaseGuests';
+import { useBaseUser } from '@models/bases/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
+import { Badge } from '@components/ui/Badge';
 
 export function GuestCard({ guest, setGuests, owner }) {
+  const history = useHistory();
+  const { baseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
@@ -35,17 +40,22 @@ export function GuestCard({ guest, setGuests, owner }) {
 
   const removeGuestAccess = async () => {
     if (!owner) {
-      saving();
-
-      const updatedGuests = guests.filter((item) => item.id !== guest.id);
-      setGuests(updatedGuests);
-
-      try {
+      if (baseUser.userId === guest.userId) {
         await removeGuest({ id: guest.id });
-        await mutateGuests(updatedGuests);
-        saved(`Successfully removed guest '${guest.firstName}'`);
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        history.push('/');
+      } else {
+        saving();
+
+        const updatedGuests = guests.filter((item) => item.id !== guest.id);
+        setGuests(updatedGuests);
+
+        try {
+          await removeGuest({ id: guest.id });
+          await mutateGuests(updatedGuests);
+          saved(`Successfully removed guest '${guest.firstName}'`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
+        }
       }
     }
   };
@@ -62,11 +72,12 @@ export function GuestCard({ guest, setGuests, owner }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">
           {guest.firstName} {guest.lastName}
+          {(!owner && !guest.isAccepted) && <Badge color="yellow" className="ml-1">Pending</Badge>}
         </p>
         <p className="text-sm text-gray-500 truncate">{guest.email}</p>
       </div>
       <GuestAccessMenu
-        access={guest.access}
+        guest={guest}
         change={handleChangeAccess}
         remove={removeGuestAccess}
         owner={owner}

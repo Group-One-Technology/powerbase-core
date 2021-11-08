@@ -26,6 +26,8 @@ Rails.application.routes.draw do
     resources :guests, only: [:index, :create, :destroy], shallow: true do
       member do
         put 'change_access'
+        put 'accept_invite'
+        put 'reject_invite'
       end
     end
 
@@ -80,7 +82,8 @@ Rails.application.routes.draw do
   resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
-  get 'shared_databases', to: 'guests#shared_databases'
+  get 'shared_databases', to: 'powerbase_databases#shared_databases'
+  get 'base_invitations', to: 'guests#base_invitations'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'

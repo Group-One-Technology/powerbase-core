@@ -48,6 +48,11 @@ class PowerbaseDatabasesController < ApplicationController
     render json: @databases.map {|item| format_json(item)}
   end
 
+  # GET /shared_databases
+  def shared_databases
+    render json: current_user.shared_databases.map {|item| format_json(item)}
+  end
+
   # GET /databases/:id
   def show
     @database = PowerbaseDatabase.find(safe_params[:id])

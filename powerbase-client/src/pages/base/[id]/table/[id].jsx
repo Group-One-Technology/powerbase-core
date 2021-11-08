@@ -33,7 +33,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   }
 
   if (!baseUser) {
-    history.push('/login');
+    history.push('/404');
     return <Loader className="h-screen" />;
   }
 

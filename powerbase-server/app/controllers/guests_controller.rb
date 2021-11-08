@@ -20,7 +20,7 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
-  schema(:destroy) do
+  schema(:accept_invite, :reject_invite, :destroy) do
     required(:id)
   end
 
@@ -31,9 +31,38 @@ class GuestsController < ApplicationController
     render json: @guests.map {|item| user_format_json(item)}
   end
 
-  # GET /shared_databases
-  def shared_databases
-    render json: current_user.shared_databases.map {|item| database_format_json(item)}
+  # GET /base_invitations
+  def base_invitations
+    render json: current_user.guest_invitations.map {|item| format_json(item)}
+  end
+
+  # PUT /guests/:id/accept_invite
+  def accept_invite
+    @guest = Guest.find(safe_params[:id])
+
+    if @guest.user_id != current_user.id
+      render json: { error: "Not Authorized." }, status: :unprocessable_entity
+      return
+    end
+
+    if @guest.update(is_accepted: true)
+      render json: format_json(@guest)
+    else
+      render json: @guest.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /guests/:id/reject_invite
+  def reject_invite
+    @guest = Guest.find(safe_params[:id])
+
+    if @guest.user_id != current_user.id
+      render json: { error: "Not Authorized." }, status: :unprocessable_entity
+      return
+    end
+
+    @guest.destroy
+    render status: :no_content
   end
 
   # PUT /guests/:id/change_access
@@ -76,6 +105,7 @@ class GuestsController < ApplicationController
       powerbase_database_id: safe_params[:database_id],
       access: safe_params[:access],
       permissions: safe_params[:permissions],
+      inviter_id: current_user.id,
     })
 
     if @guest.save
@@ -90,6 +120,8 @@ class GuestsController < ApplicationController
     @guest = Guest.find(safe_params[:id])
     check_database_access(@guest.powerbase_database_id, ["owner"]) or return
     @guest.destroy
+
+    render status: :no_content
   end
 
   private
@@ -99,7 +131,12 @@ class GuestsController < ApplicationController
         access: guest.access,
         permissions: guest.permissions,
         user_id: guest.user_id,
+        user: user_format_json(guest),
+        inviter_id: guest.inviter_id,
+        inviter: inviter_format_json(guest.inviter),
         database_id: guest.powerbase_database_id,
+        database_name: guest.powerbase_database.name,
+        is_accepted: guest.is_accepted,
       }
     end
 
@@ -114,33 +151,16 @@ class GuestsController < ApplicationController
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
+        is_accepted: guest.is_accepted,
       }
     end
 
-    def database_format_json(database)
-      owner = database.user
-
+    def inviter_format_json(user)
       {
-        id: database.id,
-        user_id: database.user_id,
-        adapter: database.adapter,
-        name: database.name,
-        database_name: database.database_name,
-        description: database.description,
-        owner: {
-          user_id: owner.id,
-          first_name: owner.first_name,
-          last_name: owner.last_name,
-          email: owner.email,
-        },
-        color: database.color,
-        is_migrated: database.is_migrated,
-        is_turbo: database.is_turbo,
-        created_at: database.created_at,
-        updated_at: database.updated_at,
-        total_tables: database.powerbase_tables.length,
-        total_collaborators: database.guests.length + 1,
-        logs: database.base_migration.logs,
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
       }
     end
 end
