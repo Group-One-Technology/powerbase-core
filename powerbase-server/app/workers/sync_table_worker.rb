@@ -1,7 +1,7 @@
 class SyncTableWorker
   include Sidekiq::Worker
 
-  def perform(table_id)
+  def perform(table_id, reindex)
     table = PowerbaseTable.find table_id
     unmigrated_columns = table.unmigrated_columns
     deleted_columns = table.deleted_columns
@@ -28,7 +28,7 @@ class SyncTableWorker
         end
       end
 
-      table.reindex!
+      table.reindex! if reindex
     end
   end
 end

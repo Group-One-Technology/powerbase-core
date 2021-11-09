@@ -1,4 +1,5 @@
 include ElasticsearchHelper
+include SequelHelper
 module Powerbase
   class Model
     DEFAULT_PAGE_SIZE = 40
@@ -63,7 +64,7 @@ module Powerbase
             .offset(@powerbase_table.logs["migration"]["offset"])
             .all
         }
-        
+
         records.each do |record|
           doc_id = get_doc_id(primary_keys, record, fields, adapter)
 
@@ -248,16 +249,10 @@ module Powerbase
     end
 
     private
-      def remote_db(&block)
-        @remote_db ||= Powerbase.connect({
-          adapter: @powerbase_database.adapter,
-          connection_string: @powerbase_database.connection_string,
-          is_turbo: @powerbase_database.is_turbo,
-        })
-
-        result = yield(@remote_db) if block.present?
-
-        result || @remote_db
+      def remote_db
+        sequel_connect(@powerbase_database) do |db|
+          yield(db) if block_given?
+        end
       end
 
       def sanitize(string)

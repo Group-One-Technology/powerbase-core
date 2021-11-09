@@ -30,8 +30,10 @@ class Tables::Creator
 
   def save
     if table.save
-      table.inject_oid if database.has_row_oid_support?
-      table.inject_notifier_trigger
+      if database.postgresql?
+        table.inject_oid if database.has_row_oid_support?
+        table.inject_notifier_trigger
+      end
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

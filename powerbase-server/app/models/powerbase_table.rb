@@ -14,6 +14,7 @@ class PowerbaseTable < ApplicationRecord
 
   belongs_to :powerbase_database
   has_many :powerbase_fields, dependent: :destroy
+  # TODO: Fix duplicate association name
   has_many :base_connections
   has_many :base_connections, foreign_key: :referenced_table_id
   has_many :table_views, dependent: :destroy
@@ -88,8 +89,8 @@ class PowerbaseTable < ApplicationRecord
     @_sequel = db._sequel(refresh: true)
   end
 
-  def sync!
-    SyncTableWorker.perform_async(self.id) unless in_synced?
+  def sync!(reindex = true)
+    SyncTableWorker.perform_async(self.id, reindex) unless in_synced?
   end
 
   def migration_worker_name
@@ -105,8 +106,10 @@ class PowerbaseTable < ApplicationRecord
   end
   
   def remove
-    table.default_view_id = nil
-    table.save
-    table.destroy
+    self.default_view_id = nil
+    self.save
+    base_connections.destroy_allx
+    BaseConnection.where(powerbase_table_id: self.id).destroy_all
+    self.destroy
   end
 end

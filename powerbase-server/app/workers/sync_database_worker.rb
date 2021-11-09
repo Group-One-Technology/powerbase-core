@@ -13,9 +13,8 @@ class SyncDatabaseWorker
 
       puts "Migrating unmigrated tables of database with id of #{@database.id}..."
 
-      if new_connection
-        notifier = Powerbase::Notifier.new database
-        notifier.create_notifier!
+      if new_connection && database.postgresql?
+        database.create_notifier_function!
       end
   
       if unmigrated_tables.any?
@@ -34,7 +33,8 @@ class SyncDatabaseWorker
           table.object.save
 
           # Migrate fields and records
-          table.object.sync!
+          # Index record to elasticsearch if on turbo
+          table.object.sync!(database.is_turbo)
           table_creators << table
         end
 
@@ -52,9 +52,11 @@ class SyncDatabaseWorker
         @base_migration.end_time = Time.now
         @base_migration.save
         
-        poller = Sidekiq::Cron::Job.find("Database Listeners")
-        poller.args << database.id
-        poller.save
+        if database.is_turbo
+          poller = Sidekiq::Cron::Job.find("Database Listeners")
+          poller.args << database.id
+          poller.save
+        end
       end
     end
   end

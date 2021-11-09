@@ -1,31 +1,24 @@
 namespace :database do
-  task :auto_sync do
+  task auto_sync: :environment do 
     puts "Enabling auto sync.."
 
-    poller = Sidekiq::Cron::Job.find("Database Listeners")
-
     PowerbaseDatabase.turbo.each do |db|
-      puts "Enabling auto sync for Database - #{db.name}##{db.id}"
+      if db.postgresql?
+        puts "Enabling auto sync for Database - #{db.name}##{db.id}"
 
-      notifier = Powerbase::Notifier.new db
-      notifier.create_notifier!
+        notifier = Powerbase::Notifier.new db
+        notifier.create_notifier!
 
-      puts " -- Adding notifier to tables"
+        puts " -- Adding notifier to tables"
 
-      db.tables.each do|table|
-        # Add oid
-        table.inject_oid if db.has_row_oid_support?
+        db.tables.find_each do|table|
+          # Add oid
+          table.inject_oid if db.has_row_oid_support?
 
-        # Inject notifier trigger
-        table.inject_notifier_trigger
+          # Inject notifier trigger
+          table.inject_notifier_trigger
+        end
       end
-
-
-      puts " -- Add db to poller"
-      poller.args << db.id
     end
-    
-    poller.save
-    poller.enque!
   end
 end
