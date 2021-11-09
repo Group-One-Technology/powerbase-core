@@ -17,12 +17,11 @@ import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
 import { PermissionsModal } from '@components/guest/PermissionsModal';
-import { CustomPermissions } from './CustomPermissions';
 
 function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const { openModal, permissions, setPermissions } = usePermissionsStateModal();
+  const { openModal, permissions } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { access: { inviteGuests } } = useBaseUser();
