@@ -39,3 +39,49 @@ export const CUSTOM_SIMPLE_PERMISSIONS = [
     value: { commentRecords: true },
   },
 ];
+
+export const CUSTOM_PERMISSIONS = {
+  Table: [
+    {
+      name: 'View Table',
+      description: 'who can see this table.',
+      value: { viewTable: true },
+    },
+    {
+      name: 'Manage Table',
+      description: 'who can update table alias, reorder them, etc.',
+      value: { manageTable: true },
+    },
+    {
+      name: 'Add Records',
+      value: { addRecords: true },
+    },
+    {
+      name: 'Delete Records',
+      value: { deleteRecords: true },
+    },
+    {
+      name: 'Comment Records',
+      description: 'who can add comments to the records.',
+      value: { commentRecords: true },
+      disabled: true,
+    },
+  ],
+  Field: [
+    {
+      name: 'View Field',
+      description: 'who can see this field.',
+      value: { viewField: true },
+    },
+    {
+      name: 'Manage Field',
+      description: 'who can update the field type, set as PII, etc.',
+      value: { manageField: true },
+    },
+    {
+      name: 'Edit Field Data',
+      description: 'who can update this specific field of the records.',
+      value: { editFieldData: true },
+    },
+  ],
+};
