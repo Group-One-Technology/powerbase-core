@@ -15,13 +15,12 @@ jobs:
           git fetch
           cp -r powerbase-server clone-server
           cd clone-server
+          git config --global init.defaultBranch main
           git init
           git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
           git config --global user.email "jenvillaganas@gmail.com"
           git config --global user.name "Jen Villaganas"
           git add .
           git commit -m "${{github.event.head_commit.message}}"
-          git fetch server
-          git checkout main
-          git push -f server main
+          git push -u -f server main
 
