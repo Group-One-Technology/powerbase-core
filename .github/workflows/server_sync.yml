@@ -13,8 +13,9 @@ jobs:
           API_GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
         run: |
           git fetch
-          cd powerbase-server
+          cp powerbase-server clone-server
+          cd clone-server
+          git init
           git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
-          git remote -v
           git push -f server main
 
