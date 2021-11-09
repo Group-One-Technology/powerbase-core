@@ -4,8 +4,7 @@ import { useState } from "react";
 import { DocumentAddIcon, PaperClipIcon } from "@heroicons/react/solid";
 import cn from "classnames";
 
-export default function CsvReader({ csvArray, setCsvArray }) {
-  const [csvFile, setCsvFile] = useState();
+export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
   const hiddenFileInput = useRef(null);
 
   useEffect(() => {

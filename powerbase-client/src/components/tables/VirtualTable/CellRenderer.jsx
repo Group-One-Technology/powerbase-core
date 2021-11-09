@@ -288,7 +288,7 @@ export function CellRenderer({
       table_type_id: table.isVirtual ? "magic_record_id" : "record_id",
       has_precision: field?.precision ? true : false,
     };
-    console.log("payload: ", payload);
+    
     const response = await securedApi.post(`/magic_values`, payload);
     if (response.statusText === "OK") {
       mutateTableRecords();

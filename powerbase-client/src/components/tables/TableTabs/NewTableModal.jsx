@@ -8,6 +8,7 @@ import TableNameInput from "./TableNameInput";
 import { securedApi } from "@lib/api";
 import { useCurrentView } from "@models/views/CurrentTableView";
 import Upload from "./UploadTable";
+import { useTableRecords } from "@models/TableRecords";
 
 const toSnakeCase = (str) =>
   str &&
@@ -16,6 +17,16 @@ const toSnakeCase = (str) =>
     .map((x) => x.toLowerCase())
     .join("_");
 
+function camelize(str) {
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, "");
+}
+
+const camelToSnakeCase = (str) =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 const initial = [
   {
     id: 1,
@@ -39,6 +50,13 @@ export default function NewTableModal({
   const [tableName, setTableName] = useState("");
   const { handleTableChange, mutateTables } = useCurrentView();
   const [csvArray, setCsvArray] = useState([]);
+  const [csvFile, setCsvFile] = useState();
+  const {
+    data: records,
+    loadMore: loadMoreRows,
+    isLoading,
+    mutate: mutateTableRecords,
+  } = useTableRecords();
 
   const handleAddNewField = () => {
     setNewFields([
@@ -96,7 +114,107 @@ export default function NewTableModal({
       if (response.data) {
         setOpen(false);
         mutateTables();
-        handleTableChange({ table: response.data });
+        handleTableChange({ table: response.data.table });
+      }
+    }
+
+    if (isUploadAction) {
+      const csvFieldNames = Object.getOwnPropertyNames(csvArray[0]);
+      console.log(csvArray[0]);
+      console.log(csvFieldNames);
+      const standardizeTable = () => {
+        return {
+          name:
+            csvFile?.name.split(".").slice(0, -1).join(".") +
+            Math.floor(Math.random() * 10) +
+            Math.floor(Math.random() * 10),
+          description: null,
+          powerbase_database_id: base.id,
+          is_migrated: true,
+          logs: null,
+          is_virtual: true,
+          page_size: 200,
+          alias: tableName,
+          order: tables.length,
+        };
+      };
+
+      const standardizeFields = () => {
+        const standardized = csvFieldNames.map((fieldName, idx) => {
+          return {
+            name: toSnakeCase(fieldName.toLowerCase()),
+            description: null,
+            oid: 1043,
+            db_type: "character varying",
+            default_value: "",
+            is_primary_key: false,
+            is_nullable: false,
+            powerbase_field_type_id: 2,
+            is_pii: false,
+            alias: fieldName,
+            order: idx,
+            is_virtual: true,
+            allow_dirty_value: true,
+            precision: null,
+          };
+        });
+        return standardized;
+      };
+
+      const payload = {
+        table: standardizeTable(),
+        fields: standardizeFields(),
+      };
+
+      const response = await securedApi.post(`/tables/virtual_tables`, payload);
+      if (response.data) {
+        const newTable = response.data.table;
+        const newFields = response.data.fields;
+        console.log(newFields);
+        csvArray.forEach(async (record, idx) => {
+          let newRecordId;
+          const recordParams = {
+            powerbase_table_id: table.id,
+            powerbase_database_id: table.databaseId,
+            powerbase_record_order: idx,
+          };
+          const newRecordResponse = await securedApi.post(
+            `/magic_records`,
+            recordParams
+          );
+          newRecordId = newRecordResponse.data?.id;
+          if (newRecordId) {
+            const recordKeys = Object.getOwnPropertyNames(record);
+            recordKeys.forEach(async (key, keyIdx) => {
+              const standardizedKey = key.replace(/^"(.*)"$/, "$1");
+              const camelizedKey = camelize(standardizedKey);
+              const payload = {
+                field_name: camelToSnakeCase(camelizedKey),
+                field_type_id: 2,
+                table_id: newTable.id,
+                field_id: newFields[camelizedKey],
+                text_value: record[key],
+                record_id: null,
+                magic_record_id: newRecordId,
+                key_type: "text_value",
+                table_type_id: "magic_record_id",
+                has_precision: false,
+              };
+              const response = await securedApi.post(`/magic_values`, payload);
+              if (response.statusText === "OK") {
+                console.log("whoop");
+                if (
+                  idx + 1 === csvArray.length &&
+                  keyIdx + 1 === recordKeys.length
+                ) {
+                  // mutateTableRecords();
+                  mutateTables();
+                  handleTableChange({ table: newTable });
+                }
+              }
+            });
+          }
+        });
       }
     }
   };
@@ -181,7 +299,11 @@ export default function NewTableModal({
               )}
 
               {isUploadAction && (
-                <Upload csvArray={csvArray} setCsvArray={setCsvArray} />
+                <Upload
+                  csvFile={csvFile}
+                  setCsvFile={setCsvFile}
+                  setCsvArray={setCsvArray}
+                />
               )}
 
               <div className="mt-5 flex justify-end items-baseline">

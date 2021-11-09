@@ -67,7 +67,7 @@ class PowerbaseTablesController < ApplicationController
     table_params = params[:table]
     fields_params = params[:fields]
     standardized_table_params = standardize_table_params(table_params)
-    puts standardized_table_params
+    res_fields = {}
     table = PowerbaseTable.create(standardized_table_params)
     if table
       @view = TableView.create(
@@ -80,9 +80,9 @@ class PowerbaseTablesController < ApplicationController
         table.default_view_id = @view.id
         table.save!
         fields_params.each_with_index do |field_param, index|
-          puts "HEYYYYYYY"
           standardized_field_params = standardize_field_params(field_param, table)
           cur_field = PowerbaseField.create(standardized_field_params)
+          res_fields[cur_field.name] = cur_field.id
           view_field = ViewFieldOption.new
           view_field.width = case cur_field.powerbase_field_type_id
             when 3
@@ -97,7 +97,7 @@ class PowerbaseTablesController < ApplicationController
         end
       end
     end
-    render json: format_json(table)
+    render json: {table: format_json(table), fields: res_fields}
 
   end
 
