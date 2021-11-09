@@ -11,6 +11,7 @@ jobs:
       - name: Copy Repo
         run: |
           git fetch
+          cd powerbase-server
           git remote add server git@github.com:Group-One-Technology/powerbase-server.git
           git push -f server main
 
