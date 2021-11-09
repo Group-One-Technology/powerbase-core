@@ -14,7 +14,7 @@ jobs:
         run: |
           git fetch
           cd powerbase-server
-          echo "Add remote server"
           git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
+          git remote -v
           git push -f server main
 
