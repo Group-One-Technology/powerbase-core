@@ -1,46 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
-import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
 
 export function TablePermissions({ guest }) {
   const { tables } = useCurrentView();
-  const { access: { changeGuestAccess, inviteGuests } } = useBaseUser();
-  const canToggleAccess = guest ? changeGuestAccess : inviteGuests;
-
-  const [table, setTable] = useState();
-  const [loading] = useState(false);
-  const [tablePermissions, setTablePermissions] = useState(CUSTOM_PERMISSIONS.Table.map((item) => ({
-    ...item,
-    enabled: false,
-  })));
-
-  useEffect(() => {
-    if (tables?.length) {
-      setTable(tables[0]);
-    }
-  }, [tables]);
-
-  useEffect(() => {
-    setTablePermissions(CUSTOM_PERMISSIONS.Table.map((item) => ({
-      ...item,
-      enabled: false,
-    })));
-  }, [table]);
-
-  const handlePermissionToggle = (selectedItem) => {
-    setTablePermissions(tablePermissions.map((item) => ({
-      ...item,
-      enabled: item.name === selectedItem.name
-        ? !item.enabled
-        : item.enabled,
-    })));
-  };
+  const {
+    table,
+    setTable,
+    tablePermissions,
+    handlePermissionToggle,
+    canToggleAccess,
+    loading,
+  } = useTablePermissions({ tables, guest });
 
   if (!table) {
     return null;
@@ -50,11 +26,11 @@ export function TablePermissions({ guest }) {
     <div className="mt-2">
       <div className="flex items-center gap-1 my-2">
         <h5 className="flex-1 text-base font-medium text-gray-900">Table</h5>
-        <Listbox value={table} onChange={setTable} disabled={!changeGuestAccess}>
+        <Listbox value={table} onChange={setTable} disabled={!canToggleAccess}>
           <div className="flex-1 relative">
             <Listbox.Button
               className="block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
-              disabled={!changeGuestAccess}
+              disabled={!canToggleAccess}
             >
               <span className="block truncate">{table.alias || table.name}</span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
