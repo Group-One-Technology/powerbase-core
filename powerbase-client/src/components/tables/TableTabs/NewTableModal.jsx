@@ -16,34 +16,6 @@ const toSnakeCase = (str) =>
     .map((x) => x.toLowerCase())
     .join("_");
 
-// const addNewField = async () => {
-//   const payload = {
-//     name: toSnakeCase(fieldName.toLowerCase()),
-//     description: null,
-//     oid: 1043,
-//     db_type: selected.dbType,
-//     default_value: "",
-//     is_primary_key: false,
-//     is_nullable: false,
-//     powerbase_table_id: tableId,
-//     powerbase_field_type_id: selected.id,
-//     is_pii: false,
-//     alias: fieldName,
-//     view_id: view.id,
-//     order: fields.length ? fields.length : 0,
-//     is_virtual: true,
-//     allow_dirty_value: isChecked,
-//     precision: numberPrecision ? numberPrecision.precision : null,
-//   };
-
-//   const response = await securedApi.post(`/tables/${tableId}/field`, payload);
-//   if (response.statusText === "OK") {
-//     setIsCreatingField(false);
-//     mutateViewFields();
-//     return response.data;
-//   }
-// };
-
 const initial = [
   {
     id: 1,
@@ -66,6 +38,7 @@ export default function NewTableModal({
   const [currentCount, setCurrentCount] = useState(1);
   const [tableName, setTableName] = useState("");
   const { handleTableChange, mutateTables } = useCurrentView();
+  const [csvArray, setCsvArray] = useState([]);
 
   const handleAddNewField = () => {
     setNewFields([
@@ -76,53 +49,55 @@ export default function NewTableModal({
   };
 
   const addTable = async () => {
-    const standardizeFields = () => {
-      const standardized = newFields.map((field, idx) => {
-        const { fieldName, fieldTypeId } = field;
-        return {
-          name: toSnakeCase(fieldName.toLowerCase()),
-          description: null,
-          oid: 1043,
-          db_type: "character varying",
-          default_value: "",
-          is_primary_key: false,
-          is_nullable: false,
-          powerbase_field_type_id: fieldTypeId,
-          is_pii: false,
-          alias: fieldName,
-          order: idx,
-          is_virtual: true,
-          allow_dirty_value: true,
-          precision: null,
-        };
-      });
-      return standardized;
-    };
-
-    const standardizeTable = () => {
-      return {
-        name: toSnakeCase(tableName.toLowerCase()),
-        description: null,
-        powerbase_database_id: base.id,
-        is_migrated: true,
-        logs: null,
-        is_virtual: true,
-        page_size: 40,
-        alias: tableName,
-        order: tables.length,
+    if (!isUploadAction) {
+      const standardizeFields = () => {
+        const standardized = newFields.map((field, idx) => {
+          const { fieldName, fieldTypeId } = field;
+          return {
+            name: toSnakeCase(fieldName.toLowerCase()),
+            description: null,
+            oid: 1043,
+            db_type: "character varying",
+            default_value: "",
+            is_primary_key: false,
+            is_nullable: false,
+            powerbase_field_type_id: fieldTypeId,
+            is_pii: false,
+            alias: fieldName,
+            order: idx,
+            is_virtual: true,
+            allow_dirty_value: true,
+            precision: null,
+          };
+        });
+        return standardized;
       };
-    };
 
-    const payload = {
-      table: standardizeTable(),
-      fields: standardizeFields(),
-    };
+      const standardizeTable = () => {
+        return {
+          name: toSnakeCase(tableName.toLowerCase()),
+          description: null,
+          powerbase_database_id: base.id,
+          is_migrated: true,
+          logs: null,
+          is_virtual: true,
+          page_size: 40,
+          alias: tableName,
+          order: tables.length,
+        };
+      };
 
-    const response = await securedApi.post(`/tables/virtual_tables`, payload);
-    if (response.data) {
-      setOpen(false);
-      mutateTables();
-      handleTableChange({ table: response.data });
+      const payload = {
+        table: standardizeTable(),
+        fields: standardizeFields(),
+      };
+
+      const response = await securedApi.post(`/tables/virtual_tables`, payload);
+      if (response.data) {
+        setOpen(false);
+        mutateTables();
+        handleTableChange({ table: response.data });
+      }
     }
   };
 
@@ -205,7 +180,9 @@ export default function NewTableModal({
                 </div>
               )}
 
-              {isUploadAction && <Upload />}
+              {isUploadAction && (
+                <Upload csvArray={csvArray} setCsvArray={setCsvArray} />
+              )}
 
               <div className="mt-5 flex justify-end items-baseline">
                 <button
