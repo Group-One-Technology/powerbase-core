@@ -1,0 +1,3 @@
+[submodule "powerbase-server"]
+	path = powerbase-server
+	url = git@github.com:Group-One-Technology/powerbase-server.git
