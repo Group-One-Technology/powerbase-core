@@ -17,7 +17,7 @@ jobs:
           cd clone-server
           git config --global init.defaultBranch main
           git init
-          git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
+          git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-server.git"
           git config --global user.email "jenvillaganas@gmail.com"
           git config --global user.name "Jen Villaganas"
           git add .
