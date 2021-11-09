@@ -21,6 +21,7 @@ jobs:
           git config --global user.name "Jen Villaganas"
           git add .
           git commit -m "${{github.event.head_commit.message}}"
+          git fetch server
           git checkout main
           git push -f server main
 
