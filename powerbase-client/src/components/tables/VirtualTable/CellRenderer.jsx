@@ -30,6 +30,7 @@ function CellValue({
   setEditCellInput,
   setCellToEdit,
   setIsNewRecord,
+  setHoveredCell,
 }) {
   const className =
     value?.toString().length && field?.isForeignKey
@@ -44,6 +45,7 @@ function CellValue({
       column: columnIndex + 1,
     });
     setIsNewRecord(true);
+    setHoveredCell({});
   };
 
   if (!isLastRow && !isLoaded) {
@@ -327,6 +329,7 @@ export function CellRenderer({
         if (!isRowNo) {
           setIsEditing(true);
           setEditCellInput(value);
+          setHoveredCell({});
           setCellToEdit({
             row: rowIndex,
             column: columnIndex,
@@ -372,6 +375,7 @@ export function CellRenderer({
           setCellToEdit={setCellToEdit}
           isNewRecord={isNewRecord}
           setIsNewRecord={setIsNewRecord}
+          setHoveredCell={setHoveredCell}
         />
       )}
     </div>
