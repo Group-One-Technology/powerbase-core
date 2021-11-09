@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useBaseUser } from '@models/BaseUser';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { useFieldPermissions } from './useFieldPermissions';
 
 export function useTablePermissions({ tables, guest }) {
   const { access: { changeGuestAccess, inviteGuests } } = useBaseUser();
@@ -12,6 +13,8 @@ export function useTablePermissions({ tables, guest }) {
     ...item,
     enabled: false,
   })));
+
+  const fieldState = useFieldPermissions({ table });
 
   useEffect(() => {
     setTablePermissions(CUSTOM_PERMISSIONS.Table.map((item) => ({
@@ -26,7 +29,7 @@ export function useTablePermissions({ tables, guest }) {
     }
   }, [tables]);
 
-  const handlePermissionToggle = (selectedItem) => {
+  const handleTablePermissionToggle = (selectedItem) => {
     setTablePermissions(tablePermissions.map((item) => ({
       ...item,
       enabled: item.name === selectedItem.name
@@ -36,11 +39,14 @@ export function useTablePermissions({ tables, guest }) {
   };
 
   return {
-    table,
-    setTable,
-    tablePermissions,
-    handlePermissionToggle,
     canToggleAccess,
-    loading,
+    tableState: {
+      table,
+      setTable,
+      tablePermissions,
+      handleTablePermissionToggle,
+      loading,
+    },
+    fieldState,
   };
 }
