@@ -61,7 +61,7 @@ class TableRecordsController < ApplicationController
     magic_record_id = params[:magic_record_id]
     # table_type_id = params[:table_type_id])
     if magic_record_id
-      magic_value = MagicValue.find_by(magic_record_id: params[:magic_record_id], table_id: params[:table_id], field_id: params[:field_id])
+      magic_value = MagicValue.find_by(magic_record_id: magic_record_id, table_id: params[:table_id], field_id: params[:field_id])
     else
       magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
     end
@@ -71,7 +71,7 @@ class TableRecordsController < ApplicationController
     else
       new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id], magic_record_id: params[:magic_record_id]})
     end
-    render json: {} if new_magic_value
+    render json: {}
   end
 
   # GET /tables/:id/magic_values

@@ -254,7 +254,9 @@ export function CellRenderer({
       num = parseInt(value).toFixed(field.precision);
     }
 
-    if (table.isVirtual) {
+    // setCellToEdit({});
+
+    if (table.isVirtual && isNewRecord) {
       const recordParams = {
         powerbase_table_id: table.id,
         powerbase_database_id: table.databaseId,
@@ -267,7 +269,6 @@ export function CellRenderer({
       newRecordId = newRecordResponse.data?.id;
     }
     mutateTableRecords();
-    console.log("IDX: ", records[rowIndex - 1]);
 
     const payload = {
       field_name: field.name,
@@ -290,7 +291,8 @@ export function CellRenderer({
     if (response.statusText === "OK") {
       mutateTableRecords();
       setIsNewRecord(false);
-      recordInputRef?.current.blur();
+      setCellToEdit({});
+      recordInputRef?.current?.blur();
       setIsEditing(false);
     }
   };
@@ -304,7 +306,12 @@ export function CellRenderer({
         "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2",
         isHoveredRow && "bg-gray-50",
         isRowNo ? "justify-center text-xs text-gray-500" : "border-r",
-        !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? "inline" : "flex"
+        !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? "inline" : "flex",
+        cellToEdit &&
+          cellToEdit.row !== null &&
+          cellToEdit.row === rowIndex &&
+          cellToEdit.column === columnIndex &&
+          "ring-2 ring-indigo-500"
       )}
       style={style}
       tabIndex={0}
