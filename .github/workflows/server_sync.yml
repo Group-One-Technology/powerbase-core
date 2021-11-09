@@ -4,17 +4,17 @@ on:
     branches:
       - main
 jobs:
-  master:
+  sync-to-server-repo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Copy Repo
         env:
           API_GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
-
         run: |
           git fetch
           cd powerbase-server
-          git remote add server https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git
+          echo "Add remote server"
+          git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
           git push -f server main
 
