@@ -18,13 +18,13 @@ export function useFieldPermissions({ table }) {
   const [field, setField] = useState();
   const [fieldPermissions, setFieldPermissions] = useState(CUSTOM_PERMISSIONS.Field.map((item) => ({
     ...item,
-    enabled: false,
+    enabled: item.defaultValue ?? false,
   })));
 
   useEffect(() => {
     setFieldPermissions(CUSTOM_PERMISSIONS.Field.map((item) => ({
       ...item,
-      enabled: false,
+      enabled: item.defaultValue ?? false,
     })));
   }, [table]);
 

@@ -11,7 +11,7 @@ export function useTablePermissions({ tables, guest }) {
   const [loading] = useState(false);
   const [tablePermissions, setTablePermissions] = useState(CUSTOM_PERMISSIONS.Table.map((item) => ({
     ...item,
-    enabled: false,
+    enabled: item.defaultValue ?? false,
   })));
 
   const fieldState = useFieldPermissions({ table });
@@ -19,7 +19,7 @@ export function useTablePermissions({ tables, guest }) {
   useEffect(() => {
     setTablePermissions(CUSTOM_PERMISSIONS.Table.map((item) => ({
       ...item,
-      enabled: false,
+      enabled: item.defaultValue ?? false,
     })));
   }, [table]);
 
