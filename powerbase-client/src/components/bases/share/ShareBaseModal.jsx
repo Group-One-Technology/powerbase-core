@@ -144,24 +144,21 @@ function BaseShareBaseModal() {
           </form>
         </div>
 
-        {access.name === 'custom' && (
-          <div className="px-6 py-2 border-b border-gray-200">
-            <CustomPermissions permissions={permissions} setPermissions={setPermissions} loading={loading} />
+        <div className="mx-6 my-1">
+          <button
+            type="button"
+            className={cn(
+              'ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+              access.name !== 'custom' && 'invisible',
+            )}
+            onClick={handleConfigurePermissions}
+          >
+            <CogIcon className="h-4 w-4 mr-1" />
+            Configure Permissions
+          </button>
+        </div>
 
-            <div className="text-sm text-gray-900">
-              <button
-                type="button"
-                className="ml-auto p-1 px-2 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 focus:bg-gray-200"
-                onClick={handleConfigurePermissions}
-              >
-                <CogIcon className="h-4 w-4 mr-1" />
-                Configure More Permissions
-              </button>
-            </div>
-          </div>
-        )}
-
-        <ul className="m-4 bg-white divide-y divide-gray-200">
+        <ul className="mx-4 my-1 bg-white divide-y divide-gray-200">
           <li className="p-2">
             <GuestCard guest={base.owner} setGuests={setGuests} owner />
           </li>
