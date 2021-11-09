@@ -1,0 +1,15 @@
+name: Sync To Server Repo
+push:
+  branches:
+    - main
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: publish:starters
+        uses: johno/actions-push-subdirectories@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: powerbase-server
