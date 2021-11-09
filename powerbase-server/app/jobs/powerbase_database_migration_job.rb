@@ -68,14 +68,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     @database.sync!(true)
-
-    @base_migration.logs["errors"].push({
-      type: "Status",
-      error: "Some tables hasn't finished migrating yet.",
-    })
-    @base_migration.save
     @database.update(is_migrated: true)
-    @base_migration.save
   end
 
   private

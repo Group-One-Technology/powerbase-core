@@ -33,7 +33,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def listen!
-    con = Powerbase::Listener.new self  
+    con = Powerbase::Listener.new self
     thread = Thread.new do
       loop do
         con.listen!
@@ -79,13 +79,17 @@ class PowerbaseDatabase < ApplicationRecord
   def migration_name
     "PendingTableMigration##{self.id}"
   end
-  
+
   def sync!(new_connection = false)
     SyncDatabaseWorker.perform_async(self.id, new_connection) unless in_synced?
   end
 
   def has_row_oid_support?
-    db_version < 12
+    begin
+      db_version < 12
+    rescue
+      false
+    end
   end
 
   def db_version
@@ -103,5 +107,11 @@ class PowerbaseDatabase < ApplicationRecord
 
   def create_notifier_function!
     notifier.create_notifier!
+  end
+
+  def remove
+    tables.each(&:remove)
+    base_migration.destroy
+    self.destroy
   end
 end
