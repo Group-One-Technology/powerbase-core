@@ -1,0 +1,26 @@
+name: Sync To Server Repo
+on:
+  push:
+    branches:
+      - main
+jobs:
+  sync-to-server-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Copy Repo
+        env:
+          API_GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
+        run: |
+          git fetch
+          cp -r powerbase-server clone-server
+          cd clone-server
+          git config --global init.defaultBranch main
+          git init
+          git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-server.git"
+          git config --global user.email "jenvillaganas@gmail.com"
+          git config --global user.name "Jen Villaganas"
+          git add .
+          git commit -m "${{github.event.head_commit.message}}"
+          git push -u -f server main
+
