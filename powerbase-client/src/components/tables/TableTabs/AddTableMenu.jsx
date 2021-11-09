@@ -17,6 +17,7 @@ const AddTable = ({
   };
 
   const handleImportCSV = () => {
+    setOpen(!open);
     setIsUploadAction(true);
   };
   return (

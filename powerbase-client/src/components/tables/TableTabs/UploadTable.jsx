@@ -1,80 +1,64 @@
 /* eslint-disable  */
 import React, { useRef } from "react";
+import { useState } from "react";
 
-export default function Upload() {
-  const buttonRef = React.useRef(null);
-  const handleOnFileLoad = () => {
-    console.log("load");
+export default function CsvReader() {
+  const [csvFile, setCsvFile] = useState();
+  const [csvArray, setCsvArray] = useState([]);
+  // [{name: "", age: 0, rank: ""},{name: "", age: 0, rank: ""}]
+
+  const processCSV = (str, delim = ",") => {
+    const headers = str.slice(0, str.indexOf("\n")).split(delim);
+    const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+
+    const newArray = rows.map((row) => {
+      const values = row.split(delim);
+      const eachObject = headers.reduce((obj, header, i) => {
+        obj[header] = values[i];
+        return obj;
+      }, {});
+      return eachObject;
+    });
+
+    setCsvArray(newArray);
   };
 
-  const handleOnError = () => {
-    console.log("error");
+  const submit = () => {
+    const file = csvFile;
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const text = e.target.result;
+      console.log(text);
+      processCSV(text);
+    };
+
+    reader.readAsText(file);
   };
 
-  const handleOpenDialog = () => {
-    console.log("dialog");
-  };
+  console.log(csvArray);
+
   return (
-    <>
-      <CSVReader
-        ref={buttonRef}
-        onFileLoad={handleOnFileLoad}
-        onError={handleOnError}
-        noClick
-        noDrag
+    <form id="csv-form">
+      <input
+        type="file"
+        accept=".csv"
+        id="csvFile"
+        onChange={(e) => {
+          setCsvFile(e.target.files[0]);
+        }}
+      ></input>
+      <br />
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          if (csvFile) submit();
+        }}
       >
-        {({ file }) => (
-          <aside
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              marginBottom: 10,
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleOpenDialog}
-              style={{
-                borderRadius: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                width: "40%",
-                paddingLeft: 0,
-                paddingRight: 0,
-              }}
-            >
-              Browse file
-            </button>
-            <div
-              style={{
-                borderWidth: 1,
-                borderStyle: "solid",
-                borderColor: "#ccc",
-                height: 45,
-                lineHeight: 2.5,
-                marginTop: 5,
-                marginBottom: 5,
-                paddingLeft: 13,
-                paddingTop: 3,
-                width: "60%",
-              }}
-            >
-              {file && file.name}
-            </div>
-            <button
-              style={{
-                borderRadius: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                paddingLeft: 20,
-                paddingRight: 20,
-              }}
-            >
-              Remove
-            </button>
-          </aside>
-        )}
-      </CSVReader>
-    </>
+        Submit
+      </button>
+      <br />
+      <br />
+    </form>
   );
 }

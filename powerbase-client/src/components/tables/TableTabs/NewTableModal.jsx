@@ -7,6 +7,7 @@ import cn from "classnames";
 import TableNameInput from "./TableNameInput";
 import { securedApi } from "@lib/api";
 import { useCurrentView } from "@models/views/CurrentTableView";
+import Upload from "./UploadTable";
 
 const toSnakeCase = (str) =>
   str &&
@@ -53,7 +54,14 @@ const initial = [
 
 const types = [];
 
-export default function NewTableModal({ open, setOpen, table, tables, base }) {
+export default function NewTableModal({
+  open,
+  setOpen,
+  table,
+  tables,
+  base,
+  isUploadAction,
+}) {
   const [newFields, setNewFields] = useState(initial);
   const [currentCount, setCurrentCount] = useState(1);
   const [tableName, setTableName] = useState("");
@@ -155,41 +163,49 @@ export default function NewTableModal({ open, setOpen, table, tables, base }) {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
-              <div className="px-2 mb-6">
-                <p className="text-gray-600">TABLE</p>
-                <TableNameInput
-                  tableName={tableName}
-                  setTableName={setTableName}
-                />
-              </div>
-              <div>
-                <p className="text-gray-600 px-2 mb-2">FIELDS</p>
-                {newFields?.map((field, index) => (
-                  <NewTableField
-                    key={index}
-                    newFields={newFields}
-                    newField={field}
-                    count={index}
-                    setNewFields={setNewFields}
-                    id={field.id}
+              {!isUploadAction && (
+                <div className="px-2 mb-6">
+                  <p className="text-gray-600">TABLE</p>
+                  <TableNameInput
+                    tableName={tableName}
+                    setTableName={setTableName}
                   />
-                ))}
-              </div>
+                </div>
+              )}
+              {!isUploadAction && (
+                <div>
+                  <p className="text-gray-600 px-2 mb-2">FIELDS</p>
+                  {newFields?.map((field, index) => (
+                    <NewTableField
+                      key={index}
+                      newFields={newFields}
+                      newField={field}
+                      count={index}
+                      setNewFields={setNewFields}
+                      id={field.id}
+                    />
+                  ))}
+                </div>
+              )}
 
-              <div className="flex flex-row justify-center mt-2">
-                <p
-                  className="flex flex-row cursor-pointer"
-                  onClick={handleAddNewField}
-                >
-                  <span className="flex-row">
-                    <PlusCircleIcon className="text-indigo-400 w-6 h-6" />
-                  </span>
-                  <span className="text-sm text-indigo-400 ml-1 mt-0.5">
-                    {" "}
-                    Add a New Field{" "}
-                  </span>
-                </p>
-              </div>
+              {!isUploadAction && (
+                <div className="flex flex-row justify-center mt-2">
+                  <p
+                    className="flex flex-row cursor-pointer"
+                    onClick={handleAddNewField}
+                  >
+                    <span className="flex-row">
+                      <PlusCircleIcon className="text-indigo-400 w-6 h-6" />
+                    </span>
+                    <span className="text-sm text-indigo-400 ml-1 mt-0.5">
+                      {" "}
+                      Add a New Field{" "}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {isUploadAction && <Upload />}
 
               <div className="mt-5 flex justify-end items-baseline">
                 <button

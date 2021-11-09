@@ -211,6 +211,10 @@ export function CellRenderer({
     });
   };
 
+  const handleMouseLeave = () => {
+    setHoveredCell({});
+  };
+
   const validateEmail = (email) => {
     const pattern =
       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -241,8 +245,6 @@ export function CellRenderer({
         return;
     }
   };
-
-  console.log("records: ", records);
 
   const onClickOutsideEditingCell = async () => {
     let num, newRecordId;
@@ -328,6 +330,7 @@ export function CellRenderer({
         if (!isRowNo) evt.target.contentEditable = false;
       }}
       onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       suppressContentEditableWarning
     >
       {isEditing &&
