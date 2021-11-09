@@ -17,5 +17,8 @@ jobs:
           cd clone-server
           git init
           git remote add server "https://$API_GITHUB_TOKEN@github.com/Group-One-Technology/powerbase-core.git"
+          git add .
+          git commit -m "${{github.event.head_commit.message}}"
+          git checkout main
           git push -f server main
 
