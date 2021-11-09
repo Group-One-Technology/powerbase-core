@@ -7,10 +7,10 @@ jobs:
   master:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: publish:starters
-        uses: johno/actions-push-subdirectories@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: powerbase-server Group-One-Technology repo-name main
+      - uses: actions/checkout@v2
+      - name: Copy Repo
+        run: |
+          git fetch
+          git remote add server git@github.com:Group-One-Technology/powerbase-server.git
+          git push -f server main
+
