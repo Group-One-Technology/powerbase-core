@@ -15,8 +15,22 @@ export const CUSTOM_PERMISSIONS = {
   Base: [
     {
       name: 'View Base',
-      description: 'who can configure the base remote DB connection.',
-      key: 'manageBase',
+      description: 'who can see this base.',
+      key: 'viewBase',
+      value: true,
+      hidden: true,
+    },
+    {
+      name: 'View Table',
+      description: 'who can view all the tables of this base.',
+      key: 'viewTable',
+      value: true,
+      hidden: true,
+    },
+    {
+      name: 'View Field',
+      description: 'who can view all the fields of this base.',
+      key: 'viewField',
       value: true,
       hidden: true,
     },
