@@ -1,31 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { useState } from 'react/cjs/react.development';
 
-export function Permissions({ guest, permissions, togglePermissions }) {
+export function Permissions({ permissions, togglePermissions, canToggleAccess }) {
   const { tables } = useCurrentView();
-  const { canToggleAccess, tableState, fieldState } = useTablePermissions({ tables, guest });
-  const {
-    table,
-    setTable,
-    tablePermissions,
-    handleTablePermissionToggle,
-    loading,
-  } = tableState;
-  const {
-    field,
-    setField,
-    fields,
-    fieldPermissions,
-    handleFieldPermissionsToggle,
-  } = fieldState;
+  const [table, setTable] = useState(tables[0]);
 
-  if (!table || !field) {
+  useEffect(() => {
+    if (tables?.length) {
+      setTable(tables[0]);
+    }
+  }, [tables]);
+
+  if (!table) {
     return null;
   }
 
@@ -52,9 +44,9 @@ export function Permissions({ guest, permissions, togglePermissions }) {
                   className={cn(
                     'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
                     checked ? 'bg-indigo-600' : 'bg-gray-200',
-                    (loading || !canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
+                    !canToggleAccess ? 'cursor-not-allowed' : 'cursor-pointer',
                   )}
-                  disabled={loading || !canToggleAccess}
+                  disabled={!canToggleAccess}
                 >
                   <span
                     aria-hidden="true"
@@ -105,11 +97,13 @@ export function Permissions({ guest, permissions, togglePermissions }) {
       </div>
 
       <ul className="my-1">
-        {tablePermissions.map((item) => {
-          const itemKey = item.name.split(' ').join('_');
+        {CUSTOM_PERMISSIONS.Table.map((item) => {
+          if (item.hidden) return null;
+
+          const checked = permissions.tables[table.id][item.key];
 
           return (
-            <li key={itemKey} className="my-2">
+            <li key={item.key} className="my-2">
               <label className="flex w-full">
                 <div>
                   <div className="font-medium text-sm capitalize">
@@ -118,20 +112,20 @@ export function Permissions({ guest, permissions, togglePermissions }) {
                   <p className="text-xs text-gray-500">{item.description}</p>
                 </div>
                 <Switch
-                  checked={item.enabled}
-                  onChange={() => handleTablePermissionToggle(item)}
+                  checked={checked}
+                  onChange={() => togglePermissions.table(table, item)}
                   className={cn(
                     'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-                    item.enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                    (loading || !canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
+                    checked ? 'bg-indigo-600' : 'bg-gray-200',
+                    (!canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
                   )}
-                  disabled={loading || !canToggleAccess}
+                  disabled={!canToggleAccess}
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
                       'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
-                      item.enabled ? 'translate-x-3' : 'translate-x-0',
+                      checked ? 'translate-x-3' : 'translate-x-0',
                     )}
                   />
                 </Switch>
@@ -141,7 +135,7 @@ export function Permissions({ guest, permissions, togglePermissions }) {
         })}
       </ul>
 
-      <div className="my-2 py-1 px-4 border border-gray-300 rounded">
+      {/* <div className="my-2 py-1 px-4 border border-gray-300 rounded">
         <div className="flex items-center gap-1 my-2">
           <h5 className="flex-1 text-base font-medium text-gray-900">Field</h5>
           <Listbox value={field} onChange={setField} disabled={!canToggleAccess}>
@@ -212,13 +206,13 @@ export function Permissions({ guest, permissions, togglePermissions }) {
             );
           })}
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 }
 
 Permissions.propTypes = {
-  guest: PropTypes.object,
   permissions: PropTypes.object,
   togglePermissions: PropTypes.object.isRequired,
+  canToggleAccess: PropTypes.bool,
 };

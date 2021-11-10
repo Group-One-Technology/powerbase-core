@@ -17,8 +17,13 @@ function intializeBasePermissions(permissions) {
     .reduce((acc, cur) => ({ ...acc, ...cur }), {});
 }
 
-export function useBasePermissions({ base, guest, permissions }) {
-  const { data: baseUser, access: { changeGuestAccess }, mutate: mutateBaseUser } = useBaseUser();
+export function useBasePermissions({
+  base,
+  guest,
+  permissions,
+  canToggleAccess,
+}) {
+  const { data: baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
@@ -29,35 +34,37 @@ export function useBasePermissions({ base, guest, permissions }) {
   }, [base, guest]);
 
   const handleBasePermissionsToggle = async (selectedItem) => {
-    const updatedBasePermissions = {
-      ...basePermissions,
-      [selectedItem.key]: !basePermissions[selectedItem.key],
-    };
-
-    setBasePermissions(updatedBasePermissions);
-
-    if (changeGuestAccess && baseUser && guest?.access === 'custom') {
-      saving();
-
-      const updatedGuestPermissions = {
-        ...permissions,
-        ...updatedBasePermissions,
+    if (canToggleAccess) {
+      const updatedBasePermissions = {
+        ...basePermissions,
+        [selectedItem.key]: !basePermissions[selectedItem.key],
       };
 
-      try {
-        await updateGuestPermissions({ id: guest.id, permissions: updatedGuestPermissions });
-        if (baseUser.userId === guest.userId) {
-          mutateBaseUser({ ...baseUser, permissions: updatedGuestPermissions });
+      setBasePermissions(updatedBasePermissions);
+
+      if (baseUser && guest?.access === 'custom') {
+        saving();
+
+        const updatedGuestPermissions = {
+          ...permissions,
+          ...updatedBasePermissions,
+        };
+
+        try {
+          await updateGuestPermissions({ id: guest.id, permissions: updatedGuestPermissions });
+          if (baseUser.userId === guest.userId) {
+            mutateBaseUser({ ...baseUser, permissions: updatedGuestPermissions });
+          }
+          await mutateGuests(guests.map((item) => ({
+            ...item,
+            permissions: item.id === guest.id
+              ? updatedGuestPermissions
+              : item.permissions,
+          })));
+          saved(`Successfully updated ${guest.firstName}'s permissions.`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
         }
-        await mutateGuests(guests.map((item) => ({
-          ...item,
-          permissions: item.id === guest.id
-            ? updatedGuestPermissions
-            : item.permissions,
-        })));
-        saved(`Successfully updated ${guest.firstName}'s permissions.`);
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };

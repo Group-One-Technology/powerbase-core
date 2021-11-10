@@ -12,6 +12,7 @@ export function PermissionsModal() {
     guest,
     permissions,
     togglePermissions,
+    canToggleAccess,
   } = usePermissionsStateModal();
 
   return (
@@ -22,9 +23,9 @@ export function PermissionsModal() {
         </Dialog.Title>
         <div className="m-4 py-4 px-8">
           <Permissions
-            guest={guest}
             permissions={permissions}
             togglePermissions={togglePermissions}
+            canToggleAccess={canToggleAccess}
           />
         </div>
       </div>

@@ -59,6 +59,7 @@ function BaseShareBaseModal() {
           permissions: access.name === 'custom'
             ? {
               ...permissions.base,
+              tables: permissions.tables,
             } : undefined,
         });
         await mutateGuests();
