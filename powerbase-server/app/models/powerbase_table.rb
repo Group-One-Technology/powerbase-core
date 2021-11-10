@@ -11,6 +11,7 @@ class PowerbaseTable < ApplicationRecord
   validates :name, presence: true
   validates :order, presence: true
   serialize :logs, JSON
+  serialize :permissions, JSON
 
   belongs_to :powerbase_database
   has_many :powerbase_fields, dependent: :destroy
@@ -80,7 +81,7 @@ class PowerbaseTable < ApplicationRecord
 
     fields.where(name: columns.map(&:to_s))
   end
-  
+
   def _sequel_table
     self._sequel.from(self.name.to_sym)
   end
@@ -104,7 +105,7 @@ class PowerbaseTable < ApplicationRecord
   def notifier
     @notifier ||= Powerbase::Notifier.new self.db
   end
-  
+
   def remove
     self.default_view_id = nil
     self.save

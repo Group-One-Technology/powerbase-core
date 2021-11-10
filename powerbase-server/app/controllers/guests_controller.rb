@@ -93,7 +93,7 @@ class GuestsController < ApplicationController
       return
     end
 
-    @guest = Guest.new({
+    guest_creator = Guests::Creator.new({
       user_id: @user.id,
       powerbase_database_id: safe_params[:database_id],
       access: safe_params[:access],
@@ -101,10 +101,10 @@ class GuestsController < ApplicationController
       inviter_id: current_user.id,
     })
 
-    if @guest.save
-      render json: format_json(@guest), status: :created
+    if guest_creator.save
+      render json: format_json(guest_creator.object), status: :created
     else
-      render json: @guest.errors, status: :unprocessable_entity
+      render json: guest_creator.object.errors, status: :unprocessable_entity
     end
   end
 

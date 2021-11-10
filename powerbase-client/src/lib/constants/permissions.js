@@ -85,6 +85,18 @@ export const CUSTOM_PERMISSIONS = {
       value: false,
     },
     {
+      name: 'Add Fields',
+      description: 'who can create an actual field and magic field for this table.',
+      key: 'addFields',
+      value: false,
+    },
+    {
+      name: 'Delete Fields',
+      description: 'who can drop a column/field for this table.',
+      key: 'deleteFields',
+      value: false,
+    },
+    {
       name: 'Add Views',
       description: 'who can create collaborative views for this table.',
       key: 'addViews',
@@ -113,18 +125,6 @@ export const CUSTOM_PERMISSIONS = {
       description: 'who can delete records for this table.',
       key: 'deleteRecords',
       value: true,
-    },
-    {
-      name: 'Add Fields',
-      description: 'who can create an actual field and magic field for this table.',
-      key: 'addFields',
-      value: true,
-    },
-    {
-      name: 'Delete Fields',
-      description: 'who can drop a column/field for this table.',
-      key: 'deleteFields',
-      value: false,
     },
     {
       name: 'Comment Records',

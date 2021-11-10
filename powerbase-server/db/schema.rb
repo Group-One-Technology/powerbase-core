@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_03_080759) do
+ActiveRecord::Schema.define(version: 2021_11_10_202755) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -143,6 +143,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_080759) do
     t.string "alias"
     t.text "logs", default: "{}"
     t.integer "order", null: false
+    t.text "permissions", default: "{\"view_table\":{\"access\":\"everyone\"},\"manage_table\":{\"access\":\"admin and up\"},\"add_fields\":{\"access\":\"admin and up\"},\"delete_fields\":{\"access\":\"admin and up\"},\"add_views\":{\"access\":\"editors and up\"},\"manage_views\":{\"access\":\"editors and up\"},\"delete_views\":{\"access\":\"editors and up\"},\"add_records\":{\"access\":\"editors and up\"},\"delete_records\":{\"access\":\"editors and up\"},\"comment_records\":{\"access\":\"commenters and up\"}}"
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end

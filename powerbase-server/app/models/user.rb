@@ -52,16 +52,6 @@ class User < ApplicationRecord
       end
 
       database = field.powerbase_table.powerbase_database
-    elsif VIEW_PERMISSIONS.include?(permission)
-      resource_type = :view
-      if !resource.is_a?(ActiveRecord::Base)
-        view = TableView.find(resource)
-        raise NotFound.new("Could not view with id of #{resource}.") if !view
-      else
-        view = resource
-      end
-
-      database = view.powerbase_table.powerbase_database
     end
 
     return true if database.user_id == self.id
