@@ -51,13 +51,6 @@ function BaseShareBaseModal() {
       setLoading(true);
       setQuery('');
 
-      const configuredPermissions = access.name === 'custom'
-        ? permissions.reduce((acc, cur) => (cur.enabled
-          ? { ...acc, ...cur.value }
-          : acc
-        ), {})
-        : undefined;
-
       try {
         await inviteGuest({
           databaseId: base.id,
@@ -65,8 +58,7 @@ function BaseShareBaseModal() {
           access: access.name,
           permissions: access.name === 'custom'
             ? {
-              ...configuredPermissions,
-              ...ACCESS_LEVEL.find((item) => item.name === 'viewer')?.value,
+              ...permissions.base,
             } : undefined,
         });
         await mutateGuests();

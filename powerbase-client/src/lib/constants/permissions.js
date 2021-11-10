@@ -7,76 +7,54 @@ export const ACCESS_LEVEL = [
   {
     name: 'viewer',
     description: 'Can only view the data.',
-    value: {
-      viewBase: true,
-      viewTable: true,
-      viewField: true,
-      seeView: true,
-    },
-  },
-];
-
-export const CUSTOM_SIMPLE_PERMISSIONS = [
-  {
-    name: 'Can share with others.',
-    value: { inviteGuests: true, removeAccess: true, changeGuestAccess: true },
-  },
-  {
-    name: 'Can configure base, tables, and fields.',
-    value: {
-      manageBase: true,
-      addTable: true,
-      manageTable: true,
-      addFields: true,
-    },
-  },
-  {
-    name: 'Can edit records and views.',
-    value: { manageView: true, addRecords: true, deleteRecords: true },
-  },
-  {
-    name: 'Can comment',
-    value: { commentRecords: true },
+    value: { viewBase: true, viewTable: true, viewField: true },
   },
 ];
 
 export const CUSTOM_PERMISSIONS = {
   Base: [
     {
+      name: 'View Base',
+      description: 'who can configure the base remote DB connection.',
+      key: 'manageBase',
+      value: true,
+      hidden: true,
+    },
+    {
       name: 'Manage Base',
       description: 'who can configure the base remote DB connection.',
-      value: { manageBase: true },
-      defaultValue: false,
+      key: 'manageBase',
+      value: false,
     },
     {
       name: 'Invite Guests',
       description: 'who can send invites to users.',
-      value: { inviteGuests: true },
-      defaultValue: false,
+      key: 'inviteGuests',
+      value: false,
     },
     {
       name: 'Change Guest Access',
       description: 'who can change guest\'s access level and permissions.',
-      value: { changeGuestAccess: true },
-      defaultValue: false,
+      key: 'changeGuestAccess',
+      value: false,
     },
     {
       name: 'Remove Guest Access',
       description: 'who can remove a guest from this base.',
-      value: { removeGuestAccess: true },
-      defaultValue: false,
+      key: 'removeGuestAccess',
+      value: false,
     },
     {
       name: 'Add Tables',
-      value: { addTables: true },
       description: 'who can create a table for this base.',
-      defaultValue: true,
+      key: 'addTables',
+      value: true,
     },
     {
       name: 'Delete Tables',
-      value: { deleteTables: true },
       description: 'who can drop a table for this base.',
-      defaultValue: false,
+      key: 'deleteTables',
+      value: false,
     },
   ],
   Table: [

@@ -3,16 +3,12 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
-
-import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
-import { useBasePermissions } from '@lib/hooks/permissions/useBasePermissions';
+import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 
-export function TablePermissions({ guest }) {
-  const { data: base } = useBase();
+export function Permissions({ guest, permissions, togglePermissions }) {
   const { tables } = useCurrentView();
-  const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({ base });
   const { canToggleAccess, tableState, fieldState } = useTablePermissions({ tables, guest });
   const {
     table,
@@ -36,11 +32,13 @@ export function TablePermissions({ guest }) {
   return (
     <div className="mt-2">
       <ul className="my-1">
-        {basePermissions.map((item) => {
-          const itemKey = item.name.split(' ').join('_');
+        {CUSTOM_PERMISSIONS.Base.map((item) => {
+          if (item.hidden) return null;
+
+          const checked = permissions.base[item.key];
 
           return (
-            <li key={itemKey} className="my-2">
+            <li key={item.key} className="my-2">
               <label className="flex w-full">
                 <div>
                   <div className="font-medium text-sm capitalize">
@@ -49,11 +47,11 @@ export function TablePermissions({ guest }) {
                   <p className="text-xs text-gray-500">{item.description}</p>
                 </div>
                 <Switch
-                  checked={item.enabled}
-                  onChange={() => handleBasePermissionsToggle(item)}
+                  checked={checked}
+                  onChange={() => togglePermissions.base(item)}
                   className={cn(
                     'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-                    item.enabled ? 'bg-indigo-600' : 'bg-gray-200',
+                    checked ? 'bg-indigo-600' : 'bg-gray-200',
                     (loading || !canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
                   )}
                   disabled={loading || !canToggleAccess}
@@ -62,7 +60,7 @@ export function TablePermissions({ guest }) {
                     aria-hidden="true"
                     className={cn(
                       'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
-                      item.enabled ? 'translate-x-3' : 'translate-x-0',
+                      checked ? 'translate-x-3' : 'translate-x-0',
                     )}
                   />
                 </Switch>
@@ -73,7 +71,7 @@ export function TablePermissions({ guest }) {
       </ul>
 
       <div className="flex items-center gap-1 my-2">
-        <h5 className="flex-1 text-base font-medium text-gray-900">Table</h5>
+        <h4 className="flex-1 text-base font-medium text-gray-900">Table</h4>
         <Listbox value={table} onChange={setTable} disabled={!canToggleAccess}>
           <div className="flex-1 relative">
             <Listbox.Button
@@ -145,7 +143,7 @@ export function TablePermissions({ guest }) {
 
       <div className="my-2 py-1 px-4 border border-gray-300 rounded">
         <div className="flex items-center gap-1 my-2">
-          <h6 className="flex-1 text-base font-medium text-gray-900">Field</h6>
+          <h5 className="flex-1 text-base font-medium text-gray-900">Field</h5>
           <Listbox value={field} onChange={setField} disabled={!canToggleAccess}>
             <div className="flex-1 relative">
               <Listbox.Button
@@ -219,6 +217,8 @@ export function TablePermissions({ guest }) {
   );
 }
 
-TablePermissions.propTypes = {
+Permissions.propTypes = {
   guest: PropTypes.object,
+  permissions: PropTypes.object,
+  togglePermissions: PropTypes.object.isRequired,
 };
