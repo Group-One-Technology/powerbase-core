@@ -16,14 +16,14 @@ import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 
 export function FieldItem({ field, setFields }) {
   const { saving, saved, catchError } = useSaveStatus();
-  const { access: { manageView } } = useBaseUser();
+  const { access: { manageViews } } = useBaseUser();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields: setRecordFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
   const [loading, setLoading] = useState(false);
 
   const handleToggleVisibility = async () => {
-    if (manageView) {
+    if (manageViews) {
       saving();
       setLoading(true);
 
@@ -60,7 +60,7 @@ export function FieldItem({ field, setFields }) {
       className="flex gap-2 items-center"
       handle={{
         position: 'left',
-        component: manageView
+        component: manageViews
           ? (
             <button
               type="button"
@@ -85,9 +85,9 @@ export function FieldItem({ field, setFields }) {
           className={cn(
             'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             !field.isHidden ? 'bg-indigo-600' : 'bg-gray-200',
-            (loading || !manageView) ? 'cursor-not-allowed' : 'cursor-pointer',
+            (loading || !manageViews) ? 'cursor-not-allowed' : 'cursor-pointer',
           )}
-          disabled={loading || !manageView}
+          disabled={loading || !manageViews}
         >
           <span className="sr-only">Show Field</span>
           <span

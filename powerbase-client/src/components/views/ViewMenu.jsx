@@ -43,13 +43,13 @@ export function ViewMenu({ tableId, views: initialViews }) {
   };
 
   const handleViewOptions = (view) => {
-    if (access?.manageView) {
+    if (access?.manageViews) {
       setViewOptionModal({ open: true, view });
     }
   };
 
   const handleViewsOrderChange = async ({ active, over }) => {
-    if (active.id !== over.id && access?.manageView) {
+    if (active.id !== over.id && access?.manageViews) {
       saving();
 
       const oldIndex = views.findIndex((item) => item.id === active.id);
@@ -97,7 +97,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                       )}
                       handle={{
                         position: 'left',
-                        component: access?.manageView
+                        component: access?.manageViews
                           ? (
                             <button
                               type="button"
@@ -117,7 +117,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
-                      {access?.manageView && (
+                      {access?.manageViews && (
                         <div className="p-0.5">
                           <button
                             type="button"

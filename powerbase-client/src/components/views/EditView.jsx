@@ -17,7 +17,7 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function EditView({ view, open, setOpen }) {
   const { mounted } = useMounted();
-  const { access: { manageView } } = useBaseUser();
+  const { access: { manageViews } } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
@@ -42,7 +42,7 @@ export function EditView({ view, open, setOpen }) {
   };
 
   const handleDelete = async () => {
-    if (manageView) {
+    if (manageViews) {
       setLoading(true);
       setError(undefined);
 
@@ -63,7 +63,7 @@ export function EditView({ view, open, setOpen }) {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (manageView) {
+    if (manageViews) {
       setLoading(true);
       setError(undefined);
 

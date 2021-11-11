@@ -15,7 +15,7 @@ import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
 export function Fields() {
-  const { access: { manageView, manageFields } } = useBaseUser();
+  const { access: { manageView, manageField } } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
   const { setFields: setRecordFields } = useViewFieldState();
@@ -103,7 +103,7 @@ export function Fields() {
                       </ul>
                     </SortableContext>
                   </DndContext>
-                  {manageFields && (
+                  {manageField && (
                     <button
                       type="button"
                       className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
