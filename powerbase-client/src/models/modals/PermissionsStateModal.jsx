@@ -4,13 +4,22 @@ import { useState } from 'react';
 import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useBaseUser } from '@models/BaseUser';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseGuests } from '@models/BaseGuests';
 import { useBasePermissions } from '@lib/hooks/permissions/useBasePermissions';
 import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
+import { updateGuestPermissions } from '@lib/api/guests';
+import { useMounted } from '@lib/hooks/useMounted';
 
 function usePermissionsStateModalModel() {
-  const { data: base } = useBase();
+  const { mounted } = useMounted();
+  const {
+    saving, saved, catchError, loading,
+  } = useSaveStatus();
   const { tables } = useCurrentView();
-  const { access: { changeGuestAccess, inviteGuests } } = useBaseUser();
+  const { data: base } = useBase();
+  const { data: baseUser, access: { changeGuestAccess, inviteGuests }, mutate: mutateBaseUser } = useBaseUser();
+  const { data: guests, mutate: mutateGuests } = useBaseGuests();
 
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
@@ -28,6 +37,37 @@ function usePermissionsStateModalModel() {
     setOpen(true);
   };
 
+  const updatePermissions = async (evt) => {
+    evt.preventDefault();
+
+    if (canToggleAccess && baseUser && guest) {
+      saving();
+
+      const permissions = guest.access === 'custom'
+        ? {
+          ...basePermissions,
+          tables: tablePermissions,
+        } : null;
+
+      try {
+        await updateGuestPermissions({ id: guest.id, permissions });
+        if (baseUser.userId === guest.userId) {
+          mutateBaseUser({ ...baseUser, permissions });
+        }
+        await mutateGuests(guests.map((item) => ({
+          ...item,
+          permissions: item.id === guest.id
+            ? permissions
+            : item.permissions,
+        })));
+        saved(`Successfully updated ${guest.firstName}'s permissions.`);
+        mounted(() => setOpen(false));
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
+  };
+
   return {
     open,
     setOpen,
@@ -43,6 +83,8 @@ function usePermissionsStateModalModel() {
       base: handleBasePermissionsToggle,
       table: handleTablePermissionToggle,
     },
+    updatePermissions,
+    loading,
   };
 }
 

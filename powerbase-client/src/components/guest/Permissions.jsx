@@ -1,13 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
+
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
-import { useState } from 'react/cjs/react.development';
 
-export function Permissions({ permissions, togglePermissions, canToggleAccess }) {
+export function Permissions({
+  guest,
+  permissions,
+  togglePermissions,
+  canToggleAccess,
+  updatePermissions,
+  loading,
+}) {
   const { tables } = useCurrentView();
   const [table, setTable] = useState(tables[0]);
 
@@ -22,7 +29,7 @@ export function Permissions({ permissions, togglePermissions, canToggleAccess })
   }
 
   return (
-    <div className="mt-2">
+    <form onSubmit={updatePermissions} className="mt-2">
       <ul className="my-1">
         {CUSTOM_PERMISSIONS.Base.map((item) => {
           if (item.hidden) return null;
@@ -207,12 +214,27 @@ export function Permissions({ permissions, togglePermissions, canToggleAccess })
           })}
         </ul>
       </div> */}
-    </div>
+
+      {(guest && canToggleAccess) && (
+        <div className="mt-5 sm:mt-6">
+          <button
+            type="submit"
+            className="block ml-auto rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+            disabled={loading}
+          >
+            Update Permissions
+          </button>
+        </div>
+      )}
+    </form>
   );
 }
 
 Permissions.propTypes = {
+  guest: PropTypes.object,
   permissions: PropTypes.object,
   togglePermissions: PropTypes.object.isRequired,
   canToggleAccess: PropTypes.bool,
+  updatePermissions: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
 };

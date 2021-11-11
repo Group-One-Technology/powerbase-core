@@ -13,6 +13,8 @@ export function PermissionsModal() {
     permissions,
     togglePermissions,
     canToggleAccess,
+    updatePermissions,
+    loading,
   } = usePermissionsStateModal();
 
   return (
@@ -29,9 +31,12 @@ export function PermissionsModal() {
 
         <div className="m-4 py-4 px-8">
           <Permissions
+            guest={guest}
             permissions={permissions}
             togglePermissions={togglePermissions}
             canToggleAccess={canToggleAccess}
+            updatePermissions={updatePermissions}
+            loading={loading}
           />
         </div>
       </div>

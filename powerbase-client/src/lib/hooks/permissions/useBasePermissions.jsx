@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useBaseUser } from '@models/BaseUser';
-import { useBaseGuests } from '@models/BaseGuests';
-import { useSaveStatus } from '@models/SaveStatus';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
-import { updateGuestPermissions } from '@lib/api/guests';
 
 function intializeBasePermissions(permissions) {
   return CUSTOM_PERMISSIONS.Base
@@ -23,10 +19,6 @@ export function useBasePermissions({
   permissions,
   canToggleAccess,
 }) {
-  const { data: baseUser, mutate: mutateBaseUser } = useBaseUser();
-  const { data: guests, mutate: mutateGuests } = useBaseGuests();
-  const { saving, saved, catchError } = useSaveStatus();
-
   const [basePermissions, setBasePermissions] = useState(intializeBasePermissions(permissions));
 
   useEffect(() => {
@@ -41,31 +33,6 @@ export function useBasePermissions({
       };
 
       setBasePermissions(updatedBasePermissions);
-
-      if (baseUser && guest?.access === 'custom') {
-        saving();
-
-        const updatedGuestPermissions = {
-          ...permissions,
-          ...updatedBasePermissions,
-        };
-
-        try {
-          await updateGuestPermissions({ id: guest.id, permissions: updatedGuestPermissions });
-          if (baseUser.userId === guest.userId) {
-            mutateBaseUser({ ...baseUser, permissions: updatedGuestPermissions });
-          }
-          await mutateGuests(guests.map((item) => ({
-            ...item,
-            permissions: item.id === guest.id
-              ? updatedGuestPermissions
-              : item.permissions,
-          })));
-          saved(`Successfully updated ${guest.firstName}'s permissions.`);
-        } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
-        }
-      }
     }
   };
 
