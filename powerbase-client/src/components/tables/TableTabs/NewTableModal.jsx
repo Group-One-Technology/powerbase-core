@@ -202,7 +202,6 @@ export default function NewTableModal({
               };
               const response = await securedApi.post(`/magic_values`, payload);
               if (response.statusText === "OK") {
-                console.log("whoop");
                 if (
                   idx + 1 === csvArray.length &&
                   keyIdx + 1 === recordKeys.length
