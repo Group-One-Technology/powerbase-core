@@ -11,10 +11,10 @@ class ApplicationController < ActionController::API
 
   private
     def not_authorized
-      render json: { error: "You are not authorized to perform this action." }, status: :unauthorized
+      render json: { error: "You are not authorized to perform this action.", status: 401 }, status: :unauthorized
     end
 
     def not_found(exception)
-      render json: { error: exception }, status: :not_found
+      render json: { error: exception, status: 404 }, status: :not_found
     end
 end
