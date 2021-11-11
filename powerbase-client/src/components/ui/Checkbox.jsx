@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React from "react";
-export default function Checkbox({ isChecked, setIsChecked }) {
+export default function Checkbox({ isChecked, setIsChecked, label }) {
   const handleCheck = () => {
     setIsChecked(!isChecked);
   };
@@ -22,7 +22,7 @@ export default function Checkbox({ isChecked, setIsChecked }) {
             htmlFor="data-validation-enabler"
             className="font-normal text-gray-600"
           >
-            Disable cell data validation
+            {label}
           </label>
         </div>
       </div>

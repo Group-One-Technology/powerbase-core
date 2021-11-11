@@ -11,7 +11,7 @@ import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
 import { useFieldTypes } from "@models/FieldTypes";
 import { useViewFields } from "@models/ViewFields";
 import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
-import Checkbox from "./FieldCheckbox";
+import Checkbox from "@components/ui/Checkbox";
 
 const debounceResolve = AwesomeDebouncePromise;
 
@@ -127,7 +127,11 @@ const FieldTypeComponent = ({
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
       </div>
       <div>
-        <Checkbox setIsChecked={setIsChecked} isChecked={isChecked} />
+        <Checkbox
+          setIsChecked={setIsChecked}
+          isChecked={isChecked}
+          label="Disable cell validation"
+        />
       </div>
       {type.id === 4 && (
         <div className="mt-4 mb-6">
@@ -159,7 +163,7 @@ export default function NewField({
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
-  const { fieldName, setFieldName, search } = useDebouncedInput(setNameExists);
+  const { fieldName, setFieldName } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
   const { mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();

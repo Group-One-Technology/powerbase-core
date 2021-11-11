@@ -144,8 +144,8 @@ ActiveRecord::Schema.define(version: 2021_11_08_193546) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_pii", default: false, null: false
     t.string "alias"
-    t.boolean "is_virtual"
     t.text "options"
+    t.boolean "is_virtual"
     t.integer "precision"
     t.boolean "allow_dirty_value"
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
