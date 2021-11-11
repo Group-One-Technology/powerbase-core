@@ -25,10 +25,16 @@ class PowerbaseTablesController < ApplicationController
   def index
     @database = PowerbaseDatabase.find(safe_params[:database_id])
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    current_user.can?(:view_base, @database)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 
     render json: {
       migrated: @database.is_migrated,
-      tables: @database.powerbase_tables.order(order: :asc).map {|item| format_json(item)}
+      tables: @database.powerbase_tables
+        .order(order: :asc)
+        .select {|table| current_user.can?(:view_table, table, @guest, false)}
+        .map {|item| format_json(item)}
     }
   end
 
@@ -36,6 +42,8 @@ class PowerbaseTablesController < ApplicationController
   def show
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:view_table, @table)
+
     render json: format_json(@table)
   end
 
@@ -88,9 +96,10 @@ class PowerbaseTablesController < ApplicationController
         page_size: table.page_size,
         order: table.order,
         is_migrated: table.is_migrated,
+        permissions: table.permissions,
         created_at: table.created_at,
         updated_at: table.updated_at,
-        database_id: table.powerbase_database_id
+        database_id: table.powerbase_database_id,
       }
     end
 end

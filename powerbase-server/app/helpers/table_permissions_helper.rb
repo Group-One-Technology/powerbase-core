@@ -12,19 +12,6 @@ module TablePermissionsHelper
     comment_records: { access: "commenters and up", default_value: true },
   }
 
-  def does_custom_have_access(access)
-    case access
-    when "everyone"
-      return true
-    when "commenters and up"
-      return true
-    when "editors and up"
-      return true
-    else
-      return false
-    end
-  end
-
   def update_table_guests_access(table, permission, guest, is_allowed)
     permission_key = permission[0].to_s
     permission_value = permission[1]

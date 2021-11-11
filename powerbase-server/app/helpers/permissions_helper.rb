@@ -12,6 +12,19 @@ module PermissionsHelper
     :viewer => [:view_base, :view_table, :view_field],
   }
 
+  def does_custom_have_access(access)
+    case access
+    when "everyone"
+      return true
+    when "commenters and up"
+      return true
+    when "editors and up"
+      return true
+    else
+      return false
+    end
+  end
+
   class NotFound < StandardError
     def message
       "Could not find resource."

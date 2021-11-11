@@ -20,7 +20,8 @@ class User < ApplicationRecord
   # :permission :: a given ability to check whether the user can do or not.
   # :resource :: the resource to check the given permission against.
   # :guest :: (optional) the guest object or guest_id
-  def can?(permission, resource, guest = nil)
+  # :error :: (optional) flag whether it should throw an error or not.
+  def can?(permission, resource, guest = nil, error = true)
     resource_type = nil
     database = nil
 
@@ -28,7 +29,8 @@ class User < ApplicationRecord
       resource_type = :database
       if !resource.is_a?(ActiveRecord::Base)
         database = PowerbaseDatabase.find(resource)
-        raise NotFound.new("Could not find database with id of #{resource}.") if !database
+        raise NotFound.new("Could not find database with id of #{resource}.") if !database && error
+        return false if !database
       else
         database = resource
       end
@@ -36,7 +38,8 @@ class User < ApplicationRecord
       resource_type = :table
       if !resource.is_a?(ActiveRecord::Base)
         table = PowerbaseTable.find(resource)
-        raise NotFound.new("Could not table with id of #{resource}.") if !table
+        raise NotFound.new("Could not table with id of #{resource}.") if !table && error
+        return false if !table
       else
         table = resource
       end
@@ -46,7 +49,8 @@ class User < ApplicationRecord
       resource_type = :field
       if !resource.is_a?(ActiveRecord::Base)
         field = PowerbaseField.find(resource)
-        raise NotFound.new("Could not field with id of #{resource}.") if !field
+        raise NotFound.new("Could not field with id of #{resource}.") if !field && error
+        return false if !field
       else
         field = resource
       end
@@ -58,16 +62,35 @@ class User < ApplicationRecord
 
     guest = Guest.find(guest) if !database.is_a?(ActiveRecord::Base)
     guest = guest || Guest.find_by(user_id: self.id, powerbase_database_id: database.id)
-    raise AccessDenied if !guest
+    raise AccessDenied if !guest && error
+    return false if !guest
 
     if guest.access.to_sym != :custom
       permissions = ROLES[guest.access.to_sym]
       return true if permissions.include?(:all)
       return true if permissions.include? permission
     else
-      return true if guest.permissions[permission.to_s] == true
+      permission_key = permission.to_s
+
+      case resource_type
+      when :database
+        return true if guest.permissions[permission_key] == true
+      when :table
+        return true if guest.permissions["tables"][table.id] && guest.permissions["tables"][table.id][permission_key] == true
+
+        restricted_guests = Array(table.permissions[permission_key]["restricted_guests"])
+        is_restricted = restricted_guests.any? {|guest_id| guest_id == guest.id}
+        raise AccessDenied if is_restricted && error
+        return false if is_restricted
+
+        return true if does_custom_have_access(table.permissions[permission_key]["access"])
+
+        allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
+        return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+      end
     end
 
-    raise AccessDenied
+    raise AccessDenied if error
+    return false
   end
 end

@@ -1,4 +1,5 @@
 class Guests::Updater
+  include PermissionsHelper
   include TablePermissionsHelper
 
   attr_accessor :guest

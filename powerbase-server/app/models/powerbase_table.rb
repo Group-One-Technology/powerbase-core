@@ -16,8 +16,8 @@ class PowerbaseTable < ApplicationRecord
   belongs_to :powerbase_database
   belongs_to :default_view, class_name: "TableView", optional: true
   has_many :powerbase_fields, dependent: :destroy
-  has_many :connections, class_name: "BaseConnection" foreign_key: :powerbase_table_id
-  has_many :referenced_connections, class_name: "BaseConnection" foreign_key: :referenced_table_id
+  has_many :connections, class_name: "BaseConnection", foreign_key: :powerbase_table_id
+  has_many :referenced_connections, class_name: "BaseConnection", foreign_key: :referenced_table_id
   has_many :table_views, dependent: :destroy
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
 

@@ -1,4 +1,5 @@
 class Guests::Creator
+  include PermissionsHelper
   include TablePermissionsHelper
 
   attr_accessor :guest
