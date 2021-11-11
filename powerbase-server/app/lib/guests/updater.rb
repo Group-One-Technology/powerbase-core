@@ -7,7 +7,7 @@ class Guests::Updater
     @guest = guest
   end
 
-  def update_permissions!(permissions)
+  def update_permissions!(permissions, filtered_permissions = nil)
     return if @guest.access != "custom"
 
     permissions["tables"].each do |table_id, table_permissions|
@@ -16,13 +16,16 @@ class Guests::Updater
       DEFAULT_PERMISSIONS.each do |key, value|
         # Check if permission didn't change
         next if table_permissions[key.to_s] == nil
-        next if table_permissions[key.to_s] == @guest.permissions["tables"][table_id.to_s][key.to_s]
+
+        if @guest.permissions["tables"] && @guest.permissions["tables"][table_id.to_s]
+          next if table_permissions[key.to_s] == @guest.permissions["tables"][table_id.to_s][key.to_s]
+        end
 
         update_table_guests_access(table, [key, value], @guest, table_permissions[key.to_s])
       end
     end
 
-    @guest.update(permissions: permissions)
+    @guest.update(permissions: filtered_permissions || permissions)
   end
 
   def update_access!(access)

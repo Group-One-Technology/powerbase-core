@@ -21,7 +21,7 @@ import { PermissionsModal } from '@components/guest/PermissionsModal';
 function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const { openModal, permissions } = usePermissionsStateModal();
+  const { openModal, getPermissions } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { access: { inviteGuests } } = useBaseUser();
@@ -57,10 +57,8 @@ function BaseShareBaseModal() {
           email,
           access: access.name,
           permissions: access.name === 'custom'
-            ? {
-              ...permissions.base,
-              tables: permissions.tables,
-            } : undefined,
+            ? getPermissions()
+            : undefined,
         });
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);

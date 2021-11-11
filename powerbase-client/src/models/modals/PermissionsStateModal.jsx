@@ -10,6 +10,7 @@ import { useBasePermissions } from '@lib/hooks/permissions/useBasePermissions';
 import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
 import { updateGuestPermissions } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
+import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 
 function usePermissionsStateModalModel() {
   const { mounted } = useMounted();
@@ -37,6 +38,29 @@ function usePermissionsStateModalModel() {
     setOpen(true);
   };
 
+  const getPermissions = () => {
+    const filteredTablePermissions = {};
+
+    Object.keys(tablePermissions).forEach((key) => {
+      const item = tablePermissions[key];
+
+      CUSTOM_PERMISSIONS.Table.forEach((permission) => {
+        if (permission.value !== item[permission.key]) {
+          if (filteredTablePermissions[key] == null) {
+            filteredTablePermissions[key] = {};
+          }
+
+          filteredTablePermissions[key][permission.key] = item[permission.key];
+        }
+      });
+    });
+
+    return {
+      ...basePermissions,
+      tables: filteredTablePermissions,
+    };
+  };
+
   const updatePermissions = async (evt) => {
     evt.preventDefault();
 
@@ -47,10 +71,11 @@ function usePermissionsStateModalModel() {
         ? {
           ...basePermissions,
           tables: tablePermissions,
-        } : null;
+        }
+        : null;
 
       try {
-        await updateGuestPermissions({ id: guest.id, permissions });
+        await updateGuestPermissions({ id: guest.id, permissions, filteredPermissions: getPermissions() });
         if (baseUser.userId === guest.userId) {
           mutateBaseUser({ ...baseUser, permissions });
         }
@@ -83,6 +108,7 @@ function usePermissionsStateModalModel() {
       base: handleBasePermissionsToggle,
       table: handleTablePermissionToggle,
     },
+    getPermissions,
     updatePermissions,
     loading,
   };

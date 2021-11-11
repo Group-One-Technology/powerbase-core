@@ -6,6 +6,7 @@ import { SelectorIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { Button } from '@components/ui/Button';
 
 export function Permissions({
   guest,
@@ -107,7 +108,9 @@ export function Permissions({
         {CUSTOM_PERMISSIONS.Table.map((item) => {
           if (item.hidden) return null;
 
-          const checked = permissions.tables[table.id][item.key];
+          const checked = permissions.tables[table.id]
+            ? permissions.tables[table.id][item.key] ?? item.value
+            : item.value;
 
           return (
             <li key={item.key} className="my-2">
@@ -217,13 +220,13 @@ export function Permissions({
 
       {(guest && canToggleAccess) && (
         <div className="mt-5 sm:mt-6">
-          <button
+          <Button
             type="submit"
-            className="block ml-auto rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
-            disabled={loading}
+            className="flex items-center justify-center ml-auto rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+            loading={loading}
           >
             Update Permissions
-          </button>
+          </Button>
         </div>
       )}
     </form>

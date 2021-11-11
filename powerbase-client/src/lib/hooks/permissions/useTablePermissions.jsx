@@ -7,7 +7,7 @@ function initializeTablePermissions(tables, permissions) {
     tablePermissions[table.id] = CUSTOM_PERMISSIONS.Table
       .map((item) => ({
         ...item,
-        value: permissions?.tables != null
+        value: permissions?.tables && permissions.tables[table.id] != null
           ? permissions.tables[table.id][item.key] ?? item.value
           : item.value ?? false,
       }))

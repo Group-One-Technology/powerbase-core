@@ -16,6 +16,7 @@ class GuestsController < ApplicationController
   schema(:update_permissions) do
     required(:id)
     required(:permissions)
+    required(:filtered_permissions)
   end
 
   schema(:create) do
@@ -127,7 +128,7 @@ class GuestsController < ApplicationController
     current_user.can?(:change_guest_access, @guest.powerbase_database)
 
     guest_updater = Guests::Updater.new(@guest)
-    guest_updater.update_permissions!(safe_params[:permissions])
+    guest_updater.update_permissions!(safe_params[:permissions], safe_params[:filtered_permissions])
 
     render status: :no_content
   end
