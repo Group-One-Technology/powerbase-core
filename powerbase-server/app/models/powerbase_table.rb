@@ -14,12 +14,11 @@ class PowerbaseTable < ApplicationRecord
   serialize :permissions, JSON
 
   belongs_to :powerbase_database
-  has_many :powerbase_fields, dependent: :destroy
-  # TODO: Fix duplicate association name
-  has_many :base_connections
-  has_many :base_connections, foreign_key: :referenced_table_id
-  has_many :table_views, dependent: :destroy
   belongs_to :default_view, class_name: "TableView", optional: true
+  has_many :powerbase_fields, dependent: :destroy
+  has_many :connections, class_name: "BaseConnection" foreign_key: :powerbase_table_id
+  has_many :referenced_connections, class_name: "BaseConnection" foreign_key: :referenced_table_id
+  has_many :table_views, dependent: :destroy
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
 
   after_create :add_migration_attributes
