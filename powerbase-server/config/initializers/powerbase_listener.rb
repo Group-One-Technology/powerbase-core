@@ -1,4 +1,5 @@
 if defined?(Rails::Server) && ENV["ENABLE_LISTENER"]
+  puts "** STARTING DATABASE AUTOSYNC AND LISTENERS **"
   ids = PowerbaseDatabase.turbo.select(&:has_row_oid_support?).map(&:id)
   
   # Destroy existing cron job to avoid duplicate
