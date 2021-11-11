@@ -112,7 +112,7 @@ class GuestsController < ApplicationController
   def change_access
     @guest = Guest.find(safe_params[:id])
     raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+    current_user.can?(:change_guest_access, @guest.powerbase_database)
 
     if @guest.update(access: safe_params[:access])
       render json: format_json(@guest)
@@ -125,20 +125,19 @@ class GuestsController < ApplicationController
   def update_permissions
     @guest = Guest.find(safe_params[:id])
     raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+    current_user.can?(:change_guest_access, @guest.powerbase_database)
 
-    if @guest.update(permissions: safe_params[:permissions])
-      render json: format_json(@guest)
-    else
-      render json: @guest.errors, status: :unprocessable_entity
-    end
+    guest_updater = Guests::Updater.new(@guest)
+    guest_updater.update_permissions!(safe_params[:permissions])
+
+    render status: :no_content
   end
 
   # DELETE /guests/:id
   def destroy
     @guest = Guest.find(safe_params[:id])
     raise AccessDenied if !@guest
-    current_user.can?(:remove_guests, @guest.powerbase_database, @guest)
+    current_user.can?(:remove_guests, @guest.powerbase_database)
     @guest.destroy
 
     render status: :no_content

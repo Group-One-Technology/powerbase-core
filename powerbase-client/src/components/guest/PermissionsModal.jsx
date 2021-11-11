@@ -21,6 +21,12 @@ export function PermissionsModal() {
         <Dialog.Title as="h3" className="text-center text-xl font-medium text-gray-900">
           Configure Permissions {guest ? `for "${guest.firstName || guest.email}"` : ''}
         </Dialog.Title>
+        {!guest && (
+          <Dialog.Description as="p" className="my-1 text-center text-sm text-gray-500">
+            The default permissions of guests are the same with the <strong>Editor</strong> access.
+          </Dialog.Description>
+        )}
+
         <div className="m-4 py-4 px-8">
           <Permissions
             permissions={permissions}
