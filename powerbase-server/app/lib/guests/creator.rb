@@ -20,6 +20,8 @@ class Guests::Creator
       table = PowerbaseTable.find(table_id)
 
       DEFAULT_PERMISSIONS.each do |key, value|
+        next if table_permissions[key.to_s] == nil
+
         if table.permissions[key.to_s]["access"] != value[:access] || table_permissions[key.to_s] != value[:default_value]
           update_table_guests_access(table, [key, value], @guest, table_permissions[key.to_s])
         end

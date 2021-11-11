@@ -137,17 +137,19 @@ function BaseShareBaseModal() {
         </div>
 
         <div className="mx-6 my-1">
-          <button
-            type="button"
-            className={cn(
-              'ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
-              access.name !== 'custom' && 'invisible',
-            )}
-            onClick={handleConfigurePermissions}
-          >
-            <CogIcon className="h-4 w-4 mr-1" />
-            Configure Permissions
-          </button>
+          {inviteGuests && (
+            <button
+              type="button"
+              className={cn(
+                'ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                access.name !== 'custom' && 'invisible',
+              )}
+              onClick={handleConfigurePermissions}
+            >
+              <CogIcon className="h-4 w-4 mr-1" />
+              Configure Permissions
+            </button>
+          )}
         </div>
 
         <ul className="mx-4 my-1 bg-white divide-y divide-gray-200">

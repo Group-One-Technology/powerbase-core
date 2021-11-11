@@ -1,7 +1,7 @@
 export const ACCESS_LEVEL = [
   { name: 'owner', description: 'Has full access to this base and can share it with others.' },
-  { name: 'custom', description: 'Configure your own permissions. It has the Editor\'s permissions as default.' },
   { name: 'admin', description: 'Can configure tables, connections, and fields.' },
+  { name: 'custom', description: 'Configure your own permissions. It has the Editor\'s permissions as default.' },
   { name: 'editor', description: 'Can edit records, and manage views but not configure the base.' },
   { name: 'commenter', description: 'Can comment and view data.', disabled: true },
   {
