@@ -39,7 +39,7 @@ function useBaseUserModel() {
       }
     }
 
-    if (BasePermissions.TABLE.includes(permissions)) {
+    if (BasePermissions.TABLE.includes(permission)) {
       if (baseUser.permissions.tables[resourceId]?.[permission]) return true;
       if (baseUser.permissions.tables[resourceId]?.[permission] == null) {
         const tablePermission = CUSTOM_PERMISSIONS.Table.find((item) => item.key === permission);
@@ -47,7 +47,7 @@ function useBaseUserModel() {
       }
     }
 
-    if (BasePermissions.FIELD.includes(permissions)) {
+    if (BasePermissions.FIELD.includes(permission)) {
       if (baseUser.permissions.fields?.[resourceId]?.[permission]) return true;
       if (baseUser.permissions.fields?.[resourceId]?.[permission] == null) {
         const fieldPermission = CUSTOM_PERMISSIONS.Field.find((item) => item.key === permission);
