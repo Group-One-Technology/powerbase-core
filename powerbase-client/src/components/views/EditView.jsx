@@ -15,13 +15,20 @@ import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 
-export function EditView({ view, open, setOpen }) {
+export function EditView({
+  tableId,
+  view,
+  open,
+  setOpen,
+}) {
   const { mounted } = useMounted();
-  const { access: { manageViews } } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
+
+  const canManageViews = baseUser?.can('manageViews', tableId);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -42,7 +49,7 @@ export function EditView({ view, open, setOpen }) {
   };
 
   const handleDelete = async () => {
-    if (manageViews) {
+    if (canManageViews) {
       setLoading(true);
       setError(undefined);
 
@@ -63,7 +70,7 @@ export function EditView({ view, open, setOpen }) {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (manageViews) {
+    if (canManageViews) {
       setLoading(true);
       setError(undefined);
 
@@ -207,6 +214,7 @@ export function EditView({ view, open, setOpen }) {
 }
 
 EditView.propTypes = {
+  tableId: PropTypes.number.isRequired,
   view: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,

@@ -11,7 +11,7 @@ import { useBaseTable } from '@models/BaseTable';
 
 export function Table() {
   const { data: base } = useBase();
-  const { data: baseUser } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { error: tableError } = useBaseTable();
   const {
     table,

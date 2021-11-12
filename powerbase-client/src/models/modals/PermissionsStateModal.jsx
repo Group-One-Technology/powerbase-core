@@ -19,12 +19,12 @@ function usePermissionsStateModalModel() {
   } = useSaveStatus();
   const { tables } = useCurrentView();
   const { data: base } = useBase();
-  const { data: baseUser, access: { changeGuestAccess, inviteGuests }, mutate: mutateBaseUser } = useBaseUser();
+  const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
 
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
-  const canToggleAccess = guest ? changeGuestAccess : inviteGuests;
+  const canToggleAccess = guest ? baseUser?.can('changeGuestAccess') : baseUser?.can('inviteGuests');
 
   const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({
     guest, base, permissions: guest?.permissions, canToggleAccess,

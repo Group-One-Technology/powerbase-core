@@ -1,13 +1,39 @@
+export const BasePermissions = {
+  BASE: ['viewBase', 'manageBase', 'inviteGuests', 'changeGuestAccess', 'removeGuests', 'addTables', 'deleteTables'],
+  TABLE: ['viewTable', 'manageTable', 'manageViews', 'addViews', 'deleteViews', 'addFields', 'deleteFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+  FIELD: ['viewField', 'manageField', 'editFieldData'],
+};
+
 export const ACCESS_LEVEL = [
-  { name: 'owner', description: 'Has full access to this base and can share it with others.' },
-  { name: 'admin', description: 'Can configure tables, connections, and fields.' },
-  { name: 'custom', description: 'Configure your own permissions. It has the Editor\'s permissions as default.' },
-  { name: 'editor', description: 'Can edit records, and manage views but not configure the base.' },
-  { name: 'commenter', description: 'Can comment and view data.', disabled: true },
+  {
+    name: 'owner',
+    description: 'Has full access to this base and can share it with others.',
+    permisions: ['all'],
+  },
+  {
+    name: 'admin',
+    description: 'Can configure tables, connections, and fields.',
+    permisions: ['viewBase', ...BasePermissions.TABLE, ...BasePermissions.FIELD],
+  },
+  {
+    name: 'custom',
+    description: 'Configure your own permissions. It has the Editor\'s permissions as default.',
+    permisions: ['viewBase', 'addViews', 'manageViews', 'deleteViews', 'addFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+  },
+  {
+    name: 'editor',
+    description: 'Can edit records, and manage views but not configure the base.',
+    permisions: ['viewBase', 'addViews', 'manageViews', 'deleteViews', 'addFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+  },
+  {
+    name: 'commenter',
+    description: 'Can comment and view data.',
+    permisions: ['viewBase', 'viewTable', 'viewField', 'commentRecords'],
+  },
   {
     name: 'viewer',
     description: 'Can only view the data.',
-    value: { viewBase: true, viewTable: true, viewField: true },
+    permisions: ['viewBase', 'viewTable', 'viewField'],
   },
 ];
 
@@ -36,7 +62,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Base',
-      description: 'who can configure the base remote DB connection.',
+      description: 'who can configure the base remote DB connection, reorder tables, update table aliases, etc.',
       key: 'manageBase',
       value: false,
     },
@@ -80,7 +106,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Table',
-      description: 'who can update table alias, reorder them, etc.',
+      description: 'who can manage this table.',
       key: 'manageTable',
       value: false,
     },

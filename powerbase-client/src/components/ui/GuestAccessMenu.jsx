@@ -15,12 +15,14 @@ export function GuestAccessMenu({
   remove,
   owner,
 }) {
-  const { baseUser, access: { changeGuestAccess, removeGuests } } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { openModal } = usePermissionsStateModal();
+  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
+  const canRemoveGuests = baseUser?.can('removeGuests');
 
   const handleConfigurePermissions = () => openModal(guest);
 
-  if (owner || !changeGuestAccess) {
+  if (owner || !canChangeGuestAccess) {
     return (
       <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
         {owner ? 'owner' : guest.access}
@@ -36,7 +38,7 @@ export function GuestAccessMenu({
           <ChevronDownIcon className="h-4 w-4 ml-1" />
         </Menu.Button>
 
-        {(guest.access === 'custom' && changeGuestAccess) && (
+        {(guest.access === 'custom' && canChangeGuestAccess) && (
           <button
             type="button"
             className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
@@ -67,7 +69,7 @@ export function GuestAccessMenu({
             <p className="text-xs text-gray-500">{item.description}</p>
           </Menu.Item>
         ))}
-        {(remove && removeGuests) && (
+        {(remove && canRemoveGuests) && (
           <Menu.Item
             as="button"
             className="px-4 py-1 w-full text-left text-sm font-medium text-red-600  capitalize cursor-pointer hover:bg-gray-100 focus:bg-gray-100"

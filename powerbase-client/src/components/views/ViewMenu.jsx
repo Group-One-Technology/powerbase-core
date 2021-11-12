@@ -20,7 +20,7 @@ import { AddView } from './AddView';
 import { EditView } from './EditView';
 
 export function ViewMenu({ tableId, views: initialViews }) {
-  const { access } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { view: currentView, handleViewChange } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
@@ -30,6 +30,9 @@ export function ViewMenu({ tableId, views: initialViews }) {
     view: undefined,
   });
 
+  const canAddViews = baseUser?.can('addViews', tableId);
+  const canManageViews = baseUser?.can('manageViews', tableId);
+
   const sensors = useSensors();
 
   useEffect(() => {
@@ -37,19 +40,19 @@ export function ViewMenu({ tableId, views: initialViews }) {
   }, [tableId, initialViews]);
 
   const handleAddView = () => {
-    if (access?.addViews) {
+    if (canAddViews) {
       setAddViewModalOpen(true);
     }
   };
 
   const handleViewOptions = (view) => {
-    if (access?.manageViews) {
+    if (canManageViews) {
       setViewOptionModal({ open: true, view });
     }
   };
 
   const handleViewsOrderChange = async ({ active, over }) => {
-    if (active.id !== over.id && access?.manageViews) {
+    if (active.id !== over.id && canManageViews) {
       saving();
 
       const oldIndex = views.findIndex((item) => item.id === active.id);
@@ -97,7 +100,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                       )}
                       handle={{
                         position: 'left',
-                        component: access?.manageViews
+                        component: canManageViews
                           ? (
                             <button
                               type="button"
@@ -117,7 +120,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
-                      {access?.manageViews && (
+                      {canManageViews && (
                         <div className="p-0.5">
                           <button
                             type="button"
@@ -133,7 +136,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
                   ))}
                 </SortableContext>
               </DndContext>
-              {access?.addViews && (
+              {canAddViews && (
                 <li>
                   <button
                     type="button"
@@ -152,6 +155,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
       <AddView tableId={tableId} open={addViewModalOpen} setOpen={setAddViewModalOpen} />
       {viewOptionModal.view && (
         <EditView
+          tableId={tableId}
           open={viewOptionModal.open}
           setOpen={(value) => setViewOptionModal((curVal) => ({ ...curVal, open: value }))}
           view={viewOptionModal.view}

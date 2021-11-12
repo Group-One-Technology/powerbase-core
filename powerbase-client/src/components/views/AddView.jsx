@@ -16,10 +16,12 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function AddView({ tableId, open, setOpen }) {
   const { mounted } = useMounted();
-  const { access: { addViews } } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
+
+  const canAddViews = baseUser?.can('addViews', tableId);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -35,7 +37,7 @@ export function AddView({ tableId, open, setOpen }) {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (addViews) {
+    if (canAddViews) {
       setLoading(true);
       setError(undefined);
 

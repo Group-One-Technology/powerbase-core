@@ -26,15 +26,23 @@ import {
 } from '@lib/api/fields';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
-export function GridHeaderOptions({ option, field, setOptionOpen }) {
+export function GridHeaderOptions({
+  table,
+  option,
+  field,
+  setOptionOpen,
+}) {
   const { saving, catchError, saved } = useSaveStatus();
-  const { access: { manageView, manageFields } } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
+  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canManageField = baseUser?.can('manageField', field.id);
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
@@ -43,7 +51,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   }, [field]);
 
   const handleOpenChange = async (value) => {
-    if (!value && alias !== field.alias && manageFields) {
+    if (!value && alias !== field.alias && canManageField) {
       saving();
       const updatedFields = fields.map((item) => ({
         ...item,
@@ -72,7 +80,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   const handleFieldTypeChange = async (selectedFieldType) => {
-    if (manageFields) {
+    if (canManageField) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -96,7 +104,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   const handleHideField = async () => {
-    if (manageView) {
+    if (canManageViews) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -120,7 +128,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   const handleTogglePII = async () => {
-    if (manageFields) {
+    if (canManageField) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -153,7 +161,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
       <DropdownMenu.Trigger />
       <DropdownMenu.Content side="bottom" sideOffset={10} align="start" alignOffset={-10} className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
         <div className="py-2">
-          {manageFields && (
+          {canManageField && (
             <div className="px-4 w-auto">
               <input
                 type="text"
@@ -167,7 +175,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           )}
 
           <dl>
-            {!manageFields && (
+            {!canManageField && (
               <>
                 <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
                   Field Alias
@@ -198,7 +206,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           <DropdownMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
             Field Type
           </DropdownMenu.Label>
-          {isFieldTypeConvertable && manageFields
+          {isFieldTypeConvertable && canManageField
             ? (
               <DropdownMenu.Root>
                 <DropdownMenu.TriggerItem textValue="\t" className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
@@ -244,9 +252,9 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
             </DropdownMenu.Item>
           )}
 
-          {manageView && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
+          {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {manageFields && (
+          {canManageField && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
               <DropdownMenu.Item
@@ -265,7 +273,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
               </DropdownMenu.Item>
             </>
           )}
-          {manageView && (
+          {canManageViews && (
             <DropdownMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
@@ -275,7 +283,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
               Hide
             </DropdownMenu.Item>
           )}
-          {manageFields && (
+          {canManageField && (
             <DropdownMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
@@ -292,6 +300,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
 }
 
 GridHeaderOptions.propTypes = {
+  table: PropTypes.object.isRequired,
   option: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
   setOptionOpen: PropTypes.func.isRequired,

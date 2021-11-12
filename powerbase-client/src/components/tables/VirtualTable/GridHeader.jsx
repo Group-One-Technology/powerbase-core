@@ -19,6 +19,7 @@ import { GridHeaderOptions } from './GridHeaderOptions';
 const GRID_HEADER_HEIGHT = 30;
 
 function CellRenderer({
+  table,
   rowIndex,
   columnIndex,
   field,
@@ -66,7 +67,7 @@ function CellRenderer({
   return (
     <React.Fragment key={key}>
       <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
-        <GridHeaderOptions option={option} field={field} setOptionOpen={setOption} />
+        <GridHeaderOptions table={table} option={option} field={field} setOptionOpen={setOption} />
 
         <DraggableItem
           id={key}
@@ -103,6 +104,7 @@ function CellRenderer({
 }
 
 CellRenderer.propTypes = {
+  table: PropTypes.object.isRequired,
   rowIndex: PropTypes.number.isRequired,
   columnIndex: PropTypes.number.isRequired,
   field: PropTypes.object,
@@ -116,6 +118,7 @@ CellRenderer.propTypes = {
 };
 
 export const GridHeader = React.forwardRef(({
+  table,
   fields,
   setFields,
   height,
@@ -132,7 +135,7 @@ export const GridHeader = React.forwardRef(({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-  } = useReorderFields({ fields, setFields });
+  } = useReorderFields({ tableId: table.id, fields, setFields });
   const { options, setOption } = useFieldOptions({ fields });
 
   return (
@@ -167,6 +170,7 @@ export const GridHeader = React.forwardRef(({
 
           return CellRenderer({
             ...props,
+            table,
             columnIndex,
             field,
             fieldTypes,
@@ -195,6 +199,7 @@ export const GridHeader = React.forwardRef(({
 });
 
 GridHeader.propTypes = {
+  table: PropTypes.object.isRequired,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired,

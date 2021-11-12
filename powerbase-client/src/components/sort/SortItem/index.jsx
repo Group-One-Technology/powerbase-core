@@ -1,10 +1,8 @@
-/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
-import { useBaseUser } from '@models/BaseUser';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';
@@ -17,8 +15,8 @@ export function SortItem({
   dragging,
   remove,
   updateRecords,
+  canManageViews,
 }) {
-  const { access: { manageView } } = useBaseUser();
   const { data: fields } = useViewFields();
   const [field, setField] = useState(sort?.field
     ? fields?.find((item) => item.name === sort.field) || fields[0]
@@ -52,7 +50,7 @@ export function SortItem({
       className="sort flex gap-2 items-center"
       handle={{
         position: 'left',
-        component: manageView
+        component: canManageViews
           ? (
             <button
               type="button"
@@ -70,7 +68,7 @@ export function SortItem({
         value={field}
         options={fields}
         onChange={handleFieldChange}
-        disabled={!manageView}
+        disabled={!canManageViews}
       />
       <label htmlFor={`sort${id}-operator`} className="sr-only">Sort Operator</label>
       <SortOperator
@@ -78,9 +76,9 @@ export function SortItem({
         value={operator}
         options={SORT_OPERATORS}
         onChange={handleOperatorChange}
-        disabled={!manageView}
+        disabled={!canManageViews}
       />
-      {manageView && (
+      {canManageViews && (
         <button
           type="button"
           className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
@@ -100,4 +98,5 @@ SortItem.propTypes = {
   dragging: PropTypes.bool,
   remove: PropTypes.func.isRequired,
   updateRecords: PropTypes.func.isRequired,
+  canManageViews: PropTypes.bool,
 };

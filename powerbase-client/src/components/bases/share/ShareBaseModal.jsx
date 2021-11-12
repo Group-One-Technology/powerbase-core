@@ -24,7 +24,8 @@ function BaseShareBaseModal() {
   const { openModal, getPermissions } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
-  const { access: { inviteGuests } } = useBaseUser();
+  const { baseUser } = useBaseUser();
+  const canInviteGuests = baseUser?.can('inviteGuests');
 
   const [guests, setGuests] = useState(initialGuests);
 
@@ -46,7 +47,7 @@ function BaseShareBaseModal() {
     evt.preventDefault();
     const email = query;
 
-    if (email.length && inviteGuests) {
+    if (email.length && canInviteGuests) {
       saving();
       setLoading(true);
       setQuery('');
@@ -83,16 +84,16 @@ function BaseShareBaseModal() {
               placeholder="Search by name or email."
               className={cn(
                 'py-1 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300',
-                inviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
+                canInviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
               )}
-              disabled={!inviteGuests}
+              disabled={!canInviteGuests}
             />
-            <Listbox value={access} onChange={setAccess} disabled={!inviteGuests}>
+            <Listbox value={access} onChange={setAccess} disabled={!canInviteGuests}>
               <Listbox.Button
                 type="button"
                 className={cn(
                   'py-0 p-2 flex items-center border-t border-b border-gray-300 text-gray-500 text-sm capitalize',
-                  inviteGuests ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
+                  canInviteGuests ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
                 )}
               >
                 {access.name}
@@ -123,7 +124,7 @@ function BaseShareBaseModal() {
               type="submit"
               className={cn(
                 'relative inline-flex items-center justify-center space-x-2 px-4 py-1 border text-sm rounded-r-md text-white',
-                inviteGuests
+                canInviteGuests
                   ? 'bg-indigo-600 border-indigo-700 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                   : 'cursor-not-allowed bg-gray-500 border-gray-900',
               )}
@@ -135,7 +136,7 @@ function BaseShareBaseModal() {
         </div>
 
         <div className="mx-6 my-1">
-          {inviteGuests && (
+          {canInviteGuests && (
             <button
               type="button"
               className={cn(
