@@ -8,7 +8,7 @@ const pusher = new Pusher(PUSHER_KEY, {
   cluster: 'ap1',
 });
 
-export function useWebsocket(logging = false) {
+export function useWebsocket(logging = true) {
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateViewFields } = useViewFields();
   const { mounted } = useMounted();
