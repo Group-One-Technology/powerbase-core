@@ -296,6 +296,8 @@ export function CellRenderer({
       `/magic_values/${field.tableId}`,
       payload
     );
+
+    mutateTableRecords();
     if (response.statusText === "OK") {
       mutateTableRecords();
       setIsNewRecord(false);
