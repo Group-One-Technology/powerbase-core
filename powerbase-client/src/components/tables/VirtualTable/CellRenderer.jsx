@@ -273,23 +273,29 @@ export function CellRenderer({
     mutateTableRecords();
 
     const payload = {
-      field_name: field.name,
-      field_type_id: field.fieldTypeId,
-      table_id: field.tableId,
-      field_id: field?.id,
-      [key]: num ? num : recordInputRef.current?.value,
-      record_id: !table.isVirtual ? records[rowIndex]?.id : null,
-      magic_record_id: table.isVirtual
-        ? !isNewRecord
-          ? records[rowIndex].id
-          : newRecordId
-        : null,
-      key_type: key,
-      table_type_id: table.isVirtual ? "magic_record_id" : "record_id",
-      has_precision: field?.precision ? true : false,
+      // field_name: field.name,
+      // field_type_id: field.fieldTypeId,
+      // table_id: field.tableId,
+      // field_id: field?.id,
+      // [key]: num ? num : recordInputRef.current?.value,
+      // record_id: !table.isVirtual ? records[rowIndex]?.id : null,
+      // magic_record_id: table.isVirtual
+      //   ? !isNewRecord
+      //     ? records[rowIndex].id
+      //     : newRecordId
+      //   : null,
+      // key_type: key,
+      // table_type_id: table.isVirtual ? "magic_record_id" : "record_id",
+      // has_precision: field?.precision ? true : false,
+      // id: records[rowIndex]?.id,
+      primary_keys: { id: records[rowIndex]?.id },
+      data: { [field.name]: num ? num : recordInputRef.current?.value },
     };
-    
-    const response = await securedApi.post(`/magic_values`, payload);
+
+    const response = await securedApi.post(
+      `/magic_values/${field.tableId}`,
+      payload
+    );
     if (response.statusText === "OK") {
       mutateTableRecords();
       setIsNewRecord(false);

@@ -150,6 +150,21 @@ module Powerbase
       @powerbase_table.save
     end
 
+
+    def update_record(options)
+      index = "table_records_#{@table_id}"
+      primary_keys = options[:primary_keys]
+      id = primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
+      @esclient.update(index: index, id: id, body: { doc: options[:data] })
+    end
+
+    def compute_record_hash(name, value)
+      new_obj = Object.new
+      property_name = "@#{name}".to_sym
+      new_obj.instance_variable_set(property_name, value)
+      new_obj  
+    end
+
     # * Get a document/table record.
     # Accepts the following options:
     # :id :: the document ID or the SWR key.

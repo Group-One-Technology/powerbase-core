@@ -94,6 +94,7 @@ export async function getMagicRecords(url) {
 }
 
 export async function getTableRecord({ tableId, recordId, ...payload }) {
+  console.log("REC", recordId);
   const response = await securedApi.post(
     `/tables/${tableId}/records/${recordId}`,
     payload

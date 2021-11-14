@@ -16,6 +16,14 @@ class TableRecordsController < ApplicationController
     required(:primary_keys)
   end
 
+
+  schema(:add_or_update_magic_value) do
+    required(:table_id).value(:integer)
+    optional(:id).value(:string)
+    required(:primary_keys)
+    optional(:data)
+  end
+
   # POST /tables/:id/records
   def index
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
@@ -54,24 +62,32 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    type = params[:key_type]
-    magic_value = nil
-    new_magic_value = nil
-    record_id = params[:record_id]
-    magic_record_id = params[:magic_record_id]
-    # table_type_id = params[:table_type_id])
-    if magic_record_id
-      magic_value = MagicValue.find_by(magic_record_id: magic_record_id, table_id: params[:table_id], field_id: params[:field_id])
-    else
-      magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
-    end
+    # type = params[:key_type]
+    # magic_value = nil
+    # new_magic_value = nil
+    # record_id = params[:record_id]
+    # magic_record_id = params[:magic_record_id]
+    # # table_type_id = params[:table_type_id])
+    # if magic_record_id
+    #   magic_value = MagicValue.find_by(magic_record_id: magic_record_id, table_id: params[:table_id], field_id: params[:field_id])
+    # else
+    #   magic_value = MagicValue.find_by(record_id: record_id, table_id: params[:table_id], field_id: params[:field_id])
+    # end
 
-    if magic_value
-      magic_value.update(type => params[type])
-    else
-      new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id], magic_record_id: params[:magic_record_id]})
-    end
-    render json: {}
+    # if magic_value
+    #   magic_value.update(type => params[type])
+    # else
+    #   new_magic_value = MagicValue.create({has_precision: params[:has_precision], field_id: params[:field_id], table_id: params[:table_id], record_id: params[:record_id], type => params[type], field_name: params[:field_name], field_type_id: params[:field_type_id], magic_record_id: params[:magic_record_id]})
+    # end
+    # render json: {}
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+    record = model.update_record({
+      id: safe_params[:id],
+      primary_keys: safe_params[:primary_keys],
+      data: safe_params[:data]
+    })
+
+    render json: record
   end
 
   # GET /tables/:id/magic_values
