@@ -21,7 +21,6 @@ export function VirtualTable({ height, table }) {
   const { dataListener } = useWebsocket();
 
   useEffect(() => {
-    console.log('initialize datalistener');
     dataListener(table.id);
   }, [table.id])
 

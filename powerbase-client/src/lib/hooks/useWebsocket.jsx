@@ -12,7 +12,6 @@ export function useWebsocket(logging = true) {
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateViewFields } = useViewFields();
   const { mounted } = useMounted();
-  console.log('Enable websocket', PUSHER_KEY);
 
   const dataListener = (tableId) => {
     Pusher.logToConsole = logging;
@@ -21,7 +20,7 @@ export function useWebsocket(logging = true) {
     channel.bind('powerbase-data-listener', async (data) => {
       await mutateTableRecords();
       await mutateViewFields();
-
+      console.log('data-changes detected!');
       // Add highlighting to cell
       mounted(() => setHighLightedCell(data.doc_id));
 
