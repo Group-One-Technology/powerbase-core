@@ -28,6 +28,15 @@ class PowerbaseDatabase < ApplicationRecord
   has_many :connections, class_name: "BaseConnection", foreign_key: :powerbase_database_id
   has_many :referenced_connections, class_name: "BaseConnection", foreign_key: :referenced_database_id
 
+  def default_table(user)
+    guest = Guest.find_by(user_id: user.id, powerbase_database_id: self.id)
+
+    self.powerbase_tables
+      .order(order: :asc)
+      .select {|table| user.can?(:view_table, table, @guest, false)}
+      .first
+  end
+
   def as_indexed_json(options = {})
     as_json(except: [:encrypted_connection_string, :connection_string, :is_turbo])
   end

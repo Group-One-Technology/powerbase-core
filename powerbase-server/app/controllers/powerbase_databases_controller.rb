@@ -226,6 +226,7 @@ class PowerbaseDatabasesController < ApplicationController
 
     def format_json(database)
       owner = database.user
+      default_table = database.default_table(current_user)
 
       {
         id: database.id,
@@ -243,6 +244,12 @@ class PowerbaseDatabasesController < ApplicationController
         color: database.color,
         is_migrated: database.is_migrated,
         is_turbo: database.is_turbo,
+        default_table: {
+          id: default_table.id,
+          name: default_table.name,
+          alias: default_table.alias,
+          default_view_id: default_table.default_view_id,
+        },
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
