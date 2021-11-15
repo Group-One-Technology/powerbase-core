@@ -87,6 +87,18 @@ class User < ApplicationRecord
 
         allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
         return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+      when :field
+        return true if guest.permissions["fields"][field.id] && guest.permissions["fields"][field.id][permission_key] == true
+
+        restricted_guests = Array(field.permissions[permission_key]["restricted_guests"])
+        is_restricted = restricted_guests.any? {|guest_id| guest_id == guest.id}
+        raise AccessDenied if is_restricted && error
+        return false if is_restricted
+
+        return true if does_custom_have_access(field.permissions[permission_key]["access"])
+
+        allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
+        return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
       end
     end
 
