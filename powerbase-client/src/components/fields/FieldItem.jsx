@@ -14,16 +14,18 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 
-export function FieldItem({ field, setFields }) {
+export function FieldItem({ table, field, setFields }) {
   const { saving, saved, catchError } = useSaveStatus();
-  const { access: { manageView } } = useBaseUser();
+  const { baseUser } = useBaseUser();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields: setRecordFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+
   const [loading, setLoading] = useState(false);
+  const canManageViews = baseUser?.can('manageViews', table.id);
 
   const handleToggleVisibility = async () => {
-    if (manageView) {
+    if (canManageViews) {
       saving();
       setLoading(true);
 
@@ -60,7 +62,7 @@ export function FieldItem({ field, setFields }) {
       className="flex gap-2 items-center"
       handle={{
         position: 'left',
-        component: manageView
+        component: canManageViews
           ? (
             <button
               type="button"
@@ -85,9 +87,9 @@ export function FieldItem({ field, setFields }) {
           className={cn(
             'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             !field.isHidden ? 'bg-indigo-600' : 'bg-gray-200',
-            (loading || !manageView) ? 'cursor-not-allowed' : 'cursor-pointer',
+            (loading || !canManageViews) ? 'cursor-not-allowed' : 'cursor-pointer',
           )}
-          disabled={loading || !manageView}
+          disabled={loading || !canManageViews}
         >
           <span className="sr-only">Show Field</span>
           <span
@@ -104,6 +106,7 @@ export function FieldItem({ field, setFields }) {
 }
 
 FieldItem.propTypes = {
+  table: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
   setFields: PropTypes.func.isRequired,
 };

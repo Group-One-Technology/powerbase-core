@@ -12,12 +12,12 @@ import { Badge } from '@components/ui/Badge';
 
 export function GuestCard({ guest, setGuests, owner }) {
   const history = useHistory();
-  const { data: baseUser, access, mutate: mutateBaseUser } = useBaseUser();
+  const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
   const handleChangeAccess = async (value) => {
-    if (!owner && access.changeGuestAccess) {
+    if (!owner && baseUser?.can('changeGuestAccess')) {
       saving();
 
       const updatedGuests = guests.map((item) => ({
@@ -42,7 +42,7 @@ export function GuestCard({ guest, setGuests, owner }) {
   };
 
   const removeGuestAccess = async () => {
-    if (!owner && baseUser && access.removeGuests) {
+    if (!owner && baseUser?.can('removeGuests')) {
       try {
         if (baseUser.userId === guest.userId) {
           await removeGuest({ id: guest.id });

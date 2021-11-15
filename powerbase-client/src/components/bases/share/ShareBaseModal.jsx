@@ -17,20 +17,20 @@ import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
 import { PermissionsModal } from '@components/guest/PermissionsModal';
-import { CustomPermissions } from './CustomPermissions';
 
 function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const { openModal, permissions, setPermissions } = usePermissionsStateModal();
+  const { modal, guest } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
-  const { access: { inviteGuests } } = useBaseUser();
+  const { baseUser } = useBaseUser();
+  const canInviteGuests = baseUser?.can('inviteGuests');
 
   const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
-  const [access, setAccess] = useState(ACCESS_LEVEL[2]);
+  const [access, setAccess] = useState(ACCESS_LEVEL[3]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,23 +41,16 @@ function BaseShareBaseModal() {
     setQuery(evt.target.value);
   };
 
-  const handleConfigurePermissions = () => openModal();
+  const handleConfigurePermissions = () => modal.open();
 
   const submit = async (evt) => {
     evt.preventDefault();
     const email = query;
 
-    if (email.length && inviteGuests) {
+    if (email.length && canInviteGuests) {
       saving();
       setLoading(true);
       setQuery('');
-
-      const configuredPermissions = access.name === 'custom'
-        ? permissions.reduce((acc, cur) => (cur.enabled
-          ? { ...acc, ...cur.value }
-          : acc
-        ), {})
-        : undefined;
 
       try {
         await inviteGuest({
@@ -65,10 +58,8 @@ function BaseShareBaseModal() {
           email,
           access: access.name,
           permissions: access.name === 'custom'
-            ? {
-              ...configuredPermissions,
-              ...ACCESS_LEVEL.find((item) => item.name === 'viewer')?.value,
-            } : undefined,
+            ? guest.getPermissions()
+            : undefined,
         });
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);
@@ -93,16 +84,16 @@ function BaseShareBaseModal() {
               placeholder="Search by name or email."
               className={cn(
                 'py-1 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300',
-                inviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
+                canInviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
               )}
-              disabled={!inviteGuests}
+              disabled={!canInviteGuests}
             />
-            <Listbox value={access} onChange={setAccess} disabled={!inviteGuests}>
+            <Listbox value={access} onChange={setAccess} disabled={!canInviteGuests}>
               <Listbox.Button
                 type="button"
                 className={cn(
                   'py-0 p-2 flex items-center border-t border-b border-gray-300 text-gray-500 text-sm capitalize',
-                  inviteGuests ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
+                  canInviteGuests ? 'hover:bg-gray-100 focus:bg-gray-100' : 'cursor-not-allowed bg-gray-300',
                 )}
               >
                 {access.name}
@@ -133,7 +124,7 @@ function BaseShareBaseModal() {
               type="submit"
               className={cn(
                 'relative inline-flex items-center justify-center space-x-2 px-4 py-1 border text-sm rounded-r-md text-white',
-                inviteGuests
+                canInviteGuests
                   ? 'bg-indigo-600 border-indigo-700 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                   : 'cursor-not-allowed bg-gray-500 border-gray-900',
               )}
@@ -144,30 +135,29 @@ function BaseShareBaseModal() {
           </form>
         </div>
 
-        {access.name === 'custom' && (
-          <div className="px-6 py-2 border-b border-gray-200">
-            <CustomPermissions permissions={permissions} setPermissions={setPermissions} loading={loading} />
+        <div className="mx-6 my-1">
+          {canInviteGuests && (
+            <button
+              type="button"
+              className={cn(
+                'ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                access.name !== 'custom' && 'invisible',
+              )}
+              onClick={handleConfigurePermissions}
+            >
+              <CogIcon className="h-4 w-4 mr-1" />
+              Configure Permissions
+            </button>
+          )}
+        </div>
 
-            <div className="text-sm text-gray-900">
-              <button
-                type="button"
-                className="ml-auto p-1 px-2 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200 focus:bg-gray-200"
-                onClick={handleConfigurePermissions}
-              >
-                <CogIcon className="h-4 w-4 mr-1" />
-                Configure More Permissions
-              </button>
-            </div>
-          </div>
-        )}
-
-        <ul className="m-4 bg-white divide-y divide-gray-200">
+        <ul className="mx-4 my-1 bg-white divide-y divide-gray-200">
           <li className="p-2">
             <GuestCard guest={base.owner} setGuests={setGuests} owner />
           </li>
-          {guests?.map((guest) => (
-            <li key={guest.email} className="p-2">
-              <GuestCard guest={guest} setGuests={setGuests} />
+          {guests?.map((item) => (
+            <li key={item.email} className="p-2">
+              <GuestCard guest={item} setGuests={setGuests} />
             </li>
           ))}
         </ul>

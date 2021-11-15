@@ -39,7 +39,7 @@ class TableViewsController < ApplicationController
   def show
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
-    current_user.can?(:see_view, @view)
+    current_user.can?(:view_table, @view.powerbase_table)
     render json: format_json(@view)
   end
 

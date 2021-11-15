@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { useBaseUser } from '@models/BaseUser';
 import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/filter/useOperator';
 import { useFilterValue } from '@lib/hooks/filter/useFilterValue';
@@ -25,8 +24,8 @@ export function SingleFilter({
   updateTableRecords,
   handleRemoveFilter,
   handleLogicalOpChange,
+  canManageViews,
 }) {
-  const { access: { manageView } } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
   const [field, setField] = useState(filter?.field
     ? fields.find((item) => item.name === filter.field) || fields[0]
@@ -35,7 +34,7 @@ export function SingleFilter({
   const [value, setValue] = useFilterValue({ value: filter?.filter?.value, fieldType });
 
   const updateField = (selectedField) => {
-    if (manageView) {
+    if (canManageViews) {
       const newFieldType = fieldTypes.find((item) => item.id.toString() === selectedField.fieldTypeId.toString());
 
       setField(selectedField);
@@ -56,7 +55,7 @@ export function SingleFilter({
   };
 
   const handleFieldChange = (selectedFieldId) => {
-    if (manageView) {
+    if (canManageViews) {
       const selectedField = fields?.find((item) => (
         item.id.toString() === selectedFieldId.toString()
       ));
@@ -66,7 +65,7 @@ export function SingleFilter({
   };
 
   const handleOperatorChange = (selectedOperator) => {
-    if (manageView) {
+    if (canManageViews) {
       setOperator(selectedOperator);
 
       if (selectedOperator !== '') {
@@ -76,7 +75,7 @@ export function SingleFilter({
   };
 
   const handleValueChange = (evt) => {
-    if (manageView) {
+    if (canManageViews) {
       switch (fieldType?.name) {
         case FieldType.CHECKBOX:
           setValue(evt.target.checked);
@@ -111,7 +110,7 @@ export function SingleFilter({
       className="filter flex gap-2 items-center"
     >
       <div className="inline-block w-16 text-right capitalize">
-        {handleLogicalOpChange && manageView
+        {handleLogicalOpChange && canManageViews
           ? (
             <>
               <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
@@ -130,7 +129,7 @@ export function SingleFilter({
           value={field}
           options={fields}
           onChange={handleFieldChange}
-          disabled={!manageView}
+          disabled={!canManageViews}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
         <FilterOperator
@@ -138,7 +137,7 @@ export function SingleFilter({
           value={operator}
           options={operators}
           onChange={handleOperatorChange}
-          disabled={!manageView}
+          disabled={!canManageViews}
         />
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <FilterValue
@@ -147,9 +146,9 @@ export function SingleFilter({
           value={value}
           onChange={handleValueChange}
           fieldType={fieldType?.name}
-          disabled={!manageView}
+          disabled={!canManageViews}
         />
-        {manageView && (
+        {canManageViews && (
           <button
             type="button"
             className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
@@ -174,4 +173,5 @@ SingleFilter.propTypes = {
   updateTableRecords: PropTypes.func.isRequired,
   handleRemoveFilter: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
+  canManageViews: PropTypes.bool,
 };

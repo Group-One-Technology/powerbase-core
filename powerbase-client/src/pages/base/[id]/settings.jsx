@@ -43,13 +43,13 @@ function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base } = useBase();
-  const { access } = useBaseUser();
+  const { baseUser } = useBaseUser();
 
-  if (base == null || authUser == null || typeof access === 'undefined') {
+  if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
   }
 
-  if (!access.manageBase) {
+  if (!baseUser.can('manageBase')) {
     history.push('/404');
     return <Loader className="h-screen" />;
   }

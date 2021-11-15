@@ -16,6 +16,7 @@ class GuestsController < ApplicationController
   schema(:update_permissions) do
     required(:id)
     required(:permissions)
+    required(:filtered_permissions)
   end
 
   schema(:create) do
@@ -82,7 +83,7 @@ class GuestsController < ApplicationController
     end
 
     if @user.id == current_user.id
-      render json: { error: "User with email of '#{current_user.email}' already has access to the database with id of #{database_id}." }, status: :unprocessable_entity
+      render json: { error: "User with email of '#{current_user.email}' already has access to the database with id of #{safe_params[:database_id]}." }, status: :unprocessable_entity
       return
     end
 
@@ -93,7 +94,7 @@ class GuestsController < ApplicationController
       return
     end
 
-    @guest = Guest.new({
+    guest_creator = Guests::Creator.new({
       user_id: @user.id,
       powerbase_database_id: safe_params[:database_id],
       access: safe_params[:access],
@@ -101,10 +102,10 @@ class GuestsController < ApplicationController
       inviter_id: current_user.id,
     })
 
-    if @guest.save
-      render json: format_json(@guest), status: :created
+    if guest_creator.save
+      render json: format_json(guest_creator.object), status: :created
     else
-      render json: @guest.errors, status: :unprocessable_entity
+      render json: guest_creator.object.errors, status: :unprocessable_entity
     end
   end
 
@@ -112,34 +113,34 @@ class GuestsController < ApplicationController
   def change_access
     @guest = Guest.find(safe_params[:id])
     raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+    current_user.can?(:change_guest_access, @guest.powerbase_database)
 
-    if @guest.update(access: safe_params[:access])
-      render json: format_json(@guest)
-    else
-      render json: @guest.errors, status: :unprocessable_entity
-    end
+    guest_updater = Guests::Updater.new(@guest)
+    guest_updater.update_access!(safe_params[:access])
+
+    render status: :no_content
   end
 
   # PUT /guests/:id/update_permissions
   def update_permissions
     @guest = Guest.find(safe_params[:id])
     raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
-    current_user.can?(:change_guest_access, @guest.powerbase_database, @guest)
+    current_user.can?(:change_guest_access, @guest.powerbase_database)
 
-    if @guest.update(permissions: safe_params[:permissions])
-      render json: format_json(@guest)
-    else
-      render json: @guest.errors, status: :unprocessable_entity
-    end
+    guest_updater = Guests::Updater.new(@guest)
+    guest_updater.update_permissions!(safe_params[:permissions], safe_params[:filtered_permissions])
+
+    render status: :no_content
   end
 
   # DELETE /guests/:id
   def destroy
     @guest = Guest.find(safe_params[:id])
     raise AccessDenied if !@guest
-    current_user.can?(:remove_guests, @guest.powerbase_database, @guest)
-    @guest.destroy
+    current_user.can?(:remove_guests, @guest.powerbase_database)
+
+    guest_updater = Guests::Updater.new(@guest)
+    guest_updater.remove_guest!
 
     render status: :no_content
   end

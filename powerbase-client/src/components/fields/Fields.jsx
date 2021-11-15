@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
@@ -14,22 +15,25 @@ import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
 
-export function Fields() {
-  const { access: { manageView, manageFields } } = useBaseUser();
+export function Fields({ table }) {
+  const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
   const { setFields: setRecordFields } = useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
+
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
+  const { sensors, handleReorderFields } = useReorderFields({ tableId: table.id, fields, setFields });
   const [loading, setLoading] = useState(false);
+  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canAddFields = baseUser?.can('addFields', table.id);
 
   useEffect(() => {
     setFields(initialFields);
   }, [initialFields]);
 
   const handleHideAll = async () => {
-    if (manageView) {
+    if (canManageViews) {
       saving();
       setLoading(true);
 
@@ -84,7 +88,7 @@ export function Fields() {
                       {view.name}
                     </strong>
                   </h4>
-                  {manageView && (
+                  {canManageViews && (
                     <div className="mx-2 flex justify-end">
                       <button
                         type="button"
@@ -99,11 +103,11 @@ export function Fields() {
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
                       <ul className="m-3 list-none flex flex-col">
-                        {fields.map((field) => <FieldItem key={field.id} field={field} setFields={setFields} />)}
+                        {fields.map((field) => <FieldItem key={field.id} table={table} field={field} setFields={setFields} />)}
                       </ul>
                     </SortableContext>
                   </DndContext>
-                  {manageFields && (
+                  {canAddFields && (
                     <button
                       type="button"
                       className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
@@ -121,3 +125,7 @@ export function Fields() {
     </Popover>
   );
 }
+
+Fields.propTypes = {
+  table: PropTypes.object.isRequired,
+};

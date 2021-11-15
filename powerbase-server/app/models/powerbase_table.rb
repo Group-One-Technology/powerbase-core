@@ -11,14 +11,14 @@ class PowerbaseTable < ApplicationRecord
   validates :name, presence: true
   validates :order, presence: true
   serialize :logs, JSON
+  serialize :permissions, JSON
 
   belongs_to :powerbase_database
-  has_many :powerbase_fields, dependent: :destroy
-  # TODO: Fix duplicate association name
-  has_many :base_connections
-  has_many :base_connections, foreign_key: :referenced_table_id
-  has_many :table_views, dependent: :destroy
   belongs_to :default_view, class_name: "TableView", optional: true
+  has_many :powerbase_fields, dependent: :destroy
+  has_many :connections, class_name: "BaseConnection", foreign_key: :powerbase_table_id
+  has_many :referenced_connections, class_name: "BaseConnection", foreign_key: :referenced_table_id
+  has_many :table_views, dependent: :destroy
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
 
   after_create :add_migration_attributes
@@ -80,7 +80,7 @@ class PowerbaseTable < ApplicationRecord
 
     fields.where(name: columns.map(&:to_s))
   end
-  
+
   def _sequel_table
     self._sequel.from(self.name.to_sym)
   end
@@ -104,7 +104,7 @@ class PowerbaseTable < ApplicationRecord
   def notifier
     @notifier ||= Powerbase::Notifier.new self.db
   end
-  
+
   def remove
     self.default_view_id = nil
     self.save

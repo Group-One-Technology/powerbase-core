@@ -8,7 +8,7 @@ function useBaseTablesModel({ id }) {
   const { authUser } = useAuthUser();
 
   const response = useSWR(
-    (id && authUser) ? `/databases/${id}/tables` : null,
+    (id && authUser) ? `${authUser.id}/databases/${id}/tables` : null,
     () => getTables({ databaseId: id }),
   );
 

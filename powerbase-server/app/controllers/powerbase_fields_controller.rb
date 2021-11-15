@@ -27,9 +27,16 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /tables/:id/fields
   def index
-    current_user.can?(:view_table, safe_params[:table_id])
-    @fields = PowerbaseField.where(powerbase_table_id: safe_params[:table_id])
-    render json: @fields.map {|item| format_json(item)}
+    @table = PowerbaseTable.find(safe_params[:table_id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    current_user.can?(:view_table, @table)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(:id)
+
+    render json: @fields
+      .select {|field| current_user.can?(:view_field, field, @guest, false)}
+      .map {|item| format_json(item)}
   end
 
   # PUT /fields/:id/alias
