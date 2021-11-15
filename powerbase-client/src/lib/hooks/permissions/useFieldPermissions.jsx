@@ -8,14 +8,6 @@ import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 function initializeFieldPermissions(initialFieldPermissions, fields, permissions) {
   const fieldPermissions = {};
 
-  if (typeof initialFieldPermissions === 'object') {
-    Object.keys(initialFieldPermissions).forEach((key) => {
-      if (fieldPermissions[key] == null) {
-        fieldPermissions[key] = initialFieldPermissions[key];
-      }
-    });
-  }
-
   fields?.forEach((field) => {
     fieldPermissions[field.id] = CUSTOM_PERMISSIONS.Field
       .map((item) => ({
@@ -27,6 +19,14 @@ function initializeFieldPermissions(initialFieldPermissions, fields, permissions
       .map((item) => ({ [item.key]: item.value }))
       .reduce((acc, cur) => ({ ...acc, ...cur }), {});
   });
+
+  if (typeof initialFieldPermissions === 'object') {
+    Object.keys(initialFieldPermissions).forEach((key) => {
+      if (fieldPermissions[key] == null) {
+        fieldPermissions[key] = initialFieldPermissions[key];
+      }
+    });
+  }
 
   return fieldPermissions;
 }
