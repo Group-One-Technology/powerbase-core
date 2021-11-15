@@ -50,6 +50,16 @@ export async function changeGuestAccess({ id, ...payload }) {
   return undefined;
 }
 
+export async function updateGuestPermissions({ id, ...payload }) {
+  const response = await securedApi.put(`/guests/${id}/update_permissions`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function removeGuest({ id }) {
   const response = await securedApi.delete(`/guests/${id}`);
 

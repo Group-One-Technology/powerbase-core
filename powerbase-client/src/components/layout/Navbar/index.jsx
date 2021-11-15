@@ -11,7 +11,7 @@ import { IBase } from '@lib/propTypes/base';
 import { BG_COLORS } from '@lib/constants';
 
 import { Logo } from '@components/ui/Logo';
-import { ShareBaseModal } from '@components/bases/ShareBaseModal';
+import { ShareBaseModal } from '@components/bases/share/ShareBaseModal';
 import { NotificationsMenu } from './NotificationsMenu';
 import { UserMenu } from './UserMenu';
 import { BaseMenu } from './BaseMenu';
