@@ -38,8 +38,12 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /views/:view_id/fields/hide_all
   def hide_all
-    @view.view_field_options.each do |field|
-      field.update(is_hidden: true)
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @view.powerbase_table.powerbase_database_id)
+
+    @view.view_field_options.each do |view_field|
+      if current_user.can?(:view_field, view_field.powerbase_field, @guest, false)
+        view_field.update(is_hidden: true)
+      end
     end
 
     render status: :no_content
