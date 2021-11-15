@@ -48,18 +48,20 @@ module Powerbase
             affected_row JSON;
             oid JSONB;
           BEGIN
-            CASE TG_OP
-            WHEN 'INSERT', 'UPDATE' THEN
-              affected_row := row_to_json(NEW);
-              IF to_jsonb(NEW) ? 'oid' THEN
+            BEGIN 
+              CASE TG_OP
+              WHEN 'INSERT', 'UPDATE' THEN
+                affected_row := row_to_json(NEW);
                 oid := json_object_agg('oid', NEW.oid);
-              END IF;
-            WHEN 'DELETE' THEN
-              affected_row := row_to_json(OLD);
-              IF to_jsonb(OLD) ? 'oid' THEN
+              WHEN 'DELETE' THEN
+                affected_row := row_to_json(OLD);
                 oid := json_object_agg('oid', OLD.oid);
-              END IF;
-            END CASE;
+              END CASE;
+            EXCEPTION
+              WHEN undefined_column THEN
+                oid := null;
+            END;
+
 
             WITH pk_columns (attname) AS (
               SELECT 

@@ -49,6 +49,8 @@ class SyncDatabaseWorker
       end
       
       if new_connection
+        database.is_migrated = true
+        database.save
         @base_migration.end_time = Time.now
         @base_migration.save
         

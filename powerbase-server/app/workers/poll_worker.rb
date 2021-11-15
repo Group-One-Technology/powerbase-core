@@ -16,11 +16,13 @@ class PollWorker
     puts "Reinitializing listeners..."
     
     dbs.each do |db|
-      if db.listener_thread.blank?
-        puts"Listening to #{db.thread_name}"
-        db.listen!
-      else
-        puts "Listener for #{db.thread_name} already exists"
+      if db.postgresql?
+        if db.listener_thread.blank?
+          puts"Listening to #{db.thread_name}"
+          db.listen!
+        else
+          puts "Listener for #{db.thread_name} already exists"
+        end
       end
     end
   end

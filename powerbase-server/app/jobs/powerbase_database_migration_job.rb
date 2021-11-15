@@ -68,7 +68,6 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     end
 
     @database.sync!(true)
-    @database.update(is_migrated: true)
   end
 
   private
