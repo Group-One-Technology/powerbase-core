@@ -83,7 +83,7 @@ class GuestsController < ApplicationController
     end
 
     if @user.id == current_user.id
-      render json: { error: "User with email of '#{current_user.email}' already has access to the database with id of #{database_id}." }, status: :unprocessable_entity
+      render json: { error: "User with email of '#{current_user.email}' already has access to the database with id of #{safe_params[:database_id]}." }, status: :unprocessable_entity
       return
     end
 
