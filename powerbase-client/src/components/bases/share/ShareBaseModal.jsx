@@ -30,7 +30,7 @@ function BaseShareBaseModal() {
   const [guests, setGuests] = useState(initialGuests);
 
   const [query, setQuery] = useState('');
-  const [access, setAccess] = useState(ACCESS_LEVEL[2]);
+  const [access, setAccess] = useState(ACCESS_LEVEL[3]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
