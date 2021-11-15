@@ -1,5 +1,5 @@
 import constate from 'constate';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
@@ -11,6 +11,7 @@ import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions'
 import { updateGuestPermissions } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { useFieldPermissions } from '@lib/hooks/permissions/useFieldPermissions';
 
 function usePermissionsStateModalModel() {
   const { mounted } = useMounted();
@@ -24,14 +25,25 @@ function usePermissionsStateModalModel() {
 
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
+  const [table, setTable] = useState();
+  const [fieldPermissions, setFieldPermissions] = useState();
   const canToggleAccess = guest ? baseUser?.can('changeGuestAccess') : baseUser?.can('inviteGuests');
 
   const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({
     guest, base, permissions: guest?.permissions, canToggleAccess,
   });
-  const { tablePermissions, handleTablePermissionToggle } = useTablePermissions({
-    guest, tables, permissions: guest?.permissions, canToggleAccess,
+  const { tablePermissions, handleTablePermissionsToggle } = useTablePermissions({
+    guest, table, tables, permissions: guest?.permissions, canToggleAccess,
   });
+  const { fields, handleFieldPermissionsToggle } = useFieldPermissions({
+    guest, table, permissions: guest?.permissions, fieldPermissions, setFieldPermissions, canToggleAccess,
+  });
+
+  useEffect(() => {
+    if (tables?.length) {
+      setTable(tables[0]);
+    }
+  }, [tables]);
 
   const openModal = (value) => {
     setGuest(value);
@@ -40,7 +52,6 @@ function usePermissionsStateModalModel() {
 
   const getPermissions = () => {
     const filteredTablePermissions = {};
-
     Object.keys(tablePermissions).forEach((key) => {
       const item = tablePermissions[key];
 
@@ -55,9 +66,25 @@ function usePermissionsStateModalModel() {
       });
     });
 
+    const filteredFieldPermissions = {};
+    Object.keys(fieldPermissions).forEach((key) => {
+      const item = fieldPermissions[key];
+
+      CUSTOM_PERMISSIONS.Field.forEach((permission) => {
+        if (permission.value !== item[permission.key]) {
+          if (filteredFieldPermissions[key] == null) {
+            filteredFieldPermissions[key] = {};
+          }
+
+          filteredFieldPermissions[key][permission.key] = item[permission.key];
+        }
+      });
+    });
+
     return {
       ...basePermissions,
       tables: filteredTablePermissions,
+      fields: filteredFieldPermissions,
     };
   };
 
@@ -71,6 +98,7 @@ function usePermissionsStateModalModel() {
         ? {
           ...basePermissions,
           tables: tablePermissions,
+          fields: fieldPermissions,
         }
         : null;
 
@@ -94,22 +122,34 @@ function usePermissionsStateModalModel() {
   };
 
   return {
-    open,
-    setOpen,
-    guest,
-    setGuest,
-    openModal,
-    canToggleAccess,
+    modal: {
+      state: open,
+      setState: setOpen,
+      open: openModal,
+    },
+    guest: {
+      state: guest,
+      setState: setGuest,
+      canToggleAccess,
+      getPermissions,
+      updatePermissions,
+    },
+    values: {
+      table,
+      setTable,
+      tables,
+      fields,
+    },
     permissions: {
       base: basePermissions,
       tables: tablePermissions,
+      fields: fieldPermissions,
     },
     togglePermissions: {
       base: handleBasePermissionsToggle,
-      table: handleTablePermissionToggle,
+      table: handleTablePermissionsToggle,
+      field: handleFieldPermissionsToggle,
     },
-    getPermissions,
-    updatePermissions,
     loading,
   };
 }

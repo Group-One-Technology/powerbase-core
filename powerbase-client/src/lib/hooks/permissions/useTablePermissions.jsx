@@ -20,6 +20,7 @@ function initializeTablePermissions(tables, permissions) {
 
 export function useTablePermissions({
   guest,
+  table,
   tables,
   permissions,
   canToggleAccess,
@@ -30,7 +31,7 @@ export function useTablePermissions({
     setTablePermissions(initializeTablePermissions(tables, permissions));
   }, [guest, tables]);
 
-  const handleTablePermissionToggle = async (table, selectedItem) => {
+  const handleTablePermissionsToggle = async (selectedItem) => {
     if (canToggleAccess) {
       const updatedTablePermission = {
         ...tablePermissions,
@@ -46,6 +47,6 @@ export function useTablePermissions({
 
   return {
     tablePermissions,
-    handleTablePermissionToggle,
+    handleTablePermissionsToggle,
   };
 }

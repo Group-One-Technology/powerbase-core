@@ -1,31 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
-import { useCurrentView } from '@models/views/CurrentTableView';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 import { Button } from '@components/ui/Button';
 
 export function Permissions({
   guest,
+  tables,
+  fields,
+  table,
+  setTable,
   permissions,
   togglePermissions,
   canToggleAccess,
   updatePermissions,
   loading,
 }) {
-  const { tables } = useCurrentView();
-  const [table, setTable] = useState(tables[0]);
+  const [field, setField] = useState();
 
   useEffect(() => {
-    if (tables?.length) {
-      setTable(tables[0]);
+    if (table && fields?.length) {
+      setField(fields[0]);
     }
-  }, [tables]);
+  }, [fields, table]);
 
-  if (!table) {
+  if (!table || !field) {
     return null;
   }
 
@@ -123,7 +125,7 @@ export function Permissions({
                 </div>
                 <Switch
                   checked={checked}
-                  onChange={() => togglePermissions.table(table, item)}
+                  onChange={() => togglePermissions.table(item)}
                   className={cn(
                     'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
                     checked ? 'bg-indigo-600' : 'bg-gray-200',
@@ -145,7 +147,7 @@ export function Permissions({
         })}
       </ul>
 
-      {/* <div className="my-2 py-1 px-4 border border-gray-300 rounded">
+      <div className="my-2 py-1 px-4 border border-gray-300 rounded">
         <div className="flex items-center gap-1 my-2">
           <h5 className="flex-1 text-base font-medium text-gray-900">Field</h5>
           <Listbox value={field} onChange={setField} disabled={!canToggleAccess}>
@@ -181,11 +183,15 @@ export function Permissions({
         </div>
 
         <ul className="my-1">
-          {fieldPermissions.map((item) => {
-            const itemKey = item.name.split(' ').join('_');
+          {CUSTOM_PERMISSIONS.Field.map((item) => {
+            if (item.hidden) return null;
+
+            const checked = permissions.fields[field.id]
+              ? permissions.fields[field.id][item.key] ?? item.value
+              : item.value;
 
             return (
-              <li key={itemKey} className="my-2">
+              <li key={item.key} className="my-2">
                 <label className="flex w-full">
                   <div>
                     <div className="font-medium text-sm capitalize">
@@ -194,11 +200,11 @@ export function Permissions({
                     <p className="text-xs text-gray-500">{item.description}</p>
                   </div>
                   <Switch
-                    checked={item.enabled}
-                    onChange={() => handleFieldPermissionsToggle(item)}
+                    checked={checked}
+                    onChange={() => togglePermissions.field(field, item)}
                     className={cn(
                       'ml-auto relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-                      item.enabled ? 'bg-indigo-600' : 'bg-gray-200',
+                      checked ? 'bg-indigo-600' : 'bg-gray-200',
                       (loading || !canToggleAccess) ? 'cursor-not-allowed' : 'cursor-pointer',
                     )}
                     disabled={loading || !canToggleAccess}
@@ -207,7 +213,7 @@ export function Permissions({
                       aria-hidden="true"
                       className={cn(
                         'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
-                        item.enabled ? 'translate-x-3' : 'translate-x-0',
+                        checked ? 'translate-x-3' : 'translate-x-0',
                       )}
                     />
                   </Switch>
@@ -216,7 +222,7 @@ export function Permissions({
             );
           })}
         </ul>
-      </div> */}
+      </div>
 
       {(guest && canToggleAccess) && (
         <div className="mt-5 sm:mt-6">
@@ -235,6 +241,10 @@ export function Permissions({
 
 Permissions.propTypes = {
   guest: PropTypes.object,
+  tables: PropTypes.array.isRequired,
+  fields: PropTypes.array,
+  table: PropTypes.object,
+  setTable: PropTypes.func.isRequired,
   permissions: PropTypes.object,
   togglePermissions: PropTypes.object.isRequired,
   canToggleAccess: PropTypes.bool,

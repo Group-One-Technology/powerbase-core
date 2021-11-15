@@ -16,11 +16,11 @@ export function GuestAccessMenu({
   owner,
 }) {
   const { baseUser } = useBaseUser();
-  const { openModal } = usePermissionsStateModal();
+  const { modal } = usePermissionsStateModal();
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canRemoveGuests = baseUser?.can('removeGuests');
 
-  const handleConfigurePermissions = () => openModal(guest);
+  const handleConfigurePermissions = () => modal.open(guest);
 
   if (owner || !canChangeGuestAccess) {
     return (

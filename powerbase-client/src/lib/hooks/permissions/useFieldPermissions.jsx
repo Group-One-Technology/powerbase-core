@@ -1,11 +1,44 @@
 import useSWR from 'swr';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useAuthUser } from '@models/AuthUser';
 import { getTableFields } from '@lib/api/fields';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 
-export function useFieldPermissions({ table }) {
+function initializeFieldPermissions(initialFieldPermissions, fields, permissions) {
+  const fieldPermissions = {};
+
+  if (typeof initialFieldPermissions === 'object') {
+    Object.keys(initialFieldPermissions).forEach((key) => {
+      if (fieldPermissions[key] == null) {
+        fieldPermissions[key] = initialFieldPermissions[key];
+      }
+    });
+  }
+
+  fields?.forEach((field) => {
+    fieldPermissions[field.id] = CUSTOM_PERMISSIONS.Field
+      .map((item) => ({
+        ...item,
+        value: permissions?.fields && permissions.fields[field.id] != null
+          ? permissions.fields[field.id][item.key] ?? item.value
+          : item.value ?? false,
+      }))
+      .map((item) => ({ [item.key]: item.value }))
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+  });
+
+  return fieldPermissions;
+}
+
+export function useFieldPermissions({
+  guest,
+  fieldPermissions,
+  setFieldPermissions,
+  table,
+  permissions,
+  canToggleAccess,
+}) {
   const { authUser } = useAuthUser();
 
   const { data: fields } = useSWR(
@@ -15,37 +48,25 @@ export function useFieldPermissions({ table }) {
       : undefined),
   );
 
-  const [field, setField] = useState();
-  const [fieldPermissions, setFieldPermissions] = useState(CUSTOM_PERMISSIONS.Field.map((item) => ({
-    ...item,
-    enabled: item.defaultValue ?? false,
-  })));
-
   useEffect(() => {
-    setFieldPermissions(CUSTOM_PERMISSIONS.Field.map((item) => ({
-      ...item,
-      enabled: item.defaultValue ?? false,
-    })));
-  }, [table]);
+    setFieldPermissions(initializeFieldPermissions(fieldPermissions, fields, permissions));
+  }, [guest, fields]);
 
-  useEffect(() => {
-    if (table && fields?.length) {
-      setField(fields[0]);
+  const handleFieldPermissionsToggle = async (field, selectedItem) => {
+    if (canToggleAccess) {
+      const updatedFieldPermission = {
+        ...fieldPermissions,
+        [field.id]: {
+          ...fieldPermissions[field.id],
+          [selectedItem.key]: !fieldPermissions[field.id][selectedItem.key],
+        },
+      };
+
+      setFieldPermissions(updatedFieldPermission);
     }
-  }, [fields, table]);
-
-  const handleFieldPermissionsToggle = (selectedItem) => {
-    setFieldPermissions(fieldPermissions.map((item) => ({
-      ...item,
-      enabled: item.name === selectedItem.name
-        ? !item.enabled
-        : item.enabled,
-    })));
   };
 
   return {
-    field,
-    setField,
     fields,
     fieldPermissions,
     handleFieldPermissionsToggle,

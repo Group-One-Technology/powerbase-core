@@ -21,7 +21,7 @@ import { PermissionsModal } from '@components/guest/PermissionsModal';
 function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const { openModal, getPermissions } = usePermissionsStateModal();
+  const { modal, getPermissions } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
@@ -41,7 +41,7 @@ function BaseShareBaseModal() {
     setQuery(evt.target.value);
   };
 
-  const handleConfigurePermissions = () => openModal();
+  const handleConfigurePermissions = () => modal.open();
 
   const submit = async (evt) => {
     evt.preventDefault();
