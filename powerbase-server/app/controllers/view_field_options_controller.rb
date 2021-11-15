@@ -23,8 +23,17 @@ class ViewFieldOptionsController < ApplicationController
 
   # GET /views/:view_id/fields
   def index
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
-    render json: @view_fields.map {|item| format_json(item)}
+    @view = TableView.find(safe_params[:view_id])
+    raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
+    @table = @view.powerbase_table
+    current_user.can?(:view_table, @table)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    @view_fields = ViewFieldOption.where(table_view_id: @view.id).order(:order)
+
+    render json: @view_fields
+      .select {|view_field| current_user.can?(:view_field, view_field.powerbase_field, @guest, false)}
+      .map {|item| format_json(item)}
   end
 
   # PUT /views/:view_id/fields/hide_all
