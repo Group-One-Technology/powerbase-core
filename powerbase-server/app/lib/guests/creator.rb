@@ -1,6 +1,6 @@
 class Guests::Creator
-  include PermissionsHelper
   include TablePermissionsHelper
+  include FieldPermissionsHelper
 
   attr_accessor :guest
 
@@ -20,11 +20,25 @@ class Guests::Creator
     @guest.permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)
 
-      DEFAULT_PERMISSIONS.each do |key, value|
-        next if table_permissions[key.to_s] == nil
+      TABLE_DEFAULT_PERMISSIONS.each do |key, value|
+        permission_key = key.to_s
+        next if table_permissions[permission_key] == nil
 
-        if table.permissions[key.to_s]["access"] != value[:access] || table_permissions[key.to_s] != value[:default_value]
-          update_table_guests_access(table, [key, value], @guest, table_permissions[key.to_s])
+        if table.permissions[permission_key]["access"] != value[:access] || table_permissions[permission_key] != value[:default_value]
+          update_table_guests_access(table, [key, value], @guest, table_permissions[permission_key])
+        end
+      end
+    end
+
+    @guest.permissions["fields"].each do |field_id, field_permissions|
+      field = PowerbaseField.find(field_id)
+
+      FIELD_DEFAULT_PERMISSIONS.each do |key, value|
+        permission_key = key.to_s
+        next if field_permissions[permission_key] == nil
+
+        if field.permissions[permission_key]["access"] != value[:access] || field_permissions[permission_key] != value[:default_value]
+          update_field_guests_access(field, [key, value], @guest, field_permissions[permission_key])
         end
       end
     end

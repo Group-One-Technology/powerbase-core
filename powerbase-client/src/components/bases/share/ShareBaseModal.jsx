@@ -21,7 +21,7 @@ import { PermissionsModal } from '@components/guest/PermissionsModal';
 function BaseShareBaseModal() {
   const { mounted } = useMounted();
   const { open, setOpen, base } = useShareBaseModal();
-  const { modal, getPermissions } = usePermissionsStateModal();
+  const { modal, guest } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
@@ -58,7 +58,7 @@ function BaseShareBaseModal() {
           email,
           access: access.name,
           permissions: access.name === 'custom'
-            ? getPermissions()
+            ? guest.getPermissions()
             : undefined,
         });
         await mutateGuests();
@@ -155,9 +155,9 @@ function BaseShareBaseModal() {
           <li className="p-2">
             <GuestCard guest={base.owner} setGuests={setGuests} owner />
           </li>
-          {guests?.map((guest) => (
-            <li key={guest.email} className="p-2">
-              <GuestCard guest={guest} setGuests={setGuests} />
+          {guests?.map((item) => (
+            <li key={item.email} className="p-2">
+              <GuestCard guest={item} setGuests={setGuests} />
             </li>
           ))}
         </ul>

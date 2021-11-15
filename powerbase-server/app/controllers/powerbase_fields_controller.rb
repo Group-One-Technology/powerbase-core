@@ -28,7 +28,7 @@ class PowerbaseFieldsController < ApplicationController
   # GET /tables/:id/fields
   def index
     current_user.can?(:view_table, safe_params[:table_id])
-    @fields = PowerbaseField.where(powerbase_table_id: safe_params[:table_id])
+    @fields = PowerbaseField.where(powerbase_table_id: safe_params[:table_id]).order(:id)
     render json: @fields.map {|item| format_json(item)}
   end
 

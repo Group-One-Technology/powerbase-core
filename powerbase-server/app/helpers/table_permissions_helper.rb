@@ -1,5 +1,7 @@
 module TablePermissionsHelper
-  DEFAULT_PERMISSIONS = {
+  include PermissionsHelper
+
+  TABLE_DEFAULT_PERMISSIONS = {
     view_table: { access: "everyone", default_value: true },
     manage_table: { access: "admins and up", default_value: false },
     add_fields: { access: "admins and up", default_value: false },
@@ -38,7 +40,7 @@ module TablePermissionsHelper
     guest.permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)
 
-      DEFAULT_PERMISSIONS.each do |key, value|
+      TABLE_DEFAULT_PERMISSIONS.each do |key, value|
         key = key.to_s
         next if table.permissions[key] == nil
 
