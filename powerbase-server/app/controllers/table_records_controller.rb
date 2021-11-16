@@ -62,16 +62,23 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
-    record = model.update_record({
-      id: safe_params[:id],
-      primary_keys: safe_params[:primary_keys],
-      ctid: safe_params[:ctid],
-      fields: safe_params[:fields],
-      data: safe_params[:data]
-    })
+    @powerbase_table = PowerbaseTable.find(safe_params[:table_id])
+    @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
+    @is_turbo = @powerbase_database.is_turbo
+    if @is_turbo
+      model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+      record = model.update_record({
+        id: safe_params[:id],
+        primary_keys: safe_params[:primary_keys],
+        ctid: safe_params[:ctid],
+        fields: safe_params[:fields],
+        data: safe_params[:data]
+      })
 
-    render json: record["get"]["_source"]
+      render json: record["get"]["_source"]
+    else
+      puts "JAMES BLAKE"
+    end
   end
 
   # GET /tables/:id/magic_values

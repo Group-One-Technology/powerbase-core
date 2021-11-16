@@ -57,11 +57,9 @@ function CellValue({
   if (isRowNo || !field) {
     return (
       <>
-        {table.isVirtual && !isLastRow && (
-          <span className="flex-1 mr-4 text-right truncate">
-            {value?.toString()}
-          </span>
-        )}
+        <span className="flex-1 mr-4 text-right truncate">
+          {value?.toString()}
+        </span>
         <span className="flex-1">
           {isHoveredRow && !isLastRow && (
             <button
@@ -77,7 +75,7 @@ function CellValue({
               <span className="sr-only">Expand Record</span>
             </button>
           )}{" "}
-          {isHoveredRow && isLastRow && isRowNo && (
+          {/* {isHoveredRow && isLastRow && isRowNo && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -86,7 +84,7 @@ function CellValue({
               <PlusIcon className="h-5 w-5 ml-2 p-0.5" />
               <span className="sr-only">Add New Record</span>
             </button>
-          )}
+          )} */}
         </span>
       </>
     );
