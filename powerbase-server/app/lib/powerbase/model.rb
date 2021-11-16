@@ -165,12 +165,15 @@ module Powerbase
       index = "table_records_#{@table_id}"
       primary_keys = options[:primary_keys]
       identifier_fields = options[:fields]
+      ctid = options[:ctid] 
       id = if primary_keys.length > 0
         primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
         elsif options[:id]
           options[:id]
         elsif identifier_fields.length > 0
           identifier_fields.collect {|key, value| "#{key}_#{identifier_fields[key]}"}.join("-")
+        elsif @powerbase_database.adapter == "postgresql" && ctid
+          "ctid_#{ctid}"
       end
       response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
       response

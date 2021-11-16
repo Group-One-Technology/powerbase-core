@@ -66,6 +66,8 @@ class TableRecordsController < ApplicationController
     record = model.update_record({
       id: safe_params[:id],
       primary_keys: safe_params[:primary_keys],
+      ctid: safe_params[:ctid],
+      fields: safe_params[:fields],
       data: safe_params[:data]
     })
 
