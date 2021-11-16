@@ -10,6 +10,7 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon,
   ChevronRightIcon,
+  LockClosedIcon,
 } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
@@ -103,6 +104,8 @@ export function GridHeaderOptions({
       }
     }
   };
+
+  const handlePermissions = () => {};
 
   const handleHideField = async () => {
     if (canManageViews) {
@@ -255,7 +258,19 @@ export function GridHeaderOptions({
 
           {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {(canManageField && fieldType.name === FieldType.CURRENCY) && <FormatCurrencyOption field={field} />}
+          {canManageField && (
+            <>
+              {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
+              <DropdownMenu.Item
+                textValue="\t"
+                className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+                onSelect={handlePermissions}
+              >
+                <LockClosedIcon className="h-4 w-4 mr-1.5" />
+                Permissions
+              </DropdownMenu.Item>
+            </>
+          )}
           {canAddFields && (
             <>
               <DropdownMenu.Item
