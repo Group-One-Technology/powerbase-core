@@ -120,6 +120,11 @@ module Powerbase
 
           doc = doc.slice!(:ctid)
 
+          # if !primary_keys.length > 0 && @powerbase_database.adapter == "postgresql" && record[:ctid]
+          #   ctid_key = "__ctid_table_#{table_id}"
+          #   doc[ctid_key] = record[:ctid]
+          # end
+
           if doc_id != nil
             @esclient.update(
               index: index,
@@ -159,10 +164,15 @@ module Powerbase
     def update_record(options)
       index = "table_records_#{@table_id}"
       primary_keys = options[:primary_keys]
+      identifier_fields = options[:fields]
       id = if primary_keys.length > 0
         primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
+        elsif options[:id]
+          options[:id]
+        elsif identifier_fields.length > 0
+          identifier_fields.collect {|key, value| "#{key}_#{identifier_fields[key]}"}.join("-")
       end
-      response = @esclient.update(index: index, id: id, body: { doc: options[:data] })
+      response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
       response
     end
 
@@ -253,6 +263,8 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
+        # puts result["hits"]["hits"]
+        # puts "is_nah"
         result["hits"]["hits"].map {|result| result["_source"]}
       else
         remote_db() {|db|

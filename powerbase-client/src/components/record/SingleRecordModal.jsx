@@ -36,7 +36,6 @@ export function SingleRecordModal({
   const { data: referencedConnections } = useTableReferencedConnections();
   const { linkedRecord, handleOpenRecord, handleToggleRecord } =
     useLinkedRecord();
-
   const [record, setRecord] = useState(initialRecord);
   const hiddenFields = record.filter((item) => item.isHidden);
 

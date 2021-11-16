@@ -13,6 +13,7 @@ import OutsideCellClick from "./OutsideCellClick.jsx";
 import EditCell from "./EditCell.jsx";
 import { securedApi } from "@lib/api";
 import { PlusIcon } from "@heroicons/react/solid";
+import { initializeFields } from "@lib/helpers/fields/initializeFields";
 
 function CellValue({
   value,
@@ -31,6 +32,7 @@ function CellValue({
   setCellToEdit,
   setIsNewRecord,
   setHoveredCell,
+  records,
 }) {
   const className =
     value?.toString().length && field?.isForeignKey
@@ -199,6 +201,8 @@ export function CellRenderer({
   table,
   isNewRecord,
   setIsNewRecord,
+  initialFields,
+  connections,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -248,6 +252,8 @@ export function CellRenderer({
     }
   };
 
+  // console.log("RI", records[rowIndex]);
+
   const onClickOutsideEditingCell = async () => {
     let num, newRecordId;
     const key = determineCellValueKey(field);
@@ -270,25 +276,32 @@ export function CellRenderer({
       );
       newRecordId = newRecordResponse.data?.id;
     }
-    mutateTableRecords();
+
+    const rowNo = rowIndex + 1;
+
+    const updatedFields = initializeFields(initialFields, connections, {
+      hidden: false,
+    })
+      .map((item) => ({
+        ...item,
+        value: records[rowNo - 1][item.name],
+      }))
+      .sort((x, y) => x.order > y.order);
+
+    const computedFields = updatedFields.filter(
+      (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
+    );
+
+    let primaryKeys = {};
+    computedFields?.forEach((item) => {
+      const { isPrimaryKey, value, name } = item;
+      if (isPrimaryKey) {
+        primaryKeys[name] = value;
+      }
+    });
 
     const payload = {
-      // field_name: field.name,
-      // field_type_id: field.fieldTypeId,
-      // table_id: field.tableId,
-      // field_id: field?.id,
-      // [key]: num ? num : recordInputRef.current?.value,
-      // record_id: !table.isVirtual ? records[rowIndex]?.id : null,
-      // magic_record_id: table.isVirtual
-      //   ? !isNewRecord
-      //     ? records[rowIndex].id
-      //     : newRecordId
-      //   : null,
-      // key_type: key,
-      // table_type_id: table.isVirtual ? "magic_record_id" : "record_id",
-      // has_precision: field?.precision ? true : false,
-      // id: records[rowIndex]?.id,
-      primary_keys: { id: records[rowIndex]?.id },
+      primary_keys: primaryKeys,
       data: { [field.name]: num ? num : recordInputRef.current?.value },
     };
 
@@ -297,9 +310,18 @@ export function CellRenderer({
       payload
     );
 
+    const updatedRecord = response.data;
+
+    const updatedRecords = records.map((item) => {
+      if (item.id === updatedRecord.id) {
+        return updatedRecord;
+      } else return item;
+    });
+
+    await mutateTableRecords(updatedRecords);
     mutateTableRecords();
+
     if (response.statusText === "OK") {
-      mutateTableRecords();
       setIsNewRecord(false);
       setCellToEdit({});
       recordInputRef?.current?.blur();
@@ -384,6 +406,7 @@ export function CellRenderer({
           isNewRecord={isNewRecord}
           setIsNewRecord={setIsNewRecord}
           setHoveredCell={setHoveredCell}
+          records={records}
         />
       )}
     </div>

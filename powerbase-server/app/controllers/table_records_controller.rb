@@ -24,7 +24,7 @@ class TableRecordsController < ApplicationController
     optional(:data)
   end
 
-  # POST /tables/:id/records
+  # POST /tables/:table_id/records
   def index
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
     records = model.search({
@@ -69,7 +69,7 @@ class TableRecordsController < ApplicationController
       data: safe_params[:data]
     })
 
-    render json: record
+    render json: record["get"]["_source"]
   end
 
   # GET /tables/:id/magic_values

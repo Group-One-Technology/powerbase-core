@@ -175,6 +175,8 @@ export function TableRenderer({ height, table }) {
                           table,
                           isNewRecord,
                           setIsNewRecord,
+                          connections,
+                          initialFields,
                           ...props,
                         });
                       }}

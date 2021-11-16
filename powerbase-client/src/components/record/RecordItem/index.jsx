@@ -33,8 +33,6 @@ export function RecordItem({
     };
   }
 
-  console.log("HEREEEEEE", primaryKeys);
-
   return (
     <TableRecordProvider
       tableId={referencedTable?.id}
