@@ -30,7 +30,7 @@ function usePermissionsStateModalModel() {
   const isInviteGuest = !!(!guest && baseUser);
   const permissions = isInviteGuest ? baseUser.permissions : guest.permissions;
 
-  const [fieldPermissions, setFieldPermissions] = useState(isInviteGuest ? baseUser.permissions.fields : undefined);
+  const [fieldPermissions, setFieldPermissions] = useState(isInviteGuest ? baseUser.permissions.fields : {});
   const canToggleAccess = isInviteGuest ? baseUser?.can('inviteGuests') : baseUser?.can('changeGuestAccess');
 
   const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({
@@ -50,7 +50,7 @@ function usePermissionsStateModalModel() {
   }, [tables]);
 
   useEffect(() => {
-    setFieldPermissions(isInviteGuest ? baseUser.permissions.fields : undefined);
+    setFieldPermissions(isInviteGuest ? baseUser.permissions.fields : {});
   }, [guest, baseUser.id]);
 
   const openModal = (value) => {
@@ -105,30 +105,29 @@ function usePermissionsStateModalModel() {
   const updatePermissions = async (evt) => {
     evt.preventDefault();
 
-    if (canToggleAccess && baseUser && guest) {
+    if (canToggleAccess && baseUser && guest.access === 'custom') {
       saving();
 
-      const configuredPermissions = guest.access === 'custom'
-        ? {
-          ...basePermissions,
-          tables: tablePermissions,
-          fields: fieldPermissions,
-        }
-        : null;
+      const configuredPermissions = {
+        ...basePermissions,
+        tables: tablePermissions ?? {},
+        fields: fieldPermissions ?? {},
+      };
+      const filteredPermissions = getPermissions();
 
       try {
         await updateGuestPermissions({
           id: guest.id,
           permissions: configuredPermissions,
-          filteredPermissions: getPermissions(),
+          filteredPermissions,
         });
         if (baseUser.userId === guest.userId) {
-          mutateBaseUser({ ...baseUser, permissions: configuredPermissions });
+          mutateBaseUser({ ...baseUser, permissions: filteredPermissions });
         }
         await mutateGuests(guests.map((item) => ({
           ...item,
           permissions: item.id === guest.id
-            ? permissions
+            ? filteredPermissions
             : item.permissions,
         })));
         saved(`Successfully updated ${guest.firstName}'s permissions.`);

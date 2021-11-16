@@ -206,7 +206,7 @@ export function Permissions({
             if (item.hidden) return null;
 
             if (baseUser.access === 'custom') {
-              if (baseUser.permissions.fields[field.id]) {
+              if (baseUser.permissions.fields?.[field.id]) {
                 if (baseUser.permissions.fields[field.id][item.key] == null) {
                   if (!item.value) return null;
                 } else if (!baseUser.permissions.fields[field.id][item.key]) {
@@ -217,7 +217,7 @@ export function Permissions({
               }
             }
 
-            const checked = permissions.fields[field.id]
+            const checked = permissions.fields?.[field.id]
               ? permissions.fields[field.id][item.key] ?? item.value
               : item.value;
 
