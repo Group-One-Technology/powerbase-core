@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { Listbox, Switch } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
+import { useBaseUser } from '@models/BaseUser';
 import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 import { Button } from '@components/ui/Button';
 
@@ -19,6 +20,7 @@ export function Permissions({
   updatePermissions,
   loading,
 }) {
+  const { baseUser } = useBaseUser();
   const [field, setField] = useState();
 
   useEffect(() => {
@@ -34,8 +36,13 @@ export function Permissions({
   return (
     <form onSubmit={updatePermissions} className="mt-2">
       <ul className="my-1">
-        {CUSTOM_PERMISSIONS.Base.map((item) => {
+        {baseUser && CUSTOM_PERMISSIONS.Base.map((item) => {
           if (item.hidden) return null;
+
+          if (baseUser.access === 'custom') {
+            if (baseUser.permissions[item.key] == null && !item.value) return null;
+            if (!baseUser.permissions[item.key]) return null;
+          }
 
           const checked = permissions.base[item.key];
 
@@ -107,8 +114,20 @@ export function Permissions({
       </div>
 
       <ul className="my-1">
-        {CUSTOM_PERMISSIONS.Table.map((item) => {
+        {baseUser && CUSTOM_PERMISSIONS.Table.map((item) => {
           if (item.hidden) return null;
+
+          if (baseUser.access === 'custom') {
+            if (baseUser.permissions.tables[table.id]) {
+              if (baseUser.permissions.tables[table.id][item.key] == null) {
+                if (!item.value) return null;
+              } else if (!baseUser.permissions.tables[table.id][item.key]) {
+                return null;
+              }
+            } else if (!item.value) {
+              return null;
+            }
+          }
 
           const checked = permissions.tables[table.id]
             ? permissions.tables[table.id][item.key] ?? item.value
@@ -183,8 +202,20 @@ export function Permissions({
         </div>
 
         <ul className="my-1">
-          {CUSTOM_PERMISSIONS.Field.map((item) => {
+          {baseUser && CUSTOM_PERMISSIONS.Field.map((item) => {
             if (item.hidden) return null;
+
+            if (baseUser.access === 'custom') {
+              if (baseUser.permissions.fields[field.id]) {
+                if (baseUser.permissions.fields[field.id][item.key] == null) {
+                  if (!item.value) return null;
+                } else if (!baseUser.permissions.fields[field.id][item.key]) {
+                  return null;
+                }
+              } else if (!item.value) {
+                return null;
+              }
+            }
 
             const checked = permissions.fields[field.id]
               ? permissions.fields[field.id][item.key] ?? item.value
