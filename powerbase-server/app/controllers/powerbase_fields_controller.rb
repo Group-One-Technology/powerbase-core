@@ -114,6 +114,7 @@ class PowerbaseFieldsController < ApplicationController
         is_nullable: field.is_nullable,
         is_pii: field.is_pii,
         options: field.options,
+        permissions: field.permissions,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,
         created_at: field.created_at,

@@ -10,14 +10,19 @@ import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
 import { Badge } from '@components/ui/Badge';
 
-export function GuestCard({ guest, setGuests, owner }) {
+export function GuestCard({
+  guest,
+  setGuests,
+  owner,
+  menu = true,
+}) {
   const history = useHistory();
   const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { saving, saved, catchError } = useSaveStatus();
 
   const handleChangeAccess = async (value) => {
-    if (!owner && baseUser?.can('changeGuestAccess')) {
+    if (!owner && baseUser?.can('changeGuestAccess') && setGuests) {
       saving();
 
       const updatedGuests = guests.map((item) => ({
@@ -42,7 +47,7 @@ export function GuestCard({ guest, setGuests, owner }) {
   };
 
   const removeGuestAccess = async () => {
-    if (!owner && baseUser?.can('removeGuests')) {
+    if (!owner && baseUser?.can('removeGuests') && setGuests) {
       try {
         if (baseUser.userId === guest.userId) {
           await removeGuest({ id: guest.id });
@@ -86,6 +91,7 @@ export function GuestCard({ guest, setGuests, owner }) {
         change={handleChangeAccess}
         remove={removeGuestAccess}
         owner={owner}
+        disabled={!menu}
       />
     </div>
   );
@@ -93,6 +99,7 @@ export function GuestCard({ guest, setGuests, owner }) {
 
 GuestCard.propTypes = {
   guest: PropTypes.object.isRequired,
-  setGuests: PropTypes.func.isRequired,
+  setGuests: PropTypes.func,
   owner: PropTypes.bool,
+  menu: PropTypes.bool,
 };
