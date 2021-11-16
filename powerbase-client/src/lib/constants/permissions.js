@@ -43,6 +43,29 @@ export const ACCESS_LEVEL = [
   },
 ];
 
+export const GROUP_ACCESS_LEVEL = [
+  {
+    name: 'owners only',
+    access: ['owner'],
+  },
+  {
+    name: 'admins and up',
+    access: ['owner', 'admin'],
+  },
+  {
+    name: 'editors and up',
+    access: ['owner', 'admin', 'custom', 'editor'],
+  },
+  {
+    name: 'commenters and up',
+    access: ['owner', 'admin', 'custom', 'editor', 'commenter'],
+  },
+  {
+    name: 'everyone',
+    access: ['owner', 'admin', 'custom', 'editor', 'commenter', 'viewer'],
+  },
+];
+
 export const CUSTOM_PERMISSIONS = {
   Base: [
     {
