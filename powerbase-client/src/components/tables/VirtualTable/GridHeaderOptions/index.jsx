@@ -42,6 +42,7 @@ export function GridHeaderOptions({
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
   const canManageViews = baseUser?.can('manageViews', table.id);
+  const canAddFields = baseUser?.can('addFields', field.id);
   const canManageField = baseUser?.can('manageField', field.id);
 
   const [alias, setAlias] = useState(field.alias || field.name);
@@ -254,9 +255,9 @@ export function GridHeaderOptions({
 
           {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {canManageField && (
+          {(canManageField && fieldType.name === FieldType.CURRENCY) && <FormatCurrencyOption field={field} />}
+          {canAddFields && (
             <>
-              {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
               <DropdownMenu.Item
                 textValue="\t"
                 className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
