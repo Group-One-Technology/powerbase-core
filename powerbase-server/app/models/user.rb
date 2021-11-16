@@ -59,11 +59,13 @@ class User < ApplicationRecord
     end
 
     return true if database.user_id == self.id
+    return false if permission === :change_guest_access || permission === :remove_guests
 
     guest = Guest.find(guest) if !database.is_a?(ActiveRecord::Base)
     guest = guest || Guest.find_by(user_id: self.id, powerbase_database_id: database.id)
     raise AccessDenied if !guest && error
     return false if !guest
+
 
     if guest.access.to_sym != :custom
       permissions = ROLES[guest.access.to_sym]

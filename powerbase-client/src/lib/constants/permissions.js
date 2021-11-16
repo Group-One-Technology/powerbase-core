@@ -9,31 +9,37 @@ export const ACCESS_LEVEL = [
     name: 'owner',
     description: 'Has full access to this base and can share it with others.',
     permisions: ['all'],
+    level: 6,
   },
   {
     name: 'admin',
     description: 'Can configure tables, connections, and fields.',
     permisions: ['viewBase', ...BasePermissions.TABLE, ...BasePermissions.FIELD],
+    level: 5,
   },
   {
     name: 'custom',
     description: 'Configure your own permissions. It has the Editor\'s permissions as default.',
     permisions: ['viewBase', 'addViews', 'manageViews', 'deleteViews', 'addFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+    level: 4,
   },
   {
     name: 'editor',
     description: 'Can edit records, and manage views but not configure the base.',
     permisions: ['viewBase', 'addViews', 'manageViews', 'deleteViews', 'addFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+    level: 3,
   },
   {
     name: 'commenter',
     description: 'Can comment and view data.',
     permisions: ['viewBase', 'viewTable', 'viewField', 'commentRecords'],
+    level: 2,
   },
   {
     name: 'viewer',
     description: 'Can only view the data.',
     permisions: ['viewBase', 'viewTable', 'viewField'],
+    level: 1,
   },
 ];
 
@@ -70,18 +76,6 @@ export const CUSTOM_PERMISSIONS = {
       name: 'Invite Guests',
       description: 'who can send invites to users.',
       key: 'inviteGuests',
-      value: false,
-    },
-    {
-      name: 'Change Guest Access',
-      description: 'who can change guest\'s access level and permissions.',
-      key: 'changeGuestAccess',
-      value: false,
-    },
-    {
-      name: 'Remove Guest Access',
-      description: 'who can remove a guest from this base.',
-      key: 'removeGuestAccess',
       value: false,
     },
     {
