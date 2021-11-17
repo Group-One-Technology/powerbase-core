@@ -26,17 +26,25 @@ function usePermissionsStateModalModel() {
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
   const [table, setTable] = useState();
-  const [fieldPermissions, setFieldPermissions] = useState();
-  const canToggleAccess = guest ? baseUser?.can('changeGuestAccess') : baseUser?.can('inviteGuests');
+
+  const isInviteGuest = !!(!guest && baseUser);
+  const permissions = !isInviteGuest
+    ? guest.permissions
+    : baseUser.userId !== base.userId
+      ? baseUser.permissions
+      : {};
+
+  const [fieldPermissions, setFieldPermissions] = useState((isInviteGuest ? baseUser.permissions.fields : guest.permissions.fields) ?? {});
+  const canToggleAccess = isInviteGuest ? baseUser?.can('inviteGuests') : baseUser?.can('changeGuestAccess');
 
   const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({
-    guest, base, permissions: guest?.permissions, canToggleAccess,
+    guest, base, permissions, canToggleAccess,
   });
   const { tablePermissions, handleTablePermissionsToggle } = useTablePermissions({
-    guest, table, tables, permissions: guest?.permissions, canToggleAccess,
+    guest, table, tables, permissions, canToggleAccess,
   });
   const { fields, handleFieldPermissionsToggle } = useFieldPermissions({
-    guest, table, permissions: guest?.permissions, fieldPermissions, setFieldPermissions, canToggleAccess,
+    guest, table, permissions, fieldPermissions, setFieldPermissions, canToggleAccess,
   });
 
   useEffect(() => {
@@ -45,13 +53,20 @@ function usePermissionsStateModalModel() {
     }
   }, [tables]);
 
+  useEffect(() => {
+    setFieldPermissions((isInviteGuest ? baseUser.permissions.fields : guest.permissions.fields) ?? {});
+  }, [guest, baseUser.id]);
+
   const openModal = (value) => {
     setGuest(value);
     setOpen(true);
   };
 
   const getPermissions = () => {
-    const filteredTablePermissions = {};
+    const filteredTablePermissions = isInviteGuest
+      ? baseUser.permissions.tables ?? {}
+      : {};
+
     Object.keys(tablePermissions).forEach((key) => {
       const item = tablePermissions[key];
 
@@ -66,7 +81,10 @@ function usePermissionsStateModalModel() {
       });
     });
 
-    const filteredFieldPermissions = {};
+    const filteredFieldPermissions = isInviteGuest
+      ? baseUser.permissions.fields ?? {}
+      : {};
+
     Object.keys(fieldPermissions).forEach((key) => {
       const item = fieldPermissions[key];
 
@@ -91,26 +109,29 @@ function usePermissionsStateModalModel() {
   const updatePermissions = async (evt) => {
     evt.preventDefault();
 
-    if (canToggleAccess && baseUser && guest) {
+    if (canToggleAccess && baseUser && guest.access === 'custom') {
       saving();
 
-      const permissions = guest.access === 'custom'
-        ? {
-          ...basePermissions,
-          tables: tablePermissions,
-          fields: fieldPermissions,
-        }
-        : null;
+      const configuredPermissions = {
+        ...basePermissions,
+        tables: tablePermissions ?? {},
+        fields: fieldPermissions ?? {},
+      };
+      const filteredPermissions = getPermissions();
 
       try {
-        await updateGuestPermissions({ id: guest.id, permissions, filteredPermissions: getPermissions() });
+        await updateGuestPermissions({
+          id: guest.id,
+          permissions: configuredPermissions,
+          filteredPermissions,
+        });
         if (baseUser.userId === guest.userId) {
-          mutateBaseUser({ ...baseUser, permissions });
+          mutateBaseUser({ ...baseUser, permissions: filteredPermissions });
         }
         await mutateGuests(guests.map((item) => ({
           ...item,
           permissions: item.id === guest.id
-            ? permissions
+            ? filteredPermissions
             : item.permissions,
         })));
         saved(`Successfully updated ${guest.firstName}'s permissions.`);

@@ -25,7 +25,8 @@ function BaseShareBaseModal() {
   const { saving, saved, catchError } = useSaveStatus();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
-  const canInviteGuests = baseUser?.can('inviteGuests');
+  const canInviteGuests = baseUser?.can('inviteGuests', guest.state);
+  const baseUserAccess = baseUser && ACCESS_LEVEL.find((item) => item.name === baseUser.access);
 
   const [guests, setGuests] = useState(initialGuests);
 
@@ -100,7 +101,7 @@ function BaseShareBaseModal() {
                 <ChevronDownIcon className="h-4 w-4 ml-1" />
               </Listbox.Button>
               <Listbox.Options className="z-10 absolute right-0 top-5 mt-1 w-auto text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                {ACCESS_LEVEL.map((item) => (
+                {ACCESS_LEVEL.map((item) => baseUserAccess.level >= item.level && (
                   <Listbox.Option
                     key={item.name}
                     value={item}

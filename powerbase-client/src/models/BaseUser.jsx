@@ -20,6 +20,7 @@ function useBaseUserModel() {
 
     if (!baseUser) return false;
     if (base.userId === baseUser.userId) return true;
+    if (permission === 'changeGuestAccess' || permission === 'removeGuests') return false;
 
     const permissions = ACCESS_LEVEL.find((item) => item.name === baseUser.access)?.permisions;
     if (!permissions) return false;
@@ -32,11 +33,37 @@ function useBaseUserModel() {
     }
 
     if (BasePermissions.BASE.includes(permission)) {
-      if (baseUser.permissions[permission]) return true;
-      if (baseUser.permissions[permission] == null) {
+      let hasPermission = false;
+
+      if (baseUser.permissions[permission]) {
+        hasPermission = true;
+      } else if (baseUser.permissions[permission] == null) {
         const basePermission = CUSTOM_PERMISSIONS.Base.find((item) => item.key === permission);
-        if (basePermission) return basePermission.value;
+        if (basePermission) {
+          hasPermission = basePermission.value;
+        }
       }
+
+      if (hasPermission && permission === 'inviteGuests' && resourceId) {
+        const guest = resourceId;
+        const access = ACCESS_LEVEL.find((item) => item.name === guest.access);
+        const baseUserAccessLevel = ACCESS_LEVEL.find((item) => item.name === baseUser.access);
+
+        if (baseUserAccessLevel >= access.level) {
+          if (baseUser.access === 'custom') {
+            if (guest.permissions.inviteGuests != null) {
+              return guest.permissions.inviteGuests;
+            }
+
+            const basePermission = CUSTOM_PERMISSIONS.Base.find((item) => item.key === 'inviteGuests');
+            return basePermission.value;
+          }
+
+          return true;
+        }
+      }
+
+      return hasPermission;
     }
 
     if (BasePermissions.TABLE.includes(permission)) {

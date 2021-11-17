@@ -58,7 +58,9 @@ export function useFieldPermissions({
         ...fieldPermissions,
         [field.id]: {
           ...fieldPermissions[field.id],
-          [selectedItem.key]: !fieldPermissions[field.id][selectedItem.key],
+          [selectedItem.key]: fieldPermissions[field.id]?.[selectedItem.key] != null
+            ? !fieldPermissions[field.id][selectedItem.key]
+            : !selectedItem.value,
         },
       };
 
