@@ -73,7 +73,7 @@ export function FieldPermissionsModal() {
                           <div className="inline font-medium text-xs text-gray-900 leading-3">Allowed Users</div>
                           <p className="text-xs text-gray-500">Click to expand to view more info.</p>
                           {!open && (
-                            <div className="mt-1">
+                            <div className="mt-1 flex gap-1">
                               {guests && permission.allowedGuests.map((guestId) => {
                                 const guest = guests.find((curItem) => curItem.id === guestId);
 
@@ -108,7 +108,7 @@ export function FieldPermissionsModal() {
                           <div className="inline font-medium text-xs text-gray-900 leading-3">Restricted Users</div>
                           <p className="text-xs text-gray-500">Click to expand to view more info.</p>
                           {!open && (
-                            <div className="mt-1">
+                            <div className="mt-1 flex gap-1">
                               {guests && permission.restrictedGuests.map((guestId) => {
                                 const guest = guests.find((curItem) => curItem.id === guestId);
 
