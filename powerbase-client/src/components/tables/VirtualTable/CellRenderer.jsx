@@ -315,6 +315,7 @@ export function CellRenderer({
 
     const mutatedRecords = recordsToUse.map((item) => {
       if (item.id === updatedRecord.id) {
+        console.log(item);
         return updatedRecord;
       } else return item;
     });
@@ -343,7 +344,7 @@ export function CellRenderer({
           cellToEdit.row !== null &&
           cellToEdit.row === rowIndex &&
           cellToEdit.column === columnIndex &&
-          "ring-2 ring-indigo-500"
+          "border border-indigo-500"
       )}
       style={style}
       tabIndex={0}
@@ -377,7 +378,10 @@ export function CellRenderer({
       rowIndex === cellToEdit?.row &&
       field?.isVirtual &&
       columnIndex === cellToEdit?.column ? (
-        <OutsideCellClick onClickOutside={onClickOutsideEditingCell}>
+        <OutsideCellClick
+          onClickOutside={onClickOutsideEditingCell}
+          className="h-full"
+        >
           <EditCell
             value={editCellInput}
             isEditing={isEditing}

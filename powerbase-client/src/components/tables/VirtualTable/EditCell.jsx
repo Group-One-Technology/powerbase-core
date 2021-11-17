@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useEffect } from "react";
+import React, { useEffect, Fragment } from "react";
 import isObject from "lodash/isObject";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
@@ -53,7 +53,7 @@ function TextCell({ isEditing, onChange, value, validationToolTip }, ref) {
       <TooltipPrimitive.Trigger className="w-full h-full">
         <input
           value={getValue(value)}
-          className="w-full h-full focus:outline-none"
+          className="w-full focus:outline-none text-sm leading-3"
           onChange={(newVal) => {
             if (isObject(value)) onChange(JSON.parse(newVal));
             else onChange(newVal);

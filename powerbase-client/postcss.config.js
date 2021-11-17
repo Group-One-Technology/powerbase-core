@@ -1,8 +1,11 @@
-const tailwindcss = require('tailwindcss');
+/* eslint-disable  */
+const autoprefixer = require("autoprefixer");
+const tailwindcss = require("tailwindcss");
 
 module.exports = {
   plugins: [
-    'postcss-preset-env',
+    // 'postcss-preset-env',
+    autoprefixer,
     tailwindcss,
   ],
 };
