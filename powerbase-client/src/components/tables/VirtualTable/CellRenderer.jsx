@@ -201,6 +201,8 @@ export function CellRenderer({
   setIsNewRecord,
   initialFields,
   connections,
+  setUpdatedRecords,
+  updatedRecords,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -309,15 +311,15 @@ export function CellRenderer({
     );
 
     const updatedRecord = response.data;
+    const recordsToUse = updatedRecords ? updatedRecords : records;
 
-    const updatedRecords = records.map((item) => {
+    const mutatedRecords = recordsToUse.map((item) => {
       if (item.id === updatedRecord.id) {
         return updatedRecord;
       } else return item;
     });
-
-    await mutateTableRecords(updatedRecords);
-    mutateTableRecords();
+    setUpdatedRecords(mutatedRecords);
+    mutateTableRecords(mutatedRecords);
 
     if (response.statusText === "OK") {
       setIsNewRecord(false);

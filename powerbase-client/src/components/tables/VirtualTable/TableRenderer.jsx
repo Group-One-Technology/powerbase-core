@@ -43,6 +43,7 @@ export function TableRenderer({ height, table }) {
   const [editCellInput, setEditCellInput] = useState(null);
   const [validationToolTip, setValidationToolTip] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
+  const [updatedRecords, setUpdatedRecords] = useState();
 
   const columnCount = fields && fields.length + 1;
 
@@ -138,9 +139,12 @@ export function TableRenderer({ height, table }) {
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isLastRow = rowIndex >= records.length;
+                        const recordsToUse = updatedRecords
+                          ? updatedRecords
+                          : records;
                         let value =
                           columnIndex !== 0 && !isLastRow
-                            ? records[rowIndex][field.name]
+                            ? recordsToUse[rowIndex][field.name]
                             : null;
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
@@ -177,6 +181,8 @@ export function TableRenderer({ height, table }) {
                           setIsNewRecord,
                           connections,
                           initialFields,
+                          setUpdatedRecords,
+                          updatedRecords,
                           ...props,
                         });
                       }}
