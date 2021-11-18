@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useViewFields } from '@models/ViewFields';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
 import { Badge } from '@components/ui/Badge';
@@ -19,6 +20,7 @@ export function GuestCard({
   const history = useHistory();
   const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
+  const { mutate: mutateViewFields } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
 
   const handleChangeAccess = async (value) => {
@@ -38,6 +40,7 @@ export function GuestCard({
         if (guest.userId === baseUser.userId) {
           await mutateBaseUser();
         }
+        mutateViewFields();
         await mutateGuests(updatedGuests);
         saved(`Successfully changed guest ${guest.firstName}'s access to '${value}'.`);
       } catch (err) {
@@ -60,6 +63,7 @@ export function GuestCard({
           setGuests(updatedGuests);
 
           await removeGuest({ id: guest.id });
+          mutateViewFields();
           await mutateGuests(updatedGuests);
           saved(`Successfully removed guest '${guest.firstName}'`);
         }

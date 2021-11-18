@@ -7,7 +7,6 @@ import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
-import { IId } from '@lib/propTypes/common';
 import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
@@ -15,18 +14,18 @@ import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { AuthOnly } from '@components/middleware/AuthOnly';
 import { Loader } from '@components/ui/Loader';
-import { CurrentViewProvider } from '@models/views/CurrentTableView';
+import { CurrentViewProvider, useCurrentView } from '@models/views/CurrentTableView';
 import { Table } from '@components/tables/Table';
+import { ViewFieldsProvider } from '@models/ViewFields';
 
-const BaseTable = React.memo(({ id: tableId, baseId }) => {
-  const query = useQuery();
+function BaseTable() {
   const history = useHistory();
-  const viewId = query.get('view');
   const { authUser } = useAuthUser();
   const { data: bases } = useBases();
   const { data: base } = useBase();
   const { data: guests } = useBaseGuests();
   const { data: baseUser } = useBaseUser();
+  const { view } = useCurrentView();
 
   if (base == null || bases == null || authUser == null || guests == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
@@ -38,11 +37,7 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
   }
 
   return (
-    <CurrentViewProvider
-      baseId={baseId}
-      initialTableId={tableId}
-      initialViewId={viewId}
-    >
+    <ViewFieldsProvider id={view?.id}>
       <Page
         navbar={<Navbar base={base} bases={bases} />}
         className="!bg-white"
@@ -51,17 +46,14 @@ const BaseTable = React.memo(({ id: tableId, baseId }) => {
           <Table />
         </PageContent>
       </Page>
-    </CurrentViewProvider>
+    </ViewFieldsProvider>
   );
-});
-
-BaseTable.propTypes = {
-  id: IId.isRequired,
-  baseId: IId.isRequired,
-};
+}
 
 export function TablePage() {
-  const { id, baseId } = useParams();
+  const { id: tableId, baseId } = useParams();
+  const query = useQuery();
+  const viewId = query.get('view');
 
   return (
     <AuthOnly>
@@ -69,8 +61,14 @@ export function TablePage() {
         <BaseProvider id={baseId}>
           <BaseGuestsProvider id={baseId}>
             <BaseUserProvider>
-              <BaseTableProvider id={id}>
-                <BaseTable id={id} baseId={baseId} />
+              <BaseTableProvider id={tableId}>
+                <CurrentViewProvider
+                  baseId={baseId}
+                  initialTableId={tableId}
+                  initialViewId={viewId}
+                >
+                  <BaseTable id={tableId} baseId={baseId} />
+                </CurrentViewProvider>
               </BaseTableProvider>
             </BaseUserProvider>
           </BaseGuestsProvider>
