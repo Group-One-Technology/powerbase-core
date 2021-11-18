@@ -67,6 +67,8 @@ class Guests::Updater
         view_base: true,
         view_table: true,
         view_field: true,
+        tables: {},
+        fields: {},
       }
     end
 

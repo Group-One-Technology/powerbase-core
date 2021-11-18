@@ -61,7 +61,7 @@ export function FieldPermissionsModal() {
               .filter((guest) => guest);
 
             if (!isDefaultAccess && doesCustomGuestHaveAccess(permission.access) !== item.value) {
-              const otherGuests = customGuests.filter((curItem) => curItem.permissions.fields[field.id]?.[item.key] == null);
+              const otherGuests = customGuests.filter((curItem) => curItem.permissions.fields?.[field.id]?.[item.key] == null);
 
               if (item.value) {
                 const filteredGuests = otherGuests.filter((curItem) => !allowedGuests.some((allowedGuest) => allowedGuest.id === curItem.id));

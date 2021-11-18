@@ -19,6 +19,7 @@ class Fields::Updater
     if access == default_access
       guests.each do |guest|
         field_id = @field.id.to_s
+        guest.permissions["fields"] = {} if guest.permissions["fields"] == nil
         guest.permissions["fields"][field_id] = {} if guest.permissions["fields"][field_id] == nil
         guest.permissions["fields"][field_id][permission] = default_value if guest.permissions["fields"][field_id][permission] == nil
 
@@ -36,6 +37,7 @@ class Fields::Updater
     else
       guests.each do |guest|
         field_id = @field.id.to_s
+        guest.permissions["fields"] = {} if guest.permissions["fields"] == nil
         guest.permissions["fields"][field_id] = {} if guest.permissions["fields"][field_id] == nil
         guest.permissions["fields"][field_id][permission] = default_value if guest.permissions["fields"][field_id][permission] == nil
 
@@ -61,11 +63,3 @@ class Fields::Updater
     @field.save
   end
 end
-
-
-
-FIELD_DEFAULT_PERMISSIONS = {
-  view_field: { access: "everyone", default_value: true },
-  manage_field: { access: "admins and up", default_value: false },
-  edit_field_data: { access: "editors and up", default_value: true },
-}
