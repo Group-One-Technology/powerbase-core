@@ -78,7 +78,8 @@ class User < ApplicationRecord
       when :database
         return true if guest.permissions[permission_key] == true
       when :table
-        return true if guest.permissions["tables"][table.id] && guest.permissions["tables"][table.id][permission_key] == true
+        table_id = table.id.to_s
+        return true if guest.permissions["tables"][table_id] && guest.permissions["tables"][table_id][permission_key] == true
 
         restricted_guests = Array(table.permissions[permission_key]["restricted_guests"])
         is_restricted = restricted_guests.any? {|guest_id| guest_id == guest.id}
@@ -90,7 +91,8 @@ class User < ApplicationRecord
         allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
         return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
       when :field
-        return true if guest.permissions["fields"][field.id] && guest.permissions["fields"][field.id][permission_key] == true
+        field_id = field.id.to_s
+        return true if guest.permissions["fields"][field_id] && guest.permissions["fields"][field_id][permission_key] == true
 
         restricted_guests = Array(field.permissions[permission_key]["restricted_guests"])
         is_restricted = restricted_guests.any? {|guest_id| guest_id == guest.id}
