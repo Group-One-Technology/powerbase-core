@@ -181,18 +181,21 @@ export const CUSTOM_PERMISSIONS = {
     {
       name: 'View Field',
       description: 'who can see this field.',
+      access: 'everyone',
       key: 'viewField',
       value: true,
     },
     {
       name: 'Manage Field',
       description: 'who can update the alias and/or field type, set as PII, update the permissions etc.',
+      access: 'admins and up',
       key: 'manageField',
       value: false,
     },
     {
       name: 'Edit Field Data',
       description: 'who can update this specific field of the records.',
+      access: 'editors and up',
       key: 'editFieldData',
       value: true,
     },

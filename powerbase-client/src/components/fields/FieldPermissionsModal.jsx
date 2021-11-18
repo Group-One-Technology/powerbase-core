@@ -12,12 +12,15 @@ import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissio
 import { updateFieldPermission } from '@lib/api/fields';
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
+import { doesCustomGuestHaveAccess } from '@lib/helpers/guests/doesCustomGuestHaveAccess';
 
 export function FieldPermissionsModal() {
   const { data: guests } = useBaseGuests();
   const { mutate: mutateViewField } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
   const { modal, field } = useFieldPermissionsModal();
+
+  const customGuests = guests.filter((item) => item.access === 'custom');
 
   const handleChangePermissionAccess = async (permission, access) => {
     saving();
@@ -47,14 +50,27 @@ export function FieldPermissionsModal() {
         <ul className="my-8 mx-10">
           {CUSTOM_PERMISSIONS.Field.map((item) => {
             const permission = field.permissions[item.key];
+            const isDefaultAccess = permission.access === item.access;
 
-            const allowedGuests = guests && permission.allowedGuests
-              ?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
+            let allowedGuests = customGuests && permission.allowedGuests
+              ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
               .filter((guest) => guest);
 
-            const restrictedGuests = guests && permission.restrictedGuests
-              ?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
+            let restrictedGuests = customGuests && permission.restrictedGuests
+              ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
               .filter((guest) => guest);
+
+            if (!isDefaultAccess && doesCustomGuestHaveAccess(permission.access) !== item.value) {
+              const otherGuests = customGuests.filter((curItem) => curItem.permissions.fields[field.id]?.[item.key] == null);
+
+              if (item.value) {
+                const filteredGuests = otherGuests.filter((curItem) => !allowedGuests.some((allowedGuest) => allowedGuest.id === curItem.id));
+                allowedGuests = [...allowedGuests, ...filteredGuests];
+              } else {
+                const filteredGuests = otherGuests.filter((curItem) => !restrictedGuests.some((restrictedGuest) => restrictedGuest.id === curItem.id));
+                restrictedGuests = [...restrictedGuests, ...filteredGuests];
+              }
+            }
 
             return (
               <li key={item.key} className="my-4">
