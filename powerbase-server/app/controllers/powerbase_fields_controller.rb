@@ -25,6 +25,12 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update_field_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
   # GET /tables/:id/fields
   def index
     @table = PowerbaseTable.find(safe_params[:table_id])
@@ -94,6 +100,14 @@ class PowerbaseFieldsController < ApplicationController
     else
       render json: @field.errors, status: :unprocessable_entity
     end
+  end
+
+  # PUT /fields/:id/update_field_permission
+  def update_field_permission
+    field_updater = Fields::Updater.new(@field)
+    field_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
   end
 
   private
