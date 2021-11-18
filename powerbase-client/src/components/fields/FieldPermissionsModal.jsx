@@ -5,20 +5,30 @@ import { Dialog, Listbox, Disclosure } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
-import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
+import { useViewFields } from '@models/ViewFields';
+import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { updateFieldPermission } from '@lib/api/fields';
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
 
 export function FieldPermissionsModal() {
   const { data: guests } = useBaseGuests();
-  const { modal, field, setField } = useFieldPermissionsModal();
+  const { mutate: mutateViewField } = useViewFields();
+  const { saving, saved, catchError } = useSaveStatus();
+  const { modal, field } = useFieldPermissionsModal();
 
-  const handleChangePermissionAccess = (permission, access) => {
-    const updatedField = { ...field };
-    updatedField.permissions[permission.key].access = access;
+  const handleChangePermissionAccess = async (permission, access) => {
+    saving();
 
-    setField(updatedField);
+    try {
+      await updateFieldPermission({ id: field.id, permission: permission.key, access });
+      await mutateViewField();
+      saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
+    } catch (err) {
+      catchError(err.response.data.error || err.response.data.exception);
+    }
   };
 
   if (!field) {

@@ -1,9 +1,18 @@
 import constate from 'constate';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useViewFields } from '@models/ViewFields';
 
 function useFieldPermissionsModalModel() {
+  const { data: fields } = useViewFields();
   const [open, setOpen] = useState(false);
   const [field, setField] = useState();
+
+  useEffect(() => {
+    if (field && fields?.length) {
+      const updatedField = fields.find((item) => item.id === field.id);
+      setField(updatedField);
+    }
+  }, [fields]);
 
   const openModal = (value) => {
     setField(value);
