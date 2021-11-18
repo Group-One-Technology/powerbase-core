@@ -123,7 +123,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Table',
-      description: 'who can manage this table.',
+      description: 'who can update the table permissions, etc.',
       key: 'manageTable',
       value: false,
     },
@@ -186,7 +186,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Field',
-      description: 'who can update the alias and/or field type, set as PII, etc.',
+      description: 'who can update the alias and/or field type, set as PII, update the permissions etc.',
       key: 'manageField',
       value: false,
     },

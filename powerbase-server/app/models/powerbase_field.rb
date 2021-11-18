@@ -32,4 +32,16 @@ class PowerbaseField < ApplicationRecord
     self.permissions[permission]["restricted_guests"] = restricted_guests.uniq
     self.save
   end
+
+  def remove_guest(guest, permission)
+    allowed_guests = Array(self.permissions[permission]["allowed_guests"])
+    restricted_guests = Array(self.permissions[permission]["restricted_guests"])
+
+    allowed_guests = allowed_guests.select {|guest_id| guest_id != guest.id}
+    restricted_guests = restricted_guests.select {|guest_id| guest_id != guest.id}
+
+    self.permissions[permission]["allowed_guests"] = allowed_guests.uniq
+    self.permissions[permission]["restricted_guests"] = restricted_guests.uniq
+    self.save
+  end
 end

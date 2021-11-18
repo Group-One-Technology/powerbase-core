@@ -22,12 +22,14 @@ export function FieldPermissionsModal() {
   const handleChangePermissionAccess = async (permission, access) => {
     saving();
 
-    try {
-      await updateFieldPermission({ id: field.id, permission: permission.key, access });
-      await mutateViewField();
-      saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
-    } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+    if (field.permissions[permission.key].access !== access) {
+      try {
+        await updateFieldPermission({ id: field.id, permission: permission.key, access });
+        await mutateViewField();
+        saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 
