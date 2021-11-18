@@ -29,6 +29,14 @@ export function FieldPermissionsModal() {
           {CUSTOM_PERMISSIONS.Field.map((item) => {
             const permission = field.permissions[item.key];
 
+            const allowedGuests = guests && permission.allowedGuests
+              ?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
+              .filter((guest) => guest);
+
+            const restrictedGuests = guests && permission.restrictedGuests
+              ?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
+              .filter((guest) => guest);
+
             return (
               <li key={item.key} className="my-4">
                 <div className="flex justify-between gap-x-1">
@@ -65,7 +73,7 @@ export function FieldPermissionsModal() {
                     </Listbox>
                   </div>
                 </div>
-                {(guests && permission.allowedGuests?.length > 0) && (
+                {allowedGuests?.length > 0 && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">
@@ -74,33 +82,25 @@ export function FieldPermissionsModal() {
                           <p className="text-xs text-gray-500">Click to expand to view more info.</p>
                           {!open && (
                             <div className="mt-1 flex gap-1">
-                              {guests && permission.allowedGuests.map((guestId) => {
-                                const guest = guests.find((curItem) => curItem.id === guestId);
-
-                                return (
-                                  <Gravatar
-                                    key={guest.id}
-                                    email={guest.email}
-                                    className="h-6 w-6 rounded-full"
-                                    alt={`${guest.firstName}'s profile picture`}
-                                  />
-                                );
-                              })}
+                              {allowedGuests.map((guest) => (
+                                <Gravatar
+                                  key={guest.id}
+                                  email={guest.email}
+                                  className="h-6 w-6 rounded-full"
+                                  alt={`${guest.firstName}'s profile picture`}
+                                />
+                              ))}
                             </div>
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="mt-0.5 ml-2">
-                          {guests && permission.allowedGuests.map((guestId) => {
-                            const guest = guests.find((curItem) => curItem.id === guestId);
-
-                            return <GuestCard key={guest.id} guest={guest} menu={false} />;
-                          })}
+                          {allowedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
                         </Disclosure.Panel>
                       </div>
                     )}
                   </Disclosure>
                 )}
-                {(guests && permission.restrictedGuests?.length > 0) && (
+                {restrictedGuests?.length > 0 && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">
@@ -109,27 +109,19 @@ export function FieldPermissionsModal() {
                           <p className="text-xs text-gray-500">Click to expand to view more info.</p>
                           {!open && (
                             <div className="mt-1 flex gap-1">
-                              {guests && permission.restrictedGuests.map((guestId) => {
-                                const guest = guests.find((curItem) => curItem.id === guestId);
-
-                                return (
-                                  <Gravatar
-                                    key={guest.id}
-                                    email={guest.email}
-                                    className="h-6 w-6 rounded-full"
-                                    alt={`${guest.firstName}'s profile picture`}
-                                  />
-                                );
-                              })}
+                              {restrictedGuests.map((guest) => (
+                                <Gravatar
+                                  key={guest.id}
+                                  email={guest.email}
+                                  className="h-6 w-6 rounded-full"
+                                  alt={`${guest.firstName}'s profile picture`}
+                                />
+                              ))}
                             </div>
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="mt-0.5 ml-2">
-                          {guests && permission.restrictedGuests.map((guestId) => {
-                            const guest = guests.find((curItem) => curItem.id === guestId);
-
-                            return <GuestCard key={guest.id} guest={guest} menu={false} />;
-                          })}
+                          {restrictedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
                         </Disclosure.Panel>
                       </div>
                     )}
