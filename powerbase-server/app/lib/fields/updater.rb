@@ -52,6 +52,11 @@ class Fields::Updater
       end
     end
 
+    allowed_guests = Array(@field.permissions[permission]["allowed_guests"])
+    restricted_guests = Array(@field.permissions[permission]["restricted_guests"])
+
+    @field.permissions[permission]["allowed_guests"] = allowed_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
+    @field.permissions[permission]["restricted_guests"] = restricted_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
     @field.permissions[permission]["access"] = access
     @field.save
   end
