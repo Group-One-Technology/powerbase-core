@@ -12,7 +12,14 @@ import { GuestCard } from '@components/guest/GuestCard';
 
 export function FieldPermissionsModal() {
   const { data: guests } = useBaseGuests();
-  const { modal, field } = useFieldPermissionsModal();
+  const { modal, field, setField } = useFieldPermissionsModal();
+
+  const handleChangePermissionAccess = (permission, access) => {
+    const updatedField = { ...field };
+    updatedField.permissions[permission.key].access = access;
+
+    setField(updatedField);
+  };
 
   if (!field) {
     return null;
@@ -47,7 +54,7 @@ export function FieldPermissionsModal() {
                     <p className="text-xs text-gray-500">{item.description}</p>
                   </div>
                   <div className="flex-1">
-                    <Listbox>
+                    <Listbox value={permission.access} onChange={(value) => handleChangePermissionAccess(item, value)}>
                       <div className="relative w-auto">
                         <Listbox.Button
                           className="ml-auto flex relative w-auto text-sm px-2 py-1 border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"

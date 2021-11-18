@@ -17,6 +17,7 @@ function useFieldPermissionsModalModel() {
       open: openModal,
     },
     field,
+    setField,
   };
 }
 
