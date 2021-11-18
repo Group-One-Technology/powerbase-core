@@ -3,7 +3,7 @@ class Guest < ApplicationRecord
 
   validates :access, presence: true
   enum access: {
-    owner: "owner",
+    creator: "creator",
     admin: "admin",
     editor: "editor",
     commenter: "commenter",

@@ -85,7 +85,7 @@ export function GuestCard({
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">
           {guest.firstName} {guest.lastName}
-          {owner && <Badge color="gray" className="ml-1">Creator</Badge>}
+          {owner && <Badge color="gray" className="ml-1">Owner</Badge>}
           {(!owner && !guest.isAccepted) && <Badge color="yellow" className="ml-1">Pending</Badge>}
         </p>
         <p className="text-sm text-gray-500 truncate">{guest.email}</p>

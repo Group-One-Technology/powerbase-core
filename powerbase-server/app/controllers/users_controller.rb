@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     if Guest.owner?(current_user.id, @database)
       render json: {
         id: current_user.id,
-        access: "owner",
+        access: "creator",
         permissions: Guest.owner_permissions,
         user_id: current_user.id,
         database_id: @database.id,

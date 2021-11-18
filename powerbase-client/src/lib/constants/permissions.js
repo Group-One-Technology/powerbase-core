@@ -6,7 +6,7 @@ export const BasePermissions = {
 
 export const ACCESS_LEVEL = [
   {
-    name: 'owner',
+    name: 'creator',
     description: 'Has full access to this base and can share it with others.',
     permisions: ['all'],
     level: 6,
@@ -45,24 +45,24 @@ export const ACCESS_LEVEL = [
 
 export const GROUP_ACCESS_LEVEL = [
   {
-    name: 'owners only',
-    access: ['owner'],
+    name: 'creators only',
+    access: ['creator'],
   },
   {
     name: 'admins and up',
-    access: ['owner', 'admin'],
+    access: ['creator', 'admin'],
   },
   {
     name: 'editors and up',
-    access: ['owner', 'admin', 'custom', 'editor'],
+    access: ['creator', 'admin', 'custom', 'editor'],
   },
   {
     name: 'commenters and up',
-    access: ['owner', 'admin', 'custom', 'editor', 'commenter'],
+    access: ['creator', 'admin', 'custom', 'editor', 'commenter'],
   },
   {
     name: 'everyone',
-    access: ['owner', 'admin', 'custom', 'editor', 'commenter', 'viewer'],
+    access: ['creator', 'admin', 'custom', 'editor', 'commenter', 'viewer'],
   },
 ];
 

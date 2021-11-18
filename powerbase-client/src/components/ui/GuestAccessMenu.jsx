@@ -26,7 +26,7 @@ export function GuestAccessMenu({
   if (owner || !canChangeGuestAccess || disabled) {
     return (
       <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
-        {owner ? 'owner' : guest.access}
+        {owner ? 'creator' : guest.access}
       </span>
     );
   }
