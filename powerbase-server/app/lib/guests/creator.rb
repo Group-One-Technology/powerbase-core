@@ -36,9 +36,15 @@ class Guests::Creator
       FIELD_DEFAULT_PERMISSIONS.each do |key, value|
         permission_key = key.to_s
         next if field_permissions[permission_key] == nil
+        field_access = field.permissions[permission_key]["access"]
 
-        if field.permissions[permission_key]["access"] != value[:access] || field_permissions[permission_key] != value[:default_value]
-          update_field_guests_access(field, [key, value], @guest, field_permissions[permission_key])
+        if field_access != value[:access] || field_permissions[permission_key] != value[:default_value]
+          field.update_guests_access({
+            permission: key,
+            access: field_access,
+            guest: @guest,
+            is_allowed: field_permissions[permission_key]
+          })
         end
       end
     end

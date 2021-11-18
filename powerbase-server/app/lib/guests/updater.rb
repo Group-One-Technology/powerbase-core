@@ -43,7 +43,12 @@ class Guests::Updater
           next if field_permissions[permission_key] == @guest.permissions["fields"][permission_field][permission_key]
         end
 
-        update_field_guests_access(field, [key, value], @guest, field_permissions[permission_key])
+        field.update_guests_access({
+          permission: key,
+          access: field.permissions[permission_key]["access"],
+          guest: @guest,
+          is_allowed: field_permissions[permission_key]
+        })
       end
     end
 
