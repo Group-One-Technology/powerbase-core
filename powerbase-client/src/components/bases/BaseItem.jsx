@@ -38,7 +38,7 @@ export function BaseItem({ base, mutate, handleErrorClick }) {
           </button>
         )}
       </div>
-      <Link to={`/base/${base.id}/table/${base.defaultTable.id}?view=${base.defaultTable.defaultViewId}`}>
+      <Link to={`/base/${base.id}/table/${base.defaultTable ? `${base.defaultTable.id}?view=${base.defaultTable.defaultViewId}` : ''}`}>
         <h2 className="text-gray-900 text-lg font-bold uppercase break-words" style={{ hyphens: 'auto' }}>{base.name}</h2>
         {base.isMigrated
           ? (
