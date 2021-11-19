@@ -30,9 +30,6 @@ class SyncDatabaseWorker
 
           # Assign default view
           table.object.default_view_id = table_view.object.id
-
-          # Set table as migrated for non-turbo databases
-          table.object.is_migrated = true if !database.is_turbo
           table.object.save
 
           # Migrate fields and records
