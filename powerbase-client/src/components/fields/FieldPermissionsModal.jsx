@@ -9,15 +9,17 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
+import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
-import { doesCustomGuestHaveAccess } from '@lib/helpers/guests/doesCustomGuestHaveAccess';
+import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { updateFieldPermission } from '@lib/api/fields';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
+import { GuestsModal } from '@components/guest/GuestsModal';
 
-export function FieldPermissionsModal() {
+function BaseFieldPermissionsModal() {
   const {
     saving, saved, catchError, loading,
   } = useSaveStatus();
@@ -26,6 +28,7 @@ export function FieldPermissionsModal() {
   const { mutate: mutateViewField } = useViewFields();
   const { modal, field } = useFieldPermissionsModal();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
+  const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageField = field
@@ -48,6 +51,36 @@ export function FieldPermissionsModal() {
         }
       }
     }
+  };
+
+  const handleAddAllowedUsers = (access, allowedGuests = [], restrictedGuests = []) => {
+    const select = (guest) => {
+      console.log(guest);
+      setGuestModalOpen(false);
+    };
+
+    openGuestModal({
+      access,
+      select: () => select,
+      search: 'allowed',
+      allowedGuests,
+      restrictedGuests,
+    });
+  };
+
+  const handleAddRestrictedUsers = (access, allowedGuests = [], restrictedGuests = []) => {
+    const select = (guest) => {
+      console.log(guest);
+      setGuestModalOpen(false);
+    };
+
+    openGuestModal({
+      access,
+      select: () => select,
+      search: 'restricted',
+      allowedGuests,
+      restrictedGuests,
+    });
   };
 
   if (!field && !canManageField) {
@@ -74,7 +107,7 @@ export function FieldPermissionsModal() {
               ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
               .filter((guest) => guest);
 
-            if (!isDefaultAccess && doesCustomGuestHaveAccess(permission.access) !== item.value) {
+            if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== item.value) {
               const otherGuests = customGuests.filter((curItem) => curItem.permissions.fields?.[field.id]?.[item.key] == null);
 
               if (item.value) {
@@ -124,30 +157,28 @@ export function FieldPermissionsModal() {
                 </div>
                 {canChangeGuestAccess && (
                   <div className="flex gap-1 justify-end">
-                    {allowedGuests?.length === 0 && (
-                      <button
-                        type="button"
-                        className={cn(
-                          'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
-                          hoveredItem !== item.key && 'invisible',
-                        )}
-                      >
-                        <PlusIcon className="h-4 w-4 mr-1" />
-                        Add allowed user
-                      </button>
-                    )}
-                    {restrictedGuests?.length === 0 && (
-                      <button
-                        type="button"
-                        className={cn(
-                          'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
-                          hoveredItem !== item.key && 'invisible',
-                        )}
-                      >
-                        <PlusIcon className="h-4 w-4 mr-1" />
-                        Add restricted user
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className={cn(
+                        'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                        hoveredItem !== item.key && 'invisible',
+                      )}
+                      onClick={() => handleAddAllowedUsers(permission.access, allowedGuests, restrictedGuests)}
+                    >
+                      <PlusIcon className="h-4 w-4 mr-1" />
+                      Add allowed user
+                    </button>
+                    <button
+                      type="button"
+                      className={cn(
+                        'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                        hoveredItem !== item.key && 'invisible',
+                      )}
+                      onClick={() => handleAddRestrictedUsers(permission.access, allowedGuests, restrictedGuests)}
+                    >
+                      <PlusIcon className="h-4 w-4 mr-1" />
+                      Add restricted user
+                    </button>
                   </div>
                 )}
                 {allowedGuests?.length > 0 && (
@@ -172,15 +203,6 @@ export function FieldPermissionsModal() {
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
                           {allowedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
-                          <div className="my-1">
-                            <button
-                              type="button"
-                              className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
-                            >
-                              <PlusIcon className="h-4 w-4 mr-1" />
-                              Add allowed user
-                            </button>
-                          </div>
                         </Disclosure.Panel>
                       </div>
                     )}
@@ -208,15 +230,6 @@ export function FieldPermissionsModal() {
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
                           {restrictedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
-                          <div className="my-1">
-                            <button
-                              type="button"
-                              className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
-                            >
-                              <PlusIcon className="h-4 w-4 mr-1" />
-                              Add restricted user
-                            </button>
-                          </div>
                         </Disclosure.Panel>
                       </div>
                     )}
@@ -226,7 +239,17 @@ export function FieldPermissionsModal() {
             );
           })}
         </ul>
+
+        <GuestsModal />
       </div>
     </Modal>
+  );
+}
+
+export function FieldPermissionsModal() {
+  return (
+    <GuestsModalProvider>
+      <BaseFieldPermissionsModal />
+    </GuestsModalProvider>
   );
 }

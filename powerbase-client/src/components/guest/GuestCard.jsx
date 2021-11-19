@@ -88,15 +88,21 @@ export function GuestCard({
           {owner && <Badge color="gray" className="ml-1">Owner</Badge>}
           {(!owner && !guest.isAccepted) && <Badge color="yellow" className="ml-1">Pending</Badge>}
         </p>
-        <p className="text-sm text-gray-500 truncate">{guest.email}</p>
+        <p className="text-sm text-gray-500 truncate">
+          {guest.email} {React.isValidElement(menu) && `(${guest.access})`}
+        </p>
       </div>
-      <GuestAccessMenu
-        guest={guest}
-        change={handleChangeAccess}
-        remove={removeGuestAccess}
-        owner={owner}
-        disabled={!menu}
-      />
+      {React.isValidElement(menu)
+        ? menu
+        : (
+          <GuestAccessMenu
+            guest={guest}
+            change={handleChangeAccess}
+            remove={removeGuestAccess}
+            owner={owner}
+            disabled={!menu}
+          />
+        )}
     </div>
   );
 }
@@ -105,5 +111,5 @@ GuestCard.propTypes = {
   guest: PropTypes.object.isRequired,
   setGuests: PropTypes.func,
   owner: PropTypes.bool,
-  menu: PropTypes.bool,
+  menu: PropTypes.any,
 };
