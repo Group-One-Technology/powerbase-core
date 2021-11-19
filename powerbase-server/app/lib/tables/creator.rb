@@ -29,7 +29,7 @@ class Tables::Creator
 
   def save
     if table.save
-      if database.postgresql?
+      if database.postgresql? && ENV["ENABLE_LISTENER"]
         table.inject_oid if database.has_row_oid_support?
         table.inject_notifier_trigger
       end
