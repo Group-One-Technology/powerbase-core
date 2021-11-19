@@ -9,6 +9,10 @@ module Indexable
     migrator.index!
   end
 
+  def reindex_later!
+    TableIndexWorker.perform_async(self.id)
+  end
+
   def sequel_records(order: nil)
     sequel_connect(self.db) do |db|
       table_query = db.from(self.name)
