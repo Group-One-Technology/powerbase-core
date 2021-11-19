@@ -2,7 +2,7 @@ import React from 'react';
 import cn from 'classnames';
 import Gravatar from 'react-gravatar';
 import { Dialog, Listbox, Disclosure } from '@headlessui/react';
-import { SelectorIcon } from '@heroicons/react/outline';
+import { SelectorIcon, PlusIcon } from '@heroicons/react/outline';
 
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { useSaveStatus } from '@models/SaveStatus';
@@ -10,17 +10,24 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { doesCustomGuestHaveAccess } from '@lib/helpers/guests/doesCustomGuestHaveAccess';
+import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { updateFieldPermission } from '@lib/api/fields';
+
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
-import { doesCustomGuestHaveAccess } from '@lib/helpers/guests/doesCustomGuestHaveAccess';
 
 export function FieldPermissionsModal() {
+  const {
+    saving, saved, catchError, loading,
+  } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: guests } = useBaseGuests();
   const { mutate: mutateViewField } = useViewFields();
-  const { saving, saved, catchError } = useSaveStatus();
   const { modal, field } = useFieldPermissionsModal();
+  const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
+
+  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageField = field
     ? baseUser?.can('manageField', field.id)
     : false;
@@ -80,8 +87,8 @@ export function FieldPermissionsModal() {
             }
 
             return (
-              <li key={item.key} className="my-4">
-                <div className="flex justify-between gap-x-1">
+              <li key={item.key} className="my-4" onMouseEnter={() => handleMouseEnter(item.key)} onMouseLeave={handleMouseLeave}>
+                <div className="flex justify-between gap-x-0.5">
                   <div className="flex-1">
                     <h4 className="font-medium text-sm capitalize">
                       {item.name}
@@ -89,7 +96,7 @@ export function FieldPermissionsModal() {
                     <p className="text-xs text-gray-500">{item.description}</p>
                   </div>
                   <div className="flex-1">
-                    <Listbox value={permission.access} onChange={(value) => handleChangePermissionAccess(item, value)}>
+                    <Listbox value={permission.access} onChange={(value) => handleChangePermissionAccess(item, value)} disabled={loading}>
                       <div className="relative w-auto">
                         <Listbox.Button
                           className="ml-auto flex relative w-auto text-sm px-2 py-1 border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
@@ -115,6 +122,34 @@ export function FieldPermissionsModal() {
                     </Listbox>
                   </div>
                 </div>
+                {canChangeGuestAccess && (
+                  <div className="flex gap-1 justify-end">
+                    {allowedGuests?.length === 0 && (
+                      <button
+                        type="button"
+                        className={cn(
+                          'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                          hoveredItem !== item.key && 'invisible',
+                        )}
+                      >
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add allowed user
+                      </button>
+                    )}
+                    {restrictedGuests?.length === 0 && (
+                      <button
+                        type="button"
+                        className={cn(
+                          'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                          hoveredItem !== item.key && 'invisible',
+                        )}
+                      >
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add restricted user
+                      </button>
+                    )}
+                  </div>
+                )}
                 {allowedGuests?.length > 0 && (
                   <Disclosure>
                     {({ open }) => (
@@ -135,8 +170,17 @@ export function FieldPermissionsModal() {
                             </div>
                           )}
                         </Disclosure.Button>
-                        <Disclosure.Panel className="mt-0.5 ml-2">
+                        <Disclosure.Panel className="my-0.5 ml-2">
                           {allowedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
+                          <div className="my-1">
+                            <button
+                              type="button"
+                              className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
+                            >
+                              <PlusIcon className="h-4 w-4 mr-1" />
+                              Add allowed user
+                            </button>
+                          </div>
                         </Disclosure.Panel>
                       </div>
                     )}
@@ -162,8 +206,17 @@ export function FieldPermissionsModal() {
                             </div>
                           )}
                         </Disclosure.Button>
-                        <Disclosure.Panel className="mt-0.5 ml-2">
+                        <Disclosure.Panel className="my-0.5 ml-2">
                           {restrictedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
+                          <div className="my-1">
+                            <button
+                              type="button"
+                              className="ml-auto px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
+                            >
+                              <PlusIcon className="h-4 w-4 mr-1" />
+                              Add restricted user
+                            </button>
+                          </div>
                         </Disclosure.Panel>
                       </div>
                     )}
