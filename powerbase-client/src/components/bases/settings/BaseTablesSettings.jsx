@@ -28,7 +28,7 @@ const INITIAL_MODAL_VALUE = {
 };
 
 export function BaseTablesSettings() {
-  const { data: base } = useBase();
+  const { data: base, mutate: mutateBase } = useBase();
   const { data: initialData, mutate: mutateTables } = useBaseTables();
   const sensors = useSensors();
 
@@ -50,6 +50,7 @@ export function BaseTablesSettings() {
     try {
       await updateTables({ databaseId: base.id, tables: updatedTables });
       mutateTables();
+      mutateBase();
       setModal((curVal) => ({ ...curVal, open: true }));
     } catch (err) {
       setModal({
