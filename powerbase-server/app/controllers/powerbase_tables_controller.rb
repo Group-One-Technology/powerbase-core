@@ -64,7 +64,7 @@ class PowerbaseTablesController < ApplicationController
 
     safe_params[:tables].each_with_index do |table, index|
       @table = PowerbaseTable.find(table[:id])
-      @table.update(alias: table[:alias], order: index)
+      @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: index)
     end
 
     render status: :no_content
@@ -95,6 +95,7 @@ class PowerbaseTablesController < ApplicationController
         default_view_id: table.default_view_id,
         page_size: table.page_size,
         order: table.order,
+        is_hidden: table.is_hidden,
         is_migrated: table.is_migrated,
         permissions: table.permissions,
         created_at: table.created_at,

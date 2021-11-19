@@ -57,7 +57,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
 
   return {
     table: currentTable,
-    tables: tablesResponse.data?.tables,
+    tables: tablesResponse.data?.tables.filter((item) => !item.isHidden),
     tablesResponse,
     view: currentView,
     views: viewsResponse.data,
