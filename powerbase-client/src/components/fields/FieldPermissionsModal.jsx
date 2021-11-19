@@ -35,7 +35,7 @@ function BaseFieldPermissionsModal() {
     ? baseUser?.can('manageField', field.id)
     : false;
 
-  const customGuests = guests.filter((item) => item.access === 'custom');
+  const customGuests = guests?.filter((item) => item.access === 'custom');
 
   const handleChangePermissionAccess = async (permission, access) => {
     if (canManageField) {
@@ -155,7 +155,7 @@ function BaseFieldPermissionsModal() {
                     </Listbox>
                   </div>
                 </div>
-                {canChangeGuestAccess && (
+                {(canChangeGuestAccess && guests?.length > 0) && (
                   <div className="flex gap-1 justify-end">
                     <button
                       type="button"
