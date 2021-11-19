@@ -107,7 +107,11 @@ export function GridHeaderOptions({
     }
   };
 
-  const handlePermissions = () => permissionsModal.open(field);
+  const handlePermissions = () => {
+    if (canManageField) {
+      permissionsModal.open(field);
+    }
+  };
 
   const handleHideField = async () => {
     if (canManageViews) {

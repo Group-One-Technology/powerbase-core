@@ -8,6 +8,7 @@ import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useViewFields } from '@models/ViewFields';
+import { useBaseUser } from '@models/BaseUser';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
 import { updateFieldPermission } from '@lib/api/fields';
 import { Modal } from '@components/ui/Modal';
@@ -15,28 +16,34 @@ import { GuestCard } from '@components/guest/GuestCard';
 import { doesCustomGuestHaveAccess } from '@lib/helpers/guests/doesCustomGuestHaveAccess';
 
 export function FieldPermissionsModal() {
+  const { baseUser } = useBaseUser();
   const { data: guests } = useBaseGuests();
   const { mutate: mutateViewField } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
   const { modal, field } = useFieldPermissionsModal();
+  const canManageField = field
+    ? baseUser?.can('manageField', field.id)
+    : false;
 
   const customGuests = guests.filter((item) => item.access === 'custom');
 
   const handleChangePermissionAccess = async (permission, access) => {
-    saving();
+    if (canManageField) {
+      saving();
 
-    if (field.permissions[permission.key].access !== access) {
-      try {
-        await updateFieldPermission({ id: field.id, permission: permission.key, access });
-        await mutateViewField();
-        saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+      if (field.permissions[permission.key].access !== access) {
+        try {
+          await updateFieldPermission({ id: field.id, permission: permission.key, access });
+          await mutateViewField();
+          saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
+        }
       }
     }
   };
 
-  if (!field) {
+  if (!field && !canManageField) {
     return null;
   }
 
