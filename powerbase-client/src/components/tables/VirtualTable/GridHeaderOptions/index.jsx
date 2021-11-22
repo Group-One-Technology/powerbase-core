@@ -45,8 +45,8 @@ export function GridHeaderOptions({
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
   const canManageViews = baseUser?.can('manageViews', table.id);
-  const canAddFields = baseUser?.can('addFields', field.id);
-  const canManageField = baseUser?.can('manageField', field.id);
+  const canAddFields = baseUser?.can('addFields', table.id);
+  const canManageField = baseUser?.can('manageField', field.fieldId);
 
   const [alias, setAlias] = useState(field.alias || field.name);
 

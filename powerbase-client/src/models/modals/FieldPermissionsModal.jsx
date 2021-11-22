@@ -15,7 +15,14 @@ function useFieldPermissionsModalModel() {
   }, [fields]);
 
   const openModal = (value) => {
-    setField(value);
+    const isViewField = value.fieldId != null;
+    const curField = isViewField
+      ? {
+        ...value,
+        id: value.fieldId,
+      } : value;
+    delete curField.fieldId;
+    setField(curField);
     setOpen(true);
   };
 
