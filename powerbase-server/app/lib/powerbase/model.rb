@@ -139,7 +139,8 @@ module Powerbase
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
 
         result = @esclient.search(index: index, body: search_params)["hits"]["hits"][0]
-        result != nil ? result["_source"] : result
+        raise StandardError.new("Record not found") if result == nil
+        result["_source"]
       else
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
