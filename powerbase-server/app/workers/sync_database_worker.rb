@@ -16,18 +16,18 @@ class SyncDatabaseWorker
       if new_connection && database.postgresql?
         database.create_notifier_function!
       end
-  
+
       if unmigrated_tables.any?
         table_creators = []
         unmigrated_tables.each_with_index do |table_name, index|
           table = Tables::Creator.new table_name, index + 1, database
-          # Save table ojbect
+          # Save table object
           table.save
 
           # Create table view
           table_view = TableViews::Creator.new table.object
           table_view.save
-          
+
           # Assign default view
           table.object.default_view_id = table_view.object.id
           table.object.save
@@ -47,14 +47,14 @@ class SyncDatabaseWorker
           table.remove
         end
       end
-      
+
       if new_connection
         database.is_migrated = true
         database.save
         @base_migration.end_time = Time.now
         @base_migration.save
-        
-        if database.is_turbo
+
+        if database.is_turbo && ENV["ENABLE_LISTENER"]
           poller = Sidekiq::Cron::Job.find("Database Listeners")
           poller.args << database.id
           poller.save

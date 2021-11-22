@@ -5,11 +5,11 @@ class Fields::Creator
 
   def initialize(column, table)
     @column = column
-    @table = table  
+    @table = table
     @field_name = column[0]
     @field_options = column[1]
     @table_view = find_or_create_table_view
-    
+
     create_field_object
   end
 
@@ -18,7 +18,7 @@ class Fields::Creator
   end
 
   def find_or_create_table_view
-    TableView.find_by(powerbase_table_id: table.id) || 
+    TableView.find_by(powerbase_table_id: table.id) ||
     TableView.create!(
       powerbase_table_id: table.id,
       name: "Default",
@@ -31,13 +31,17 @@ class Fields::Creator
     ViewFieldOption.find_by(
       table_view_id: table_view.id,
       powerbase_field_id: field.id,
-    ) || 
+    ) ||
     ViewFieldOption.create!({
       width: set_view_field_width,
       order: table.fields.count,
       table_view_id: table_view.id,
       powerbase_field_id: field.id
     })
+
+    # Set table as migrated for non-turbo databases
+    table.is_migrated = true if !table.powerbase_database.is_turbo
+    table.save
   end
 
   def field_params
