@@ -78,6 +78,8 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def _sequel(refresh: false)
+    Sequel.extension :pg_enum if postgresql?
+
     if refresh
       @_sequel.try(:disconnect)
       @_sequel = Sequel.connect self.connection_string
