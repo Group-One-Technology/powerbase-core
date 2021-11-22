@@ -4,19 +4,19 @@ import { useState } from 'react';
 function useGuestsModalModel({ allowedGuests: initialAllowedGuests, restrictedGuests: initialRestrictedGuests }) {
   const [open, setOpen] = useState(false);
   const [select, setSelect] = useState();
-  const [access, setAccess] = useState();
+  const [permission, setPermission] = useState();
   const [search, setSearch] = useState('allowed');
   const [allowedGuests, setAllowedGuests] = useState(initialAllowedGuests);
   const [restrictedGuests, setRestrictedGuests] = useState(initialRestrictedGuests);
 
   const openModal = ({
-    access: curAccess,
+    permission: curPermission,
     select: curSelect,
     search: curSearch,
     allowedGuests: curAllowedGuests,
     restrictedGuests: curRestrictedGuests,
   }) => {
-    setAccess(curAccess);
+    setPermission(curPermission);
     setSelect(curSelect);
     setSearch(curSearch || 'allowed');
     setAllowedGuests(curAllowedGuests?.length ? curAllowedGuests : []);
@@ -30,8 +30,8 @@ function useGuestsModalModel({ allowedGuests: initialAllowedGuests, restrictedGu
     openModal,
     select,
     setSelect,
-    access,
-    setAccess,
+    permission,
+    setPermission,
     search,
     setSearch,
     allowedGuests,

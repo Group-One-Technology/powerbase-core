@@ -27,8 +27,8 @@ function BaseFieldPermissionsModal() {
   } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
-  const { mutate: mutateViewField } = useViewFields();
-  const { modal, field, setField } = useFieldPermissionsModal();
+  const { data: fields, mutate: mutateViewField } = useViewFields();
+  const { modal, field } = useFieldPermissionsModal();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
@@ -69,13 +69,12 @@ function BaseFieldPermissionsModal() {
 
       const updatedField = { ...field };
       if (list === 'allowed') {
-        const { restrictedGuests } = updatedField.permissions[permission];
+        const restrictedGuests = updatedField.permissions[permission]?.restrictedGuests || [];
         updatedField.permissions[permission].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
       } else {
-        const { allowedGuests } = updatedField.permissions[permission];
-        updatedField.permissions[permission].allowedGuest = allowedGuests.filter((guestId) => guestId !== guest.id);
+        const allowedGuests = updatedField.permissions[permission]?.allowedGuests || [];
+        updatedField.permissions[permission].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
       }
-      setField(updatedField);
 
       try {
         await updateGuestFieldPermissions({
@@ -89,8 +88,9 @@ function BaseFieldPermissionsModal() {
             ? updatedGuestPermission
             : item.permissions,
         })));
-
-        await mutateViewField();
+        mutateViewField(fields.map((item) => (item.id === field.id
+          ? updatedField
+          : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -98,34 +98,61 @@ function BaseFieldPermissionsModal() {
     }
   };
 
-  const handleAddAllowedUsers = (access, allowedGuests = [], restrictedGuests = []) => {
-    const select = (guest) => {
-      console.log(guest);
-      setGuestModalOpen(false);
-    };
+  const handleAddGuests = (permission, list, allowedGuests = [], restrictedGuests = []) => {
+    if (canChangeGuestAccess && field) {
+      const select = async (guest) => {
+        const permissionKey = permission.key;
+        const permissions = { [permissionKey]: list === 'allowed' };
 
-    openGuestModal({
-      access,
-      select: () => select,
-      search: 'allowed',
-      allowedGuests,
-      restrictedGuests,
-    });
-  };
+        const updatedGuestPermission = {
+          ...(guest.permissions.fields || {}),
+          [field.id]: {
+            ...(guest.permissions.fields?.[field.id] || {}),
+            ...permissions,
+          },
+        };
 
-  const handleAddRestrictedUsers = (access, allowedGuests = [], restrictedGuests = []) => {
-    const select = (guest) => {
-      console.log(guest);
-      setGuestModalOpen(false);
-    };
+        const updatedField = { ...field };
+        if (list === 'allowed') {
+          const curRestrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
+          updatedField.permissions[permissionKey].restrictedGuests = [...curRestrictedGuests, guest.id];
+        } else {
+          const curAllowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
+          updatedField.permissions[permissionKey].allowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
+          updatedField.permissions[permissionKey].allowedGuests = [...curAllowedGuests, guest.id];
+        }
 
-    openGuestModal({
-      access,
-      select: () => select,
-      search: 'restricted',
-      allowedGuests,
-      restrictedGuests,
-    });
+        try {
+          await updateGuestFieldPermissions({
+            id: guest.id,
+            fieldId: field.id,
+            permissions,
+          });
+          mutateGuests(guests.map((item) => ({
+            ...item,
+            permissions: item.id === guest.id
+              ? updatedGuestPermission
+              : item.permissions,
+          })));
+          mutateViewField(fields.map((item) => (item.id === field.id
+            ? updatedField
+            : item)));
+          saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
+        }
+
+        setGuestModalOpen(false);
+      };
+
+      openGuestModal({
+        permission,
+        select: () => select,
+        search: list,
+        allowedGuests,
+        restrictedGuests,
+      });
+    }
   };
 
   if (!field && !canManageField) {
@@ -208,7 +235,7 @@ function BaseFieldPermissionsModal() {
                         'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
                         hoveredItem !== item.key && 'invisible',
                       )}
-                      onClick={() => handleAddAllowedUsers(permission.access, allowedGuests, restrictedGuests)}
+                      onClick={() => handleAddGuests({ ...permission, key: item.key }, 'allowed', allowedGuests, restrictedGuests)}
                     >
                       <PlusIcon className="h-4 w-4 mr-1" />
                       Add allowed user
@@ -219,7 +246,7 @@ function BaseFieldPermissionsModal() {
                         'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
                         hoveredItem !== item.key && 'invisible',
                       )}
-                      onClick={() => handleAddRestrictedUsers(permission.access, allowedGuests, restrictedGuests)}
+                      onClick={() => handleAddGuests({ ...permission, key: item.key }, 'restricted', allowedGuests, restrictedGuests)}
                     >
                       <PlusIcon className="h-4 w-4 mr-1" />
                       Add restricted user

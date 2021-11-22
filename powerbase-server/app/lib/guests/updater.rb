@@ -71,7 +71,8 @@ class Guests::Updater
       permission = key.to_s
 
       @guest.permissions["fields"][field_id_key][permission] = value
-      field.remove_guest(@guest, permission)
+
+      field.update_guest(@guest, permission, value)
     end
 
     @guest.save

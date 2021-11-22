@@ -10,7 +10,7 @@ import { GuestCard } from './GuestCard';
 export function GuestsModal() {
   const { data: initialGuests } = useBaseGuests();
   const {
-    open, setOpen, select, access, search, allowedGuests, restrictedGuests,
+    open, setOpen, select, permission, search, allowedGuests, restrictedGuests,
   } = useGuestsModal();
 
   const [query, setQuery] = useState('');
@@ -51,7 +51,7 @@ export function GuestsModal() {
               ? restrictedGuests.some((item) => item.id === guest.id)
               : allowedGuests.some((item) => item.id === guest.id);
 
-            const hasAccess = doesGuestHaveAccess(guest.access, access);
+            const hasAccess = doesGuestHaveAccess(guest.access, permission.access);
             const clickable = isExcluded
               || (!isAlreadySelected && select
                 && ((search === 'allowed' && !hasAccess) || (search === 'restricted' && hasAccess)));
