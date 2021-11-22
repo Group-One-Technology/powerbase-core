@@ -113,13 +113,20 @@ function BaseFieldPermissionsModal() {
         };
 
         const updatedField = { ...field };
+        const curRestrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
+        const curAllowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
         if (list === 'allowed') {
-          const curRestrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
-          updatedField.permissions[permissionKey].restrictedGuests = [...curRestrictedGuests, guest.id];
-        } else {
-          const curAllowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
-          updatedField.permissions[permissionKey].allowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
           updatedField.permissions[permissionKey].allowedGuests = [...curAllowedGuests, guest.id];
+
+          if (updatedField.permissions[permissionKey].restrictedGuests) {
+            updatedField.permissions[permissionKey].restrictedGuests = curRestrictedGuests.filter((guestId) => guestId !== guest.id);
+          }
+        } else {
+          updatedField.permissions[permissionKey].restrictedGuests = [...curRestrictedGuests, guest.id];
+
+          if (updatedField.permissions[permissionKey].allowedGuests) {
+            updatedField.permissions[permissionKey].allowedGuests = curAllowedGuests.filter((guestId) => guestId !== guest.id);
+          }
         }
 
         try {
