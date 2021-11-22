@@ -1,13 +1,14 @@
 class Fields::Creator
   include FieldTypeHelper
 
-  attr_accessor :table, :column, :field, :field_name, :field_options, :table_view
+  attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :base_migration
 
   def initialize(column, table)
     @column = column
     @table = table
     @field_name = column[0]
     @field_options = column[1]
+    @base_migration = table.db.base_migration
     @table_view = find_or_create_table_view
 
     create_field_object
@@ -44,6 +45,35 @@ class Fields::Creator
     table.save
   end
 
+  def add_field_select_options
+    field_select_options = FieldSelectOption.find_by(
+      name: field_options[:db_type],
+      powerbase_field_id: field.id,
+    ) || FieldSelectOption.new
+    field_select_options.name = field_options[:db_type]
+
+    database = table.db
+
+    if database.postgresql?
+      field_select_options.values = field_options[:enum_values]
+    elsif database.mysql2?
+      field_select_options.values = field_options[:db_type].slice(5..-2)
+        .tr("''", "")
+        .split(",")
+    end
+
+    field_select_options.powerbase_field_id = field.id
+
+    if !field_select_options.save
+      base_migration.logs["errors"].push({
+        type: "Active Record",
+        error: "Failed to save '#{field_options[:db_type]}' enums",
+        messages: field_select_options.errors.messages,
+      })
+      base_migration.save
+    end
+  end
+
   def field_params
     {
       name: field_name,
@@ -70,7 +100,17 @@ class Fields::Creator
   end
 
   def save
-    field.save && add_to_viewfield
+    if field.save
+      add_to_viewfield
+      add_field_select_options if field.powerbase_field_type.data_type == "enums"
+    else
+      base_migration.logs["errors"].push({
+        type: "Active Record",
+        error: "Failed to save '#{field_name}' field",
+        messages: field.errors.messages,
+      })
+      base_migration.save
+    end
   end
 
 
