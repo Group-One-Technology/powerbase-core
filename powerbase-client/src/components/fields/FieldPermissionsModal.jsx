@@ -11,15 +11,15 @@ import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { updateFieldPermission } from '@lib/api/fields';
+import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
-import { updateFieldPermission } from '@lib/api/fields';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
 import { GuestsModal } from '@components/guest/GuestsModal';
 import { Button } from '@components/ui/Button';
-import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
 
 function BaseFieldPermissionsModal() {
   const {
@@ -28,7 +28,7 @@ function BaseFieldPermissionsModal() {
   const { baseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { mutate: mutateViewField } = useViewFields();
-  const { modal, field } = useFieldPermissionsModal();
+  const { modal, field, setField } = useFieldPermissionsModal();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
@@ -59,13 +59,37 @@ function BaseFieldPermissionsModal() {
     if (canChangeGuestAccess && field) {
       const permissions = { [permission]: !(list === 'allowed') };
 
+      const updatedGuestPermission = {
+        ...(guest.permissions.fields || {}),
+        [field.id]: {
+          ...(guest.permissions.fields?.[field.id] || {}),
+          ...permissions,
+        },
+      };
+
+      const updatedField = { ...field };
+      if (list === 'allowed') {
+        const { restrictedGuests } = updatedField.permissions[permission];
+        updatedField.permissions[permission].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
+      } else {
+        const { allowedGuests } = updatedField.permissions[permission];
+        updatedField.permissions[permission].allowedGuest = allowedGuests.filter((guestId) => guestId !== guest.id);
+      }
+      setField(updatedField);
+
       try {
         await updateGuestFieldPermissions({
           id: guest.id,
           fieldId: field.id,
           permissions,
         });
-        mutateGuests();
+        mutateGuests(guests.map((item) => ({
+          ...item,
+          permissions: item.id === guest.id
+            ? updatedGuestPermission
+            : item.permissions,
+        })));
+
         await mutateViewField();
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
