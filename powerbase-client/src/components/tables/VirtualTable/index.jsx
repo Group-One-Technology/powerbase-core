@@ -1,14 +1,16 @@
-/* eslint-disable*/
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+
 import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
 import { useFieldTypes } from '@models/FieldTypes';
+import { FieldPermissionsModalProvider } from '@models/modals/FieldPermissionsModal';
 import { useWebsocket } from '@lib/hooks/useWebsocket';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
+import { FieldPermissionsModal } from '@components/fields/FieldPermissionsModal';
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
@@ -22,13 +24,20 @@ export function VirtualTable({ height, table }) {
 
   useEffect(() => {
     dataListener(table.id);
-  }, [table.id])
+  }, [table.id]);
 
   if (fields == null || connections == null || records == null || fieldTypes == null) {
     return <Loader style={{ height }} />;
   }
 
-  return <TableRenderer height={height} table={table} highlightedCell={highlightedCell}/>;
+  return (
+    <>
+      <FieldPermissionsModalProvider>
+        <TableRenderer height={height} table={table} highlightedCell={highlightedCell} />
+        <FieldPermissionsModal />
+      </FieldPermissionsModalProvider>
+    </>
+  );
 }
 
 VirtualTable.propTypes = {

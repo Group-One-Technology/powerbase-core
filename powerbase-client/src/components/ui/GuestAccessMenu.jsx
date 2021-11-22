@@ -14,6 +14,7 @@ export function GuestAccessMenu({
   change,
   remove,
   owner,
+  disabled,
 }) {
   const { baseUser } = useBaseUser();
   const { modal } = usePermissionsStateModal();
@@ -22,10 +23,10 @@ export function GuestAccessMenu({
 
   const handleConfigurePermissions = () => modal.open(guest);
 
-  if (owner || !canChangeGuestAccess) {
+  if (owner || !canChangeGuestAccess || disabled) {
     return (
       <span className="py-1 px-2 inline-flex items-center text-sm text-gray-500 capitalize rounded">
-        {owner ? 'owner' : guest.access}
+        {owner ? 'creator' : guest.access}
       </span>
     );
   }
@@ -88,4 +89,5 @@ GuestAccessMenu.propTypes = {
   change: PropTypes.func,
   remove: PropTypes.func,
   owner: PropTypes.bool,
+  disabled: PropTypes.bool,
 };

@@ -6,6 +6,7 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
+import { useViewFields } from '@models/ViewFields';
 import { useBasePermissions } from '@lib/hooks/permissions/useBasePermissions';
 import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
 import { updateGuestPermissions } from '@lib/api/guests';
@@ -22,6 +23,7 @@ function usePermissionsStateModalModel() {
   const { data: base } = useBase();
   const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
+  const { mutate: mutateViewFields } = useViewFields();
 
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState();
@@ -128,6 +130,7 @@ function usePermissionsStateModalModel() {
         if (baseUser.userId === guest.userId) {
           mutateBaseUser({ ...baseUser, permissions: filteredPermissions });
         }
+        mutateViewFields();
         await mutateGuests(guests.map((item) => ({
           ...item,
           permissions: item.id === guest.id

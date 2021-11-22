@@ -25,6 +25,12 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update_field_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
   # GET /tables/:id/fields
   def index
     @table = PowerbaseTable.find(safe_params[:table_id])
@@ -96,6 +102,14 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
+  # PUT /fields/:id/update_field_permission
+  def update_field_permission
+    field_updater = Fields::Updater.new(@field)
+    field_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
+  end
+
   private
     def check_field_access
       @field = PowerbaseField.find(safe_params[:id])
@@ -114,6 +128,7 @@ class PowerbaseFieldsController < ApplicationController
         is_nullable: field.is_nullable,
         is_pii: field.is_pii,
         options: field.options,
+        permissions: field.permissions,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,
         created_at: field.created_at,

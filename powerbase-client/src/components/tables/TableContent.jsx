@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
+import { useViewFields } from '@models/ViewFields';
 import { TableRecordsProvider } from '@models/TableRecords';
 import { TableViewProvider, useTableView } from '@models/TableView';
 import { ViewOptionsProvider } from '@models/views/ViewOptions';
@@ -68,9 +68,7 @@ export const TableContent = React.memo(({
     <TableConnectionsProvider tableId={table.id}>
       <TableReferencedConnectionsProvider tableId={table.id}>
         <TableViewProvider id={currentView?.id} initialData={currentView}>
-          <ViewFieldsProvider id={currentView?.id}>
-            <BaseTableContent table={table} views={views} />
-          </ViewFieldsProvider>
+          <BaseTableContent table={table} views={views} />
         </TableViewProvider>
       </TableReferencedConnectionsProvider>
     </TableConnectionsProvider>

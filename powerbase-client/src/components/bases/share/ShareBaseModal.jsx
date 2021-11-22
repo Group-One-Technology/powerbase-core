@@ -7,6 +7,7 @@ import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useViewFields } from '@models/ViewFields';
 import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
@@ -23,8 +24,10 @@ function BaseShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
   const { modal, guest } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
+  const { mutate: mutateViewFields } = useViewFields();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
+
   const canInviteGuests = baseUser?.can('inviteGuests', guest.state);
   const baseUserAccess = baseUser && ACCESS_LEVEL.find((item) => item.name === baseUser.access);
 
@@ -62,6 +65,7 @@ function BaseShareBaseModal() {
             ? guest.getPermissions()
             : undefined,
         });
+        mutateViewFields();
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);
       } catch (err) {

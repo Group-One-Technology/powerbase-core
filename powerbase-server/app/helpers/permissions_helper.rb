@@ -5,7 +5,7 @@ module PermissionsHelper
   PERMISSIONS = [*BASE_PERMISSIONS, *TABLE_PERMISSIONS, *FIELD_PERMISSIONS]
 
   ROLES = {
-    :owner => [:all],
+    :creator => [:all],
     :admin => [:view_base, *TABLE_PERMISSIONS, *FIELD_PERMISSIONS],
     :editor => [:view_base, :add_views, :manage_views, :view_table, :view_field, :add_records, :delete_records, :comment_records],
     :commenter => [:view_base, :view_table, :view_field, :comment_records],

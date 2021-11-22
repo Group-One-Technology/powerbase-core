@@ -10,12 +10,14 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon,
   ChevronRightIcon,
+  LockClosedIcon,
 } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
+import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
 import {
@@ -37,11 +39,13 @@ export function GridHeaderOptions({
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+  const { modal: permissionsModal } = useFieldPermissionsModal();
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
   const canManageViews = baseUser?.can('manageViews', table.id);
+  const canAddFields = baseUser?.can('addFields', field.id);
   const canManageField = baseUser?.can('manageField', field.id);
 
   const [alias, setAlias] = useState(field.alias || field.name);
@@ -100,6 +104,12 @@ export function GridHeaderOptions({
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
       }
+    }
+  };
+
+  const handlePermissions = () => {
+    if (canManageField) {
+      permissionsModal.open(field);
     }
   };
 
@@ -257,6 +267,18 @@ export function GridHeaderOptions({
           {canManageField && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
+              <DropdownMenu.Item
+                textValue="\t"
+                className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+                onSelect={handlePermissions}
+              >
+                <LockClosedIcon className="h-4 w-4 mr-1.5" />
+                Permissions
+              </DropdownMenu.Item>
+            </>
+          )}
+          {canAddFields && (
+            <>
               <DropdownMenu.Item
                 textValue="\t"
                 className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"

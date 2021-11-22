@@ -40,6 +40,7 @@ Rails.application.routes.draw do
           put 'field_type', as: 'update_field_field_type'
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
+          put 'update_field_permission', as: 'update_field_permission'
         end
       end
 

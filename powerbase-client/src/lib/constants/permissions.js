@@ -6,7 +6,7 @@ export const BasePermissions = {
 
 export const ACCESS_LEVEL = [
   {
-    name: 'owner',
+    name: 'creator',
     description: 'Has full access to this base and can share it with others.',
     permisions: ['all'],
     level: 6,
@@ -40,6 +40,29 @@ export const ACCESS_LEVEL = [
     description: 'Can only view the data.',
     permisions: ['viewBase', 'viewTable', 'viewField'],
     level: 1,
+  },
+];
+
+export const GROUP_ACCESS_LEVEL = [
+  {
+    name: 'creators only',
+    access: ['creator'],
+  },
+  {
+    name: 'admins and up',
+    access: ['creator', 'admin'],
+  },
+  {
+    name: 'editors and up',
+    access: ['creator', 'admin', 'custom', 'editor'],
+  },
+  {
+    name: 'commenters and up',
+    access: ['creator', 'admin', 'custom', 'editor', 'commenter'],
+  },
+  {
+    name: 'everyone',
+    access: ['creator', 'admin', 'custom', 'editor', 'commenter', 'viewer'],
   },
 ];
 
@@ -100,7 +123,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Table',
-      description: 'who can manage this table.',
+      description: 'who can update the table permissions, etc.',
       key: 'manageTable',
       value: false,
     },
@@ -158,18 +181,21 @@ export const CUSTOM_PERMISSIONS = {
     {
       name: 'View Field',
       description: 'who can see this field.',
+      access: 'everyone',
       key: 'viewField',
       value: true,
     },
     {
       name: 'Manage Field',
-      description: 'who can update the alias and/or field type, set as PII, etc.',
+      description: 'who can update the alias and/or field type, set as PII, update the permissions etc.',
+      access: 'admins and up',
       key: 'manageField',
       value: false,
     },
     {
       name: 'Edit Field Data',
       description: 'who can update this specific field of the records.',
+      access: 'editors and up',
       key: 'editFieldData',
       value: true,
     },
