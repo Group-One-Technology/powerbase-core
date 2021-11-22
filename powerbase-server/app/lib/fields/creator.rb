@@ -1,14 +1,15 @@
 class Fields::Creator
   include FieldTypeHelper
 
-  attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :base_migration
+  attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :database, :base_migration
 
   def initialize(column, table)
     @column = column
     @table = table
     @field_name = column[0]
     @field_options = column[1]
-    @base_migration = table.db.base_migration
+    @database = table.db
+    @base_migration = @database.base_migration
     @table_view = find_or_create_table_view
 
     create_field_object
@@ -41,8 +42,15 @@ class Fields::Creator
     })
 
     # Set table as migrated for non-turbo databases
-    table.is_migrated = true if !table.powerbase_database.is_turbo
+    table.is_migrated = true if !database.is_turbo
     table.save
+
+    if !database.is_turbo && table.in_synced?
+      database.is_migrated = true
+      database.save
+      base_migration.end_time = Time.now
+      base_migration.save
+    end
   end
 
   def add_field_select_options
@@ -51,8 +59,6 @@ class Fields::Creator
       powerbase_field_id: field.id,
     ) || FieldSelectOption.new
     field_select_options.name = field_options[:db_type]
-
-    database = table.db
 
     if database.postgresql?
       field_select_options.values = field_options[:enum_values]

@@ -3,8 +3,8 @@ class Tables::Migrator
   include SequelHelper
   include FieldTypeHelper
   include PusherHelper
-  
-  attr_accessor :table, :index_name, :primary_keys, 
+
+  attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
                 :indexed_records, :total_records, :records,
                 :powerbase_database, :has_row_oid_support
@@ -29,7 +29,7 @@ class Tables::Migrator
 
     if total_records.zero?
         puts "No record found"
-        return 
+        return
     end
 
     # Reset all migration counter logs
@@ -66,7 +66,7 @@ class Tables::Migrator
         doc = doc.slice!(:oid)
 
         if doc_id.present?
-          update_record(index_name, doc_id, doc) 
+          update_record(index_name, doc_id, doc)
           @indexed_records += 1
         else
           write_table_migration_logs!(
@@ -85,6 +85,13 @@ class Tables::Migrator
 
     table.is_migrated = true
     table.save
+
+    if table.in_synced?
+      powerbase_database.is_migrated = true
+      powerbase_database.save
+      powerbase_database.base_migration.end_time = Time.now
+      powerbase_database.base_migration.save
+    end
 
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end

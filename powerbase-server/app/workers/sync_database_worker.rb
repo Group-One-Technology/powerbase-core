@@ -6,6 +6,8 @@ class SyncDatabaseWorker
   def perform(database_id, new_connection = false)
     @database = PowerbaseDatabase.find database_id
     @base_migration = @database.base_migration
+    @base_migration.logs["errors"] = [] if !@base_migration.logs["errors"]
+    @base_migration.save
 
     unless database.in_synced?
       @unmigrated_tables = @database.unmigrated_tables
@@ -48,17 +50,10 @@ class SyncDatabaseWorker
         end
       end
 
-      if new_connection
-        database.is_migrated = true
-        database.save
-        @base_migration.end_time = Time.now
-        @base_migration.save
-
-        if database.is_turbo && ENV["ENABLE_LISTENER"]
-          poller = Sidekiq::Cron::Job.find("Database Listeners")
-          poller.args << database.id
-          poller.save
-        end
+      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]
+        poller = Sidekiq::Cron::Job.find("Database Listeners")
+        poller.args << database.id
+        poller.save
       end
     end
   end
