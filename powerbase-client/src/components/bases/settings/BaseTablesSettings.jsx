@@ -142,8 +142,8 @@ export function BaseTablesSettings() {
                         <button
                           type="button"
                           className={cn(
-                            'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm',
-                            !table.isHidden ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700' : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
+                            'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm',
+                            table.isHidden ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700' : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
                             loading ? 'cursor-not-allowed' : 'cursor-pointer',
                           )}
                           onClick={() => handleToggleVisibility(table.id)}

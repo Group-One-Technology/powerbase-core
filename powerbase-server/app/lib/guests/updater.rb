@@ -55,6 +55,29 @@ class Guests::Updater
     @guest.update(permissions: filtered_permissions || permissions)
   end
 
+  def update_field_permissions!(field_id, permissions)
+    return if @guest.access != "custom"
+
+    field = PowerbaseField.find(field_id)
+
+    field_id_key = field_id.to_s
+    @guest.permissions["fields"] = {} if @guest.permissions["fields"] == nil
+    @guest.permissions["fields"][field_id_key] = {} if @guest.permissions["fields"][field_id_key] == nil
+
+    permissions.each do |key, value|
+      next if FIELD_DEFAULT_PERMISSIONS[key.to_sym] == nil
+      next if ![true, false].include?(value)
+
+      permission = key.to_s
+
+      @guest.permissions["fields"][field_id_key][permission] = value
+
+      field.update_guest(@guest, permission, value)
+    end
+
+    @guest.save
+  end
+
   def update_access!(access)
     if @guest.access == "custom"
       remove_table_custom_guest(@guest)

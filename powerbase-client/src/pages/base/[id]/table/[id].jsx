@@ -7,6 +7,8 @@ import { BaseTableProvider } from '@models/BaseTable';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
+import { ViewFieldsProvider } from '@models/ViewFields';
+import { CurrentViewProvider, useCurrentView } from '@models/views/CurrentTableView';
 import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
@@ -14,9 +16,7 @@ import { Navbar } from '@components/layout/Navbar';
 import { PageContent } from '@components/layout/PageContent';
 import { AuthOnly } from '@components/middleware/AuthOnly';
 import { Loader } from '@components/ui/Loader';
-import { CurrentViewProvider, useCurrentView } from '@models/views/CurrentTableView';
 import { Table } from '@components/tables/Table';
-import { ViewFieldsProvider } from '@models/ViewFields';
 
 function BaseTable() {
   const history = useHistory();

@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       member do
         put 'change_access'
         put 'update_permissions'
+        put 'update_field_permissions'
         put 'accept_invite'
         put 'reject_invite'
       end
