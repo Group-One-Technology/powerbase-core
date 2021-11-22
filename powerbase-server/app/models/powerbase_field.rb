@@ -34,6 +34,8 @@ class PowerbaseField < ApplicationRecord
   end
 
   def remove_guest(guest, permission)
+    permission = permission.to_s
+
     allowed_guests = Array(self.permissions[permission]["allowed_guests"])
     restricted_guests = Array(self.permissions[permission]["restricted_guests"])
 

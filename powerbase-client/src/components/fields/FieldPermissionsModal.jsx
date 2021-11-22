@@ -2,7 +2,7 @@ import React from 'react';
 import cn from 'classnames';
 import Gravatar from 'react-gravatar';
 import { Dialog, Listbox, Disclosure } from '@headlessui/react';
-import { SelectorIcon, PlusIcon } from '@heroicons/react/outline';
+import { SelectorIcon, PlusIcon, XIcon } from '@heroicons/react/outline';
 
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { useSaveStatus } from '@models/SaveStatus';
@@ -18,13 +18,15 @@ import { updateFieldPermission } from '@lib/api/fields';
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
 import { GuestsModal } from '@components/guest/GuestsModal';
+import { Button } from '@components/ui/Button';
+import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
 
 function BaseFieldPermissionsModal() {
   const {
     saving, saved, catchError, loading,
   } = useSaveStatus();
   const { baseUser } = useBaseUser();
-  const { data: guests } = useBaseGuests();
+  const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { mutate: mutateViewField } = useViewFields();
   const { modal, field } = useFieldPermissionsModal();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
@@ -49,6 +51,25 @@ function BaseFieldPermissionsModal() {
         } catch (err) {
           catchError(err.response.data.error || err.response.data.exception);
         }
+      }
+    }
+  };
+
+  const handleRemoveGuests = async (guest, permission, list) => {
+    if (canChangeGuestAccess && field) {
+      const permissions = { [permission]: !(list === 'allowed') };
+
+      try {
+        await updateGuestFieldPermissions({
+          id: guest.id,
+          fieldId: field.id,
+          permissions,
+        });
+        mutateGuests();
+        await mutateViewField();
+        saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };
@@ -202,7 +223,26 @@ function BaseFieldPermissionsModal() {
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
-                          {allowedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
+                          {allowedGuests.map((guest) => (
+                            <GuestCard
+                              key={guest.id}
+                              guest={guest}
+                              menu={changeGuestAccess && (
+                                <Button
+                                  type="button"
+                                  className={cn(
+                                    'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
+                                    loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                                  )}
+                                  disabled={loading}
+                                  onClick={() => handleRemoveGuests(guest, item.key, 'allowed')}
+                                >
+                                  <XIcon className="h-4 w-4" />
+                                  <span className="sr-only">Remove Guest</span>
+                                </Button>
+                              )}
+                            />
+                          ))}
                         </Disclosure.Panel>
                       </div>
                     )}
@@ -229,7 +269,26 @@ function BaseFieldPermissionsModal() {
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
-                          {restrictedGuests.map((guest) => <GuestCard key={guest.id} guest={guest} menu={false} />)}
+                          {restrictedGuests.map((guest) => (
+                            <GuestCard
+                              key={guest.id}
+                              guest={guest}
+                              menu={changeGuestAccess && (
+                                <Button
+                                  type="button"
+                                  className={cn(
+                                    'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
+                                    loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                                  )}
+                                  disabled={loading}
+                                  onClick={() => handleRemoveGuests(guest, item.key, 'restricted')}
+                                >
+                                  <XIcon className="h-4 w-4" />
+                                  <span className="sr-only">Remove Guest</span>
+                                </Button>
+                              )}
+                            />
+                          ))}
                         </Disclosure.Panel>
                       </div>
                     )}

@@ -19,6 +19,12 @@ class GuestsController < ApplicationController
     required(:filtered_permissions)
   end
 
+  schema(:update_field_permissions) do
+    required(:id)
+    required(:field_id)
+    required(:permissions)
+  end
+
   schema(:create) do
     required(:database_id)
     required(:email)
@@ -117,6 +123,18 @@ class GuestsController < ApplicationController
 
     guest_updater = Guests::Updater.new(@guest)
     guest_updater.update_access!(safe_params[:access])
+
+    render status: :no_content
+  end
+
+  # PUT /guests/:id/update_field_permissions
+  def update_field_permissions
+    @guest = Guest.find(safe_params[:id])
+    raise NotFound.new("Could not find guest with id of #{safe_params[:id]}") if !@guest
+    current_user.can?(:change_guest_access, @guest.powerbase_database)
+
+    guest_updater = Guests::Updater.new(@guest)
+    guest_updater.update_field_permissions!(safe_params[:field_id], safe_params[:permissions])
 
     render status: :no_content
   end
