@@ -129,18 +129,18 @@ module Powerbase
     def get(options)
       index = "table_records_#{@table_id}"
 
-      if @is_turbo
-        id = options[:id] || options[:primary_keys]
-          .each_key {|key| "#{sanitize(key)}_#{sanitize(options[:primary_keys][key])}" }
-          .join("-")
+      query = Powerbase::QueryCompiler.new({
+        table_id: @table_id,
+        adapter: @powerbase_database.adapter,
+        turbo: @is_turbo
+      })
 
-        @esclient.get(index: index, id: format_doc_id(id))["_source"]
+      if @is_turbo
+        search_params = query.find_by(options[:primary_keys]).to_elasticsearch
+
+        result = @esclient.search(index: index, body: search_params)["hits"]["hits"][0]
+        result != nil ? result["_source"] : result
       else
-        query = Powerbase::QueryCompiler.new({
-          table_id: @table_id,
-          adapter: @powerbase_database.adapter,
-          turbo: @is_turbo
-        })
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
