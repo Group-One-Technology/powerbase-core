@@ -21,16 +21,15 @@ class Tables::Creator
     table.powerbase_database_id = database.id
     table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
     table.order = order
-    table.is_migrated = true
   end
-  
+
   def object
     table
   end
 
   def save
     if table.save
-      if database.postgresql?
+      if database.postgresql? && ENV["ENABLE_LISTENER"]
         table.inject_oid if database.has_row_oid_support?
         table.inject_notifier_trigger
       end
@@ -105,7 +104,7 @@ class Tables::Creator
 
           if !base_connection
             referenced_table_column = referenced_table.primary_keys.first
-            
+
             base_connection = BaseConnection.new
             base_connection.name = "fk_#{table.powerbase_database_id}_#{table.name}_#{referenced_table.powerbase_database_id}_#{referenced_table.name}_#{field.name}"
             base_connection.columns = [field.name]

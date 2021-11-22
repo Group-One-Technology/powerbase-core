@@ -24,17 +24,20 @@ class Tables::Migrator
 
   def index!
     create_index!(index_name)
-    fetch_table_records!
 
-    if records.empty?
-      puts "No record found"
-      return 
+    @total_records = sequel_connect(powerbase_database) {|db| db.from(table.name).count}
+
+    if total_records.zero?
+        puts "No record found"
+        return 
     end
 
     # Reset all migration counter logs
     write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
     while offset < total_records
+      fetch_table_records!
+
       records.each do |record|
         oid = record.try(:[], :oid)
         doc_id = has_row_oid_support ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
