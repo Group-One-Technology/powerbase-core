@@ -2,7 +2,7 @@
 import constate from "constate";
 import useSWR, { useSWRInfinite } from "swr";
 
-import { getTableRecords, getMagicRecords } from "@lib/api/records";
+import { getTableRecords, getMagicValues } from "@lib/api/records";
 import { useAuthUser } from "./AuthUser";
 import { useViewOptions } from "./views/ViewOptions";
 import { securedApi } from "@lib/api";
@@ -17,7 +17,7 @@ function getKey({ index, tableId, query, sort, filters, pageSize }) {
   return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
-function useTableRecordsModel({ id, pageSize = 40, isVirtual }) {
+function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
   const { viewId, query, filters, sort } = useViewOptions();
 
@@ -45,13 +45,34 @@ function useTableRecordsModel({ id, pageSize = 40, isVirtual }) {
                 ? filters.value
                 : undefined,
             sort: sort && sort.id && sort.value ? sort.value : undefined,
-            isVirtual,
           })
         : undefined
   );
 
-  const { data, mutate, error, size, setSize } = response;
+  const { data, error, size, setSize } = response;
+
+  const magicValuesResponse = useSWR(
+    `/tables/${id}/magic_values`,
+    getMagicValues
+  );
+
+  const { data: magicData } = magicValuesResponse;
+
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
+  let magicValues = magicData;
+
+  let mergedData = parsedData;
+  parsedData?.forEach((record, idx) =>
+    magicValues?.forEach((magicValue) => {
+      const pkName = magicValue.primaryKey.name;
+      const pkFieldValue = magicValue.pkFieldValue;
+      if (record[pkName] + "" === pkFieldValue) {
+        let remoteRecord = record;
+        remoteRecord[magicValue.powerbaseField.name] = magicValue.value;
+        mergedData[idx] = remoteRecord;
+      }
+    })
+  );
   const isLoadingInitialData = !data && !error;
   const isLoading =
     isLoadingInitialData ||
@@ -63,8 +84,7 @@ function useTableRecordsModel({ id, pageSize = 40, isVirtual }) {
 
   return {
     ...response,
-    data: parsedData,
-    mutate,
+    data: mergedData,
     isLoading,
     isReachingEnd,
     loadMore,

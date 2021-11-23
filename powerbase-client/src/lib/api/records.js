@@ -1,91 +1,17 @@
 /* eslint-disable */
-import { func } from "prop-types";
 import { securedApi } from "./index";
 
-const determineCellValueKey = (fieldTypeId, precision) => {
-  switch (fieldTypeId) {
-    case 1:
-    case 8:
-      return "stringValue";
-    case 2:
-      return "textValue";
-    case 4:
-      if (precision) return "decimalValue";
-      else return "integerValue";
-    default:
-      // console.log("Unknown field type");
-      return;
-  }
-};
-
 export async function getTableRecords({ url, ...payload }) {
-  let magicData;
-  let options = {};
-  let mad = [];
-  if (payload.isVirtual) {
-    const res = await securedApi.get(`/tables/${payload.tableId}/magic_values`);
-    const magicValues = res.data;
-    magicValues?.forEach((value) => {
-      if (value.magicRecordId) options[value.magicRecordId] = {};
-    });
-    magicValues.forEach((value) => {
-      if (options[value.magicRecordId]) {
-        const key = determineCellValueKey(
-          value.fieldTypeId,
-          value.hasPrecision
-        );
-        const entry = {
-          [value.fieldName]: value[key],
-          id: value.magicRecordId,
-        };
-        options[value.magicRecordId] = Object.assign(
-          options[value.magicRecordId],
-          entry
-        );
-      }
-    });
-    if (options) {
-      for (const key in options) {
-        mad.push(options[key]);
-      }
-    }
-    return mad;
-  }
-  const tableId = payload?.tableId;
-  const magicResponse = await securedApi.get(`/tables/${tableId}/magic_values`);
-  if (magicResponse.statusText === "OK" && magicResponse.data?.length) {
-    magicData = magicResponse.data;
-  }
   const response = await securedApi.post(url, payload);
 
   if (response.statusText === "OK") {
-    const data = response.data;
-    let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-    if (magicData) {
-      let mergedData = parsedData;
-      parsedData?.forEach((record, idx) =>
-        magicData?.forEach((magicRecord) => {
-          const key = determineCellValueKey(
-            magicRecord.fieldTypeId,
-            magicRecord.hasPrecision
-          );
-          if (magicRecord?.recordId === record?.id) {
-            let remoteRecord = record;
-            remoteRecord[magicRecord?.fieldName] = magicRecord[key];
-            mergedData[idx] = remoteRecord;
-          }
-        })
-      );
-      return mergedData;
-    } else {
-      return data;
-    }
+    return response.data;
   }
 
   return undefined;
 }
 
-export async function getMagicRecords(url) {
+export async function getMagicValues(url) {
   const response = await securedApi.get(url);
   if (response.statusText === "OK") {
     return response.data;
@@ -94,7 +20,6 @@ export async function getMagicRecords(url) {
 }
 
 export async function getTableRecord({ tableId, recordId, ...payload }) {
-  console.log("REC", recordId);
   const response = await securedApi.post(
     `/tables/${tableId}/records/${recordId}`,
     payload
@@ -107,29 +32,7 @@ export async function getTableRecord({ tableId, recordId, ...payload }) {
   return undefined;
 }
 
-// const magicRecordsResponse = useSWR(
-//   `/tables/${id}/magic_records`,
-//   getMagicRecords
-// );
-
-// const { data: magicData, mutate: mutateMagicRecords } = magicRecordsResponse;
-
-// let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-// let magicRecords = magicData;
-
-// let mergedData = parsedData;
-// parsedData?.forEach((record, idx) =>
-//   magicRecords?.forEach((magicRecord) => {
-//     if (magicRecord?.recordId === record?.id) {
-//       let remoteRecord = record;
-//       remoteRecord[magicRecord?.fieldName] = magicRecord["textValue"];
-//       mergedData[idx] = remoteRecord;
-//     }
-//   })
-// );
-
 export async function getTableRecordsCount({ tableId, ...payload }) {
-  if (payload.isVirtual) return [];
   const response = await securedApi.post(
     `/tables/${tableId}/records_count`,
     payload

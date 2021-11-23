@@ -265,15 +265,7 @@ export function CellRenderer({
   };
 
   const onClickOutsideEditingCell = async () => {
-    let num, newRecordId;
-    const key = determineCellValueKey(field);
-    if (field.fieldTypeId === 4 && field.precision && !field.allowDirtyValue) {
-      const value = recordInputRef.current?.value;
-      num = parseInt(value).toFixed(field.precision);
-    }
-
     // setCellToEdit({});
-
     if (table.isVirtual && isNewRecord) {
       const recordParams = {
         powerbase_table_id: table.id,
@@ -322,14 +314,12 @@ export function CellRenderer({
       field_type_id: field.fieldTypeId,
     };
 
-    console.log(payload);
-
     const response = await securedApi.post(
       `/magic_values/${field.tableId}`,
       payload
     );
 
-    console.log("response", response);
+    mutateTableRecords();
 
     // mutateTableRecords();
 
@@ -360,14 +350,13 @@ export function CellRenderer({
     // console.log(mutatedRecords);
 
     // setUpdatedRecords(mutatedRecords);
-    // mutateTableRecords();
 
-    // if (response.statusText === "OK") {
-    //   setIsNewRecord(false);
-    //   setCellToEdit({});
-    //   recordInputRef?.current?.blur();
-    //   setIsEditing(false);
-    // }
+    if (response.statusText === "OK") {
+      setIsNewRecord(false);
+      setCellToEdit({});
+      recordInputRef?.current?.blur();
+      setIsEditing(false);
+    }
   };
 
   return (
