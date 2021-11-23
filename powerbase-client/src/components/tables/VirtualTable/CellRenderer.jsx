@@ -302,26 +302,24 @@ export function CellRenderer({
       (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
     );
 
-    let primaryKeys = {};
-    let primaryKeyProp;
-    let primaryKeyValue;
+    let pkFieldId;
+    let pkFieldValue;
     computedFields?.forEach((item) => {
-      const { isPrimaryKey, value, name } = item;
+      const { isPrimaryKey, value, id } = item;
       if (isPrimaryKey) {
-        primaryKeyProp = name;
-        primaryKeys[name.toLowerCase()] = value;
-        primaryKeyValue = value;
+        pkFieldId = id;
+        pkFieldValue = value;
       }
     });
 
     const payload = {
-      primary_keys: primaryKeys,
+      pk_field_value: pkFieldValue,
+      pk_field_id: pkFieldId,
       table_id: field.tableId,
       has_precision: false,
       value: recordInputRef.current?.value,
       field_id: field.id,
       field_type_id: field.fieldTypeId,
-      field_name: field.name,
     };
 
     console.log(payload);

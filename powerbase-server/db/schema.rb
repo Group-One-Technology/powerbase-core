@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_23_065041) do
+ActiveRecord::Schema.define(version: 2021_11_23_151308) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -81,18 +81,20 @@ ActiveRecord::Schema.define(version: 2021_11_23_065041) do
   end
 
   create_table "magic_values", force: :cascade do |t|
-    t.integer "table_id"
-    t.integer "field_id"
-    t.string "data_type"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "field_name"
-    t.boolean "has_precision", default: false
-    t.integer "field_type_id"
     t.bigint "magic_record_id"
-    t.string "composed_record_identifier"
     t.text "value"
+    t.string "pk_field_value"
+    t.bigint "pk_field_id"
+    t.bigint "powerbase_field_type_id"
+    t.bigint "powerbase_field_id"
+    t.bigint "powerbase_table_id"
     t.index ["magic_record_id"], name: "index_magic_values_on_magic_record_id"
+    t.index ["pk_field_id"], name: "index_magic_values_on_pk_field_id"
+    t.index ["powerbase_field_id"], name: "index_magic_values_on_powerbase_field_id"
+    t.index ["powerbase_field_type_id"], name: "index_magic_values_on_powerbase_field_type_id"
+    t.index ["powerbase_table_id"], name: "index_magic_values_on_powerbase_table_id"
   end
 
   create_table "piis", force: :cascade do |t|
@@ -208,6 +210,10 @@ ActiveRecord::Schema.define(version: 2021_11_23_065041) do
   add_foreign_key "magic_records", "powerbase_databases"
   add_foreign_key "magic_records", "powerbase_tables"
   add_foreign_key "magic_values", "magic_records"
+  add_foreign_key "magic_values", "powerbase_field_types"
+  add_foreign_key "magic_values", "powerbase_fields"
+  add_foreign_key "magic_values", "powerbase_fields", column: "pk_field_id"
+  add_foreign_key "magic_values", "powerbase_tables"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"
