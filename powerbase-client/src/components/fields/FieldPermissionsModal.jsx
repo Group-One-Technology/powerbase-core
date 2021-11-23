@@ -137,6 +137,9 @@ function BaseFieldPermissionsModal() {
           });
           mutateGuests(guests.map((item) => ({
             ...item,
+            access: item.access !== 'custom' && item.id === guest.id
+              ? 'custom'
+              : item.access,
             permissions: item.id === guest.id
               ? updatedGuestPermission
               : item.permissions,
