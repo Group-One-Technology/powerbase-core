@@ -45,7 +45,7 @@ export function ConnectionSelect({
     if (!table && tables?.length) {
       setTable(tables[0]);
     }
-  }, [bases]);
+  }, [bases, tables]);
 
   const handleBaseChange = (evt) => {
     const selectedBase = bases?.find((item) => (
