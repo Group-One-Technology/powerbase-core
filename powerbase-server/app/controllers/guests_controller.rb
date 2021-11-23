@@ -189,6 +189,7 @@ class GuestsController < ApplicationController
         user_id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
+        name: "#{user.first_name} #{user.last_name}",
         email: user.email,
         is_accepted: guest.is_accepted,
       }
@@ -199,6 +200,7 @@ class GuestsController < ApplicationController
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
+        name: "#{user.first_name} #{user.last_name}",
         email: user.email,
       }
     end
