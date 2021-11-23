@@ -45,7 +45,7 @@ class Fields::Creator
     table.is_migrated = true if !database.is_turbo
     table.save
 
-    if !database.is_turbo && table.in_synced?
+    if !database.is_turbo && database.in_synced?
       database.is_migrated = true
       database.save
       base_migration.end_time = Time.now

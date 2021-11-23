@@ -86,7 +86,7 @@ class Tables::Migrator
     table.is_migrated = true
     table.save
 
-    if table.in_synced?
+    if powerbase_database.in_synced?
       powerbase_database.is_migrated = true
       powerbase_database.save
       powerbase_database.base_migration.end_time = Time.now
