@@ -23,6 +23,8 @@ export function GuestCard({
   const { mutate: mutateViewFields } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
 
+  const isUser = typeof guest.type === 'undefined';
+
   const handleChangeAccess = async (value) => {
     if (!owner && baseUser?.can('changeGuestAccess') && setGuests) {
       saving();
@@ -65,7 +67,7 @@ export function GuestCard({
           await removeGuest({ id: guest.id });
           mutateViewFields();
           await mutateGuests(updatedGuests);
-          saved(`Successfully removed guest '${guest.firstName}'`);
+          saved(`Successfully removed guest '${guest.name}'`);
         }
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -77,19 +79,21 @@ export function GuestCard({
     <div className="relative flex items-center space-x-4">
       <div className="flex-shrink-0">
         <Gravatar
-          email={guest.email}
+          email={isUser ? guest.email : `${guest.id}@nonexistent.user`}
           className="h-8 w-8 rounded-full"
-          alt={`${guest.firstName}'s profile picture`}
+          alt={`${guest.name}'s profile picture`}
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">
-          {guest.firstName} {guest.lastName}
-          {owner && <Badge color="gray" className="ml-1">Owner</Badge>}
-          {(!owner && !guest.isAccepted) && <Badge color="yellow" className="ml-1">Pending</Badge>}
+        <p className="text-sm font-medium text-gray-900 truncate capitalize">
+          {guest.name}
+          {(owner && isUser) && <Badge color="gray" className="ml-1">Owner</Badge>}
+          {(!owner && !guest.isAccepted && isUser) && <Badge color="yellow" className="ml-1">Pending</Badge>}
         </p>
         <p className="text-sm text-gray-500 truncate">
-          {guest.email} {React.isValidElement(menu) && `(${guest.access})`}
+          {isUser
+            ? `${guest.email} ${React.isValidElement(menu) && `(${guest.access})`}`
+            : guest.description}
         </p>
       </div>
       {React.isValidElement(menu)

@@ -4,8 +4,20 @@ import cn from 'classnames';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useGuestsModal } from '@models/modals/GuestsModal';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
+import { ACCESS_LEVEL } from '@lib/constants/permissions';
+
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from './GuestCard';
+
+const ROLES = ACCESS_LEVEL
+  .filter((item) => item.name !== 'custom')
+  .map((item) => ({
+    ...item,
+    id: item.name,
+    name: `${item.name}s`,
+    type: 'role',
+    access: item.name,
+  }));
 
 export function GuestsModal() {
   const { data: initialGuests } = useBaseGuests();
@@ -15,11 +27,16 @@ export function GuestsModal() {
 
   const [query, setQuery] = useState('');
 
-  const guests = query.length
-    ? initialGuests?.filter((item) => item.firstName.toLowerCase().includes(query.toLowerCase())
-      || item.lastName.toLowerCase().includes(query.toLowerCase())
-      || item.email.toLowerCase().includes(query.toLowerCase()))
+  const list = permission?.access === 'specific users only'
+    ? [...initialGuests, ...ROLES.map((item) => ({
+      ...item,
+      description: `${initialGuests?.filter((guest) => guest.access === item.name).length || 0} guest(s) have this role.`,
+    }))]
     : initialGuests;
+  const filteredList = query.length
+    ? list?.filter((item) => item.name.toLowerCase().includes(query.toLowerCase())
+      || item.email?.toLowerCase().includes(query.toLowerCase()))
+    : list;
 
   const handleQueryChange = (evt) => {
     setQuery(evt.target.value);
@@ -43,7 +60,7 @@ export function GuestsModal() {
           />
         </div>
         <div className="mx-4 my-1 bg-white divide-y divide-gray-200">
-          {guests?.map((guest) => {
+          {filteredList?.map((guest) => {
             const isAlreadySelected = search === 'allowed'
               ? allowedGuests.some((item) => item.id === guest.id)
               : restrictedGuests.some((item) => item.id === guest.id);
