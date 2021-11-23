@@ -326,10 +326,12 @@ export function CellRenderer({
 
     console.log(payload);
 
-    // const response = await securedApi.post(
-    //   `/magic_values/${field.tableId}`,
-    //   payload
-    // );
+    const response = await securedApi.post(
+      `/magic_values/${field.tableId}`,
+      payload
+    );
+
+    console.log("response", response);
 
     // mutateTableRecords();
 

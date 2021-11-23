@@ -21,7 +21,7 @@ class TableRecordsController < ApplicationController
     required(:table_id).value(:integer)
     optional(:id).value(:string)
     required(:primary_keys)
-    optional(:data)
+    required(:value)
   end
 
   # POST /tables/:table_id/records
@@ -62,7 +62,7 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    primary_keys = params[:primary_keys]
+    primary_keys = safe_params[:primary_keys]
     record_identifier = nil
     new_magic_value = nil
     if !primary_keys.empty?
@@ -75,13 +75,14 @@ class TableRecordsController < ApplicationController
       table_id: params[:table_id]
     )
     if magic_value
-      magic_value.update(value => params[:data])
+      magic_value.update(value: params[:value])
     else
       new_magic_value = MagicValue.create(
         has_precision: params[:has_precision],
         field_id: params[:field_id], table_id: params[:table_id],
-        composed_record_identifier: params[:composed_record_identifier],
-        field_name: params[:field_name], field_type_id: params[:field_type_id]
+        composed_record_identifier: record_identifier,
+        field_name: params[:field_name], field_type_id: params[:field_type_id],
+        value: params[:value]
       )
     end
     render json: new_magic_value if new_magic_value
