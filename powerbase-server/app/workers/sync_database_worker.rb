@@ -6,8 +6,6 @@ class SyncDatabaseWorker
   def perform(database_id, new_connection = false)
     @database = PowerbaseDatabase.find database_id
     @base_migration = @database.base_migration
-    @base_migration.logs["errors"] = [] if !@base_migration.logs["errors"]
-    @base_migration.save
 
     unless database.in_synced?
       @unmigrated_tables = @database.unmigrated_tables
