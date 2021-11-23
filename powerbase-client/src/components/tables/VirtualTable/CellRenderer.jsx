@@ -316,7 +316,12 @@ export function CellRenderer({
 
     const payload = {
       primary_keys: primaryKeys,
-      data: { [field.name]: recordInputRef.current?.value },
+      table_id: field.tableId,
+      has_precision: false,
+      value: recordInputRef.current?.value,
+      field_id: field.id,
+      field_type_id: field.fieldTypeId,
+      field_name: field.name,
     };
 
     console.log(payload);

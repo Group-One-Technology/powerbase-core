@@ -62,23 +62,29 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    @powerbase_table = PowerbaseTable.find(safe_params[:table_id])
-    @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
-    @is_turbo = @powerbase_database.is_turbo
-    if @is_turbo
-      model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
-      record = model.update_record({
-        id: safe_params[:id],
-        primary_keys: safe_params[:primary_keys],
-        ctid: safe_params[:ctid],
-        fields: safe_params[:fields],
-        data: safe_params[:data]
-      })
-
-      render json: record["get"]["_source"]
-    else
-      puts "JAMES BLAKE"
+    primary_keys = params[:primary_keys]
+    record_identifier = nil
+    new_magic_value = nil
+    if !primary_keys.empty?
+      record_identifier = primary_keys.collect { |key, _| "#{key}_#{primary_keys[key]}" }.join('-')
+    elsif options[:id]
+      record_identifier = options[:id]
     end
+    magic_value = MagicValue.find_by(
+      composed_record_identifier: record_identifier,
+      table_id: params[:table_id]
+    )
+    if magic_value
+      magic_value.update(value => params[:data])
+    else
+      new_magic_value = MagicValue.create(
+        has_precision: params[:has_precision],
+        field_id: params[:field_id], table_id: params[:table_id],
+        composed_record_identifier: params[:composed_record_identifier],
+        field_name: params[:field_name], field_type_id: params[:field_type_id]
+      )
+    end
+    render json: new_magic_value if new_magic_value
   end
 
   # GET /tables/:id/magic_values
@@ -106,20 +112,16 @@ class TableRecordsController < ApplicationController
     render json: { count: total_records }
   end
 
-  def format_json(record)
+  def format_json(value)
     {
-      id: record.id,
-      field_name: record.field_name,
-      text_value: record.text_value,
-      string_value: record.string_value,
-      decimal_value: record.decimal_value,
-      integer_value: record.integer_value,
-      record_id: record.record_id,
-      magic_record_id: record.magic_record_id,
-      table_id: record.table_id,
-      has_precision: record.has_precision,
-      field_id: record.field_id,
-      field_type_id: record.field_type_id
+      id: value.id,
+      field_name: value.field_name,
+      value: value.value,
+      composed_record_identifier: value.composed_record_identifier,
+      magic_record_id: value.magic_record_id,
+      table_id: value.table_id,
+      field_id: value.field_id,
+      field_type_id: value.field_type_id
     }
   end
 
