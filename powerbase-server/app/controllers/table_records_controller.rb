@@ -62,34 +62,39 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    values = MagicValue.includes(:powerbase_field)
-    render json: values if values
-    # new_magic_value = nil
-    # magic_value = MagicValue.find_by(
-    #   pk_field_id: params[:pk_field_id],
-    #   pk_field_value: params[:pk_field_value],
-    #   powerbase_table_id: params[:table_id]
-    # )
-    # if magic_value
-    #   magic_value.update(value: params[:value])
-    # else
-    #   new_magic_value = MagicValue.create(
-    #     powerbase_field_id: params[:field_id],
-    #     powerbase_table_id: params[:table_id],
-    #     powerbase_field_type_id: params[:field_type_id],
-    #     pk_field_id: params[:pk_field_id],
-    #     pk_field_value: params[:pk_field_value],
-    #     value: params[:value]
-    #   )
-    # end
-    # render json: new_magic_value if new_magic_value
+    new_magic_value = nil
+    magic_value = MagicValue.find_by(
+      pk_field_id: params[:pk_field_id],
+      pk_field_value: params[:pk_field_value],
+      powerbase_table_id: params[:table_id]
+    )
+    if magic_value
+      magic_value.update(value: params[:value])
+    else
+      new_magic_value = MagicValue.create(
+        powerbase_field_id: params[:field_id],
+        powerbase_table_id: params[:table_id],
+        powerbase_field_type_id: params[:field_type_id],
+        pk_field_id: params[:pk_field_id],
+        pk_field_value: params[:pk_field_value],
+        value: params[:value]
+      )
+    end
+    render json: new_magic_value if new_magic_value
   end
 
   # GET /tables/:id/magic_values
   def magic_values
-    magic_values = MagicValue.where(powerbase_table_id: params[:id])
-    # formatted_values = magic_values.map { |value| format_json(value) }
-    render json: {}
+    combined_values ||= []
+    values = MagicValue.where(powerbase_table_id: params[:id]).joins(:powerbase_field)
+    values.each do |value|
+      composed = value.attributes.merge!(primary_key: value.powerbase_field.attributes)
+      id = value.powerbase_field_id
+      field = PowerbaseField.find(id)
+      composed[:powerbase_field] = field
+      combined_values << composed
+    end
+    render json: combined_values
   end
 
   # POST /magic_records

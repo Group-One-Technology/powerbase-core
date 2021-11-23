@@ -7,4 +7,5 @@ class PowerbaseField < ApplicationRecord
   belongs_to :powerbase_field_type
   has_one :field_select_option
   has_many :view_field_options
+  has_many :magic_values, foreign_key: "pk_field_id"
 end
