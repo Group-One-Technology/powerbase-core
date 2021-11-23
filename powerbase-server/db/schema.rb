@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_08_193546) do
+ActiveRecord::Schema.define(version: 2021_11_23_065041) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -82,23 +82,16 @@ ActiveRecord::Schema.define(version: 2021_11_08_193546) do
 
   create_table "magic_values", force: :cascade do |t|
     t.integer "table_id"
-    t.integer "record_id"
-    t.integer "database_id"
-    t.boolean "is_magic_cell"
     t.integer "field_id"
     t.string "data_type"
-    t.text "text_value"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "field_name"
-    t.string "string_value"
-    t.float "float_value"
-    t.boolean "boolean_value"
-    t.integer "integer_value"
-    t.decimal "decimal_value"
     t.boolean "has_precision", default: false
     t.integer "field_type_id"
     t.bigint "magic_record_id"
+    t.string "composed_record_identifier"
+    t.text "value"
     t.index ["magic_record_id"], name: "index_magic_values_on_magic_record_id"
   end
 

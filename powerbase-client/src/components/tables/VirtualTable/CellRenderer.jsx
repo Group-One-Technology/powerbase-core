@@ -15,6 +15,18 @@ import { securedApi } from "@lib/api";
 import { PlusIcon } from "@heroicons/react/solid";
 import { initializeFields } from "@lib/helpers/fields/initializeFields";
 
+const camelToSnakeCase = (str) =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+function caseInsensitivelyAccessProp(obj, prop) {
+  prop = (prop + "").toLowerCase();
+  for (var p in obj) {
+    if (obj.hasOwnProperty(p) && prop == (p + "").toLowerCase()) {
+      return obj[p];
+    } else return false;
+  }
+}
+
 function CellValue({
   value,
   isLoaded,
@@ -252,8 +264,6 @@ export function CellRenderer({
     }
   };
 
-  // console.log("RI", records[rowIndex]);
-
   const onClickOutsideEditingCell = async () => {
     let num, newRecordId;
     const key = determineCellValueKey(field);
@@ -293,41 +303,66 @@ export function CellRenderer({
     );
 
     let primaryKeys = {};
+    let primaryKeyProp;
+    let primaryKeyValue;
     computedFields?.forEach((item) => {
       const { isPrimaryKey, value, name } = item;
       if (isPrimaryKey) {
-        primaryKeys[name] = value;
+        primaryKeyProp = name;
+        primaryKeys[name.toLowerCase()] = value;
+        primaryKeyValue = value;
       }
     });
 
     const payload = {
       primary_keys: primaryKeys,
-      data: { [field.name]: num ? num : recordInputRef.current?.value },
+      data: { [field.name]: recordInputRef.current?.value },
     };
 
-    const response = await securedApi.post(
-      `/magic_values/${field.tableId}`,
-      payload
-    );
+    console.log(payload);
 
-    const updatedRecord = response.data;
-    const recordsToUse = updatedRecords ? updatedRecords : records;
+    // const response = await securedApi.post(
+    //   `/magic_values/${field.tableId}`,
+    //   payload
+    // );
 
-    const mutatedRecords = recordsToUse.map((item) => {
-      if (item.id === updatedRecord.id) {
-        console.log(item);
-        return updatedRecord;
-      } else return item;
-    });
-    setUpdatedRecords(mutatedRecords);
-    mutateTableRecords(mutatedRecords);
+    // mutateTableRecords();
 
-    if (response.statusText === "OK") {
-      setIsNewRecord(false);
-      setCellToEdit({});
-      recordInputRef?.current?.blur();
-      setIsEditing(false);
-    }
+    // const updatedRecord = response.data;
+    // const recordsToUse = updatedRecords ? updatedRecords : records;
+
+    // const mutatedRecords = records.map((recordObj) => {
+    //   console.log(recordObj);
+    //   const accessedValue = caseInsensitivelyAccessProp(
+    //     recordObj,
+    //     primaryKeyProp
+    //   );
+    //   if (accessedValue === primaryKeyValue) {
+    //     let newObj = {};
+    //     Object.keys(recordObj).forEach((key) => {
+    //       Object.keys(updatedRecord).forEach((updatedKey) => {
+    //         console.log(key, updatedKey);
+    //         if (key.toLowerCase() === updatedKey.toLowerCase()) {
+    //           newObj[key] = updatedRecord[updatedKey];
+    //         }
+    //       });
+    //     });
+    //     console.log(newObj);
+    //     return newObj;
+    //   } else return recordObj;
+    // });
+
+    // console.log(mutatedRecords);
+
+    // setUpdatedRecords(mutatedRecords);
+    // mutateTableRecords();
+
+    // if (response.statusText === "OK") {
+    //   setIsNewRecord(false);
+    //   setCellToEdit({});
+    //   recordInputRef?.current?.blur();
+    //   setIsEditing(false);
+    // }
   };
 
   return (

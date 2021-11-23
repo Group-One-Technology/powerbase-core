@@ -171,7 +171,7 @@ module Powerbase
         elsif options[:id]
           options[:id]
         elsif identifier_fields.length > 0
-          identifier_fields.collect {|key, value| "#{key}_#{identifier_fields[key]}"}.join("-")
+          identifier_fields.collect {|key, _| "#{key}_#{identifier_fields[key]}"}.join("-")
         elsif @powerbase_database.adapter == "postgresql" && ctid
           "ctid_#{ctid}"
       end

@@ -30,8 +30,6 @@ const BaseTableContent = React.memo(({ views, table }) => {
     return <Loader style={{ height: "calc(100vh - 80px)" }} />;
   }
 
-  console.log("NAH: ", table);
-
   return (
     <ViewOptionsProvider view={view}>
       <TableRecordsCountProvider id={table.id} isVirtual={table.isVirtual}>

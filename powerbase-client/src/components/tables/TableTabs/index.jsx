@@ -50,8 +50,6 @@ export function TableTabs() {
     alert("add new table clicked");
   };
 
-  console.log("base: ", base);
-
   return (
     <div
       className={cn(

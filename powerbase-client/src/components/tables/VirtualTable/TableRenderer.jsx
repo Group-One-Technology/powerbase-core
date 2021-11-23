@@ -17,7 +17,6 @@ import { initializeFields } from "@lib/helpers/fields/initializeFields";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
-import { useBaseTable } from "@models/BaseTable";
 export function TableRenderer({ height, table }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
