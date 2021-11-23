@@ -67,6 +67,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       @base_migration.start_time = Time.now
     end
 
+    @base_migration.save
     @database.sync!(true)
   end
 

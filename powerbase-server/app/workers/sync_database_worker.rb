@@ -48,17 +48,10 @@ class SyncDatabaseWorker
         end
       end
 
-      if new_connection
-        database.is_migrated = true
-        database.save
-        @base_migration.end_time = Time.now
-        @base_migration.save
-
-        if database.is_turbo && ENV["ENABLE_LISTENER"]
-          poller = Sidekiq::Cron::Job.find("Database Listeners")
-          poller.args << database.id
-          poller.save
-        end
+      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]
+        poller = Sidekiq::Cron::Job.find("Database Listeners")
+        poller.args << database.id
+        poller.save
       end
     end
   end
