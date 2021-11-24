@@ -180,7 +180,6 @@ function BaseFieldPermissionsModal() {
           {CUSTOM_PERMISSIONS.Field.map((item) => {
             const permission = field.permissions[item.key];
             const isDefaultAccess = permission.access === item.access;
-            const isSpecificUsersOnly = permission.access === 'specific users only';
 
             let allowedGuests = customGuests && permission.allowedGuests
               ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
@@ -238,7 +237,7 @@ function BaseFieldPermissionsModal() {
                     </Listbox>
                   </div>
                 </div>
-                {(canChangeGuestAccess && !isSpecificUsersOnly && guests?.length > 0) && (
+                {(canChangeGuestAccess && guests?.length > 0) && (
                   <div className="flex gap-1 justify-end">
                     <button
                       type="button"
@@ -264,7 +263,7 @@ function BaseFieldPermissionsModal() {
                     </button>
                   </div>
                 )}
-                {(!isSpecificUsersOnly && allowedGuests?.length > 0) && (
+                {allowedGuests?.length > 0 && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">
@@ -310,7 +309,7 @@ function BaseFieldPermissionsModal() {
                     )}
                   </Disclosure>
                 )}
-                {(!isSpecificUsersOnly && restrictedGuests?.length > 0) && (
+                {restrictedGuests?.length > 0 && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">

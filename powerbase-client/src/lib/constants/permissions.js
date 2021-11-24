@@ -61,10 +61,6 @@ export const GROUP_ACCESS_LEVEL = [
     access: ['creator', 'admin', 'custom', 'editor', 'commenter'],
   },
   {
-    name: 'specific users only',
-    access: ['creator'],
-  },
-  {
     name: 'everyone',
     access: ['creator', 'admin', 'custom', 'editor', 'commenter', 'viewer'],
   },
