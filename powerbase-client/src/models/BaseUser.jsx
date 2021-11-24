@@ -35,6 +35,7 @@ function useBaseUserModel() {
         if (field.permissions[permission].access === 'specific users only') {
           if (baseUser.access === 'creator') return true;
           if (field.permissions[permission].allowedRoles?.includes(baseUser.access)) return true;
+          if (field.permissions[permission].allowedGuests?.includes(baseUser.id)) return true;
         }
       }
 

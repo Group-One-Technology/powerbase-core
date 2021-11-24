@@ -75,6 +75,8 @@ class User < ApplicationRecord
       when :field
         if field.permissions[permission_key]["access"] == "specific users only"
           return true if guest.creator?
+          allowed_roles = Array(field.permissions[permission_key]["allowed_roles"])
+          return true if allowed_roles.any? {|role| role == guest.access}
           allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
         end
