@@ -56,26 +56,34 @@ class Guests::Updater
   end
 
   def update_field_permissions!(field_id, permissions)
-    if @guest.access != "custom"
-      @guest.permissions = get_permissions(@guest)
-      @guest.access = "custom"
-    end
-
     field = PowerbaseField.find(field_id)
 
     field_id_key = field_id.to_s
-    @guest.permissions["fields"] = {} if @guest.permissions["fields"] == nil
-    @guest.permissions["fields"][field_id_key] = {} if @guest.permissions["fields"][field_id_key] == nil
+
+    if @guest.access == "custom"
+      @guest.permissions["fields"] = {} if @guest.permissions["fields"] == nil
+      @guest.permissions["fields"][field_id_key] = {} if @guest.permissions["fields"][field_id_key] == nil
+    end
 
     permissions.each do |key, value|
       next if FIELD_DEFAULT_PERMISSIONS[key.to_sym] == nil
       next if ![true, false].include?(value)
 
       permission = key.to_s
-      @guest.permissions["fields"][field_id_key][permission] = value
+
+      if @guest.access != "custom" && field.permissions[permission]["access"] != "specific users only"
+        @guest.permissions = get_permissions(@guest)
+        @guest.permissions["fields"] = {} if @guest.permissions["fields"] == nil
+        @guest.permissions["fields"][field_id_key] = {} if @guest.permissions["fields"][field_id_key] == nil
+        @guest.access = "custom"
+      end
+
+      @guest.permissions["fields"][field_id_key][permission] = value if @guest.access == "custom"
+
       field.update_guest(@guest, permission, value)
     end
 
+    @guest.permissions = nil if @guest.access != "custom"
     @guest.save
   end
 
