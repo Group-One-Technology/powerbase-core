@@ -72,9 +72,7 @@ class Guests::Updater
       next if ![true, false].include?(value)
 
       permission = key.to_s
-
       @guest.permissions["fields"][field_id_key][permission] = value
-
       field.update_guest(@guest, permission, value)
     end
 
@@ -103,8 +101,7 @@ class Guests::Updater
   end
 
   def remove_guest!
-    remove_table_custom_guest(@guest)
-    remove_field_custom_guest(@guest)
+    RemoveGuestWorker.perform_async(@guest.id, @guest.powerbase_database_id, @guest.access)
     @guest.destroy
   end
 

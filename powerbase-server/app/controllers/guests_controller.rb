@@ -176,6 +176,7 @@ class GuestsController < ApplicationController
         database_id: guest.powerbase_database_id,
         database_name: guest.powerbase_database.name,
         is_accepted: guest.is_accepted,
+        is_synced: guest.is_synced,
       }
     end
 
@@ -192,6 +193,7 @@ class GuestsController < ApplicationController
         name: "#{user.first_name} #{user.last_name}",
         email: user.email,
         is_accepted: guest.is_accepted,
+        is_synced: guest.is_synced,
       }
     end
 

@@ -24,7 +24,7 @@ class Fields::Updater
         guest.permissions["fields"][field_id][permission] = default_value if guest.permissions["fields"][field_id][permission] == nil
 
         if guest.permissions["fields"][field_id][permission] == default_value
-          @field.remove_guest(guest, permission)
+          @field.remove_guest(guest.id, permission)
         else
           @field.update_guests_access({
             permission: permission,
@@ -49,7 +49,7 @@ class Fields::Updater
             is_allowed: guest.permissions["fields"][field_id][permission]
           })
         else
-          @field.remove_guest(guest, permission)
+          @field.remove_guest(guest.id, permission)
         end
       end
     end

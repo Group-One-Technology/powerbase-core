@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_19_093352) do
+ActiveRecord::Schema.define(version: 2021_11_24_020642) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,6 +63,7 @@ ActiveRecord::Schema.define(version: 2021_11_19_093352) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_accepted", default: false
     t.bigint "inviter_id"
+    t.boolean "is_synced", default: false
     t.index ["inviter_id"], name: "index_guests_on_inviter_id"
     t.index ["powerbase_database_id"], name: "index_guests_on_powerbase_database_id"
     t.index ["user_id"], name: "index_guests_on_user_id"
