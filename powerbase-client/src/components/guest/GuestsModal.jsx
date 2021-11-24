@@ -122,7 +122,7 @@ export function GuestsModal() {
             const isExcluded = search === 'allowed'
               ? restrictedGuests.some((guestId) => guestId === guest.id)
               : allowedGuests.some((guestId) => guestId === guest.id);
-            const hasAccess = doesGuestHaveAccess(guest.access, permission.access);
+            const hasAccess = doesGuestHaveAccess(guest.access, permission.access) || permission.allowedRoles?.includes(guest.access);
 
             const clickable = isExcluded
               || (!isAlreadySelected && select

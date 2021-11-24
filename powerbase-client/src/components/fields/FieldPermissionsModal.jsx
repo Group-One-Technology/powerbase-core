@@ -256,6 +256,10 @@ function BaseFieldPermissionsModal() {
               }
             }
 
+            if (allowedRoles?.length) {
+              allowedGuests = allowedGuests.filter((guest) => !allowedRoles.includes(guest.access));
+            }
+
             return (
               <li key={item.key} className="my-4" onMouseEnter={() => handleMouseEnter(item.key)} onMouseLeave={handleMouseLeave}>
                 <div className="flex justify-between gap-x-0.5">
@@ -322,12 +326,16 @@ function BaseFieldPermissionsModal() {
                     )}
                   </div>
                 )}
-                {allowedGuests?.length > 0 && (
+                {(allowedGuests?.length > 0 || (isSpecificUsersOnly && allowedRoles?.length > 0)) && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">
                         <Disclosure.Button as="div" role="button" tabIndex={0} className="pt-0.5 pb-2 pl-2 rounded hover:bg-gray-100 focus:bg-gray-100">
-                          <div className="inline font-medium text-xs text-gray-900 leading-3">Allowed Users</div>
+                          <div className="inline font-medium text-xs text-gray-900 leading-3">
+                            {isSpecificUsersOnly
+                              ? 'Allowed Users/Roles'
+                              : 'Allowed Users'}
+                          </div>
                           <p className="text-xs text-gray-500">Click to expand to view more info.</p>
                           {!open && (
                             <div className="mt-1 flex gap-1">
