@@ -56,7 +56,10 @@ class Guests::Updater
   end
 
   def update_field_permissions!(field_id, permissions)
-    return if @guest.access != "custom"
+    if @guest.access != "custom"
+      @guest.permissions = get_permissions(@guest)
+      @guest.access = "custom"
+    end
 
     field = PowerbaseField.find(field_id)
 

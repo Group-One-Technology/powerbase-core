@@ -9,7 +9,7 @@ class Guest < ApplicationRecord
     commenter: "commenter",
     viewer: "viewer",
     custom: "custom",
-    }, _prefix: true
+    }
   serialize :permissions, JSON
 
   belongs_to :user

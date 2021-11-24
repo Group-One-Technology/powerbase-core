@@ -15,12 +15,11 @@ export function GuestsModal() {
 
   const [query, setQuery] = useState('');
 
-  const customGuests = initialGuests?.filter((item) => item.access === 'custom');
   const guests = query.length
-    ? customGuests?.filter((item) => item.firstName.toLowerCase().includes(query.toLowerCase())
+    ? initialGuests?.filter((item) => item.firstName.toLowerCase().includes(query.toLowerCase())
       || item.lastName.toLowerCase().includes(query.toLowerCase())
       || item.email.toLowerCase().includes(query.toLowerCase()))
-    : customGuests;
+    : initialGuests;
 
   const handleQueryChange = (evt) => {
     setQuery(evt.target.value);
