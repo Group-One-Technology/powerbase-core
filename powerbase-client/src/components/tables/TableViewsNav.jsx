@@ -1,18 +1,20 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { ShareIcon } from '@heroicons/react/outline';
+/* eslint-disable  */
+import React from "react";
+import PropTypes from "prop-types";
+import { ShareIcon } from "@heroicons/react/outline";
 
-import { useTableRecords } from '@models/TableRecords';
-import { useTableRecordsCount } from '@models/TableRecordsCount';
-import { IView } from '@lib/propTypes/view';
-import { ITable } from '@lib/propTypes/table';
+import { useTableRecords } from "@models/TableRecords";
+import { useTableRecordsCount } from "@models/TableRecordsCount";
+import { IView } from "@lib/propTypes/view";
+import { ITable } from "@lib/propTypes/table";
 
-import { Badge } from '@components/ui/Badge';
-import { ViewMenu } from '@components/views/ViewMenu';
-import { Fields } from '@components/fields/Fields';
-import { Filter } from '@components/filter/Filter';
-import { Sort } from '@components/sort/Sort';
-import { Search } from '@components/search/Search';
+import { Badge } from "@components/ui/Badge";
+import { ViewMenu } from "@components/views/ViewMenu";
+import { Fields } from "@components/fields/Fields";
+import { Filter } from "@components/filter/Filter";
+import { Sort } from "@components/sort/Sort";
+import { Search } from "@components/search/Search";
+import Sync from "@components/sync/Sync";
 
 export function TableViewsNav({ table, views }) {
   const { data: records } = useTableRecords();
@@ -28,7 +30,11 @@ export function TableViewsNav({ table, views }) {
               {records.length} loaded out of {totalRecords}
             </p>
           )}
-          {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
+          {!table.isMigrated && (
+            <Badge color="yellow" className="hidden sm:block">
+              Migrating
+            </Badge>
+          )}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
           <Fields tableId={table.id} />
@@ -41,6 +47,7 @@ export function TableViewsNav({ table, views }) {
             <ShareIcon className="block h-4 w-4 mr-1" />
             Share
           </button>
+          <Sync />
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />
