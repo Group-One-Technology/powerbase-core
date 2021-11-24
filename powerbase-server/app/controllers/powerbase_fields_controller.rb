@@ -197,4 +197,5 @@ class PowerbaseFieldsController < ApplicationController
         allow_dirty_value: field.allow_dirty_value
       }
     end
+  end
 end

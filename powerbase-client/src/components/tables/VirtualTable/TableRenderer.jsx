@@ -1,4 +1,6 @@
-/* eslint-disable */
+/* eslint-disable operator-linebreak */
+/* eslint-disable object-curly-newline */
+/* eslint-disable quotes */
 import React, { useState, useRef } from "react";
 import { Grid, InfiniteLoader, AutoSizer, ScrollSync } from "react-virtualized";
 import PropTypes from "prop-types";
@@ -137,11 +139,10 @@ export function TableRenderer({ height, table, highlightedCell }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
-                        const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
+                        const isHighlighted =
+                          records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
-                        const recordsToUse = updatedRecords
-                          ? updatedRecords
-                          : records;
+                        const recordsToUse = updatedRecords || records;
                         let value =
                           columnIndex !== 0 && !isLastRow
                             ? recordsToUse[rowIndex][field.name]
