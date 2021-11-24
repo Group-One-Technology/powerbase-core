@@ -68,9 +68,9 @@ export const TableContent = React.memo(
       <TableConnectionsProvider tableId={table.id}>
         <TableReferencedConnectionsProvider tableId={table.id}>
           <TableViewProvider id={currentView?.id} initialData={currentView}>
-            <ViewFieldsProvider id={currentView?.id}>
-              <BaseTableContent table={table} views={views} />
-            </ViewFieldsProvider>
+            {/* <ViewFieldsProvider id={currentView?.id}> */}
+            <BaseTableContent table={table} views={views} />
+            {/* </ViewFieldsProvider> */}
           </TableViewProvider>
         </TableReferencedConnectionsProvider>
       </TableConnectionsProvider>

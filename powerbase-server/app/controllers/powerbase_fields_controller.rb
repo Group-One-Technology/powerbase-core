@@ -161,6 +161,7 @@ class PowerbaseFieldsController < ApplicationController
   private
     def set_table
       @table = PowerbaseTable.find(safe_params[:table_id])
+    end
   # PUT /fields/:id/update_field_permission
   def update_field_permission
     field_updater = Fields::Updater.new(@field)
@@ -197,5 +198,4 @@ class PowerbaseFieldsController < ApplicationController
         allow_dirty_value: field.allow_dirty_value
       }
     end
-  end
 end

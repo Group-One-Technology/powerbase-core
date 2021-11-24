@@ -1,11 +1,13 @@
-import Pusher from 'pusher-js';
-import { useTableRecords } from '@models/TableRecords';
-import { useViewFields } from '@models/ViewFields';
-import { useMounted } from './useMounted';
+/* eslint-disable  */
+import Pusher from "pusher-js";
+import { useTableRecords } from "@models/TableRecords";
+import { useViewFields } from "@models/ViewFields";
+import { useMounted } from "./useMounted";
 
 const { PUSHER_KEY } = process.env;
+console.log(process.env);
 const pusher = new Pusher(PUSHER_KEY, {
-  cluster: 'ap1',
+  cluster: "ap1",
 });
 
 export function useWebsocket(logging = false) {
@@ -17,7 +19,7 @@ export function useWebsocket(logging = false) {
     Pusher.logToConsole = logging;
     const channel = pusher.subscribe(`table.${tableId}`);
 
-    channel.bind('powerbase-data-listener', async (data) => {
+    channel.bind("powerbase-data-listener", async (data) => {
       await mutateTableRecords();
       await mutateViewFields();
 

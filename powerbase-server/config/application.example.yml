@@ -6,7 +6,7 @@ elasticsearch_url_development: "http://localhost:9200"
 hubspot_api_key: ""
 elasticsearch_url: ""
 
-PUSHER_KEY: ""
-PUSHER_SECRET: ""
-PUSHER_APP_ID: ""
+PUSHER_KEY: "1fa8e84feca07575f40d"
+PUSHER_SECRET: "3484070215788ad6455f"
+PUSHER_APP_ID: "1277145"
 ENABLE_LISTENER: true
