@@ -97,6 +97,27 @@ function BaseFieldPermissionsModal() {
     }
   };
 
+  const handleRemoveRole = async (role, permission) => {
+    const updatedField = { ...field };
+    const allowedRoles = (updatedField.permissions[permission]?.allowedRoles || [])
+      .filter((item) => item !== role);
+    updatedField.permissions[permission].allowedRoles = allowedRoles;
+
+    try {
+      await updateFieldPermissionAllowedRoles({
+        id: field.id,
+        roles: allowedRoles,
+        permission,
+      });
+      mutateViewField(fields.map((item) => (item.id === field.id
+        ? updatedField
+        : item)));
+      saved(`Successfully removed "${role}" from allowed roles.`);
+    } catch (err) {
+      catchError(err.response.data.error || err.response.data.exception);
+    }
+  };
+
   const handleAddGuests = (permission, list) => {
     if (canChangeGuestAccess && field) {
       const select = async (guest) => {
@@ -343,6 +364,7 @@ function BaseFieldPermissionsModal() {
                                         loading ? 'cursor-not-allowed' : 'cursor-pointer',
                                       )}
                                       disabled={loading}
+                                      onClick={() => handleRemoveRole(role, item.key)}
                                     >
                                       <XIcon className="h-4 w-4" />
                                       <span className="sr-only">Remove Role</span>
