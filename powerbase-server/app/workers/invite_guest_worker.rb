@@ -48,5 +48,8 @@ class InviteGuestWorker
         end
       end
     end
+
+    guest.is_synced = true
+    guest.save
   end
 end

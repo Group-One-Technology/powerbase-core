@@ -11,6 +11,7 @@ class Guests::Creator
       access: params[:access],
       permissions: params[:permissions],
       inviter_id: params[:inviter_id],
+      is_synced: params[:access] != "custom"
     })
   end
 
