@@ -20,6 +20,7 @@ import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
 import { GuestsModal } from '@components/guest/GuestsModal';
 import { Button } from '@components/ui/Button';
+import { GuestRoleCard } from '@components/guest/GuestRoleCard';
 
 function BaseFieldPermissionsModal() {
   const {
@@ -36,8 +37,6 @@ function BaseFieldPermissionsModal() {
   const canManageField = field
     ? baseUser?.can('manageField', field.id)
     : false;
-
-  const customGuests = guests?.filter((item) => item.access === 'custom');
 
   const handleChangePermissionAccess = async (permission, access) => {
     if (canManageField) {
@@ -98,9 +97,16 @@ function BaseFieldPermissionsModal() {
     }
   };
 
-  const handleAddGuests = (permission, list, allowedGuests = [], restrictedGuests = []) => {
+  const handleAddGuests = (permission, list) => {
     if (canChangeGuestAccess && field) {
       const select = async (guest) => {
+        if (typeof guest === 'string') {
+          const role = guest;
+          console.log(role);
+          setGuestModalOpen(false);
+          return;
+        }
+
         const permissionKey = permission.key;
         const permissions = { [permissionKey]: list === 'allowed' };
 
@@ -113,19 +119,19 @@ function BaseFieldPermissionsModal() {
         };
 
         const updatedField = { ...field };
-        const curRestrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
-        const curAllowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
+        const restrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
+        const allowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
         if (list === 'allowed') {
-          updatedField.permissions[permissionKey].allowedGuests = [...curAllowedGuests, guest.id];
+          updatedField.permissions[permissionKey].allowedGuests = [...allowedGuests, guest.id];
 
           if (updatedField.permissions[permissionKey].restrictedGuests) {
-            updatedField.permissions[permissionKey].restrictedGuests = curRestrictedGuests.filter((guestId) => guestId !== guest.id);
+            updatedField.permissions[permissionKey].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
           }
         } else {
-          updatedField.permissions[permissionKey].restrictedGuests = [...curRestrictedGuests, guest.id];
+          updatedField.permissions[permissionKey].restrictedGuests = [...restrictedGuests, guest.id];
 
           if (updatedField.permissions[permissionKey].allowedGuests) {
-            updatedField.permissions[permissionKey].allowedGuests = curAllowedGuests.filter((guestId) => guestId !== guest.id);
+            updatedField.permissions[permissionKey].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
           }
         }
 
@@ -156,11 +162,11 @@ function BaseFieldPermissionsModal() {
       };
 
       openGuestModal({
+        id: field.id,
+        type: 'field',
         permission,
         select: () => select,
         search: list,
-        allowedGuests,
-        restrictedGuests,
       });
     }
   };
@@ -178,19 +184,26 @@ function BaseFieldPermissionsModal() {
 
         <ul className="my-8 mx-10">
           {CUSTOM_PERMISSIONS.Field.map((item) => {
-            const permission = field.permissions[item.key];
+            const permission = {
+              ...(field.permissions[item.key] || {}),
+              key: item.key,
+              defaultAccess: item.access,
+              defaultValue: item.value,
+            };
             const isDefaultAccess = permission.access === item.access;
+            const isSpecificUsersOnly = permission.access === 'specific users only';
 
-            let allowedGuests = customGuests && permission.allowedGuests
-              ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
+            const { allowedRoles } = permission;
+            let allowedGuests = guests && permission.allowedGuests
+              ?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
               .filter((guest) => guest);
 
-            let restrictedGuests = customGuests && permission.restrictedGuests
-              ?.map((guestId) => customGuests.find((curItem) => curItem.id === guestId))
-              .filter((guest) => guest);
+            let restrictedGuests = guests && !isSpecificUsersOnly
+              && permission.restrictedGuests?.map((guestId) => guests.find((curItem) => curItem.id === guestId))
+                .filter((guest) => guest);
 
             if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== item.value) {
-              const otherGuests = customGuests.filter((curItem) => curItem.permissions.fields?.[field.id]?.[item.key] == null);
+              const otherGuests = guests.filter((curItem) => curItem.permissions.fields?.[field.id]?.[item.key] == null);
 
               if (item.value) {
                 const filteredGuests = otherGuests.filter((curItem) => !allowedGuests.some((allowedGuest) => allowedGuest.id === curItem.id));
@@ -245,22 +258,24 @@ function BaseFieldPermissionsModal() {
                         'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
                         hoveredItem !== item.key && 'invisible',
                       )}
-                      onClick={() => handleAddGuests({ ...permission, key: item.key }, 'allowed', allowedGuests, restrictedGuests)}
+                      onClick={() => handleAddGuests(permission, 'allowed')}
                     >
                       <PlusIcon className="h-4 w-4 mr-1" />
                       Add allowed user
                     </button>
-                    <button
-                      type="button"
-                      className={cn(
-                        'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
-                        hoveredItem !== item.key && 'invisible',
-                      )}
-                      onClick={() => handleAddGuests({ ...permission, key: item.key }, 'restricted', allowedGuests, restrictedGuests)}
-                    >
-                      <PlusIcon className="h-4 w-4 mr-1" />
-                      Add restricted user
-                    </button>
+                    {!isSpecificUsersOnly && (
+                      <button
+                        type="button"
+                        className={cn(
+                          'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
+                          hoveredItem !== item.key && 'invisible',
+                        )}
+                        onClick={() => handleAddGuests(permission, 'restricted')}
+                      >
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add restricted user
+                      </button>
+                    )}
                   </div>
                 )}
                 {allowedGuests?.length > 0 && (
@@ -284,6 +299,25 @@ function BaseFieldPermissionsModal() {
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
+                          {isSpecificUsersOnly && allowedRoles?.map((role) => (
+                            <GuestRoleCard
+                              key={role}
+                              role={role}
+                              menu={changeGuestAccess && (
+                                <Button
+                                  type="button"
+                                  className={cn(
+                                    'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
+                                    loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                                  )}
+                                  disabled={loading}
+                                >
+                                  <XIcon className="h-4 w-4" />
+                                  <span className="sr-only">Remove Role</span>
+                                </Button>
+                              )}
+                            />
+                          ))}
                           {allowedGuests.map((guest) => (
                             <GuestCard
                               key={guest.id}
@@ -309,7 +343,7 @@ function BaseFieldPermissionsModal() {
                     )}
                   </Disclosure>
                 )}
-                {restrictedGuests?.length > 0 && (
+                {(!isSpecificUsersOnly && restrictedGuests?.length > 0) && (
                   <Disclosure>
                     {({ open }) => (
                       <div className="my-1 ml-1">
