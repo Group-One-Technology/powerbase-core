@@ -16,7 +16,7 @@ import { Sort } from "@components/sort/Sort";
 import { Search } from "@components/search/Search";
 import Sync from "@components/sync/Sync";
 
-export function TableViewsNav({ table, views }) {
+export function TableViewsNav({ table, views, fields }) {
   const { data: records } = useTableRecords();
   const { data: totalRecords } = useTableRecordsCount();
 
@@ -44,10 +44,10 @@ export function TableViewsNav({ table, views }) {
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <ShareIcon className="block h-4 w-4 mr-1" />
+            <ShareIcon table={table} className="block h-4 w-4 mr-1" />
             Share
           </button>
-          <Sync />
+          <Sync fields={fields} table={table} />
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />
