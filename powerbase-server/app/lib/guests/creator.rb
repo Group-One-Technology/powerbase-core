@@ -15,7 +15,7 @@ class Guests::Creator
   end
 
   def update_custom_permissions
-    return true if @guest.access != "custom"
+    return true unless @guest.custom?
 
     @guest.permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)
@@ -48,6 +48,8 @@ class Guests::Creator
         end
       end
     end
+
+    InviteGuestWorker.perform_async(@guest.id)
   end
 
   def object

@@ -2,6 +2,7 @@ class PowerbaseTable < ApplicationRecord
   include PusherHelper
   include Notifier
   include Indexable
+  include TablePermissionsHelper
 
   alias_attribute :fields, :powerbase_fields
   alias_attribute :db, :powerbase_database
@@ -111,5 +112,30 @@ class PowerbaseTable < ApplicationRecord
     base_connections.destroy_allx
     BaseConnection.where(powerbase_table_id: self.id).destroy_all
     self.destroy
+  end
+
+  def remove_guest(guest_id, permission = nil)
+    if permission != nil
+      _remove_guest_for_permission(guest_id, permission)
+      return
+    end
+
+    TABLE_DEFAULT_PERMISSIONS.each do |key, value|
+      _remove_guest_for_permission(guest_id, key)
+    end
+  end
+
+  def _remove_guest_for_permission(guest_id, permission)
+    permission = permission.to_s
+
+    allowed_guests = Array(self.permissions[permission]["allowed_guests"])
+    restricted_guests = Array(self.permissions[permission]["restricted_guests"])
+
+    allowed_guests = allowed_guests.select {|id| id != guest_id}
+    restricted_guests = restricted_guests.select {|id| id != guest_id}
+
+    self.permissions[permission]["allowed_guests"] = allowed_guests.uniq
+    self.permissions[permission]["restricted_guests"] = restricted_guests.uniq
+    self.save
   end
 end
