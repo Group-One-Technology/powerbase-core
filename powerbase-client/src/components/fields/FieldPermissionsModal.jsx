@@ -35,7 +35,7 @@ function BaseFieldPermissionsModal() {
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageField = field
-    ? baseUser?.can('manageField', field.id)
+    ? baseUser?.can('manageField', field)
     : false;
 
   const handleChangePermissionAccess = async (permission, access) => {

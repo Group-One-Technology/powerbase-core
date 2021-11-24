@@ -66,11 +66,18 @@ class User < ApplicationRecord
     raise AccessDenied if !guest && error
     return false if !guest
 
-
     if guest.access.to_sym != :custom
       permissions = ROLES[guest.access.to_sym]
       return true if permissions.include?(:all)
       return true if permissions.include? permission
+
+      case resource_type
+      when :field
+        if field.permissions[permission_key]["access"] == "specific users only"
+          allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
+          return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+        end
+      end
     else
       permission_key = permission.to_s
 
