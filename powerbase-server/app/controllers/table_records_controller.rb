@@ -62,16 +62,16 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    new_magic_value = nil
+    response = nil
     magic_value = MagicValue.find_by(
       pk_field_id: params[:pk_field_id],
       pk_field_value: params[:pk_field_value],
       powerbase_table_id: params[:table_id]
     )
     if magic_value
-      magic_value.update(value: params[:value])
+      response = magic_value.update!(value: params[:value])
     else
-      new_magic_value = MagicValue.create(
+      response = MagicValue.create(
         powerbase_field_id: params[:field_id],
         powerbase_table_id: params[:table_id],
         powerbase_field_type_id: params[:field_type_id],
@@ -80,7 +80,7 @@ class TableRecordsController < ApplicationController
         value: params[:value]
       )
     end
-    render json: new_magic_value if new_magic_value
+    render json: response if response
   end
 
   # GET /tables/:id/magic_values

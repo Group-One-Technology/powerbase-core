@@ -15,18 +15,6 @@ import { securedApi } from "@lib/api";
 import { PlusIcon } from "@heroicons/react/solid";
 import { initializeFields } from "@lib/helpers/fields/initializeFields";
 
-const camelToSnakeCase = (str) =>
-  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
-function caseInsensitivelyAccessProp(obj, prop) {
-  prop = (prop + "").toLowerCase();
-  for (var p in obj) {
-    if (obj.hasOwnProperty(p) && prop == (p + "").toLowerCase()) {
-      return obj[p];
-    } else return false;
-  }
-}
-
 function CellValue({
   value,
   isLoaded,
@@ -206,7 +194,6 @@ export function CellRenderer({
   records,
   validationToolTip,
   setValidationToolTip,
-  singleCellRef,
   mutateTableRecords,
   table,
   isNewRecord,
@@ -247,25 +234,7 @@ export function CellRenderer({
     }
   };
 
-  const determineCellValueKey = (field) => {
-    const { fieldTypeId, precision } = field;
-    switch (fieldTypeId) {
-      case 1:
-      case 8:
-        return "string_value";
-      case 2:
-        return "text_value";
-      case 4:
-        if (precision) return "decimal_value";
-        else return "integer_value";
-      default:
-        // console.log("Unknown field type");
-        return;
-    }
-  };
-
   const onClickOutsideEditingCell = async () => {
-    // setCellToEdit({});
     if (table.isVirtual && isNewRecord) {
       const recordParams = {
         powerbase_table_id: table.id,
@@ -294,13 +263,13 @@ export function CellRenderer({
       (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
     );
 
-    let pkFieldId;
-    let pkFieldValue;
+    let pkFieldId, pkFieldValue, pkFieldName;
     computedFields?.forEach((item) => {
-      const { isPrimaryKey, value, id } = item;
+      const { isPrimaryKey, value, id, name } = item;
       if (isPrimaryKey) {
         pkFieldId = id;
         pkFieldValue = value;
+        pkFieldName = name;
       }
     });
 
@@ -319,39 +288,18 @@ export function CellRenderer({
       payload
     );
 
-    mutateTableRecords();
-
-    // mutateTableRecords();
-
-    // const updatedRecord = response.data;
-    // const recordsToUse = updatedRecords ? updatedRecords : records;
-
-    // const mutatedRecords = records.map((recordObj) => {
-    //   console.log(recordObj);
-    //   const accessedValue = caseInsensitivelyAccessProp(
-    //     recordObj,
-    //     primaryKeyProp
-    //   );
-    //   if (accessedValue === primaryKeyValue) {
-    //     let newObj = {};
-    //     Object.keys(recordObj).forEach((key) => {
-    //       Object.keys(updatedRecord).forEach((updatedKey) => {
-    //         console.log(key, updatedKey);
-    //         if (key.toLowerCase() === updatedKey.toLowerCase()) {
-    //           newObj[key] = updatedRecord[updatedKey];
-    //         }
-    //       });
-    //     });
-    //     console.log(newObj);
-    //     return newObj;
-    //   } else return recordObj;
-    // });
-
-    // console.log(mutatedRecords);
-
-    // setUpdatedRecords(mutatedRecords);
+    const recordsToUse = updatedRecords ? updatedRecords : records;
 
     if (response.statusText === "OK") {
+      const mutatedRecords = recordsToUse.map((recordObj, idx) => {
+        if (recordObj[pkFieldName] === pkFieldValue) {
+          let newObj = { ...recordObj };
+          newObj[field.name] = recordInputRef.current?.value;
+          return newObj;
+        } else return recordObj;
+      });
+
+      setUpdatedRecords(mutatedRecords);
       setIsNewRecord(false);
       setCellToEdit({});
       recordInputRef?.current?.blur();
