@@ -245,7 +245,10 @@ function BaseFieldPermissionsModal() {
                 .filter((guest) => guest);
 
             if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== item.value) {
-              const otherGuests = guests.filter((curItem) => curItem.permissions.fields?.[field.id]?.[item.key] == null);
+              const otherGuests = guests.filter((curItem) => (
+                curItem.permissions.fields?.[field.id]?.[item.key] == null
+                  && curItem.access === 'custom'
+              ));
 
               if (item.value) {
                 const filteredGuests = otherGuests.filter((curItem) => !allowedGuests.some((allowedGuest) => allowedGuest.id === curItem.id));
