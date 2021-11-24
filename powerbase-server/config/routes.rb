@@ -1,4 +1,11 @@
+
+require 'sidekiq/web'
+Sidekiq::Web.use ActionDispatch::Cookies
+Sidekiq::Web.use ActionDispatch::Session::CookieStore, key: "_interslice_session"
+
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/bg_admin' # TODO: Remove after test
+
   get '/auth/', to: 'users/auth#index'
   post '/refresh/', to: 'users/refresh#create'
   post '/login/', to: 'users/login#create'
@@ -16,6 +23,15 @@ Rails.application.routes.draw do
     end
 
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
+    resources :guests, only: [:index, :create, :destroy], shallow: true do
+      member do
+        put 'change_access'
+        put 'update_permissions'
+        put 'update_field_permissions'
+        put 'accept_invite'
+        put 'reject_invite'
+      end
+    end
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index], shallow: true do
@@ -25,7 +41,12 @@ Rails.application.routes.draw do
           put 'field_type', as: 'update_field_field_type'
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
+          put 'update_field_permission', as: 'update_field_permission'
         end
+      end
+
+      resources :tasks do
+        post :start
       end
 
       resources :table_views, path: 'views', as: 'views', except: [:new], shallow: true do
@@ -64,6 +85,9 @@ Rails.application.routes.draw do
   resources :hubspot_databases, only: [:update], shallow: true
   resources :powerbase_field_types, path: 'field_types', as: 'field_types', only: [:index]
 
+  get 'shared_databases', to: 'powerbase_databases#shared_databases'
+  get 'base_invitations', to: 'guests#base_invitations'
+  get 'auth/databases/:database_id/guest', to: 'users#guest'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   post 'tables/virtual_tables', to: 'powerbase_tables#create_virtual_table', as: 'virtual_table' 
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'

@@ -14,6 +14,7 @@ import { useAuthUser } from '@models/AuthUser';
 import { BaseTablesProvider } from '@models/BaseTables';
 import { BasesProvider } from '@models/Bases';
 import { BaseConnectionsProvider } from '@models/BaseConnections';
+import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -27,17 +28,14 @@ const TABS = [
   {
     name: 'Core Settings',
     icon: CogIcon,
-    current: true,
   },
   {
     name: 'Tables',
     icon: TableIcon,
-    current: false,
   },
   {
     name: 'Connections',
     icon: ViewGridAddIcon,
-    current: false,
   },
 ];
 
@@ -45,13 +43,14 @@ function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base } = useBase();
+  const { baseUser } = useBaseUser();
 
-  if (base == null || authUser == null) {
+  if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
   }
 
-  if (base.userId !== authUser.id) {
-    history.push('/login');
+  if (!baseUser.can('manageBase')) {
+    history.push('/404');
     return <Loader className="h-screen" />;
   }
 
@@ -73,7 +72,7 @@ function BaseSettings() {
                         className={({ selected }) => cn(
                           'group border-l-4 px-3 py-2 flex items-center text-sm font-medium w-full',
                           selected
-                            ? 'bg-teal-50 border-teal-500 text-teal-700 hover:bg-teal-50 hover:text-teal-700'
+                            ? 'bg-indigo-50 border-indigo-500 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-700'
                             : 'border-transparent text-gray-900 hover:bg-gray-50 hover:text-gray-900',
                         )}
                         aria-current={({ selected }) => (selected ? 'page' : undefined)}
@@ -117,11 +116,13 @@ export function BaseSettingsPage() {
   return (
     <BaseProvider id={id}>
       <BasesProvider>
-        <BaseTablesProvider id={id}>
-          <BaseConnectionsProvider baseId={id}>
-            <BaseSettings />
-          </BaseConnectionsProvider>
-        </BaseTablesProvider>
+        <BaseUserProvider>
+          <BaseTablesProvider id={id}>
+            <BaseConnectionsProvider baseId={id}>
+              <BaseSettings />
+            </BaseConnectionsProvider>
+          </BaseTablesProvider>
+        </BaseUserProvider>
       </BasesProvider>
     </BaseProvider>
   );

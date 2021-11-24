@@ -9,6 +9,7 @@ class PowerbaseFieldType < ApplicationRecord
     date: "date",
     plugin: "plugin",
     others: "others",
+    text: "text",
   }, _prefix: true
 
   has_many :powerbase_fields

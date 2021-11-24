@@ -33,24 +33,26 @@ export function useResizeFields({ fields, setFields }) {
   };
 
   const handleResizeStop = async () => {
-    saving();
+    if (resizedColumn) {
+      saving();
 
-    try {
-      await resizeViewField({
-        id: resizedColumn.id,
-        width: resizedColumn.width,
-      });
-      const updatedFields = fields.map((column) => ({
-        ...column,
-        width: column.id === resizedColumn.id
-          ? resizedColumn.width
-          : column.width,
-      }));
+      try {
+        await resizeViewField({
+          id: resizedColumn.id,
+          width: resizedColumn.width,
+        });
+        const updatedFields = fields.map((column) => ({
+          ...column,
+          width: column.id === resizedColumn.id
+            ? resizedColumn.width
+            : column.width,
+        }));
 
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err);
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err);
+      }
     }
   };
 

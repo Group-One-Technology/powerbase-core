@@ -59,3 +59,13 @@ export async function unsetFieldAsPII({ id }) {
 
   return undefined;
 }
+
+export async function updateFieldPermission({ id, ...payload }) {
+  const response = await securedApi.put(`/fields/${id}/update_field_permission`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

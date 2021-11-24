@@ -27,6 +27,7 @@ import { GridHeaderOptions } from "./GridHeaderOptions";
 const GRID_HEADER_HEIGHT = 30;
 
 function CellRenderer({
+  table,
   rowIndex,
   columnIndex,
   field,
@@ -76,16 +77,8 @@ function CellRenderer({
 
   return (
     <React.Fragment key={key}>
-      <div
-        id={key}
-        className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2"
-        style={style}
-      >
-        <GridHeaderOptions
-          option={option}
-          field={field}
-          setOptionOpen={setOption}
-        />
+      <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
+        <GridHeaderOptions table={table} option={option} field={field} setOptionOpen={setOption} />
 
         <DraggableItem
           id={key}
@@ -124,6 +117,7 @@ function CellRenderer({
 }
 
 CellRenderer.propTypes = {
+  table: PropTypes.object.isRequired,
   rowIndex: PropTypes.number.isRequired,
   columnIndex: PropTypes.number.isRequired,
   field: PropTypes.object,
@@ -197,19 +191,20 @@ export const GridHeader = React.forwardRef(
               ? options.find((item) => item.id === field.id)
               : undefined;
 
-            return CellRenderer({
-              ...props,
-              columnIndex,
-              field,
-              fieldTypes,
-              option,
-              setOption: (value) => setOption(field.id, value),
-              dragging,
-              handleResizeColumn,
-              handleResizeStop,
-            });
-          }}
-        />
+          return CellRenderer({
+            ...props,
+            table,
+            columnIndex,
+            field,
+            fieldTypes,
+            option,
+            setOption: (value) => setOption(field.id, value),
+            dragging,
+            handleResizeColumn,
+            handleResizeStop,
+          });
+        }}
+      />
 
         <DragOverlay>
           {dragging?.active.data.current?.field && (

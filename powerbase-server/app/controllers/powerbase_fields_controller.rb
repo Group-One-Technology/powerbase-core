@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :set_table, only: [:index]
+  before_action :check_field_access, except: [:index]
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -29,9 +29,24 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:update_field_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
   # GET /tables/:id/fields
   def index
-    render json: @table.powerbase_fields.map {|item| format_json(item)}
+    @table = PowerbaseTable.find(safe_params[:table_id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    current_user.can?(:view_table, @table)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(:id)
+
+    render json: @fields
+      .select {|field| current_user.can?(:view_field, field, @guest, false)}
+      .map {|item| format_json(item)}
   end
 
   # POST /tables/:id/field
@@ -60,8 +75,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/alias
   def alias
-    @field = PowerbaseField.find(safe_params[:id])
-
     if @field.update(alias: safe_params[:alias])
       render json: format_json(@field)
     else
@@ -71,16 +84,15 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/field_type
   def field_type
-    @field = PowerbaseField.find(safe_params[:id])
     @field_type = PowerbaseFieldType.find(safe_params[:field_type_id])
 
     if @field.powerbase_field_type.data_type != @field_type.data_type
-      render json: { errors: ["Could not convert field of type '#{@field.powerbase_field_type.name}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      render json: { error: "Could not convert field of type '#{@field.powerbase_field_type.name}' to '#{@field_type.name}'" }, status: :unprocessable_entity
       return
     end
 
     if @field.db_type.include?("uuid") || @field.db_type.include?("int")
-      render json: { errors: ["Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'"] }, status: :unprocessable_entity
+      render json: { error: "Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'" }, status: :unprocessable_entity
       return
     end
 
@@ -93,8 +105,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/options
   def options
-    @field = PowerbaseField.find(safe_params[:id])
-
     if @field.update(options: safe_params[:options])
       render json: format_json(@field)
     else
@@ -104,8 +114,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/set_as_pii
   def set_as_pii
-    @field = PowerbaseField.find(safe_params[:id])
-
     if @field.update(is_pii: true)
       render json: format_json(@field)
     else
@@ -115,8 +123,6 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/unset_as_pii
   def unset_as_pii
-    @field = PowerbaseField.find(safe_params[:id])
-
     if @field.update(is_pii: false)
       render json: format_json(@field)
     else
@@ -155,10 +161,19 @@ class PowerbaseFieldsController < ApplicationController
   private
     def set_table
       @table = PowerbaseTable.find(safe_params[:table_id])
+  # PUT /fields/:id/update_field_permission
+  def update_field_permission
+    field_updater = Fields::Updater.new(@field)
+    field_updater.update_access!(safe_params[:permission], safe_params[:access])
 
-      if !@table
-        raise StandardError.new("Could not find table with id of '#{safe_params[:table_id]}'")
-      end
+    render status: :no_content
+  end
+
+  private
+    def check_field_access
+      @field = PowerbaseField.find(safe_params[:id])
+      raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
+      current_user.can?(:manage_field, @field)
     end
 
     def format_json(field)
@@ -172,6 +187,7 @@ class PowerbaseFieldsController < ApplicationController
         is_nullable: field.is_nullable,
         is_pii: field.is_pii,
         options: field.options,
+        permissions: field.permissions,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,
         created_at: field.created_at,

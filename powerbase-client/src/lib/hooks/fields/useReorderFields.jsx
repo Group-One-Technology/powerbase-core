@@ -1,16 +1,22 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseUser } from '@models/BaseUser';
+import { useTableView } from '@models/TableView';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
 export function useReorderFields({ tableId, fields, setFields }) {
+  const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
+  const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
+
+  const canManageViews = baseUser?.can('manageViews', tableId);
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
-    if (active.id !== over.id) {
+    if (active.id !== over.id && canManageViews) {
       saving();
 
       const oldIndex = fields.findIndex((item) => item.id === active.id);
@@ -23,13 +29,13 @@ export function useReorderFields({ tableId, fields, setFields }) {
       setFields(updatedFields);
       try {
         await reorderViewFields({
-          tableId,
+          viewId: view.id,
           viewFields: updatedFields.map((item) => item.id),
         });
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };

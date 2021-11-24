@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-
 /**
  * Used to track whether the component has mounted or not, and call a function only when the component is mounted.
  * Mostly used when doing a react setState after an async function.

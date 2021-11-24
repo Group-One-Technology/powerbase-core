@@ -60,12 +60,14 @@ module Powerbase
     # Used in conjunction with to_sequel or to_elasticsearch
     # Ex: query_string.find_by({ is_completed: true, year: 2001 }).to_sequel
     def find_by(filters)
+      operator = @turbo ? "is" : "="
+
       updated_filters = filters
         .collect {|key, value| key }
         .map do |field|
           next {
             field: field,
-            filter: { operator: "=", value: filters[field].to_s }
+            filter: { operator: operator, value: filters[field].to_s }
           }
         end
 

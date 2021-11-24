@@ -13,13 +13,13 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const [viewId, setViewId] = useState(initialViewId);
 
   const tablesResponse = useSWR(
-    baseId && authUser ? `/databases/${baseId}/tables` : null,
+    baseId && authUser ? `${authUser.id}/databases/${baseId}/tables` : null,
     () => getTables({ databaseId: baseId }),
     { revalidateOnFocus: true }
   );
 
   const viewsResponse = useSWR(
-    tableId && authUser ? `/tables/${tableId}/views` : null,
+    tableId && authUser ? `${authUser.id}/tables/${tableId}/views` : null,
     () => getTableViews({ tableId }),
     { revalidateOnFocus: true }
   );
@@ -66,7 +66,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
 
   return {
     table: currentTable,
-    tables: tablesResponse.data?.tables,
+    tables: tablesResponse.data?.tables.filter((item) => !item.isHidden),
     tablesResponse,
     view: currentView,
     views: viewsResponse.data,

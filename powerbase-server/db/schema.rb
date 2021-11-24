@@ -10,7 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 2021_11_23_151308) do
+=======
+ActiveRecord::Schema.define(version: 2021_11_24_020642) do
+>>>>>>> 3cab053048f6890f24347062b325e90ba2321556
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +56,21 @@ ActiveRecord::Schema.define(version: 2021_11_23_151308) do
     t.string "values", default: [], null: false, array: true
     t.bigint "powerbase_field_id", null: false
     t.index ["powerbase_field_id"], name: "index_field_select_options_on_powerbase_field_id"
+  end
+
+  create_table "guests", force: :cascade do |t|
+    t.string "access", null: false
+    t.text "permissions"
+    t.bigint "user_id", null: false
+    t.bigint "powerbase_database_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.boolean "is_accepted", default: false
+    t.bigint "inviter_id"
+    t.boolean "is_synced", default: false
+    t.index ["inviter_id"], name: "index_guests_on_inviter_id"
+    t.index ["powerbase_database_id"], name: "index_guests_on_powerbase_database_id"
+    t.index ["user_id"], name: "index_guests_on_user_id"
   end
 
   create_table "hubspot_databases", force: :cascade do |t|
@@ -140,9 +159,13 @@ ActiveRecord::Schema.define(version: 2021_11_23_151308) do
     t.boolean "is_pii", default: false, null: false
     t.string "alias"
     t.text "options"
+<<<<<<< HEAD
     t.boolean "is_virtual"
     t.integer "precision"
     t.boolean "allow_dirty_value"
+=======
+    t.text "permissions", default: "{\"view_field\":{\"access\":\"everyone\"},\"manage_field\":{\"access\":\"admins and up\"},\"edit_field_data\":{\"access\":\"editors and up\"}}"
+>>>>>>> 3cab053048f6890f24347062b325e90ba2321556
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
   end
@@ -159,7 +182,12 @@ ActiveRecord::Schema.define(version: 2021_11_23_151308) do
     t.string "alias"
     t.text "logs", default: "{}"
     t.integer "order", null: false
+<<<<<<< HEAD
     t.boolean "is_virtual", default: false
+=======
+    t.text "permissions", default: "{\"view_table\":{\"access\":\"everyone\"},\"manage_table\":{\"access\":\"admins and up\"},\"add_fields\":{\"access\":\"admins and up\"},\"delete_fields\":{\"access\":\"admins and up\"},\"add_views\":{\"access\":\"editors and up\"},\"manage_views\":{\"access\":\"editors and up\"},\"delete_views\":{\"access\":\"editors and up\"},\"add_records\":{\"access\":\"editors and up\"},\"delete_records\":{\"access\":\"editors and up\"},\"comment_records\":{\"access\":\"commenters and up\"}}"
+    t.boolean "is_hidden", default: false
+>>>>>>> 3cab053048f6890f24347062b325e90ba2321556
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
@@ -205,6 +233,9 @@ ActiveRecord::Schema.define(version: 2021_11_23_151308) do
   add_foreign_key "base_migrations", "powerbase_databases"
   add_foreign_key "field_db_type_mappings", "powerbase_field_types"
   add_foreign_key "field_select_options", "powerbase_fields"
+  add_foreign_key "guests", "powerbase_databases"
+  add_foreign_key "guests", "users"
+  add_foreign_key "guests", "users", column: "inviter_id"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
   add_foreign_key "magic_records", "powerbase_databases"

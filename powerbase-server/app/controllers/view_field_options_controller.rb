@@ -1,5 +1,7 @@
 class ViewFieldOptionsController < ApplicationController
   before_action :authorize_access_request!
+  before_action :check_view_access, only: [:hide_all, :update_order]
+  before_action :check_view_field_access, only: [:hide, :unhide, :resize]
 
   schema(:index, :hide_all) do
     required(:view_id).value(:integer)
@@ -21,16 +23,27 @@ class ViewFieldOptionsController < ApplicationController
 
   # GET /views/:view_id/fields
   def index
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id]).order(:order)
-    render json: @view_fields.map {|item| format_json(item)}
+    @view = TableView.find(safe_params[:view_id])
+    raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
+    @table = @view.powerbase_table
+    current_user.can?(:view_table, @table)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    @view_fields = ViewFieldOption.where(table_view_id: @view.id).order(:order)
+
+    render json: @view_fields
+      .select {|view_field| current_user.can?(:view_field, view_field.powerbase_field, @guest, false)}
+      .map {|item| format_json(item)}
   end
 
   # PUT /views/:view_id/fields/hide_all
   def hide_all
-    @view_fields = ViewFieldOption.where(table_view_id: safe_params[:view_id])
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @view.powerbase_table.powerbase_database_id)
 
-    @view_fields.each do |field|
-      field.update(is_hidden: true)
+    @view.view_field_options.each do |view_field|
+      if current_user.can?(:view_field, view_field.powerbase_field, @guest, false)
+        view_field.update(is_hidden: true)
+      end
     end
 
     render status: :no_content
@@ -48,8 +61,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/hide
   def hide
-    @view_field = ViewFieldOption.find(safe_params[:id])
-
     if @view_field.update(is_hidden: true)
       render json: format_json(@view_field)
     else
@@ -59,8 +70,6 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/unhide
   def unhide
-    @view_field = ViewFieldOption.find(safe_params[:id])
-
     if @view_field.update(is_hidden: false)
       render json: format_json(@view_field)
     else
@@ -70,12 +79,23 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/resize
   def resize
-    view_field = ViewFieldOption.find(safe_params[:id])
-    view_field.update_attribute(:width, safe_params[:width])
-    render json: format_json(view_field) if view_field.save!
+    @view_field.update_attribute(:width, safe_params[:width])
+    render json: format_json(@view_field) if @view_field.save!
   end
 
   private
+    def check_view_access
+      @view = TableView.find(safe_params[:view_id]);
+      raise NotFound.new("Could not find view with id of #{safe_params[:view_id]}") if !@view
+      current_user.can?(:manage_views, @view.powerbase_table)
+    end
+
+    def check_view_field_access
+      @view_field = ViewFieldOption.find(safe_params[:id])
+      raise NotFound.new("Could not find view field with id of #{safe_params[:id]}") if !@view_field
+      current_user.can?(:manage_views, @view_field.table_view.powerbase_table)
+    end
+
     def format_json(view_field)
       field = view_field.powerbase_field
 
@@ -95,6 +115,7 @@ class ViewFieldOptionsController < ApplicationController
         is_hidden: view_field.is_hidden,
         is_pii: field.is_pii,
         options: field.options,
+        permissions: field.permissions,
         view_id: view_field.table_view_id,
         table_id: field.powerbase_table_id,
         field_type_id: field.powerbase_field_type_id,

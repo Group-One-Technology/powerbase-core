@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
@@ -24,6 +23,7 @@ export function SingleFilter({
   updateTableRecords,
   handleRemoveFilter,
   handleLogicalOpChange,
+  canManageViews,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const [field, setField] = useState(filter?.field
@@ -33,55 +33,63 @@ export function SingleFilter({
   const [value, setValue] = useFilterValue({ value: filter?.filter?.value, fieldType });
 
   const updateField = (selectedField) => {
-    const newFieldType = fieldTypes.find((item) => item.id.toString() === selectedField.fieldTypeId.toString());
+    if (canManageViews) {
+      const newFieldType = fieldTypes.find((item) => item.id.toString() === selectedField.fieldTypeId.toString());
 
-    setField(selectedField);
-    updateOperator(newFieldType);
+      setField(selectedField);
+      updateOperator(newFieldType);
 
-    if (newFieldType.name === FieldType.CHECKBOX) {
-      setValue(false);
-    } else if (newFieldType.name === FieldType.SINGLE_SELECT) {
-      setValue(undefined);
-    } else if (newFieldType.name === FieldType.DATE) {
-      setValue(new Date().toString());
-    } else {
-      setValue('');
-    }
+      if (newFieldType.name === FieldType.CHECKBOX) {
+        setValue(false);
+      } else if (newFieldType.name === FieldType.SINGLE_SELECT) {
+        setValue(undefined);
+      } else if (newFieldType.name === FieldType.DATE) {
+        setValue(new Date().toString());
+      } else {
+        setValue('');
+      }
 
-    updateTableRecords();
-  };
-
-  const handleFieldChange = (selectedFieldId) => {
-    const selectedField = fields?.find((item) => (
-      item.id.toString() === selectedFieldId.toString()
-    ));
-
-    updateField(selectedField);
-  };
-
-  const handleOperatorChange = (selectedOperator) => {
-    setOperator(selectedOperator);
-
-    if (selectedOperator !== '') {
       updateTableRecords();
     }
   };
 
-  const handleValueChange = (evt) => {
-    switch (fieldType?.name) {
-      case FieldType.CHECKBOX:
-        setValue(evt.target.checked);
-        break;
-      case FieldType.SINGLE_SELECT:
-      case FieldType.DATE:
-        setValue(evt?.toString());
-        break;
-      default:
-        setValue(evt.target.value);
-        break;
-    }
+  const handleFieldChange = (selectedFieldId) => {
+    if (canManageViews) {
+      const selectedField = fields?.find((item) => (
+        item.id.toString() === selectedFieldId.toString()
+      ));
 
-    updateTableRecords();
+      updateField(selectedField);
+    }
+  };
+
+  const handleOperatorChange = (selectedOperator) => {
+    if (canManageViews) {
+      setOperator(selectedOperator);
+
+      if (selectedOperator !== '') {
+        updateTableRecords();
+      }
+    }
+  };
+
+  const handleValueChange = (evt) => {
+    if (canManageViews) {
+      switch (fieldType?.name) {
+        case FieldType.CHECKBOX:
+          setValue(evt.target.checked);
+          break;
+        case FieldType.SINGLE_SELECT:
+        case FieldType.DATE:
+          setValue(evt?.toString());
+          break;
+        default:
+          setValue(evt.target.value);
+          break;
+      }
+
+      updateTableRecords();
+    }
   };
 
   return (
@@ -101,7 +109,7 @@ export function SingleFilter({
       className="filter flex gap-2 items-center"
     >
       <div className="inline-block w-16 text-right capitalize">
-        {handleLogicalOpChange
+        {handleLogicalOpChange && canManageViews
           ? (
             <>
               <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
@@ -120,6 +128,7 @@ export function SingleFilter({
           value={field}
           options={fields}
           onChange={handleFieldChange}
+          disabled={!canManageViews}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
         <FilterOperator
@@ -127,6 +136,7 @@ export function SingleFilter({
           value={operator}
           options={operators}
           onChange={handleOperatorChange}
+          disabled={!canManageViews}
         />
         <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
         <FilterValue
@@ -135,15 +145,18 @@ export function SingleFilter({
           value={value}
           onChange={handleValueChange}
           fieldType={fieldType?.name}
+          disabled={!canManageViews}
         />
-        <button
-          type="button"
-          className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
-          onClick={() => handleRemoveFilter(id)}
-        >
-          <span className="sr-only">Remove Filter</span>
-          <XIcon className="block h-4 w-4" />
-        </button>
+        {canManageViews && (
+          <button
+            type="button"
+            className="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-red-100 focus:outline-none focus:ring-2 ring-offset-2"
+            onClick={() => handleRemoveFilter(id)}
+          >
+            <span className="sr-only">Remove Filter</span>
+            <XIcon className="block h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -159,4 +172,5 @@ SingleFilter.propTypes = {
   updateTableRecords: PropTypes.func.isRequired,
   handleRemoveFilter: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
+  canManageViews: PropTypes.bool,
 };

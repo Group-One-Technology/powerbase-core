@@ -3,17 +3,19 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { useBaseUser } from '@models/BaseUser';
 
-export function useReorderSort({ sort, updateSort }) {
-  const { mounted } = useSaveStatus();
-  const { saving, saved, catchError } = useMounted();
+export function useReorderSort({ tableId, sort, updateSort }) {
+  const { mounted } = useMounted();
+  const { saving, saved, catchError } = useSaveStatus();
+  const { baseUser } = useBaseUser();
   const [dragging, setDragging] = useState(false);
   const sensors = useSensors();
 
   const handleDragStart = () => setDragging(true);
 
   const handleReorderSort = async ({ active, over }) => {
-    if (active.id !== over.id) {
+    if (active.id !== over.id && baseUser?.can('manageViews', tableId)) {
       saving();
 
       const oldIndex = sort.findIndex((item) => item.id === active.id);

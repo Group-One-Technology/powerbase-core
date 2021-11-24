@@ -25,6 +25,7 @@ module.exports = {
     'react/forbid-prop-types': 'off',
     'react/button-has-type': 'off',
     'no-param-reassign': 'off',
+    'no-nested-ternary': 'off',
     'react/jsx-props-no-spreading': 'off',
     'jsx-a11y/label-has-associated-control': 'off',
     'max-len': 'off',

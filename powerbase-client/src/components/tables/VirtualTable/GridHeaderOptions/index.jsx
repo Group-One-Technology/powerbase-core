@@ -10,11 +10,14 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon,
   ChevronRightIcon,
+  LockClosedIcon,
 } from '@heroicons/react/outline';
 
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
+import { useBaseUser } from '@models/BaseUser';
+import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
 import {
@@ -25,14 +28,25 @@ import {
 } from '@lib/api/fields';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
-export function GridHeaderOptions({ option, field, setOptionOpen }) {
+export function GridHeaderOptions({
+  table,
+  option,
+  field,
+  setOptionOpen,
+}) {
   const { saving, catchError, saved } = useSaveStatus();
+  const { baseUser } = useBaseUser();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+  const { modal: permissionsModal } = useFieldPermissionsModal();
+
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
+  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canAddFields = baseUser?.can('addFields', table.id);
+  const canManageField = baseUser?.can('manageField', field.fieldId);
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
@@ -41,7 +55,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   }, [field]);
 
   const handleOpenChange = async (value) => {
-    if (!value && alias !== field.alias) {
+    if (!value && alias !== field.alias && canManageField) {
       saving();
       const updatedFields = fields.map((item) => ({
         ...item,
@@ -58,7 +72,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.error || err.response.data.exception);
       }
     } else {
       setOptionOpen(value);
@@ -70,73 +84,85 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
   };
 
   const handleFieldTypeChange = async (selectedFieldType) => {
-    saving();
+    if (canManageField) {
+      saving();
 
-    const updatedFields = fields.map((item) => ({
-      ...item,
-      fieldTypeId: item.id === field.id
-        ? selectedFieldType.id
-        : item.fieldTypeId,
-    }));
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        fieldTypeId: item.id === field.id
+          ? selectedFieldType.id
+          : item.fieldTypeId,
+      }));
 
-    setFields(updatedFields);
-    setOptionOpen(false);
+      setFields(updatedFields);
+      setOptionOpen(false);
 
-    try {
-      await updateFieldType({ id: field.fieldId, fieldTypeId: selectedFieldType.id });
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err.response.data.errors || err.response.data.exception);
+      try {
+        await updateFieldType({ id: field.fieldId, fieldTypeId: selectedFieldType.id });
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
+  };
+
+  const handlePermissions = () => {
+    if (canManageField) {
+      permissionsModal.open(field);
     }
   };
 
   const handleHideField = async () => {
-    saving();
+    if (canManageViews) {
+      saving();
 
-    const updatedFields = fields.map((item) => ({
-      ...item,
-      isHidden: item.id === field.id
-        ? true
-        : item.isHidden,
-    }));
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: item.id === field.id
+          ? true
+          : item.isHidden,
+      }));
 
-    setFields(updatedFields);
-    setOptionOpen(false);
+      setFields(updatedFields);
+      setOptionOpen(false);
 
-    try {
-      await hideViewField({ id: field.id });
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err);
+      try {
+        await hideViewField({ id: field.id });
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 
   const handleTogglePII = async () => {
-    saving();
+    if (canManageField) {
+      saving();
 
-    const updatedFields = fields.map((item) => ({
-      ...item,
-      isPII: item.id === field.id
-        ? !field.isPii
-        : item.isPii,
-    }));
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isPII: item.id === field.id
+          ? !field.isPii
+          : item.isPii,
+      }));
 
-    setFields(updatedFields);
-    setOptionOpen(false);
+      setFields(updatedFields);
+      setOptionOpen(false);
 
-    try {
-      if (!field.isPii) {
-        await setFieldAsPII({ id: field.fieldId });
-      } else {
-        await unsetFieldAsPII({ id: field.fieldId });
+      try {
+        if (!field.isPii) {
+          await setFieldAsPII({ id: field.fieldId });
+        } else {
+          await unsetFieldAsPII({ id: field.fieldId });
+        }
+
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
       }
-
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err);
     }
   };
 
@@ -145,18 +171,31 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
       <DropdownMenu.Trigger />
       <DropdownMenu.Content side="bottom" sideOffset={10} align="start" alignOffset={-10} className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
         <div className="py-2">
-          <div className="px-4 w-auto">
-            <input
-              type="text"
-              aria-label="Field Alias"
-              value={alias}
-              onChange={handleAliasChange}
-              placeholder="Field Alias"
-              className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
+          {canManageField && (
+            <div className="px-4 w-auto">
+              <input
+                type="text"
+                aria-label="Field Alias"
+                value={alias}
+                onChange={handleAliasChange}
+                placeholder="Field Alias"
+                className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+          )}
 
           <dl>
+            {!canManageField && (
+              <>
+                <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+                  Field Alias
+                </dt>
+                <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
+                  {field.alias}
+                </dd>
+              </>
+            )}
+
             <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
               Field Name
             </dt>
@@ -177,7 +216,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
           <DropdownMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
             Field Type
           </DropdownMenu.Label>
-          {isFieldTypeConvertable
+          {isFieldTypeConvertable && canManageField
             ? (
               <DropdownMenu.Root>
                 <DropdownMenu.TriggerItem textValue="\t" className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
@@ -223,39 +262,59 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
             </DropdownMenu.Item>
           )}
 
-          <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />
+          {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
-          <DropdownMenu.Item
-            textValue="\t"
-            className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-          >
-            <ArrowRightIcon className="h-4 w-4 mr-1.5" />
-            Insert right
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            textValue="\t"
-            className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
-            Insert left
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            textValue="\t"
-            className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-            onSelect={handleHideField}
-          >
-            <EyeOffIcon className="h-4 w-4 mr-1.5" />
-            Hide
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            textValue="\t"
-            className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-            onSelect={handleTogglePII}
-          >
-            <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-            {!field.isPii ? 'Set as PII' : 'Unset as PII'}
-          </DropdownMenu.Item>
+          {canManageField && (
+            <>
+              {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
+              <DropdownMenu.Item
+                textValue="\t"
+                className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+                onSelect={handlePermissions}
+              >
+                <LockClosedIcon className="h-4 w-4 mr-1.5" />
+                Permissions
+              </DropdownMenu.Item>
+            </>
+          )}
+          {canAddFields && (
+            <>
+              <DropdownMenu.Item
+                textValue="\t"
+                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              >
+                <ArrowRightIcon className="h-4 w-4 mr-1.5" />
+                Insert right
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                textValue="\t"
+                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              >
+                <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
+                Insert left
+              </DropdownMenu.Item>
+            </>
+          )}
+          {canManageViews && (
+            <DropdownMenu.Item
+              textValue="\t"
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleHideField}
+            >
+              <EyeOffIcon className="h-4 w-4 mr-1.5" />
+              Hide
+            </DropdownMenu.Item>
+          )}
+          {canManageField && (
+            <DropdownMenu.Item
+              textValue="\t"
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleTogglePII}
+            >
+              <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
+              {!field.isPii ? 'Set as PII' : 'Unset as PII'}
+            </DropdownMenu.Item>
+          )}
         </div>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
@@ -263,6 +322,7 @@ export function GridHeaderOptions({ option, field, setOptionOpen }) {
 }
 
 GridHeaderOptions.propTypes = {
+  table: PropTypes.object.isRequired,
   option: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
   setOptionOpen: PropTypes.func.isRequired,

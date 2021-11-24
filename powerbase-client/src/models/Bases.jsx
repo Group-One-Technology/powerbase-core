@@ -3,10 +3,8 @@ import constate from 'constate';
 import useSWR from 'swr';
 
 import { getDatabases } from '@lib/api/databases';
+import { NON_TURBO_REFRESH_INTERVAL, TURBO_REFRESH_INTERVAL } from '@lib/constants/bases';
 import { useAuthUser } from './AuthUser';
-
-const NON_TURBO_REFRESH_INTERVAL = 5000; // milliseconds = 5 seconds
-const TURBO_REFRESH_INTERVAL = 600000; // milliseconds = 10 minutes
 
 function useBasesModel() {
   const { authUser } = useAuthUser();

@@ -4,17 +4,24 @@ import PropTypes from 'prop-types';
 import { Dialog, Transition, RadioGroup } from '@headlessui/react';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
+import { useBaseUser } from '@models/BaseUser';
 import { createTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { IId } from '@lib/propTypes/common';
+import { useMounted } from '@lib/hooks/useMounted';
+
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function AddView({ tableId, open, setOpen }) {
+  const { mounted } = useMounted();
+  const { baseUser } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
+
+  const canAddViews = baseUser?.can('addViews', tableId);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -29,24 +36,27 @@ export function AddView({ tableId, open, setOpen }) {
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    setLoading(true);
-    setError(undefined);
 
-    try {
-      await createTableView({
-        tableId,
-        name,
-        viewType: viewType.value,
-      });
+    if (canAddViews) {
+      setLoading(true);
+      setError(undefined);
 
-      await viewsResponse.mutate();
+      try {
+        await createTableView({
+          tableId,
+          name,
+          viewType: viewType.value,
+        });
 
-      setOpen(false);
-    } catch (err) {
-      setError(err.response.data.errors || err.response.data.exception);
+        await viewsResponse.mutate();
+
+        mounted(() => setOpen(false));
+      } catch (err) {
+        setError(err.response.data.errors || err.response.data.error || err.response.data.exception);
+      }
+
+      mounted(() => setLoading(false));
     }
-
-    setLoading(false);
   };
 
   return (

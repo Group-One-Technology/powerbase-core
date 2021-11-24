@@ -1,11 +1,10 @@
-/* eslint-disable */
+/* eslint-disable  */
 import constate from "constate";
 import useSWR, { useSWRInfinite } from "swr";
-
+import { useState } from "react";
 import { getTableRecords, getMagicValues } from "@lib/api/records";
 import { useAuthUser } from "./AuthUser";
 import { useViewOptions } from "./views/ViewOptions";
-import { securedApi } from "@lib/api";
 
 function getKey({ index, tableId, query, sort, filters, pageSize }) {
   const page = index + 1;
@@ -81,6 +80,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   const isReachingEnd =
     isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
+  const [highlightedCell, setHighLightedCell] = useState(null);
 
   return {
     ...response,
@@ -88,6 +88,8 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
     isLoading,
     isReachingEnd,
     loadMore,
+    highlightedCell,
+    setHighLightedCell,
   };
 }
 

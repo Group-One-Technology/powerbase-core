@@ -1,7 +1,6 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
-  before_action :set_database, only: [:index]
-  before_action :set_table, only: [:show, :update, :update_default_view]
+  before_action :check_table_access, only: [:update, :update_default_view]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -24,14 +23,27 @@ class PowerbaseTablesController < ApplicationController
 
   # GET /databases/:database_id/tables
   def index
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    current_user.can?(:view_base, @database)
+
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
+
     render json: {
       migrated: @database.is_migrated,
-      tables: @database.powerbase_tables.order(order: :asc).map {|item| format_json(item)}
+      tables: @database.powerbase_tables
+        .order(order: :asc)
+        .select {|table| current_user.can?(:view_table, table, @guest, false)}
+        .map {|item| format_json(item)}
     }
   end
 
   # GET /tables/:id
   def show
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:view_table, @table)
+
     render json: format_json(@table)
   end
 
@@ -46,9 +58,13 @@ class PowerbaseTablesController < ApplicationController
 
   # PUT /databases/:database_id/tables/update
   def update_tables
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    current_user.can?(:manage_base, @database)
+
     safe_params[:tables].each_with_index do |table, index|
       @table = PowerbaseTable.find(table[:id])
-      @table.update(alias: table[:alias], order: index)
+      @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: index)
     end
 
     render status: :no_content
@@ -137,16 +153,10 @@ class PowerbaseTablesController < ApplicationController
 
 
   private
-    def set_database
-      @database = PowerbaseDatabase.find(safe_params[:database_id])
-
-      if !@database
-        raise StandardError.new("Must establish a database connection first to execute this action.")
-      end
-    end
-
-    def set_table
+    def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
+      raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+      current_user.can?(:manage_table, @table)
     end
 
     def format_json(table)
@@ -158,7 +168,9 @@ class PowerbaseTablesController < ApplicationController
         default_view_id: table.default_view_id,
         page_size: table.page_size,
         order: table.order,
+        is_hidden: table.is_hidden,
         is_migrated: table.is_migrated,
+        permissions: table.permissions,
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,

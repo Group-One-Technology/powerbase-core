@@ -1,15 +1,15 @@
+include ElasticsearchHelper
+include SequelHelper
 module Powerbase
-  ELASTICSEACH_ID_LIMIT = 512
-  DEFAULT_PAGE_SIZE = 40
-
   class Model
+    DEFAULT_PAGE_SIZE = 40
+
     # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
-    def initialize(esclient, table_id)
-      @table_id = table_id
+    def initialize(esclient, table)
       @esclient = esclient
-
-      @powerbase_table = PowerbaseTable.find(table_id)
+      @powerbase_table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
+      @table_id = @powerbase_table.id
       @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
       @table_name = @powerbase_table.name
       @is_turbo = @powerbase_database.is_turbo
@@ -17,12 +17,13 @@ module Powerbase
 
     # * Save multiple documents of a table to Elasticsearch.
     def index_records
-      index = "table_records_#{@table_id}"
-      fields = PowerbaseField.where(powerbase_table_id: @table_id)
-      primary_keys = fields.select {|field| field.is_primary_key }
+      index = @powerbase_table.index_name
+      fields = @powerbase_table.fields
+      primary_keys = @powerbase_table.primary_keys
       order_field = primary_keys.length > 0 ? primary_keys.first : fields.first
       number_field_type = PowerbaseFieldType.find_by(name: "Number")
       date_field_type = PowerbaseFieldType.find_by(name: "Date")
+      adapter = @powerbase_database.adapter
 
       if !@esclient.indices.exists(index: index)
         @esclient.indices.create(
@@ -55,10 +56,8 @@ module Powerbase
       while @powerbase_table.logs["migration"]["offset"] < @powerbase_table.logs["migration"]["total_records"]
         records = remote_db() {|db|
           table = db.from(@table_name)
-
-          table_select = [Sequel.lit("*")]
-          table_select.push(Sequel.lit("ctid")) if @powerbase_database.adapter == "postgresql"
-
+          table_select = [ Sequel.lit("*") ]
+          table_select << Sequel.lit("oid") if adapter == "postgresql" && @powerbase_database.has_row_oid_support?
           table.select(*table_select)
             .order(order_field.name.to_sym)
             .limit(DEFAULT_PAGE_SIZE)
@@ -67,35 +66,7 @@ module Powerbase
         }
 
         records.each do |record|
-          doc_id = if primary_keys.length > 0
-              primary_keys
-                .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                .join("-")
-            elsif @powerbase_database.adapter == "postgresql"
-              "ctid_#{record[:ctid]}"
-            else
-              field_ids = fields.select {|field|
-                field.name.downcase.include?("id") || field.name.downcase.include?("identifier")
-              }
-
-              if field_ids.length > 0
-                field_ids
-                  .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                  .join("-")
-              else
-                not_nullable_fields = fields.select {|field| !field.is_nullable }
-
-                if not_nullable_fields.length > 0
-                  not_nullable_fields
-                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                    .join("-")
-                else
-                  fields
-                    .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
-                    .join("-")
-                end
-              end
-            end
+          doc_id = get_doc_id(primary_keys, record, fields, adapter)
 
           doc = {}
           record.collect {|key, value| key }.each do |key|
@@ -118,7 +89,7 @@ module Powerbase
             end
           end
 
-          doc = doc.slice!(:ctid)
+          doc = doc.slice!(:oid)
 
           # if !primary_keys.length > 0 && @powerbase_database.adapter == "postgresql" && record[:ctid]
           #   ctid_key = "__ctid_table_#{table_id}"
@@ -187,18 +158,19 @@ module Powerbase
     def get(options)
       index = "table_records_#{@table_id}"
 
-      if @is_turbo
-        id = options[:id] || options[:primary_keys]
-          .each_key {|key| "#{sanitize(key)}_#{sanitize(options[:primary_keys][key])}" }
-          .join("-")
+      query = Powerbase::QueryCompiler.new({
+        table_id: @table_id,
+        adapter: @powerbase_database.adapter,
+        turbo: @is_turbo
+      })
 
-        @esclient.get(index: index, id: format_doc_id(id))["_source"]
+      if @is_turbo
+        search_params = query.find_by(options[:primary_keys]).to_elasticsearch
+
+        result = @esclient.search(index: index, body: search_params)["hits"]["hits"][0]
+        raise StandardError.new("Record not found") if result == nil
+        result["_source"]
       else
-        query = Powerbase::QueryCompiler.new({
-          table_id: @table_id,
-          adapter: @powerbase_database.adapter,
-          turbo: @is_turbo
-        })
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
         remote_db() {|db|
@@ -266,9 +238,8 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
-        # puts result["hits"]["hits"]
-        # puts "is_nah"
-        result["hits"]["hits"].map {|result| result["_source"]}
+
+        result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
       else
         remote_db() {|db|
           db.from(@table_name)
@@ -308,18 +279,10 @@ module Powerbase
     end
 
     private
-      def remote_db(&block)
-        Powerbase.connect({
-          adapter: @powerbase_database.adapter,
-          connection_string: @powerbase_database.connection_string,
-          is_turbo: @powerbase_database.is_turbo,
-        }, &block)
-      end
-
-      def format_doc_id(value)
-        value
-          .parameterize(separator: "_")
-          .truncate(ELASTICSEACH_ID_LIMIT)
+      def remote_db
+        sequel_connect(@powerbase_database) do |db|
+          yield(db) if block_given?
+        end
       end
 
       def sanitize(string)

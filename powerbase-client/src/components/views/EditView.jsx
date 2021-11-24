@@ -5,18 +5,30 @@ import { Dialog, Transition, RadioGroup } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
+import { useTableView } from '@models/TableView';
+import { useBaseUser } from '@models/BaseUser';
 import { deleteTableView, updateTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
+import { useMounted } from '@lib/hooks/useMounted';
+
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
-import { useTableView } from '@models/TableView';
 
-export function EditView({ view, open, setOpen }) {
+export function EditView({
+  tableId,
+  view,
+  open,
+  setOpen,
+}) {
+  const { mounted } = useMounted();
+  const { baseUser } = useBaseUser();
   const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
+
+  const canManageViews = baseUser?.can('manageViews', tableId);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -24,6 +36,8 @@ export function EditView({ view, open, setOpen }) {
   useEffect(() => {
     setName(view.name);
     setViewType(VIEW_TYPES.find((item) => item.value === view.viewType));
+    setError(undefined);
+    setLoading(false);
   }, [view.id]);
 
   const handleNameChange = (evt) => {
@@ -35,42 +49,47 @@ export function EditView({ view, open, setOpen }) {
   };
 
   const handleDelete = async () => {
-    setLoading(true);
-    setError(undefined);
+    if (canManageViews) {
+      setLoading(true);
+      setError(undefined);
 
-    try {
-      await deleteTableView({ id: view.id });
-      await viewsResponse.mutate();
-      await mutateView();
+      try {
+        await deleteTableView({ id: view.id });
+        await viewsResponse.mutate();
+        await mutateView();
 
-      setOpen(false);
-    } catch (err) {
-      setError(err.response.data.errors || err.response.data.exception);
+        mounted(() => setOpen(false));
+      } catch (err) {
+        setError(err.response.data.error || err.response.data.exception);
+      }
+
+      mounted(() => setLoading(false));
     }
-
-    setLoading(false);
   };
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    setLoading(true);
-    setError(undefined);
 
-    try {
-      await updateTableView({
-        id: view.id,
-        name,
-        viewType: viewType.value,
-      });
+    if (canManageViews) {
+      setLoading(true);
+      setError(undefined);
 
-      await viewsResponse.mutate();
+      try {
+        await updateTableView({
+          id: view.id,
+          name,
+          viewType: viewType.value,
+        });
 
-      setOpen(false);
-    } catch (err) {
-      setError(err.response.data.errors || err.response.data.exception);
+        await viewsResponse.mutate();
+
+        mounted(() => setOpen(false));
+      } catch (err) {
+        setError(err.response.data.error || err.response.data.exception);
+      }
+
+      mounted(() => setLoading(false));
     }
-
-    setLoading(false);
   };
 
   return (
@@ -195,6 +214,7 @@ export function EditView({ view, open, setOpen }) {
 }
 
 EditView.propTypes = {
+  tableId: PropTypes.number.isRequired,
   view: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,

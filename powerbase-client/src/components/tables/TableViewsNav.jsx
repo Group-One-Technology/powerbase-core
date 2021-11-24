@@ -37,15 +37,15 @@ export function TableViewsNav({ table, views, fields }) {
           )}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
-          <Fields tableId={table.id} />
-          <Filter />
-          <Sort />
+          <Fields table={table} />
+          <Filter table={table} />
+          <Sort table={table} />
           <button
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <ShareIcon table={table} className="block h-4 w-4 mr-1" />
-            Share
+            <ShareIcon className="block h-4 w-4 mr-1" />
+            Share View
           </button>
           <Sync fields={fields} table={table} />
         </div>

@@ -1,13 +1,13 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { Dot } from '@components/ui/Dot';
 import { SortableItem } from '@components/ui/SortableItem';
-import { Tooltip } from '@components/ui/Tooltip';
 
-export const TableTabItem = React.forwardRef(({ table, index }, activeTabRef) => {
+export const TableTabItem = React.forwardRef(({ table }, activeTabRef) => {
   const { table: activeTable, handleTableChange } = useCurrentView();
 
   const isCurrentTable = table.id.toString() === activeTable.id.toString();
@@ -30,13 +30,15 @@ export const TableTabItem = React.forwardRef(({ table, index }, activeTabRef) =>
 
   if (!table.isMigrated) {
     component = (
-      <Tooltip
-        text="Migrating"
-        position={index > 1 ? 'left' : 'right'}
-        className={index > 1 ? '-left-16 top-2 z-10' : '-right-4 top-2 z-10'}
-      >
-        {component}
-      </Tooltip>
+      <Tooltip.Root delayDuration={0}>
+        <Tooltip.Trigger>
+          {component}
+        </Tooltip.Trigger>
+        <Tooltip.Content className="bg-gray-900 text-white text-xs py-1 px-2 rounded">
+          <Tooltip.Arrow className="gray-900" />
+          Migrating
+        </Tooltip.Content>
+      </Tooltip.Root>
     );
   }
 
@@ -54,5 +56,4 @@ export const TableTabItem = React.forwardRef(({ table, index }, activeTabRef) =>
 
 TableTabItem.propTypes = {
   table: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired,
 };

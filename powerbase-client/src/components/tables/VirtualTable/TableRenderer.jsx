@@ -9,7 +9,6 @@ import { useTableRecords } from "@models/TableRecords";
 import { useTableConnections } from "@models/TableConnections";
 import { useTableRecordsCount } from "@models/TableRecordsCount";
 import { useViewFieldState } from "@models/view/ViewFieldState";
-
 import { ITable } from "@lib/propTypes/table";
 import { useDidMountEffect } from "@lib/hooks/useDidMountEffect";
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from "@lib/constants";
@@ -17,7 +16,8 @@ import { initializeFields } from "@lib/helpers/fields/initializeFields";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
-export function TableRenderer({ height, table }) {
+
+export function TableRenderer({ height, table, highlightedCell }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
@@ -137,6 +137,7 @@ export function TableRenderer({ height, table }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
+                        const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
                         const recordsToUse = updatedRecords
                           ? updatedRecords
@@ -152,6 +153,7 @@ export function TableRenderer({ height, table }) {
                         return CellRenderer({
                           rowIndex,
                           columnIndex,
+                          isHighlighted,
                           isLastRow,
                           isLoaded: !!records[rowIndex],
                           value,
@@ -224,4 +226,5 @@ export function TableRenderer({ height, table }) {
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
+  highlightedCell: PropTypes.string,
 };

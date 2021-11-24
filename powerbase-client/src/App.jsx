@@ -1,8 +1,10 @@
 /* eslint-disable quotes */
+
 import React from "react";
 import {
   Switch,
   Route,
+  Redirect,
   useRouteMatch,
   BrowserRouter as Router,
 } from "react-router-dom";
@@ -12,6 +14,7 @@ import { GlobalProviders } from "@components/GlobalProviders";
 import { LoginPage } from "@pages/login";
 import { RegisterPage } from "@pages/register";
 import { BasesPage } from "@pages/bases";
+import { SettingsPage } from "@pages/settings";
 import { BasePage } from "@pages/base/[id]";
 import { AddBasePage } from "@pages/base/add-base";
 import { CreateBasePage } from "@pages/base/create";
@@ -20,7 +23,7 @@ import { ConnectURLBasePage } from "@pages/base/connect-url";
 import { ConnectIntegrationBasePage } from "@pages/base/connect-integration";
 import { BaseSettingsPage } from "@pages/base/[id]/settings";
 import { TablePage } from "@pages/base/[id]/table/[id]";
-import { Error404Page } from "@pages/Error404";
+import { Error404Page } from "@pages/404";
 
 import "./index.css";
 
@@ -33,10 +36,12 @@ export function App() {
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/register" component={RegisterPage} />
           <Route exact path="/bases" component={BasesPage} />
+          <Route exact path="/settings" component={SettingsPage} />
           <Route path="/base">
             <BasesRoute />
           </Route>
-          <Route path="*" component={Error404Page} />
+          <Route path="/404" component={Error404Page} />
+          <Redirect from="*" to="/404" />
         </Switch>
       </Router>
       <Toaster position="bottom-left" />
@@ -65,7 +70,7 @@ function BasesRoute() {
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route exact path={`${path}/:id/settings`} component={BaseSettingsPage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
-      <Route path="*" component={Error404Page} />
+      <Redirect from="*" to="/404" />
     </Switch>
   );
 }

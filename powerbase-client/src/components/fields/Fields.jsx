@@ -1,10 +1,7 @@
-/* eslint-disable comma-dangle */
-/* eslint-disable quotes */
-/* eslint-disable no-unused-vars */
-/* eslint-disabl */
+/* eslint-disable */
 import React, { Fragment, useEffect, useState } from "react";
-import cn from "classnames";
 import PropTypes from "prop-types";
+import cn from "classnames";
 import { Popover, Transition } from "@headlessui/react";
 import { AdjustmentsIcon, TableIcon, PlusIcon } from "@heroicons/react/outline";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -17,23 +14,28 @@ import { useSaveStatus } from "@models/SaveStatus";
 import { useViewFields } from "@models/ViewFields";
 import { useTableView } from "@models/TableView";
 import { useViewFieldState } from "@models/view/ViewFieldState";
+import { useBaseUser } from "@models/BaseUser";
 import { hideAllViewFields } from "@lib/api/view-fields";
 import { useReorderFields } from "@lib/hooks/fields/useReorderFields";
 import { FieldItem } from "./FieldItem";
 import NewField from "./NewField";
 
-export function Fields({ tableId }) {
+export function Fields({ table }) {
+  const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
   const { setFields: setRecordFields } = useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
+
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({
-    tableId,
+    tableId: table.id,
     fields,
     setFields,
   });
   const [loading, setLoading] = useState(false);
+  const canManageViews = baseUser?.can("manageViews", table.id);
+  const canAddFields = baseUser?.can("addFields", table.id);
   const [isCreatingField, setIsCreatingField] = useState(false);
 
   useEffect(() => {
@@ -45,24 +47,26 @@ export function Fields({ tableId }) {
   };
 
   const handleHideAll = async () => {
-    saving();
-    setLoading(true);
+    if (canManageViews) {
+      saving();
+      setLoading(true);
 
-    const updatedFields = fields.map((item) => ({
-      ...item,
-      isHidden: true,
-    }));
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isHidden: true,
+      }));
 
-    setFields(updatedFields);
-    setRecordFields(updatedFields);
-    setLoading(false);
+      setFields(updatedFields);
+      setRecordFields(updatedFields);
+      setLoading(false);
 
-    try {
-      await hideAllViewFields({ viewId: view.id });
-      await mutateViewFields(updatedFields);
-      saved();
-    } catch (err) {
-      catchError(err);
+      try {
+        await hideAllViewFields({ viewId: view.id });
+        await mutateViewFields(updatedFields);
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
     }
   };
 
@@ -102,16 +106,18 @@ export function Fields({ tableId }) {
                         {view.name}
                       </strong>
                     </h4>
-                    <div className="mx-2 flex justify-end">
-                      <button
-                        type="button"
-                        className="p-1 text-indigo-500"
-                        onClick={handleHideAll}
-                        disabled={loading}
-                      >
-                        Hide all
-                      </button>
-                    </div>
+                    {canManageViews && (
+                      <div className="mx-2 flex justify-end">
+                        <button
+                          type="button"
+                          className="p-1 text-indigo-500"
+                          onClick={handleHideAll}
+                          disabled={loading}
+                        >
+                          Hide all
+                        </button>
+                      </div>
+                    )}
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
@@ -125,6 +131,7 @@ export function Fields({ tableId }) {
                           {fields.map((field) => (
                             <FieldItem
                               key={field.id}
+                              table={table}
                               field={field}
                               setFields={setFields}
                             />
@@ -132,20 +139,21 @@ export function Fields({ tableId }) {
                         </ul>
                       </SortableContext>
                     </DndContext>
-                    <button
-                      type="button"
-                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                      onClick={handleAddNewField}
-                    >
-                      <PlusIcon className="mr-1 h-4 w-4" />
-                      Add a field
-                    </button>
+                    {canAddFields && (
+                      <button
+                        type="button"
+                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
+                      >
+                        <PlusIcon className="mr-1 h-4 w-4" />
+                        Add a field
+                      </button>
+                    )}
                   </div>
                 )}
                 {isCreatingField && (
                   <div className="text-sm text-gray-900">
                     <NewField
-                      tableId={tableId}
+                      tableId={table.id}
                       fields={fields}
                       view={view}
                       setIsCreatingField={setIsCreatingField}
@@ -162,5 +170,5 @@ export function Fields({ tableId }) {
 }
 
 Fields.propTypes = {
-  tableId: PropTypes.number.isRequired,
+  table: PropTypes.object.isRequired,
 };

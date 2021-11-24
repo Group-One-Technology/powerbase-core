@@ -42,6 +42,26 @@ export async function getDatabases() {
   return undefined;
 }
 
+export async function getSharedDatabases() {
+  const response = await securedApi.get('/shared_databases');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function getBaseInvitations() {
+  const response = await securedApi.get('/base_invitations');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function getDatabase({ id }) {
   const response = await securedApi.get(`/databases/${id}`);
 

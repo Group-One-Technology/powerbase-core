@@ -19,6 +19,7 @@ export function FilterGroup({
   handleLogicalOpChange,
   handleRemoveFilter: handleParentRemoveFilter,
   updateTableRecords,
+  canManageViews,
 }) {
   const filterGroupId = `filterGroup${level}`;
 
@@ -42,42 +43,49 @@ export function FilterGroup({
   });
 
   const handleAddFilter = (isGroup) => {
-    const newFilter = isGroup
-      ? ({
-        id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
-        operator: 'and',
-        filters: [newFilterItem],
-      })
-      : newFilterItem;
+    if (canManageViews) {
+      const newFilter = isGroup
+        ? ({
+          id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
+          operator: 'and',
+          filters: [newFilterItem],
+        })
+        : newFilterItem;
 
-    setFilterGroup((prevFilterGroup) => ({
-      operator: prevFilterGroup.operator,
-      filters: [
-        ...(prevFilterGroup.filters || []),
-        newFilter,
-      ],
-    }));
-    setNewFilterCount((prevCount) => prevCount + 1);
+      setFilterGroup((prevFilterGroup) => ({
+        operator: prevFilterGroup.operator,
+        filters: [
+          ...(prevFilterGroup.filters || []),
+          newFilter,
+        ],
+      }));
+
+      setNewFilterCount((prevCount) => prevCount + 1);
+    }
   };
 
   const handleChildLogicalOpChange = (value) => {
-    setLogicalOperator(value);
-    updateTableRecords();
+    if (canManageViews) {
+      setLogicalOperator(value);
+      updateTableRecords();
+    }
   };
 
   const handleRemoveChildFilter = (filterId) => {
-    setFilterGroup((prevFilterGroup) => ({
-      operator: prevFilterGroup.operator,
-      filters: prevFilterGroup.filters.filter((item) => (
-        item.id !== filterId
-      )),
-    }));
+    if (canManageViews) {
+      setFilterGroup((prevFilterGroup) => ({
+        operator: prevFilterGroup.operator,
+        filters: prevFilterGroup.filters.filter((item) => (
+          item.id !== filterId
+        )),
+      }));
 
-    if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
-      handleParentRemoveFilter(id);
+      if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
+        handleParentRemoveFilter(id);
+      }
+
+      updateTableRecords();
     }
-
-    updateTableRecords();
   };
 
   return (
@@ -88,7 +96,7 @@ export function FilterGroup({
     >
       {!root && (
         <div className="inline-block mt-2 w-16 text-right capitalize">
-          {handleLogicalOpChange
+          {handleLogicalOpChange && canManageViews
             ? (
               <>
                 <label htmlFor={`${filterGroupId}-logicalOperator`} className="sr-only">Logical Operator</label>
@@ -122,6 +130,7 @@ export function FilterGroup({
                   handleLogicalOpChange={index === 1
                     ? logicalOperatorChange
                     : undefined}
+                  canManageViews={canManageViews}
                 />
               );
             }
@@ -140,6 +149,7 @@ export function FilterGroup({
                 handleLogicalOpChange={index === 1
                   ? handleChildLogicalOpChange
                   : undefined}
+                canManageViews={canManageViews}
               />
             );
           })}
@@ -149,9 +159,9 @@ export function FilterGroup({
             </p>
           )}
         </div>
-        <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />
+        {canManageViews && <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />}
       </div>
-      {(!root && id && handleParentRemoveFilter) && (
+      {(!root && id && handleParentRemoveFilter && canManageViews) && (
         <div className="mt-2">
           <button
             type="button"
@@ -177,4 +187,5 @@ FilterGroup.propTypes = {
   updateTableRecords: PropTypes.func.isRequired,
   handleRemoveFilter: PropTypes.func,
   handleLogicalOpChange: PropTypes.func,
+  canManageViews: PropTypes.bool,
 };

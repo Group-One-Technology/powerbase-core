@@ -7,10 +7,13 @@ import cn from "classnames";
 import PropTypes from "prop-types";
 
 import { useAuthUser } from "@models/AuthUser";
+import { ShareBaseModalProvider } from "@models/modals/ShareBaseModal";
 import { IBase } from "@lib/propTypes/base";
 import { BG_COLORS } from "@lib/constants";
 
 import { Logo } from "@components/ui/Logo";
+import { ShareBaseModal } from "@components/bases/share/ShareBaseModal";
+import { NotificationsMenu } from "./NotificationsMenu";
 import { UserMenu } from "./UserMenu";
 import { BaseMenu } from "./BaseMenu";
 import { MobileNav } from "./MobileNav";
@@ -23,7 +26,7 @@ export const NAVIGATION = [
   // { name: 'Settings', href: '/settings' },
 ];
 
-export function Navbar({ base, bases }) {
+function BaseNavbar({ base, bases }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
 
@@ -87,9 +90,11 @@ export function Navbar({ base, bases }) {
                   })}
               </div>
               <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
+                <NotificationsMenu colored={!!base} />
                 <UserMenu colored={!!base} />
               </div>
-              <div className="-mr-2 flex items-center sm:hidden">
+              <div className="-mr-2 flex items-center gap-1 sm:hidden">
+                <NotificationsMenu colored={!!base} />
                 {/* Mobile menu button */}
                 <Disclosure.Button
                   className={cn(
@@ -110,9 +115,23 @@ export function Navbar({ base, bases }) {
             </div>
           </div>
           <MobileNav base={base} bases={otherBases} navigation={NAVIGATION} />
+          {base && <ShareBaseModal />}
         </>
       )}
     </Disclosure>
+  );
+}
+
+BaseNavbar.propTypes = {
+  base: IBase,
+  bases: PropTypes.arrayOf(IBase),
+};
+
+export function Navbar({ base, bases }) {
+  return (
+    <ShareBaseModalProvider base={base}>
+      <BaseNavbar base={base} bases={bases} />
+    </ShareBaseModalProvider>
   );
 }
 

@@ -7,6 +7,7 @@ class FieldSelectOptionsController < ApplicationController
 
   # GET /fields/:field_id/select_options
   def index
+    current_user.can?(:view_field, safe_params[:field_id])
     @select_option = FieldSelectOption.find_by(powerbase_field_id: safe_params[:field_id])
     render json: format_json(@select_option)
   end

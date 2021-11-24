@@ -1,6 +1,7 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
+  before_action :check_database_access, only: [:update, :clear_logs]
 
   schema(:show, :clear_logs) do
     required(:id).value(:integer)
@@ -48,25 +49,23 @@ class PowerbaseDatabasesController < ApplicationController
     render json: @databases.map {|item| format_json(item)}
   end
 
+  # GET /shared_databases
+  def shared_databases
+    render json: current_user.shared_databases.map {|item| format_json(item)}
+  end
+
   # GET /databases/:id
   def show
     @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    current_user.can?(:view_base, @database)
 
-    if @database
-      render json: format_json(@database)
-    end
+    render json: format_json(@database)
   end
 
   # PUT /databases/:id
   def update
     options = safe_params.output
-    @database = PowerbaseDatabase.find(safe_params[:id])
-
-    if !@database
-      render status: :not_found
-      return
-    end
-
     options[:adapter] = @database.adapter
     options[:is_turbo] = @database.is_turbo
     is_connection_updated = false
@@ -205,8 +204,6 @@ class PowerbaseDatabasesController < ApplicationController
 
   # PUT /databases/:id/clear_logs
   def clear_logs
-    @database = PowerbaseDatabase.find(safe_params[:id])
-
     if @database.base_migration.update(logs: { errors: [] })
       render status: :no_content
     else
@@ -215,6 +212,12 @@ class PowerbaseDatabasesController < ApplicationController
   end
 
   private
+    def check_database_access
+      @database = PowerbaseDatabase.find(safe_params[:id])
+      raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+      current_user.can?(:manage_base, @database)
+    end
+
     def authorize_acesss_hubspot
       if safe_params[:api_key] != ENV["hubspot_api_key"]
         raise StandardError.new "Invalid Hubspot API Key. Access denied."
@@ -222,6 +225,9 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     def format_json(database)
+      owner = database.user
+      default_table = database.default_table(current_user)
+
       {
         id: database.id,
         user_id: database.user_id,
@@ -229,12 +235,29 @@ class PowerbaseDatabasesController < ApplicationController
         name: database.name,
         database_name: database.database_name,
         description: database.description,
+        owner: {
+          user_id: owner.id,
+          first_name: owner.first_name,
+          last_name: owner.last_name,
+          email: owner.email,
+        },
         color: database.color,
         is_migrated: database.is_migrated,
         is_turbo: database.is_turbo,
+        default_table: if default_table
+            {
+              id: default_table.id,
+              name: default_table.name,
+              alias: default_table.alias,
+              default_view_id: default_table.default_view_id,
+            }
+          else
+            nil
+          end,
         created_at: database.created_at,
         updated_at: database.updated_at,
         total_tables: database.powerbase_tables.length,
+        total_collaborators: database.guests.length + 1,
         logs: database.base_migration.logs,
       }
     end

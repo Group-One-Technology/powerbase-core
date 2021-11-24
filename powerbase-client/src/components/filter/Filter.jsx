@@ -1,4 +1,5 @@
 import React, { Fragment, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
@@ -9,21 +10,25 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableView } from '@models/TableView';
+import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter() {
+export function Filter({ table }) {
   const filterRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
+  const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
+  const canManageViews = baseUser?.can('manageViews', table.id);
+
   const updateTableRecords = useCallback(debounce(async () => {
-    if (filterRef.current) {
+    if (filterRef.current && canManageViews) {
       saving();
 
       const filters = Array.from(filterRef.current.querySelectorAll('.filter') || []).map(({ attributes }) => ({
@@ -93,6 +98,7 @@ export function Filter() {
                       filterGroup={initialFilters}
                       fields={fields}
                       updateTableRecords={updateTableRecords}
+                      canManageViews={canManageViews}
                     />
                   </div>
                 </div>
@@ -104,3 +110,7 @@ export function Filter() {
     </Popover>
   );
 }
+
+Filter.propTypes = {
+  table: PropTypes.object.isRequired,
+};
