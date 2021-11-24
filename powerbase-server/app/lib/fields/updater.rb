@@ -1,4 +1,5 @@
 class Fields::Updater
+  include PermissionsHelper
   include FieldPermissionsHelper
 
   attr_accessor :field
@@ -60,6 +61,13 @@ class Fields::Updater
     @field.permissions[permission]["allowed_guests"] = allowed_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
     @field.permissions[permission]["restricted_guests"] = restricted_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
     @field.permissions[permission]["access"] = access
+    @field.save
+  end
+
+  def update_allowed_roles!(permission, roles)
+    permission = permission.underscore
+    allowed_roles = Array(roles).select {|role| ROLES[role.to_sym] != nil}
+    @field.permissions[permission]["allowed_roles"] = allowed_roles
     @field.save
   end
 end

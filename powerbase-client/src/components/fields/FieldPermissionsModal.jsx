@@ -11,7 +11,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
-import { updateFieldPermission } from '@lib/api/fields';
+import { updateFieldPermission, updateFieldPermissionAllowedRoles } from '@lib/api/fields';
 import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
@@ -100,15 +100,36 @@ function BaseFieldPermissionsModal() {
   const handleAddGuests = (permission, list) => {
     if (canChangeGuestAccess && field) {
       const select = async (guest) => {
+        const permissionKey = permission.key;
+        const permissions = { [permissionKey]: list === 'allowed' };
+
         if (typeof guest === 'string') {
           const role = guest;
-          console.log(role);
+
+          const updatedField = { ...field };
+          const allowedRoles = [
+            ...(updatedField.permissions[permissionKey]?.allowedRoles || []),
+            role,
+          ];
+          updatedField.permissions[permissionKey].allowedRoles = allowedRoles;
+
+          try {
+            await updateFieldPermissionAllowedRoles({
+              id: field.id,
+              roles: allowedRoles,
+              permission: permissionKey,
+            });
+            mutateViewField(fields.map((item) => (item.id === field.id
+              ? updatedField
+              : item)));
+            saved(`Successfully added "${role}" from allowed roles.`);
+          } catch (err) {
+            catchError(err.response.data.error || err.response.data.exception);
+          }
+
           setGuestModalOpen(false);
           return;
         }
-
-        const permissionKey = permission.key;
-        const permissions = { [permissionKey]: list === 'allowed' };
 
         const updatedGuestPermission = {
           ...(guest.permissions.fields || {}),
@@ -261,7 +282,9 @@ function BaseFieldPermissionsModal() {
                       onClick={() => handleAddGuests(permission, 'allowed')}
                     >
                       <PlusIcon className="h-4 w-4 mr-1" />
-                      Add allowed user
+                      {isSpecificUsersOnly
+                        ? 'Add user/role'
+                        : 'Add allowed user'}
                     </button>
                     {!isSpecificUsersOnly && (
                       <button
@@ -295,29 +318,40 @@ function BaseFieldPermissionsModal() {
                                   alt={`${guest.firstName}'s profile picture`}
                                 />
                               ))}
+                              {isSpecificUsersOnly && allowedRoles.map((role) => (
+                                <Gravatar
+                                  key={role}
+                                  email={`${role}@nonexistent.user`}
+                                  className="h-6 w-6 rounded-full"
+                                />
+                              ))}
                             </div>
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="my-0.5 ml-2">
-                          {isSpecificUsersOnly && allowedRoles?.map((role) => (
-                            <GuestRoleCard
-                              key={role}
-                              role={role}
-                              menu={changeGuestAccess && (
-                                <Button
-                                  type="button"
-                                  className={cn(
-                                    'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
-                                    loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                          {isSpecificUsersOnly && (
+                            <div className="mb-1">
+                              {allowedRoles?.map((role) => (
+                                <GuestRoleCard
+                                  key={role}
+                                  role={role}
+                                  menu={changeGuestAccess && (
+                                    <Button
+                                      type="button"
+                                      className={cn(
+                                        'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
+                                        loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                                      )}
+                                      disabled={loading}
+                                    >
+                                      <XIcon className="h-4 w-4" />
+                                      <span className="sr-only">Remove Role</span>
+                                    </Button>
                                   )}
-                                  disabled={loading}
-                                >
-                                  <XIcon className="h-4 w-4" />
-                                  <span className="sr-only">Remove Role</span>
-                                </Button>
-                              )}
-                            />
-                          ))}
+                                />
+                              ))}
+                            </div>
+                          )}
                           {allowedGuests.map((guest) => (
                             <GuestCard
                               key={guest.id}

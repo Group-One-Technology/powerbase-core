@@ -9,7 +9,7 @@ import { Modal } from '@components/ui/Modal';
 import { GuestCard } from './GuestCard';
 import { GuestRoleCard } from './GuestRoleCard';
 
-const ROLES = ACCESS_LEVEL.filter((item) => item.name !== 'custom');
+const ROLES = ACCESS_LEVEL.filter((item) => !['custom', 'creator'].includes(item.name));
 
 export function GuestsModal() {
   const { data: initialGuests } = useBaseGuests();

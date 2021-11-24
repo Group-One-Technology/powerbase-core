@@ -74,6 +74,7 @@ class User < ApplicationRecord
       case resource_type
       when :field
         if field.permissions[permission_key]["access"] == "specific users only"
+          return true if guest.creator?
           allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
         end
