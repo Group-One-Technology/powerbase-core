@@ -95,7 +95,11 @@ export function Fields({ table }) {
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md">
+            <Popover.Panel
+              className={cn(
+                "absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md"
+              )}
+            >
               <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                 {!isCreatingField && (
                   <div className="text-sm text-gray-900">
@@ -142,7 +146,8 @@ export function Fields({ table }) {
                     {canAddFields && (
                       <button
                         type="button"
-                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
+                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                        onClick={handleAddNewField}
                       >
                         <PlusIcon className="mr-1 h-4 w-4" />
                         Add a field

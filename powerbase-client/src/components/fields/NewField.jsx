@@ -15,45 +15,6 @@ import Checkbox from "@components/ui/Checkbox";
 
 const debounceResolve = AwesomeDebouncePromise;
 
-const mockFieldTypes = [
-  {
-    name: "Single Line Text",
-    description: "A short line of text.",
-    id: 1,
-    dbType: "character varying",
-  },
-  {
-    name: "Long Text",
-    description: "A long text field.",
-    id: 2,
-    dbType: "text",
-  },
-  {
-    name: "Number",
-    description: "An integer or a decimal number.",
-    id: 4,
-    dbType: "integer",
-  },
-  {
-    name: "Email",
-    description: "An email address.",
-    id: 8,
-    dbType: "character varying",
-  },
-  {
-    name: "Checkbox",
-    description: "A binary choice.",
-    id: 3,
-    dbType: "boolean",
-  },
-  {
-    name: "Date",
-    description: "A date.",
-    id: 7,
-    dbType: "character varying",
-  },
-];
-
 const useDebouncedInput = (setNameExists) => {
   const [fieldName, setFieldName] = useState("");
   const searchPowerbase = async (text) => {
@@ -105,6 +66,18 @@ const FieldTypeComponent = ({
     setSelected(null);
   };
 
+  const precisionPresenceConditions = {
+    isPercent: type.name.toLowerCase() === "percent",
+    isCurrency: type.name.toLowerCase() === "currency",
+    isDecimal: numberSubtype?.id === 2,
+  };
+
+  const { isPercent, isCurrency, isDecimal } = precisionPresenceConditions;
+  const hasPrecisionField = isPercent || isCurrency || isDecimal;
+  const includeCellValidationOption =
+    type.name.toLowerCase() === "single line text" ||
+    type.name.toLowerCase() === "long text";
+
   return (
     <div className="mt-2">
       <div
@@ -126,22 +99,29 @@ const FieldTypeComponent = ({
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
       </div>
-      <div>
-        <Checkbox
-          setIsChecked={setIsChecked}
-          isChecked={isChecked}
-          label="Disable cell validation"
-        />
-      </div>
-      {type.id === 4 && (
-        <div className="mt-4 mb-6">
-          <NumberFieldSelectOptions
-            isPrecision={false}
-            setNumberSubtype={setNumberSubtype}
+      {!includeCellValidationOption && (
+        <div>
+          <Checkbox
+            setIsChecked={setIsChecked}
+            isChecked={isChecked}
+            label="Disable cell validation"
           />
-          {numberSubtype?.id === 2 && (
+        </div>
+      )}
+      {(type.name.toLowerCase() === "number" ||
+        type.name.toLowerCase() === "percent") && (
+        <div className={cn("mt-4 mb-6 h-24", hasPrecisionField && "h-56")}>
+          {type.name.toLowerCase() === "number" && (
+            <NumberFieldSelectOptions
+              isPrecision={false}
+              isPercent={isPercent}
+              setNumberSubtype={setNumberSubtype}
+            />
+          )}
+          {hasPrecisionField && (
             <NumberFieldSelectOptions
               isPrecision={true}
+              isPercent={isPercent}
               setNumberPrecision={setNumberPrecision}
             />
           )}
@@ -167,10 +147,20 @@ export default function NewField({
   const fieldInputRef = useRef(null);
   const { mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
+  const [supportedNewFieldTypes, setSupportedNewFieldTypes] = useState();
 
   useEffect(() => {
     fieldInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    const supported = ["string", "number", "date"];
+    setSupportedNewFieldTypes(
+      fieldTypes?.filter((item) =>
+        supported.includes(item.dataType.toLowerCase())
+      )
+    );
+  }, [fieldTypes]);
 
   const handleChange = (e) => {
     setFieldName(e.target.value);
@@ -247,7 +237,7 @@ export default function NewField({
 
       {!selected && (
         <div className="mt-2">
-          {mockFieldTypes.map((type) => (
+          {supportedNewFieldTypes?.map((type) => (
             <div
               className="hover:bg-indigo-200 cursor-default flex p-2 mb-2 hover:rounded-md"
               onClick={() => handleFieldTypeClick(type)}
@@ -283,10 +273,11 @@ export default function NewField({
         />
       )}
 
-      <div className="mt-2 flex justify-end items-baseline">
+      <div className="mt-8 flex justify-end items-baseline">
         <button
           type="button"
           className="mr-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          onClick={() => setIsCreatingField(false)}
         >
           Cancel
         </button>

@@ -1,5 +1,4 @@
 /* eslint-disable */
-/* This example requires Tailwind CSS v2.0+ */
 import React, { Fragment, useState, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
@@ -10,10 +9,11 @@ const options = [
 ];
 
 const points = [
-  { id: 1, name: "0.01", precision: 2 },
-  { id: 2, name: "0.001", precision: 3 },
-  { id: 3, name: "0.0001", precision: 4 },
-  { id: 4, name: "0.00001", precision: 5 },
+  { id: 1, name: "1", precision: 0 },
+  { id: 2, name: "1.0", precision: 1 },
+  { id: 3, name: "1.00", precision: 2 },
+  { id: 4, name: "1.000", precision: 3 },
+  { id: 5, name: "1.0000", precision: 4 },
 ];
 
 function classNames(...classes) {
@@ -24,9 +24,10 @@ export default function NumberFieldSelectOptions({
   isPrecision,
   setNumberPrecision,
   setNumberSubtype,
+  isPercent,
 }) {
   const [selected, setSelected] = useState(
-    isPrecision ? points[0] : options[0]
+    isPrecision ? (isPercent ? points[0] : points[1]) : options[0]
   );
 
   const handleSelect = (item) => {
@@ -39,6 +40,7 @@ export default function NumberFieldSelectOptions({
     }
   };
 
+
   useEffect(() => {
     if (!isPrecision) setNumberSubtype(selected);
     if (isPrecision) setNumberPrecision(selected);
@@ -49,6 +51,11 @@ export default function NumberFieldSelectOptions({
       {!isPrecision && (
         <Listbox.Label className="block text-sm font-normal text-gray-700">
           Format
+        </Listbox.Label>
+      )}
+      {isPrecision && (
+        <Listbox.Label className="block text-sm font-normal text-gray-700 mt-1">
+          Precision
         </Listbox.Label>
       )}
       <div className="mt-1 relative">
@@ -69,7 +76,12 @@ export default function NumberFieldSelectOptions({
           leaveTo="opacity-0"
         >
           <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm mb-2">
-            {(isPrecision ? points : options).map((option) => (
+            {(isPrecision
+              ? !isPercent
+                ? points.filter((point) => point.id !== 1)
+                : points
+              : options
+            ).map((option) => (
               <Listbox.Option
                 key={option.id}
                 className={({ active }) =>
