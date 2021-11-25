@@ -12,7 +12,12 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
-export function BaseItem({ base, mutate, handleErrorClick }) {
+export function BaseItem({
+  base,
+  mutate,
+  handleErrorClick,
+  showOwner,
+}) {
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
       <div className="absolute top-1 right-1 flex gap-1.5">
@@ -40,6 +45,11 @@ export function BaseItem({ base, mutate, handleErrorClick }) {
       </div>
       <Link to={`/base/${base.id}${base.defaultTable ? `/table/${base.defaultTable.id}?view=${base.defaultTable.defaultViewId}` : ''}`}>
         <h2 className="text-gray-900 text-lg font-bold uppercase break-words" style={{ hyphens: 'auto' }}>{base.name}</h2>
+        {showOwner && (
+          <p className="text-xs text-gray-500 truncate">
+            Owned by {base.owner.firstName}
+          </p>
+        )}
         {base.isMigrated
           ? (
             <>
@@ -73,4 +83,5 @@ BaseItem.propTypes = {
   base: IBase.isRequired,
   mutate: PropTypes.func.isRequired,
   handleErrorClick: PropTypes.func.isRequired,
+  showOwner: PropTypes.bool,
 };
