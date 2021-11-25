@@ -387,6 +387,7 @@ export function CellRenderer({
             onChange={onChange}
             validationToolTip={validationToolTip}
             cellToEdit={cellToEdit}
+            fieldType={fieldType}
           />
         </OutsideCellClick>
       ) : (

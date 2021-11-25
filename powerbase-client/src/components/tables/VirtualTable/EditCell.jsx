@@ -1,7 +1,9 @@
 /* eslint-disable */
-import React, { useEffect, Fragment } from "react";
+import React, { useEffect, Fragment, useState, forwardRef } from "react";
 import isObject from "lodash/isObject";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function getValue(value) {
   if (isObject(value)) return JSON.stringify(value);
@@ -37,23 +39,66 @@ const TooltipContent = () => {
   );
 };
 
-function TextCell({ isEditing, onChange, value, validationToolTip }, ref) {
+const Calendar = () => {
+  const [startDate, setStartDate] = useState(new Date());
+
+  const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
+    <input
+      className="w-full focus:outline-none text-sm leading-3"
+      onChange={onChange}
+      value={value}
+      ref={ref}
+      onClick={onClick}
+    />
+  ));
+  return (
+    <DatePicker
+      selected={startDate}
+      value={startDate}
+      onChange={(date) => setStartDate(date)}
+      customInput={<CustomInput />}
+      timeInputLabel="Time:"
+      dateFormat="MM/dd/yyyy h:mm aa"
+      portalId="root-portal"
+      showTimeInput
+      popperModifiers={[
+        {
+          name: "preventOverflow",
+          options: {
+            rootBoundary: "viewport",
+            tether: false,
+            altAxis: true,
+          },
+        },
+      ]}
+    />
+  );
+};
+
+function TextCell(
+  { isEditing, onChange, value, validationToolTip, fieldType },
+  ref
+) {
   useEffect(() => {
-    ref.current.focus();
+    if (fieldType.dataType !== "date") ref.current.focus();
   }, []);
 
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
-        <input
-          value={getValue(value)}
-          className="w-full focus:outline-none text-sm leading-3"
-          onChange={(newVal) => {
-            if (isObject(value)) onChange(JSON.parse(newVal));
-            else onChange(newVal);
-          }}
-          ref={ref}
-        />
+        {fieldType.dataType === "date" ? (
+          <Calendar />
+        ) : (
+          <input
+            value={getValue(value)}
+            className="w-full focus:outline-none text-sm leading-3"
+            onChange={(newVal) => {
+              if (isObject(value)) onChange(JSON.parse(newVal));
+              else onChange(newVal);
+            }}
+            ref={ref}
+          />
+        )}
         <TooltipPrimitive.Content side="top">
           <TooltipContent />
         </TooltipPrimitive.Content>
