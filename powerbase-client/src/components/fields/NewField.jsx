@@ -48,10 +48,6 @@ const useDebouncedInput = (setNameExists) => {
   };
 };
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
 const FieldTypeComponent = ({
   type,
   fieldTypes,
@@ -74,9 +70,9 @@ const FieldTypeComponent = ({
 
   const { isPercent, isCurrency, isDecimal } = precisionPresenceConditions;
   const hasPrecisionField = isPercent || isCurrency || isDecimal;
-  const includeCellValidationOption =
-    type.name.toLowerCase() === "single line text" ||
-    type.name.toLowerCase() === "long text";
+  const canHaveValidation =
+    type.name.toLowerCase() !== "single line text" &&
+    type.name.toLowerCase() !== "long text";
 
   return (
     <div className="mt-2">
@@ -99,7 +95,7 @@ const FieldTypeComponent = ({
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
       </div>
-      {!includeCellValidationOption && (
+      {canHaveValidation && (
         <div>
           <Checkbox
             setIsChecked={setIsChecked}
@@ -183,8 +179,7 @@ export default function NewField({
     const payload = {
       name: toSnakeCase(fieldName.toLowerCase()),
       description: null,
-      oid: 1043,
-      db_type: selected.dbType,
+      db_type: "int",
       default_value: "",
       is_primary_key: false,
       is_nullable: false,
@@ -193,10 +188,10 @@ export default function NewField({
       is_pii: false,
       alias: fieldName,
       view_id: view.id,
-      order: fields.length ? fields.length : 0,
       is_virtual: true,
       allow_dirty_value: isChecked,
       precision: numberPrecision ? numberPrecision.precision : null,
+      order: fields.length ? fields.length : 0,
     };
 
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
@@ -205,6 +200,7 @@ export default function NewField({
       mutateViewFields();
       return response.data;
     }
+    // console.log(payload);
   };
 
   return (
@@ -287,11 +283,11 @@ export default function NewField({
             type="button"
             className={cn(
               `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
-              nameExists && "cursor-not-allowed",
-              !nameExists && "hover:bg-indigo-700"
+              nameExists || (!fieldName.length && "cursor-not-allowed"),
+              !nameExists && fieldName.length && "hover:bg-indigo-700"
             )}
             onClick={() => addNewField()}
-            disabled={nameExists}
+            disabled={nameExists || !fieldName.length}
           >
             Add Field
           </button>

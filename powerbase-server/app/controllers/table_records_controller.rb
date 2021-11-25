@@ -79,6 +79,7 @@ class TableRecordsController < ApplicationController
     magic_value = MagicValue.find_by(
       pk_field_id: params[:pk_field_id],
       pk_field_value: params[:pk_field_value],
+      powerbase_field_id: params[:field_id],
       powerbase_table_id: params[:table_id]
     )
     if magic_value
@@ -92,6 +93,7 @@ class TableRecordsController < ApplicationController
         pk_field_value: params[:pk_field_value],
         value: params[:value]
       )
+
     end
     render json: response if response
   end

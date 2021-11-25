@@ -313,16 +313,16 @@ export function CellRenderer({
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2',
-        isHighlighted && 'update-highlight',
-        isHoveredRow && 'bg-gray-50',
-        isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
-        (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
+        "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2",
+        isHighlighted && "update-highlight",
+        isHoveredRow && "bg-gray-50",
+        isRowNo ? "justify-center text-xs text-gray-500" : "border-r",
+        !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? "inline" : "flex",
         cellToEdit &&
-        cellToEdit.row !== null &&
-        cellToEdit.row === rowIndex &&
-        cellToEdit.column === columnIndex &&
-        "border border-indigo-500"
+          cellToEdit.row !== null &&
+          cellToEdit.row === rowIndex &&
+          cellToEdit.column === columnIndex &&
+          "border border-indigo-500"
       )}
       style={style}
       tabIndex={0}

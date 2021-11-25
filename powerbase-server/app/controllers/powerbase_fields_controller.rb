@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, except: [:index]
+  before_action :check_field_access, except: [:index, :add]
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -58,7 +58,6 @@ class PowerbaseFieldsController < ApplicationController
     if @field
       view_field_params[:powerbase_field_id] = @field.id
       view_field = ViewFieldOption.create(view_field_params)
-      puts view_field
       render json: format_json(@field)
     end
   end
@@ -134,7 +133,6 @@ class PowerbaseFieldsController < ApplicationController
     field = {
       name: payload[:name],
       description: payload[:description],
-      oid: payload[:oid],
       db_type: payload[:db_type],
       default_value: payload[:default_value],
       is_primary_key: payload[:is_primary_key],
@@ -144,7 +142,6 @@ class PowerbaseFieldsController < ApplicationController
       is_pii: payload[:is_pii],
       alias: payload[:alias],
       is_virtual: payload[:is_virtual],
-      precision: payload[:precision],
       allow_dirty_value: payload[:allow_dirty_value]
     }
 
