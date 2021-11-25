@@ -14,6 +14,11 @@ import EditCell from "./EditCell.jsx";
 import { securedApi } from "@lib/api";
 import { PlusIcon } from "@heroicons/react/solid";
 import { initializeFields } from "@lib/helpers/fields/initializeFields";
+import {
+  isValidInteger,
+  isValidNumberOrDecimal,
+  formatToDecimalPlaces,
+} from "@lib/helpers/numbers";
 
 function CellValue({
   value,
@@ -220,18 +225,26 @@ export function CellRenderer({
     setHoveredCell({});
   };
 
-  const validateEmail = (email) => {
-    const pattern =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return pattern.test(email);
+  const handleMagicInputValidation = (value) => {
+    if (!value) return true;
+    const type = fieldType.dataType;
+    switch (type?.toLowerCase()) {
+      case "string":
+      case "text":
+        return true;
+      case "number":
+        return field.precision
+          ? isValidNumberOrDecimal(value)
+          : isValidInteger(value);
+      default:
+        return true;
+    }
   };
 
   const onChange = (e) => {
-    setEditCellInput(e.target.value);
-    if (field?.fieldTypeId === 8) {
-      if (validateEmail(e.target.value)) setValidationToolTip(false);
-      else setValidationToolTip(true);
-    }
+    let value = e.target.value;
+    if (!handleMagicInputValidation(value)) return;
+    setEditCellInput(value);
   };
 
   const onClickOutsideEditingCell = async () => {
@@ -273,12 +286,20 @@ export function CellRenderer({
       }
     });
 
+    let hasPrecision = false;
+    let formattedNumber;
+    if (field.precision && fieldType.dataType === "number") {
+      hasPrecision = true;
+      const sanitizedNumber = parseFloat(recordInputRef.current?.value);
+      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.precision);
+    }
+
     const payload = {
       pk_field_value: pkFieldValue,
       pk_field_id: pkFieldId,
       table_id: field.tableId,
       has_precision: false,
-      value: recordInputRef.current?.value,
+      value: field.precision ? formattedNumber : recordInputRef.current?.value,
       field_id: field.id,
       field_type_id: field.fieldTypeId,
     };
@@ -294,7 +315,10 @@ export function CellRenderer({
       const mutatedRecords = recordsToUse.map((recordObj, idx) => {
         if (recordObj[pkFieldName] === pkFieldValue) {
           let newObj = { ...recordObj };
-          newObj[field.name] = recordInputRef.current?.value;
+          newObj[field.name] =
+            hasPrecision && formattedNumber
+              ? formattedNumber
+              : recordInputRef.current?.value;
           return newObj;
         } else return recordObj;
       });

@@ -2,20 +2,11 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
-import { CURRENCY_OPTIONS } from "@lib/constants";
-
-const options = [
-  { id: 1, name: "Integer" },
-  { id: 2, name: "Decimal" },
-];
-
-const points = [
-  { id: 1, name: "1", precision: 0 },
-  { id: 2, name: "1.0", precision: 1 },
-  { id: 3, name: "1.00", precision: 2 },
-  { id: 4, name: "1.000", precision: 3 },
-  { id: 5, name: "1.0000", precision: 4 },
-];
+import {
+  CURRENCY_OPTIONS,
+  NUMBER_FORMAT_OPTIONS,
+  PRECISION_POINTS,
+} from "@lib/constants";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -31,11 +22,11 @@ export default function NumberFieldSelectOptions({
   const computeInitialSelected = () => {
     if (isPrecision) {
       if (isPercent || isCurrency) {
-        return points[0];
-      } else return points[1];
+        return PRECISION_POINTS[0];
+      } else return PRECISION_POINTS[1];
     } else if (isCurrency) {
       return CURRENCY_OPTIONS[0];
-    } else return options[0];
+    } else return NUMBER_FORMAT_OPTIONS[0];
   };
 
   const [selected, setSelected] = useState(computeInitialSelected());
@@ -87,11 +78,11 @@ export default function NumberFieldSelectOptions({
           <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm mb-2">
             {(isPrecision
               ? !hasIntPrecisionOption
-                ? points.filter((point) => point.id !== 1)
-                : points
+                ? PRECISION_POINTS.filter((point) => point.id !== 1)
+                : PRECISION_POINTS
               : isCurrency
               ? CURRENCY_OPTIONS
-              : options
+              : NUMBER_FORMAT_OPTIONS
             ).map((option) => (
               <Listbox.Option
                 key={isCurrency ? option.code : option.id}

@@ -142,7 +142,8 @@ class PowerbaseFieldsController < ApplicationController
       is_pii: payload[:is_pii],
       alias: payload[:alias],
       is_virtual: payload[:is_virtual],
-      allow_dirty_value: payload[:allow_dirty_value]
+      allow_dirty_value: payload[:allow_dirty_value],
+      precision: payload[:precision]
     }
 
     view_field = {

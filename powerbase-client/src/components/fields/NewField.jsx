@@ -1,7 +1,6 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
-import { RadioGroup } from "@headlessui/react";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { XIcon } from "@heroicons/react/outline";
 import useConstant from "@lib/hooks/useConstant";
@@ -202,14 +201,14 @@ export default function NewField({
           ViewFields.map((item) => item.order)
         ) + 1,
     };
+    // console.log(payload);
 
-    // const response = await securedApi.post(`/tables/${tableId}/field`, payload);
-    // if (response.statusText === "OK") {
-    //   setIsCreatingField(false);
-    //   mutateViewFields();
-    //   return response.data;
-    // }
-    console.log(payload);
+    const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+    if (response.statusText === "OK") {
+      setIsCreatingField(false);
+      mutateViewFields();
+      return response.data;
+    }
   };
 
   return (
