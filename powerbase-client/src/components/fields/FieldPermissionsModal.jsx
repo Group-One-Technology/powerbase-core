@@ -350,7 +350,7 @@ function BaseFieldPermissionsModal() {
                                   alt={`${guest.firstName}'s profile picture`}
                                 />
                               ))}
-                              {isSpecificUsersOnly && allowedRoles.map((role) => (
+                              {isSpecificUsersOnly && allowedRoles?.map((role) => (
                                 <Gravatar
                                   key={role}
                                   email={`${role}@nonexistent.user`}
