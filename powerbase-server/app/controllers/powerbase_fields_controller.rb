@@ -1,6 +1,7 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, except: [:index]
+  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission]
+  before_action :check_field_permission_access, only: [:update_allowed_roles, :update_field_permission]
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -29,6 +30,12 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
     required(:permission)
     required(:access)
+  end
+
+  schema(:update_allowed_roles) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:roles)
   end
 
   # GET /tables/:id/fields
@@ -102,6 +109,14 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
+  # PUT /fields/:id/allowed_roles
+  def update_allowed_roles
+    field_updater = Fields::Updater.new(@field)
+    field_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
+
+    render status: :no_content
+  end
+
   # PUT /fields/:id/update_field_permission
   def update_field_permission
     field_updater = Fields::Updater.new(@field)
@@ -115,6 +130,12 @@ class PowerbaseFieldsController < ApplicationController
       @field = PowerbaseField.find(safe_params[:id])
       raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
       current_user.can?(:manage_field, @field)
+    end
+
+    def check_field_permission_access
+      @field = PowerbaseField.find(safe_params[:id])
+      raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
+      current_user.can?(:change_guest_access, @field.powerbase_table.powerbase_database)
     end
 
     def format_json(field)

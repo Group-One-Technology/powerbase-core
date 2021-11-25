@@ -17,15 +17,7 @@ class Guest < ApplicationRecord
   belongs_to :powerbase_database
 
   def permissions
-    if self.access.to_sym != :custom
-      permissions = {}
-      PERMISSIONS.each do |permission|
-        permissions[permission] = (ROLES[self.access.to_sym].include?(permission) || ROLES[self.access.to_sym].include?(:all))
-      end
-      permissions
-    else
-      super
-    end
+    super || {}
   end
 
   def self.owner?(user_id, database)

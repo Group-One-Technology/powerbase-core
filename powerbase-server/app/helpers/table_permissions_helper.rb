@@ -22,10 +22,10 @@ module TablePermissionsHelper
 
     if is_allowed == true
       restricted_guests = restricted_guests.select {|guest_id| guest_id != guest.id}
-      allowed_guests.push(guest.id) if !does_custom_have_access(table.permissions[permission_key]["access"])
+      allowed_guests.push(guest.id) if !does_guest_have_access("custom", table.permissions[permission_key]["access"])
     else
       allowed_guests = allowed_guests.select {|guest_id| guest_id != guest.id}
-      restricted_guests.push(guest.id) if does_custom_have_access(table.permissions[permission_key]["access"])
+      restricted_guests.push(guest.id) if does_guest_have_access("custom", table.permissions[permission_key]["access"])
     end
 
     table.permissions[permission_key]["allowed_guests"] = allowed_guests.uniq

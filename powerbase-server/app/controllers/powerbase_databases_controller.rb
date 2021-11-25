@@ -239,6 +239,7 @@ class PowerbaseDatabasesController < ApplicationController
           user_id: owner.id,
           first_name: owner.first_name,
           last_name: owner.last_name,
+          name: "#{owner.first_name} #{owner.last_name}",
           email: owner.email,
         },
         color: database.color,

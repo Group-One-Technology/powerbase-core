@@ -46,7 +46,8 @@ export function GridHeaderOptions({
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
   const canManageViews = baseUser?.can('manageViews', table.id);
   const canAddFields = baseUser?.can('addFields', table.id);
-  const canManageField = baseUser?.can('manageField', field.fieldId);
+  const canManageField = baseUser?.can('manageField', field);
+  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
@@ -108,7 +109,7 @@ export function GridHeaderOptions({
   };
 
   const handlePermissions = () => {
-    if (canManageField) {
+    if (canChangeGuestAccess) {
       permissionsModal.open(field);
     }
   };
@@ -264,7 +265,7 @@ export function GridHeaderOptions({
 
           {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {canManageField && (
+          {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
               <DropdownMenu.Item

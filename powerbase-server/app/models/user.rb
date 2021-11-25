@@ -1,5 +1,6 @@
 class User < ApplicationRecord
-  include PermissionsHelper
+  include TablePermissionsHelper
+  include FieldPermissionsHelper
 
   has_secure_password
 
@@ -66,14 +67,29 @@ class User < ApplicationRecord
     raise AccessDenied if !guest && error
     return false if !guest
 
-
     if guest.access.to_sym != :custom
+      permission_key = permission.to_s
+
+      case resource_type
+      when :field
+        field_access = field.permissions[permission_key]["access"]
+
+        if field_access == "specific users only"
+          return true if guest.creator?
+          allowed_roles = Array(field.permissions[permission_key]["allowed_roles"])
+          return true if allowed_roles.any? {|role| role == guest.access}
+          allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
+          return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+        elsif field_access != FIELD_DEFAULT_PERMISSIONS[permission][:access]
+          return does_guest_have_access(guest.access, field_access)
+        end
+      end
+
       permissions = ROLES[guest.access.to_sym]
       return true if permissions.include?(:all)
       return true if permissions.include? permission
     else
       permission_key = permission.to_s
-
       case resource_type
       when :database
         return true if guest.permissions[permission_key] == true
@@ -86,7 +102,7 @@ class User < ApplicationRecord
         raise AccessDenied if is_restricted && error
         return false if is_restricted
 
-        return true if does_custom_have_access(table.permissions[permission_key]["access"])
+        return true if does_guest_have_access("custom", table.permissions[permission_key]["access"])
 
         allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
         return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
@@ -99,7 +115,7 @@ class User < ApplicationRecord
         raise AccessDenied if is_restricted && error
         return false if is_restricted
 
-        return true if does_custom_have_access(field.permissions[permission_key]["access"])
+        return true if does_guest_have_access("custom", field.permissions[permission_key]["access"])
 
         allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
         return true if allowed_guests.any? {|guest_id| guest_id == guest.id}

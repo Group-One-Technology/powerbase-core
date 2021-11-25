@@ -1,4 +1,5 @@
 class Fields::Updater
+  include PermissionsHelper
   include FieldPermissionsHelper
 
   attr_accessor :field
@@ -14,7 +15,7 @@ class Fields::Updater
     default_access = FIELD_DEFAULT_PERMISSIONS[permission.to_sym][:access]
     default_value = FIELD_DEFAULT_PERMISSIONS[permission.to_sym][:default_value]
     guests = Guest.where(access: "custom", powerbase_database_id: @field.powerbase_table.powerbase_database_id)
-    has_access = does_custom_have_access(access)
+    has_access = does_guest_have_access("custom", access)
 
     if access == default_access
       guests.each do |guest|
@@ -60,6 +61,13 @@ class Fields::Updater
     @field.permissions[permission]["allowed_guests"] = allowed_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
     @field.permissions[permission]["restricted_guests"] = restricted_guests.select {|guest_id| guests.any? {|guest| guest.id == guest_id} }
     @field.permissions[permission]["access"] = access
+    @field.save
+  end
+
+  def update_allowed_roles!(permission, roles)
+    permission = permission.underscore
+    allowed_roles = Array(roles).select {|role| ROLES[role.to_sym] != nil}
+    @field.permissions[permission]["allowed_roles"] = allowed_roles
     @field.save
   end
 end
