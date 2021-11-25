@@ -12,14 +12,18 @@ module PermissionsHelper
     :viewer => [:view_base, :view_table, :view_field],
   }
 
-  def does_custom_have_access(access)
+  def does_guest_have_access(role, access)
     case access
     when "everyone"
       return true
     when "commenters and up"
-      return true
+      return role == "commenter" || role == "editor" || role == "custom" || role == "admin" || role == "creator"
     when "editors and up"
-      return true
+      return role == "editor" || role == "custom" || role == "admin" || role == "creator"
+    when "admins and up"
+      return role == "admin" || role == "creator"
+    when "creators only"
+      return role == "creator"
     else
       return false
     end

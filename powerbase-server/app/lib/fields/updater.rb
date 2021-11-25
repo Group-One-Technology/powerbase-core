@@ -15,7 +15,7 @@ class Fields::Updater
     default_access = FIELD_DEFAULT_PERMISSIONS[permission.to_sym][:access]
     default_value = FIELD_DEFAULT_PERMISSIONS[permission.to_sym][:default_value]
     guests = Guest.where(access: "custom", powerbase_database_id: @field.powerbase_table.powerbase_database_id)
-    has_access = does_custom_have_access(access)
+    has_access = does_guest_have_access("custom", access)
 
     if access == default_access
       guests.each do |guest|
