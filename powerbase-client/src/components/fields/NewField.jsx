@@ -139,20 +139,21 @@ export default function NewField({
   setIsCreatingField,
 }) {
   const [selected, setSelected] = useState(null);
-  const [selectedNumberType, setSelectedNumberType] = useState(null);
   const [nameExists, setNameExists] = useState(false);
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const { fieldName, setFieldName } = useDebouncedInput(setNameExists);
   const fieldInputRef = useRef(null);
-  const { mutate: mutateViewFields } = useViewFields();
+  const { data: ViewFields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
   const [supportedNewFieldTypes, setSupportedNewFieldTypes] = useState();
 
   useEffect(() => {
     fieldInputRef.current?.focus();
   }, []);
+
+  console.log(ViewFields);
 
   useEffect(() => {
     const supported = ["string", "number", "date"];
@@ -187,7 +188,7 @@ export default function NewField({
       db_type: "int",
       default_value: "",
       is_primary_key: false,
-      is_nullable: false,
+      is_nullable: true,
       powerbase_table_id: tableId,
       powerbase_field_type_id: selected.id,
       is_pii: false,
@@ -196,16 +197,20 @@ export default function NewField({
       is_virtual: true,
       allow_dirty_value: isChecked,
       precision: numberPrecision ? numberPrecision.precision : null,
-      order: fields.length ? fields.length : 0,
+      order:
+        Math.max.apply(
+          Math,
+          ViewFields.map((item) => item.order)
+        ) + 1,
     };
 
-    const response = await securedApi.post(`/tables/${tableId}/field`, payload);
-    if (response.statusText === "OK") {
-      setIsCreatingField(false);
-      mutateViewFields();
-      return response.data;
-    }
-    // console.log(payload);
+    // const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+    // if (response.statusText === "OK") {
+    //   setIsCreatingField(false);
+    //   mutateViewFields();
+    //   return response.data;
+    // }
+    console.log(payload);
   };
 
   return (
