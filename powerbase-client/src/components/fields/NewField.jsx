@@ -56,6 +56,7 @@ const FieldTypeComponent = ({
   numberSubtype,
   setIsChecked,
   isChecked,
+  setCurrency,
 }) => {
   const collapseSelectedField = () => {
     setSelected(null);
@@ -114,6 +115,7 @@ const FieldTypeComponent = ({
               isPercent={isPercent}
               setNumberSubtype={setNumberSubtype}
               isCurrency={isCurrency}
+              setCurrency={setCurrency}
             />
           )}
           {hasPrecisionField && (
@@ -146,12 +148,11 @@ export default function NewField({
   const { data: ViewFields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
   const [supportedNewFieldTypes, setSupportedNewFieldTypes] = useState();
+  const [currency, setCurrency] = useState(null);
 
   useEffect(() => {
     fieldInputRef.current?.focus();
   }, []);
-
-  console.log(ViewFields);
 
   useEffect(() => {
     const supported = ["string", "number", "date"];
@@ -200,8 +201,9 @@ export default function NewField({
           Math,
           ViewFields.map((item) => item.order)
         ) + 1,
+      options: currency ? { style: "currency", currency } : null,
     };
-    // console.log(payload);
+    console.log(payload);
 
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
@@ -274,6 +276,7 @@ export default function NewField({
           numberSubtype={numberSubtype}
           setIsChecked={setIsChecked}
           isChecked={isChecked}
+          setCurrency={setCurrency}
         />
       )}
 

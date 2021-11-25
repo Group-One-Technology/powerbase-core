@@ -18,6 +18,7 @@ export default function NumberFieldSelectOptions({
   setNumberSubtype,
   isPercent,
   isCurrency,
+  setCurrency,
 }) {
   const computeInitialSelected = () => {
     if (isPrecision) {
@@ -35,6 +36,9 @@ export default function NumberFieldSelectOptions({
     if (isPrecision) {
       setNumberPrecision(item);
       setSelected(item);
+    } else if (isCurrency && setCurrency) {
+      setCurrency(item.code);
+      setSelected(item);
     } else {
       setNumberSubtype(item);
       setSelected(item);
@@ -44,6 +48,7 @@ export default function NumberFieldSelectOptions({
   useEffect(() => {
     if (!isPrecision) setNumberSubtype(selected);
     if (isPrecision) setNumberPrecision(selected);
+    if (isCurrency && setCurrency) setCurrency(selected.code);
   }, [selected]);
 
   return (
