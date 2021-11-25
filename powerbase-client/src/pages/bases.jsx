@@ -75,7 +75,9 @@ function BasesContentPage() {
               </h2>
               <ul className="mt-4 flex flex-col sm:flex-row flex-wrap gap-6">
                 {sharedBases.map((base) => {
-                  const hasDuplicateName = sharedBases.filter((item) => item.name === base.name).length > 1;
+                  const similarSharedBases = sharedBases.filter((item) => item.name === base.name);
+                  const similarBases = bases?.filter((item) => item.name === base.name);
+                  const hasDuplicateName = similarSharedBases.length > 1 || similarBases?.length > 0;
 
                   return (
                     <li
