@@ -248,21 +248,17 @@ export function CellRenderer({
   };
 
   const onClickOutsideEditingCell = async () => {
-    if (table.isVirtual && isNewRecord) {
-      const recordParams = {
-        powerbase_table_id: table.id,
-        powerbase_database_id: table.databaseId,
-        powerbase_record_order: records.length,
-      };
-      const newRecordResponse = await securedApi.post(
-        `/magic_records`,
-        recordParams
-      );
-      newRecordId = newRecordResponse.data?.id;
+    const exitEditing = () => {
+      setCellToEdit({});
+      recordInputRef?.current?.blur();
+      setIsEditing(false);
+    };
+
+    if (!editCellInput?.length) {
+      exitEditing();
+      return;
     }
-
     const rowNo = rowIndex + 1;
-
     const updatedFields = initializeFields(initialFields, connections, {
       hidden: false,
     })
@@ -304,30 +300,30 @@ export function CellRenderer({
       field_type_id: field.fieldTypeId,
     };
 
-    const response = await securedApi.post(
-      `/magic_values/${field.tableId}`,
-      payload
-    );
+    try {
+      const response = await securedApi.post(
+        `/magic_values/${field.tableId}`,
+        payload
+      );
+      const recordsToUse = updatedRecords ? updatedRecords : records;
+      if (response.statusText === "OK") {
+        const mutatedRecords = recordsToUse.map((recordObj, idx) => {
+          if (recordObj[pkFieldName] === pkFieldValue) {
+            let newObj = { ...recordObj };
+            newObj[field.name] =
+              hasPrecision && formattedNumber
+                ? formattedNumber
+                : recordInputRef.current?.value;
+            return newObj;
+          } else return recordObj;
+        });
 
-    const recordsToUse = updatedRecords ? updatedRecords : records;
-
-    if (response.statusText === "OK") {
-      const mutatedRecords = recordsToUse.map((recordObj, idx) => {
-        if (recordObj[pkFieldName] === pkFieldValue) {
-          let newObj = { ...recordObj };
-          newObj[field.name] =
-            hasPrecision && formattedNumber
-              ? formattedNumber
-              : recordInputRef.current?.value;
-          return newObj;
-        } else return recordObj;
-      });
-
-      setUpdatedRecords(mutatedRecords);
-      setIsNewRecord(false);
-      setCellToEdit({});
-      recordInputRef?.current?.blur();
-      setIsEditing(false);
+        setUpdatedRecords(mutatedRecords);
+        setIsNewRecord(false);
+        exitEditing();
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
