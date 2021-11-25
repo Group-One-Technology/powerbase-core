@@ -60,7 +60,7 @@ export function GuestsModal() {
   return (
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-block align-bottom bg-white min-h-[400px] rounded-lg pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-        <div className="px-4 w-auto">
+        <div className="px-4 py-1 w-auto">
           <input
             type="text"
             aria-label="Search user"
@@ -69,6 +69,11 @@ export function GuestsModal() {
             placeholder="Search by name or email"
             className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
+          {!isSpecificUsersOnly && (
+            <p className="text-sm text-gray-500">
+              {search === 'allowed' ? 'Allowing' : 'Restricting'} a guest will change their role to &quot;custom&quot;.
+            </p>
+          )}
         </div>
         <div className="mx-4 my-1 bg-white divide-y divide-gray-200">
           {isSpecificUsersOnly && roles.map((role) => {
