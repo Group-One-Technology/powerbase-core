@@ -5,6 +5,7 @@ import { useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { getAuthGuestByDatabase } from '@lib/api/auth';
 import { BasePermissions, ACCESS_LEVEL, CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 
 function useBaseUserModel() {
   const { authUser } = useAuthUser();
@@ -26,18 +27,22 @@ function useBaseUserModel() {
     if (!permissions) return false;
 
     if (baseUser.access !== 'custom') {
-      if (permissions.includes('all')) return true;
-      if (permissions.includes(permission)) return true;
-
       if (BasePermissions.FIELD.includes(permission)) {
         const field = resource;
+        const fieldAccess = field.permissions[permission].access;
+        const fieldDefaultPermission = CUSTOM_PERMISSIONS.Field.find((item) => item.key === permission);
 
-        if (field.permissions[permission].access === 'specific users only') {
+        if (fieldAccess === 'specific users only') {
           if (baseUser.access === 'creator') return true;
           if (field.permissions[permission].allowedRoles?.includes(baseUser.access)) return true;
           if (field.permissions[permission].allowedGuests?.includes(baseUser.id)) return true;
+        } else if (fieldAccess !== fieldDefaultPermission.access) {
+          return doesGuestHaveAccess(baseUser.access, fieldAccess);
         }
       }
+
+      if (permissions.includes('all')) return true;
+      if (permissions.includes(permission)) return true;
 
       return false;
     }
