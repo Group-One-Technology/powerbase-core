@@ -71,7 +71,6 @@ const FieldTypeComponent = ({
 
   const { isPercent, isCurrency, hasDecimal, isNumber } =
     precisionPresenceConditions;
-  console.log("ISC", isCurrency);
   const hasPrecisionField = isPercent || isCurrency || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
   const canHaveValidation =
@@ -237,7 +236,7 @@ export default function NewField({
 
       <div>
         <p className="text-red-500">
-          {nameExists ? "Field name already exists." : <br />}
+          {nameExists ? "Field name already exists for this table." : <br />}
         </p>
       </div>
 
