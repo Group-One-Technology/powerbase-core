@@ -74,14 +74,23 @@ function BasesContentPage() {
                 Shared Bases
               </h2>
               <ul className="mt-4 flex flex-col sm:flex-row flex-wrap gap-6">
-                {sharedBases.map((base) => (
-                  <li
-                    key={base.id}
-                    className="sm:w-40 sm:h-40 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
-                  >
-                    <BaseItem base={base} handleErrorClick={handleErrorClick} mutate={mutateSharedBases} />
-                  </li>
-                ))}
+                {sharedBases.map((base) => {
+                  const hasDuplicateName = sharedBases.filter((item) => item.name === base.name).length > 1;
+
+                  return (
+                    <li
+                      key={base.id}
+                      className="sm:w-40 sm:h-40 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
+                    >
+                      <BaseItem
+                        base={base}
+                        handleErrorClick={handleErrorClick}
+                        mutate={mutateSharedBases}
+                        showOwner={hasDuplicateName}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </>
           )}
