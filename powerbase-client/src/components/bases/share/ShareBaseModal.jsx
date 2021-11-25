@@ -86,7 +86,7 @@ function BaseShareBaseModal() {
               type="text"
               value={query}
               onChange={handleQueryChange}
-              placeholder="Search by name or email."
+              placeholder="Enter email."
               className={cn(
                 'py-1 block w-full rounded-none rounded-l-md text-sm border-r-0 border-gray-300',
                 canInviteGuests ? 'focus:ring-indigo-500 focus:border-indigo-500' : 'cursor-not-allowed bg-gray-300',
