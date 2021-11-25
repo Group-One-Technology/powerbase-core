@@ -65,11 +65,15 @@ const FieldTypeComponent = ({
   const precisionPresenceConditions = {
     isPercent: type.name.toLowerCase() === "percent",
     isCurrency: type.name.toLowerCase() === "currency",
-    isDecimal: numberSubtype?.id === 2,
+    hasDecimal: numberSubtype?.id === 2,
+    isNumber: type.name.toLowerCase() === "number",
   };
 
-  const { isPercent, isCurrency, isDecimal } = precisionPresenceConditions;
-  const hasPrecisionField = isPercent || isCurrency || isDecimal;
+  const { isPercent, isCurrency, hasDecimal, isNumber } =
+    precisionPresenceConditions;
+  console.log("ISC", isCurrency);
+  const hasPrecisionField = isPercent || isCurrency || hasDecimal;
+  const hasFormatOptions = isPercent || isCurrency || isNumber;
   const canHaveValidation =
     type.name.toLowerCase() !== "single line text" &&
     type.name.toLowerCase() !== "long text";
@@ -104,14 +108,14 @@ const FieldTypeComponent = ({
           />
         </div>
       )}
-      {(type.name.toLowerCase() === "number" ||
-        type.name.toLowerCase() === "percent") && (
+      {hasFormatOptions && (
         <div className={cn("mt-4 mb-6 h-24", hasPrecisionField && "h-56")}>
-          {type.name.toLowerCase() === "number" && (
+          {(isNumber || isCurrency) && (
             <NumberFieldSelectOptions
               isPrecision={false}
               isPercent={isPercent}
               setNumberSubtype={setNumberSubtype}
+              isCurrency={isCurrency}
             />
           )}
           {hasPrecisionField && (
@@ -119,6 +123,7 @@ const FieldTypeComponent = ({
               isPrecision={true}
               isPercent={isPercent}
               setNumberPrecision={setNumberPrecision}
+              isCurrency={isCurrency}
             />
           )}
         </div>

@@ -2,6 +2,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
+import { CURRENCY_OPTIONS } from "@lib/constants";
 
 const options = [
   { id: 1, name: "Integer" },
@@ -25,11 +26,20 @@ export default function NumberFieldSelectOptions({
   setNumberPrecision,
   setNumberSubtype,
   isPercent,
+  isCurrency,
 }) {
-  const [selected, setSelected] = useState(
-    isPrecision ? (isPercent ? points[0] : points[1]) : options[0]
-  );
+  const computeInitialSelected = () => {
+    if (isPrecision) {
+      if (isPercent || isCurrency) {
+        return points[0];
+      } else return points[1];
+    } else if (isCurrency) {
+      return CURRENCY_OPTIONS[0];
+    } else return options[0];
+  };
 
+  const [selected, setSelected] = useState(computeInitialSelected());
+  const hasIntPrecisionOption = isPercent || isCurrency;
   const handleSelect = (item) => {
     if (isPrecision) {
       setNumberPrecision(item);
@@ -39,7 +49,6 @@ export default function NumberFieldSelectOptions({
       setSelected(item);
     }
   };
-
 
   useEffect(() => {
     if (!isPrecision) setNumberSubtype(selected);
@@ -77,13 +86,15 @@ export default function NumberFieldSelectOptions({
         >
           <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm mb-2">
             {(isPrecision
-              ? !isPercent
+              ? !hasIntPrecisionOption
                 ? points.filter((point) => point.id !== 1)
                 : points
+              : isCurrency
+              ? CURRENCY_OPTIONS
               : options
             ).map((option) => (
               <Listbox.Option
-                key={option.id}
+                key={isCurrency ? option.code : option.id}
                 className={({ active }) =>
                   classNames(
                     active ? "text-white bg-indigo-600" : "text-gray-900",
