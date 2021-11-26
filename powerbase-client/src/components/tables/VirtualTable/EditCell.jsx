@@ -111,7 +111,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       portalId="root-portal"
       showYearDropdown
       dropdownMode="select"
-      showTimeInput
+      showTimeSelect
       popperModifiers={[
         {
           name: "preventOverflow",

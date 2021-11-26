@@ -335,6 +335,10 @@ export function CellRenderer({
     }
   };
 
+  const Wrapper = ({ children, condition, wrapper }) => {
+    return condition ? wrapper(children) : children;
+  };
+
   return (
     <div
       role="button"
@@ -384,9 +388,17 @@ export function CellRenderer({
       rowIndex === cellToEdit?.row &&
       field?.isVirtual &&
       columnIndex === cellToEdit?.column ? (
-        <OutsideCellClick
-          onClickOutside={onClickOutsideEditingCell}
-          className="h-full"
+        <Wrapper
+          condition={fieldType.dataType !== "date"}
+          wrapper={(children) => (
+            <OutsideCellClick
+              onClickOutside={onClickOutsideEditingCell}
+              className="h-full"
+              isCalender={fieldType.dataType === "date"}
+            >
+              {children}
+            </OutsideCellClick>
+          )}
         >
           <EditCell
             value={editCellInput}
@@ -400,7 +412,7 @@ export function CellRenderer({
             calendarValue={calendarValue}
             onClickOutsideEditingCell={onClickOutsideEditingCell}
           />
-        </OutsideCellClick>
+        </Wrapper>
       ) : (
         <CellValue
           value={value}
