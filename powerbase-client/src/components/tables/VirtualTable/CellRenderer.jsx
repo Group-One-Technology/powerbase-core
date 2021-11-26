@@ -256,7 +256,7 @@ export function CellRenderer({
       setIsEditing(false);
     };
 
-    if (!editCellInput?.length) {
+    if (!editCellInput?.length && fieldType.dataType !== "date") {
       exitEditing();
       return;
     }
@@ -297,7 +297,11 @@ export function CellRenderer({
       pk_field_id: pkFieldId,
       table_id: field.tableId,
       has_precision: false,
-      value: field.precision ? formattedNumber : recordInputRef.current?.value,
+      value: field.precision
+        ? formattedNumber
+        : calendarData
+        ? calendarData
+        : recordInputRef.current?.value,
       field_id: field.id,
       field_type_id: field.fieldTypeId,
     };

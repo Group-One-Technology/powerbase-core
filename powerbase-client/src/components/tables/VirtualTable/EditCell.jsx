@@ -56,25 +56,49 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       minute: "numeric",
     }).format(date);
 
-    // const formattedTime = time.split(" ")[0];
-
     const val = `${month}-${day}-${year} ${time}`;
     return val;
   };
 
   const handleChange = async (date) => {
     setStartDate(date);
-    return await onClickOutsideEditingCell(formatDate(date));
+    const formatted = formatDate(date);
+    await onClickOutsideEditingCell(formatted);
+  };
+
+  const CalButton = ({ onClick, value, ref }) => {
+    useEffect(() => {
+      document.getElementById("cal-button").click();
+    }, []);
+    return (
+      <button
+        className="w-full focus:outline-none text-sm leading-3"
+        onClick={onClick}
+        ref={ref}
+        id="cal-button"
+      >
+        {value}
+      </button>
+    );
   };
 
   const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
-    <input
-      className="w-full focus:outline-none text-sm leading-3"
-      onChange={onChange}
-      value={value}
-      ref={ref}
-      onClick={onClick}
-    />
+    // <input
+    //   className="w-full focus:outline-none text-sm leading-3"
+    //   onChange={onChange}
+    //   value={value}
+    //   ref={ref}
+    //   onClick={onClick}
+    // />
+    <CalButton onClick={onClick} value={value} ref={ref} />
+
+    // <button
+    //   className="w-full focus:outline-none text-sm leading-3"
+    //   onClick={onClick}
+    //   ref={ref}
+    // >
+    //   {value}
+    // </button>
   ));
   return (
     <DatePicker
@@ -85,6 +109,8 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       timeInputLabel="Time:"
       dateFormat="MM/dd/yyyy h:mm aa"
       portalId="root-portal"
+      showYearDropdown
+      dropdownMode="select"
       showTimeInput
       popperModifiers={[
         {
