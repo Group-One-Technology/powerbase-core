@@ -39,8 +39,33 @@ const TooltipContent = () => {
   );
 };
 
-const Calendar = () => {
+const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
+
+  const formatDate = (date) => {
+    const year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
+      date
+    );
+    const month = new Intl.DateTimeFormat("en", { month: "numeric" }).format(
+      date
+    );
+    const day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
+
+    const time = new Intl.DateTimeFormat("en", {
+      hour: "numeric",
+      minute: "numeric",
+    }).format(date);
+
+    // const formattedTime = time.split(" ")[0];
+
+    const val = `${month}-${day}-${year} ${time}`;
+    return val;
+  };
+
+  const handleChange = async (date) => {
+    setStartDate(date);
+    return await onClickOutsideEditingCell(formatDate(date));
+  };
 
   const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
     <input
@@ -55,7 +80,7 @@ const Calendar = () => {
     <DatePicker
       selected={startDate}
       value={startDate}
-      onChange={(date) => setStartDate(date)}
+      onChange={(date) => handleChange(date)}
       customInput={<CustomInput />}
       timeInputLabel="Time:"
       dateFormat="MM/dd/yyyy h:mm aa"
@@ -76,7 +101,15 @@ const Calendar = () => {
 };
 
 function TextCell(
-  { isEditing, onChange, value, validationToolTip, fieldType },
+  {
+    isEditing,
+    onChange,
+    value,
+    validationToolTip,
+    fieldType,
+    setCalendarValue,
+    onClickOutsideEditingCell,
+  },
   ref
 ) {
   useEffect(() => {
@@ -87,7 +120,10 @@ function TextCell(
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
         {fieldType.dataType === "date" ? (
-          <Calendar />
+          <Calendar
+            setCalendarValue={setCalendarValue}
+            onClickOutsideEditingCell={onClickOutsideEditingCell}
+          />
         ) : (
           <input
             value={getValue(value)}

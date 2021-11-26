@@ -207,6 +207,8 @@ export function CellRenderer({
   setUpdatedRecords,
   updatedRecords,
   isHighlighted,
+  setCalendarValue,
+  calendarValue,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -247,7 +249,7 @@ export function CellRenderer({
     setEditCellInput(value);
   };
 
-  const onClickOutsideEditingCell = async () => {
+  const onClickOutsideEditingCell = async (calendarData = null) => {
     const exitEditing = () => {
       setCellToEdit({});
       recordInputRef?.current?.blur();
@@ -313,6 +315,8 @@ export function CellRenderer({
             newObj[field.name] =
               hasPrecision && formattedNumber
                 ? formattedNumber
+                : calendarData
+                ? calendarData
                 : recordInputRef.current?.value;
             return newObj;
           } else return recordObj;
@@ -388,6 +392,9 @@ export function CellRenderer({
             validationToolTip={validationToolTip}
             cellToEdit={cellToEdit}
             fieldType={fieldType}
+            setCalendarValue={setCalendarValue}
+            calendarValue={calendarValue}
+            onClickOutsideEditingCell={onClickOutsideEditingCell}
           />
         </OutsideCellClick>
       ) : (

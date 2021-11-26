@@ -1,6 +1,6 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable object-curly-newline */
-/* eslint-disable quotes */
+/* eslint-disable  */
 import React, { useState, useRef } from "react";
 import { Grid, InfiniteLoader, AutoSizer, ScrollSync } from "react-virtualized";
 import PropTypes from "prop-types";
@@ -45,6 +45,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
   const [validationToolTip, setValidationToolTip] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
+  const [calendarValue, setCalendarValue] = useState()
 
   const columnCount = fields && fields.length + 1;
 
@@ -185,6 +186,8 @@ export function TableRenderer({ height, table, highlightedCell }) {
                           initialFields,
                           setUpdatedRecords,
                           updatedRecords,
+                          calendarValue,
+                          setCalendarValue,
                           ...props,
                         });
                       }}
