@@ -81,7 +81,7 @@ class GuestsController < ApplicationController
   # POST /databases/:database_id/guests
   def create
     current_user.can?(:invite_guests, safe_params[:database_id])
-    @user = User.find_by(email: safe_params[:email].strip!)
+    @user = User.find_by(email: safe_params[:email].strip)
 
     if !@user
       render json: { error: "Could not find user with email of '#{safe_params[:email]}'." }, status: :unprocessable_entity
