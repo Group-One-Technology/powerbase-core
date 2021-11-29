@@ -274,13 +274,17 @@ export function CellRenderer({
       (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
     );
 
-    let pkFieldId, pkFieldValue, pkFieldName;
+    let primaryKeys = {},
+      pkFieldId,
+      pkFieldValue,
+      pkFieldName;
     computedFields?.forEach((item) => {
       const { isPrimaryKey, value, id, name } = item;
       if (isPrimaryKey) {
         pkFieldId = id;
         pkFieldValue = value;
         pkFieldName = name;
+        primaryKeys[name.toLowerCase()] = value;
       }
     });
 
@@ -293,19 +297,26 @@ export function CellRenderer({
     }
 
     const payload = {
-      pk_field_value: pkFieldValue,
-      pk_field_id: pkFieldId,
-      table_id: field.tableId,
-      has_precision: false,
-      value: field.precision
-        ? formattedNumber
-        : calendarData
-        ? calendarData
-        : recordInputRef.current?.value,
-      field_id: field.id,
-      field_type_id: field.fieldTypeId,
+      // pk_field_value: pkFieldValue,
+      // pk_field_id: pkFieldId,
+      // table_id: field.tableId,
+      // has_precision: false,
+      // value: field.precision
+      //   ? formattedNumber
+      //   : calendarData
+      //   ? calendarData
+      //   : recordInputRef.current?.value,
+      // field_id: field.id,
+      // field_type_id: field.fieldTypeId,
+      primary_keys: primaryKeys,
+      data: {
+        [field.name]: field.precision
+          ? formattedNumber
+          : recordInputRef.current?.value,
+      },
     };
 
+    console.log(payload);
     try {
       const response = await securedApi.post(
         `/magic_values/${field.tableId}`,

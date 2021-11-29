@@ -20,6 +20,7 @@ class TableRecordsController < ApplicationController
   schema(:add_or_update_magic_value) do
     required(:table_id).value(:integer)
     optional(:id).value(:string)
+    optional(:data)
     required(:primary_keys)
     required(:value)
   end
@@ -75,27 +76,35 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    response = nil
-    magic_value = MagicValue.find_by(
-      pk_field_id: params[:pk_field_id],
-      pk_field_value: params[:pk_field_value],
-      powerbase_field_id: params[:field_id],
-      powerbase_table_id: params[:table_id]
-    )
-    if magic_value
-      response = magic_value.update!(value: params[:value])
-    else
-      response = MagicValue.create(
-        powerbase_field_id: params[:field_id],
-        powerbase_table_id: params[:table_id],
-        powerbase_field_type_id: params[:field_type_id],
-        pk_field_id: params[:pk_field_id],
-        pk_field_value: params[:pk_field_value],
-        value: params[:value]
-      )
+    # response = nil
+    # magic_value = MagicValue.find_by(
+    #   pk_field_id: params[:pk_field_id],
+    #   pk_field_value: params[:pk_field_value],
+    #   powerbase_field_id: params[:field_id],
+    #   powerbase_table_id: params[:table_id]
+    # )
+    # if magic_value
+    #   response = magic_value.update!(value: params[:value])
+    # else
+    #   response = MagicValue.create(
+    #     powerbase_field_id: params[:field_id],
+    #     powerbase_table_id: params[:table_id],
+    #     powerbase_field_type_id: params[:field_type_id],
+    #     pk_field_id: params[:pk_field_id],
+    #     pk_field_value: params[:pk_field_value],
+    #     value: params[:value]
+    #   )
 
-    end
-    render json: response if response
+    # end
+    # render json: response if response
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+    record = model.update_record({
+      id: safe_params[:id],
+      primary_keys: safe_params[:primary_keys],
+      fields: safe_params[:fields],
+      data: safe_params[:data]
+    })
+    render json: record["get"]["_source"]
   end
 
   # GET /tables/:id/magic_values

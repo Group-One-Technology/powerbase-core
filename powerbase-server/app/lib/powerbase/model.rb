@@ -133,7 +133,7 @@ module Powerbase
     # :primary_keys :: an object of the table's primary keys.
     # Ex: { pathId: 123, userId: 1245 }
     def update_record(options)
-      index = "table_records_magic_values_#{@table_id}"
+      index = "table_records_#{@table_id}"
 
       if !@esclient.indices.exists(index: index)
         @esclient.indices.create(

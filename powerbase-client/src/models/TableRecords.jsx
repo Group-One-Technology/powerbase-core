@@ -50,28 +50,28 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
 
   const { data, error, size, setSize } = response;
 
-  const magicValuesResponse = useSWR(
-    `/tables/${id}/magic_values`,
-    getMagicValues
-  );
+  // const magicValuesResponse = useSWR(
+  //   `/tables/${id}/magic_values`,
+  //   getMagicValues
+  // );
 
-  const { data: magicData } = magicValuesResponse;
+  // const { data: magicData } = magicValuesResponse;
 
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-  let magicValues = magicData;
+  // let magicValues = magicData;
 
-  let mergedData = parsedData;
-  parsedData?.forEach((record, idx) =>
-    magicValues?.forEach((magicValue) => {
-      const pkName = magicValue.primaryKey.name;
-      const pkFieldValue = magicValue.pkFieldValue;
-      if (record[pkName] + "" === pkFieldValue) {
-        let remoteRecord = record;
-        remoteRecord[magicValue.powerbaseField.name] = magicValue.value;
-        mergedData[idx] = remoteRecord;
-      }
-    })
-  );
+  // let mergedData = parsedData;
+  // parsedData?.forEach((record, idx) =>
+  //   magicValues?.forEach((magicValue) => {
+  //     const pkName = magicValue.primaryKey.name;
+  //     const pkFieldValue = magicValue.pkFieldValue;
+  //     if (record[pkName] + "" === pkFieldValue) {
+  //       let remoteRecord = record;
+  //       remoteRecord[magicValue.powerbaseField.name] = magicValue.value;
+  //       mergedData[idx] = remoteRecord;
+  //     }
+  //   })
+  // );
   const isLoadingInitialData = !data && !error;
   const isLoading =
     isLoadingInitialData ||
@@ -84,7 +84,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
 
   return {
     ...response,
-    data: mergedData,
+    data: parsedData,
     isLoading,
     isReachingEnd,
     loadMore,
