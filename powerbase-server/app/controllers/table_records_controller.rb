@@ -28,7 +28,7 @@ class TableRecordsController < ApplicationController
   def index
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:view_table, @table)
+    # current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     @records = model.search({
@@ -46,7 +46,7 @@ class TableRecordsController < ApplicationController
   def show
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
-    current_user.can?(:view_table, @table)
+    # current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     record = model.get({
@@ -62,7 +62,7 @@ class TableRecordsController < ApplicationController
   def linked_records
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:view_table, @table)
+    # current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     records = model.where({
@@ -122,7 +122,7 @@ class TableRecordsController < ApplicationController
   def count
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:view_table, @table)
+    # current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     total_records = model.get_count({

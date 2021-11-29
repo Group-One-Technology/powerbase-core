@@ -133,18 +133,25 @@ module Powerbase
     # :primary_keys :: an object of the table's primary keys.
     # Ex: { pathId: 123, userId: 1245 }
     def update_record(options)
-      index = "table_records_#{@table_id}"
+      index = "table_records_magic_values_#{@table_id}"
+
+      if !@esclient.indices.exists(index: index)
+        @esclient.indices.create(
+          index: index,
+          body: {
+            settings: { "index.mapping.ignore_malformed": true },
+          }
+        )
+      end
+
       primary_keys = options[:primary_keys]
       identifier_fields = options[:fields]
-      ctid = options[:ctid] 
       id = if primary_keys.length > 0
         primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
         elsif options[:id]
           options[:id]
         elsif identifier_fields.length > 0
           identifier_fields.collect {|key, _| "#{key}_#{identifier_fields[key]}"}.join("-")
-        elsif @powerbase_database.adapter == "postgresql" && ctid
-          "ctid_#{ctid}"
       end
       response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
       response

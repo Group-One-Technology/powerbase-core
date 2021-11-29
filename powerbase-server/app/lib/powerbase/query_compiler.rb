@@ -71,7 +71,10 @@ module Powerbase
           }
         end
 
+      puts "FILTERMAN"
+
       @filter = { operator: "and", filters: updated_filters }
+      puts filter
 
       self
     end

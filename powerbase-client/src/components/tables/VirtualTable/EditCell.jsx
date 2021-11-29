@@ -1,5 +1,11 @@
 /* eslint-disable */
-import React, { useEffect, Fragment, useState, forwardRef } from "react";
+import React, {
+  useEffect,
+  Fragment,
+  useState,
+  forwardRef,
+  useRef,
+} from "react";
 import isObject from "lodash/isObject";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import DatePicker from "react-datepicker";
@@ -67,15 +73,17 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
   };
 
   const CalButton = ({ onClick, value, ref }) => {
+    const buttonRef = useRef(null);
     useEffect(() => {
-      document.getElementById("cal-button").click();
+      // document.getElementById("cal-button").click();
+      buttonRef?.current?.click();
     }, []);
     return (
       <button
         className="w-full focus:outline-none text-sm leading-3"
         onClick={onClick}
-        ref={ref}
         id="cal-button"
+        ref={buttonRef}
       >
         {value}
       </button>
@@ -85,20 +93,20 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
   const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
     // <input
     //   className="w-full focus:outline-none text-sm leading-3"
-    //   onChange={onChange}
+    //   onChange={(e) => onChange(e.target.value)}
     //   value={value}
     //   ref={ref}
     //   onClick={onClick}
     // />
-    <CalButton onClick={onClick} value={value} ref={ref} />
+    <CalButton onClick={onClick} value={value} />
 
-    // <button
-    //   className="w-full focus:outline-none text-sm leading-3"
-    //   onClick={onClick}
-    //   ref={ref}
-    // >
-    //   {value}
-    // </button>
+    // // <button
+    // //   className="w-full focus:outline-none text-sm leading-3"
+    // //   onClick={onClick}
+    // //   ref={ref}
+    // // >
+    // //   {value}
+    // // </button>
   ));
   return (
     <DatePicker
