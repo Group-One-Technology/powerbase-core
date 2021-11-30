@@ -1,6 +1,7 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :check_table_access, only: [:update, :update_default_view]
+  before_action :check_field_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -79,11 +80,33 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
+  # PUT /tables/:id/allowed_roles
+  def update_allowed_roles
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
+
+    render status: :no_content
+  end
+
+  # PUT /tables/:id/update_table_permission
+  def update_table_permission
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
+  end
+
   private
     def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
       raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
       current_user.can?(:manage_table, @table)
+    end
+
+    def check_field_permission_access
+      @table = PowerbaseTable.find(safe_params[:id])
+      raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+      current_user.can?(:change_guest_access, @table.powerbase_database)
     end
 
     def format_json(table)

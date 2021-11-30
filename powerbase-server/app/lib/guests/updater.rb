@@ -25,7 +25,12 @@ class Guests::Updater
           next if table_permissions[permission_key] == @guest.permissions["tables"][permission_table][permission_key]
         end
 
-        update_table_guests_access(table, [key, value], @guest, table_permissions[permission_key])
+        table.update_guests_access({
+          permission: key,
+          access: table.permissions[permission_key]["access"],
+          guest: @guest,
+          is_allowed: table_permissions[permission_key]
+        })
       end
     end
 
