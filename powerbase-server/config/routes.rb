@@ -30,6 +30,7 @@ Rails.application.routes.draw do
         put 'update_field_permissions'
         put 'accept_invite'
         put 'reject_invite'
+        delete 'leave_base'
       end
     end
 
