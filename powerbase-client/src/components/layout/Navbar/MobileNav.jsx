@@ -4,11 +4,12 @@ import { Disclosure } from '@headlessui/react';
 import Gravatar from 'react-gravatar';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { CogIcon, ShareIcon } from '@heroicons/react/outline';
+import { CogIcon, QuestionMarkCircleIcon, ShareIcon } from '@heroicons/react/outline';
 
 import { useAuthUser } from '@models/AuthUser';
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { IBase } from '@lib/propTypes/base';
+import { DOCUMENTATION_LINK } from '@lib/constants/links';
 import { Badge } from '@components/ui/Badge';
 import { UserMenu } from './UserMenu';
 
@@ -41,6 +42,15 @@ export function MobileNav({ base, bases, navigation }) {
               <ShareIcon className="h-4 w-4 mr-2" />
               Share Base
             </button>
+            <a
+              href={DOCUMENTATION_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full pl-3 pr-4 py-2 border-l-4 flex items-center text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
+            >
+              <QuestionMarkCircleIcon className="h-4 w-4 mr-2" />
+              Help
+            </a>
             <Link
               to={`/base/${base.id}/settings`}
               className="pl-3 pr-4 py-2 border-l-4 flex items-center text-base font-medium border-transparent text-white hover:bg-gray-100 hover:bg-opacity-30 hover:border-current"
