@@ -26,7 +26,7 @@ export function Sort({ table }) {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canManageViews = baseUser?.can('manageViews', table);
 
   const updateSort = async (value) => {
     if (canManageViews) {

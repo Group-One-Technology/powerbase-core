@@ -25,7 +25,12 @@ class Guests::Updater
           next if table_permissions[permission_key] == @guest.permissions["tables"][permission_table][permission_key]
         end
 
-        update_table_guests_access(table, [key, value], @guest, table_permissions[permission_key])
+        table.update_guests_access({
+          permission: key,
+          access: table.permissions[permission_key]["access"],
+          guest: @guest,
+          is_allowed: table_permissions[permission_key]
+        })
       end
     end
 
@@ -81,6 +86,38 @@ class Guests::Updater
       @guest.permissions["fields"][field_id_key][permission] = value if @guest.access == "custom"
 
       field.update_guest(@guest, permission, value)
+    end
+
+    @guest.permissions = nil if @guest.access != "custom"
+    @guest.save
+  end
+
+  def update_table_permissions!(table_id, permissions)
+    table = PowerbaseTable.find(table_id)
+
+    table_id_key = table_id.to_s
+
+    if @guest.access == "custom"
+      @guest.permissions["tables"] = {} if @guest.permissions["tables"] == nil
+      @guest.permissions["tables"][table_id_key] = {} if @guest.permissions["tables"][table_id_key] == nil
+    end
+
+    permissions.each do |key, value|
+      next if TABLE_DEFAULT_PERMISSIONS[key.to_sym] == nil
+      next if ![true, false].include?(value)
+
+      permission = key.to_s
+
+      if @guest.access != "custom" && table.permissions[permission]["access"] != "specific users only"
+        @guest.permissions = get_permissions(@guest)
+        @guest.permissions["tables"] = {} if @guest.permissions["tables"] == nil
+        @guest.permissions["tables"][table_id_key] = {} if @guest.permissions["tables"][table_id_key] == nil
+        @guest.access = "custom"
+      end
+
+      @guest.permissions["tables"][table_id_key][permission] = value if @guest.access == "custom"
+
+      table.update_guest(@guest, permission, value)
     end
 
     @guest.permissions = nil if @guest.access != "custom"

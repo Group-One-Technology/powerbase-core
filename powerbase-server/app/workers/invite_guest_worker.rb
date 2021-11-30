@@ -21,7 +21,12 @@ class InviteGuestWorker
         table_access = table.permissions[permission_key]["access"]
 
         if table_access != value[:access]
-          update_table_guests_access(table, [key, value], @guest, value[:default_value])
+          table.update_guests_access({
+            permission: key,
+            access: table_access,
+            guest: guest,
+            is_allowed: value[:default_value]
+          })
         end
       end
 

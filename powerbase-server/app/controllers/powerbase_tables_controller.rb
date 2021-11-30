@@ -1,6 +1,7 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :check_table_access, only: [:update, :update_default_view]
+  before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -20,6 +21,19 @@ class PowerbaseTablesController < ApplicationController
     required(:id).value(:string)
     required(:view_id)
   end
+
+  schema(:update_table_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
+  schema(:update_allowed_roles) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:roles)
+  end
+
 
   # GET /databases/:database_id/tables
   def index
@@ -79,6 +93,22 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
+  # PUT /tables/:id/allowed_roles
+  def update_allowed_roles
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
+
+    render status: :no_content
+  end
+
+  # PUT /tables/:id/update_table_permission
+  def update_table_permission
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
+  end
+
   private
     def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
@@ -86,11 +116,17 @@ class PowerbaseTablesController < ApplicationController
       current_user.can?(:manage_table, @table)
     end
 
+    def check_table_permission_access
+      @table = PowerbaseTable.find(safe_params[:id])
+      raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+      current_user.can?(:change_guest_access, @table.powerbase_database)
+    end
+
     def format_json(table)
       {
         id: table.id,
         name: table.name,
-        alias: table.alias,
+        alias: table.alias || table.name,
         description: table.description,
         default_view_id: table.default_view_id,
         page_size: table.page_size,

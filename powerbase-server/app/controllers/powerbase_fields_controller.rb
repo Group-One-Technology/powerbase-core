@@ -38,7 +38,7 @@ class PowerbaseFieldsController < ApplicationController
     required(:roles)
   end
 
-  # GET /tables/:id/fields
+  # GET /tables/:table_id/fields
   def index
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
@@ -142,7 +142,7 @@ class PowerbaseFieldsController < ApplicationController
       {
         id: field.id,
         name: field.name,
-        alias: field.alias,
+        alias: field.alias || field.name,
         description: field.description,
         default_value: field.default_value,
         is_primary_key: field.is_primary_key,

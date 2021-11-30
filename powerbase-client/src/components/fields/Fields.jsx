@@ -23,10 +23,10 @@ export function Fields({ table }) {
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({ tableId: table.id, fields, setFields });
+  const { sensors, handleReorderFields } = useReorderFields({ table, fields, setFields });
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can('manageViews', table.id);
-  const canAddFields = baseUser?.can('addFields', table.id);
+  const canManageViews = baseUser?.can('manageViews', table);
+  const canAddFields = baseUser?.can('addFields', table);
 
   useEffect(() => {
     setFields(initialFields);

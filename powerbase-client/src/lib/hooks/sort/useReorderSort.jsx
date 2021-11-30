@@ -5,7 +5,7 @@ import { useMounted } from '@lib/hooks/useMounted';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useBaseUser } from '@models/BaseUser';
 
-export function useReorderSort({ tableId, sort, updateSort }) {
+export function useReorderSort({ table, sort, updateSort }) {
   const { mounted } = useMounted();
   const { saving, saved, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
@@ -15,7 +15,7 @@ export function useReorderSort({ tableId, sort, updateSort }) {
   const handleDragStart = () => setDragging(true);
 
   const handleReorderSort = async ({ active, over }) => {
-    if (active.id !== over.id && baseUser?.can('manageViews', tableId)) {
+    if (active.id !== over.id && baseUser?.can('manageViews', table)) {
       saving();
 
       const oldIndex = sort.findIndex((item) => item.id === active.id);

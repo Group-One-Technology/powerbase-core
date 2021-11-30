@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Popover, Transition } from '@headlessui/react';
@@ -9,8 +8,6 @@ import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/out
 import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useSaveStatus } from '@models/SaveStatus';
-import { IView } from '@lib/propTypes/view';
-import { IId } from '@lib/propTypes/common';
 import { updateViewsOrder } from '@lib/api/views';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
@@ -19,10 +16,15 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { AddView } from './AddView';
 import { EditView } from './EditView';
 
-export function ViewMenu({ tableId, views: initialViews }) {
+export function ViewMenu() {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
-  const { view: currentView, handleViewChange } = useCurrentView();
+  const {
+    table,
+    view: currentView,
+    views: initialViews,
+    handleViewChange,
+  } = useCurrentView();
   const [addViewModalOpen, setAddViewModalOpen] = useState(false);
   const [views, setViews] = useState(initialViews);
   const [viewOptionModal, setViewOptionModal] = useState({
@@ -30,14 +32,14 @@ export function ViewMenu({ tableId, views: initialViews }) {
     view: undefined,
   });
 
-  const canAddViews = baseUser?.can('addViews', tableId);
-  const canManageViews = baseUser?.can('manageViews', tableId);
+  const canAddViews = baseUser?.can('addViews', table);
+  const canManageViews = baseUser?.can('manageViews', table);
 
   const sensors = useSensors();
 
   useEffect(() => {
     setViews(initialViews);
-  }, [tableId, initialViews]);
+  }, [table, initialViews]);
 
   const handleAddView = () => {
     if (canAddViews) {
@@ -61,7 +63,7 @@ export function ViewMenu({ tableId, views: initialViews }) {
       setViews(updatedViews);
 
       try {
-        await updateViewsOrder({ tableId, views: updatedViews.map((item) => item.id) });
+        await updateViewsOrder({ tableId: table.id, views: updatedViews.map((item) => item.id) });
         saved();
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -152,10 +154,9 @@ export function ViewMenu({ tableId, views: initialViews }) {
           </Popover.Panel>
         </Transition>
       </Popover>
-      <AddView tableId={tableId} open={addViewModalOpen} setOpen={setAddViewModalOpen} />
+      <AddView open={addViewModalOpen} setOpen={setAddViewModalOpen} />
       {viewOptionModal.view && (
         <EditView
-          tableId={tableId}
           open={viewOptionModal.open}
           setOpen={(value) => setViewOptionModal((curVal) => ({ ...curVal, open: value }))}
           view={viewOptionModal.view}
@@ -164,8 +165,3 @@ export function ViewMenu({ tableId, views: initialViews }) {
     </>
   );
 }
-
-ViewMenu.propTypes = {
-  tableId: IId.isRequired,
-  views: PropTypes.arrayOf(IView).isRequired,
-};

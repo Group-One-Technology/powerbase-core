@@ -25,7 +25,7 @@ export function Filter({ table }) {
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
-  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canManageViews = baseUser?.can('manageViews', table);
 
   const updateTableRecords = useCallback(debounce(async () => {
     if (filterRef.current && canManageViews) {

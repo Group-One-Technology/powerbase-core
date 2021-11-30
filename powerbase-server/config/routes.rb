@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       member do
         put 'change_access'
         put 'update_permissions'
+        put 'update_table_permissions'
         put 'update_field_permissions'
         put 'accept_invite'
         put 'reject_invite'
@@ -80,6 +81,8 @@ Rails.application.routes.draw do
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
         put 'update_default_view'
+        put 'update_table_permission', as: 'update_table_permission'
+        put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_tables#update_allowed_roles'
       end
     end
   end

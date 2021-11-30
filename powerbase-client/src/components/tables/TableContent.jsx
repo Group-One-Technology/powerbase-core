@@ -17,7 +17,7 @@ import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
 
-const BaseTableContent = React.memo(({ views, table }) => {
+const BaseTableContent = React.memo(({ table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
 
@@ -33,11 +33,7 @@ const BaseTableContent = React.memo(({ views, table }) => {
         <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <FieldTypesProvider>
             <ViewFieldStateProvider>
-              <TableViewsNav
-                table={table}
-                views={views}
-                fields={fields}
-              />
+              <TableViewsNav />
               {table.isMigrated
                 ? <VirtualTable table={table} height={height} />
                 : <Loader style={{ height }} />}
@@ -51,7 +47,6 @@ const BaseTableContent = React.memo(({ views, table }) => {
 
 BaseTableContent.propTypes = {
   table: ITable,
-  views: PropTypes.arrayOf(IView),
 };
 
 export const TableContent = React.memo(({
@@ -68,7 +63,7 @@ export const TableContent = React.memo(({
     <TableConnectionsProvider tableId={table.id}>
       <TableReferencedConnectionsProvider tableId={table.id}>
         <TableViewProvider id={currentView?.id} initialData={currentView}>
-          <BaseTableContent table={table} views={views} />
+          <BaseTableContent table={table} />
         </TableViewProvider>
       </TableReferencedConnectionsProvider>
     </TableConnectionsProvider>
