@@ -27,6 +27,20 @@ function useBaseUserModel() {
     if (!permissions) return false;
 
     if (baseUser.access !== 'custom') {
+      if (BasePermissions.TABLE.includes(permission)) {
+        const table = resource;
+        const tableAccess = table.permissions[permission].access;
+        const tableDefaultPermission = CUSTOM_PERMISSIONS.Table.find((item) => item.key === permission);
+
+        if (tableAccess === 'specific users only') {
+          if (baseUser.access === 'creator') return true;
+          if (table.permissions[permission].allowedRoles?.includes(baseUser.access)) return true;
+          if (tableAccess.permissions[permission].allowedGuests?.includes(baseUser.id)) return true;
+        } else if (tableAccess !== tableDefaultPermission.access) {
+          return doesGuestHaveAccess(baseUser.access, tableAccess);
+        }
+      }
+
       if (BasePermissions.FIELD.includes(permission)) {
         const field = resource;
         const fieldAccess = field.permissions[permission].access;

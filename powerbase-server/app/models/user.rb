@@ -71,6 +71,19 @@ class User < ApplicationRecord
       permission_key = permission.to_s
 
       case resource_type
+      when :table
+        table_access = table.permissions[permission_key]["access"]
+
+        if table_access == "specific users only"
+          return true if guest.creator?
+          allowed_roles = Array(table.permissions[permission_key]["allowed_roles"])
+          return true if allowed_roles.any? {|role| role == guest.access}
+          allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
+          return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          return false
+        elsif table_access != TABLE_DEFAULT_PERMISSIONS[permission][:access]
+          return does_guest_have_access(guest.access, table_access)
+        end
       when :field
         field_access = field.permissions[permission_key]["access"]
 
@@ -80,6 +93,7 @@ class User < ApplicationRecord
           return true if allowed_roles.any? {|role| role == guest.access}
           allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          return false
         elsif field_access != FIELD_DEFAULT_PERMISSIONS[permission][:access]
           return does_guest_have_access(guest.access, field_access)
         end

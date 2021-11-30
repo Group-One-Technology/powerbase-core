@@ -16,19 +16,18 @@ import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 
 export function EditView({
-  tableId,
   view,
   open,
   setOpen,
 }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { viewsResponse } = useCurrentView();
+  const { table, viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
 
-  const canManageViews = baseUser?.can('manageViews', tableId);
+  const canManageViews = baseUser?.can('manageViews', table);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -214,7 +213,6 @@ export function EditView({
 }
 
 EditView.propTypes = {
-  tableId: PropTypes.number.isRequired,
   view: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,

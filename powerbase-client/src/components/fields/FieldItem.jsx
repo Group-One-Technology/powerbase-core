@@ -22,7 +22,7 @@ export function FieldItem({ table, field, setFields }) {
   const { data: fieldTypes } = useFieldTypes();
 
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canManageViews = baseUser?.can('manageViews', table);
 
   const handleToggleVisibility = async () => {
     if (canManageViews) {

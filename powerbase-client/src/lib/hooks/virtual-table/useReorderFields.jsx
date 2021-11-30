@@ -15,7 +15,7 @@ import { useMounted } from '@lib/hooks/useMounted';
  * @param {function} setFields
  * @returns { sensors, dragging, handleDragStart, handleDragMove, handleDragEnd }
  */
-export function useReorderFields({ tableId, fields, setFields }) {
+export function useReorderFields({ table, fields, setFields }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
@@ -39,7 +39,7 @@ export function useReorderFields({ tableId, fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can('manageViews', tableId)) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can('manageViews', table)) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);
