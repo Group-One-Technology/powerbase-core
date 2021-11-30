@@ -31,12 +31,10 @@ export function VirtualTable({ height, table }) {
   }
 
   return (
-    <>
-      <FieldPermissionsModalProvider>
-        <TableRenderer height={height} table={table} highlightedCell={highlightedCell} />
-        <FieldPermissionsModal />
-      </FieldPermissionsModalProvider>
-    </>
+    <FieldPermissionsModalProvider>
+      <TableRenderer height={height} table={table} highlightedCell={highlightedCell} />
+      <FieldPermissionsModal />
+    </FieldPermissionsModalProvider>
   );
 }
 
