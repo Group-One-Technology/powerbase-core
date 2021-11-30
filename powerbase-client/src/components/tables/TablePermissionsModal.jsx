@@ -14,10 +14,12 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider } from '@models/modals/GuestsModal';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
+import { updateTablePermission } from '@lib/api/tables';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -26,16 +28,38 @@ import { Button } from '@components/ui/Button';
 import { GuestRoleCard } from '@components/guest/GuestRoleCard';
 
 function BaseTablePermissionsModal() {
-  const { loading } = useSaveStatus();
+  const {
+    saving,
+    saved,
+    catchError,
+    loading,
+  } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: guests } = useBaseGuests();
   const { modal, table } = useTablePermissionsModal();
+  const { tablesResponse: { mutate: mutateTables } } = useCurrentView();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageTable = table
     ? baseUser?.can('manageTable', table)
     : false;
+
+  const handleChangePermissionAccess = async (permission, access) => {
+    if (canManageTable) {
+      saving();
+
+      if (table.permissions[permission.key].access !== access) {
+        try {
+          await updateTablePermission({ id: table.id, permission: permission.key, access });
+          await mutateTables();
+          saved(`Successfully updated table "${table.alias}"'s ${permission.name} permission to "${access}" access`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
+        }
+      }
+    }
+  };
 
   if (!table && !canManageTable) {
     return null;
@@ -98,7 +122,7 @@ function BaseTablePermissionsModal() {
                       <p className="text-xs text-gray-500">{item.description}</p>
                     </div>
                     <div className="min-w-[200px]">
-                      <Listbox value={permission.access} disabled={loading}>
+                      <Listbox value={permission.access} onChange={(value) => handleChangePermissionAccess(item, value)} disabled={loading}>
                         <div className="relative w-auto">
                           <Listbox.Button
                             className="ml-auto flex relative w-auto text-sm px-2 py-1 border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
