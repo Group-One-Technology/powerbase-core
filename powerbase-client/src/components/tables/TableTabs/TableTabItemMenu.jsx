@@ -34,14 +34,36 @@ export function TableTabItemMenu({ table, children }) {
           <div className="px-4 w-auto">
             <input
               type="text"
-              aria-label="Table Name"
-              value={table.name}
-              placeholder="Field Alias"
+              aria-label="Table Alias"
+              value={table.alias}
+              placeholder="Table Alias"
               className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               disabled
             />
           </div>
         )}
+
+        <dl>
+          {!canManageTables && (
+            <>
+              <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+                Table Alias
+              </dt>
+              <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
+                {table.alias}
+              </dd>
+            </>
+          )}
+
+          <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+            Table Name
+          </dt>
+          <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
+            {table.name}
+          </dd>
+        </dl>
+
+        <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />
 
         {canChangeGuestAccess && (
           <ContextMenu.Item

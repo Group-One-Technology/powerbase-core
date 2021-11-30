@@ -46,7 +46,7 @@ function BaseTablePermissionsModal() {
       <div className="inline-flex flex-col align-bottom bg-white min-h-[400px] rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
         <div className="pt-5 pb-4">
           <Dialog.Title as="h3" className="text-center text-xl font-medium text-gray-900">
-            {`"${table.name}"`} Table Permissions
+            {`"${table.alias || table.name}"`} Table Permissions
           </Dialog.Title>
 
           <ul className="my-8 mx-10">
