@@ -12,14 +12,14 @@ import {
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
-import { GuestsModalProvider } from '@models/modals/GuestsModal';
+import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
-import { updateTablePermission } from '@lib/api/tables';
+import { updateTablePermission, updateTablePermissionAllowedRoles } from '@lib/api/tables';
 import { updateGuestTablePermissions } from '@lib/api/guests';
 
 import { Modal } from '@components/ui/Modal';
@@ -40,6 +40,7 @@ function BaseTablePermissionsModal() {
   const { modal, table } = useTablePermissionsModal();
   const { tablesResponse } = useCurrentView();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
+  const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageTable = table
@@ -105,6 +106,107 @@ function BaseTablePermissionsModal() {
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
       }
+    }
+  };
+
+  const handleAddGuests = (permission, list) => {
+    if (canChangeGuestAccess && table) {
+      const select = async (guest) => {
+        const permissionKey = permission.key;
+        const permissions = { [permissionKey]: list === 'allowed' };
+
+        if (typeof guest === 'string') {
+          const role = guest;
+
+          const updatedTable = { ...table };
+          const allowedRoles = [
+            ...(updatedTable.permissions[permissionKey]?.allowedRoles || []),
+            role,
+          ];
+          updatedTable.permissions[permissionKey].allowedRoles = allowedRoles;
+
+          try {
+            await updateTablePermissionAllowedRoles({
+              id: table.id,
+              roles: allowedRoles,
+              permission: permissionKey,
+            });
+            tablesResponse.mutate({
+              ...tablesResponse.data,
+              tables: tablesResponse.data.tables.map((item) => (item.id === table.id
+                ? updatedTable
+                : item)),
+            });
+            saved(`Successfully added "${role}" from allowed roles.`);
+          } catch (err) {
+            catchError(err.response.data.error || err.response.data.exception);
+          }
+
+          setGuestModalOpen(false);
+          return;
+        }
+
+        const updatedGuestPermission = {
+          ...(guest.permissions.tables || {}),
+          [table.id]: {
+            ...(guest.permissions.tables?.[table.id] || {}),
+            ...permissions,
+          },
+        };
+
+        const updatedTable = { ...table };
+        const restrictedGuests = updatedTable.permissions[permissionKey]?.restrictedGuests || [];
+        const allowedGuests = updatedTable.permissions[permissionKey]?.allowedGuests || [];
+        if (list === 'allowed') {
+          updatedTable.permissions[permissionKey].allowedGuests = [...allowedGuests, guest.id];
+
+          if (updatedTable.permissions[permissionKey].restrictedGuests) {
+            updatedTable.permissions[permissionKey].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
+          }
+        } else {
+          updatedTable.permissions[permissionKey].restrictedGuests = [...restrictedGuests, guest.id];
+
+          if (updatedTable.permissions[permissionKey].allowedGuests) {
+            updatedTable.permissions[permissionKey].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
+          }
+        }
+
+        try {
+          await updateGuestTablePermissions({
+            id: guest.id,
+            tableId: table.id,
+            permissions,
+          });
+          mutateGuests(guests.map((item) => ({
+            ...item,
+            access: item.access !== 'custom' && item.id === guest.id
+              ? 'custom'
+              : item.access,
+            permissions: item.id === guest.id
+              ? updatedGuestPermission
+              : item.permissions,
+          })));
+          tablesResponse.mutate({
+            ...tablesResponse.data,
+            tables: tablesResponse.data.tables.map((item) => (item.id === table.id
+              ? updatedTable
+              : item)),
+          });
+          saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
+        } catch (err) {
+          catchError(err.response.data.error || err.response.data.exception);
+        }
+
+        setGuestModalOpen(false);
+      };
+
+      openGuestModal({
+        id: table.id,
+        type: 'table',
+        permission,
+        select: () => select,
+        search: list,
+      });
     }
   };
 
@@ -203,6 +305,7 @@ function BaseTablePermissionsModal() {
                           'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
                           hoveredItem !== item.key && 'invisible',
                         )}
+                        onClick={() => handleAddGuests(permission, 'allowed')}
                       >
                         <PlusIcon className="h-4 w-4 mr-1" />
                         {isSpecificUsersOnly
@@ -216,6 +319,7 @@ function BaseTablePermissionsModal() {
                             'px-1 py-0.5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100',
                             hoveredItem !== item.key && 'invisible',
                           )}
+                          onClick={() => handleAddGuests(permission, 'restricted')}
                         >
                           <PlusIcon className="h-4 w-4 mr-1" />
                           Add restricted user
