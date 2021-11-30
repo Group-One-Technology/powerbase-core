@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   ChevronDownIcon,
   ChevronRightIcon,
   CogIcon,
+  LogoutIcon,
   ShareIcon,
   UsersIcon,
 } from '@heroicons/react/outline';
@@ -12,18 +13,47 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
+import { useBases } from '@models/Bases';
 import { useBaseUser } from '@models/BaseUser';
+import { useSaveStatus } from '@models/SaveStatus';
 import { IBase } from '@lib/propTypes/base';
+import { leaveBase } from '@lib/api/guests';
 import { Badge } from '@components/ui/Badge';
 
 export function BaseMenu({ base, otherBases }) {
+  const history = useHistory();
+  const {
+    saving,
+    saved,
+    catchError,
+    loading,
+  } = useSaveStatus();
+  const { data: bases, mutate: mutateBases } = useBases();
   const { setOpen: setShareModalOpen } = useShareBaseModal();
   const { baseUser } = useBaseUser();
   const canInviteGuests = baseUser?.can('inviteGuests');
   const canManageBase = baseUser?.can('manageBase');
+  const isOwner = base.owner.userId === baseUser.userId;
 
   const handleShareBase = () => {
     setShareModalOpen(true);
+  };
+
+  const handleLeaveBase = async () => {
+    if (!isOwner) {
+      saving();
+
+      const updatedBases = bases.filter((item) => item.id !== base.id);
+
+      try {
+        await leaveBase({ guestId: baseUser.id });
+        history.push('/');
+        await mutateBases(updatedBases);
+        saved(`Successfully left "${base.name}" base.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
   };
 
   return (
@@ -87,6 +117,18 @@ export function BaseMenu({ base, otherBases }) {
                       Settings
                     </Link>
                   )}
+                </Menu.Item>
+              )}
+              {!isOwner && (
+                <Menu.Item
+                  as="button"
+                  type="button"
+                  className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  onClick={handleLeaveBase}
+                  disabled={loading}
+                >
+                  <LogoutIcon className="h-4 w-4 mr-2" />
+                  Leave Base
                 </Menu.Item>
               )}
               {!!otherBases?.length && (
