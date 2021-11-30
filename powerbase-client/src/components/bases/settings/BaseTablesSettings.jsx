@@ -3,6 +3,7 @@ import cn from 'classnames';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { updateTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
@@ -24,7 +25,7 @@ const INITIAL_MODAL_VALUE = {
     </div>
   ),
   title: 'Update Successful',
-  content: 'The tables\' aliases and/or order have been updated.',
+  content: 'The tables\' info, aliases, order and/or visibility, have been updated.',
 };
 
 export function BaseTablesSettings() {
@@ -40,32 +41,37 @@ export function BaseTablesSettings() {
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
   const [loading, setLoading] = useState(false);
 
+  const visibleTables = tables.filter((item) => !item.isHidden);
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    setLoading(true);
-    setModal(INITIAL_MODAL_VALUE);
 
-    const updatedTables = tables.filter((item) => item.updated);
+    if (visibleTables.length >= 1) {
+      setLoading(true);
+      setModal(INITIAL_MODAL_VALUE);
 
-    try {
-      await updateTables({ databaseId: base.id, tables: updatedTables });
-      mutateTables();
-      mutateBase();
-      setModal((curVal) => ({ ...curVal, open: true }));
-    } catch (err) {
-      setModal({
-        open: true,
-        icon: (
-          <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-            <ExclamationIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
-          </div>
-        ),
-        title: 'Update Failed',
-        content: err?.response?.data.exception || 'Something went wrong. Please try again later.',
-      });
+      const updatedTables = tables.filter((item) => item.updated);
+
+      try {
+        await updateTables({ databaseId: base.id, tables: updatedTables });
+        mutateTables();
+        mutateBase();
+        setModal((curVal) => ({ ...curVal, open: true }));
+      } catch (err) {
+        setModal({
+          open: true,
+          icon: (
+            <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+              <ExclamationIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+            </div>
+          ),
+          title: 'Update Failed',
+          content: err?.response?.data.error || err?.response?.data.exception || 'Something went wrong. Please try again later.',
+        });
+      }
+
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleChange = (tableId, value) => {
@@ -89,8 +95,9 @@ export function BaseTablesSettings() {
       setTables((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex).map((item) => ({
+        return arrayMove(items, oldIndex, newIndex).map((item, index) => ({
           ...item,
+          order: index,
           updated: true,
         }));
       });
@@ -107,53 +114,75 @@ export function BaseTablesSettings() {
             <ul className="divide-y divide-gray-200">
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTablesOrderChange}>
                 <SortableContext items={tables} strategy={verticalListSortingStrategy}>
-                  {tables.map((table) => (
-                    <SortableItem
-                      key={table.id}
-                      as="li"
-                      id={table.id}
-                      className="grid grid-cols-12 gap-3 items-center p-2 w-full bg-white hover:bg-gray-50 sm:px-6"
-                      handle={{
-                        position: 'right',
-                        className: 'col-span-1 flex justify-end',
-                        component: (
-                          <button type="button" className="col-span-1 flex items-center p-2 cursor-inherit cursor-grabbing">
-                            <GripVerticalIcon className="h-4 w-4 text-gray-500" />
-                            <span className="sr-only">Reorder Table</span>
-                          </button>
-                        ),
-                      }}
-                    >
-                      <div className="col-span-4">
-                        <p className="text-base text-gray-900">{table.name}</p>
-                      </div>
-                      <div className="col-span-6 flex items-center">
-                        <Input
-                          type="text"
-                          id={`${table.name}-alias`}
-                          name={`${table.name}-alias`}
-                          value={table.alias || ''}
-                          placeholder="Add Alias"
-                          onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
-                          className="w-full"
-                        />
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          type="button"
-                          className={cn(
-                            'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm',
-                            table.isHidden ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700' : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
-                            loading ? 'cursor-not-allowed' : 'cursor-pointer',
-                          )}
-                          onClick={() => handleToggleVisibility(table.id)}
-                          disabled={loading}
-                        >
-                          {table.isHidden ? 'Unhide' : 'Hide'}
-                        </button>
-                      </div>
-                    </SortableItem>
-                  ))}
+                  {tables.map((table) => {
+                    const isOnlyVisibleTable = (!table.isHidden && visibleTables.length === 1);
+
+                    return (
+                      <SortableItem
+                        key={table.id}
+                        as="li"
+                        id={table.id}
+                        className="grid grid-cols-12 gap-3 items-center p-2 w-full bg-white hover:bg-gray-50 sm:px-6"
+                        handle={{
+                          position: 'right',
+                          className: 'col-span-1 flex justify-end',
+                          component: (
+                            <button type="button" className="col-span-1 flex items-center p-2 cursor-inherit cursor-grabbing">
+                              <GripVerticalIcon className="h-4 w-4 text-gray-500" />
+                              <span className="sr-only">Reorder Table</span>
+                            </button>
+                          ),
+                        }}
+                      >
+                        <div className="col-span-4">
+                          <p className="text-base text-gray-900">{table.name}</p>
+                        </div>
+                        <div className="col-span-6 flex items-center">
+                          <Input
+                            type="text"
+                            id={`${table.name}-alias`}
+                            name={`${table.name}-alias`}
+                            value={table.alias || ''}
+                            placeholder="Add Alias"
+                            onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="col-span-1">
+                          {isOnlyVisibleTable
+                            ? (
+                              <Tooltip.Root delayDuration={0}>
+                                <Tooltip.Trigger
+                                  type="button"
+                                  className="ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-base font-medium text-gray-900 bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm"
+                                >
+                                  Hide
+                                </Tooltip.Trigger>
+                                <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                                  <Tooltip.Arrow className="gray-900" />
+                                  Can&lsquo;t hide the only visible table in this base.
+                                </Tooltip.Content>
+                              </Tooltip.Root>
+                            ) : (
+                              <button
+                                type="button"
+                                className={cn(
+                                  'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm',
+                                  loading || isOnlyVisibleTable ? 'cursor-not-allowed' : 'cursor-pointer',
+                                  table.isHidden
+                                    ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700'
+                                    : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
+                                )}
+                                onClick={() => handleToggleVisibility(table.id)}
+                                disabled={loading}
+                              >
+                                {table.isHidden ? 'Unhide' : 'Hide'}
+                              </button>
+                            )}
+                        </div>
+                      </SortableItem>
+                    );
+                  })}
                 </SortableContext>
               </DndContext>
             </ul>
