@@ -5,6 +5,7 @@ import {
   ChevronRightIcon,
   CogIcon,
   LogoutIcon,
+  QuestionMarkCircleIcon,
   ShareIcon,
   UsersIcon,
 } from '@heroicons/react/outline';
@@ -21,6 +22,7 @@ import { leaveBase } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
 import { Badge } from '@components/ui/Badge';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { DOCUMENTATION_LINK } from '@lib/constants/links';
 
 export function BaseMenu({ base, otherBases }) {
   const history = useHistory();
@@ -131,6 +133,21 @@ export function BaseMenu({ base, otherBases }) {
                     )}
                   </Menu.Item>
                 )}
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href={DOCUMENTATION_LINK}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn('flex items-center px-4 py-2 text-sm text-gray-700', {
+                        'bg-gray-100': active,
+                      })}
+                    >
+                      <QuestionMarkCircleIcon className="h-4 w-4 mr-2" />
+                      Help
+                    </a>
+                  )}
+                </Menu.Item>
                 {!isOwner && (
                   <Menu.Item
                     as="button"
