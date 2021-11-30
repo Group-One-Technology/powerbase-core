@@ -20,6 +20,7 @@ import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
 import { updateTablePermission } from '@lib/api/tables';
+import { updateGuestTablePermissions } from '@lib/api/guests';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -35,9 +36,9 @@ function BaseTablePermissionsModal() {
     loading,
   } = useSaveStatus();
   const { baseUser } = useBaseUser();
-  const { data: guests } = useBaseGuests();
+  const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { modal, table } = useTablePermissionsModal();
-  const { tablesResponse: { mutate: mutateTables } } = useCurrentView();
+  const { tablesResponse } = useCurrentView();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
@@ -52,11 +53,57 @@ function BaseTablePermissionsModal() {
       if (table.permissions[permission.key].access !== access) {
         try {
           await updateTablePermission({ id: table.id, permission: permission.key, access });
-          await mutateTables();
+          await tablesResponse.mutate();
           saved(`Successfully updated table "${table.alias}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
           catchError(err.response.data.error || err.response.data.exception);
         }
+      }
+    }
+  };
+
+  const handleRemoveGuests = async (guest, permission, list) => {
+    if (canChangeGuestAccess && table) {
+      const permissions = { [permission]: !(list === 'allowed') };
+
+      const updatedGuestPermission = {
+        ...(guest.permissions.tables || {}),
+        [table.id]: {
+          ...(guest.permissions.tables?.[table.id] || {}),
+          ...permissions,
+        },
+      };
+
+      const updatedTable = { ...table };
+      if (list === 'allowed') {
+        const restrictedGuests = updatedTable.permissions[permission]?.restrictedGuests || [];
+        updatedTable.permissions[permission].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
+      } else {
+        const allowedGuests = updatedTable.permissions[permission]?.allowedGuests || [];
+        updatedTable.permissions[permission].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
+      }
+
+      try {
+        await updateGuestTablePermissions({
+          id: guest.id,
+          tableId: table.id,
+          permissions,
+        });
+        mutateGuests(guests.map((item) => ({
+          ...item,
+          permissions: item.id === guest.id
+            ? updatedGuestPermission
+            : item.permissions,
+        })));
+        tablesResponse.mutate({
+          ...tablesResponse.data,
+          tables: tablesResponse.data.tables.map((item) => (item.id === table.id
+            ? updatedTable
+            : item)),
+        });
+        saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
       }
     }
   };
@@ -242,7 +289,8 @@ function BaseTablePermissionsModal() {
                                       'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
                                       loading ? 'cursor-not-allowed' : 'cursor-pointer',
                                     )}
-                                    disabled={loading}
+                                    loading={loading}
+                                    onClick={() => handleRemoveGuests(guest, item.key, 'allowed')}
                                   >
                                     <XIcon className="h-4 w-4" />
                                     <span className="sr-only">Remove Guest</span>
@@ -287,7 +335,8 @@ function BaseTablePermissionsModal() {
                                       'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
                                       loading ? 'cursor-not-allowed' : 'cursor-pointer',
                                     )}
-                                    disabled={loading}
+                                    loading={loading}
+                                    onClick={() => handleRemoveGuests(guest, item.key, 'restricted')}
                                   >
                                     <XIcon className="h-4 w-4" />
                                     <span className="sr-only">Remove Guest</span>
