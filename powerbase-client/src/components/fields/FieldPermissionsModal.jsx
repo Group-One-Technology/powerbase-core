@@ -381,7 +381,7 @@ function BaseFieldPermissionsModal() {
                                           'ml-auto inline-flex justify-center w-full rounded-md border border-transparent shadow-sm p-1 text-xs text-white bg-red-600 focus:ring-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-red-600 sm:w-auto sm:text-sm',
                                           loading ? 'cursor-not-allowed' : 'cursor-pointer',
                                         )}
-                                        disabled={loading}
+                                        loading={loading}
                                         onClick={() => handleRemoveRole(role, item.key)}
                                       >
                                         <XIcon className="h-4 w-4" />
