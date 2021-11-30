@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import {
   PlusIcon,
@@ -34,6 +34,10 @@ export function TableTabs() {
   const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
 
   const canAddTables = baseUser?.can('addTables');
+
+  useEffect(() => {
+    setTables(initialTables);
+  }, [initialTables]);
 
   const handleSearchModal = () => {
     setTableSearchModalOpen(true);
