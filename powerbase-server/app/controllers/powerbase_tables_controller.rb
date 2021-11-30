@@ -76,12 +76,28 @@ class PowerbaseTablesController < ApplicationController
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:manage_base, @database)
 
-    safe_params[:tables].each_with_index do |table, index|
-      @table = PowerbaseTable.find(table[:id])
-      @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: index)
+    is_updated = false
+
+    ActiveRecord::Base.transaction do
+      safe_params[:tables].each do |table|
+        @table = PowerbaseTable.find(table[:id])
+        @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: table[:order])
+      end
+
+      visible_tables = @database.powerbase_tables.select {|item| !item.is_hidden}
+
+      if visible_tables.length <= 1
+        raise ActiveRecord::Rollback
+      else
+        is_updated = true
+      end
     end
 
-    render status: :no_content
+    if is_updated
+      render status: :no_content
+    else
+      render json: { error: "There must be at least one visible table in this base." }, status: :unprocessable_entity
+    end
   end
 
   # PUT tables/:id/update_default_view

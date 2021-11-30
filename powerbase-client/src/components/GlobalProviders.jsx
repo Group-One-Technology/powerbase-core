@@ -3,6 +3,7 @@ import { SWRConfig } from 'swr';
 import PropTypes from 'prop-types';
 import { AuthUserProvider } from '@models/AuthUser';
 import { SaveStatusProvider } from '@models/SaveStatus';
+import { SharedBasesProvider } from '@models/SharedBases';
 
 export function GlobalProviders({ children }) {
   return (
@@ -14,7 +15,9 @@ export function GlobalProviders({ children }) {
     >
       <AuthUserProvider>
         <SaveStatusProvider>
-          {children}
+          <SharedBasesProvider>
+            {children}
+          </SharedBasesProvider>
         </SaveStatusProvider>
       </AuthUserProvider>
     </SWRConfig>
