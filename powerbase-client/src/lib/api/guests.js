@@ -20,6 +20,16 @@ export async function inviteGuest({ databaseId, ...payload }) {
   return undefined;
 }
 
+export async function leaveBase({ guestId }) {
+  const response = await securedApi.delete(`/guests/${guestId}/leave_base`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function acceptGuestInvitation({ id, ...payload }) {
   const response = await securedApi.put(`/guests/${id}/accept_invite`, payload);
 
