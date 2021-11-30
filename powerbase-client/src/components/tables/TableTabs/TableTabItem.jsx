@@ -6,6 +6,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { Dot } from '@components/ui/Dot';
 import { SortableItem } from '@components/ui/SortableItem';
+import { TableTabItemMenu } from './TableTabItemMenu';
 
 export const TableTabItem = React.forwardRef(({ table }, activeTabRef) => {
   const { table: activeTable, handleTableChange } = useCurrentView();
@@ -43,14 +44,16 @@ export const TableTabItem = React.forwardRef(({ table }, activeTabRef) => {
   }
 
   return (
-    <SortableItem
-      id={table.id}
-      role={undefined}
-      tabIndex={undefined}
-      onClick={() => handleTableChange({ table })}
-    >
-      {component}
-    </SortableItem>
+    <TableTabItemMenu table={table}>
+      <SortableItem
+        id={table.id}
+        role={undefined}
+        tabIndex={undefined}
+        onClick={() => handleTableChange({ table })}
+      >
+        {component}
+      </SortableItem>
+    </TableTabItemMenu>
   );
 });
 
