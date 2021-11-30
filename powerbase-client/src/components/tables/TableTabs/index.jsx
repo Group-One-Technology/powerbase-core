@@ -11,6 +11,7 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import { useBase } from '@models/Base';
+import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
@@ -23,18 +24,23 @@ import { TableTabItem } from './TableTabItem';
 
 export function TableTabs() {
   const { data: base } = useBase();
+  const { baseUser } = useBaseUser();
   const { table, tables: initialTables, handleTableChange } = useCurrentView();
   const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
   const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
 
+  const canAddTables = baseUser?.can('addTables');
+
   const handleSearchModal = () => {
     setTableSearchModalOpen(true);
   };
 
   const addTable = () => {
-    alert('add new table clicked');
+    if (canAddTables) {
+      alert('add new table clicked');
+    }
   };
 
   return (
@@ -70,7 +76,7 @@ export function TableTabs() {
               {tables?.map((item) => <TableTabItem ref={activeTabEl} key={item.id} table={item} />)}
             </SortableContext>
           </DndContext>
-          {tables && (
+          {(tables && canAddTables) && (
             <div className="my-auto px-2">
               <button
                 type="button"
