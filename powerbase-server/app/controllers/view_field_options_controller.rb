@@ -103,7 +103,7 @@ class ViewFieldOptionsController < ApplicationController
         id: view_field.id,
         field_id: view_field.powerbase_field_id,
         name: field.name,
-        alias: field.alias,
+        alias: field.alias || field.name,
         db_type: field.db_type,
         description: field.description,
         default_value: field.default_value,

@@ -142,7 +142,7 @@ class PowerbaseFieldsController < ApplicationController
       {
         id: field.id,
         name: field.name,
-        alias: field.alias,
+        alias: field.alias || field.name,
         description: field.description,
         default_value: field.default_value,
         is_primary_key: field.is_primary_key,
