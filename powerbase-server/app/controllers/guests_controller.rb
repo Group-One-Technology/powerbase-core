@@ -32,7 +32,7 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
-  schema(:accept_invite, :reject_invite, :destroy) do
+  schema(:accept_invite, :reject_invite, :leave_base, :destroy) do
     required(:id)
   end
 
@@ -113,6 +113,19 @@ class GuestsController < ApplicationController
     else
       render json: guest_creator.object.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /guests/:id/leave_base
+  def leave_base
+    @guest = Guest.find(safe_params[:id])
+
+    if @guest.user_id != current_user.id
+      render json: { error: "Not Authorized." }, status: :unprocessable_entity
+      return
+    end
+
+    @guest.destroy
+    render status: :no_content
   end
 
   # PUT /guests/:id/change_access
