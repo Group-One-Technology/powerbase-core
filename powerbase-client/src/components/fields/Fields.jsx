@@ -100,72 +100,75 @@ export function Fields({ table }) {
                 "absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md"
               )}
             >
-              <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                {!isCreatingField && (
-                  <div className="text-sm text-gray-900">
-                    <h4 className="flex mx-3 mt-3 items-center">
-                      Fields for&nbsp;
-                      <strong>
-                        <TableIcon className="inline mr-1 h-5 w-5" />
-                        {view.name}
-                      </strong>
-                    </h4>
-                    {canManageViews && (
-                      <div className="mx-2 flex justify-end">
+              {({ close }) => (
+                <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  {!isCreatingField && (
+                    <div className="text-sm text-gray-900">
+                      <h4 className="flex mx-3 mt-3 items-center">
+                        Fields for&nbsp;
+                        <strong>
+                          <TableIcon className="inline mr-1 h-5 w-5" />
+                          {view.name}
+                        </strong>
+                      </h4>
+                      {canManageViews && (
+                        <div className="mx-2 flex justify-end">
+                          <button
+                            type="button"
+                            className="p-1 text-indigo-500"
+                            onClick={handleHideAll}
+                            disabled={loading}
+                          >
+                            Hide all
+                          </button>
+                        </div>
+                      )}
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleReorderFields}
+                      >
+                        <SortableContext
+                          items={fields}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <ul className="m-3 list-none flex flex-col">
+                            {fields.map((field) => (
+                              <FieldItem
+                                key={field.id}
+                                table={table}
+                                field={field}
+                                setFields={setFields}
+                              />
+                            ))}
+                          </ul>
+                        </SortableContext>
+                      </DndContext>
+                      {canAddFields && (
                         <button
                           type="button"
-                          className="p-1 text-indigo-500"
-                          onClick={handleHideAll}
-                          disabled={loading}
+                          className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                          onClick={handleAddNewField}
                         >
-                          Hide all
+                          <PlusIcon className="mr-1 h-4 w-4" />
+                          Add a field
                         </button>
-                      </div>
-                    )}
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleReorderFields}
-                    >
-                      <SortableContext
-                        items={fields}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <ul className="m-3 list-none flex flex-col">
-                          {fields.map((field) => (
-                            <FieldItem
-                              key={field.id}
-                              table={table}
-                              field={field}
-                              setFields={setFields}
-                            />
-                          ))}
-                        </ul>
-                      </SortableContext>
-                    </DndContext>
-                    {canAddFields && (
-                      <button
-                        type="button"
-                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                        onClick={handleAddNewField}
-                      >
-                        <PlusIcon className="mr-1 h-4 w-4" />
-                        Add a field
-                      </button>
-                    )}
-                  </div>
-                )}
-                {isCreatingField && (
-                  <div className="text-sm text-gray-900">
-                    <NewField
-                      tableId={table.id}
-                      fields={fields}
-                      view={view}
-                      setIsCreatingField={setIsCreatingField}
-                    />
-                  </div>
-                )}
-              </div>
+                      )}
+                    </div>
+                  )}
+                  {isCreatingField && (
+                    <div className="text-sm text-gray-900">
+                      <NewField
+                        tableId={table.id}
+                        fields={fields}
+                        view={view}
+                        setIsCreatingField={setIsCreatingField}
+                        close={close}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </Popover.Panel>
           </Transition>
         </>

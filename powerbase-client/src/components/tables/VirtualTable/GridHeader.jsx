@@ -108,7 +108,7 @@ function CellRenderer({
           isForeignKey={field.isForeignKey}
           className="mr-1"
         />
-        <span>{field.alias || field.name}</span>
+        <span id={`field-${field.id}-name`}>{field.alias || field.name}</span>
         {field.isVirtual && (
           <SparklesIcon
             className={`h-5 w-5 ml-auto text-${

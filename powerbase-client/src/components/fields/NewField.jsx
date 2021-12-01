@@ -137,6 +137,7 @@ export default function NewField({
   view,
   fields,
   setIsCreatingField,
+  close,
 }) {
   const [selected, setSelected] = useState(null);
   const [nameExists, setNameExists] = useState(false);
@@ -203,12 +204,20 @@ export default function NewField({
         ) + 1,
       options: currency ? { style: "currency", currency } : null,
     };
-    console.log(payload);
 
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
     if (response.statusText === "OK") {
       setIsCreatingField(false);
       mutateViewFields();
+      const id = response.data.id;
+      const element = document.getElementById(`row-0-column-12`);
+      close();
+      console.log("el", element);
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "center",
+      });
       return response.data;
     }
   };
