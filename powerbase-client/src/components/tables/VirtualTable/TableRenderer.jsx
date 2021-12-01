@@ -18,11 +18,13 @@ import { initializeFields } from "@lib/helpers/fields/initializeFields";
 import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
+import { useBase } from "@models/Base";
 
 export function TableRenderer({ height, table, highlightedCell }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
+  const { data: base } = useBase();
   const {
     data: records,
     loadMore: loadMoreRows,
@@ -45,7 +47,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
   const [validationToolTip, setValidationToolTip] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
-  const [calendarValue, setCalendarValue] = useState()
+  const [calendarValue, setCalendarValue] = useState();
 
   const columnCount = fields && fields.length + 1;
 
@@ -188,6 +190,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
                           updatedRecords,
                           calendarValue,
                           setCalendarValue,
+                          isTurbo: base.isTurbo,
                           ...props,
                         });
                       }}

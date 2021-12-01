@@ -6,7 +6,7 @@ import { getTableRecords, getMagicValues } from "@lib/api/records";
 import { useAuthUser } from "./AuthUser";
 import { useViewOptions } from "./views/ViewOptions";
 
-function getKey({ index, tableId, query, sort, filters, pageSize }) {
+function getKey({ index, tableId, query, sort, filters, pageSize, isTurbo }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
   const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : "";
@@ -50,29 +50,37 @@ function useTableRecordsModel({ id, pageSize = 40, base }) {
 
   const { data, error, size, setSize } = response;
 
-  // const magicValuesResponse = useSWR(
-  //   `/tables/${id}/magic_values`,
-  //   getMagicValues
-  // );
+  const magicValuesResponse = useSWR(
+    `/tables/${id}/magic_values`,
+    getMagicValues
+  );
 
-  // const { data: magicData } = magicValuesResponse;
-  console.log("base", base);
+  const { data: magicData } = magicValuesResponse;
 
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-  // let magicValues = magicData;
+  let magicValues = magicData;
+  console.log(magicData);
 
-  // let mergedData = parsedData;
-  // parsedData?.forEach((record, idx) =>
-  //   magicValues?.forEach((magicValue) => {
-  //     const pkName = magicValue.primaryKey.name;
-  //     const pkFieldValue = magicValue.pkFieldValue;
-  //     if (record[pkName] + "" === pkFieldValue) {
-  //       let remoteRecord = record;
-  //       remoteRecord[magicValue.powerbaseField.name] = magicValue.value;
-  //       mergedData[idx] = remoteRecord;
-  //     }
-  //   })
-  // );
+  let mergedData = parsedData;
+  parsedData?.forEach((record, idx) =>
+    magicValues?.forEach((magicValue) => {
+      const formattedPkFieldNameLabel = `PrimaryKeyNameTable${id}`;
+      const formattedPkFieldValueLabel = `PrimaryKeyValueTable${id}`;
+      const pkName = magicValue[formattedPkFieldNameLabel];
+      const pkValue = magicValue[formattedPkFieldValueLabel];
+      if (record[pkName] === pkValue) {
+        const {
+          formattedPkFieldNameLabel,
+          formattedPkFieldValueLabel,
+          ...associatedValue
+        } = magicValue;
+        const combined = { ...record, ...associatedValue };
+        mergedData[idx] = combined;
+      }
+    })
+  );
+
+  console.log(mergedData);
   const isLoadingInitialData = !data && !error;
   const isLoading =
     isLoadingInitialData ||
@@ -85,7 +93,7 @@ function useTableRecordsModel({ id, pageSize = 40, base }) {
 
   return {
     ...response,
-    data: parsedData,
+    data: mergedData,
     isLoading,
     isReachingEnd,
     loadMore,

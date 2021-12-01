@@ -135,29 +135,27 @@ module Powerbase
     def update_record(options)
       index = "table_records_#{@table_id}"
       primary_keys = options[:primary_keys]
-      identifier_fields = options[:identifier_fields]
-      id = if primary_keys.length.positive?
-        primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
-        elsif options[:id]
-          options[:id]
-        elsif identifier_fields.length.positive?
-          identifier_fields.collect { |key, _| "#{key}_#{identifier_fields[key]}"}.join("-")
+      id = nil
+      if primary_keys.length.positive?
+        id = primary_keys.collect { |key, _| "#{key}_#{primary_keys[key]}" }.join("-")
       end
 
-      if !@esclient.indices.exists(index: index)
-        @esclient.indices.create(
-          index: index,
-          body: {
-            settings: { "index.mapping.ignore_malformed": true }
-          }
-        )
+      if !@is_turbo
+        unless @esclient.indices.exists(index: index)
+          @esclient.indices.create(
+            index: index,
+            body: {
+              settings: { "index.mapping.ignore_malformed": true }
+            }
+          )
+        end
         record = @esclient.update(
           index: index,
           id: id,
           body: {
             doc: options[:data],
             doc_as_upsert: true
-          }
+          },
         )
         record
       else
@@ -166,7 +164,9 @@ module Powerbase
       end
     end
 
-    def magic_search(options)
+    def magic_search
+      puts "fdfd"
+      puts @table_id
       index = "table_records_#{@table_id}"
       result = @esclient.search(index: index)
       result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}

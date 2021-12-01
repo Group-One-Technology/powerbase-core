@@ -76,27 +76,6 @@ class TableRecordsController < ApplicationController
 
   # POST /magic_values
   def add_or_update_magic_value
-    # response = nil
-    # magic_value = MagicValue.find_by(
-    #   pk_field_id: params[:pk_field_id],
-    #   pk_field_value: params[:pk_field_value],
-    #   powerbase_field_id: params[:field_id],
-    #   powerbase_table_id: params[:table_id]
-    # )
-    # if magic_value
-    #   response = magic_value.update!(value: params[:value])
-    # else
-    #   response = MagicValue.create(
-    #     powerbase_field_id: params[:field_id],
-    #     powerbase_table_id: params[:table_id],
-    #     powerbase_field_type_id: params[:field_type_id],
-    #     pk_field_id: params[:pk_field_id],
-    #     pk_field_value: params[:pk_field_value],
-    #     value: params[:value]
-    #   )
-
-    # end
-    # render json: response if response
     model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
     record = model.update_record({
       id: safe_params[:id],
@@ -104,33 +83,20 @@ class TableRecordsController < ApplicationController
       fields: safe_params[:fields],
       data: safe_params[:data]
     })
-    render json: record["get"]["_source"]
+    render json: record
   end
 
   # GET /tables/:id/magic_values
   def magic_values
-    # combined_values ||= []
-    # values = MagicValue.where(powerbase_table_id: params[:id]).joins(:powerbase_field)
-    # values.each do |value|
-    #   composed = value.attributes.merge!(primary_key: value.powerbase_field.attributes)
-    #   id = value.powerbase_field_id
-    #   field = PowerbaseField.find(id)
-    #   composed[:powerbase_field] = field
-    #   combined_values << composed
-    # end
-    # render json: combined_values
-    @table = PowerbaseTable.find(safe_params[:id])
-    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    puts "IN DREAMLAND"
+    puts params[:id]
+    @table = PowerbaseTable.find(params[:id])
+    raise NotFound.new("Could not find table with id of #{params[:id]}") if !@table
     # current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
-    @records = model.magic_search({
-      query: safe_params[:query],
-      filters: safe_params[:filters],
-      sort: safe_params[:sort],
-      page: safe_params[:page],
-      limit: safe_params[:limit],
-    })
+    @records = model.magic_search
+    puts @records
 
     render json: @records
   end

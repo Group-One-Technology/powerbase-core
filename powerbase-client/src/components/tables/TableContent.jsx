@@ -38,7 +38,7 @@ const BaseTableContent = React.memo(({ views, table }) => {
           id={table.id}
           pageSize={table.pageSize}
           isVirtual={table.isVirtual}
-          base={base}
+          isTurbo={base.isTurbo}
         >
           <FieldTypesProvider>
             <ViewFieldStateProvider>

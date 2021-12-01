@@ -209,6 +209,7 @@ export function CellRenderer({
   isHighlighted,
   setCalendarValue,
   calendarValue,
+  isTurbo,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -274,31 +275,29 @@ export function CellRenderer({
       (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
     );
 
-    let primaryKeys = {},
-      pkFieldId,
+    let computedPrimaryKey = {},
       pkFieldValue,
       pkFieldName;
-    computedFields?.forEach((item) => {
-      const { isPrimaryKey, value, id, name } = item;
-      if (isPrimaryKey) {
-        pkFieldId = id;
-        pkFieldValue = value;
-        pkFieldName = name;
-        primaryKeys[name.toLowerCase()] = value;
-        primaryKey;
-      }
-    });
+    const primaryKey = computedFields?.find((item) => item.isPrimaryKey);
+
+    if (primaryKey) {
+      const { value, name } = primaryKey;
+      pkFieldValue = value;
+      pkFieldName = name;
+      computedPrimaryKey[name.toLowerCase()] = value;
+    }
 
     let hasPrecision = false;
     let formattedNumber;
+    let payload;
     if (field.precision && fieldType.dataType === "number") {
       hasPrecision = true;
       const sanitizedNumber = parseFloat(recordInputRef.current?.value);
       formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.precision);
     }
 
-    const payload = {
-      primary_key,
+    payload = {
+      primary_keys: computedPrimaryKey,
       data: {
         [field.name]: field.precision
           ? formattedNumber
@@ -306,7 +305,13 @@ export function CellRenderer({
       },
     };
 
-    console.log(payload);
+    if (!isTurbo) {
+      const formattedPkFieldNameLabel = `__primary_key_name_table_${table.id}`;
+      const formattedPKFieldValueLabel = `__primary_key_value_table_${table.id}`;
+      payload.data[formattedPkFieldNameLabel] = pkFieldName;
+      payload.data[formattedPKFieldValueLabel] = pkFieldValue;
+    }
+
     try {
       const response = await securedApi.post(
         `/magic_values/${field.tableId}`,
