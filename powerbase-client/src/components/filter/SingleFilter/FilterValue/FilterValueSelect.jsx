@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import useSWR from 'swr';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { SelectorIcon } from '@heroicons/react/solid';
-import { Listbox } from '@headlessui/react';
+/* eslint-disable */
+import React, { useEffect } from "react";
+import useSWR from "swr";
+import PropTypes from "prop-types";
+import cn from "classnames";
+import { SelectorIcon } from "@heroicons/react/solid";
+import { Listbox } from "@headlessui/react";
 
-import { useAuthUser } from '@models/AuthUser';
-import { IId } from '@lib/propTypes/common';
-import { getSelectOptions } from '@lib/api/select-options';
+import { useAuthUser } from "@models/AuthUser";
+import { IId } from "@lib/propTypes/common";
+import { getSelectOptions } from "@lib/api/select-options";
 
 export function FilterValueSelect({
   id,
@@ -20,8 +21,8 @@ export function FilterValueSelect({
   const { authUser } = useAuthUser();
 
   const { data: options } = useSWR(
-    (fieldId && authUser) ? `/fields/${fieldId}/select_options` : null,
-    () => (fieldId ? getSelectOptions({ fieldId }) : undefined),
+    fieldId && authUser ? `/fields/${fieldId}/select_options` : null,
+    () => (fieldId ? getSelectOptions({ fieldId }) : undefined)
   );
 
   useEffect(() => {
@@ -31,13 +32,20 @@ export function FilterValueSelect({
   }, [fieldId, options]);
 
   return (
-    <Listbox value={value || options?.values[0]} onChange={onChange} disabled={disabled} {...props}>
+    <Listbox
+      value={value || options?.values[0]}
+      onChange={onChange}
+      disabled={disabled}
+      {...props}
+    >
       <div className="block w-full">
         <Listbox.Button
           id={id}
           className={cn(
-            'block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm',
-            disabled ? 'cursor-not-allowed bg-gray-100' : 'bg-white cursor-default',
+            "block relative w-full text-sm h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm",
+            disabled
+              ? "cursor-not-allowed bg-gray-100"
+              : "bg-white cursor-default"
           )}
         >
           <span className="block truncate">{value}</span>
@@ -53,10 +61,12 @@ export function FilterValueSelect({
             <Listbox.Option
               key={option}
               value={option}
-              className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate',
-                (active || selected) ? 'bg-gray-100' : 'bg-white',
-              )}
+              className={({ active, selected }) =>
+                cn(
+                  "cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate",
+                  active || selected ? "bg-gray-100" : "bg-white"
+                )
+              }
             >
               {option}
             </Listbox.Option>

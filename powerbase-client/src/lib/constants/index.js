@@ -47,6 +47,17 @@ export const BG_COLORS = {
   pink: "bg-pink-500",
 };
 
+export const OUTLINE_COLORS = {
+  gray: "gray-500",
+  yellow: "yellow-500",
+  red: "red-500",
+  green: "green-500",
+  blue: "blue-500",
+  indigo: "indigo-500",
+  purple: "purple-500",
+  pink: "pink-500",
+};
+
 export const SCROLLBAR_WIDTH = 15;
 export const ROW_NO_CELL_WIDTH = 80;
 export const DEFAULT_CELL_WIDTH = 300;

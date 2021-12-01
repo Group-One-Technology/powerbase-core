@@ -9,6 +9,7 @@ import {
   restrictToHorizontalAxis,
   restrictToFirstScrollableAncestor,
 } from "@dnd-kit/modifiers";
+import { SparklesIcon, UserIcon } from "@heroicons/react/outline";
 
 import { useFieldTypes } from "@models/FieldTypes";
 import {
@@ -23,6 +24,7 @@ import { useReorderFields } from "@lib/hooks/virtual-table/useReorderFields";
 import { useResizeFields } from "@lib/hooks/virtual-table/useResizeFields";
 import { useFieldOptions } from "@lib/hooks/virtual-table/useFieldOptions";
 import { GridHeaderOptions } from "./GridHeaderOptions";
+import { OUTLINE_COLORS } from "@lib/constants/index";
 
 const GRID_HEADER_HEIGHT = 30;
 
@@ -38,9 +40,10 @@ function CellRenderer({
   handleResizeColumn,
   handleResizeStop,
   style,
+  base,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
-
+  console.log("base:", base);
   const handleClick = () => setOption(true);
 
   const droppableArea = (
@@ -77,15 +80,24 @@ function CellRenderer({
 
   return (
     <React.Fragment key={key}>
-      <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
-        <GridHeaderOptions table={table} option={option} field={field} setOptionOpen={setOption} />
+      <div
+        id={key}
+        className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2"
+        style={style}
+      >
+        <GridHeaderOptions
+          table={table}
+          option={option}
+          field={field}
+          setOptionOpen={setOption}
+        />
 
         <DraggableItem
           id={key}
           data={{ type: "column", index: columnIndex - 1, field }}
           className="absolute w-full h-full"
           onKeyDown={(evt) => {
-            if (evt.key === 'Enter') handleClick(evt);
+            if (evt.key === "Enter") handleClick(evt);
           }}
           onClick={handleClick}
         />
@@ -98,6 +110,13 @@ function CellRenderer({
           className="mr-1"
         />
         <span>{field.alias || field.name}</span>
+        {field.isVirtual && (
+          <SparklesIcon
+            className={`h-5 w-5 ml-auto text-${
+              OUTLINE_COLORS[base.color]
+            } cursor-auto select-none`}
+          />
+        )}
       </div>
       <Draggable
         axis="x"
@@ -141,6 +160,7 @@ export const GridHeader = React.forwardRef(
       onScroll,
       scrollLeft,
       hasScrollbar,
+      base,
     },
     ref
   ) => {
@@ -191,20 +211,21 @@ export const GridHeader = React.forwardRef(
               ? options.find((item) => item.id === field.id)
               : undefined;
 
-          return CellRenderer({
-            ...props,
-            table,
-            columnIndex,
-            field,
-            fieldTypes,
-            option,
-            setOption: (value) => setOption(field.id, value),
-            dragging,
-            handleResizeColumn,
-            handleResizeStop,
-          });
-        }}
-      />
+            return CellRenderer({
+              ...props,
+              table,
+              columnIndex,
+              field,
+              fieldTypes,
+              option,
+              setOption: (value) => setOption(field.id, value),
+              dragging,
+              handleResizeColumn,
+              handleResizeStop,
+              base,
+            });
+          }}
+        />
 
         <DragOverlay>
           {dragging?.active.data.current?.field && (

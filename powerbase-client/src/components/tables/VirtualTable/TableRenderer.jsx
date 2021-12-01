@@ -20,11 +20,10 @@ import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
 import { useBase } from "@models/Base";
 
-export function TableRenderer({ height, table, highlightedCell }) {
+export function TableRenderer({ height, table, highlightedCell, base }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
-  const { data: base } = useBase();
   const {
     data: records,
     loadMore: loadMoreRows,
@@ -109,6 +108,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
                   onScroll={onScroll}
                   scrollLeft={scrollLeft}
                   hasScrollbar={scrollHeight > clientHeight}
+                  base={base}
                 />
                 <InfiniteLoader
                   isRowLoaded={({ index }) => !!records[index]}

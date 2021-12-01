@@ -3,6 +3,8 @@ import { securedApi } from "./index";
 
 export async function getTableRecords({ url, ...payload }) {
   const response = await securedApi.post(url, payload);
+  console.log(url);
+  console.log(payload);
 
   if (response.statusText === "OK") {
     return response.data;

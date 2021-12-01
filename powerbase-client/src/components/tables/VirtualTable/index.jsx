@@ -15,6 +15,7 @@ import { FieldPermissionsModal } from "@components/fields/FieldPermissionsModal"
 import { TableRenderer } from "./TableRenderer";
 
 import "react-virtualized/styles.css";
+import { useBase } from "@models/Base";
 
 export function VirtualTable({ height, table }) {
   const { data: fields } = useViewFields();
@@ -22,6 +23,7 @@ export function VirtualTable({ height, table }) {
   const { data: records, highlightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
   const { dataListener } = useWebsocket();
+  const { data: base } = useBase();
 
   useEffect(() => {
     dataListener(table.id);
@@ -43,6 +45,7 @@ export function VirtualTable({ height, table }) {
           height={height}
           table={table}
           highlightedCell={highlightedCell}
+          base={base}
         />
         <FieldPermissionsModal />
       </FieldPermissionsModalProvider>

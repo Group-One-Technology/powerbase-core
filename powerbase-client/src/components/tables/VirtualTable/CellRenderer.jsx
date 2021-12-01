@@ -80,16 +80,6 @@ function CellValue({
               <span className="sr-only">Expand Record</span>
             </button>
           )}{" "}
-          {/* {isHoveredRow && isLastRow && isRowNo && (
-            <button
-              type="button"
-              className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
-              onClick={addNewRecord}
-            >
-              <PlusIcon className="h-5 w-5 ml-2 p-0.5" />
-              <span className="sr-only">Add New Record</span>
-            </button>
-          )} */}
         </span>
       </>
     );
@@ -345,22 +335,25 @@ export function CellRenderer({
     return condition ? wrapper(children) : children;
   };
 
+  const isDoubleClickedCell =
+    cellToEdit &&
+    cellToEdit.row !== null &&
+    cellToEdit.row === rowIndex &&
+    cellToEdit.column === columnIndex;
+
   return (
     <div
       role="button"
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        "single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2",
+        "single-line text-sm truncate focus:bg-gray-100 border-b items-center py-1 px-2",
         isHighlighted && "update-highlight",
         isHoveredRow && "bg-gray-50",
         isRowNo ? "justify-center text-xs text-gray-500" : "border-r",
         !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? "inline" : "flex",
-        cellToEdit &&
-          cellToEdit.row !== null &&
-          cellToEdit.row === rowIndex &&
-          cellToEdit.column === columnIndex &&
-          "border border-indigo-500"
+        isDoubleClickedCell && "border border-indigo-500",
+        !isDoubleClickedCell && "border-gray-200"
       )}
       style={style}
       tabIndex={0}

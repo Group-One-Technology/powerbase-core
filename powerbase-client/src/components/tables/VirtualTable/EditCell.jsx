@@ -91,22 +91,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
   };
 
   const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
-    // <input
-    //   className="w-full focus:outline-none text-sm leading-3"
-    //   onChange={(e) => onChange(e.target.value)}
-    //   value={value}
-    //   ref={ref}
-    //   onClick={onClick}
-    // />
     <CalButton onClick={onClick} value={value} />
-
-    // // <button
-    // //   className="w-full focus:outline-none text-sm leading-3"
-    // //   onClick={onClick}
-    // //   ref={ref}
-    // // >
-    // //   {value}
-    // // </button>
   ));
   return (
     <DatePicker
