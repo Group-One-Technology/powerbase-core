@@ -240,7 +240,7 @@ export function CellRenderer({
     setEditCellInput(value);
   };
 
-  const onClickOutsideEditingCell = async (calendarData = null) => {
+  const onClickOutsideEditingCell = async (e, calendarData = null) => {
     const exitEditing = () => {
       setCellToEdit({});
       recordInputRef?.current?.blur();
@@ -307,6 +307,7 @@ export function CellRenderer({
         `/magic_values/${field.tableId}`,
         payload
       );
+      console.log("russ: ", recordInputRef.current.value);
       const recordsToUse = updatedRecords ? updatedRecords : records;
       if (response.statusText === "OK") {
         const mutatedRecords = recordsToUse.map((recordObj, idx) => {
@@ -391,7 +392,7 @@ export function CellRenderer({
           condition={fieldType.dataType !== "date"}
           wrapper={(children) => (
             <OutsideCellClick
-              onClickOutside={onClickOutsideEditingCell}
+              onClickOutside={(e) => onClickOutsideEditingCell(e)}
               className="h-full"
               isCalender={fieldType.dataType === "date"}
             >

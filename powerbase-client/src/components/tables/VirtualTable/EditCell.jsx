@@ -75,7 +75,6 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
   const CalButton = ({ onClick, value, ref }) => {
     const buttonRef = useRef(null);
     useEffect(() => {
-      // document.getElementById("cal-button").click();
       buttonRef?.current?.click();
     }, []);
     return (
@@ -134,7 +133,6 @@ function TextCell(
   useEffect(() => {
     if (fieldType.dataType !== "date") ref.current.focus();
   }, []);
-
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">

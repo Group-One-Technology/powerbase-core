@@ -43,7 +43,6 @@ function CellRenderer({
   base,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
-  console.log("base:", base);
   const handleClick = () => setOption(true);
 
   const droppableArea = (
