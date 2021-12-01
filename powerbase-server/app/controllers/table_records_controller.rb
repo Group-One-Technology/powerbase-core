@@ -88,8 +88,6 @@ class TableRecordsController < ApplicationController
 
   # GET /tables/:id/magic_values
   def magic_values
-    puts "IN DREAMLAND"
-    puts params[:id]
     @table = PowerbaseTable.find(params[:id])
     raise NotFound.new("Could not find table with id of #{params[:id]}") if !@table
     # current_user.can?(:view_table, @table)

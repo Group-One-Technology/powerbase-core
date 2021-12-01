@@ -165,8 +165,6 @@ module Powerbase
     end
 
     def magic_search
-      puts "fdfd"
-      puts @table_id
       index = "table_records_#{@table_id}"
       result = @esclient.search(index: index)
       result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}

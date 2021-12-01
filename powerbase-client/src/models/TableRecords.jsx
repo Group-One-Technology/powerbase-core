@@ -66,7 +66,7 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
         const formattedPkFieldValueLabel = `PrimaryKeyValueTable${id}`;
         const pkName = magicValue[formattedPkFieldNameLabel];
         const pkValue = magicValue[formattedPkFieldValueLabel];
-        if (record[pkName] === pkValue) {
+        if (record[pkName] + "" === pkValue + "") {
           const {
             formattedPkFieldNameLabel,
             formattedPkFieldValueLabel,
