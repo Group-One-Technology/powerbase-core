@@ -86,7 +86,10 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
   };
 
   return (
-    <div className="w-full overflow-hidden z-0">
+    <div
+      className="w-full overflow-hidden z-0"
+      id="power-base-virtualized-table"
+    >
       <AutoSizer
         disableHeight
         onResize={() => {

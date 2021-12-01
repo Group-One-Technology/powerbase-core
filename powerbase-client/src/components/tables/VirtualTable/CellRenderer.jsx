@@ -307,7 +307,6 @@ export function CellRenderer({
         `/magic_values/${field.tableId}`,
         payload
       );
-      console.log("russ: ", recordInputRef.current.value);
       const recordsToUse = updatedRecords ? updatedRecords : records;
       if (response.statusText === "OK") {
         const mutatedRecords = recordsToUse.map((recordObj, idx) => {
