@@ -209,18 +209,12 @@ export default function NewField({
     if (response.statusText === "OK") {
       setIsCreatingField(false);
       mutateViewFields();
-      const id = response.data.id;
-      const element = document.getElementById(`row-0-column-12`);
       close();
-      console.log("el", element);
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "center",
-      });
       return response.data;
     }
   };
+
+  window.scrollTo(1200, 1200);
 
   return (
     <div className="m-4">
