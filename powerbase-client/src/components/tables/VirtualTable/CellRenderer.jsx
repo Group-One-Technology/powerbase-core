@@ -285,6 +285,7 @@ export function CellRenderer({
         pkFieldValue = value;
         pkFieldName = name;
         primaryKeys[name.toLowerCase()] = value;
+        primaryKey;
       }
     });
 
@@ -297,18 +298,7 @@ export function CellRenderer({
     }
 
     const payload = {
-      // pk_field_value: pkFieldValue,
-      // pk_field_id: pkFieldId,
-      // table_id: field.tableId,
-      // has_precision: false,
-      // value: field.precision
-      //   ? formattedNumber
-      //   : calendarData
-      //   ? calendarData
-      //   : recordInputRef.current?.value,
-      // field_id: field.id,
-      // field_type_id: field.fieldTypeId,
-      primary_keys: primaryKeys,
+      primary_key,
       data: {
         [field.name]: field.precision
           ? formattedNumber

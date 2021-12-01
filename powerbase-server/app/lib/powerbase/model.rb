@@ -134,28 +134,44 @@ module Powerbase
     # Ex: { pathId: 123, userId: 1245 }
     def update_record(options)
       index = "table_records_#{@table_id}"
+      primary_keys = options[:primary_keys]
+      identifier_fields = options[:identifier_fields]
+      id = if primary_keys.length.positive?
+        primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
+        elsif options[:id]
+          options[:id]
+        elsif identifier_fields.length.positive?
+          identifier_fields.collect { |key, _| "#{key}_#{identifier_fields[key]}"}.join("-")
+      end
 
       if !@esclient.indices.exists(index: index)
         @esclient.indices.create(
           index: index,
           body: {
-            settings: { "index.mapping.ignore_malformed": true },
+            settings: { "index.mapping.ignore_malformed": true }
           }
         )
+        record = @esclient.update(
+          index: index,
+          id: id,
+          body: {
+            doc: options[:data],
+            doc_as_upsert: true
+          }
+        )
+        record
+      else
+        response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
+        response
       end
-
-      primary_keys = options[:primary_keys]
-      identifier_fields = options[:fields]
-      id = if primary_keys.length > 0
-        primary_keys.collect {|key, value| "#{key}_#{primary_keys[key]}"}.join("-")
-        elsif options[:id]
-          options[:id]
-        elsif identifier_fields.length > 0
-          identifier_fields.collect {|key, _| "#{key}_#{identifier_fields[key]}"}.join("-")
-      end
-      response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
-      response
     end
+
+    def magic_search(options)
+      index = "table_records_#{@table_id}"
+      result = @esclient.search(index: index)
+      result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
+    end
+
 
     # * Get a document/table record.
     # Accepts the following options:

@@ -109,16 +109,30 @@ class TableRecordsController < ApplicationController
 
   # GET /tables/:id/magic_values
   def magic_values
-    combined_values ||= []
-    values = MagicValue.where(powerbase_table_id: params[:id]).joins(:powerbase_field)
-    values.each do |value|
-      composed = value.attributes.merge!(primary_key: value.powerbase_field.attributes)
-      id = value.powerbase_field_id
-      field = PowerbaseField.find(id)
-      composed[:powerbase_field] = field
-      combined_values << composed
-    end
-    render json: combined_values
+    # combined_values ||= []
+    # values = MagicValue.where(powerbase_table_id: params[:id]).joins(:powerbase_field)
+    # values.each do |value|
+    #   composed = value.attributes.merge!(primary_key: value.powerbase_field.attributes)
+    #   id = value.powerbase_field_id
+    #   field = PowerbaseField.find(id)
+    #   composed[:powerbase_field] = field
+    #   combined_values << composed
+    # end
+    # render json: combined_values
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    # current_user.can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    @records = model.magic_search({
+      query: safe_params[:query],
+      filters: safe_params[:filters],
+      sort: safe_params[:sort],
+      page: safe_params[:page],
+      limit: safe_params[:limit],
+    })
+
+    render json: @records
   end
 
   # POST /magic_records

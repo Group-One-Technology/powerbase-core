@@ -16,7 +16,7 @@ function getKey({ index, tableId, query, sort, filters, pageSize }) {
   return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
-function useTableRecordsModel({ id, pageSize = 40 }) {
+function useTableRecordsModel({ id, pageSize = 40, base }) {
   const { authUser } = useAuthUser();
   const { viewId, query, filters, sort } = useViewOptions();
 
@@ -56,6 +56,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   // );
 
   // const { data: magicData } = magicValuesResponse;
+  console.log("base", base);
 
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   // let magicValues = magicData;
