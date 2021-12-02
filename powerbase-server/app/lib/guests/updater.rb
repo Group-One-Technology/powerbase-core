@@ -177,8 +177,6 @@ class Guests::Updater
     if access == "custom"
       @guest.permissions = {
         view_base: true,
-        view_table: true,
-        view_field: true,
         tables: {},
         fields: {},
       }

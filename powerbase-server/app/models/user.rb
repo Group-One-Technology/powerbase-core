@@ -68,6 +68,8 @@ class User < ApplicationRecord
     raise AccessDenied if !guest && error
     return false if !guest
 
+    return guest != nil if permission == :view_base
+
     if guest.access.to_sym != :custom
       permission_key = permission.to_s
 
