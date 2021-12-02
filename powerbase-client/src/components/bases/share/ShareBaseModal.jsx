@@ -13,6 +13,7 @@ import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models
 import { inviteGuest } from '@lib/api/guests';
 import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
+import { useBase } from '@models/Base';
 
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
@@ -30,6 +31,7 @@ function BaseShareBaseModal() {
   const { mutate: mutateViewFields } = useViewFields();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
+  const { mutate: mutateBase } = useBase();
 
   const isOwner = baseUser.userId === base.owner.userId;
   const canInviteGuests = baseUser?.can(PERMISSIONS.InviteGuests, guest.state);
@@ -69,6 +71,7 @@ function BaseShareBaseModal() {
             ? guest.getPermissions()
             : undefined,
         });
+        mutateBase();
         mutateTables();
         mutateViewFields();
         await mutateGuests();

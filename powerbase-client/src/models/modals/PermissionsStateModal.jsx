@@ -20,7 +20,7 @@ function usePermissionsStateModalModel() {
     saving, saved, catchError, loading,
   } = useSaveStatus();
   const { tables, tablesResponse: { mutate: mutateTables } } = useCurrentView();
-  const { data: base } = useBase();
+  const { data: base, mutate: mutateBase } = useBase();
   const { baseUser, mutate: mutateBaseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { mutate: mutateViewFields } = useViewFields();
@@ -130,6 +130,7 @@ function usePermissionsStateModalModel() {
         if (baseUser.userId === guest.userId) {
           mutateBaseUser({ ...baseUser, permissions: filteredPermissions });
         }
+        mutateBase();
         mutateTables();
         mutateViewFields();
         await mutateGuests(guests.map((item) => ({
