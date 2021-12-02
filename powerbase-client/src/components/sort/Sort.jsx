@@ -16,6 +16,7 @@ import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
 import { useReorderSort } from '@lib/hooks/sort/useReorderSort';
 import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { SortItem } from './SortItem';
 
 export function Sort({ table }) {
@@ -26,7 +27,7 @@ export function Sort({ table }) {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const canManageViews = baseUser?.can('manageViews', table);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
 
   const updateSort = async (value) => {
     if (canManageViews) {

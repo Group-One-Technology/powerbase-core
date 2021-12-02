@@ -35,13 +35,15 @@ export function GuestsModal() {
       || item.email.toLowerCase().includes(query.toLowerCase()))
     : initialGuests;
 
-  let { allowedGuests, restrictedGuests } = permission;
+  let allowedGuests = permission?.allowedGuests || [];
+  let restrictedGuests = permission?.restrictedGuests || [];
 
   if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== permission.defaultValue) {
     const otherGuests = guests.filter((curItem) => {
       if (curItem.access !== 'custom') return false;
       if (type === 'field') return curItem.permissions.fields?.[id]?.[permission.key] == null;
-      return curItem.permissions.tables?.[id]?.[permission.key] == null;
+      if (type === 'table') return curItem.permissions.tables?.[id]?.[permission.key] == null;
+      return curItem.permissions?.[permission.key] == null;
     });
 
     if (permission.defaultValue) {

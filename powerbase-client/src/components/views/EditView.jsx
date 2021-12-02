@@ -10,6 +10,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { deleteTableView, updateTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { useMounted } from '@lib/hooks/useMounted';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
@@ -27,7 +28,7 @@ export function EditView({
   const [name, setName] = useState(view.name);
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
 
-  const canManageViews = baseUser?.can('manageViews', table);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();

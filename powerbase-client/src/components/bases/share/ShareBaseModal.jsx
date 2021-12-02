@@ -11,14 +11,15 @@ import { useViewFields } from '@models/ViewFields';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { inviteGuest } from '@lib/api/guests';
-import { ACCESS_LEVEL } from '@lib/constants/permissions';
+import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
+import { useBase } from '@models/Base';
 
 import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
-import { PermissionsModal } from '@components/guest/PermissionsModal';
+import { PermissionsModal } from '@components/permissions/PermissionsModal';
 import { GUEST_COLLABORATION_LINK, OWNER_COLLABORATION_LINK } from '@lib/constants/links';
 
 function BaseShareBaseModal() {
@@ -30,9 +31,10 @@ function BaseShareBaseModal() {
   const { mutate: mutateViewFields } = useViewFields();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
+  const { mutate: mutateBase } = useBase();
 
   const isOwner = baseUser.userId === base.owner.userId;
-  const canInviteGuests = baseUser?.can('inviteGuests', guest.state);
+  const canInviteGuests = baseUser?.can(PERMISSIONS.InviteGuests, guest.state);
   const baseUserAccess = baseUser && ACCESS_LEVEL.find((item) => item.name === baseUser.access);
 
   const [guests, setGuests] = useState(initialGuests);
@@ -69,6 +71,7 @@ function BaseShareBaseModal() {
             ? guest.getPermissions()
             : undefined,
         });
+        mutateBase();
         mutateTables();
         mutateViewFields();
         await mutateGuests();

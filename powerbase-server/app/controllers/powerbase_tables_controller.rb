@@ -34,7 +34,6 @@ class PowerbaseTablesController < ApplicationController
     required(:roles)
   end
 
-
   # GET /databases/:database_id/tables
   def index
     @database = PowerbaseDatabase.find(safe_params[:database_id])

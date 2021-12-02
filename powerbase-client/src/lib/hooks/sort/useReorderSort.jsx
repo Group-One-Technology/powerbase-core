@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
+
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBaseUser } from '@models/BaseUser';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
-import { useBaseUser } from '@models/BaseUser';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function useReorderSort({ table, sort, updateSort }) {
   const { mounted } = useMounted();
@@ -15,7 +17,7 @@ export function useReorderSort({ table, sort, updateSort }) {
   const handleDragStart = () => setDragging(true);
 
   const handleReorderSort = async ({ active, over }) => {
-    if (active.id !== over.id && baseUser?.can('manageViews', table)) {
+    if (active.id !== over.id && baseUser?.can(PERMISSIONS.ManageViews, table)) {
       saving();
 
       const oldIndex = sort.findIndex((item) => item.id === active.id);

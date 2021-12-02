@@ -16,13 +16,14 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { TablePermissionsModalProvider } from '@models/modals/TablePermissionsModal';
 import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { useTableTabsReorder } from '@lib/hooks/tables/useTableTabsReorder';
 
+import { TablePermissionsModal } from '@components/permissions/TablePermissionsModal';
 import TableSearchModal from '../TableSearchModal';
 import { TableTabsMobile } from './TableTabsMobile';
 import { TableTabsLoader } from './TableTabsLoader';
 import { TableTabItem } from './TableTabItem';
-import { TablePermissionsModal } from '../TablePermissionsModal';
 
 export function TableTabs() {
   const { data: base } = useBase();
@@ -33,7 +34,7 @@ export function TableTabs() {
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
   const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
 
-  const canAddTables = baseUser?.can('addTables');
+  const canAddTables = baseUser?.can(PERMISSIONS.AddTables);
 
   useEffect(() => {
     setTables(initialTables);
@@ -51,7 +52,6 @@ export function TableTabs() {
 
   return (
     <TablePermissionsModalProvider>
-
       <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[base.color])}>
         <TableTabsMobile addTable={addTable} />
         <div className="hidden sm:flex">

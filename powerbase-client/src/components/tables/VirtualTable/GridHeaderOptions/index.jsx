@@ -26,6 +26,7 @@ import {
   setFieldAsPII,
   unsetFieldAsPII,
 } from '@lib/api/fields';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
 export function GridHeaderOptions({
@@ -44,10 +45,10 @@ export function GridHeaderOptions({
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
-  const canManageViews = baseUser?.can('manageViews', table);
-  const canAddFields = baseUser?.can('addFields', table);
-  const canManageField = baseUser?.can('manageField', field);
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
+  const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const [alias, setAlias] = useState(field.alias || field.name);
 

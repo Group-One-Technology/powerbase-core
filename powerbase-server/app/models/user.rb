@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
@@ -67,10 +68,25 @@ class User < ApplicationRecord
     raise AccessDenied if !guest && error
     return false if !guest
 
+    return guest != nil if permission == :view_base
+
     if guest.access.to_sym != :custom
       permission_key = permission.to_s
 
       case resource_type
+      when :database
+        database_access = database.permissions[permission_key]["access"]
+
+        if database_access == "specific users only"
+          return true if guest.creator?
+          allowed_roles = Array(database.permissions[permission_key]["allowed_roles"])
+          return true if allowed_roles.any? {|role| role == guest.access}
+          allowed_guests = Array(database.permissions[permission_key]["allowed_guests"])
+          return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          return false
+        elsif database_access != DATABASE_DEFAULT_PERMISSIONS[permission][:access]
+          return does_guest_have_access(guest.access, database_access)
+        end
       when :table
         table_access = table.permissions[permission_key]["access"]
 

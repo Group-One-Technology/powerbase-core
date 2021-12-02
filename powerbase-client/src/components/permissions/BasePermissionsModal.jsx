@@ -9,18 +9,18 @@ import {
   QuestionMarkCircleIcon,
 } from '@heroicons/react/outline';
 
-import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseGuests } from '@models/BaseGuests';
-import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
-import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
-import { updateFieldPermission, updateFieldPermissionAllowedRoles } from '@lib/api/fields';
-import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
+import { useBasePermissionsModal } from '@models/modals/BasePermissionsModal';
+import { useBase } from '@models/Base';
+import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
+import { updateDatabasePermission, updateDatabasePermissionAllowedRoles } from '@lib/api/databases';
+import { updateGuestDatabasePermissions } from '@lib/api/guests';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -28,31 +28,31 @@ import { GuestsModal } from '@components/guest/GuestsModal';
 import { Button } from '@components/ui/Button';
 import { GuestRoleCard } from '@components/guest/GuestRoleCard';
 
-function BaseFieldPermissionsModal() {
+function BasePermissionsModalContent() {
   const {
-    saving, saved, catchError, loading,
+    saving,
+    saved,
+    catchError,
+    loading,
   } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
-  const { data: fields, mutate: mutateViewField } = useViewFields();
-  const { modal, field } = useFieldPermissionsModal();
+  const { modal } = useBasePermissionsModal();
+  const { data: base, mutate: mutateBase } = useBase();
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canManageField = field
-    ? baseUser?.can('manageField', field)
-    : false;
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const handleChangePermissionAccess = async (permission, access) => {
-    if (canManageField) {
+    if (canChangeGuestAccess) {
       saving();
 
-      if (field.permissions[permission.key].access !== access) {
+      if (base.permissions[permission.key].access !== access) {
         try {
-          await updateFieldPermission({ id: field.id, permission: permission.key, access });
-          await mutateViewField();
-          saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
+          await updateDatabasePermission({ id: base.id, permission: permission.key, access });
+          await mutateBase();
+          saved(`Successfully updated base "${base.name}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
           catchError(err.response.data.error || err.response.data.exception);
         }
@@ -61,41 +61,32 @@ function BaseFieldPermissionsModal() {
   };
 
   const handleRemoveGuests = async (guest, permission, list) => {
-    if (canChangeGuestAccess && field) {
+    if (canChangeGuestAccess && base) {
       const permissions = { [permission]: !(list === 'allowed') };
 
       const updatedGuestPermission = {
-        ...(guest.permissions.fields || {}),
-        [field.id]: {
-          ...(guest.permissions.fields?.[field.id] || {}),
-          ...permissions,
-        },
+        ...(guest.permissions || {}),
+        ...permissions,
       };
 
-      const updatedField = { ...field };
+      const updatedBase = { ...base };
       if (list === 'allowed') {
-        const restrictedGuests = updatedField.permissions[permission]?.restrictedGuests || [];
-        updatedField.permissions[permission].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
+        const restrictedGuests = updatedBase.permissions[permission]?.restrictedGuests || [];
+        updatedBase.permissions[permission].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
       } else {
-        const allowedGuests = updatedField.permissions[permission]?.allowedGuests || [];
-        updatedField.permissions[permission].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
+        const allowedGuests = updatedBase.permissions[permission]?.allowedGuests || [];
+        updatedBase.permissions[permission].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
       }
 
       try {
-        await updateGuestFieldPermissions({
-          id: guest.id,
-          fieldId: field.id,
-          permissions,
-        });
+        await updateGuestDatabasePermissions({ id: guest.id, permissions });
         mutateGuests(guests.map((item) => ({
           ...item,
           permissions: item.id === guest.id
             ? updatedGuestPermission
             : item.permissions,
         })));
-        mutateViewField(fields.map((item) => (item.id === field.id
-          ? updatedField
-          : item)));
+        await mutateBase(updatedBase);
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -104,20 +95,18 @@ function BaseFieldPermissionsModal() {
   };
 
   const handleRemoveRole = async (role, permission) => {
-    const updatedField = { ...field };
-    const allowedRoles = (updatedField.permissions[permission]?.allowedRoles || [])
+    const updatedBase = { ...base };
+    const allowedRoles = (updatedBase.permissions[permission]?.allowedRoles || [])
       .filter((item) => item !== role);
-    updatedField.permissions[permission].allowedRoles = allowedRoles;
+    updatedBase.permissions[permission].allowedRoles = allowedRoles;
 
     try {
-      await updateFieldPermissionAllowedRoles({
-        id: field.id,
+      await updateDatabasePermissionAllowedRoles({
+        id: base.id,
         roles: allowedRoles,
         permission,
       });
-      mutateViewField(fields.map((item) => (item.id === field.id
-        ? updatedField
-        : item)));
+      await mutateBase(updatedBase);
       saved(`Successfully removed "${role}" from allowed roles.`);
     } catch (err) {
       catchError(err.response.data.error || err.response.data.exception);
@@ -125,7 +114,7 @@ function BaseFieldPermissionsModal() {
   };
 
   const handleAddGuests = (permission, list) => {
-    if (canChangeGuestAccess && field) {
+    if (canChangeGuestAccess && base) {
       const select = async (guest) => {
         const permissionKey = permission.key;
         const permissions = { [permissionKey]: list === 'allowed' };
@@ -133,22 +122,20 @@ function BaseFieldPermissionsModal() {
         if (typeof guest === 'string') {
           const role = guest;
 
-          const updatedField = { ...field };
+          const updatedBase = { ...base };
           const allowedRoles = [
-            ...(updatedField.permissions[permissionKey]?.allowedRoles || []),
+            ...(updatedBase.permissions[permissionKey]?.allowedRoles || []),
             role,
           ];
-          updatedField.permissions[permissionKey].allowedRoles = allowedRoles;
+          updatedBase.permissions[permissionKey].allowedRoles = allowedRoles;
 
           try {
-            await updateFieldPermissionAllowedRoles({
-              id: field.id,
+            await updateDatabasePermissionAllowedRoles({
+              id: base.id,
               roles: allowedRoles,
               permission: permissionKey,
             });
-            mutateViewField(fields.map((item) => (item.id === field.id
-              ? updatedField
-              : item)));
+            await mutateBase(updatedBase);
             saved(`Successfully added "${role}" from allowed roles.`);
           } catch (err) {
             catchError(err.response.data.error || err.response.data.exception);
@@ -159,36 +146,30 @@ function BaseFieldPermissionsModal() {
         }
 
         const updatedGuestPermission = {
-          ...(guest.permissions.fields || {}),
-          [field.id]: {
-            ...(guest.permissions.fields?.[field.id] || {}),
-            ...permissions,
-          },
+          ...(guest.permissions || {}),
+          ...permissions,
         };
 
-        const updatedField = { ...field };
-        const restrictedGuests = updatedField.permissions[permissionKey]?.restrictedGuests || [];
-        const allowedGuests = updatedField.permissions[permissionKey]?.allowedGuests || [];
+        const updatedBase = { ...base };
+        const restrictedGuests = updatedBase.permissions[permissionKey]?.restrictedGuests || [];
+        const allowedGuests = updatedBase.permissions[permissionKey]?.allowedGuests || [];
         if (list === 'allowed') {
-          updatedField.permissions[permissionKey].allowedGuests = [...allowedGuests, guest.id];
+          updatedBase.permissions[permissionKey].allowedGuests = [...allowedGuests, guest.id];
 
-          if (updatedField.permissions[permissionKey].restrictedGuests) {
-            updatedField.permissions[permissionKey].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
+          if (updatedBase.permissions[permissionKey].restrictedGuests) {
+            updatedBase.permissions[permissionKey].restrictedGuests = restrictedGuests.filter((guestId) => guestId !== guest.id);
           }
         } else {
-          updatedField.permissions[permissionKey].restrictedGuests = [...restrictedGuests, guest.id];
+          updatedBase.permissions[permissionKey].restrictedGuests = [...restrictedGuests, guest.id];
 
-          if (updatedField.permissions[permissionKey].allowedGuests) {
-            updatedField.permissions[permissionKey].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
+          if (updatedBase.permissions[permissionKey].allowedGuests) {
+            updatedBase.permissions[permissionKey].allowedGuests = allowedGuests.filter((guestId) => guestId !== guest.id);
           }
         }
 
         try {
-          await updateGuestFieldPermissions({
-            id: guest.id,
-            fieldId: field.id,
-            permissions,
-          });
+          await updateGuestDatabasePermissions({ id: guest.id, permissions });
+          await mutateBase(updatedBase);
           mutateGuests(guests.map((item) => ({
             ...item,
             access: item.access !== 'custom' && item.id === guest.id
@@ -198,9 +179,6 @@ function BaseFieldPermissionsModal() {
               ? updatedGuestPermission
               : item.permissions,
           })));
-          mutateViewField(fields.map((item) => (item.id === field.id
-            ? updatedField
-            : item)));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
         } catch (err) {
           catchError(err.response.data.error || err.response.data.exception);
@@ -210,8 +188,8 @@ function BaseFieldPermissionsModal() {
       };
 
       openGuestModal({
-        id: field.id,
-        type: 'field',
+        id: base.id,
+        type: 'base',
         permission,
         select: () => select,
         search: list,
@@ -219,22 +197,24 @@ function BaseFieldPermissionsModal() {
     }
   };
 
-  if (!field && !canManageField) {
+  if (base == null || !canChangeGuestAccess) {
     return null;
   }
 
   return (
     <Modal open={modal.state} setOpen={modal.setState}>
-      <div className="inline-flex flex-col align-bottom bg-white min-h-[400px] rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div className="inline-flex flex-col align-bottom bg-white min-h-[400px] rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
         <div className="pt-5 pb-4">
           <Dialog.Title as="h3" className="text-center text-xl font-medium text-gray-900">
-            {`"${field.alias || field.name}"`} Field Permissions
+            {`"${base.name}"`} Base Permissions
           </Dialog.Title>
 
           <ul className="my-8 mx-10">
-            {CUSTOM_PERMISSIONS.Field.map((item) => {
+            {CUSTOM_PERMISSIONS.Base.map((item) => {
+              if (item.hidden) return null;
+
               const permission = {
-                ...(field.permissions[item.key] || {}),
+                ...(base.permissions[item.key] || {}),
                 key: item.key,
                 defaultAccess: item.access,
                 defaultValue: item.value,
@@ -253,7 +233,7 @@ function BaseFieldPermissionsModal() {
 
               if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== item.value) {
                 const otherGuests = guests.filter((curItem) => (
-                  curItem.permissions.fields?.[field.id]?.[item.key] == null
+                  curItem.permissions?.[item.key] == null
                     && curItem.access === 'custom'
                 ));
 
@@ -279,7 +259,7 @@ function BaseFieldPermissionsModal() {
                       </h4>
                       <p className="text-xs text-gray-500">{item.description}</p>
                     </div>
-                    <div className="flex-1">
+                    <div className="min-w-[200px]">
                       <Listbox value={permission.access} onChange={(value) => handleChangePermissionAccess(item, value)} disabled={loading}>
                         <div className="relative w-auto">
                           <Listbox.Button
@@ -306,7 +286,7 @@ function BaseFieldPermissionsModal() {
                       </Listbox>
                     </div>
                   </div>
-                  {(canChangeGuestAccess && guests?.length > 0) && (
+                  {(guests?.length > 0) && (
                     <div className="flex gap-1 justify-end">
                       <button
                         type="button"
@@ -374,7 +354,7 @@ function BaseFieldPermissionsModal() {
                                   <GuestRoleCard
                                     key={role}
                                     role={role}
-                                    menu={changeGuestAccess && (
+                                    menu={(
                                       <Button
                                         type="button"
                                         className={cn(
@@ -396,7 +376,7 @@ function BaseFieldPermissionsModal() {
                               <GuestCard
                                 key={guest.id}
                                 guest={guest}
-                                menu={changeGuestAccess && (
+                                menu={(
                                   <Button
                                     type="button"
                                     className={cn(
@@ -442,7 +422,7 @@ function BaseFieldPermissionsModal() {
                               <GuestCard
                                 key={guest.id}
                                 guest={guest}
-                                menu={changeGuestAccess && (
+                                menu={(
                                   <Button
                                     type="button"
                                     className={cn(
@@ -487,10 +467,10 @@ function BaseFieldPermissionsModal() {
   );
 }
 
-export function FieldPermissionsModal() {
+export function BasePermissionsModal() {
   return (
     <GuestsModalProvider>
-      <BaseFieldPermissionsModal />
+      <BasePermissionsModalContent />
     </GuestsModalProvider>
   );
 }

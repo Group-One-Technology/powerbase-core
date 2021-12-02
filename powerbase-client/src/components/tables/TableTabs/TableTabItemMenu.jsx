@@ -5,14 +5,15 @@ import { EyeOffIcon, LockClosedIcon, TrashIcon } from '@heroicons/react/outline'
 
 import { useBaseUser } from '@models/BaseUser';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function TableTabItemMenu({ table, children }) {
   const { baseUser } = useBaseUser();
   const { modal } = useTablePermissionsModal();
 
-  const canManageTables = baseUser?.can('manageTables');
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canDeleteTables = baseUser?.can('deleteTables');
+  const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
+  const canDeleteTables = baseUser?.can(PERMISSIONS.DeleteTables);
 
   const handlePermissions = () => {
     if (canChangeGuestAccess) {

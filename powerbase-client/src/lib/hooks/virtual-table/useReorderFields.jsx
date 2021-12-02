@@ -7,6 +7,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useMounted } from '@lib/hooks/useMounted';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 /**
  * Handles the reordering logic of the fields/columns.
@@ -39,7 +40,7 @@ export function useReorderFields({ table, fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can('manageViews', table)) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can(PERMISSIONS.ManageViews, table)) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);
