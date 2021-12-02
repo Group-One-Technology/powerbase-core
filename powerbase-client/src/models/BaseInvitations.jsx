@@ -1,7 +1,7 @@
 import constate from 'constate';
 import useSWR from 'swr';
 
-import { getBaseInvitations } from '@lib/api/databases';
+import { getBaseInvitations } from '@lib/api/notifications';
 import { useAuthUser } from './AuthUser';
 
 function useBaseInvitationsModel() {

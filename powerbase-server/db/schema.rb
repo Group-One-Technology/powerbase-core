@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_02_004801) do
+ActiveRecord::Schema.define(version: 2021_12_02_070752) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -83,6 +83,19 @@ ActiveRecord::Schema.define(version: 2021_12_02_004801) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["powerbase_database_id"], name: "index_hubspot_databases_on_powerbase_database_id"
     t.index ["user_id"], name: "index_hubspot_databases_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.string "data_type", null: false
+    t.text "message", null: false
+    t.text "object"
+    t.boolean "has_read", default: false
+    t.bigint "subject_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subject_id"], name: "index_notifications_on_subject_id"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "piis", force: :cascade do |t|
@@ -198,6 +211,8 @@ ActiveRecord::Schema.define(version: 2021_12_02_004801) do
   add_foreign_key "guests", "users", column: "inviter_id"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

@@ -1,4 +1,5 @@
 class Guests::Creator
+  include NotificationsHelper
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
@@ -17,7 +18,11 @@ class Guests::Creator
   end
 
   def update_custom_permissions
-    return true unless @guest.custom?
+    unless @guest.custom?
+      # Notify changes to client
+      notif_pusher_trigger!(guest.user_id, "base_invite", @guest)
+      return true
+    end
 
     database = @guest.powerbase_database
 

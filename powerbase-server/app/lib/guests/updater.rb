@@ -1,12 +1,71 @@
 class Guests::Updater
+  include NotificationsHelper
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
-  attr_accessor :guest
+  attr_accessor :guest, :errors
 
   def initialize(guest)
     @guest = guest
+    @errors = nil
+  end
+
+  def accept_invite
+    if @guest.update(is_accepted: true)
+      create_notification!({
+        data_type: "accept_invite",
+        user_id: @guest.inviter_id,
+        subject_id: @guest.user_id,
+        message: "has accepted the invite to",
+        object_type: 'database',
+      }, @guest.powerbase_database)
+      return true
+    else
+      @errors = @guest.errors
+    end
+  end
+
+  def reject_invite
+    database = @guest.powerbase_database
+    notification = {
+      data_type: "reject_invite",
+      user_id: @guest.inviter_id,
+      subject_id: @guest.user_id,
+      message: "has rejected the invite to",
+      object_type: 'database',
+    }
+
+    if self.remove_guest!
+      create_notification!(notification, database)
+      return true
+    else
+      @errors = @guest.errors
+    end
+  end
+
+  def leave_base
+    database = @guest.powerbase_database
+    notification = {
+      data_type: "leave_base",
+      user_id: @guest.inviter_id,
+      subject_id: @guest.user_id,
+      message: "has left",
+      object_type: 'database',
+    }
+
+    if self.remove_guest!
+      create_notification!(notification, database)
+
+      if @guest.inviter_id != database.user_id
+        notification[:user_id] = database.user_id
+        create_notification!(notification, database)
+      end
+
+      return true
+    else
+      @errors = @guest.errors
+    end
   end
 
   def update_permissions!(permissions, filtered_permissions = nil)

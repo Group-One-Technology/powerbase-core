@@ -1,5 +1,6 @@
 class InviteGuestWorker
   include Sidekiq::Worker
+  include NotificationsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
@@ -56,5 +57,8 @@ class InviteGuestWorker
 
     guest.is_synced = true
     guest.save
+
+    # Notify changes to client
+    notif_pusher_trigger!(guest.user_id, "base_invite", guest)
   end
 end

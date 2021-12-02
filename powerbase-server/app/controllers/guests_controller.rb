@@ -69,10 +69,11 @@ class GuestsController < ApplicationController
       return
     end
 
-    if @guest.update(is_accepted: true)
-      render json: format_json(@guest)
+    guest_updater = Guests::Updater.new(@guest)
+    if guest_updater.accept_invite
+      render json: format_json(guest_updater.guest)
     else
-      render json: @guest.errors, status: :unprocessable_entity
+      render json: guest_updater.errors, status: :unprocessable_entity
     end
   end
 
@@ -85,8 +86,12 @@ class GuestsController < ApplicationController
       return
     end
 
-    @guest.destroy
-    render status: :no_content
+    guest_updater = Guests::Updater.new(@guest)
+    if guest_updater.reject_invite
+      render status: :no_content
+    else
+      render json: guest_updater.errors, status: :unprocessable_entity
+    end
   end
 
   # POST /databases/:database_id/guests
@@ -135,8 +140,12 @@ class GuestsController < ApplicationController
       return
     end
 
-    @guest.destroy
-    render status: :no_content
+    guest_updater = Guests::Updater.new(@guest)
+    if guest_updater.leave_base
+      render status: :no_content
+    else
+      render json: guest_updater.errors, status: :unprocessable_entity
+    end
   end
 
   # PUT /guests/:id/change_access
