@@ -43,12 +43,9 @@ function BaseTablePermissionsModal() {
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canManageTable = table
-    ? baseUser?.can('manageTable', table)
-    : false;
 
   const handleChangePermissionAccess = async (permission, access) => {
-    if (canManageTable) {
+    if (canChangeGuestAccess) {
       saving();
 
       if (table.permissions[permission.key].access !== access) {
@@ -68,10 +65,13 @@ function BaseTablePermissionsModal() {
       const permissions = { [permission]: !(list === 'allowed') };
 
       const updatedGuestPermission = {
-        ...(guest.permissions.tables || {}),
-        [table.id]: {
-          ...(guest.permissions.tables?.[table.id] || {}),
-          ...permissions,
+        ...(guest.permissions || {}),
+        tables: {
+          ...(guest.permissions.tables || {}),
+          [table.id]: {
+            ...(guest.permissions.tables?.[table.id] || {}),
+            ...permissions,
+          },
         },
       };
 
@@ -171,10 +171,13 @@ function BaseTablePermissionsModal() {
         }
 
         const updatedGuestPermission = {
-          ...(guest.permissions.tables || {}),
-          [table.id]: {
-            ...(guest.permissions.tables?.[table.id] || {}),
-            ...permissions,
+          ...(guest.permissions || {}),
+          tables: {
+            ...(guest.permissions.tables || {}),
+            [table.id]: {
+              ...(guest.permissions.tables?.[table.id] || {}),
+              ...permissions,
+            },
           },
         };
 
@@ -234,7 +237,7 @@ function BaseTablePermissionsModal() {
     }
   };
 
-  if (!table && !canManageTable) {
+  if (table == null || !canChangeGuestAccess) {
     return null;
   }
 
@@ -321,7 +324,7 @@ function BaseTablePermissionsModal() {
                       </Listbox>
                     </div>
                   </div>
-                  {(canChangeGuestAccess && guests?.length > 0) && (
+                  {(guests?.length > 0) && (
                     <div className="flex gap-1 justify-end">
                       <button
                         type="button"

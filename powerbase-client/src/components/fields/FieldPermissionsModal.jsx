@@ -40,12 +40,9 @@ function BaseFieldPermissionsModal() {
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
   const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canManageField = field
-    ? baseUser?.can('manageField', field)
-    : false;
 
   const handleChangePermissionAccess = async (permission, access) => {
-    if (canManageField) {
+    if (canChangeGuestAccess && field) {
       saving();
 
       if (field.permissions[permission.key].access !== access) {
@@ -65,10 +62,13 @@ function BaseFieldPermissionsModal() {
       const permissions = { [permission]: !(list === 'allowed') };
 
       const updatedGuestPermission = {
-        ...(guest.permissions.fields || {}),
-        [field.id]: {
-          ...(guest.permissions.fields?.[field.id] || {}),
-          ...permissions,
+        ...(guest.permissions || {}),
+        fields: {
+          ...(guest.permissions.fields || {}),
+          [field.id]: {
+            ...(guest.permissions.fields?.[field.id] || {}),
+            ...permissions,
+          },
         },
       };
 
@@ -159,10 +159,13 @@ function BaseFieldPermissionsModal() {
         }
 
         const updatedGuestPermission = {
-          ...(guest.permissions.fields || {}),
-          [field.id]: {
-            ...(guest.permissions.fields?.[field.id] || {}),
-            ...permissions,
+          ...(guest.permissions || {}),
+          fields: {
+            ...(guest.permissions.fields || {}),
+            [field.id]: {
+              ...(guest.permissions.fields?.[field.id] || {}),
+              ...permissions,
+            },
           },
         };
 
@@ -219,7 +222,7 @@ function BaseFieldPermissionsModal() {
     }
   };
 
-  if (!field && !canManageField) {
+  if (field == null || !canChangeGuestAccess) {
     return null;
   }
 
@@ -306,7 +309,7 @@ function BaseFieldPermissionsModal() {
                       </Listbox>
                     </div>
                   </div>
-                  {(canChangeGuestAccess && guests?.length > 0) && (
+                  {(guests?.length > 0) && (
                     <div className="flex gap-1 justify-end">
                       <button
                         type="button"

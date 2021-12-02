@@ -51,7 +51,6 @@ export function TableTabs() {
 
   return (
     <TablePermissionsModalProvider>
-
       <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[base.color])}>
         <TableTabsMobile addTable={addTable} />
         <div className="hidden sm:flex">
