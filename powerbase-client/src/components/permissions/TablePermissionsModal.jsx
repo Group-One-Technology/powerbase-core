@@ -251,6 +251,8 @@ function BaseTablePermissionsModal() {
 
           <ul className="my-8 mx-10">
             {CUSTOM_PERMISSIONS.Table.map((item) => {
+              if (item.hidden) return null;
+
               const permission = {
                 ...(table.permissions[item.key] || {}),
                 key: item.key,

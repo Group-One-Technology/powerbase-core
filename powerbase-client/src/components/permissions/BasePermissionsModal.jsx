@@ -211,6 +211,8 @@ function BasePermissionsModalContent() {
 
           <ul className="my-8 mx-10">
             {CUSTOM_PERMISSIONS.Base.map((item) => {
+              if (item.hidden) return null;
+
               const permission = {
                 ...(base.permissions[item.key] || {}),
                 key: item.key,

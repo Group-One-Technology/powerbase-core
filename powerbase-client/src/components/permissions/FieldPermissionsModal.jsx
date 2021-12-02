@@ -236,6 +236,8 @@ function BaseFieldPermissionsModal() {
 
           <ul className="my-8 mx-10">
             {CUSTOM_PERMISSIONS.Field.map((item) => {
+              if (item.hidden) return null;
+
               const permission = {
                 ...(field.permissions[item.key] || {}),
                 key: item.key,
