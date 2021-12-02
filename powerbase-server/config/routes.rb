@@ -20,6 +20,8 @@ Rails.application.routes.draw do
 
     member do
       put 'clear_logs'
+      put 'update_database_permission', as: 'update_database_permission'
+      put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_databases#update_allowed_roles'
     end
 
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
@@ -27,6 +29,7 @@ Rails.application.routes.draw do
       member do
         put 'change_access'
         put 'update_permissions'
+        put 'update_database_permissions'
         put 'update_table_permissions'
         put 'update_field_permissions'
         put 'accept_invite'
