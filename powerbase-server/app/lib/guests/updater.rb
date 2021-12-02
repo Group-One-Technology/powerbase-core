@@ -57,8 +57,8 @@ class Guests::Updater
     if self.remove_guest!
       create_notification!(notification, database)
 
-      if @guest.inviter_id != database.owner_id
-        notification[:user_id] = database.owner_id
+      if @guest.inviter_id != database.user_id
+        notification[:user_id] = database.user_id
         create_notification!(notification, database)
       end
 
