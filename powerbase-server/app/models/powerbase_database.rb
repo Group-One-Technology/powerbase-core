@@ -19,6 +19,7 @@ class PowerbaseDatabase < ApplicationRecord
   }, _prefix: true
   attr_encrypted :connection_string, key: ENV["encryption_key"],
     algorithm: "aes-256-cbc", mode: :single_iv_and_salt, insecure_mode: true
+  serialize :permissions, JSON
 
   belongs_to :user
   has_many :guests
