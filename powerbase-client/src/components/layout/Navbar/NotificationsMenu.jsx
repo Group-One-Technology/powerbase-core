@@ -40,11 +40,11 @@ function BaseNotificationsMenu({ colored }) {
     title: 'Reject Invitation',
     description: 'Are you sure you want to reject this invitation? This action cannot be undone.',
   });
+  const unreadNotifications = notifications?.filter((item) => !item.hasRead);
+  const [notificationsCount, setNotificationsCount] = useState((guestInvitations?.length || 0) + (unreadNotifications?.length || 0));
 
   const isEmptyNotifications = ((guestInvitations == null || guestInvitations?.length === 0)
     && (notifications == null || notifications?.length === 0));
-  const unreadNotifications = notifications?.filter((item) => !item.hasRead);
-  const notificationsCount = (guestInvitations?.length || 0) + (unreadNotifications?.length || 0);
 
   useEffect(() => {
     setGuestInvitations(initialGuestInvitations);
@@ -54,9 +54,14 @@ function BaseNotificationsMenu({ colored }) {
     listener(authUser.id);
   }, [authUser.id]);
 
+  useEffect(() => {
+    setNotificationsCount((guestInvitations?.length || 0) + (unreadNotifications?.length || 0));
+  }, [notifications, initialGuestInvitations]);
+
   const handleReadNotifications = async () => {
     if (unreadNotifications?.length > 0) {
       try {
+        setNotificationsCount(0);
         await readNotifications();
       } catch (err) {
         console.log(err);
