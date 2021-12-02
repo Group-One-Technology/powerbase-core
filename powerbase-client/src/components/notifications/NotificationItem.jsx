@@ -21,7 +21,7 @@ export function NotificationItem({ notification }) {
   const link = getLink(notification);
 
   const component = (
-    <li key={notification.id} className="p-2 flex items-center space-x-2">
+    <li key={notification.id} className={cn('p-2 flex items-center space-x-2', !notification.hasRead && 'border-l-4 border-indigo-900')}>
       <div className="flex-shrink-0">
         <Gravatar
           email={notification.subject.email}
@@ -30,7 +30,7 @@ export function NotificationItem({ notification }) {
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={cn('text-xs', notification.hasRead ? 'text-gray-700' : 'text-gray-900')}>
+        <p className="text-xs text-gray-900">
           <strong>{notification.subject.name}</strong> {notification.message} <strong>{notification.object.name}</strong>
         </p>
         <p className="text-xs text-gray-500">

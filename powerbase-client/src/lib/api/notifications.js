@@ -19,3 +19,13 @@ export async function getNotifications() {
 
   return undefined;
 }
+
+export async function readNotifications() {
+  const response = await securedApi.put('/notifications/read');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

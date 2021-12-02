@@ -17,6 +17,7 @@ import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { NotificationItem } from '@components/notifications/NotificationItem';
+import { readNotifications } from '@lib/api/notifications';
 
 function BaseNotificationsMenu({ colored }) {
   const { mounted } = useMounted();
@@ -42,7 +43,8 @@ function BaseNotificationsMenu({ colored }) {
 
   const isEmptyNotifications = ((guestInvitations == null || guestInvitations?.length === 0)
     && (notifications == null || notifications?.length === 0));
-  const notificationsCount = (guestInvitations?.length || 0) + (notifications?.length || 0);
+  const unreadNotifications = notifications?.filter((item) => !item.hasRead);
+  const notificationsCount = (guestInvitations?.length || 0) + (unreadNotifications?.length || 0);
 
   useEffect(() => {
     setGuestInvitations(initialGuestInvitations);
@@ -51,6 +53,16 @@ function BaseNotificationsMenu({ colored }) {
   useEffect(() => {
     listener(authUser.id);
   }, [authUser.id]);
+
+  const handleReadNotifications = async () => {
+    if (unreadNotifications?.length > 0) {
+      try {
+        await readNotifications();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
 
   const handleAcceptInvitation = async (guest) => {
     if (guest) {
@@ -100,6 +112,7 @@ function BaseNotificationsMenu({ colored }) {
                 'relative p-1 bg-transparent flex items-center text-sm rounded hover:ring-2 hover:ring-current focus:outline-none focus:ring-2 focus:ring-current',
                 colored ? 'text-white' : 'text-gray-900 focus:ring-offset-2',
               )}
+              onClickCapture={handleReadNotifications}
             >
               <span className="sr-only">Notifications</span>
               <BellIcon className="h-5 w-5" />
