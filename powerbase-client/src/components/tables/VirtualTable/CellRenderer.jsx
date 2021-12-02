@@ -366,7 +366,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={(evt) => {
-        if (!isRowNo) {
+        if (!isRowNo && field.isVirtual) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
