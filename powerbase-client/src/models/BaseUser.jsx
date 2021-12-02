@@ -4,7 +4,7 @@ import constate from 'constate';
 import { useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { getAuthGuestByDatabase } from '@lib/api/auth';
-import { BasePermissions, ACCESS_LEVEL, CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { BASE_PERMISSIONS, ACCESS_LEVEL, CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 
 function useBaseUserModel() {
@@ -27,7 +27,7 @@ function useBaseUserModel() {
     if (!permissions) return false;
 
     if (baseUser.access !== 'custom') {
-      if (base && BasePermissions.BASE.includes(permission)) {
+      if (base && BASE_PERMISSIONS.Base.includes(permission)) {
         const baseAccess = base.permissions[permission].access;
         const baseDefaultPermission = CUSTOM_PERMISSIONS.Base.find((item) => item.key === permission);
 
@@ -40,7 +40,7 @@ function useBaseUserModel() {
         }
       }
 
-      if (resource && BasePermissions.TABLE.includes(permission)) {
+      if (resource && BASE_PERMISSIONS.Table.includes(permission)) {
         const table = resource;
         const tableAccess = table.permissions[permission].access;
         const tableDefaultPermission = CUSTOM_PERMISSIONS.Table.find((item) => item.key === permission);
@@ -54,7 +54,7 @@ function useBaseUserModel() {
         }
       }
 
-      if (resource && BasePermissions.FIELD.includes(permission)) {
+      if (resource && BASE_PERMISSIONS.Field.includes(permission)) {
         const field = resource;
         const fieldAccess = field.permissions[permission].access;
         const fieldDefaultPermission = CUSTOM_PERMISSIONS.Field.find((item) => item.key === permission);
@@ -74,7 +74,7 @@ function useBaseUserModel() {
       return false;
     }
 
-    if (BasePermissions.BASE.includes(permission)) {
+    if (BASE_PERMISSIONS.Base.includes(permission)) {
       let hasPermission = false;
 
       if (baseUser.permissions[permission]) {
@@ -108,7 +108,7 @@ function useBaseUserModel() {
       return hasPermission;
     }
 
-    if (BasePermissions.TABLE.includes(permission)) {
+    if (BASE_PERMISSIONS.Table.includes(permission)) {
       if (baseUser.permissions.tables[resource]?.[permission]) return true;
       if (baseUser.permissions.tables[resource]?.[permission] == null) {
         const tablePermission = CUSTOM_PERMISSIONS.Table.find((item) => item.key === permission);
@@ -116,7 +116,7 @@ function useBaseUserModel() {
       }
     }
 
-    if (BasePermissions.FIELD.includes(permission)) {
+    if (BASE_PERMISSIONS.Field.includes(permission)) {
       const field = resource;
       const fieldId = field.fieldId || field.id;
 

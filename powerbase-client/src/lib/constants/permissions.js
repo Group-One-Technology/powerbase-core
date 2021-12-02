@@ -1,7 +1,7 @@
-export const BasePermissions = {
-  BASE: ['viewBase', 'manageBase', 'inviteGuests', 'changeGuestAccess', 'removeGuests', 'addTables', 'deleteTables'],
-  TABLE: ['viewTable', 'manageTable', 'manageViews', 'addViews', 'deleteViews', 'addFields', 'deleteFields', 'addRecords', 'deleteRecords', 'commentRecords'],
-  FIELD: ['viewField', 'manageField', 'editFieldData'],
+export const BASE_PERMISSIONS = {
+  Base: ['viewBase', 'manageBase', 'inviteGuests', 'changeGuestAccess', 'removeGuests', 'addTables', 'deleteTables'],
+  Table: ['viewTable', 'manageTable', 'manageViews', 'addViews', 'deleteViews', 'addFields', 'deleteFields', 'addRecords', 'deleteRecords', 'commentRecords'],
+  Field: ['viewField', 'manageField', 'editFieldData'],
 };
 
 export const ACCESS_LEVEL = [
@@ -14,7 +14,7 @@ export const ACCESS_LEVEL = [
   {
     name: 'admin',
     description: 'Can configure tables, connections, and fields.',
-    permisions: ['viewBase', ...BasePermissions.TABLE, ...BasePermissions.FIELD],
+    permisions: ['viewBase', ...BASE_PERMISSIONS.TABLE, ...BASE_PERMISSIONS.FIELD],
     level: 5,
   },
   {
