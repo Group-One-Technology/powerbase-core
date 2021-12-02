@@ -41,7 +41,8 @@ export function GuestsModal() {
     const otherGuests = guests.filter((curItem) => {
       if (curItem.access !== 'custom') return false;
       if (type === 'field') return curItem.permissions.fields?.[id]?.[permission.key] == null;
-      return curItem.permissions.tables?.[id]?.[permission.key] == null;
+      if (type === 'table') return curItem.permissions.tables?.[id]?.[permission.key] == null;
+      return curItem.permissions?.[permission.key] == null;
     });
 
     if (permission.defaultValue) {

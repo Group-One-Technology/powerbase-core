@@ -17,6 +17,8 @@ import { PageContent } from '@components/layout/PageContent';
 import { AuthOnly } from '@components/middleware/AuthOnly';
 import { Loader } from '@components/ui/Loader';
 import { Table } from '@components/tables/Table';
+import { BasePermissionsModalProvider } from '@models/modals/BasePermissionsModal';
+import { BasePermissionsModal } from '@components/permissions/BasePermissionsModal';
 
 function BaseTable() {
   const history = useHistory();
@@ -38,14 +40,17 @@ function BaseTable() {
 
   return (
     <ViewFieldsProvider id={view?.id}>
-      <Page
-        navbar={<Navbar base={base} bases={bases} />}
-        className="!bg-white"
-      >
-        <PageContent className="!px-0 max-w-full">
-          <Table />
-        </PageContent>
-      </Page>
+      <BasePermissionsModalProvider>
+        <Page
+          navbar={<Navbar base={base} bases={bases} />}
+          className="!bg-white"
+        >
+          <PageContent className="!px-0 max-w-full">
+            <Table />
+          </PageContent>
+        </Page>
+        <BasePermissionsModal />
+      </BasePermissionsModalProvider>
     </ViewFieldsProvider>
   );
 }

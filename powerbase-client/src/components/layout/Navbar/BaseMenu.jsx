@@ -4,6 +4,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   CogIcon,
+  LockClosedIcon,
   LogoutIcon,
   QuestionMarkCircleIcon,
   ShareIcon,
@@ -17,12 +18,14 @@ import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBases } from '@models/Bases';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBasePermissionsModal } from '@models/modals/BasePermissionsModal';
 import { IBase } from '@lib/propTypes/base';
 import { leaveBase } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
+import { DOCUMENTATION_LINK } from '@lib/constants/links';
+
 import { Badge } from '@components/ui/Badge';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
-import { DOCUMENTATION_LINK } from '@lib/constants/links';
 
 export function BaseMenu({ base, otherBases }) {
   const history = useHistory();
@@ -35,6 +38,7 @@ export function BaseMenu({ base, otherBases }) {
   } = useSaveStatus();
   const { data: bases, mutate: mutateBases } = useBases();
   const { setOpen: setShareModalOpen } = useShareBaseModal();
+  const { modal: basePermissionsModal } = useBasePermissionsModal();
   const { baseUser } = useBaseUser();
   const [confirmModal, setConfirmModal] = useState({
     open: false,
@@ -43,11 +47,18 @@ export function BaseMenu({ base, otherBases }) {
   });
 
   const canInviteGuests = baseUser?.can('inviteGuests');
+  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
   const canManageBase = baseUser?.can('manageBase');
   const isOwner = base.owner.userId === baseUser.userId;
 
   const handleShareBase = () => {
     setShareModalOpen(true);
+  };
+
+  const handleBasePermissions = () => {
+    if (canChangeGuestAccess) {
+      basePermissionsModal.open();
+    }
   };
 
   const handleLeaveBase = async () => {
@@ -118,6 +129,17 @@ export function BaseMenu({ base, otherBases }) {
                       </>
                     )}
                 </Menu.Item>
+                {canChangeGuestAccess && (
+                  <Menu.Item
+                    as="button"
+                    type="button"
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleBasePermissions}
+                  >
+                    <LockClosedIcon className="h-4 w-4 mr-2" />
+                    Permissions
+                  </Menu.Item>
+                )}
                 {canManageBase && (
                   <Menu.Item>
                     {({ active }) => (
