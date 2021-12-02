@@ -11,8 +11,9 @@ import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitat
 import { useNotifications } from '@models/Notifications';
 import { startsWithVowel } from '@lib/helpers/startsWithVowel';
 import { useMounted } from '@lib/hooks/useMounted';
-import { useWebsocket } from '@lib/hooks/useWebsocket';
+import { useNotificationsListener } from '@lib/hooks/websockets/useNotificationsListener';
 import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
+
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { NotificationItem } from '@components/notifications/NotificationItem';
@@ -20,7 +21,7 @@ import { NotificationItem } from '@components/notifications/NotificationItem';
 function BaseNotificationsMenu({ colored }) {
   const { mounted } = useMounted();
   const { authUser } = useAuthUser();
-  const { notificationsListener } = useWebsocket();
+  const { listener } = useNotificationsListener();
   const { mutate: mutateSharedBases } = useSharedBases();
   const { data: notifications } = useNotifications();
   const { data: initialGuestInvitations, mutate: mutateGuestInvitations } = useBaseInvitations();
@@ -48,7 +49,7 @@ function BaseNotificationsMenu({ colored }) {
   }, [initialGuestInvitations]);
 
   useEffect(() => {
-    notificationsListener(authUser.id);
+    listener(authUser.id);
   }, [authUser.id]);
 
   const handleAcceptInvitation = async (guest) => {

@@ -6,7 +6,7 @@ import { useTableConnections } from '@models/TableConnections';
 import { useTableRecords } from '@models/TableRecords';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldPermissionsModalProvider } from '@models/modals/FieldPermissionsModal';
-import { useWebsocket } from '@lib/hooks/useWebsocket';
+import { useDataListener } from '@lib/hooks/websockets/useDataListener';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
@@ -20,7 +20,7 @@ export function VirtualTable({ height, table }) {
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
-  const { dataListener } = useWebsocket();
+  const { dataListener } = useDataListener();
 
   useEffect(() => {
     dataListener(table.id);
