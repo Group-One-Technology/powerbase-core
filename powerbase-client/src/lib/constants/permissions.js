@@ -14,7 +14,7 @@ export const ACCESS_LEVEL = [
   {
     name: 'admin',
     description: 'Can configure tables, connections, and fields.',
-    permisions: ['viewBase', ...BASE_PERMISSIONS.TABLE, ...BASE_PERMISSIONS.FIELD],
+    permisions: ['viewBase', ...BASE_PERMISSIONS.Table, ...BASE_PERMISSIONS.Field],
     level: 5,
   },
   {
