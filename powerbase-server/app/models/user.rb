@@ -10,6 +10,7 @@ class User < ApplicationRecord
   validates :email, presence: true
 
   has_many :notifications
+  has_many :unread_notifications, -> { where has_read: false }, class_name: "Notification"
   has_many :powerbase_databases
   has_many :guests, -> { where is_accepted: true }
   has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"

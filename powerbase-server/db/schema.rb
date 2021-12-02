@@ -88,9 +88,13 @@ ActiveRecord::Schema.define(version: 2021_12_02_070752) do
   create_table "notifications", force: :cascade do |t|
     t.string "data_type", null: false
     t.text "message", null: false
+    t.text "object"
     t.boolean "has_read", default: false
+    t.bigint "subject_id", null: false
     t.bigint "user_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subject_id"], name: "index_notifications_on_subject_id"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -208,6 +212,7 @@ ActiveRecord::Schema.define(version: 2021_12_02_070752) do
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
   add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

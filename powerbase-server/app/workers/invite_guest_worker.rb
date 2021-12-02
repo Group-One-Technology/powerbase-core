@@ -59,6 +59,6 @@ class InviteGuestWorker
     guest.save
 
     # Notify changes to client
-    notif_pusher_trigger!(guest.user_id, "base-invite", guest)
+    notif_pusher_trigger!(guest.user_id, "base_invite", guest)
   end
 end

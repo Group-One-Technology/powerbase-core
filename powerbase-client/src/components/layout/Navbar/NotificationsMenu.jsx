@@ -8,18 +8,21 @@ import { useSharedBases } from '@models/SharedBases';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitations';
+import { useNotifications } from '@models/Notifications';
 import { startsWithVowel } from '@lib/helpers/startsWithVowel';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useWebsocket } from '@lib/hooks/useWebsocket';
 import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { NotificationItem } from '@components/notifications/NotificationItem';
 
 function BaseNotificationsMenu({ colored }) {
   const { mounted } = useMounted();
   const { authUser } = useAuthUser();
   const { notificationsListener } = useWebsocket();
   const { mutate: mutateSharedBases } = useSharedBases();
+  const { data: notifications } = useNotifications();
   const { data: initialGuestInvitations, mutate: mutateGuestInvitations } = useBaseInvitations();
   const {
     saving,
@@ -35,6 +38,10 @@ function BaseNotificationsMenu({ colored }) {
     title: 'Reject Invitation',
     description: 'Are you sure you want to reject this invitation? This action cannot be undone.',
   });
+
+  const isEmptyNotifications = ((guestInvitations == null || guestInvitations?.length === 0)
+    && (notifications == null || notifications?.length === 0));
+  const notificationsCount = (guestInvitations?.length || 0) + (notifications?.length || 0);
 
   useEffect(() => {
     setGuestInvitations(initialGuestInvitations);
@@ -95,9 +102,9 @@ function BaseNotificationsMenu({ colored }) {
             >
               <span className="sr-only">Notifications</span>
               <BellIcon className="h-5 w-5" />
-              {guestInvitations?.length > 0 && (
+              {notificationsCount > 0 && (
                 <span className="h-4 w-4 absolute -top-1 -right-1 flex items-center justify-center bg-red-600 rounded-full text-[0.5rem] text-white">
-                  {guestInvitations.length}
+                  {notificationsCount}
                 </span>
               )}
             </Popover.Button>
@@ -111,11 +118,11 @@ function BaseNotificationsMenu({ colored }) {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel className="absolute z-10 w-64 p-2 rounded shadow-lg bg-white mt-3 transform -translate-x-1/2 left-1/2">
+              <Popover.Panel className="absolute z-10 w-64 overflow-x-hidden rounded-lg bg-white shadow-lg mt-3 transform -translate-x-1/2 left-1/2">
                 {guestInvitations?.length > 0 && (
                   <ul className="bg-white divide-y divide-gray-200">
                     {guestInvitations.map((item) => (
-                      <li key={item.id} className="p-1 flex items-center gap-2 text-xs text-gray-900">
+                      <li key={item.id} className="p-2 flex items-center gap-2 text-xs text-gray-900">
                         {item.access === 'custom'
                           ? (
                             <div>
@@ -150,7 +157,14 @@ function BaseNotificationsMenu({ colored }) {
                     ))}
                   </ul>
                 )}
-                {(guestInvitations == null || guestInvitations?.length === 0) && (
+                {notifications?.length > 0 && (
+                  <ul className="bg-white divide-y divide-gray-200">
+                    {notifications.map((item) => (
+                      <NotificationItem key={item.id} notification={item} />
+                    ))}
+                  </ul>
+                )}
+                {isEmptyNotifications && (
                   <p className="my-4 flex items-center justify-center text-sm text-gray-700">
                     You have no notifications.
                   </p>

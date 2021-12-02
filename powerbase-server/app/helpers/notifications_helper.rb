@@ -1,13 +1,29 @@
 module NotificationsHelper
   include PusherHelper
 
+  def create_notification!(data, object)
+    notification = Notification.create!({
+      data_type: data[:data_type],
+      message: data[:message],
+      object: object_format_json(data[:object_type], object),
+      subject_id: data[:subject_id],
+      user_id: data[:user_id]
+    })
+
+    notif_pusher_trigger!(notification.user_id, notification.data_type, notification)
+  end
+
   def notif_pusher_trigger!(user_id, type, data)
-    payload = if "base-invite"
+    payload = if type == "base_invite"
       {
-        type: "base-invite",
-        data: guest_format_json(data)
+        type: type,
+        data: guest_format_json(data) # data = guest
       }
-    # else other notification types
+    else
+      {
+        type: type,
+        data: data # data = notification
+      }
     end
 
     # Notify changes to client
@@ -15,6 +31,28 @@ module NotificationsHelper
   end
 
   private
+    def object_format_json(type, object)
+      if type == "database"
+        owner = object.user
+
+        {
+          type: "database",
+          id: object.id,
+          name: object.name,
+          owner_id: object.user_id,
+          owner: {
+            user_id: owner.id,
+            first_name: owner.first_name,
+            last_name: owner.last_name,
+            name: "#{owner.first_name} #{owner.last_name}",
+            email: owner.email
+          }
+        }
+      else
+        object
+      end
+    end
+
     def guest_format_json(guest)
       user = guest.user
       inviter = guest.inviter

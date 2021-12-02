@@ -20,7 +20,7 @@ class Guests::Creator
   def update_custom_permissions
     unless @guest.custom?
       # Notify changes to client
-      notif_pusher_trigger!(guest.user_id, "base-invite", @guest)
+      notif_pusher_trigger!(guest.user_id, "base_invite", @guest)
       return true
     end
 

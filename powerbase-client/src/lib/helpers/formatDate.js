@@ -25,5 +25,6 @@ export function formatDate(value, options = {}) {
     minute: 'numeric',
     second: 'numeric',
     timeZone: 'UTC',
+    ...options,
   });
 }

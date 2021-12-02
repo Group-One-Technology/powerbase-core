@@ -2,6 +2,7 @@ import Pusher from 'pusher-js';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewFields } from '@models/ViewFields';
 import { useBaseInvitations } from '@models/BaseInvitations';
+import { useNotifications } from '@models/Notifications';
 import { NOTIFICATIONS } from '@lib/constants/notifications';
 import { useMounted } from './useMounted';
 
@@ -13,6 +14,7 @@ const pusher = new Pusher(PUSHER_KEY, {
 export function useWebsocket(logging = false) {
   const { mounted } = useMounted();
   const { data: baseInvitations, mutate: mutateBaseInvitations } = useBaseInvitations();
+  const { data: notifications, mutate: mutateNotifications } = useNotifications();
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateViewFields } = useViewFields();
 
@@ -42,6 +44,8 @@ export function useWebsocket(logging = false) {
       const { type, data } = response;
       if (type === NOTIFICATIONS.BaseInvite) {
         await mutateBaseInvitations([...(baseInvitations || []), data]);
+      } else if (type === NOTIFICATIONS.AcceptInvite || type === NOTIFICATIONS.RejectInvite) {
+        await mutateNotifications([...(notifications || []), data]);
       }
     });
   };
