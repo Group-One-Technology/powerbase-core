@@ -7,6 +7,8 @@ class RemoveGuestWorker
     return unless access == "custom"
 
     db = PowerbaseDatabase.find database_id
+    db.remove_guest(guest_id)
+
     db.powerbase_tables.each do |table|
       table.remove_guest(guest_id)
 
