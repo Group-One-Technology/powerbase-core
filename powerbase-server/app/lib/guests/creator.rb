@@ -1,4 +1,5 @@
 class Guests::Creator
+  include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
@@ -17,6 +18,23 @@ class Guests::Creator
 
   def update_custom_permissions
     return true unless @guest.custom?
+
+    database = @guest.powerbase_database
+
+    DATABASE_DEFAULT_PERMISSIONS.each do |key, value|
+      permission_key = key.to_s
+      next if @guest.permissions[permission_key] == nil
+      database_access = database.permissions[permission_key]["access"]
+
+      if database_access != value[:access] || @guest.permissions[permission_key] != value[:default_value]
+        database.update_guests_access({
+          permission: key,
+          access: database_access,
+          guest: @guest,
+          is_allowed: @guest.permissions[permission_key]
+        })
+      end
+    end
 
     @guest.permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)

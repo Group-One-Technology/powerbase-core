@@ -1,4 +1,5 @@
 class Guests::Updater
+  include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
@@ -10,6 +11,23 @@ class Guests::Updater
 
   def update_permissions!(permissions, filtered_permissions = nil)
     return if @guest.access != "custom"
+
+    database = @guest.powerbase_database
+
+    DATABASE_DEFAULT_PERMISSIONS.each do |key, value|
+      permission_key = key.to_s
+
+      # Check if permission didn't change
+      next if permissions[permission_key] == nil
+      next if permissions[permission_key] == @guest.permissions[permission_key]
+
+      database.update_guests_access({
+        permission: key,
+        access: database.permissions[permission_key]["access"],
+        guest: @guest,
+        is_allowed: permissions[permission_key]
+      })
+    end
 
     permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)
@@ -124,8 +142,33 @@ class Guests::Updater
     @guest.save
   end
 
+  def update_database_permissions!(permissions)
+    database = @guest.powerbase_database
+
+    @guest.permissions = {} if @guest.access == "custom" && @guest.permissions == nil
+
+    permissions.each do |key, value|
+      next if DATABASE_DEFAULT_PERMISSIONS[key.to_sym] == nil
+      next if ![true, false].include?(value)
+
+      permission = key.to_s
+
+      if @guest.access != "custom" && database.permissions[permission]["access"] != "specific users only"
+        @guest.permissions = get_permissions(@guest)
+        @guest.access = "custom"
+      end
+
+      @guest.permissions[permission] = value if @guest.access == "custom"
+      database.update_guest(@guest, permission, value)
+    end
+
+    @guest.permissions = nil if @guest.access != "custom"
+    @guest.save
+  end
+
   def update_access!(access)
     if @guest.access == "custom"
+      remove_database_custom_guest(@guest)
       remove_table_custom_guest(@guest)
       remove_field_custom_guest(@guest)
       @guest.permissions = nil
