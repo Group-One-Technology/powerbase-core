@@ -18,7 +18,7 @@ import { Modal } from '@components/ui/Modal';
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { GuestCard } from '@components/guest/GuestCard';
-import { PermissionsModal } from '@components/guest/PermissionsModal';
+import { PermissionsModal } from '@components/permissions/PermissionsModal';
 import { GUEST_COLLABORATION_LINK, OWNER_COLLABORATION_LINK } from '@lib/constants/links';
 
 function BaseShareBaseModal() {

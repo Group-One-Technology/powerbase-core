@@ -18,11 +18,11 @@ import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
 import { useTableTabsReorder } from '@lib/hooks/tables/useTableTabsReorder';
 
+import { TablePermissionsModal } from '@components/permissions/TablePermissionsModal';
 import TableSearchModal from '../TableSearchModal';
 import { TableTabsMobile } from './TableTabsMobile';
 import { TableTabsLoader } from './TableTabsLoader';
 import { TableTabItem } from './TableTabItem';
-import { TablePermissionsModal } from '../TablePermissionsModal';
 
 export function TableTabs() {
   const { data: base } = useBase();

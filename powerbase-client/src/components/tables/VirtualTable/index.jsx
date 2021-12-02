@@ -10,7 +10,7 @@ import { useWebsocket } from '@lib/hooks/useWebsocket';
 import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
-import { FieldPermissionsModal } from '@components/fields/FieldPermissionsModal';
+import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
 import { TableRenderer } from './TableRenderer';
 
 import 'react-virtualized/styles.css';
