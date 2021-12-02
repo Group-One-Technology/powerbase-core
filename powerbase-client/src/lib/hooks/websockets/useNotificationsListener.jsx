@@ -16,7 +16,7 @@ export function useNotificationsListener(logging = false) {
       const { type, data } = response;
       if (type === NOTIFICATIONS.BaseInvite) {
         await mutateBaseInvitations([...(baseInvitations || []), data]);
-      } else if (type === NOTIFICATIONS.AcceptInvite || type === NOTIFICATIONS.RejectInvite) {
+      } else if (type === NOTIFICATIONS.AcceptInvite || type === NOTIFICATIONS.RejectInvite || type === NOTIFICATIONS.LeaveBase) {
         await mutateNotifications([...(notifications || []), data]);
       }
     });

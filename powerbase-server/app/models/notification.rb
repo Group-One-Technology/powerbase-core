@@ -5,6 +5,7 @@ class Notification < ApplicationRecord
     base_invite: "base_invite",
     accept_invite: "accept_invite",
     reject_invite: "reject_invite",
+    leave_base: "leave_base",
   }
   serialize :object, JSON
 

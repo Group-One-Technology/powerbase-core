@@ -11,6 +11,7 @@ function getLink(data) {
   switch (data.dataType) {
     case NOTIFICATIONS.AcceptInvite:
     case NOTIFICATIONS.RejectInvite:
+    case NOTIFICATIONS.LeaveBase:
       return `/base/${data.object.id}`;
     default:
       return null;
