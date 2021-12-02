@@ -35,7 +35,8 @@ export function GuestsModal() {
       || item.email.toLowerCase().includes(query.toLowerCase()))
     : initialGuests;
 
-  let { allowedGuests, restrictedGuests } = permission;
+  let allowedGuests = permission?.allowedGuests || [];
+  let restrictedGuests = permission?.restrictedGuests || [];
 
   if (!isDefaultAccess && doesGuestHaveAccess('custom', permission.access) !== permission.defaultValue) {
     const otherGuests = guests.filter((curItem) => {
