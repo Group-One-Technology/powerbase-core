@@ -3,7 +3,7 @@ class NotificationsController < ApplicationController
 
   # GET /notifications
   def index
-    render json: current_user.notifications.map {|item| format_json(current_user, item)}
+    render json: current_user.notifications.order(created_at: :desc).map {|item| format_json(current_user, item)}
   end
 
   # PUT /notifications/read
