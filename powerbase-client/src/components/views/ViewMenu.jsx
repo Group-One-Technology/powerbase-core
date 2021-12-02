@@ -10,6 +10,7 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useSaveStatus } from '@models/SaveStatus';
 import { updateViewsOrder } from '@lib/api/views';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
@@ -32,8 +33,8 @@ export function ViewMenu() {
     view: undefined,
   });
 
-  const canAddViews = baseUser?.can('addViews', table);
-  const canManageViews = baseUser?.can('manageViews', table);
+  const canAddViews = baseUser?.can(PERMISSIONS.AddViews, table);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
 
   const sensors = useSensors();
 

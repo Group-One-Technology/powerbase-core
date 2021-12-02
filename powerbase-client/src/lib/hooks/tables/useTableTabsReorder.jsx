@@ -2,6 +2,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useBaseUser } from '@models/BaseUser';
 import { updateTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function useTableTabsReorder({ base, setTables }) {
   const { baseUser } = useBaseUser();
@@ -16,7 +17,7 @@ export function useTableTabsReorder({ base, setTables }) {
   });
 
   const handleReorderViews = ({ active, over }) => {
-    if (active.id !== over.id && baseUser?.can('manageBase', base.id)) {
+    if (active.id !== over.id && baseUser?.can(PERMISSIONS.ManageBase, base.id)) {
       setTables((prevViews) => {
         const oldIndex = prevViews.findIndex((item) => item.id === active.id);
         const newIndex = prevViews.findIndex((item) => item.id === over.id);

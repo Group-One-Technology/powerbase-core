@@ -4,6 +4,29 @@ export const BASE_PERMISSIONS = {
   Field: ['viewField', 'manageField', 'editFieldData'],
 };
 
+export const PERMISSIONS = {
+  ViewBase: 'viewBase',
+  ManageBase: 'manageBase',
+  InviteGuests: 'inviteGuests',
+  ChangeGuestAccess: 'changeGuestAccess',
+  RemoveGuests: 'removeGuests',
+  AddTables: 'addTables',
+  DeleteTables: 'deleteTables',
+  ViewTable: 'viewTable',
+  ManageTable: 'manageTable',
+  ManageViews: 'manageViews',
+  AddViews: 'addViews',
+  DeleteViews: 'deleteViews',
+  AddFields: 'addFields',
+  DeleteFields: 'deleteFields',
+  AddRecords: 'addRecords',
+  DeleteRecords: 'deleteRecords',
+  CommentRecords: 'commentRecords',
+  ViewField: 'viewField',
+  ManageField: 'manageField',
+  EditFieldData: 'editFieldData',
+};
+
 export const ACCESS_LEVEL = [
   {
     name: 'creator',

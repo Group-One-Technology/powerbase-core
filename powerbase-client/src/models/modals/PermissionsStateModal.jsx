@@ -11,7 +11,7 @@ import { useBasePermissions } from '@lib/hooks/permissions/useBasePermissions';
 import { useTablePermissions } from '@lib/hooks/permissions/useTablePermissions';
 import { updateGuestPermissions } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
-import { CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
+import { CUSTOM_PERMISSIONS, PERMISSIONS } from '@lib/constants/permissions';
 import { useFieldPermissions } from '@lib/hooks/permissions/useFieldPermissions';
 
 function usePermissionsStateModalModel() {
@@ -37,7 +37,7 @@ function usePermissionsStateModalModel() {
       : {};
 
   const [fieldPermissions, setFieldPermissions] = useState((isInviteGuest ? baseUser.permissions.fields : guest.permissions.fields) ?? {});
-  const canToggleAccess = isInviteGuest ? baseUser?.can('inviteGuests') : baseUser?.can('changeGuestAccess');
+  const canToggleAccess = isInviteGuest ? baseUser?.can(PERMISSIONS.InviteGuests) : baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const { basePermissions, handleBasePermissionsToggle } = useBasePermissions({
     guest, base, permissions, canToggleAccess,

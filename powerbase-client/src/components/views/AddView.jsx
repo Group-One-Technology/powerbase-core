@@ -8,6 +8,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { createTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
 import { useMounted } from '@lib/hooks/useMounted';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
@@ -20,7 +21,7 @@ export function AddView({ open, setOpen }) {
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
 
-  const canAddViews = baseUser?.can('addViews', table);
+  const canAddViews = baseUser?.can(PERMISSIONS.AddViews, table);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();

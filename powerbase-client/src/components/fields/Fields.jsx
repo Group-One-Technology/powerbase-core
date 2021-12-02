@@ -11,6 +11,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { FieldItem } from './FieldItem';
@@ -25,8 +26,8 @@ export function Fields({ table }) {
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({ table, fields, setFields });
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can('manageViews', table);
-  const canAddFields = baseUser?.can('addFields', table);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
 
   useEffect(() => {
     setFields(initialFields);

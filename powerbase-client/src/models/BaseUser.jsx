@@ -4,8 +4,13 @@ import constate from 'constate';
 import { useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { getAuthGuestByDatabase } from '@lib/api/auth';
-import { BASE_PERMISSIONS, ACCESS_LEVEL, CUSTOM_PERMISSIONS } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
+import {
+  BASE_PERMISSIONS,
+  ACCESS_LEVEL,
+  CUSTOM_PERMISSIONS,
+  PERMISSIONS,
+} from '@lib/constants/permissions';
 
 function useBaseUserModel() {
   const { authUser } = useAuthUser();
@@ -21,7 +26,7 @@ function useBaseUserModel() {
 
     if (!baseUser) return false;
     if (base.userId === baseUser.userId) return true;
-    if (permission === 'changeGuestAccess' || permission === 'removeGuests') return false;
+    if (permission === PERMISSIONS.ChangeGuestAccess || permission === PERMISSIONS.RemoveGuests) return false;
 
     const permissions = ACCESS_LEVEL.find((item) => item.name === baseUser.access)?.permisions;
     if (!permissions) return false;

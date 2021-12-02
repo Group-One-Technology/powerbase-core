@@ -16,6 +16,7 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { TablePermissionsModalProvider } from '@models/modals/TablePermissionsModal';
 import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { useTableTabsReorder } from '@lib/hooks/tables/useTableTabsReorder';
 
 import { TablePermissionsModal } from '@components/permissions/TablePermissionsModal';
@@ -33,7 +34,7 @@ export function TableTabs() {
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
   const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
 
-  const canAddTables = baseUser?.can('addTables');
+  const canAddTables = baseUser?.can(PERMISSIONS.AddTables);
 
   useEffect(() => {
     setTables(initialTables);

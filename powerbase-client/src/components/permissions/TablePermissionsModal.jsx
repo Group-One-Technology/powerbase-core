@@ -15,7 +15,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useCurrentView } from '@models/views/CurrentTableView';
-import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
@@ -42,7 +42,7 @@ function BaseTablePermissionsModal() {
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const handleChangePermissionAccess = async (permission, access) => {
     if (canChangeGuestAccess) {

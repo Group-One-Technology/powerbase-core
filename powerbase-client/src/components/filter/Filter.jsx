@@ -13,6 +13,7 @@ import { useTableView } from '@models/TableView';
 import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { FilterGroup } from './FilterGroup';
 
@@ -25,7 +26,7 @@ export function Filter({ table }) {
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
 
-  const canManageViews = baseUser?.can('manageViews', table);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
 
   const updateTableRecords = useCallback(debounce(async () => {
     if (filterRef.current && canManageViews) {

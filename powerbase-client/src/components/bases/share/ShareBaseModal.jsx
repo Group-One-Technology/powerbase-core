@@ -11,7 +11,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { inviteGuest } from '@lib/api/guests';
-import { ACCESS_LEVEL } from '@lib/constants/permissions';
+import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
@@ -32,7 +32,7 @@ function BaseShareBaseModal() {
   const { baseUser } = useBaseUser();
 
   const isOwner = baseUser.userId === base.owner.userId;
-  const canInviteGuests = baseUser?.can('inviteGuests', guest.state);
+  const canInviteGuests = baseUser?.can(PERMISSIONS.InviteGuests, guest.state);
   const baseUserAccess = baseUser && ACCESS_LEVEL.find((item) => item.name === baseUser.access);
 
   const [guests, setGuests] = useState(initialGuests);

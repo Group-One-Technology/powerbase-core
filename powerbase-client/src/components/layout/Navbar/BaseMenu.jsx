@@ -23,6 +23,7 @@ import { IBase } from '@lib/propTypes/base';
 import { leaveBase } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
 import { DOCUMENTATION_LINK } from '@lib/constants/links';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Badge } from '@components/ui/Badge';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
@@ -46,9 +47,9 @@ export function BaseMenu({ base, otherBases }) {
     description: 'Are you sure you want to leave this base? This action cannot be undone.',
   });
 
-  const canInviteGuests = baseUser?.can('inviteGuests');
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canManageBase = baseUser?.can('manageBase');
+  const canInviteGuests = baseUser?.can(PERMISSIONS.InviteGuests);
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
+  const canManageBase = baseUser?.can(PERMISSIONS.ManageBase);
   const isOwner = base.owner.userId === baseUser.userId;
 
   const handleShareBase = () => {

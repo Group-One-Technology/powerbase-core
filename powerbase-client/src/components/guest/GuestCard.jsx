@@ -8,6 +8,8 @@ import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
+import { PERMISSIONS } from '@lib/constants/permissions';
+
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
 import { Badge } from '@components/ui/Badge';
 
@@ -24,7 +26,7 @@ export function GuestCard({
   const { saving, saved, catchError } = useSaveStatus();
 
   const handleChangeAccess = async (value) => {
-    if (!owner && baseUser?.can('changeGuestAccess') && setGuests) {
+    if (!owner && baseUser?.can(PERMISSIONS.ChangeGuestAccess) && setGuests) {
       saving();
 
       const updatedGuests = guests.map((item) => ({
@@ -50,7 +52,7 @@ export function GuestCard({
   };
 
   const removeGuestAccess = async () => {
-    if (!owner && baseUser?.can('removeGuests') && setGuests) {
+    if (!owner && baseUser?.can(PERMISSIONS.RemoveGuests) && setGuests) {
       try {
         if (baseUser.userId === guest.userId) {
           await removeGuest({ id: guest.id });

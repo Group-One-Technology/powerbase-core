@@ -15,7 +15,7 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useViewFields } from '@models/ViewFields';
 import { useBaseUser } from '@models/BaseUser';
 import { GuestsModalProvider, useGuestsModal } from '@models/modals/GuestsModal';
-import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL } from '@lib/constants/permissions';
+import { CUSTOM_PERMISSIONS, GROUP_ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { updateFieldPermission, updateFieldPermissionAllowedRoles } from '@lib/api/fields';
 import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests';
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
@@ -39,7 +39,7 @@ function BaseFieldPermissionsModal() {
   const { hoveredItem, handleMouseEnter, handleMouseLeave } = useHoverItem();
   const { openModal: openGuestModal, setOpen: setGuestModalOpen } = useGuestsModal();
 
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const handleChangePermissionAccess = async (permission, access) => {
     if (canChangeGuestAccess && field) {
