@@ -7,7 +7,7 @@ import { BellIcon, CheckIcon, XIcon } from '@heroicons/react/outline';
 import { useSharedBases } from '@models/SharedBases';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useAuthUser } from '@models/AuthUser';
-import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitationsProvider';
+import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitations';
 import { startsWithVowel } from '@lib/helpers/startsWithVowel';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useWebsocket } from '@lib/hooks/useWebsocket';

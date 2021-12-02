@@ -1,7 +1,7 @@
 import Pusher from 'pusher-js';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewFields } from '@models/ViewFields';
-import { useBaseInvitations } from '@models/BaseInvitationsProvider';
+import { useBaseInvitations } from '@models/BaseInvitations';
 import { NOTIFICATIONS } from '@lib/constants/notifications';
 import { useMounted } from './useMounted';
 
