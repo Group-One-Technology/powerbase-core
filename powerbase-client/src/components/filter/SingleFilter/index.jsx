@@ -39,6 +39,8 @@ export function SingleFilter({
     fieldType,
   });
 
+  console.log("CURR: ", level);
+
   const updateField = (selectedField) => {
     if (canManageViews) {
       const newFieldType = fieldTypes.find(
@@ -146,6 +148,7 @@ export function SingleFilter({
           options={fields}
           onChange={handleFieldChange}
           disabled={!canManageViews}
+          first={first}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">
           Operator

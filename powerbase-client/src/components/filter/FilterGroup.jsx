@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { XIcon } from '@heroicons/react/outline';
+/* eslint-disable  */
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import cn from "classnames";
+import { XIcon } from "@heroicons/react/outline";
 
-import { IViewField } from '@lib/propTypes/view-field';
-import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
-import { AddFilterMenu } from './AddFilterMenu';
-import { SingleFilter } from './SingleFilter';
-import { FilterLogicalOperator } from './FilterLogicalOperator';
+import { IViewField } from "@lib/propTypes/view-field";
+import { initializeFilterGroup } from "@lib/helpers/filter/initializeFilterGroup";
+import { AddFilterMenu } from "./AddFilterMenu";
+import { SingleFilter } from "./SingleFilter";
+import { FilterLogicalOperator } from "./FilterLogicalOperator";
 
 export function FilterGroup({
   id,
   root,
-  parentOperator = 'and',
+  parentOperator = "and",
   level = 0,
   fields,
   filterGroup: initialFilterGroup,
@@ -24,12 +25,16 @@ export function FilterGroup({
   const filterGroupId = `filterGroup${level}`;
 
   const [newFilterCount, setNewFilterCount] = useState(1);
-  const [filterGroup, setFilterGroup] = useState(initializeFilterGroup({
-    id: filterGroupId,
-    filterGroup: initialFilterGroup,
-    fields,
-  }));
-  const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
+  const [filterGroup, setFilterGroup] = useState(
+    initializeFilterGroup({
+      id: filterGroupId,
+      filterGroup: initialFilterGroup,
+      fields,
+    })
+  );
+  const [logicalOperator, setLogicalOperator] = useState(
+    filterGroup?.operator || "and"
+  );
 
   useEffect(() => {
     if (initialFilterGroup?.filters.length > 0) {
@@ -37,27 +42,24 @@ export function FilterGroup({
     }
   }, [initialFilterGroup]);
 
-  const newFilterItem = ({
+  const newFilterItem = {
     id: `${filterGroupId}-${fields[0].name}-filter-${newFilterCount}`,
     field: fields[0].name,
-  });
+  };
 
   const handleAddFilter = (isGroup) => {
     if (canManageViews) {
       const newFilter = isGroup
-        ? ({
-          id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
-          operator: 'and',
-          filters: [newFilterItem],
-        })
+        ? {
+            id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
+            operator: "and",
+            filters: [newFilterItem],
+          }
         : newFilterItem;
 
       setFilterGroup((prevFilterGroup) => ({
         operator: prevFilterGroup.operator,
-        filters: [
-          ...(prevFilterGroup.filters || []),
-          newFilter,
-        ],
+        filters: [...(prevFilterGroup.filters || []), newFilter],
       }));
 
       setNewFilterCount((prevCount) => prevCount + 1);
@@ -75,12 +77,14 @@ export function FilterGroup({
     if (canManageViews) {
       setFilterGroup((prevFilterGroup) => ({
         operator: prevFilterGroup.operator,
-        filters: prevFilterGroup.filters.filter((item) => (
-          item.id !== filterId
-        )),
+        filters: prevFilterGroup.filters.filter((item) => item.id !== filterId),
       }));
 
-      if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
+      if (
+        !root &&
+        handleParentRemoveFilter &&
+        filterGroup.filters.length <= 1
+      ) {
         handleParentRemoveFilter(id);
       }
 
@@ -92,30 +96,42 @@ export function FilterGroup({
     <div
       data-level={level}
       data-operator={logicalOperator}
-      className={cn('filter', !root, 'flex gap-2')}
+      className={cn("filter", !root, "flex gap-2")}
     >
       {!root && (
         <div className="inline-block mt-2 w-16 text-right capitalize">
-          {handleLogicalOpChange && canManageViews
-            ? (
-              <>
-                <label htmlFor={`${filterGroupId}-logicalOperator`} className="sr-only">Logical Operator</label>
-                <FilterLogicalOperator
-                  id={`${filterGroupId}-logicalOperator`}
-                  value={parentOperator}
-                  onChange={handleLogicalOpChange}
-                />
-              </>
-            ) : parentOperator}
+          {handleLogicalOpChange && canManageViews ? (
+            <>
+              <label
+                htmlFor={`${filterGroupId}-logicalOperator`}
+                className="sr-only"
+              >
+                Logical Operator
+              </label>
+              <FilterLogicalOperator
+                id={`${filterGroupId}-logicalOperator`}
+                value={parentOperator}
+                onChange={handleLogicalOpChange}
+              />
+            </>
+          ) : (
+            parentOperator
+          )}
         </div>
       )}
-      <div className={cn('flex-1', !root && 'bg-gray-50 border border-gray-300 rounded-md')}>
+      <div
+        className={cn(
+          "flex-1",
+          !root && "bg-gray-50 border border-gray-300 rounded-md"
+        )}
+      >
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {
-              const logicalOperatorChange = root && !index === 1
-                ? handleLogicalOpChange
-                : handleChildLogicalOpChange;
+              const logicalOperatorChange =
+                root && !index === 1
+                  ? handleLogicalOpChange
+                  : handleChildLogicalOpChange;
 
               return (
                 <FilterGroup
@@ -127,9 +143,9 @@ export function FilterGroup({
                   parentOperator={logicalOperator}
                   updateTableRecords={updateTableRecords}
                   handleRemoveFilter={handleRemoveChildFilter}
-                  handleLogicalOpChange={index === 1
-                    ? logicalOperatorChange
-                    : undefined}
+                  handleLogicalOpChange={
+                    index === 1 ? logicalOperatorChange : undefined
+                  }
                   canManageViews={canManageViews}
                 />
               );
@@ -146,9 +162,9 @@ export function FilterGroup({
                 logicalOperator={logicalOperator}
                 updateTableRecords={updateTableRecords}
                 handleRemoveFilter={handleRemoveChildFilter}
-                handleLogicalOpChange={index === 1
-                  ? handleChildLogicalOpChange
-                  : undefined}
+                handleLogicalOpChange={
+                  index === 1 ? handleChildLogicalOpChange : undefined
+                }
                 canManageViews={canManageViews}
               />
             );
@@ -159,9 +175,15 @@ export function FilterGroup({
             </p>
           )}
         </div>
-        {canManageViews && <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />}
+        {canManageViews && (
+          <AddFilterMenu
+            root={root}
+            level={level}
+            handleAddFilter={handleAddFilter}
+          />
+        )}
       </div>
-      {(!root && id && handleParentRemoveFilter && canManageViews) && (
+      {!root && id && handleParentRemoveFilter && canManageViews && (
         <div className="mt-2">
           <button
             type="button"

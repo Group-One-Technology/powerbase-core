@@ -1,8 +1,13 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { Menu } from '@headlessui/react';
-import { PlusIcon, ChevronDownIcon, ViewGridAddIcon } from '@heroicons/react/outline';
+/* eslint-disable  */
+import React from "react";
+import PropTypes from "prop-types";
+import cn from "classnames";
+import { Menu } from "@headlessui/react";
+import {
+  PlusIcon,
+  ChevronDownIcon,
+  ViewGridAddIcon,
+} from "@heroicons/react/outline";
 
 export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
   if (level > 1) {
@@ -23,8 +28,8 @@ export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
       <Menu.Button
         type="button"
         className={cn(
-          'px-3 py-2 w-full text-left text-sm flex items-center transition duration-150 ease-in-out text-blue-600 hover:bg-gray-100 focus:bg-gray-100',
-          root ? 'bg-white' : 'bg-gray-50',
+          "px-3 py-2 w-full text-left text-sm flex items-center transition duration-150 ease-in-out text-blue-600 hover:bg-gray-100 focus:bg-gray-100",
+          root ? "bg-white" : "bg-gray-50"
         )}
       >
         <PlusIcon className="mr-1 h-4 w-4" />
@@ -33,8 +38,8 @@ export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
       </Menu.Button>
       <Menu.Items
         className={cn(
-          'absolute w-52 mt-2 origin-top-right text-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
-          root ? 'left-0' : 'left-20',
+          "absolute w-52 mt-2 origin-top-right text-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none",
+          root ? "left-0" : "left-20"
         )}
       >
         <Menu.Item
