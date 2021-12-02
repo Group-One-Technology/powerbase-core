@@ -1,6 +1,8 @@
 import Pusher from 'pusher-js';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewFields } from '@models/ViewFields';
+import { useBaseInvitations } from '@models/BaseInvitationsProvider';
+import { NOTIFICATIONS } from '@lib/constants/notifications';
 import { useMounted } from './useMounted';
 
 const { PUSHER_KEY } = process.env;
@@ -9,9 +11,10 @@ const pusher = new Pusher(PUSHER_KEY, {
 });
 
 export function useWebsocket(logging = false) {
+  const { mounted } = useMounted();
+  const { data: baseInvitations, mutate: mutateBaseInvitations } = useBaseInvitations();
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateViewFields } = useViewFields();
-  const { mounted } = useMounted();
 
   const dataListener = (tableId) => {
     Pusher.logToConsole = logging;
@@ -31,8 +34,21 @@ export function useWebsocket(logging = false) {
     });
   };
 
+  const notificationsListener = (userId) => {
+    Pusher.logToConsole = logging;
+    const channel = pusher.subscribe(`notifications.${userId}`);
+
+    channel.bind('notifications-listener', async (response) => {
+      const { type, data } = response;
+      if (type === NOTIFICATIONS.BaseInvite) {
+        await mutateBaseInvitations([...(baseInvitations || []), data]);
+      }
+    });
+  };
+
   return {
-    dataListener,
     pusher,
+    dataListener,
+    notificationsListener,
   };
 }

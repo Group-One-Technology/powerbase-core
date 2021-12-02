@@ -6,15 +6,19 @@ import { BellIcon, CheckIcon, XIcon } from '@heroicons/react/outline';
 
 import { useSharedBases } from '@models/SharedBases';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useAuthUser } from '@models/AuthUser';
 import { BaseInvitationsProvider, useBaseInvitations } from '@models/BaseInvitationsProvider';
 import { startsWithVowel } from '@lib/helpers/startsWithVowel';
 import { useMounted } from '@lib/hooks/useMounted';
+import { useWebsocket } from '@lib/hooks/useWebsocket';
 import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 
 function BaseNotificationsMenu({ colored }) {
   const { mounted } = useMounted();
+  const { authUser } = useAuthUser();
+  const { notificationsListener } = useWebsocket();
   const { mutate: mutateSharedBases } = useSharedBases();
   const { data: initialGuestInvitations, mutate: mutateGuestInvitations } = useBaseInvitations();
   const {
@@ -35,6 +39,10 @@ function BaseNotificationsMenu({ colored }) {
   useEffect(() => {
     setGuestInvitations(initialGuestInvitations);
   }, [initialGuestInvitations]);
+
+  useEffect(() => {
+    notificationsListener(authUser.id);
+  }, [authUser.id]);
 
   const handleAcceptInvitation = async (guest) => {
     if (guest) {
