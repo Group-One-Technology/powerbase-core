@@ -24,7 +24,8 @@ export function Fields({ table }) {
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
-  const { setFields: setRecordFields } = useViewFieldState();
+  const { setFields: setRecordFields, setHasAddedNewField } =
+    useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
@@ -164,6 +165,7 @@ export function Fields({ table }) {
                         view={view}
                         setIsCreatingField={setIsCreatingField}
                         close={close}
+                        setHasAddedNewField={setHasAddedNewField}
                       />
                     </div>
                   )}

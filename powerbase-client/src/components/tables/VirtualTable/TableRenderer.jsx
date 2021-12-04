@@ -1,7 +1,5 @@
-/* eslint-disable operator-linebreak */
-/* eslint-disable object-curly-newline */
 /* eslint-disable  */
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Grid, InfiniteLoader, AutoSizer, ScrollSync } from "react-virtualized";
 import PropTypes from "prop-types";
 
@@ -19,6 +17,7 @@ import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
 import { useBase } from "@models/Base";
+import constate from "constate";
 
 export function TableRenderer({ height, table, highlightedCell, base }) {
   const { data: fieldTypes } = useFieldTypes();
@@ -30,7 +29,13 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
     isLoading,
     mutate: mutateTableRecords,
   } = useTableRecords();
-  const { initialFields, fields, setFields } = useViewFieldState();
+  const {
+    initialFields,
+    fields,
+    setFields,
+    hasAddedNewField,
+    setHasAddedNewField,
+  } = useViewFieldState();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
@@ -47,6 +52,23 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
+  const [totalFieldWidth, _] = useState(
+    fields?.reduce(function (a, b) {
+      return a + b.width;
+    }, 0)
+  );
+
+  useEffect(() => {
+    let timer;
+    if (hasAddedNewField) {
+      recordsGridRef.current.forceUpdate();
+      recordsGridRef.current.recomputeGridSize();
+      timer = setTimeout(() => {
+        setHasAddedNewField(false);
+      }, 800);
+    }
+    return () => clearTimeout(timer);
+  }, [hasAddedNewField]);
 
   const columnCount = fields && fields.length + 1;
 
@@ -128,6 +150,7 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
                       }}
                       onScroll={onScroll}
                       scrollLeft={scrollLeft}
+                      scrollToColumn={hasAddedNewField ? width : 0} //using width here and not column count because the latter is computed late and falls being the conditional-setter in the set time out
                       onSectionRendered={({
                         columnStartIndex,
                         columnStopIndex,

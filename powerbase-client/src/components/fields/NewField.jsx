@@ -135,9 +135,9 @@ const FieldTypeComponent = ({
 export default function NewField({
   tableId,
   view,
-  fields,
   setIsCreatingField,
   close,
+  setHasAddedNewField,
 }) {
   const [selected, setSelected] = useState(null);
   const [nameExists, setNameExists] = useState(false);
@@ -209,12 +209,11 @@ export default function NewField({
     if (response.statusText === "OK") {
       setIsCreatingField(false);
       mutateViewFields();
+      setHasAddedNewField(true);
       close();
-      return response.data;
+      // return response.data;
     }
   };
-
-  window.scrollTo(1200, 1200);
 
   return (
     <div className="m-4">

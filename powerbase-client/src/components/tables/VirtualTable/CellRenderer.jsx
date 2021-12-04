@@ -265,17 +265,15 @@ export function CellRenderer({
       (item) => !(item.isHidden || item.foreignKey?.columns.length > 1)
     );
 
-    let computedPrimaryKey = {},
-      pkFieldValue,
-      pkFieldName;
-    const primaryKey = computedFields?.find((item) => item.isPrimaryKey);
+    const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
 
-    if (primaryKey) {
-      const { value, name } = primaryKey;
-      pkFieldValue = value;
-      pkFieldName = name;
-      computedPrimaryKey[name.toLowerCase()] = value;
-    }
+    const composedKeys = primaryKeys
+      .map((key) => {
+        const keyName = key.name.toLowerCase();
+        const keyValue = (key.value + "").toLocaleLowerCase();
+        return `${keyName}_${keyValue}`;
+      })
+      .join("-");
 
     let hasPrecision = false;
     let formattedNumber;
@@ -287,20 +285,13 @@ export function CellRenderer({
     }
 
     payload = {
-      primary_keys: computedPrimaryKey,
+      primary_keys: composedKeys,
       data: {
         [field.name]: field.precision
           ? formattedNumber
           : recordInputRef.current?.value,
       },
     };
-
-    if (!isTurbo) {
-      const formattedPkFieldNameLabel = `__primary_key_name_table_${table.id}`;
-      const formattedPKFieldValueLabel = `__primary_key_value_table_${table.id}`;
-      payload.data[formattedPkFieldNameLabel] = pkFieldName;
-      payload.data[formattedPKFieldValueLabel] = pkFieldValue;
-    }
 
     try {
       const response = await securedApi.post(

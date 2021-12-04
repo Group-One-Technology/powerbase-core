@@ -58,7 +58,7 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
       `/tables/${id}/magic_values`,
       getMagicValues
     );
-
+    console.log("md", magicValuesResponse);
     const { data: magicData } = magicValuesResponse;
     parsedData?.forEach((record, idx) =>
       magicData?.forEach((magicValue) => {
@@ -66,7 +66,7 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
         const formattedPkFieldValueLabel = `PrimaryKeyValueTable${id}`;
         const pkName = magicValue[formattedPkFieldNameLabel];
         const pkValue = magicValue[formattedPkFieldValueLabel];
-        if (record[pkName] + "" === pkValue + "") {
+        if (record[pkName] === pkValue) {
           const {
             formattedPkFieldNameLabel,
             formattedPkFieldValueLabel,

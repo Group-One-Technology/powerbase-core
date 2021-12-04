@@ -140,6 +140,11 @@ module Powerbase
         id = primary_keys.collect { |key, _| "#{key}_#{primary_keys[key]}" }.join("-")
       end
 
+      puts "huhuhu"
+      puts options
+      puts id
+      puts index
+
       if !@is_turbo
         unless @esclient.indices.exists(index: index)
           @esclient.indices.create(
