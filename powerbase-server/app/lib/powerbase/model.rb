@@ -134,17 +134,7 @@ module Powerbase
     # Ex: { pathId: 123, userId: 1245 }
     def update_record(options)
       index = "table_records_#{@table_id}"
-      primary_keys = options[:primary_keys]
-      id = nil
-      if primary_keys.length.positive?
-        id = primary_keys.collect { |key, _| "#{key}_#{primary_keys[key]}" }.join("-")
-      end
-
-      puts "huhuhu"
-      puts options
-      puts id
-      puts index
-
+      id = options[:primary_keys]
       if !@is_turbo
         unless @esclient.indices.exists(index: index)
           @esclient.indices.create(

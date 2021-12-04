@@ -271,9 +271,9 @@ export function CellRenderer({
       .map((key) => {
         const keyName = key.name.toLowerCase();
         const keyValue = (key.value + "").toLocaleLowerCase();
-        return `${keyName}_${keyValue}`;
+        return `${keyName}___${keyValue}`;
       })
-      .join("-");
+      .join("---");
 
     let hasPrecision = false;
     let formattedNumber;
@@ -299,24 +299,24 @@ export function CellRenderer({
         payload
       );
       const recordsToUse = updatedRecords ? updatedRecords : records;
-      if (response.statusText === "OK") {
-        const mutatedRecords = recordsToUse.map((recordObj, idx) => {
-          if (recordObj[pkFieldName] === pkFieldValue) {
-            let newObj = { ...recordObj };
-            newObj[field.name] =
-              hasPrecision && formattedNumber
-                ? formattedNumber
-                : calendarData
-                ? calendarData
-                : recordInputRef.current?.value;
-            return newObj;
-          } else return recordObj;
-        });
+      // if (response.statusText === "OK") {
+      //   const mutatedRecords = recordsToUse.map((recordObj, idx) => {
+      //     if (recordObj[pkFieldName] === pkFieldValue) {
+      //       let newObj = { ...recordObj };
+      //       newObj[field.name] =
+      //         hasPrecision && formattedNumber
+      //           ? formattedNumber
+      //           : calendarData
+      //           ? calendarData
+      //           : recordInputRef.current?.value;
+      //       return newObj;
+      //     } else return recordObj;
+      //   });
 
-        setUpdatedRecords(mutatedRecords);
-        setIsNewRecord(false);
-        exitEditing();
-      }
+      //   setUpdatedRecords(mutatedRecords);
+      //   setIsNewRecord(false);
+      //   exitEditing();
+      // }
     } catch (error) {
       console.log(error);
     }

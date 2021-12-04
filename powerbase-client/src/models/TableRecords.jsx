@@ -53,28 +53,36 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   let mergedData = parsedData;
 
+  function getParameterCaseInsensitive(object, key) {
+    return object[
+      Object.keys(object).find((k) => k.toLowerCase() === key.toLowerCase())
+    ];
+  }
+
   if (!isTurbo) {
     const magicValuesResponse = useSWR(
       `/tables/${id}/magic_values`,
       getMagicValues
     );
-    console.log("md", magicValuesResponse);
     const { data: magicData } = magicValuesResponse;
     parsedData?.forEach((record, idx) =>
       magicData?.forEach((magicValue) => {
-        const formattedPkFieldNameLabel = `PrimaryKeyNameTable${id}`;
-        const formattedPkFieldValueLabel = `PrimaryKeyValueTable${id}`;
-        const pkName = magicValue[formattedPkFieldNameLabel];
-        const pkValue = magicValue[formattedPkFieldValueLabel];
-        if (record[pkName] === pkValue) {
-          const {
-            formattedPkFieldNameLabel,
-            formattedPkFieldValueLabel,
-            ...associatedValue
-          } = magicValue;
-          const combined = { ...record, ...associatedValue };
-          mergedData[idx] = combined;
-        }
+        let matches = [];
+        const docId = magicValue.docId;
+        const primaryKeys = docId.split("---");
+        primaryKeys.forEach((key, pkIdx) => {
+          const sanitized = key.split("___");
+          const pkName = sanitized[0];
+          const pkValue = sanitized[1];
+          matches.push(
+            getParameterCaseInsensitive(record, pkName) + "" === pkValue + ""
+          );
+          if (pkIdx === primaryKeys.length - 1 && !matches.includes(false)) {
+            const { docId, ...associatedValue } = magicValue;
+            const combined = { ...record, ...associatedValue };
+            mergedData[idx] = combined;
+          }
+        });
       })
     );
   }
