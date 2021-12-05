@@ -14,5 +14,4 @@ class PowerbaseFieldType < ApplicationRecord
 
   has_many :powerbase_fields
   has_many :field_db_type_mappings
-  has_many :magic_values
 end

@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission]
+  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission, :add]
   before_action :check_field_permission_access, only: [:update_allowed_roles, :update_field_permission]
 
   schema(:index) do

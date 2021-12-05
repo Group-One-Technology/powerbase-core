@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_02_070752) do
+ActiveRecord::Schema.define(version: 2021_12_05_191217) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -94,24 +94,6 @@ ActiveRecord::Schema.define(version: 2021_12_02_070752) do
     t.index ["powerbase_database_id"], name: "index_magic_records_on_powerbase_database_id"
     t.index ["powerbase_table_id"], name: "index_magic_records_on_powerbase_table_id"
   end
-
-  create_table "magic_values", force: :cascade do |t|
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.bigint "magic_record_id"
-    t.text "value"
-    t.string "pk_field_value"
-    t.bigint "pk_field_id"
-    t.bigint "powerbase_field_type_id"
-    t.bigint "powerbase_field_id"
-    t.bigint "powerbase_table_id"
-    t.index ["magic_record_id"], name: "index_magic_values_on_magic_record_id"
-    t.index ["pk_field_id"], name: "index_magic_values_on_pk_field_id"
-    t.index ["powerbase_field_id"], name: "index_magic_values_on_powerbase_field_id"
-    t.index ["powerbase_field_type_id"], name: "index_magic_values_on_powerbase_field_type_id"
-    t.index ["powerbase_table_id"], name: "index_magic_values_on_powerbase_table_id"
-  end
-
 
   create_table "notifications", force: :cascade do |t|
     t.string "data_type", null: false
@@ -245,12 +227,6 @@ ActiveRecord::Schema.define(version: 2021_12_02_070752) do
   add_foreign_key "hubspot_databases", "users"
   add_foreign_key "magic_records", "powerbase_databases"
   add_foreign_key "magic_records", "powerbase_tables"
-  add_foreign_key "magic_values", "magic_records"
-  add_foreign_key "magic_values", "powerbase_field_types"
-  add_foreign_key "magic_values", "powerbase_fields"
-  add_foreign_key "magic_values", "powerbase_fields", column: "pk_field_id"
-  add_foreign_key "magic_values", "powerbase_tables"
-  
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"

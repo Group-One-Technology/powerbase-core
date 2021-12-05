@@ -11,7 +11,6 @@ class PowerbaseField < ApplicationRecord
   belongs_to :powerbase_field_type
   has_one :field_select_option, dependent: :destroy
   has_many :view_field_options, dependent: :destroy
-  has_many :magic_values, foreign_key: "pk_field_id", dependent: :destroy
 
   def update_guests_access(options)
     guest = options[:guest]
