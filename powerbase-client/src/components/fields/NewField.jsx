@@ -70,11 +70,9 @@ const FieldTypeComponent = ({
 
   const { isPercent, isCurrency, hasDecimal, isNumber } =
     precisionPresenceConditions;
-  const hasPrecisionField = isPercent || isCurrency || hasDecimal;
+  const hasPrecisionField = isPercent || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
-  const canHaveValidation =
-    type.name.toLowerCase() !== "single line text" &&
-    type.name.toLowerCase() !== "long text";
+  const canHaveValidation = false; //TODO - this would be true for strict-type fields for the option to allow dirty values
 
   return (
     <div className="mt-2">
@@ -157,9 +155,12 @@ export default function NewField({
   useEffect(() => {
     // Excluded date for now
     const supported = ["string", "number"];
+    // Also exlcuding long text for now until I implement rich text / container editing for it later on
     setSupportedNewFieldTypes(
-      fieldTypes?.filter((item) =>
-        supported.includes(item.dataType.toLowerCase())
+      fieldTypes?.filter(
+        (item) =>
+          supported.includes(item.dataType.toLowerCase()) &&
+          item.name.toLowerCase() !== "long text"
       )
     );
   }, [fieldTypes]);

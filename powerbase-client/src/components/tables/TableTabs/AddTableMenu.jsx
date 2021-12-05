@@ -13,12 +13,16 @@ const AddTable = ({
 }) => {
   const [open, setOpen] = useState(false);
   const handleAddTable = () => {
-    setOpen(!open);
+    // TODO - Implemented this earlier and didnt finish the feature yet but works on a basic level
+    // setOpen(!open);
+    alert("Add table clicked - COMING SOON");
   };
 
   const handleImportCSV = () => {
-    setOpen(!open);
-    setIsUploadAction(true);
+    // TODO - Implemented this earlier and didnt finish the feature yet but works on a basic level
+    // setOpen(!open);
+    // setIsUploadAction(true);
+    alert("CSV Import Clicked - COMING SOON");
   };
   return (
     <>

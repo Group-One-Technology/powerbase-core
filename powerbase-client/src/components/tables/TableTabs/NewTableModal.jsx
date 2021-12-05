@@ -170,7 +170,6 @@ export default function NewTableModal({
       if (response.data) {
         const newTable = response.data.table;
         const newFields = response.data.fields;
-        console.log(newFields);
         csvArray.forEach(async (record, idx) => {
           let newRecordId;
           const recordParams = {
