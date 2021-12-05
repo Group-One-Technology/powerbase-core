@@ -65,6 +65,7 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
       getMagicValues
     );
     const { data: magicData } = magicValuesResponse;
+    console.log(magicData);
     parsedData?.forEach((record, idx) =>
       magicData?.forEach((magicValue) => {
         let matches = [];

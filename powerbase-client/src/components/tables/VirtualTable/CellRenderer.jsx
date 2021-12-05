@@ -293,31 +293,60 @@ export function CellRenderer({
       },
     };
 
+    function getParameterCaseInsensitive(object, searchKey) {
+      return object[
+        Object.keys(object).find(
+          (k) => k.toLowerCase() === searchKey.toLowerCase()
+        )
+      ];
+    }
+
     try {
       const response = await securedApi.post(
         `/magic_values/${field.tableId}`,
         payload
       );
       const recordsToUse = updatedRecords ? updatedRecords : records;
-      // if (response.statusText === "OK") {
-      //   const mutatedRecords = recordsToUse.map((recordObj, idx) => {
-      //     if (recordObj[pkFieldName] === pkFieldValue) {
-      //       let newObj = { ...recordObj };
-      //       newObj[field.name] =
-      //         hasPrecision && formattedNumber
-      //           ? formattedNumber
-      //           : calendarData
-      //           ? calendarData
-      //           : recordInputRef.current?.value;
-      //       return newObj;
-      //     } else return recordObj;
-      //   });
+      if (response.statusText === "OK") {
+        const mutatedRecords = recordsToUse?.map((recordObj, idx) => {
+          let matches = [];
+          const primaryKeys = composedKeys.split("---");
+          let objToUse = {};
+          primaryKeys.forEach((key, pkIdx) => {
+            const sanitized = key.split("___");
+            const pkName = sanitized[0];
+            const pkValue = sanitized[1];
+            console.log(getParameterCaseInsensitive(recordObj, pkName));
+            matches.push(
+              getParameterCaseInsensitive(recordObj, pkName) + "" ===
+                pkValue + ""
+            );
+            if (pkIdx === primaryKeys.length - 1) {
+              if (!matches.includes(false)) {
+                let newObj = { ...recordObj };
+                newObj[field.name] =
+                  hasPrecision && formattedNumber
+                    ? formattedNumber
+                    : calendarData
+                    ? calendarData
+                    : recordInputRef.current?.value;
+                objToUse = newObj;
+              } else {
+                objToUse = recordObj;
+              }
+            }
+          });
+          return objToUse;
+        });
 
-      //   setUpdatedRecords(mutatedRecords);
-      //   setIsNewRecord(false);
-      //   exitEditing();
-      // }
+        console.log(mutatedRecords);
+
+        setUpdatedRecords(mutatedRecords);
+        setIsNewRecord(false);
+        exitEditing();
+      }
     } catch (error) {
+      exitEditing();
       console.log(error);
     }
   };

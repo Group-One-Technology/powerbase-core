@@ -144,14 +144,7 @@ module Powerbase
             }
           )
         end
-        record = @esclient.update(
-          index: index,
-          id: id,
-          body: {
-            doc: options[:data],
-            doc_as_upsert: true
-          },
-        )
+        record = @esclient.update(index: index, id: id, body: { doc: options[:data], doc_as_upsert: true }, refresh: true,_source: true)
         record
       else
         response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
@@ -161,7 +154,7 @@ module Powerbase
 
     def magic_search
       index = "table_records_#{@table_id}"
-      result = @esclient.search(index: index)
+      result = @esclient.search(index: index, size: 1000)
       result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
     end
 
