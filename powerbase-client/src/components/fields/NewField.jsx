@@ -1,20 +1,23 @@
-/* eslint-disable */
-import React, { useState, useRef, useEffect } from "react";
-import { securedApi } from "@lib/api";
-import { XIcon } from "@heroicons/react/outline";
-import useConstant from "@lib/hooks/useConstant";
-import { useAsync } from "react-async-hook";
-import cn from "classnames";
-import { FieldTypeIcon } from "@components/ui/FieldTypeIcon";
-import { useFieldTypes } from "@models/FieldTypes";
-import { useViewFields } from "@models/ViewFields";
-import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
-import Checkbox from "@components/ui/Checkbox";
-import debounce from "lodash.debounce";
-import { toSnakeCase } from "@lib/helpers/text/textTypeFormatters";
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable prefer-spread */
+import React, { useState, useRef, useEffect } from 'react';
+import { securedApi } from '@lib/api';
+import { XIcon } from '@heroicons/react/outline';
+import useConstant from '@lib/hooks/useConstant';
+import { useAsync } from 'react-async-hook';
+import cn from 'classnames';
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { useFieldTypes } from '@models/FieldTypes';
+import { useViewFields } from '@models/ViewFields';
+import Checkbox from '@components/ui/Checkbox';
+import debounce from 'lodash.debounce';
+import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
+import PropTypes from 'prop-types';
+import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
 const useDebouncedInput = (setNameExists, id) => {
-  const [fieldName, setFieldName] = useState("");
+  const [fieldName, setFieldName] = useState('');
+  // eslint-disable-next-line consistent-return
   const searchPowerbase = async (text) => {
     try {
       const response = await securedApi.get(`tables/${id}/fields/${text}`);
@@ -27,16 +30,13 @@ const useDebouncedInput = (setNameExists, id) => {
     }
   };
 
-  const debouncedSearchPowerbase = useConstant(() =>
-    debounce(searchPowerbase, 100)
-  );
+  const debouncedSearchPowerbase = useConstant(() => debounce(searchPowerbase, 100));
 
   const search = useAsync(async () => {
     if (fieldName.length === 0) {
       return [];
-    } else {
-      return debouncedSearchPowerbase(toSnakeCase(fieldName.toLowerCase()));
     }
+    return debouncedSearchPowerbase(toSnakeCase(fieldName.toLowerCase()));
   }, [fieldName]);
 
   return {
@@ -62,23 +62,26 @@ const FieldTypeComponent = ({
   };
 
   const precisionPresenceConditions = {
-    isPercent: type.name.toLowerCase() === "percent",
-    isCurrency: type.name.toLowerCase() === "currency",
+    isPercent: type.name.toLowerCase() === 'percent',
+    isCurrency: type.name.toLowerCase() === 'currency',
     hasDecimal: numberSubtype?.id === 2,
-    isNumber: type.name.toLowerCase() === "number",
+    isNumber: type.name.toLowerCase() === 'number',
   };
 
-  const { isPercent, isCurrency, hasDecimal, isNumber } =
-    precisionPresenceConditions;
+  const {
+    isPercent, isCurrency, hasDecimal, isNumber,
+  } = precisionPresenceConditions;
   const hasPrecisionField = isPercent || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
-  const canHaveValidation = false; //TODO - this would be true for strict-type fields for the option to allow dirty values
+  const canHaveValidation = false; // TODO - this would be true for strict-type fields for the option to allow dirty values
 
   return (
     <div className="mt-2">
       <div
         className="bg-indigo-200 hover:bg-indigo-300 cursor-default flex p-2 mb-2 rounded-md hover:rounded-md"
         onClick={collapseSelectedField}
+        role="button"
+        tabIndex={-1}
       >
         <div>
           <FieldTypeIcon
@@ -105,7 +108,7 @@ const FieldTypeComponent = ({
         </div>
       )}
       {hasFormatOptions && (
-        <div className={cn("mt-4 mb-6 h-24", hasPrecisionField && "h-56")}>
+        <div className={cn('mt-4 mb-6 h-24', hasPrecisionField && 'h-56')}>
           {(isNumber || isCurrency) && (
             <NumberFieldSelectOptions
               isPrecision={false}
@@ -117,7 +120,7 @@ const FieldTypeComponent = ({
           )}
           {hasPrecisionField && (
             <NumberFieldSelectOptions
-              isPrecision={true}
+              isPrecision
               isPercent={isPercent}
               setNumberPrecision={setNumberPrecision}
               isCurrency={isCurrency}
@@ -154,14 +157,13 @@ export default function NewField({
 
   useEffect(() => {
     // Excluded date for now
-    const supported = ["string", "number"];
+    const supported = ['string', 'number'];
     // Also exlcuding long text for now until I implement rich text / container editing for it later on
     setSupportedNewFieldTypes(
       fieldTypes?.filter(
-        (item) =>
-          supported.includes(item.dataType.toLowerCase()) &&
-          item.name.toLowerCase() !== "long text"
-      )
+        (item) => supported.includes(item.dataType.toLowerCase())
+          && item.name.toLowerCase() !== 'long text',
+      ),
     );
   }, [fieldTypes]);
 
@@ -175,13 +177,14 @@ export default function NewField({
 
   // REFACTOR eventually to acccount for a wider variety of types with byte considerations
   const computeDBType = () => {
-    if (selected?.dataType.toLowerCase() === "string") return "text";
-    else if (selected?.dataType.toLowerCase() === "number") {
+    if (selected?.dataType.toLowerCase() === 'string') return 'text';
+    if (selected?.dataType.toLowerCase() === 'number') {
       if (numberPrecision?.precision) {
-        const precision = numberPrecision?.precision + "";
+        const precision = `${numberPrecision?.precision}`;
         return `numeric(10,${precision})`;
-      } else return "integer";
+      } return 'integer';
     }
+    return ''; // Just an error gauard
   };
 
   const addNewField = async () => {
@@ -189,7 +192,7 @@ export default function NewField({
       name: toSnakeCase(fieldName.toLowerCase()),
       description: null,
       db_type: computeDBType(),
-      default_value: "",
+      default_value: '',
       is_primary_key: false,
       is_nullable: true,
       powerbase_table_id: tableId,
@@ -203,13 +206,13 @@ export default function NewField({
       order:
         Math.max.apply(
           Math,
-          ViewFields.map((item) => item.order)
+          ViewFields.map((item) => item.order),
         ) + 1,
-      options: currency ? { style: "currency", currency } : null,
+      options: currency ? { style: 'currency', currency } : null,
     };
 
     const response = await securedApi.post(`/tables/${tableId}/field`, payload);
-    if (response.statusText === "OK") {
+    if (response.statusText === 'OK') {
       setIsCreatingField(false);
       mutateViewFields();
       setHasAddedNewField(true);
@@ -228,9 +231,9 @@ export default function NewField({
           name="field-name"
           id="new-field-name"
           className={cn(
-            "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md",
-            nameExists && "focus:ring-red-500 focus:border-red-500",
-            !nameExists && "focus:ring-indigo-500 focus:border-indigo-500"
+            'shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
+            nameExists && 'focus:ring-red-500 focus:border-red-500',
+            !nameExists && 'focus:ring-indigo-500 focus:border-indigo-500',
           )}
           placeholder="Enter field name (required)"
           autoComplete="off"
@@ -241,7 +244,7 @@ export default function NewField({
 
       <div>
         <p className="text-red-500">
-          {nameExists ? "Field name already exists for this table." : <br />}
+          {nameExists ? 'Field name already exists for this table.' : <br />}
         </p>
       </div>
 
@@ -252,6 +255,8 @@ export default function NewField({
               className="hover:bg-indigo-200 cursor-default flex p-2 mb-2 hover:rounded-md"
               onClick={() => handleFieldTypeClick(type)}
               key={type.id}
+              role="button"
+              tabIndex={0}
             >
               <div>
                 <FieldTypeIcon
@@ -297,9 +302,9 @@ export default function NewField({
           <button
             type="button"
             className={cn(
-              `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
-              (nameExists || !fieldName.length) && "cursor-not-allowed",
-              !nameExists && fieldName.length && "hover:bg-indigo-700"
+              'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+              (nameExists || !fieldName.length) && 'cursor-not-allowed',
+              !nameExists && fieldName.length && 'hover:bg-indigo-700',
             )}
             onClick={() => addNewField()}
             disabled={nameExists || !fieldName.length}
@@ -311,3 +316,23 @@ export default function NewField({
     </div>
   );
 }
+
+FieldTypeComponent.propTypes = {
+  type: PropTypes.object.isRequired,
+  fieldTypes: PropTypes.array.isRequired,
+  setSelected: PropTypes.func.isRequired,
+  setNumberSubtype: PropTypes.func.isRequired,
+  setNumberPrecision: PropTypes.func.isRequired,
+  numberSubtype: PropTypes.any,
+  setIsChecked: PropTypes.func.isRequired,
+  isChecked: PropTypes.bool.isRequired,
+  setCurrency: PropTypes.func.isRequired,
+};
+
+NewField.propTypes = {
+  tableId: PropTypes.number.isRequired,
+  view: PropTypes.object.isRequired,
+  setIsCreatingField: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
+  setHasAddedNewField: PropTypes.func.isRequired,
+};

@@ -1,8 +1,8 @@
 /* eslint-disable */
-import React, { Fragment, useEffect, useState, ReactDOM } from "react";
-import { PlusIcon } from "@heroicons/react/solid";
-import * as Popover from "@radix-ui/react-popover";
-import NewTableModal from "./NewTableModal";
+import React from 'react';
+import { PlusIcon } from '@heroicons/react/solid';
+import * as Popover from '@radix-ui/react-popover';
+import NewTableModal from './NewTableModal';
 
 const AddTable = ({
   table,
@@ -15,14 +15,14 @@ const AddTable = ({
   const handleAddTable = () => {
     // TODO - Implemented this earlier and didnt finish the feature yet but works on a basic level
     // setOpen(!open);
-    alert("Add table clicked - COMING SOON");
+    alert('Add table clicked - COMING SOON');
   };
 
   const handleImportCSV = () => {
     // TODO - Implemented this earlier and didnt finish the feature yet but works on a basic level
     // setOpen(!open);
     // setIsUploadAction(true);
-    alert("CSV Import Clicked - COMING SOON");
+    alert('CSV Import Clicked - COMING SOON');
   };
   return (
     <>
