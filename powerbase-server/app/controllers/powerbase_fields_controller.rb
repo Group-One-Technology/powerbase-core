@@ -6,10 +6,6 @@ class PowerbaseFieldsController < ApplicationController
     required(:table_id).value(:integer)
   end
 
-  # schema(:add) do
-  #   required(:table_id).value(:integer)
-  # end
-
   schema(:alias) do
     required(:id).value(:integer)
     required(:alias).value(:string)
@@ -69,8 +65,8 @@ class PowerbaseFieldsController < ApplicationController
 
   # GET /tables/:id/fields/:name
   def get_single_field
-    name = params[:name]
-    id = params[:id]
+    name = safe_params[:name]
+    id = safe_params[:id]
     field = PowerbaseField.where('lower(name) = ? and powerbase_table_id = ?', name.downcase, id).first
     if field
       render json: format_json(field)

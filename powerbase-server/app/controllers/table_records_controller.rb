@@ -18,11 +18,13 @@ class TableRecordsController < ApplicationController
 
 
   schema(:add_or_update_magic_value) do
-    required(:table_id).value(:integer)
-    optional(:id).value(:string)
+    optional(:id).value(:integer)
     optional(:data)
     required(:primary_keys)
-    required(:value)
+  end
+
+  schema(:magic_values) do
+    required(:id).value(:integer)
   end
 
   # POST /tables/:table_id/records
@@ -74,12 +76,12 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /magic_values
+  # POST /tables/:id/magic_value
   def add_or_update_magic_value
-    @table = PowerbaseTable.find(params[:table_id])
+    @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:add_records, @table)
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:table_id])
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
     record = model.update_record({
       primary_keys: safe_params[:primary_keys],
       fields: safe_params[:fields],
@@ -90,8 +92,8 @@ class TableRecordsController < ApplicationController
 
   # GET /tables/:id/magic_values
   def magic_values
-    @table = PowerbaseTable.find(params[:id])
-    raise NotFound.new("Could not find table with id of #{params[:id]}") if !@table
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:view_table, @table)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
@@ -100,10 +102,11 @@ class TableRecordsController < ApplicationController
   end
 
   # POST /magic_records
-  def create_magic_record
-    new_magic_record = MagicRecord.create({powerbase_table_id: params[:powerbase_table_id], powerbase_database_id: params[:powerbase_database_id], powerbase_record_order: params[:powerbase_record_order]})
-    render json: new_magic_record
-  end
+  # A test endpoint that's functional for creating magic records (virtual rows) - TO CONTINUE ON NEXT FEATURE
+  # def create_magic_record
+  #   new_magic_record = MagicRecord.create({powerbase_table_id: params[:powerbase_table_id], powerbase_database_id: params[:powerbase_database_id], powerbase_record_order: params[:powerbase_record_order]})
+  #   render json: new_magic_record
+  # end
 
   # GET /tables/:id/records_count
   def count
@@ -118,17 +121,6 @@ class TableRecordsController < ApplicationController
     })
 
     render json: { count: total_records }
-  end
-
-  def format_json(value)
-    {
-      id: value.id,
-      value: value.value,
-      magic_record_id: value.magic_record_id,
-      table_id: value.powerbase_table_id,
-      field_id: value.powerbase_field_id,
-      field_type_id: value.powerbase_field_type_id
-    }
   end
 
 end

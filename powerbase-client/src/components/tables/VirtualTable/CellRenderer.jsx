@@ -297,7 +297,7 @@ export function CellRenderer({
 
     try {
       const response = await securedApi.post(
-        `/magic_values/${field.tableId}`,
+        `/tables/${field.tableId}/magic_value`,
         payload
       );
       const recordsToUse = updatedRecords ? updatedRecords : records;
