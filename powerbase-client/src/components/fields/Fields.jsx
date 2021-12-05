@@ -1,38 +1,35 @@
-/* eslint-disable */
-import React, { Fragment, useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import cn from "classnames";
-import { Popover, Transition } from "@headlessui/react";
-import { AdjustmentsIcon, TableIcon, PlusIcon } from "@heroicons/react/outline";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import React, { Fragment, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { Popover, Transition } from '@headlessui/react';
+import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
+import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+} from '@dnd-kit/sortable';
 
-import { useSaveStatus } from "@models/SaveStatus";
-import { useViewFields } from "@models/ViewFields";
-import { useTableView } from "@models/TableView";
-import { useViewFieldState } from "@models/view/ViewFieldState";
-import { useBaseUser } from "@models/BaseUser";
-import { PERMISSIONS } from "@lib/constants/permissions";
-import { hideAllViewFields } from "@lib/api/view-fields";
-import { useReorderFields } from "@lib/hooks/fields/useReorderFields";
-import { FieldItem } from "./FieldItem";
-import NewField from "./NewField";
+import { useSaveStatus } from '@models/SaveStatus';
+import { useViewFields } from '@models/ViewFields';
+import { useTableView } from '@models/TableView';
+import { useViewFieldState } from '@models/view/ViewFieldState';
+import { useBaseUser } from '@models/BaseUser';
+import { hideAllViewFields } from '@lib/api/view-fields';
+import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
+import { FieldItem } from './FieldItem';
+import NewField from './NewField';
 
 export function Fields({ table }) {
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
-  const { setFields: setRecordFields, setHasAddedNewField } =
-    useViewFieldState();
+  const { setFields: setRecordFields, setHasAddedNewField } = useViewFieldState();
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
-  const canManageViews = baseUser?.can("manageViews", table.id);
-  const canAddFields = baseUser?.can("addFields", table.id);
-  /* Setting this as a way of checking for tables with unique row identifiers 
+  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canAddFields = baseUser?.can('addFields', table.id);
+  /* Setting this as a way of checking for tables with unique row identifiers
   as it is messier to maintain witout that for now */
   const containsPrimaryKey = initialFields?.some((field) => field.isPrimaryKey);
   const [isCreatingField, setIsCreatingField] = useState(false);
@@ -82,10 +79,10 @@ export function Fields({ table }) {
           <Popover.Button
             type="button"
             className={cn(
-              "inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500",
+              'inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
               {
-                "ring-2": open,
-              }
+                'ring-2': open,
+              },
             )}
           >
             <AdjustmentsIcon className="block h-4 w-4 mr-1" />
@@ -102,7 +99,7 @@ export function Fields({ table }) {
           >
             <Popover.Panel
               className={cn(
-                "absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md"
+                'absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md',
               )}
             >
               {({ close }) => (

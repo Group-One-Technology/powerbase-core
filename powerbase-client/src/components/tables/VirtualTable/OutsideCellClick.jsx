@@ -1,5 +1,4 @@
-/* eslint-disable */
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
 const OutsideCellClick = (props) => {
   let clickCaptured = false;
@@ -27,34 +26,30 @@ const OutsideCellClick = (props) => {
     focusCaptured = false;
   };
 
-  const getProps = () => {
-    return {
-      className: props.className,
-      style: props.style,
-      onMouseDown: innerClick,
-      onFocus: innerFocus,
-      onTouchStart: innerClick,
-    };
-  };
+  const getProps = () => ({
+    className: props.className,
+    style: props.style,
+    onMouseDown: innerClick,
+    onFocus: innerFocus,
+    onTouchStart: innerClick,
+  });
 
-  const renderComponent = () => {
-    return React.createElement(
-      props.component || "span",
-      getProps(),
-      props.children
-    );
-  };
+  const renderComponent = () => React.createElement(
+    props.component || 'span',
+    getProps(),
+    props.children,
+  );
 
   const init = () => {
-    document.addEventListener("mousedown", documentClick);
-    document.addEventListener("focusin", documentFocus);
-    document.addEventListener("touchstart", documentClick);
+    document.addEventListener('mousedown', documentClick);
+    document.addEventListener('focusin', documentFocus);
+    document.addEventListener('touchstart', documentClick);
   };
 
   const clear = () => {
-    document.removeEventListener("mousedown", documentClick);
-    document.removeEventListener("focusin", documentFocus);
-    document.removeEventListener("touchstart", documentClick);
+    document.removeEventListener('mousedown', documentClick);
+    document.removeEventListener('focusin', documentFocus);
+    document.removeEventListener('touchstart', documentClick);
   };
 
   useEffect(() => {
@@ -64,7 +59,7 @@ const OutsideCellClick = (props) => {
 
   const render = props.render || props.children;
 
-  if (typeof render === "function") {
+  if (typeof render === 'function') {
     return render(getProps());
   }
 

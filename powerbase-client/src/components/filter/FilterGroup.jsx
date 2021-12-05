@@ -1,19 +1,18 @@
-/* eslint-disable  */
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import cn from "classnames";
-import { XIcon } from "@heroicons/react/outline";
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { XIcon } from '@heroicons/react/outline';
 
-import { IViewField } from "@lib/propTypes/view-field";
-import { initializeFilterGroup } from "@lib/helpers/filter/initializeFilterGroup";
-import { AddFilterMenu } from "./AddFilterMenu";
-import { SingleFilter } from "./SingleFilter";
-import { FilterLogicalOperator } from "./FilterLogicalOperator";
+import { IViewField } from '@lib/propTypes/view-field';
+import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
+import { AddFilterMenu } from './AddFilterMenu';
+import { SingleFilter } from './SingleFilter';
+import { FilterLogicalOperator } from './FilterLogicalOperator';
 
 export function FilterGroup({
   id,
   root,
-  parentOperator = "and",
+  parentOperator = 'and',
   level = 0,
   fields,
   filterGroup: initialFilterGroup,
@@ -30,10 +29,10 @@ export function FilterGroup({
       id: filterGroupId,
       filterGroup: initialFilterGroup,
       fields,
-    })
+    }),
   );
   const [logicalOperator, setLogicalOperator] = useState(
-    filterGroup?.operator || "and"
+    filterGroup?.operator || 'and',
   );
 
   useEffect(() => {
@@ -51,10 +50,10 @@ export function FilterGroup({
     if (canManageViews) {
       const newFilter = isGroup
         ? {
-            id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
-            operator: "and",
-            filters: [newFilterItem],
-          }
+          id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
+          operator: 'and',
+          filters: [newFilterItem],
+        }
         : newFilterItem;
 
       setFilterGroup((prevFilterGroup) => ({
@@ -81,9 +80,9 @@ export function FilterGroup({
       }));
 
       if (
-        !root &&
-        handleParentRemoveFilter &&
-        filterGroup.filters.length <= 1
+        !root
+        && handleParentRemoveFilter
+        && filterGroup.filters.length <= 1
       ) {
         handleParentRemoveFilter(id);
       }
@@ -96,7 +95,7 @@ export function FilterGroup({
     <div
       data-level={level}
       data-operator={logicalOperator}
-      className={cn("filter", !root, "flex gap-2")}
+      className={cn('filter', !root, 'flex gap-2')}
     >
       {!root && (
         <div className="inline-block mt-2 w-16 text-right capitalize">
@@ -121,17 +120,16 @@ export function FilterGroup({
       )}
       <div
         className={cn(
-          "flex-1",
-          !root && "bg-gray-50 border border-gray-300 rounded-md"
+          'flex-1',
+          !root && 'bg-gray-50 border border-gray-300 rounded-md',
         )}
       >
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {
-              const logicalOperatorChange =
-                root && !index === 1
-                  ? handleLogicalOpChange
-                  : handleChildLogicalOpChange;
+              const logicalOperatorChange = root && !index === 1
+                ? handleLogicalOpChange
+                : handleChildLogicalOpChange;
 
               return (
                 <FilterGroup

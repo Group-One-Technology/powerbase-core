@@ -1,50 +1,47 @@
-/* eslint-disable  */
-import React, { useEffect, useState } from "react";
-import cn from "classnames";
+import React, { useEffect, useState } from 'react';
+import cn from 'classnames';
 import {
   PlusIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   TableIcon,
-} from "@heroicons/react/solid";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+} from '@heroicons/react/solid';
+import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
   horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
+} from '@dnd-kit/sortable';
 import {
   restrictToHorizontalAxis,
   restrictToFirstScrollableAncestor,
-} from "@dnd-kit/modifiers";
+} from '@dnd-kit/modifiers';
 
-import { useBase } from "@models/Base";
-import { useBaseUser } from "@models/BaseUser";
-import { useCurrentView } from "@models/views/CurrentTableView";
-import { TablePermissionsModalProvider } from "@models/modals/TablePermissionsModal";
-import { BG_COLORS } from "@lib/constants";
-import { useTableTabsScroll } from "@lib/hooks/tables/useTableTabsScroll";
-import { PERMISSIONS } from "@lib/constants/permissions";
-import { useTableTabsReorder } from "@lib/hooks/tables/useTableTabsReorder";
+import { useBase } from '@models/Base';
+import { useBaseUser } from '@models/BaseUser';
+import { useCurrentView } from '@models/views/CurrentTableView';
+import { TablePermissionsModalProvider } from '@models/modals/TablePermissionsModal';
+import { BG_COLORS } from '@lib/constants';
+import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
+import { PERMISSIONS } from '@lib/constants/permissions';
+import { useTableTabsReorder } from '@lib/hooks/tables/useTableTabsReorder';
 
-import { TablePermissionsModal } from "@components/permissions/TablePermissionsModal";
-import TableSearchModal from "../TableSearchModal";
-import { TableTabsMobile } from "./TableTabsMobile";
-import { TableTabsLoader } from "./TableTabsLoader";
-import { TableTabItem } from "./TableTabItem";
+import { TablePermissionsModal } from '@components/permissions/TablePermissionsModal';
+import TableSearchModal from '../TableSearchModal';
+import { TableTabsMobile } from './TableTabsMobile';
+import { TableTabsLoader } from './TableTabsLoader';
+import { TableTabItem } from './TableTabItem';
 
 export function TableTabs() {
   const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const { table, tables: initialTables, handleTableChange } = useCurrentView();
   const [tables, setTables] = useState(initialTables);
-  const [isCreatingTable, setIsCreatingTable] = useState(false);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
   const { sensors, handleReorderViews } = useTableTabsReorder({
     base,
     setTables,
   });
-  const [isUploadAction, setIsUploadAction] = useState(false);
 
   const canAddTables = baseUser?.can(PERMISSIONS.AddTables);
 
@@ -58,7 +55,7 @@ export function TableTabs() {
 
   const addTable = () => {
     if (canAddTables) {
-      alert("add new table clicked");
+      alert('add new table clicked');
     }
   };
 
@@ -66,8 +63,8 @@ export function TableTabs() {
     <TablePermissionsModalProvider>
       <div
         className={cn(
-          "relative w-full overflow-hidden px-4 sm:px-6 lg:px-8",
-          BG_COLORS[base.color]
+          'relative w-full overflow-hidden px-4 sm:px-6 lg:px-8',
+          BG_COLORS[base.color],
         )}
       >
         <TableTabsMobile addTable={addTable} />
@@ -89,7 +86,7 @@ export function TableTabs() {
             id="tableTabsLeftArrow"
             type="button"
             className="relative inline-flex items-center m-2 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
-            onClick={() => handleScroll("left")}
+            onClick={() => handleScroll('left')}
           >
             <span className="sr-only">Previous</span>
             <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
@@ -135,7 +132,7 @@ export function TableTabs() {
             id="tableTabsRightArrow"
             type="button"
             className="relative inline-flex items-center m-2 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
-            onClick={() => handleScroll("right")}
+            onClick={() => handleScroll('right')}
           >
             <span className="sr-only">Previous</span>
             <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
@@ -145,5 +142,4 @@ export function TableTabs() {
       <TablePermissionsModal />
     </TablePermissionsModalProvider>
   );
-  p;
 }

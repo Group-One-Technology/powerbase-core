@@ -1,25 +1,27 @@
-/* eslint-disable  */
-import React, { useState, useRef, useEffect } from "react";
-import { Grid, InfiniteLoader, AutoSizer, ScrollSync } from "react-virtualized";
-import PropTypes from "prop-types";
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Grid, InfiniteLoader, AutoSizer, ScrollSync,
+} from 'react-virtualized';
+import PropTypes from 'prop-types';
 
-import { useFieldTypes } from "@models/FieldTypes";
-import { RecordsModalStateProvider } from "@models/record/RecordsModalState";
-import { useTableRecords } from "@models/TableRecords";
-import { useTableConnections } from "@models/TableConnections";
-import { useTableRecordsCount } from "@models/TableRecordsCount";
-import { useViewFieldState } from "@models/view/ViewFieldState";
-import { ITable } from "@lib/propTypes/table";
-import { useDidMountEffect } from "@lib/hooks/useDidMountEffect";
-import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from "@lib/constants";
-import { initializeFields } from "@lib/helpers/fields/initializeFields";
-import { SingleRecordModal } from "@components/record/SingleRecordModal";
-import { GridHeader } from "./GridHeader";
-import { CellRenderer } from "./CellRenderer";
-import { useBase } from "@models/Base";
-import { useBaseUser } from "@models/BaseUser";
+import { useFieldTypes } from '@models/FieldTypes';
+import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
+import { useTableRecords } from '@models/TableRecords';
+import { useTableConnections } from '@models/TableConnections';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useViewFieldState } from '@models/view/ViewFieldState';
+import { ITable } from '@lib/propTypes/table';
+import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
+import { useBaseUser } from '@models/BaseUser';
+import { GridHeader } from './GridHeader';
+import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, table, highlightedCell, base }) {
+export function TableRenderer({
+  height, table, highlightedCell, base,
+}) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
@@ -53,12 +55,7 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
-  const canAddRecords = baseUser?.can("addRecords", table.id);
-  const [totalFieldWidth, _] = useState(
-    fields?.reduce(function (a, b) {
-      return a + b.width;
-    }, 0)
-  );
+  const canAddRecords = baseUser?.can('addRecords', table.id);
 
   useEffect(() => {
     let timer;
@@ -87,9 +84,9 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
     const stop = stopIndex / columnCount;
 
     if (
-      !isLoading &&
-      stop + 100 > records.length &&
-      records.length - 1 !== totalRecords
+      !isLoading
+      && stop + 100 > records.length
+      && records.length - 1 !== totalRecords
     ) {
       loadMoreRows();
     }
@@ -123,7 +120,9 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
       >
         {({ width }) => (
           <ScrollSync>
-            {({ onScroll, scrollLeft, scrollHeight, clientHeight }) => (
+            {({
+              onScroll, scrollLeft, scrollHeight, clientHeight,
+            }) => (
               <>
                 <GridHeader
                   ref={headerGridRef}
@@ -152,17 +151,15 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
                       }}
                       onScroll={onScroll}
                       scrollLeft={scrollLeft}
-                      scrollToColumn={hasAddedNewField ? width : 0} //using width here and not column count because the latter is computed late and falls being the conditional-setter in the set time out
+                      scrollToColumn={hasAddedNewField ? width : 0} // using width here and not column count because the latter is computed late and falls being the conditional-setter in the set time out
                       onSectionRendered={({
                         columnStartIndex,
                         columnStopIndex,
                         rowStartIndex,
                         rowStopIndex,
                       }) => {
-                        const startIndex =
-                          rowStartIndex * columnCount + columnStartIndex;
-                        const stopIndex =
-                          rowStopIndex * columnCount + columnStopIndex;
+                        const startIndex = rowStartIndex * columnCount + columnStartIndex;
+                        const stopIndex = rowStopIndex * columnCount + columnStopIndex;
                         return onRowsRendered({ startIndex, stopIndex });
                       }}
                       onRowsRendered={onRowsRendered}
@@ -170,14 +167,12 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
                         const field = fields[columnIndex - 1];
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
-                        const isHighlighted =
-                          records[rowIndex]?.doc_id === highlightedCell;
+                        const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
                         const recordsToUse = updatedRecords || records;
-                        let value =
-                          columnIndex !== 0 && !isLastRow
-                            ? recordsToUse[rowIndex][field.name]
-                            : null;
+                        let value = columnIndex !== 0 && !isLastRow
+                          ? recordsToUse[rowIndex][field.name]
+                          : null;
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
                         }
@@ -263,4 +258,5 @@ TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
   highlightedCell: PropTypes.string,
+  base: PropTypes.object.isRequired,
 };

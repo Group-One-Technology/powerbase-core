@@ -6,8 +6,6 @@ export default function TableNameInput({ tableName, setTableName }) {
     setTableName(e.target.value);
   };
 
-  //   const [value, setValue] = useState("");
-
   return (
     <div className="mt-1 mb-2 w-full">
       <input
