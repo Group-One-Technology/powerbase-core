@@ -1,7 +1,6 @@
 /* eslint-disable */
 import React, { useState, useRef, useEffect } from "react";
 import { securedApi } from "@lib/api";
-import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { XIcon } from "@heroicons/react/outline";
 import useConstant from "@lib/hooks/useConstant";
 import { useAsync } from "react-async-hook";
@@ -156,7 +155,7 @@ export default function NewField({
   }, []);
 
   useEffect(() => {
-    // excluded date for now
+    // Excluded date for now
     const supported = ["string", "number"];
     setSupportedNewFieldTypes(
       fieldTypes?.filter((item) =>
@@ -173,11 +172,22 @@ export default function NewField({
     setSelected(fieldType);
   };
 
+  // REFACTOR eventually to acccount for a wider variety of types with byte considerations
+  const computeDBType = () => {
+    if (selected?.dataType.toLowerCase() === "string") return "text";
+    else if (selected?.dataType.toLowerCase() === "number") {
+      if (numberPrecision?.precision) {
+        const precision = numberPrecision?.precision + "";
+        return `numeric(10,${precision})`;
+      } else return "integer";
+    }
+  };
+
   const addNewField = async () => {
     const payload = {
       name: toSnakeCase(fieldName.toLowerCase()),
       description: null,
-      db_type: "int",
+      db_type: computeDBType(),
       default_value: "",
       is_primary_key: false,
       is_nullable: true,
