@@ -275,8 +275,6 @@ export function CellRenderer({
       })
       .join(isTurbo ? '-' : '---');
 
-    console.log('composed', composedKeys);
-
     let hasPrecision = false;
     let formattedNumber;
     if (field.precision && fieldType.dataType === 'number') {

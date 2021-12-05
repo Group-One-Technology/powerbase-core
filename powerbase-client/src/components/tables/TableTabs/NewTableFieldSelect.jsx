@@ -34,7 +34,7 @@ export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
   };
 
   useEffect(() => {
-    console.log("DD", newFields);
+    console.log("new_fields: ", newFields);
   }, [newFields]);
 
   return (

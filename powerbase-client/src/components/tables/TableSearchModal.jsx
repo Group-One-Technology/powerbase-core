@@ -27,8 +27,6 @@ export default function TableSearchModal({
     return acc;
   }, {});
 
-  console.log(listItemRefs);
-
   const scrollToActiveItem = (id) =>
     listItemRefs[id].current?.scrollIntoView({
       behavior: "smooth",
