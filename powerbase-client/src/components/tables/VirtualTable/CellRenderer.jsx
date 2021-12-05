@@ -19,6 +19,7 @@ import {
   isValidNumberOrDecimal,
   formatToDecimalPlaces,
 } from "@lib/helpers/numbers";
+import { getParameterCaseInsensitive } from "@lib/helpers/getParameterCaseInsensitive.js";
 
 function CellValue({
   value,
@@ -293,14 +294,6 @@ export function CellRenderer({
           : recordInputRef.current?.value,
       },
     };
-
-    function getParameterCaseInsensitive(object, searchKey) {
-      return object[
-        Object.keys(object).find(
-          (k) => k.toLowerCase() === searchKey.toLowerCase()
-        )
-      ];
-    }
 
     try {
       const response = await securedApi.post(

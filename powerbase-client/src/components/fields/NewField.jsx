@@ -11,14 +11,14 @@ import { useFieldTypes } from "@models/FieldTypes";
 import { useViewFields } from "@models/ViewFields";
 import NumberFieldSelectOptions from "./NumberFieldSelectOptions";
 import Checkbox from "@components/ui/Checkbox";
+import debounce from "lodash.debounce";
+import { toSnakeCase } from "@lib/helpers/text/textTypeFormatters";
 
-const debounceResolve = AwesomeDebouncePromise;
-
-const useDebouncedInput = (setNameExists) => {
+const useDebouncedInput = (setNameExists, id) => {
   const [fieldName, setFieldName] = useState("");
   const searchPowerbase = async (text) => {
     try {
-      const response = await securedApi.get(`/fields/${text}`);
+      const response = await securedApi.get(`tables/${id}/fields/${text}`);
       const { data } = response;
       if (data?.message) setNameExists(false);
       else if (data?.id) setNameExists(true);
@@ -29,14 +29,14 @@ const useDebouncedInput = (setNameExists) => {
   };
 
   const debouncedSearchPowerbase = useConstant(() =>
-    debounceResolve(searchPowerbase, 100)
+    debounce(searchPowerbase, 100)
   );
 
   const search = useAsync(async () => {
     if (fieldName.length === 0) {
       return [];
     } else {
-      return debouncedSearchPowerbase(fieldName);
+      return debouncedSearchPowerbase(toSnakeCase(fieldName.toLowerCase()));
     }
   }, [fieldName]);
 
@@ -144,7 +144,7 @@ export default function NewField({
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
-  const { fieldName, setFieldName } = useDebouncedInput(setNameExists);
+  const { fieldName, setFieldName } = useDebouncedInput(setNameExists, tableId);
   const fieldInputRef = useRef(null);
   const { data: ViewFields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
@@ -172,15 +172,6 @@ export default function NewField({
   const handleFieldTypeClick = (fieldType) => {
     setSelected(fieldType);
   };
-
-  const toSnakeCase = (str) =>
-    str &&
-    str
-      .match(
-        /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
-      )
-      .map((x) => x.toLowerCase())
-      .join("_");
 
   const addNewField = async () => {
     const payload = {
@@ -296,7 +287,7 @@ export default function NewField({
             type="button"
             className={cn(
               `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
-              nameExists || (!fieldName.length && "cursor-not-allowed"),
+              (nameExists || !fieldName.length) && "cursor-not-allowed",
               !nameExists && fieldName.length && "hover:bg-indigo-700"
             )}
             onClick={() => addNewField()}

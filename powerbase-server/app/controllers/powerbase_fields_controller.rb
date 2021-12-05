@@ -35,6 +35,11 @@ class PowerbaseFieldsController < ApplicationController
     required(:access)
   end
 
+  schema(:get_single_field) do
+    required(:id).value(:integer)
+    required(:name)
+  end
+
   # GET /tables/:id/fields
   def index
     @table = PowerbaseTable.find(safe_params[:table_id])
@@ -62,9 +67,11 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
-  # GET /field/:name
+  # GET /tables/:id/fields/:name
   def get_single_field
-    field = PowerbaseField.find_by(name: params[:name])
+    name = params[:name]
+    id = params[:id]
+    field = PowerbaseField.where('lower(name) = ? and powerbase_table_id = ?', name.downcase, id).first
     if field
       render json: format_json(field)
     else

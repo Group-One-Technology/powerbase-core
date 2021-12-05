@@ -94,7 +94,7 @@ Rails.application.routes.draw do
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
   post 'tables/:table_id/field', to: 'powerbase_fields#add', as: 'new_field'
-  get 'fields/:name', to: 'powerbase_fields#get_single_field', as: 'get_field'
+  get 'tables/:id/fields/:name', to: 'powerbase_fields#get_single_field', as: 'get_single_field'
   post 'magic_values/:table_id', to: 'table_records#add_or_update_magic_value', as: 'change_magic_value'
   post 'magic_records', to: 'table_records#create_magic_record', as: 'new_magic_records'
   get 'tables/:id/magic_values', to: 'table_records#magic_values', as: 'magic_values'

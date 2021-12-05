@@ -5,6 +5,7 @@ import { useState } from "react";
 import { getTableRecords, getMagicValues } from "@lib/api/records";
 import { useAuthUser } from "./AuthUser";
 import { useViewOptions } from "./views/ViewOptions";
+import { getParameterCaseInsensitive } from "@lib/helpers/getParameterCaseInsensitive";
 
 function getKey({ index, tableId, query, sort, filters, pageSize }) {
   const page = index + 1;
@@ -53,19 +54,12 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   let mergedData = parsedData;
 
-  function getParameterCaseInsensitive(object, key) {
-    return object[
-      Object.keys(object).find((k) => k.toLowerCase() === key.toLowerCase())
-    ];
-  }
-
   if (!isTurbo) {
     const magicValuesResponse = useSWR(
       `/tables/${id}/magic_values`,
       getMagicValues
     );
     const { data: magicData } = magicValuesResponse;
-    console.log(magicData);
     parsedData?.forEach((record, idx) =>
       magicData?.forEach((magicValue) => {
         let matches = [];
