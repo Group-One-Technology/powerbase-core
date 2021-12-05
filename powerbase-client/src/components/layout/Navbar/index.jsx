@@ -21,9 +21,8 @@ import { SavingIndicator } from "./SavingIndicator";
 
 export const NAVIGATION = [
   { name: "Bases", href: "/" },
-  // Taking these out for the sake of demos until we build them out
-  // { name: 'Team', href: '/team' },
-  // { name: 'Settings', href: '/settings' },
+  { name: "Team", href: "/team" },
+  { name: "Settings", href: "/settings" },
 ];
 
 function BaseNavbar({ base, bases }) {
