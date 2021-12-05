@@ -91,11 +91,6 @@ module Powerbase
 
           doc = doc.slice!(:oid)
 
-          # if !primary_keys.length > 0 && @powerbase_database.adapter == "postgresql" && record[:ctid]
-          #   ctid_key = "__ctid_table_#{table_id}"
-          #   doc[ctid_key] = record[:ctid]
-          # end
-
           if doc_id != nil
             @esclient.update(
               index: index,

@@ -96,8 +96,6 @@ class TableRecordsController < ApplicationController
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     @records = model.magic_search
-    puts @records
-
     render json: @records
   end
 
