@@ -308,20 +308,21 @@ export function CellRenderer({
       );
       const recordsToUse = updatedRecords ? updatedRecords : records;
       if (response.statusText === "OK") {
-        const mutatedRecords = recordsToUse?.map((recordObj, idx) => {
+        const mutatedRecords = recordsToUse?.map((recordObj) => {
           let matches = [];
-          const primaryKeys = composedKeys.split("---");
+          const extractedPrimaryKeys = isTurbo
+            ? primaryKeys
+            : composedKeys.split("---");
           let objToUse = {};
-          primaryKeys.forEach((key, pkIdx) => {
+          extractedPrimaryKeys.forEach((key, pkIdx) => {
             const sanitized = key.split("___");
-            const pkName = sanitized[0];
-            const pkValue = sanitized[1];
-            console.log(getParameterCaseInsensitive(recordObj, pkName));
+            const pkName = isTurbo ? key.name : sanitized[0];
+            const pkValue = isTurbo ? key.value : sanitized[1];
             matches.push(
               getParameterCaseInsensitive(recordObj, pkName) + "" ===
                 pkValue + ""
             );
-            if (pkIdx === primaryKeys.length - 1) {
+            if (pkIdx === extractedPrimaryKeys.length - 1) {
               if (!matches.includes(false)) {
                 let newObj = { ...recordObj };
                 newObj[field.name] =
@@ -338,9 +339,6 @@ export function CellRenderer({
           });
           return objToUse;
         });
-
-        console.log(mutatedRecords);
-
         setUpdatedRecords(mutatedRecords);
         setIsNewRecord(false);
         exitEditing();
