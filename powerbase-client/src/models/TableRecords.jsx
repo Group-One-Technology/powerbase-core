@@ -63,6 +63,7 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
     parsedData?.forEach((record, idx) =>
       magicData?.forEach((magicValue) => {
         let matches = [];
+        let counter = 0;
         const docId = magicValue.docId;
         const primaryKeys = docId.split("---");
         primaryKeys.forEach((key, pkIdx) => {
@@ -73,6 +74,8 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
             getParameterCaseInsensitive(record, pkName) + "" === pkValue + ""
           );
           if (pkIdx === primaryKeys.length - 1 && !matches.includes(false)) {
+            counter += 1;
+            console.log(counter);
             const { docId, ...associatedValue } = magicValue;
             const combined = { ...record, ...associatedValue };
             mergedData[idx] = combined;

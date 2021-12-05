@@ -276,9 +276,11 @@ export function CellRenderer({
       .map((key) => {
         const keyName = key.name.toLowerCase();
         const keyValue = (key.value + "").toLocaleLowerCase();
-        return `${keyName}${isTurbo ? `_` : "__"}${keyValue}`;
+        return `${keyName}${isTurbo ? `_` : "___"}${keyValue}`;
       })
-      .join(isTurbo ? `-` : `--`);
+      .join(isTurbo ? `-` : `---`);
+
+    console.log("composed", composedKeys);
 
     let hasPrecision = false;
     let formattedNumber;
