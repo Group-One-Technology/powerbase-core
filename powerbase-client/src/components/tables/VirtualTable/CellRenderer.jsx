@@ -200,6 +200,7 @@ export function CellRenderer({
   setCalendarValue,
   calendarValue,
   isTurbo,
+  canAddRecords,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -384,7 +385,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={(evt) => {
-        if (!isRowNo && field.isVirtual) {
+        if (!isRowNo && field.isVirtual && canAddRecords) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});

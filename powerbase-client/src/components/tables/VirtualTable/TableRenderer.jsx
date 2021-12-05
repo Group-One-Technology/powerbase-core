@@ -17,12 +17,13 @@ import { SingleRecordModal } from "@components/record/SingleRecordModal";
 import { GridHeader } from "./GridHeader";
 import { CellRenderer } from "./CellRenderer";
 import { useBase } from "@models/Base";
-import constate from "constate";
+import { useBaseUser } from "@models/BaseUser";
 
 export function TableRenderer({ height, table, highlightedCell, base }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
+  const { baseUser } = useBaseUser();
   const {
     data: records,
     loadMore: loadMoreRows,
@@ -52,6 +53,7 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
+  const canAddRecords = baseUser?.can("addRecords", table.id);
   const [totalFieldWidth, _] = useState(
     fields?.reduce(function (a, b) {
       return a + b.width;
@@ -217,6 +219,7 @@ export function TableRenderer({ height, table, highlightedCell, base }) {
                           calendarValue,
                           setCalendarValue,
                           isTurbo: base.isTurbo,
+                          canAddRecords,
                           ...props,
                         });
                       }}
