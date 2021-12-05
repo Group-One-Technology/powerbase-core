@@ -130,6 +130,8 @@ module Powerbase
     def update_record(options)
       index = "table_records_#{@table_id}"
       id = options[:primary_keys]
+      puts id
+      puts "EXPLAIN"
       if !@is_turbo
         unless @esclient.indices.exists(index: index)
           @esclient.indices.create(

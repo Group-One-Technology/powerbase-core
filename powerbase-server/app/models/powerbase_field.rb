@@ -2,7 +2,7 @@ class PowerbaseField < ApplicationRecord
   include PermissionsHelper
   include FieldPermissionsHelper
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false}
+  validates :name, presence: true
   validates :db_type, presence: true
   serialize :options, JSON
   serialize :permissions, JSON

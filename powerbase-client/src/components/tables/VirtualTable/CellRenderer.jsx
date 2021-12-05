@@ -273,9 +273,9 @@ export function CellRenderer({
       .map((key) => {
         const keyName = key.name.toLowerCase();
         const keyValue = (key.value + "").toLocaleLowerCase();
-        return `${keyName}___${keyValue}`;
+        return `${keyName}${isTurbo ? `_` : "__"}${keyValue}`;
       })
-      .join("---");
+      .join(isTurbo ? `-` : `--`);
 
     let hasPrecision = false;
     let formattedNumber;
@@ -309,7 +309,8 @@ export function CellRenderer({
             : composedKeys.split("---");
           let objToUse = {};
           extractedPrimaryKeys.forEach((key, pkIdx) => {
-            const sanitized = key.split("___");
+            let sanitized;
+            if (!isTurbo) sanitized = key.split("___");
             const pkName = isTurbo ? key.name : sanitized[0];
             const pkValue = isTurbo ? key.value : sanitized[1];
             matches.push(
