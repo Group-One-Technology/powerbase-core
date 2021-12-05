@@ -8,11 +8,12 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
+import { hideViewField, unhideViewField } from '@lib/api/view-fields';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 
 export function FieldItem({ table, field, setFields }) {
   const { saving, saved, catchError } = useSaveStatus();
@@ -22,7 +23,7 @@ export function FieldItem({ table, field, setFields }) {
   const { data: fieldTypes } = useFieldTypes();
 
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can('manageViews', table.id);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
 
   const handleToggleVisibility = async () => {
     if (canManageViews) {

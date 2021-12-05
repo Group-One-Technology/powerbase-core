@@ -1,6 +1,7 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :check_table_access, only: [:update, :update_default_view]
+  before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
     required(:database_id).value(:string)
@@ -19,6 +20,18 @@ class PowerbaseTablesController < ApplicationController
   schema(:update_default_view) do
     required(:id).value(:string)
     required(:view_id)
+  end
+
+  schema(:update_table_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
+  schema(:update_allowed_roles) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:roles)
   end
 
   # GET /databases/:database_id/tables
@@ -62,12 +75,28 @@ class PowerbaseTablesController < ApplicationController
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:manage_base, @database)
 
-    safe_params[:tables].each_with_index do |table, index|
-      @table = PowerbaseTable.find(table[:id])
-      @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: index)
+    is_updated = false
+
+    ActiveRecord::Base.transaction do
+      safe_params[:tables].each do |table|
+        @table = PowerbaseTable.find(table[:id])
+        @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: table[:order])
+      end
+
+      visible_tables = @database.powerbase_tables.select {|item| !item.is_hidden}
+
+      if visible_tables.length <= 1
+        raise ActiveRecord::Rollback
+      else
+        is_updated = true
+      end
     end
 
-    render status: :no_content
+    if is_updated
+      render status: :no_content
+    else
+      render json: { error: "There must be at least one visible table in this base." }, status: :unprocessable_entity
+    end
   end
 
   # PUT tables/:id/update_default_view
@@ -79,6 +108,8 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
+  # This is a functional test endpoint for now alongside its corresponding helpers
+  # TODO - add to validation schema on revisiting the feature
   def create_virtual_table
     table_params = params[:table]
     fields_params = params[:fields]
@@ -152,6 +183,22 @@ class PowerbaseTablesController < ApplicationController
   end
 
 
+  # PUT /tables/:id/allowed_roles
+  def update_allowed_roles
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
+
+    render status: :no_content
+  end
+
+  # PUT /tables/:id/update_table_permission
+  def update_table_permission
+    table_updater = Tables::Updater.new(@table)
+    table_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
+  end
+
   private
     def check_table_access
       @table = PowerbaseTable.find(safe_params[:id])
@@ -159,11 +206,17 @@ class PowerbaseTablesController < ApplicationController
       current_user.can?(:manage_table, @table)
     end
 
+    def check_table_permission_access
+      @table = PowerbaseTable.find(safe_params[:id])
+      raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+      current_user.can?(:change_guest_access, @table.powerbase_database)
+    end
+
     def format_json(table)
       {
         id: table.id,
         name: table.name,
-        alias: table.alias,
+        alias: table.alias || table.name,
         description: table.description,
         default_view_id: table.default_view_id,
         page_size: table.page_size,

@@ -52,16 +52,6 @@ export async function getSharedDatabases() {
   return undefined;
 }
 
-export async function getBaseInvitations() {
-  const response = await securedApi.get('/base_invitations');
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
-  return undefined;
-}
-
 export async function getDatabase({ id }) {
   const response = await securedApi.get(`/databases/${id}`);
 
@@ -74,6 +64,26 @@ export async function getDatabase({ id }) {
 
 export async function updateDatabase({ id, ...payload }) {
   const response = await securedApi.put(`/databases/${id}`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function updateDatabasePermission({ id, ...payload }) {
+  const response = await securedApi.put(`/databases/${id}/update_database_permission`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function updateDatabasePermissionAllowedRoles({ id, ...payload }) {
+  const response = await securedApi.put(`/databases/${id}/allowed_roles`, payload);
 
   if (response.statusText === 'OK') {
     return response.data;

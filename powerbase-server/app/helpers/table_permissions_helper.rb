@@ -14,25 +14,6 @@ module TablePermissionsHelper
     comment_records: { access: "commenters and up", default_value: true },
   }
 
-  def update_table_guests_access(table, permission, guest, is_allowed)
-    permission_key = permission[0].to_s
-    permission_value = permission[1]
-    allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
-    restricted_guests = Array(table.permissions[permission_key]["restricted_guests"])
-
-    if is_allowed == true
-      restricted_guests = restricted_guests.select {|guest_id| guest_id != guest.id}
-      allowed_guests.push(guest.id) if !does_custom_have_access(table.permissions[permission_key]["access"])
-    else
-      allowed_guests = allowed_guests.select {|guest_id| guest_id != guest.id}
-      restricted_guests.push(guest.id) if does_custom_have_access(table.permissions[permission_key]["access"])
-    end
-
-    table.permissions[permission_key]["allowed_guests"] = allowed_guests.uniq
-    table.permissions[permission_key]["restricted_guests"] = restricted_guests.uniq
-    table.save
-  end
-
   def remove_table_custom_guest(guest)
     return if guest.permissions == nil
     return if guest.permissions["tables"] == nil

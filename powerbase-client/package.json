@@ -16,6 +16,7 @@
     "@dnd-kit/utilities": "^3.0.0",
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.1",
+    "@radix-ui/react-context-menu": "^0.1.1",
     "@radix-ui/react-dropdown-menu": "^0.1.1",
     "@radix-ui/react-hover-card": "^0.1.1",
     "@radix-ui/react-popover": "^0.1.0",

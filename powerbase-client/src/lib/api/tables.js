@@ -47,3 +47,23 @@ export async function updateTableDefaultView({ tableId, viewId }) {
 
   return undefined;
 }
+
+export async function updateTablePermission({ id, ...payload }) {
+  const response = await securedApi.put(`/tables/${id}/update_table_permission`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function updateTablePermissionAllowedRoles({ id, ...payload }) {
+  const response = await securedApi.put(`/tables/${id}/allowed_roles`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

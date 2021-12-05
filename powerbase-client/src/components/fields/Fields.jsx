@@ -15,6 +15,7 @@ import { useViewFields } from "@models/ViewFields";
 import { useTableView } from "@models/TableView";
 import { useViewFieldState } from "@models/view/ViewFieldState";
 import { useBaseUser } from "@models/BaseUser";
+import { PERMISSIONS } from "@lib/constants/permissions";
 import { hideAllViewFields } from "@lib/api/view-fields";
 import { useReorderFields } from "@lib/hooks/fields/useReorderFields";
 import { FieldItem } from "./FieldItem";
@@ -29,18 +30,18 @@ export function Fields({ table }) {
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({
-    tableId: table.id,
-    fields,
-    setFields,
-  });
-  const [loading, setLoading] = useState(false);
   const canManageViews = baseUser?.can("manageViews", table.id);
   const canAddFields = baseUser?.can("addFields", table.id);
   /* Setting this as a way of checking for tables with unique row identifiers 
   as it is messier to maintain witout that for now */
   const containsPrimaryKey = initialFields?.some((field) => field.isPrimaryKey);
   const [isCreatingField, setIsCreatingField] = useState(false);
+  const { sensors, handleReorderFields } = useReorderFields({
+    table,
+    fields,
+    setFields,
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setFields(initialFields);

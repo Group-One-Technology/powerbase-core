@@ -6,7 +6,7 @@ import { ChevronDownIcon, CogIcon } from '@heroicons/react/outline';
 
 import { useBaseUser } from '@models/BaseUser';
 import { usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
-import { ACCESS_LEVEL } from '@lib/constants/permissions';
+import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { Badge } from './Badge';
 
 export function GuestAccessMenu({
@@ -18,8 +18,8 @@ export function GuestAccessMenu({
 }) {
   const { baseUser } = useBaseUser();
   const { modal } = usePermissionsStateModal();
-  const canChangeGuestAccess = baseUser?.can('changeGuestAccess');
-  const canRemoveGuests = baseUser?.can('removeGuests');
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
+  const canRemoveGuests = baseUser?.can(PERMISSIONS.RemoveGuests);
 
   const handleConfigurePermissions = () => modal.open(guest);
 

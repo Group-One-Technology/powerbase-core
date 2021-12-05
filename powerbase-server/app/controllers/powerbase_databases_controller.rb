@@ -2,6 +2,7 @@ class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
   before_action :check_database_access, only: [:update, :clear_logs]
+  before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
   schema(:show, :clear_logs) do
     required(:id).value(:integer)
@@ -40,6 +41,18 @@ class PowerbaseDatabasesController < ApplicationController
     required(:database).value(:string)
     required(:database_size).value(:integer)
     required(:user_id).value(:integer)
+  end
+
+  schema(:update_database_permission) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:access)
+  end
+
+  schema(:update_allowed_roles) do
+    required(:id).value(:integer)
+    required(:permission)
+    required(:roles)
   end
 
   # GET /databases/
@@ -211,11 +224,33 @@ class PowerbaseDatabasesController < ApplicationController
     end
   end
 
+  # PUT /databases/:id/allowed_roles
+  def update_allowed_roles
+    database_updater = Databases::Updater.new(@database)
+    database_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
+
+    render status: :no_content
+  end
+
+  # PUT /databases/:id/update_database_permission
+  def update_database_permission
+    database_updater = Databases::Updater.new(@database)
+    database_updater.update_access!(safe_params[:permission], safe_params[:access])
+
+    render status: :no_content
+  end
+
   private
     def check_database_access
       @database = PowerbaseDatabase.find(safe_params[:id])
       raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
       current_user.can?(:manage_base, @database)
+    end
+
+    def check_database_permission_access
+      @database = PowerbaseDatabase.find(safe_params[:id])
+      raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+      current_user.can?(:change_guest_access, @database)
     end
 
     def authorize_acesss_hubspot
@@ -239,6 +274,7 @@ class PowerbaseDatabasesController < ApplicationController
           user_id: owner.id,
           first_name: owner.first_name,
           last_name: owner.last_name,
+          name: "#{owner.first_name} #{owner.last_name}",
           email: owner.email,
         },
         color: database.color,
@@ -259,6 +295,7 @@ class PowerbaseDatabasesController < ApplicationController
         total_tables: database.powerbase_tables.length,
         total_collaborators: database.guests.length + 1,
         logs: database.base_migration.logs,
+        permissions: database.permissions,
       }
     end
 end

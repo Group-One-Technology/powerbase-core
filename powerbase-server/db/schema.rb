@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_24_020642) do
+ActiveRecord::Schema.define(version: 2021_12_02_070752) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -112,6 +112,20 @@ ActiveRecord::Schema.define(version: 2021_11_24_020642) do
     t.index ["powerbase_table_id"], name: "index_magic_values_on_powerbase_table_id"
   end
 
+
+  create_table "notifications", force: :cascade do |t|
+    t.string "data_type", null: false
+    t.text "message", null: false
+    t.text "object"
+    t.boolean "has_read", default: false
+    t.bigint "subject_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subject_id"], name: "index_notifications_on_subject_id"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "piis", force: :cascade do |t|
     t.string "name", null: false
     t.string "abbreviation"
@@ -129,6 +143,7 @@ ActiveRecord::Schema.define(version: 2021_11_24_020642) do
     t.bigint "user_id", null: false
     t.boolean "is_turbo", default: true
     t.string "database_name", null: false
+    t.text "permissions", default: "{\"view_base\":{\"access\":\"everyone\"},\"manage_base\":{\"access\":\"creators only\"},\"invite_guests\":{\"access\":\"creators only\"},\"add_tables\":{\"access\":\"admins and up\"},\"delete_tables\":{\"access\":\"admins and up\"}}"
     t.index ["user_id"], name: "index_powerbase_databases_on_user_id"
   end
 
@@ -235,6 +250,9 @@ ActiveRecord::Schema.define(version: 2021_11_24_020642) do
   add_foreign_key "magic_values", "powerbase_fields"
   add_foreign_key "magic_values", "powerbase_fields", column: "pk_field_id"
   add_foreign_key "magic_values", "powerbase_tables"
+  
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"
   add_foreign_key "powerbase_fields", "powerbase_field_types"
   add_foreign_key "powerbase_fields", "powerbase_tables"

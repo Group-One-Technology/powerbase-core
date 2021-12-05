@@ -12,6 +12,12 @@ Rails.application.routes.draw do
   post '/logout/', to: 'users/login#destroy'
   post '/register/', to: 'users/register#create'
 
+  resources :notifications, only: [:index], shallow: true do
+    collection do
+      put 'read'
+    end
+  end
+
   resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show, :update], shallow: true do
     collection do
       post 'connect'
@@ -20,6 +26,8 @@ Rails.application.routes.draw do
 
     member do
       put 'clear_logs'
+      put 'update_database_permission', as: 'update_database_permission'
+      put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_databases#update_allowed_roles'
     end
 
     resources :base_connections, path: 'connections', as: 'connections', only: [:index, :create, :update, :destroy], shallow: true
@@ -27,9 +35,12 @@ Rails.application.routes.draw do
       member do
         put 'change_access'
         put 'update_permissions'
+        put 'update_database_permissions'
+        put 'update_table_permissions'
         put 'update_field_permissions'
         put 'accept_invite'
         put 'reject_invite'
+        delete 'leave_base'
       end
     end
 
@@ -42,6 +53,7 @@ Rails.application.routes.draw do
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
           put 'update_field_permission', as: 'update_field_permission'
+          put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_fields#update_allowed_roles'
         end
       end
 
@@ -78,6 +90,8 @@ Rails.application.routes.draw do
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
         put 'update_default_view'
+        put 'update_table_permission', as: 'update_table_permission'
+        put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_tables#update_allowed_roles'
       end
     end
   end

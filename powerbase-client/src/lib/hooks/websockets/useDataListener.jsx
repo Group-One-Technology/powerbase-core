@@ -1,19 +1,14 @@
-/* eslint-disable  */
+/* eslint-disable */
 import Pusher from "pusher-js";
 import { useTableRecords } from "@models/TableRecords";
 import { useViewFields } from "@models/ViewFields";
-import { useMounted } from "./useMounted";
+import { pusher } from ".";
+import { useMounted } from "../useMounted";
 
-const { PUSHER_KEY } = process.env;
-console.log(process.env);
-const pusher = new Pusher(PUSHER_KEY, {
-  cluster: "ap1",
-});
-
-export function useWebsocket(logging = false) {
+export function useDataListener(logging = false) {
+  const { mounted } = useMounted();
   const { setHighLightedCell, mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateViewFields } = useViewFields();
-  const { mounted } = useMounted();
 
   const dataListener = (tableId) => {
     Pusher.logToConsole = logging;
@@ -35,6 +30,5 @@ export function useWebsocket(logging = false) {
 
   return {
     dataListener,
-    pusher,
   };
 }

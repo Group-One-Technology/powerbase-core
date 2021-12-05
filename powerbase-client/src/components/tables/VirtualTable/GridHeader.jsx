@@ -148,34 +148,27 @@ CellRenderer.propTypes = {
   style: PropTypes.object,
 };
 
-export const GridHeader = React.forwardRef(
-  (
-    {
-      table,
-      fields,
-      setFields,
-      height,
-      width,
-      onScroll,
-      scrollLeft,
-      hasScrollbar,
-      base,
-    },
-    ref
-  ) => {
-    const { data: fieldTypes } = useFieldTypes();
-    const { handleResizeColumn, handleResizeStop } = useResizeFields({
-      fields,
-      setFields,
-    });
-    const {
-      sensors,
-      dragging,
-      handleDragStart,
-      handleDragMove,
-      handleDragEnd,
-    } = useReorderFields({ tableId: table.id, fields, setFields });
-    const { options, setOption } = useFieldOptions({ fields });
+export const GridHeader = React.forwardRef(({
+  table,
+  fields,
+  setFields,
+  height,
+  width,
+  onScroll,
+  scrollLeft,
+  hasScrollbar,
+  base,
+}, ref) => {
+  const { data: fieldTypes } = useFieldTypes();
+  const { handleResizeColumn, handleResizeStop } = useResizeFields({ fields, setFields });
+  const {
+    sensors,
+    dragging,
+    handleDragStart,
+    handleDragMove,
+    handleDragEnd,
+  } = useReorderFields({ table, fields, setFields });
+  const { options, setOption } = useFieldOptions({ fields });
 
     return (
       <DndContext

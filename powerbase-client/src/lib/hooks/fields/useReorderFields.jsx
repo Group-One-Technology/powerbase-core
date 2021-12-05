@@ -5,14 +5,15 @@ import { useBaseUser } from '@models/BaseUser';
 import { useTableView } from '@models/TableView';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
-export function useReorderFields({ tableId, fields, setFields }) {
+export function useReorderFields({ table, fields, setFields }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
 
-  const canManageViews = baseUser?.can('manageViews', tableId);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {

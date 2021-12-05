@@ -26,6 +26,7 @@ import {
   setFieldAsPII,
   unsetFieldAsPII,
 } from '@lib/api/fields';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
 export function GridHeaderOptions({
@@ -44,9 +45,10 @@ export function GridHeaderOptions({
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
-  const canManageViews = baseUser?.can('manageViews', table.id);
-  const canAddFields = baseUser?.can('addFields', table.id);
-  const canManageField = baseUser?.can('manageField', field.fieldId);
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
+  const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
+  const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
@@ -108,7 +110,7 @@ export function GridHeaderOptions({
   };
 
   const handlePermissions = () => {
-    if (canManageField) {
+    if (canChangeGuestAccess) {
       permissionsModal.open(field);
     }
   };
@@ -264,7 +266,7 @@ export function GridHeaderOptions({
 
           {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
-          {canManageField && (
+          {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
               <DropdownMenu.Item

@@ -24,10 +24,10 @@ class PowerbaseField < ApplicationRecord
 
     if is_allowed == true
       restricted_guests = restricted_guests.select {|guest_id| guest_id != guest.id}
-      allowed_guests.push(guest.id) if !does_custom_have_access(access)
+      allowed_guests.push(guest.id) if !does_guest_have_access("custom", access)
     else
       allowed_guests = allowed_guests.select {|guest_id| guest_id != guest.id}
-      restricted_guests.push(guest.id) if does_custom_have_access(access)
+      restricted_guests.push(guest.id) if does_guest_have_access("custom", access)
     end
 
     self.permissions[permission]["allowed_guests"] = allowed_guests.uniq
@@ -37,7 +37,7 @@ class PowerbaseField < ApplicationRecord
 
   def update_guest(guest, permission, is_allowed)
     permission = permission.to_s
-    has_access = does_custom_have_access(self.permissions[permission]["access"])
+    has_access = does_guest_have_access("custom", self.permissions[permission]["access"])
     allowed_guests = Array(self.permissions[permission]["allowed_guests"])
     restricted_guests = Array(self.permissions[permission]["restricted_guests"])
 

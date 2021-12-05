@@ -7,21 +7,21 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useBaseUser } from '@models/BaseUser';
 import { createTableView } from '@lib/api/views';
 import { VIEW_TYPES } from '@lib/constants/view';
-import { IId } from '@lib/propTypes/common';
 import { useMounted } from '@lib/hooks/useMounted';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Badge } from '@components/ui/Badge';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 
-export function AddView({ tableId, open, setOpen }) {
+export function AddView({ open, setOpen }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { viewsResponse } = useCurrentView();
+  const { table, viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
 
-  const canAddViews = baseUser?.can('addViews', tableId);
+  const canAddViews = baseUser?.can(PERMISSIONS.AddViews, table);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -43,7 +43,7 @@ export function AddView({ tableId, open, setOpen }) {
 
       try {
         await createTableView({
-          tableId,
+          tableId: table.id,
           name,
           viewType: viewType.value,
         });
@@ -172,7 +172,6 @@ export function AddView({ tableId, open, setOpen }) {
 }
 
 AddView.propTypes = {
-  tableId: IId,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
 };

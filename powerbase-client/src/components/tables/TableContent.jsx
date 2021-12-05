@@ -20,7 +20,7 @@ import { Loader } from "@components/ui/Loader";
 import { TableViewsNav } from "./TableViewsNav";
 import { useBase } from "@models/Base";
 
-const BaseTableContent = React.memo(({ views, table }) => {
+const BaseTableContent = React.memo(({ table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { data: base } = useBase();
@@ -42,9 +42,9 @@ const BaseTableContent = React.memo(({ views, table }) => {
         >
           <FieldTypesProvider>
             <ViewFieldStateProvider>
-              <TableViewsNav table={table} views={views} fields={fields} />
+              <TableViewsNav />
               {table.isMigrated ? (
-                <VirtualTable table={table} height={height} />
+                <VirtualTable table={table} height={height} fields={fields} />
               ) : (
                 <Loader style={{ height }} />
               )}
@@ -58,7 +58,6 @@ const BaseTableContent = React.memo(({ views, table }) => {
 
 BaseTableContent.propTypes = {
   table: ITable,
-  views: PropTypes.arrayOf(IView),
 };
 
 export const TableContent = React.memo(

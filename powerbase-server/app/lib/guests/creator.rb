@@ -1,4 +1,6 @@
 class Guests::Creator
+  include NotificationsHelper
+  include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
@@ -16,7 +18,28 @@ class Guests::Creator
   end
 
   def update_custom_permissions
-    return true unless @guest.custom?
+    unless @guest.custom?
+      # Notify changes to client
+      notif_pusher_trigger!(guest.user_id, "base_invite", @guest)
+      return true
+    end
+
+    database = @guest.powerbase_database
+
+    DATABASE_DEFAULT_PERMISSIONS.each do |key, value|
+      permission_key = key.to_s
+      next if @guest.permissions[permission_key] == nil
+      database_access = database.permissions[permission_key]["access"]
+
+      if database_access != value[:access] || @guest.permissions[permission_key] != value[:default_value]
+        database.update_guests_access({
+          permission: key,
+          access: database_access,
+          guest: @guest,
+          is_allowed: @guest.permissions[permission_key]
+        })
+      end
+    end
 
     @guest.permissions["tables"].each do |table_id, table_permissions|
       table = PowerbaseTable.find(table_id)
@@ -24,9 +47,15 @@ class Guests::Creator
       TABLE_DEFAULT_PERMISSIONS.each do |key, value|
         permission_key = key.to_s
         next if table_permissions[permission_key] == nil
+        table_access = table.permissions[permission_key]["access"]
 
-        if table.permissions[permission_key]["access"] != value[:access] || table_permissions[permission_key] != value[:default_value]
-          update_table_guests_access(table, [key, value], @guest, table_permissions[permission_key])
+        if table_access != value[:access] || table_permissions[permission_key] != value[:default_value]
+          table.update_guests_access({
+            permission: key,
+            access: table_access,
+            guest: @guest,
+            is_allowed: table_permissions[permission_key]
+          })
         end
       end
     end

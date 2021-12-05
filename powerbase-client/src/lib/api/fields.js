@@ -69,3 +69,13 @@ export async function updateFieldPermission({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function updateFieldPermissionAllowedRoles({ id, ...payload }) {
+  const response = await securedApi.put(`/fields/${id}/allowed_roles`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
