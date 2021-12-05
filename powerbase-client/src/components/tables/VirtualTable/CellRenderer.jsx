@@ -269,6 +269,9 @@ export function CellRenderer({
 
     const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
 
+    /* The ids are composed in a double underscore and double hypen commas to avoid 
+    incomplete splits down the line for field names that have underscore already */
+    // REFACTOR to use a new identifier-composition approach with unique unicode characters
     const composedKeys = primaryKeys
       .map((key) => {
         const keyName = key.name.toLowerCase();

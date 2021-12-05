@@ -124,8 +124,7 @@ module Powerbase
 
     # Updates a property in a document/table record.
     # Accepts the following options:
-    # :id :: the document ID or the SWR key.
-    # :primary_keys :: an object of the table's primary keys.
+    # :primary_keys :: a specific-format string concat of the primary keys and their values.
     # Ex: { pathId: 123, userId: 1245 }
     def update_record(options)
       index = "table_records_#{@table_id}"
@@ -149,6 +148,9 @@ module Powerbase
       end
     end
 
+    # Gets all magic values for a non turbo table
+    # REFACTOR to make fetch size flexible/dynamic - it's currently fixed because of the eventual aggregation
+    # REFACTOR doc_id parameter to something else to avoid collisions
     def magic_search
       index = "table_records_#{@table_id}"
       result = @esclient.search(index: index, size: 10000)
