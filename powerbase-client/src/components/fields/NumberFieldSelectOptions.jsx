@@ -131,9 +131,9 @@ export default function NumberFieldSelectOptions({
 
 NumberFieldSelectOptions.propTypes = {
   isPrecision: PropTypes.bool.isRequired,
-  setNumberPrecision: PropTypes.func.isRequired,
-  setNumberSubtype: PropTypes.func.isRequired,
-  isPercent: PropTypes.bool.isRequired,
-  isCurrency: PropTypes.bool.isRequired,
-  setCurrency: PropTypes.bool.isRequired,
+  setNumberPrecision: PropTypes.func,
+  setNumberSubtype: PropTypes.func,
+  isPercent: PropTypes.bool,
+  isCurrency: PropTypes.bool,
+  setCurrency: PropTypes.func,
 };

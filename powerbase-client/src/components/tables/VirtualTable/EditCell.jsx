@@ -5,61 +5,60 @@ import React, {
   useState,
   forwardRef,
   useRef,
-} from "react";
-import isObject from "lodash/isObject";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+} from 'react';
+import isObject from 'lodash/isObject';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import PropTypes from 'prop-types';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function getValue(value) {
   if (isObject(value)) return JSON.stringify(value);
   if (value && value.toString) return value.toString();
-  if (value === null) return "";
-  if (value === undefined) return "";
+  if (value === null) return '';
+  if (value === undefined) return '';
   return value;
 }
 
-const TooltipContent = () => {
-  return (
-    <>
-      <div className="flex">
-        <div className="relative mx-2">
-          <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
-            Enter a valid email
-            <svg
-              className="absolute text-black h-2 w-full left-0 top-full"
-              x="0px"
-              y="0px"
-              viewBox="0 0 255 255"
-              xmlSpace="preserve"
-            >
-              <polygon
-                className="fill-current"
-                points="0,0 127.5,127.5 255,0"
-              />
-            </svg>
-          </div>
+const TooltipContent = () => (
+  <>
+    <div className="flex">
+      <div className="relative mx-2">
+        <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
+          Enter a valid email
+          <svg
+            className="absolute text-black h-2 w-full left-0 top-full"
+            x="0px"
+            y="0px"
+            viewBox="0 0 255 255"
+            xmlSpace="preserve"
+          >
+            <polygon
+              className="fill-current"
+              points="0,0 127.5,127.5 255,0"
+            />
+          </svg>
         </div>
       </div>
-    </>
-  );
-};
+    </div>
+  </>
+);
 
 const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
 
   const formatDate = (date) => {
-    const year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
-      date
+    const year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(
+      date,
     );
-    const month = new Intl.DateTimeFormat("en", { month: "numeric" }).format(
-      date
+    const month = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(
+      date,
     );
-    const day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
+    const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
 
-    const time = new Intl.DateTimeFormat("en", {
-      hour: "numeric",
-      minute: "numeric",
+    const time = new Intl.DateTimeFormat('en', {
+      hour: 'numeric',
+      minute: 'numeric',
     }).format(date);
 
     const val = `${month}-${day}-${year} ${time}`;
@@ -89,7 +88,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
     );
   };
 
-  const CustomInput = forwardRef(({ value, onClick, onChange }, ref) => (
+  const CustomInput = forwardRef(({ value, onClick }) => (
     <CalButton onClick={onClick} value={value} />
   ));
   return (
@@ -106,9 +105,9 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       showTimeSelect
       popperModifiers={[
         {
-          name: "preventOverflow",
+          name: 'preventOverflow',
           options: {
-            rootBoundary: "viewport",
+            rootBoundary: 'viewport',
             tether: false,
             altAxis: true,
           },
@@ -128,15 +127,15 @@ function TextCell(
     setCalendarValue,
     onClickOutsideEditingCell,
   },
-  ref
+  ref,
 ) {
   useEffect(() => {
-    if (fieldType.dataType !== "date") ref.current.focus();
+    if (fieldType.dataType !== 'date') ref.current.focus();
   }, []);
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
-        {fieldType.dataType === "date" ? (
+        {fieldType.dataType === 'date' ? (
           <Calendar
             setCalendarValue={setCalendarValue}
             onClickOutsideEditingCell={onClickOutsideEditingCell}

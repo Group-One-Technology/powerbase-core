@@ -1,6 +1,5 @@
-/* eslint-disable */
-import React, { useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
@@ -12,10 +11,9 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
 import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
+import { useBase } from '@models/Base';
 import { TableRenderer } from './TableRenderer';
-
-import "react-virtualized/styles.css";
-import { useBase } from "@models/Base";
+import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, table }) {
   const { data: fields } = useViewFields();
@@ -30,10 +28,10 @@ export function VirtualTable({ height, table }) {
   }, [table.id]);
 
   if (
-    fields == null ||
-    connections == null ||
-    records == null ||
-    fieldTypes == null
+    fields == null
+    || connections == null
+    || records == null
+    || fieldTypes == null
   ) {
     return <Loader style={{ height }} />;
   }

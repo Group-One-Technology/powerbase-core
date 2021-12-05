@@ -1,5 +1,6 @@
-/* eslint-disable */
-import React from "react";
+import React from 'react';
+import PropTypes from 'prop-types';
+
 export default function Checkbox({ isChecked, setIsChecked, label }) {
   const handleCheck = () => {
     setIsChecked(!isChecked);
@@ -29,3 +30,9 @@ export default function Checkbox({ isChecked, setIsChecked, label }) {
     </fieldset>
   );
 }
+
+Checkbox.propTypes = {
+  isChecked: PropTypes.bool.isRequired,
+  setIsChecked: PropTypes.func.isRequired,
+  label: PropTypes.string,
+};

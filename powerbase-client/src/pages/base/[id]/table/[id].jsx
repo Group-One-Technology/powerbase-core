@@ -1,19 +1,18 @@
-/* eslint-disable */
-import React from "react";
-import { useHistory, useParams } from "react-router-dom";
+import React from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
-import { BasesProvider, useBases } from "@models/Bases";
-import { BaseProvider, useBase } from "@models/Base";
-import { BaseTableProvider } from "@models/BaseTable";
-import { useAuthUser } from "@models/AuthUser";
-import { BaseUserProvider, useBaseUser } from "@models/BaseUser";
-import { BaseGuestsProvider, useBaseGuests } from "@models/BaseGuests";
-import { ViewFieldsProvider } from "@models/ViewFields";
+import { BasesProvider, useBases } from '@models/Bases';
+import { BaseProvider, useBase } from '@models/Base';
+import { BaseTableProvider } from '@models/BaseTable';
+import { useAuthUser } from '@models/AuthUser';
+import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
+import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
+import { ViewFieldsProvider } from '@models/ViewFields';
 import {
   CurrentViewProvider,
   useCurrentView,
-} from "@models/views/CurrentTableView";
-import { useQuery } from "@lib/hooks/useQuery";
+} from '@models/views/CurrentTableView';
+import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
 import { Navbar } from '@components/layout/Navbar';
@@ -34,17 +33,17 @@ function BaseTable() {
   const { view } = useCurrentView();
 
   if (
-    base == null ||
-    bases == null ||
-    authUser == null ||
-    guests == null ||
-    typeof baseUser === "undefined"
+    base == null
+    || bases == null
+    || authUser == null
+    || guests == null
+    || typeof baseUser === 'undefined'
   ) {
     return <Loader className="h-screen" />;
   }
 
   if (!baseUser) {
-    history.push("/404");
+    history.push('/404');
     return <Loader className="h-screen" />;
   }
 
@@ -68,7 +67,7 @@ function BaseTable() {
 export function TablePage() {
   const { id: tableId, baseId } = useParams();
   const query = useQuery();
-  const viewId = query.get("view");
+  const viewId = query.get('view');
 
   return (
     <AuthOnly>

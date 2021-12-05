@@ -1,11 +1,10 @@
-/* eslint-disable */
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import { TableFieldsProvider } from "@models/TableFields";
-import { TableRecordProvider } from "@models/TableRecord";
-import { TableConnectionsProvider } from "@models/TableConnections";
-import { RecordItemValue } from "./RecordItemValue";
+import { TableFieldsProvider } from '@models/TableFields';
+import { TableRecordProvider } from '@models/TableRecord';
+import { TableConnectionsProvider } from '@models/TableConnections';
+import { RecordItemValue } from './RecordItemValue';
 
 export function RecordItem({
   item,
@@ -16,9 +15,9 @@ export function RecordItem({
   const isForeignKey = !!(item.isForeignKey && item.foreignKey && item.value);
   const primaryKeys = isForeignKey
     ? {
-        [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]:
+      [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]:
           item.value,
-      }
+    }
     : undefined;
   const referencedTable = isForeignKey
     ? item.foreignKey.referencedTable
@@ -39,8 +38,8 @@ export function RecordItem({
       recordId={
         primaryKeys
           ? Object.entries(primaryKeys)
-              .map(([key, value]) => `${key}_${value}`)
-              .join("-")
+            .map(([key, value]) => `${key}_${value}`)
+            .join('-')
           : undefined
       }
       primaryKeys={primaryKeys}

@@ -1,18 +1,17 @@
-/* eslint-disable */
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import { XIcon } from "@heroicons/react/outline";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { XIcon } from '@heroicons/react/outline';
 
-import { useFieldTypes } from "@models/FieldTypes";
-import { IViewField } from "@lib/propTypes/view-field";
-import { useOperator } from "@lib/hooks/filter/useOperator";
-import { useFilterValue } from "@lib/hooks/filter/useFilterValue";
-import { FieldType } from "@lib/constants/field-types";
-import { formatDate } from "@lib/helpers/formatDate";
-import { FilterField } from "./FilterField";
-import { FilterOperator } from "./FilterOperator";
-import { FilterValue } from "./FilterValue";
-import { FilterLogicalOperator } from "../FilterLogicalOperator";
+import { useFieldTypes } from '@models/FieldTypes';
+import { IViewField } from '@lib/propTypes/view-field';
+import { useOperator } from '@lib/hooks/filter/useOperator';
+import { useFilterValue } from '@lib/hooks/filter/useFilterValue';
+import { FieldType } from '@lib/constants/field-types';
+import { formatDate } from '@lib/helpers/formatDate';
+import { FilterField } from './FilterField';
+import { FilterOperator } from './FilterOperator';
+import { FilterValue } from './FilterValue';
+import { FilterLogicalOperator } from '../FilterLogicalOperator';
 
 export function SingleFilter({
   id,
@@ -20,7 +19,7 @@ export function SingleFilter({
   level,
   fields,
   filter,
-  logicalOperator = "and",
+  logicalOperator = 'and',
   updateTableRecords,
   handleRemoveFilter,
   handleLogicalOpChange,
@@ -30,21 +29,18 @@ export function SingleFilter({
   const [field, setField] = useState(
     filter?.field
       ? fields.find((item) => item.name === filter.field) || fields[0]
-      : fields[0]
+      : fields[0],
   );
-  const [operator, setOperator, operators, updateOperator, fieldType] =
-    useOperator({ filter, field });
+  const [operator, setOperator, operators, updateOperator, fieldType] = useOperator({ filter, field });
   const [value, setValue] = useFilterValue({
     value: filter?.filter?.value,
     fieldType,
   });
 
-  console.log("CURR: ", level);
-
   const updateField = (selectedField) => {
     if (canManageViews) {
       const newFieldType = fieldTypes.find(
-        (item) => item.id.toString() === selectedField.fieldTypeId.toString()
+        (item) => item.id.toString() === selectedField.fieldTypeId.toString(),
       );
 
       setField(selectedField);
@@ -57,19 +53,17 @@ export function SingleFilter({
       } else if (newFieldType.name === FieldType.DATE) {
         setValue(new Date().toString());
       } else {
-        setValue("");
+        setValue('');
       }
 
       updateTableRecords();
     }
   };
 
-  console.log("level:", level);
-
   const handleFieldChange = (selectedFieldId) => {
     if (canManageViews) {
       const selectedField = fields?.find(
-        (item) => item.id.toString() === selectedFieldId.toString()
+        (item) => item.id.toString() === selectedFieldId.toString(),
       );
 
       updateField(selectedField);
@@ -80,7 +74,7 @@ export function SingleFilter({
     if (canManageViews) {
       setOperator(selectedOperator);
 
-      if (selectedOperator !== "") {
+      if (selectedOperator !== '') {
         updateTableRecords();
       }
     }
@@ -114,10 +108,10 @@ export function SingleFilter({
           operator,
           value:
             fieldType?.name === FieldType.CHECKBOX
-              ? value.toString() === "true"
+              ? value.toString() === 'true'
               : fieldType?.name === FieldType.DATE
-              ? formatDate(value, { dateOnly: true })
-              : value,
+                ? formatDate(value, { dateOnly: true })
+                : value,
         },
       })}
       className="filter flex gap-2 items-center"
@@ -135,7 +129,7 @@ export function SingleFilter({
             />
           </>
         ) : (
-          <p>{first ? "where" : logicalOperator}</p>
+          <p>{first ? 'where' : logicalOperator}</p>
         )}
       </div>
       <div className="flex-1 flex gap-2 items-center">

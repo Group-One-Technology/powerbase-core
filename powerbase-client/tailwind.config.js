@@ -1,16 +1,15 @@
-/* eslint-disable */
-const defaultTheme = require("tailwindcss/defaultTheme");
-const forms = require("@tailwindcss/forms");
-const colors = require("tailwindcss/colors");
+const defaultTheme = require('tailwindcss/defaultTheme');
+const forms = require('@tailwindcss/forms');
+const colors = require('tailwindcss/colors');
 
 module.exports = {
-  mode: "jit",
-  purge: ["./public/*.html", "./src/**/*.{js,jsx}"],
-  darkMode: "class",
+  mode: 'jit',
+  purge: ['./public/*.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter var", ...defaultTheme.fontFamily.sans],
+        sans: ['Inter var', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         rose: colors.rose,

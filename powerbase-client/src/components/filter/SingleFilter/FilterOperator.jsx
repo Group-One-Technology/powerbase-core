@@ -1,21 +1,22 @@
-/* eslint-disable */
-import React from "react";
-import PropTypes from "prop-types";
-import cn from "classnames";
-import { SelectorIcon } from "@heroicons/react/solid";
-import { Listbox } from "@headlessui/react";
+import React from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { SelectorIcon } from '@heroicons/react/solid';
+import { Listbox } from '@headlessui/react';
 
-export function FilterOperator({ id, value, options, onChange, disabled }) {
+export function FilterOperator({
+  id, value, options, onChange, disabled,
+}) {
   return (
     <Listbox value={value} onChange={onChange} disabled={disabled}>
       <div className="block w-full">
         <Listbox.Button
           id={id}
           className={cn(
-            "block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm",
+            'block relative w-full text-sm capitalize h-8 px-2 py-1 text-left border border-gray-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm',
             disabled
-              ? "cursor-not-allowed bg-gray-100"
-              : "cursor-default bg-white"
+              ? 'cursor-not-allowed bg-gray-100'
+              : 'cursor-default bg-white',
           )}
         >
           <span className="block truncate">{value}</span>
@@ -31,12 +32,10 @@ export function FilterOperator({ id, value, options, onChange, disabled }) {
             <Listbox.Option
               key={option}
               value={option}
-              className={({ active, selected }) =>
-                cn(
-                  "cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate capitalize",
-                  active || selected ? "bg-gray-100" : "bg-white"
-                )
-              }
+              className={({ active, selected }) => cn(
+                'cursor-default select-none relative py-1.5 px-4 text-gray-900 truncate capitalize',
+                active || selected ? 'bg-gray-100' : 'bg-white',
+              )}
             >
               {option}
             </Listbox.Option>

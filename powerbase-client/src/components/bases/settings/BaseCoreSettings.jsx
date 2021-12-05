@@ -1,22 +1,21 @@
-/* eslint-disable */
-import React, { useState } from "react";
-import cn from "classnames";
-import { CheckIcon, ExclamationIcon } from "@heroicons/react/outline";
+import React, { useState } from 'react';
+import cn from 'classnames';
+import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
-import { useValidState } from "@lib/hooks/useValidState";
-import { REQUIRED_VALIDATOR } from "@lib/validators/REQUIRED_VALIDATOR";
-import { SQL_IDENTIFIER_VALIDATOR } from "@lib/validators/SQL_IDENTIFIER_VALIDATOR";
-import { updateDatabase } from "@lib/api/databases";
-import { DATABASE_TYPES, POWERBASE_TYPE } from "@lib/constants";
-import { useBase } from "@models/Base";
-import { useBases } from "@models/Bases";
+import { useValidState } from '@lib/hooks/useValidState';
+import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
+import { updateDatabase } from '@lib/api/databases';
+import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
+import { useBase } from '@models/Base';
+import { useBases } from '@models/Bases';
 
-import { Button } from "@components/ui/Button";
-import { InlineColorRadio } from "@components/ui/InlineColorRadio";
-import { InlineInput } from "@components/ui/InlineInput";
-import { InlineRadio } from "@components/ui/InlineRadio";
-import { InlineSelect } from "@components/ui/InlineSelect";
-import { StatusModal } from "@components/ui/StatusModal";
+import { Button } from '@components/ui/Button';
+import { InlineColorRadio } from '@components/ui/InlineColorRadio';
+import { InlineInput } from '@components/ui/InlineInput';
+import { InlineRadio } from '@components/ui/InlineRadio';
+import { InlineSelect } from '@components/ui/InlineSelect';
+import { StatusModal } from '@components/ui/StatusModal';
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -25,7 +24,7 @@ const INITIAL_MODAL_VALUE = {
       <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
     </div>
   ),
-  title: "Update Successful",
+  title: 'Update Successful',
   content: "The database's information has been updated.",
 };
 
@@ -41,19 +40,19 @@ export function BaseCoreSettings() {
 
   const [name, setName, nameError] = useValidState(
     base.name,
-    REQUIRED_VALIDATOR
+    REQUIRED_VALIDATOR,
   );
   const [databaseName, setDatabaseName, databaseNameError] = useValidState(
     base.databaseName,
-    SQL_IDENTIFIER_VALIDATOR
+    SQL_IDENTIFIER_VALIDATOR,
   );
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
-  const [host, setHost] = useState("");
-  const [port, setPort] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [host, setHost] = useState('');
+  const [port, setPort] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [powerbaseType, setPowerbaseType] = useState(
-    POWERBASE_TYPE[base.isTurbo ? 0 : 1]
+    POWERBASE_TYPE[base.isTurbo ? 0 : 1],
   );
   const [color, setColor, colorError] = useValidState(base.color);
 
@@ -66,7 +65,7 @@ export function BaseCoreSettings() {
     setModal(INITIAL_MODAL_VALUE);
 
     if (!color.length) {
-      colorError.setError(new Error("Required"));
+      colorError.setError(new Error('Required'));
       setLoading(false);
       return;
     }
@@ -87,7 +86,7 @@ export function BaseCoreSettings() {
         setModal({
           open: true,
           icon: ERROR_ICON,
-          title: "Update Failed",
+          title: 'Update Failed',
           content: response.isExisting
             ? `Database with name of "${response.database.name}" already exists in this account.`
             : `Couldn't connect to "${name}". Please check the information given if they are correct.`,
@@ -101,10 +100,10 @@ export function BaseCoreSettings() {
       setModal({
         open: true,
         icon: ERROR_ICON,
-        title: "Update Failed",
+        title: 'Update Failed',
         content:
-          err?.response?.data.exception ||
-          "Something went wrong. Please try again later.",
+          err?.response?.data.exception
+          || 'Something went wrong. Please try again later.',
       });
     }
 
@@ -161,7 +160,7 @@ export function BaseCoreSettings() {
           <br />
           {base.isTurbo && (
             <>
-              Updating the connection string is an <strong>irreversible</strong>{" "}
+              Updating the connection string is an <strong>irreversible</strong>{' '}
               action. Please check your inputs carefully.
             </>
           )}
@@ -216,9 +215,9 @@ export function BaseCoreSettings() {
           <Button
             type="submit"
             className={cn(
-              "bg-sky-700 ml-5 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500",
-              databaseName.length && "hover:bg-sky-800",
-              !databaseName.length && "cursor-not-allowed"
+              'bg-sky-700 ml-5 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500',
+              databaseName.length && 'hover:bg-sky-800',
+              !databaseName.length && 'cursor-not-allowed',
             )}
             loading={loading}
             disabled={!databaseName.length}
