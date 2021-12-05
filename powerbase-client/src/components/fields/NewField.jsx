@@ -156,7 +156,8 @@ export default function NewField({
   }, []);
 
   useEffect(() => {
-    const supported = ["string", "number", "date"];
+    // excluded date for now
+    const supported = ["string", "number"];
     setSupportedNewFieldTypes(
       fieldTypes?.filter((item) =>
         supported.includes(item.dataType.toLowerCase())
@@ -211,7 +212,6 @@ export default function NewField({
       mutateViewFields();
       setHasAddedNewField(true);
       close();
-      // return response.data;
     }
   };
 
