@@ -49,11 +49,12 @@ export function Filter() {
 
       setFilters(updatedFilter);
       try {
-        updateTableView({ id: view.id, filters: updatedFilter });
+        updateTableView({ id: view.id, filters: updatedFilter })
+          .catch((err) => catchError(err.response.data.exception || err.response.data.error));
         await mutateTableRecords();
         saved();
       } catch (err) {
-        catchError(err);
+        catchError(err.response.data.exception || err.response.data.error);
       }
     }
   }, 500), [view]);

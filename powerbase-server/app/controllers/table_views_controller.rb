@@ -12,11 +12,11 @@ class TableViewsController < ApplicationController
   schema(:update) do
     required(:id).value(:integer)
     optional(:name)
-    optional(:filters)
-    optional(:sort)
     optional(:view_type)
     required(:permission)
     required(:is_locked)
+    optional(:filters)
+    optional(:sort)
   end
 
   schema(:create) do
@@ -98,11 +98,18 @@ class TableViewsController < ApplicationController
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
     current_user.can?(:manage_view, @view)
 
-    if safe_params[:name]
+    if safe_params[:name] != nil
       @existing_view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @view.powerbase_table_id)
 
       if @existing_view && @existing_view.id != @view.id
         render json: { error: "View with name of \"#{safe_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
+        return
+      end
+    end
+
+    if safe_params[:filters] != nil || safe_params[:sort] != nil
+      if @view.is_locked
+        render json: { error: "Unlock '#{@view.name}' view in order to update it." }, status: :unprocessable_entity
         return
       end
     end
