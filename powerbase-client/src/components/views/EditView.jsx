@@ -31,14 +31,14 @@ export function EditView({
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saving, saved } = useSaveStatus();
-  const { table, viewsResponse } = useCurrentView();
+  const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
   const [permission, setPermission] = useState(VIEWS_PERMISSIONS.find((item) => item.value === view.permission));
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
   const [isLocked, setIsLocked] = useState(view.isLocked);
 
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -67,7 +67,7 @@ export function EditView({
   };
 
   const handleDelete = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
       setLoading(true);
       setError(undefined);
@@ -92,7 +92,7 @@ export function EditView({
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (canManageViews) {
+    if (canManageView) {
       saving();
       setLoading(true);
       setError(undefined);

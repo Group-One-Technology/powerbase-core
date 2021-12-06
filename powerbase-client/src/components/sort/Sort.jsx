@@ -1,6 +1,5 @@
 import React, { Fragment, useRef } from 'react';
 import cn from 'classnames';
-import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -19,7 +18,7 @@ import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { SortItem } from './SortItem';
 
-export function Sort({ table }) {
+export function Sort() {
   const sortRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
@@ -27,10 +26,10 @@ export function Sort({ table }) {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
 
   const updateSort = async (value) => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
 
       const updatedSort = {
@@ -51,7 +50,7 @@ export function Sort({ table }) {
   };
 
   const updateRecords = async () => {
-    if (sortRef.current && canManageViews) {
+    if (sortRef.current && canManageView) {
       const updatedSort = Array.from(sortRef.current.querySelectorAll('.sort') || []).map(({ attributes }) => ({
         id: attributes['data-id']?.nodeValue,
         field: attributes['data-field']?.nodeValue,
@@ -67,10 +66,10 @@ export function Sort({ table }) {
     sensors,
     handleDragStart,
     handleReorderSort,
-  } = useReorderSort({ tableId: table.id, sort, updateSort });
+  } = useReorderSort({ view, sort, updateSort });
 
   const handleAddSortItem = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       const updatedSort = [
         ...sort,
         {
@@ -85,7 +84,7 @@ export function Sort({ table }) {
   };
 
   const handleRemoveSortItem = async (sortItemId) => {
-    if (canManageViews) {
+    if (canManageView) {
       const updatedSort = sort.filter((item) => item.id !== sortItemId);
       await updateSort(updatedSort);
     }
@@ -141,7 +140,7 @@ export function Sort({ table }) {
                             sort={item}
                             remove={handleRemoveSortItem}
                             updateRecords={updateRecords}
-                            canManageViews={canManageViews}
+                            canManageViews={canManageView}
                           />
                         ))}
                       </SortableContext>
@@ -152,7 +151,7 @@ export function Sort({ table }) {
                       </p>
                     )}
                   </ul>
-                  {canManageViews && (
+                  {canManageView && (
                     <button
                       type="button"
                       className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
@@ -171,7 +170,3 @@ export function Sort({ table }) {
     </Popover>
   );
 }
-
-Sort.propTypes = {
-  table: PropTypes.object.isRequired,
-};

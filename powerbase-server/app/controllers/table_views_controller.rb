@@ -96,7 +96,7 @@ class TableViewsController < ApplicationController
   def update
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
-    current_user.can?(:manage_views, @view.powerbase_table)
+    current_user.can?(:manage_view, @view)
 
     if safe_params[:name]
       @existing_view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @view.powerbase_table_id)
@@ -120,7 +120,7 @@ class TableViewsController < ApplicationController
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
     @table = @view.powerbase_table
-    current_user.can?(:manage_views, @table)
+    current_user.can?(:manage_view, @view)
 
     if @table.default_view_id === @view.id
       render json: { error: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
@@ -140,7 +140,7 @@ class TableViewsController < ApplicationController
   def update_order
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
-    current_user.can?(:manage_table, @table)
+    current_user.can?(:manage_views, @table)
 
     safe_params[:views].each_with_index do |view_id, index|
       view = TableView.find(view_id)
@@ -161,6 +161,8 @@ class TableViewsController < ApplicationController
         filters: view.filters,
         sort: view.sort,
         order: view.order,
+        access: view.access,
+        creator_id: view.creator_id,
         is_locked: view.is_locked,
         created_at: view.created_at,
         updated_at: view.updated_at,

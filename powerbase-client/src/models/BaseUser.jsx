@@ -31,6 +31,12 @@ function useBaseUserModel() {
     const permissions = ACCESS_LEVEL.find((item) => item.name === baseUser.access)?.permisions;
     if (!permissions) return false;
 
+    if (BASE_PERMISSIONS.View.includes(permission)) {
+      const view = resource;
+      if (view.permission === 'personal') return baseUser.userId === view.creatorId;
+      return doesGuestHaveAccess(baseUser.access, view.access);
+    }
+
     if (baseUser.access !== 'custom') {
       if (base && BASE_PERMISSIONS.Base.includes(permission)) {
         const baseAccess = base.permissions[permission].access;

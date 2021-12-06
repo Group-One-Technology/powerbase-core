@@ -26,6 +26,7 @@ import {
   setFieldAsPII,
   unsetFieldAsPII,
 } from '@lib/api/fields';
+import { useTableView } from '@models/TableView';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
@@ -37,6 +38,7 @@ export function GridHeaderOptions({
 }) {
   const { saving, catchError, saved } = useSaveStatus();
   const { baseUser } = useBaseUser();
+  const { data: view } = useTableView();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
   const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
@@ -45,7 +47,7 @@ export function GridHeaderOptions({
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
@@ -116,7 +118,7 @@ export function GridHeaderOptions({
   };
 
   const handleHideField = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -264,7 +266,7 @@ export function GridHeaderOptions({
             </DropdownMenu.Item>
           )}
 
-          {canManageViews && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
+          {canManageView && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
           {canChangeGuestAccess && (
             <>
@@ -297,7 +299,7 @@ export function GridHeaderOptions({
               </DropdownMenu.Item>
             </>
           )}
-          {canManageViews && (
+          {canManageView && (
             <DropdownMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"

@@ -50,7 +50,7 @@ export function ViewMenu() {
   };
 
   const handleViewOptions = (view) => {
-    if (canManageViews) {
+    if (baseUser?.can(PERMISSIONS.ManageView, view)) {
       setViewOptionModal({ open: true, view });
     }
   };
@@ -126,13 +126,11 @@ export function ViewMenu() {
                       >
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
-                      </button>
-                      <div className="flex items-center">
                         {view.permission === 'personal'
                           ? <UserIcon className="inline text-gray-500 h-4 w-4 ml-1" />
                           : <UserGroupIcon className="inline text-gray-500 h-4 w-4 ml-1" />}
-                      </div>
-                      {canManageViews && (
+                      </button>
+                      {baseUser?.can(PERMISSIONS.ManageView, view) && (
                         <div className="p-0.5">
                           <button
                             type="button"

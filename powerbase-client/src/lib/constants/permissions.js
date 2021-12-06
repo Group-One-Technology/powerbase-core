@@ -2,6 +2,7 @@ export const BASE_PERMISSIONS = {
   Base: ['viewBase', 'manageBase', 'inviteGuests', 'changeGuestAccess', 'removeGuests', 'addTables', 'deleteTables'],
   Table: ['viewTable', 'manageTable', 'manageViews', 'addViews', 'deleteViews', 'addFields', 'deleteFields', 'addRecords', 'deleteRecords', 'commentRecords'],
   Field: ['viewField', 'manageField', 'editFieldData'],
+  View: ['manageView'],
 };
 
 export const PERMISSIONS = {
@@ -14,6 +15,7 @@ export const PERMISSIONS = {
   DeleteTables: 'deleteTables',
   ViewTable: 'viewTable',
   ManageTable: 'manageTable',
+  ManageView: 'manageView',
   ManageViews: 'manageViews',
   AddViews: 'addViews',
   DeleteViews: 'deleteViews',
@@ -142,7 +144,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Table',
-      description: 'who can update the table permissions, etc.',
+      description: 'who can update the table permissions etc.',
       access: 'admins and up',
       key: 'manageTable',
       value: false,
@@ -170,7 +172,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Manage Views',
-      description: 'who can update the filter, sort, resize/reorder fields, etc.',
+      description: 'who can update the reorder, filter, sort, resize/reorder fields, etc. of collaborative views.',
       access: 'editors and up',
       key: 'manageViews',
       value: true,

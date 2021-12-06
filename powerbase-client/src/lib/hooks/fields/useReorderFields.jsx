@@ -7,17 +7,16 @@ import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
-export function useReorderFields({ table, fields, setFields }) {
+export function useReorderFields({ fields, setFields }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
 
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
-    if (active.id !== over.id && canManageViews) {
+    if (active.id !== over.id && baseUser?.can(PERMISSIONS.ManageView, view)) {
       saving();
 
       const oldIndex = fields.findIndex((item) => item.id === active.id);
