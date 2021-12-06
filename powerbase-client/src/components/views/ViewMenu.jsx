@@ -4,6 +4,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Popover, Transition } from '@headlessui/react';
 import { PlusIcon, DotsHorizontalIcon, ViewGridIcon } from '@heroicons/react/outline';
+import { UserIcon, UserGroupIcon } from '@heroicons/react/solid';
 
 import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
@@ -78,6 +79,9 @@ export function ViewMenu() {
         <Popover.Button type="button" className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
           <ViewGridIcon className="inline h-4 w-4 mr-1" />
           {currentView.name}
+          {currentView.permission === 'personal'
+            ? <UserIcon className="inline text-gray-500 h-4 w-4 ml-1" />
+            : <UserGroupIcon className="inline text-gray-500 h-4 w-4 ml-1" />}
         </Popover.Button>
         <Transition
           as={Fragment}
@@ -123,6 +127,11 @@ export function ViewMenu() {
                         <ViewGridIcon className="inline h-4 w-4 mr-1" />
                         {view.name}
                       </button>
+                      <div className="flex items-center">
+                        {view.permission === 'personal'
+                          ? <UserIcon className="inline text-gray-500 h-4 w-4 ml-1" />
+                          : <UserGroupIcon className="inline text-gray-500 h-4 w-4 ml-1" />}
+                      </div>
                       {canManageViews && (
                         <div className="p-0.5">
                           <button
