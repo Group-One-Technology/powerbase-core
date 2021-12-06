@@ -56,7 +56,7 @@ function BaseNotificationsMenu({ colored }) {
 
   useEffect(() => {
     setNotificationsCount((guestInvitations?.length || 0) + (unreadNotifications?.length || 0));
-  }, [notifications, initialGuestInvitations]);
+  }, [notifications, guestInvitations]);
 
   const handleReadNotifications = async () => {
     if (unreadNotifications?.length > 0) {
