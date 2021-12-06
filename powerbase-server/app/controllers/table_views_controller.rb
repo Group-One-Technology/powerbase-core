@@ -11,16 +11,20 @@ class TableViewsController < ApplicationController
 
   schema(:update) do
     required(:id).value(:integer)
+    optional(:name)
     optional(:filters)
     optional(:sort)
     optional(:view_type)
-    optional(:name)
+    required(:permission)
+    required(:is_locked)
   end
 
   schema(:create) do
     required(:table_id)
     required(:name)
     required(:view_type)
+    required(:permission)
+    required(:is_locked)
   end
 
   schema(:update_order) do
@@ -61,6 +65,8 @@ class TableViewsController < ApplicationController
       view_type: safe_params[:view_type],
       order: @table.table_views.count,
       powerbase_table_id: @table.id,
+      permission: safe_params[:permission],
+      is_locked: safe_params[:is_locked],
     )
 
     if @view.save
@@ -89,7 +95,7 @@ class TableViewsController < ApplicationController
   def update
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
-    current_user.can?(:manage_view, @view)
+    current_user.can?(:manage_views, @view.powerbase_table)
 
     if safe_params[:name]
       @existing_view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @view.powerbase_table_id)
@@ -112,16 +118,17 @@ class TableViewsController < ApplicationController
   def destroy
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
-    current_user.can?(:manage_view, @view)
+    @table = @view.powerbase_table
+    current_user.can?(:manage_views, @table)
 
-    if @view.powerbase_table.default_view_id === @view.id
+    if @table.default_view_id === @view.id
       render json: { error: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
       return
     end
 
     @view.destroy
 
-    views = TableView.where(powerbase_table_id: @view.powerbase_table_id).order(order: :asc)
+    views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
     views.each_with_index do |view, index|
       view = TableView.find(view.id)
       view.update(order: index)
@@ -149,9 +156,11 @@ class TableViewsController < ApplicationController
         name: view.name,
         table_id: view.powerbase_table_id,
         view_type: view.view_type,
+        permission: view.permission,
         filters: view.filters,
         sort: view.sort,
         order: view.order,
+        is_locked: view.is_locked,
         created_at: view.created_at,
         updated_at: view.updated_at,
       }
