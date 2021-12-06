@@ -25,7 +25,9 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 export function AddView({ open, setOpen }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { saving, saved } = useSaveStatus();
+  const {
+    saving, saved, loading, setLoading,
+  } = useSaveStatus();
   const { table, viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
   const [permission, setPermission] = useState(VIEWS_PERMISSIONS[0]);
@@ -34,7 +36,6 @@ export function AddView({ open, setOpen }) {
 
   const canAddViews = baseUser?.can(PERMISSIONS.AddViews, table);
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
   const handleNameChange = (evt) => {
@@ -58,7 +59,6 @@ export function AddView({ open, setOpen }) {
 
     if (canAddViews) {
       saving();
-      setLoading(true);
       setError(undefined);
 
       try {

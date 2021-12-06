@@ -30,7 +30,9 @@ export function EditView({
 }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { saving, saved } = useSaveStatus();
+  const {
+    saving, saved, loading, setLoading,
+  } = useSaveStatus();
   const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
@@ -39,8 +41,6 @@ export function EditView({
   const [isLocked, setIsLocked] = useState(view.isLocked);
 
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
-
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
   useEffect(() => {
@@ -69,7 +69,6 @@ export function EditView({
   const handleDelete = async () => {
     if (canManageView) {
       saving();
-      setLoading(true);
       setError(undefined);
 
       const deletedViewName = view.name;
@@ -79,8 +78,6 @@ export function EditView({
         await viewsResponse.mutate();
         await mutateView();
         saved(`Successfully deleted "${deletedViewName}" view.`);
-
-        mounted(() => setOpen(false));
       } catch (err) {
         setError(err.response.data.error || err.response.data.exception);
       }
@@ -94,7 +91,6 @@ export function EditView({
 
     if (canManageView) {
       saving();
-      setLoading(true);
       setError(undefined);
 
       try {
