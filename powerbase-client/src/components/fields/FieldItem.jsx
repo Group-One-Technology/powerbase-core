@@ -23,7 +23,7 @@ export function FieldItem({ view, field, setFields }) {
   const { data: fieldTypes } = useFieldTypes();
 
   const [loading, setLoading] = useState(false);
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   const handleToggleVisibility = async () => {
     if (canManageView) {

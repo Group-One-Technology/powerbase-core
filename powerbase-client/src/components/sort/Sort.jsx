@@ -26,7 +26,7 @@ export function Sort() {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   const updateSort = async (value) => {
     if (canManageView) {

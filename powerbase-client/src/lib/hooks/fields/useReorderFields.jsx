@@ -13,10 +13,11 @@ export function useReorderFields({ fields, setFields }) {
   const { data: view } = useTableView();
   const { mutate: mutateViewFields } = useViewFields();
 
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
-    if (active.id !== over.id && baseUser?.can(PERMISSIONS.ManageView, view)) {
+    if (active.id !== over.id && canManageView) {
       saving();
 
       const oldIndex = fields.findIndex((item) => item.id === active.id);
