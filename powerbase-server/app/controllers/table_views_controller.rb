@@ -134,11 +134,6 @@ class TableViewsController < ApplicationController
       return
     end
 
-    if @table.collaborative_views.length < 2 && @view.collaborative?
-      render json: { error: "Cannot delete \"#{@view.name}\" view for table \"#{@table.name}\". There must be at least one collaborative view in this table." }, status: :unprocessable_entity
-      return
-    end
-
     @view.destroy
 
     views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
