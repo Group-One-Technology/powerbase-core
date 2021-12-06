@@ -23,6 +23,7 @@ export function useReorderFields({ fields, setFields }) {
   const { data: remoteFields, mutate: mutateViewFields } = useViewFields();
   const [dragging, setDragging] = useState();
 
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const sensors = useSensors({
     keyboard: false,
     mouse: {
@@ -39,7 +40,7 @@ export function useReorderFields({ fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can(PERMISSIONS.ManageView, view)) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && canManageView) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);
@@ -56,9 +57,10 @@ export function useReorderFields({ fields, setFields }) {
         saved();
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
-        mounted(() => setDragging(null));
       }
     }
+
+    mounted(() => setDragging(null));
   };
 
   return {

@@ -26,7 +26,7 @@ export function Fields({ table }) {
   const [fields, setFields] = useState(initialFields);
   const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
   const [loading, setLoading] = useState(false);
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
 
   useEffect(() => {

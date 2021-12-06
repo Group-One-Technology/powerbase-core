@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShareIcon } from '@heroicons/react/outline';
+import { LockClosedIcon } from '@heroicons/react/solid';
 
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
@@ -13,7 +14,7 @@ import { Sort } from '@components/sort/Sort';
 import { Search } from '@components/search/Search';
 
 export function TableViewsNav() {
-  const { table } = useCurrentView();
+  const { table, view } = useCurrentView();
   const { data: records } = useTableRecords();
   const { data: totalRecords } = useTableRecordsCount();
 
@@ -22,6 +23,12 @@ export function TableViewsNav() {
       <div className="relative flex  py-1.5 gap-x-2">
         <div className="flex-1 flex items-center gap-x-2">
           <ViewMenu />
+          {view.isLocked && (
+            <p className="text-xs text-gray-500 hidden lg:inline-flex">
+              <LockClosedIcon className="ml-1 h-4 w-4" />
+              Locked
+            </p>
+          )}
           {!!(records && totalRecords && table.isMigrated) && (
             <p className="text-xs hidden lg:inline">
               {records.length} loaded out of {totalRecords}

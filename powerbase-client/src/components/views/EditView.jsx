@@ -104,6 +104,13 @@ export function EditView({
         });
         mounted(() => setOpen(false));
         await viewsResponse.mutate();
+        await mutateView({
+          ...view,
+          name,
+          viewType: viewType.value,
+          permission: permission.value,
+          isLocked,
+        });
         saved(`Successfully updated "${view.name}" view.`);
       } catch (err) {
         setError(err.response.data.error || err.response.data.exception);
