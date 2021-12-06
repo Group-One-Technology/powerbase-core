@@ -22,6 +22,8 @@ class PowerbaseTable < ApplicationRecord
   has_many :referenced_connections, class_name: "BaseConnection", foreign_key: :referenced_table_id
   has_many :table_views, dependent: :destroy
   has_many :primary_keys, -> { where is_primary_key: true }, class_name: "PowerbaseField"
+  has_many :collaborative_views, -> { where permission: "collaborative" }, class_name: "TableView"
+  has_many :personal_views, -> { where permission: "personal" }, class_name: "TableView"
 
   after_create :add_migration_attributes
 
