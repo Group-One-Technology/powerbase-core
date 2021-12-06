@@ -75,6 +75,7 @@ export function EditView({
 
       try {
         await deleteTableView({ id: view.id });
+        mounted(() => setOpen(false));
         await viewsResponse.mutate();
         await mutateView();
         saved(`Successfully deleted "${deletedViewName}" view.`);
