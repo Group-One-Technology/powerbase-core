@@ -24,9 +24,9 @@ export function Fields({ table }) {
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({ table, fields, setFields });
+  const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function Fields({ table }) {
   }, [initialFields]);
 
   const handleHideAll = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
       setLoading(true);
 
@@ -89,7 +89,7 @@ export function Fields({ table }) {
                       {view.name}
                     </strong>
                   </h4>
-                  {canManageViews && (
+                  {canManageView && (
                     <div className="mx-2 flex justify-end">
                       <button
                         type="button"
@@ -104,7 +104,7 @@ export function Fields({ table }) {
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                     <SortableContext items={fields} strategy={verticalListSortingStrategy}>
                       <ul className="m-3 list-none flex flex-col">
-                        {fields.map((field) => <FieldItem key={field.id} table={table} field={field} setFields={setFields} />)}
+                        {fields.map((field) => <FieldItem key={field.id} view={view} field={field} setFields={setFields} />)}
                       </ul>
                     </SortableContext>
                   </DndContext>

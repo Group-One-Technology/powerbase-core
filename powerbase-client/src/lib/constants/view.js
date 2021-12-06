@@ -1,3 +1,20 @@
+import { UserGroupIcon, UserIcon } from '@heroicons/react/outline';
+
+export const VIEWS_PERMISSIONS = [
+  {
+    name: 'Collaborative View',
+    description: 'Editors and up can edit this view.',
+    value: 'collaborative',
+    icon: UserGroupIcon,
+  },
+  {
+    name: 'Personal View',
+    description: 'Only you and the owner can edit this view.',
+    value: 'personal',
+    icon: UserIcon,
+  },
+];
+
 export const VIEW_TYPES = [
   {
     name: 'Grid',

@@ -11,12 +11,11 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 
 /**
  * Handles the reordering logic of the fields/columns.
- * @param {number} tableId
  * @param {array} fields
  * @param {function} setFields
  * @returns { sensors, dragging, handleDragStart, handleDragMove, handleDragEnd }
  */
-export function useReorderFields({ table, fields, setFields }) {
+export function useReorderFields({ fields, setFields }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
@@ -40,7 +39,7 @@ export function useReorderFields({ table, fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can(PERMISSIONS.ManageViews, table)) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can(PERMISSIONS.ManageView, view)) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);

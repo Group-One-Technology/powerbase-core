@@ -1,12 +1,20 @@
 import React, { Fragment, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-import { Dialog, Transition, RadioGroup } from '@headlessui/react';
+import {
+  Dialog,
+  Transition,
+  RadioGroup,
+  Listbox,
+  Switch,
+} from '@headlessui/react';
+import { SelectorIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useBaseUser } from '@models/BaseUser';
+import { useSaveStatus } from '@models/SaveStatus';
 import { createTableView } from '@lib/api/views';
-import { VIEW_TYPES } from '@lib/constants/view';
+import { VIEWS_PERMISSIONS, VIEW_TYPES } from '@lib/constants/view';
 import { useMounted } from '@lib/hooks/useMounted';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
@@ -17,13 +25,17 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 export function AddView({ open, setOpen }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
+  const {
+    saving, saved, loading, setLoading,
+  } = useSaveStatus();
   const { table, viewsResponse } = useCurrentView();
   const [name, setName] = useState('');
+  const [permission, setPermission] = useState(VIEWS_PERMISSIONS[0]);
   const [viewType, setViewType] = useState(VIEW_TYPES[0]);
+  const [isLocked, setIsLocked] = useState(false);
 
   const canAddViews = baseUser?.can(PERMISSIONS.AddViews, table);
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
   const handleNameChange = (evt) => {
@@ -34,11 +46,19 @@ export function AddView({ open, setOpen }) {
     setViewType(value);
   };
 
+  const handleChangePermission = (value) => {
+    setPermission(value);
+  };
+
+  const handleToggleLocked = () => {
+    setIsLocked((value) => !value);
+  };
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
     if (canAddViews) {
-      setLoading(true);
+      saving();
       setError(undefined);
 
       try {
@@ -46,11 +66,12 @@ export function AddView({ open, setOpen }) {
           tableId: table.id,
           name,
           viewType: viewType.value,
+          permission: permission.value,
+          isLocked,
         });
-
-        await viewsResponse.mutate();
-
         mounted(() => setOpen(false));
+        await viewsResponse.mutate();
+        saved(`Successfully created "${name}" view.`);
       } catch (err) {
         setError(err.response.data.errors || err.response.data.error || err.response.data.exception);
       }
@@ -107,6 +128,45 @@ export function AddView({ open, setOpen }) {
                   placeholder="View name"
                   required
                 />
+                <div className="my-2">
+                  <label htmlFor="view_permission" className="sr-only">
+                    View Type
+                  </label>
+                  <Listbox id="view_permission" value={permission} onChange={handleChangePermission} disabled={loading}>
+                    <div className="relative w-auto">
+                      <Listbox.Button
+                        className="ml-auto relative flex justify-between items-center w-full text-sm px-4 py-2 border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
+                      >
+                        <span className="block text-left">
+                          <span className="flex font-medium text-gray-900">
+                            <permission.icon className="h-4 w-4 mr-1" />
+                            {permission.name}
+                          </span>
+                          <span className="block mt-0.5 text-xs text-gray-500">{permission.description}</span>
+                        </span>
+                        <SelectorIcon className="ml-auto w-5 h-5 text-gray-400" aria-hidden="true" />
+                      </Listbox.Button>
+                      <Listbox.Options className="absolute z-10 mt-1 w-full text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                        {VIEWS_PERMISSIONS.map((option) => (
+                          <Listbox.Option
+                            key={option.name}
+                            value={option}
+                            className={({ active, selected }) => cn(
+                              'cursor-default select-none relative py-1.5 px-4 text-left',
+                              (active || selected) ? 'bg-gray-100' : 'bg-white',
+                            )}
+                          >
+                            <div className="flex font-medium text-gray-900">
+                              <option.icon className="h-4 w-4 mr-1" />
+                              {option.name}
+                            </div>
+                            <p className="block mt-0.5 text-xs text-gray-500">{option.description}</p>
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </div>
+                  </Listbox>
+                </div>
                 <RadioGroup value={viewType} onChange={handleViewTypeChange} className="mt-2">
                   <RadioGroup.Label className="sr-only">
                     View Type
@@ -145,6 +205,35 @@ export function AddView({ open, setOpen }) {
                     ))}
                   </div>
                 </RadioGroup>
+                <label className="my-2 flex justify-between">
+                  <div className="cursor-pointer">
+                    <div className="text-gray-900 text-sm font-medium">
+                      Lock View
+                    </div>
+                    <p className="text-gray-500 text-xs">
+                      Lock view to avoid accidental edits for filter, sort, reorder fields, etc.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isLocked}
+                    onChange={handleToggleLocked}
+                    className={cn(
+                      'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                      isLocked ? 'bg-indigo-600' : 'bg-gray-200',
+                      loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                    )}
+                    disabled={loading}
+                  >
+                    <span className="sr-only">Lock View</span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+                        isLocked ? 'translate-x-3' : 'translate-x-0',
+                      )}
+                    />
+                  </Switch>
+                </label>
                 <div className="mt-4 flex gap-2">
                   <Button
                     type="button"

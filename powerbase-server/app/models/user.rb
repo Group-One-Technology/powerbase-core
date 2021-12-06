@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :powerbase_databases
   has_many :guests, -> { where is_accepted: true }
   has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"
+  has_many :views, class_name: "TableView"
 
   def name
     "#{self.first_name} #{self.last_name}"
@@ -64,17 +65,47 @@ class User < ApplicationRecord
       end
 
       database = field.powerbase_table.powerbase_database
+    elsif VIEW_PERMISSIONS.include?(permission)
+      resource_type = :view
+
+      if !resource.is_a?(ActiveRecord::Base)
+        view = TableView.find(resource)
+        raise NotFound.new("Could not view with id of #{resource}.") if !view && error
+        return false if !view
+      else
+        view = resource
+      end
+
+      database = view.powerbase_table.powerbase_database
     end
 
     return true if database.user_id == self.id
-    return false if permission === :change_guest_access || permission === :remove_guests
+
+    if permission === :change_guest_access || permission === :remove_guests
+      raise AccessDenied if error
+      return false
+    end
 
     guest = Guest.find(guest) if !database.is_a?(ActiveRecord::Base)
     guest = guest || Guest.find_by(user_id: self.id, powerbase_database_id: database.id)
     raise AccessDenied if !guest && error
     return false if !guest
 
-    return guest != nil if permission == :view_base
+    if permission == :view_base
+      access = guest != nil
+      raise AccessDenied if !access && error
+      return access
+    end
+
+    if resource_type == :view
+      access = if view.personal?
+          guest.user_id == view.creator_id
+        else
+          does_guest_have_access(guest.access, view.access)
+        end
+      raise AccessDenied if !access && error
+      return false
+    end
 
     if guest.access.to_sym != :custom
       permission_key = permission.to_s
@@ -89,9 +120,12 @@ class User < ApplicationRecord
           return true if allowed_roles.any? {|role| role == guest.access}
           allowed_guests = Array(database.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          raise AccessDenied if error
           return false
         elsif database_access != DATABASE_DEFAULT_PERMISSIONS[permission][:access]
-          return does_guest_have_access(guest.access, database_access)
+          access = does_guest_have_access(guest.access, database_access)
+          raise AccessDenied if !access && error
+          return access
         end
       when :table
         table_access = table.permissions[permission_key]["access"]
@@ -102,9 +136,12 @@ class User < ApplicationRecord
           return true if allowed_roles.any? {|role| role == guest.access}
           allowed_guests = Array(table.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          raise AccessDenied if error
           return false
         elsif table_access != TABLE_DEFAULT_PERMISSIONS[permission][:access]
-          return does_guest_have_access(guest.access, table_access)
+          access =  does_guest_have_access(guest.access, table_access)
+          raise AccessDenied if !access && error
+          return access
         end
       when :field
         field_access = field.permissions[permission_key]["access"]
@@ -115,9 +152,12 @@ class User < ApplicationRecord
           return true if allowed_roles.any? {|role| role == guest.access}
           allowed_guests = Array(field.permissions[permission_key]["allowed_guests"])
           return true if allowed_guests.any? {|guest_id| guest_id == guest.id}
+          raise AccessDenied if error
           return false
         elsif field_access != FIELD_DEFAULT_PERMISSIONS[permission][:access]
-          return does_guest_have_access(guest.access, field_access)
+          access = does_guest_have_access(guest.access, field_access)
+          raise AccessDenied if !access && error
+          return access
         end
       end
 
