@@ -65,6 +65,7 @@ class TableViewsController < ApplicationController
       view_type: safe_params[:view_type],
       order: @table.table_views.count,
       powerbase_table_id: @table.id,
+      creator_id: current_user.id,
       permission: safe_params[:permission],
       is_locked: safe_params[:is_locked],
     )

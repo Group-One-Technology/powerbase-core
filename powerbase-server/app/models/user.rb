@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :powerbase_databases
   has_many :guests, -> { where is_accepted: true }
   has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"
+  has_many :views, class_name: "TableView"
 
   def name
     "#{self.first_name} #{self.last_name}"

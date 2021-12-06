@@ -13,6 +13,7 @@ class PowerbaseTable < ApplicationRecord
   validates :order, presence: true
   serialize :logs, JSON
   serialize :permissions, JSON
+  alias_attribute :views, :table_views
 
   belongs_to :powerbase_database
   belongs_to :default_view, class_name: "TableView", optional: true
