@@ -146,33 +146,6 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
-  def construct_field(payload)
-    field = {
-      name: payload[:name],
-      description: payload[:description],
-      db_type: payload[:db_type],
-      default_value: payload[:default_value],
-      is_primary_key: payload[:is_primary_key],
-      is_nullable: payload[:is_nullable],
-      powerbase_table_id: payload[:powerbase_table_id],
-      powerbase_field_type_id: payload[:powerbase_field_type_id],
-      is_pii: payload[:is_pii],
-      alias: payload[:alias],
-      is_virtual: payload[:is_virtual],
-      allow_dirty_value: payload[:allow_dirty_value],
-      precision: payload[:precision],
-      options: payload[:options]
-    }
-
-    view_field = {
-      width: 300,
-      is_frozen: false,
-      is_hidden: false,
-      order: payload[:order],
-      table_view_id: payload[:view_id]
-    }
-    { field: field, view_field: view_field }
-  end
 
   private
     def set_table
@@ -207,6 +180,36 @@ class PowerbaseFieldsController < ApplicationController
       current_user.can?(:change_guest_access, @field.powerbase_table.powerbase_database)
     end
 
+  private
+    def construct_field(payload)
+      field = {
+        name: payload[:name],
+        description: payload[:description],
+        db_type: payload[:db_type],
+        default_value: payload[:default_value],
+        is_primary_key: payload[:is_primary_key],
+        is_nullable: payload[:is_nullable],
+        powerbase_table_id: payload[:powerbase_table_id],
+        powerbase_field_type_id: payload[:powerbase_field_type_id],
+        is_pii: payload[:is_pii],
+        alias: payload[:alias],
+        is_virtual: payload[:is_virtual],
+        allow_dirty_value: payload[:allow_dirty_value],
+        precision: payload[:precision],
+        options: payload[:options]
+      }
+  
+      view_field = {
+        width: 300,
+        is_frozen: false,
+        is_hidden: false,
+        order: payload[:order],
+        table_view_id: payload[:view_id]
+      }
+      { field: field, view_field: view_field }
+    end
+    
+  private
     def format_json(field)
       {
         id: field.id,

@@ -148,41 +148,6 @@ class PowerbaseTablesController < ApplicationController
 
   end
 
-
-
-
-  def standardize_table_params(params)
-    {
-      powerbase_database_id: params[:powerbase_database_id],
-      is_migrated: params[:is_migrated],
-      is_virtual: params[:is_virtual],
-      alias: params[:alias],
-      name: params[:name],
-      order: params[:order],
-      page_size: params[:page_size]
-    }
-  end
-
-  def standardize_field_params(params, table)
-   {
-      name: params[:name],
-      description: params[:description],
-      oid: params[:oid],
-      db_type: params[:db_type],
-      default_value: params[:default_value],
-      is_primary_key: params[:is_primary_key],
-      is_nullable: params[:is_nullable],
-      powerbase_table_id: table.id,
-      powerbase_field_type_id: params[:powerbase_field_type_id],
-      is_pii: params[:is_pii],
-      alias: params[:alias],
-      is_virtual: params[:is_virtual],
-      precision: params[:precision],
-      allow_dirty_value: params[:allow_dirty_value]
-    }
-  end
-
-
   # PUT /tables/:id/allowed_roles
   def update_allowed_roles
     table_updater = Tables::Updater.new(@table)
@@ -212,6 +177,7 @@ class PowerbaseTablesController < ApplicationController
       current_user.can?(:change_guest_access, @table.powerbase_database)
     end
 
+  private
     def format_json(table)
       {
         id: table.id,
@@ -228,6 +194,39 @@ class PowerbaseTablesController < ApplicationController
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
         is_virtual: table.is_virtual
+      }
+    end
+
+  private  
+    def standardize_table_params(params)
+      {
+        powerbase_database_id: params[:powerbase_database_id],
+        is_migrated: params[:is_migrated],
+        is_virtual: params[:is_virtual],
+        alias: params[:alias],
+        name: params[:name],
+        order: params[:order],
+        page_size: params[:page_size]
+      }
+    end
+  
+  private
+    def standardize_field_params(params, table)
+     {
+        name: params[:name],
+        description: params[:description],
+        oid: params[:oid],
+        db_type: params[:db_type],
+        default_value: params[:default_value],
+        is_primary_key: params[:is_primary_key],
+        is_nullable: params[:is_nullable],
+        powerbase_table_id: table.id,
+        powerbase_field_type_id: params[:powerbase_field_type_id],
+        is_pii: params[:is_pii],
+        alias: params[:alias],
+        is_virtual: params[:is_virtual],
+        precision: params[:precision],
+        allow_dirty_value: params[:allow_dirty_value]
       }
     end
 end
