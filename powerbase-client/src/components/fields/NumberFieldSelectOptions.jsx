@@ -7,10 +7,7 @@ import {
   PRECISION_POINTS,
 } from '@lib/constants';
 import PropTypes from 'prop-types';
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+import cn from 'classnames';
 
 export default function NumberFieldSelectOptions({
   isPrecision,
@@ -91,7 +88,7 @@ export default function NumberFieldSelectOptions({
             ).map((option) => (
               <Listbox.Option
                 key={isCurrency ? option.code : option.id}
-                className={({ active }) => classNames(
+                className={({ active }) => cn(
                   active ? 'text-white bg-indigo-600' : 'text-gray-900',
                   'cursor-default select-none relative py-2 pl-3 pr-9',
                 )}
@@ -100,7 +97,7 @@ export default function NumberFieldSelectOptions({
                 {({ selected, active }) => (
                   <>
                     <span
-                      className={classNames(
+                      className={cn(
                         selected ? 'font-semibold' : 'font-normal',
                         'block truncate',
                       )}
@@ -110,7 +107,7 @@ export default function NumberFieldSelectOptions({
 
                     {selected ? (
                       <span
-                        className={classNames(
+                        className={cn(
                           active ? 'text-white' : 'text-indigo-600',
                           'absolute inset-y-0 right-0 flex items-center pr-4',
                         )}

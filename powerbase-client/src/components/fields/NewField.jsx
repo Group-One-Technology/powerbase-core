@@ -184,17 +184,17 @@ export default function NewField({
     const payload = {
       name: toSnakeCase(fieldName.toLowerCase()),
       description: null,
-      db_type: computeDBType(),
-      default_value: '',
-      is_primary_key: false,
-      is_nullable: true,
-      powerbase_table_id: tableId,
-      powerbase_field_type_id: selected.id,
-      is_pii: false,
+      dbType: computeDBType(),
+      defaultValue: '',
+      isPrimaryKey: false,
+      isNullable: true,
+      powerbaseTableId: tableId,
+      powerbaseFieldTypeId: selected.id,
+      isPii: false,
       alias: fieldName,
-      view_id: view.id,
-      is_virtual: true,
-      allow_dirty_value: isChecked,
+      viewId: view.id,
+      isVirtual: true,
+      allowDirtyValue: isChecked,
       precision: numberPrecision ? numberPrecision.precision : null,
       order:
         Math.max.apply(
@@ -244,12 +244,11 @@ export default function NewField({
       {!selected && (
         <div className="mt-2">
           {supportedNewFieldTypes?.map((type) => (
-            <div
-              className="hover:bg-indigo-200 cursor-default flex p-2 mb-2 hover:rounded-md"
+            <button
+              className="flex items-center w-full p-2 mb-2 hover:rounded-md hover:bg-indigo-200 focus:bg-indigo-200 cursor-default "
               onClick={() => handleFieldTypeClick(type)}
               key={type.id}
-              role="button"
-              tabIndex={0}
+              type="button"
             >
               <div>
                 <FieldTypeIcon
@@ -261,7 +260,7 @@ export default function NewField({
               <p className="font-medium text-gray-900 cursor-default">
                 {type.name}
               </p>
-            </div>
+            </button>
           ))}
         </div>
       )}
