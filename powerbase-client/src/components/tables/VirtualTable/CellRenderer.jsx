@@ -8,15 +8,9 @@ import { formatCurrency } from '@lib/helpers/formatCurrency';
 import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
 import { isValidEmail } from '@lib/helpers/isValidEmail';
 import { isValidJSONString } from '@lib/helpers/isValidJSONString';
-import { securedApi } from '@lib/api';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
-import {
-  isValidInteger,
-  isValidNumberOrDecimal,
-  formatToDecimalPlaces,
-} from '@lib/helpers/numbers';
-import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
+import { useEditingCell } from '@lib/hooks/useEditingCell';
 import EditCell from './EditCell';
 
 function CellValue({
@@ -196,129 +190,8 @@ export function CellRenderer({
     setHoveredCell({});
   };
 
-  const handleMagicInputValidation = (val) => {
-    if (!val) return true;
-    const type = fieldType.dataType;
-    switch (type?.toLowerCase()) {
-      case 'string':
-      case 'text':
-        return true;
-      case 'number':
-        return field.precision
-          ? isValidNumberOrDecimal(val)
-          : isValidInteger(val);
-      default:
-        return true;
-    }
-  };
-
-  const onChange = (e) => {
-    const magicInputValue = e.target.value;
-    if (!handleMagicInputValidation(magicInputValue)) return;
-    setEditCellInput(magicInputValue);
-  };
-
-  const onClickOutsideEditingCell = async (e, calendarData = null) => {
-    const exitEditing = () => {
-      setCellToEdit({});
-      recordInputRef?.current?.blur();
-      setIsEditing(false);
-    };
-
-    if (!editCellInput?.length && fieldType.dataType !== 'date') {
-      exitEditing();
-      return;
-    }
-    const rowNo = rowIndex + 1;
-    const updatedFields = initializeFields(initialFields, connections, {
-      hidden: false,
-    })
-      .map((item) => ({
-        ...item,
-        value: records[rowNo - 1][item.name],
-      }))
-      .sort((x, y) => x.order > y.order);
-
-    const computedFields = updatedFields.filter(
-      (item) => !(item.isHidden || item.foreignKey?.columns.length > 1),
-    );
-
-    const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
-
-    /* The ids are composed in a double underscore and double hypen commas to avoid
-    incomplete splits down the line for field names that have underscore already */
-    // REFACTOR to use a new identifier-composition approach with unique unicode characters
-    const composedKeys = primaryKeys
-      .map((primaryKey) => {
-        const keyName = primaryKey.name.toLowerCase();
-        const keyValue = (`${primaryKey.value}`).toLocaleLowerCase();
-        return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
-      })
-      .join(isTurbo ? '-' : '---');
-
-    let hasPrecision = false;
-    let formattedNumber;
-    if (field.precision && fieldType.dataType === 'number') {
-      hasPrecision = true;
-      const sanitizedNumber = parseFloat(recordInputRef.current?.value);
-      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.precision);
-    }
-
-    const payload = {
-      primary_keys: composedKeys,
-      data: {
-        [field.name]: field.precision
-          ? formattedNumber
-          : recordInputRef.current?.value,
-      },
-    };
-
-    try {
-      const response = await securedApi.post(
-        `/tables/${field.tableId}/magic_value`,
-        payload,
-      );
-      const recordsToUse = updatedRecords || records;
-      if (response.statusText === 'OK') {
-        const mutatedRecords = recordsToUse?.map((recordObj) => {
-          const matches = [];
-          const extractedPrimaryKeys = isTurbo
-            ? primaryKeys
-            : composedKeys.split('---');
-          let objToUse = {};
-          extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
-            let sanitized;
-            if (!isTurbo) sanitized = extractedKey.split('___');
-            const pkName = isTurbo ? extractedKey.name : sanitized[0];
-            const pkValue = isTurbo ? extractedKey.value : sanitized[1];
-            matches.push(
-              `${getParameterCaseInsensitive(recordObj, pkName)}`
-                === `${pkValue}`,
-            );
-            if (pkIdx === extractedPrimaryKeys.length - 1) {
-              if (!matches.includes(false)) {
-                const newObj = { ...recordObj };
-                newObj[field.name] = hasPrecision && formattedNumber
-                  ? formattedNumber
-                  : calendarData || recordInputRef.current?.value;
-                objToUse = newObj;
-              } else {
-                objToUse = recordObj;
-              }
-            }
-          });
-          return objToUse;
-        });
-        setUpdatedRecords(mutatedRecords);
-        setIsNewRecord(false);
-        exitEditing();
-      }
-    } catch (error) {
-      exitEditing();
-      console.log(error);
-    }
-  };
-
+  const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord);
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit

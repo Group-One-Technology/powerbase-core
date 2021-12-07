@@ -1,5 +1,4 @@
-/* eslint-disable quotes */
-import * as React from "react";
+import * as React from 'react';
 
 export default function useConstant(fn) {
   const ref = React.useRef();
