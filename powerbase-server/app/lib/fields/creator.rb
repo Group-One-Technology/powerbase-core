@@ -25,6 +25,7 @@ class Fields::Creator
       powerbase_table_id: table.id,
       name: "Default",
       view_type: "grid",
+      creator_id: table.db.user_id,
       order: 0
     )
   end

@@ -17,6 +17,7 @@ class TableViews::Creator
     table_view.powerbase_table_id = table.id
     table_view.name = "Default"
     table_view.view_type = "grid"
+    table_view.creator_id = table.db.user_id
     table_view.order = 0
   end
 
