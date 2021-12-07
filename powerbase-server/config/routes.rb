@@ -44,7 +44,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update], shallow: true do
+    resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update, :create], shallow: true do
       resources :powerbase_fields, path: 'fields', as: 'fields', only: [:index, :create], shallow: true do
         member do
           put 'alias', as: 'update_field_alias'
