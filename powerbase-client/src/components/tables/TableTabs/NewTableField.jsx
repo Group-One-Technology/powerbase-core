@@ -64,15 +64,14 @@ export default function Field({
           />
         </div>
         {newFields.length > 1 && (
-          <div
-            className={`flex flex-col justify-center text-gray-500 
-        }`}
+          <button
+            onClick={() => removeField(id)}
+            className={`flex flex-col justify-center text-gray-500}`}
           >
             <TrashIcon
-              onClick={() => removeField(id)}
               className={`w-5 h-5  cursor-pointer`}
             />
-          </div>
+          </button>
         )}
       </div>
     </>

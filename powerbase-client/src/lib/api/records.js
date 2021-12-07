@@ -43,3 +43,29 @@ export async function getTableRecordsCount({ tableId, ...payload }) {
 
   return undefined;
 }
+
+export async function addMagicValue(payload) {
+  const response = await securedApi.post(
+    '/magic_values',
+    payload,
+  );
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function addMagicRecord(payload) {
+  const response = await securedApi.post(
+    '/magic_records',
+    payload,
+  );
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

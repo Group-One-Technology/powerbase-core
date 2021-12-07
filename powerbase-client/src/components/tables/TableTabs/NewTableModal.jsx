@@ -5,10 +5,11 @@ import { PlusCircleIcon } from "@heroicons/react/outline";
 import NewTableField from "./NewTableField";
 import cn from "classnames";
 import TableNameInput from "./TableNameInput";
-import { securedApi } from "@lib/api";
 import { useCurrentView } from "@models/views/CurrentTableView";
 import Upload from "./UploadTable";
 import { toSnakeCase, camelToSnakeCase, camelize } from "@lib/helpers/text/textTypeFormatters";
+import { addVirtualTable } from "@lib/api/tables";
+import { addMagicValue, addMagicRecord } from '@lib/api/records'
 
 const initial = [
   {
@@ -18,7 +19,6 @@ const initial = [
   },
 ];
 
-const types = [];
 
 export default function NewTableModal({
   open,
@@ -82,12 +82,11 @@ export default function NewTableModal({
         };
       };
 
-      const payload = {
+
+      const data = await addVirtualTable({
         table: standardizeTable(),
         fields: standardizeFields(),
-      };
-
-      const data = await addVirtualTable({payload});
+      });
       if (data) {
         setOpen(false);
         mutateTables();
@@ -141,47 +140,39 @@ export default function NewTableModal({
         fields: standardizeFields(),
       };
 
-      const data = await await addVirtualTable({payload});
+      const { data } = await addVirtualTable({payload});
       if (data) {
-        const newTable = response.data.table;
-        const newFields = response.data.fields;
+        const newTable = data.table;
+        const newFields = data.fields;
         csvArray.forEach(async (record, idx) => {
-          let newRecordId;
-          const recordParams = {
-            powerbaseTableId: table.id,
-            powerbaseDatabaseId: table.databaseId,
-            powerbaseRecordOrder: idx,
-          };
-          // TODO - REFACTOR to use api helper and camelcase prop names
-          const newRecordResponse = await securedApi.post(
-            `/magic_records`,
-            recordParams
+          const { id: newRecordId } = await addMagicRecord({
+              powerbaseTableId: table.id,
+              powerbaseDatabaseId: table.databaseId,
+              powerbaseRecordOrder: idx,
+            }
           );
-          newRecordId = newRecordResponse.data?.id;
           if (newRecordId) {
             const recordKeys = Object.getOwnPropertyNames(record);
-            recordKeys.forEach(async (key, keyIdx) => {
-              const standardizedKey = key.replace(/^"(.*)"$/, "$1");
+            recordKeys.forEach(async (recordKey, keyIdx) => {
+              const standardizedKey = recordKey.replace(/^"(.*)"$/, "$1");
               const camelizedKey = camelize(standardizedKey);
-              const payload = {
+              const magicValueResponseData = await addMagicValue({
                 fieldName: camelToSnakeCase(camelizedKey),
                 fieldType_id: 2,
                 tableId: newTable.id,
                 fieldId: newFields[camelizedKey],
-                textValue: record[key],
+                textValue: record[recordKey],
                 recordId: null,
                 magicRecordId: newRecordId,
                 keyType: "text_value",
                 tableTypeId: "magic_record_id",
                 hasPrecision: false,
-              };
-              const response = await securedApi.post(`/magic_values`, payload);
-              if (response.statusText === "OK") {
+              });
+              if (magicValueResponseData) {
                 if (
                   idx + 1 === csvArray.length &&
                   keyIdx + 1 === recordKeys.length
                 ) {
-                  // mutateTableRecords();
                   mutateTables();
                   handleTableChange({ table: newTable });
                 }
