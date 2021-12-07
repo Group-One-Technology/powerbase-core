@@ -11,16 +11,20 @@ class TableViewsController < ApplicationController
 
   schema(:update) do
     required(:id).value(:integer)
+    optional(:name)
+    optional(:view_type)
+    required(:permission)
+    required(:is_locked)
     optional(:filters)
     optional(:sort)
-    optional(:view_type)
-    optional(:name)
   end
 
   schema(:create) do
     required(:table_id)
     required(:name)
     required(:view_type)
+    required(:permission)
+    required(:is_locked)
   end
 
   schema(:update_order) do
@@ -61,6 +65,9 @@ class TableViewsController < ApplicationController
       view_type: safe_params[:view_type],
       order: @table.table_views.count,
       powerbase_table_id: @table.id,
+      creator_id: current_user.id,
+      permission: safe_params[:permission],
+      is_locked: safe_params[:is_locked],
     )
 
     if @view.save
@@ -91,11 +98,18 @@ class TableViewsController < ApplicationController
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
     current_user.can?(:manage_view, @view)
 
-    if safe_params[:name]
+    if safe_params[:name] != nil
       @existing_view = TableView.find_by(name: safe_params[:name], powerbase_table_id: @view.powerbase_table_id)
 
       if @existing_view && @existing_view.id != @view.id
         render json: { error: "View with name of \"#{safe_params[:name]}\" already exists in this table." }, status: :unprocessable_entity
+        return
+      end
+    end
+
+    if safe_params[:filters] != nil || safe_params[:sort] != nil
+      if @view.is_locked
+        render json: { error: "Unlock '#{@view.name}' view in order to update it." }, status: :unprocessable_entity
         return
       end
     end
@@ -112,16 +126,17 @@ class TableViewsController < ApplicationController
   def destroy
     @view = TableView.find(safe_params[:id])
     raise NotFound.new("Could not find view with id of #{safe_params[:id]}") if !@view
+    @table = @view.powerbase_table
     current_user.can?(:manage_view, @view)
 
-    if @view.powerbase_table.default_view_id === @view.id
+    if @table.default_view_id === @view.id
       render json: { error: "Cannot delete the view \"#{@view.name}\" for table \"#{@table.name}\". To delete this view, please change the current view first." }, status: :unprocessable_entity
       return
     end
 
     @view.destroy
 
-    views = TableView.where(powerbase_table_id: @view.powerbase_table_id).order(order: :asc)
+    views = TableView.where(powerbase_table_id: @table.id).order(order: :asc)
     views.each_with_index do |view, index|
       view = TableView.find(view.id)
       view.update(order: index)
@@ -132,7 +147,7 @@ class TableViewsController < ApplicationController
   def update_order
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
-    current_user.can?(:manage_table, @table)
+    current_user.can?(:manage_views, @table)
 
     safe_params[:views].each_with_index do |view_id, index|
       view = TableView.find(view_id)
@@ -149,9 +164,13 @@ class TableViewsController < ApplicationController
         name: view.name,
         table_id: view.powerbase_table_id,
         view_type: view.view_type,
+        permission: view.permission,
         filters: view.filters,
         sort: view.sort,
         order: view.order,
+        access: view.access,
+        creator_id: view.creator_id,
+        is_locked: view.is_locked,
         created_at: view.created_at,
         updated_at: view.updated_at,
       }

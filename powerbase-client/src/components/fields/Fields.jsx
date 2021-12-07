@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -27,18 +28,14 @@ export function Fields({ table }) {
   const { data: initialFields, mutate: mutateViewFields } = useViewFields();
 
   const [fields, setFields] = useState(initialFields);
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageView, table);
+  const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
+  const [loading, setLoading] = useState(false);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   /* Setting this as a way of checking for tables with unique row identifiers
   as it is messier to maintain witout that for now */
   const containsPrimaryKey = initialFields?.some((field) => field.isPrimaryKey);
   const [isCreatingField, setIsCreatingField] = useState(false);
-  const { sensors, handleReorderFields } = useReorderFields({
-    table,
-    fields,
-    setFields,
-  });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setFields(initialFields);
@@ -49,7 +46,7 @@ export function Fields({ table }) {
   };
 
   const handleHideAll = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
       setLoading(true);
 
@@ -105,6 +102,7 @@ export function Fields({ table }) {
               {({ close }) => (
                 <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                   {!isCreatingField && (
+                  <>
                     <div className="text-sm text-gray-900">
                       <h4 className="flex mx-3 mt-3 items-center">
                         Fields for&nbsp;
@@ -113,17 +111,17 @@ export function Fields({ table }) {
                           {view.name}
                         </strong>
                       </h4>
-                      {canManageViews && (
-                        <div className="mx-2 flex justify-end">
-                          <button
-                            type="button"
-                            className="p-1 text-indigo-500"
-                            onClick={handleHideAll}
-                            disabled={loading}
-                          >
-                            Hide all
-                          </button>
-                        </div>
+                      {canManageView && (
+                      <div className="mx-2 flex justify-end">
+                        <button
+                          type="button"
+                          className="p-1 text-indigo-500"
+                          onClick={handleHideAll}
+                          disabled={loading}
+                        >
+                          Hide all
+                        </button>
+                      </div>
                       )}
                       <DndContext
                         sensors={sensors}
@@ -147,28 +145,46 @@ export function Fields({ table }) {
                         </SortableContext>
                       </DndContext>
                       {canAddFields && containsPrimaryKey && (
-                        <button
-                          type="button"
-                          className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                          onClick={handleAddNewField}
-                        >
-                          <PlusIcon className="mr-1 h-4 w-4" />
-                          Add a field
-                        </button>
+                      <button
+                        type="button"
+                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                        onClick={handleAddNewField}
+                      >
+                        <PlusIcon className="mr-1 h-4 w-4" />
+                        Add a field
+                      </button>
                       )}
                     </div>
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
+                      <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+                        <ul className="m-3 list-none flex flex-col">
+                          {fields.map((field) => <FieldItem key={field.id} view={view} field={field} setFields={setFields} />)}
+                        </ul>
+                      </SortableContext>
+                    </DndContext>
+                    {canAddFields && (
+                    <button
+                      type="button"
+                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
+                    >
+                      <PlusIcon className="mr-1 h-4 w-4" />
+                      Add a field
+                    </button>
+                    )}
+
+                  </>
                   )}
                   {isCreatingField && (
-                    <div className="text-sm text-gray-900">
-                      <NewField
-                        tableId={table.id}
-                        fields={fields}
-                        view={view}
-                        setIsCreatingField={setIsCreatingField}
-                        close={close}
-                        setHasAddedNewField={setHasAddedNewField}
-                      />
-                    </div>
+                  <div className="text-sm text-gray-900">
+                    <NewField
+                      tableId={table.id}
+                      fields={fields}
+                      view={view}
+                      setIsCreatingField={setIsCreatingField}
+                      close={close}
+                      setHasAddedNewField={setHasAddedNewField}
+                    />
+                  </div>
                   )}
                 </div>
               )}

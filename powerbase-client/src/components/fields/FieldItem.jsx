@@ -15,7 +15,7 @@ import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
-export function FieldItem({ table, field, setFields }) {
+export function FieldItem({ view, field, setFields }) {
   const { saving, saved, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: fields, mutate: mutateViewFields } = useViewFields();
@@ -23,10 +23,10 @@ export function FieldItem({ table, field, setFields }) {
   const { data: fieldTypes } = useFieldTypes();
 
   const [loading, setLoading] = useState(false);
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   const handleToggleVisibility = async () => {
-    if (canManageViews) {
+    if (canManageView) {
       saving();
       setLoading(true);
 
@@ -63,7 +63,7 @@ export function FieldItem({ table, field, setFields }) {
       className="flex gap-2 items-center"
       handle={{
         position: 'left',
-        component: canManageViews
+        component: canManageView
           ? (
             <button
               type="button"
@@ -88,9 +88,9 @@ export function FieldItem({ table, field, setFields }) {
           className={cn(
             'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             !field.isHidden ? 'bg-indigo-600' : 'bg-gray-200',
-            (loading || !canManageViews) ? 'cursor-not-allowed' : 'cursor-pointer',
+            (loading || !canManageView) ? 'cursor-not-allowed' : 'cursor-pointer',
           )}
-          disabled={loading || !canManageViews}
+          disabled={loading || !canManageView}
         >
           <span className="sr-only">Show Field</span>
           <span
@@ -107,7 +107,7 @@ export function FieldItem({ table, field, setFields }) {
 }
 
 FieldItem.propTypes = {
-  table: PropTypes.object.isRequired,
+  view: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
   setFields: PropTypes.func.isRequired,
 };

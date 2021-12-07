@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_05_191217) do
+ActiveRecord::Schema.define(version: 2021_12_06_042746) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -188,6 +188,10 @@ ActiveRecord::Schema.define(version: 2021_12_05_191217) do
     t.text "filters", default: "{}"
     t.text "sort", default: "{}"
     t.integer "order", null: false
+    t.string "permission", default: "collaborative"
+    t.boolean "is_locked", default: false
+    t.bigint "creator_id", null: false
+    t.index ["creator_id"], name: "index_table_views_on_creator_id"
     t.index ["powerbase_table_id"], name: "index_table_views_on_powerbase_table_id"
   end
 
@@ -235,6 +239,7 @@ ActiveRecord::Schema.define(version: 2021_12_05_191217) do
   add_foreign_key "powerbase_tables", "powerbase_databases"
   add_foreign_key "powerbase_tables", "table_views", column: "default_view_id"
   add_foreign_key "table_views", "powerbase_tables"
+  add_foreign_key "table_views", "users", column: "creator_id"
   add_foreign_key "view_field_options", "powerbase_fields"
   add_foreign_key "view_field_options", "table_views"
 end

@@ -1,14 +1,21 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-import { Dialog, Transition, RadioGroup } from '@headlessui/react';
-import { TrashIcon } from '@heroicons/react/outline';
+import {
+  Dialog,
+  Transition,
+  RadioGroup,
+  Listbox,
+  Switch,
+} from '@headlessui/react';
+import { TrashIcon, SelectorIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTableView } from '@models/TableView';
 import { useBaseUser } from '@models/BaseUser';
+import { useSaveStatus } from '@models/SaveStatus';
 import { deleteTableView, updateTableView } from '@lib/api/views';
-import { VIEW_TYPES } from '@lib/constants/view';
+import { VIEW_TYPES, VIEWS_PERMISSIONS } from '@lib/constants/view';
 import { useMounted } from '@lib/hooks/useMounted';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
@@ -23,14 +30,17 @@ export function EditView({
 }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { table, viewsResponse } = useCurrentView();
+  const {
+    saving, saved, loading, setLoading,
+  } = useSaveStatus();
+  const { viewsResponse } = useCurrentView();
   const { mutate: mutateView } = useTableView();
   const [name, setName] = useState(view.name);
+  const [permission, setPermission] = useState(VIEWS_PERMISSIONS.find((item) => item.value === view.permission));
   const [viewType, setViewType] = useState(VIEW_TYPES.find((item) => item.value === view.viewType));
+  const [isLocked, setIsLocked] = useState(view.isLocked);
 
-  const canManageViews = baseUser?.can(PERMISSIONS.ManageViews, table);
-
-  const [loading, setLoading] = useState(false);
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const [error, setError] = useState();
 
   useEffect(() => {
@@ -48,17 +58,27 @@ export function EditView({
     setViewType(value);
   };
 
+  const handleChangePermission = (value) => {
+    setPermission(value);
+  };
+
+  const handleToggleLocked = () => {
+    setIsLocked((value) => !value);
+  };
+
   const handleDelete = async () => {
-    if (canManageViews) {
-      setLoading(true);
+    if (canManageView) {
+      saving();
       setError(undefined);
+
+      const deletedViewName = view.name;
 
       try {
         await deleteTableView({ id: view.id });
+        mounted(() => setOpen(false));
         await viewsResponse.mutate();
         await mutateView();
-
-        mounted(() => setOpen(false));
+        saved(`Successfully deleted "${deletedViewName}" view.`);
       } catch (err) {
         setError(err.response.data.error || err.response.data.exception);
       }
@@ -70,8 +90,8 @@ export function EditView({
   const handleSubmit = async (evt) => {
     evt.preventDefault();
 
-    if (canManageViews) {
-      setLoading(true);
+    if (canManageView) {
+      saving();
       setError(undefined);
 
       try {
@@ -79,11 +99,19 @@ export function EditView({
           id: view.id,
           name,
           viewType: viewType.value,
+          permission: permission.value,
+          isLocked,
         });
-
-        await viewsResponse.mutate();
-
         mounted(() => setOpen(false));
+        await viewsResponse.mutate();
+        await mutateView({
+          ...view,
+          name,
+          viewType: viewType.value,
+          permission: permission.value,
+          isLocked,
+        });
+        saved(`Successfully updated "${view.name}" view.`);
       } catch (err) {
         setError(err.response.data.error || err.response.data.exception);
       }
@@ -140,6 +168,45 @@ export function EditView({
                   placeholder="View name"
                   required
                 />
+                <div className="my-2">
+                  <label htmlFor="view_permission" className="sr-only">
+                    View Type
+                  </label>
+                  <Listbox id="view_permission" value={permission} onChange={handleChangePermission} disabled={loading}>
+                    <div className="relative w-auto">
+                      <Listbox.Button
+                        className="ml-auto relative flex justify-between items-center w-full text-sm px-4 py-2 border border-gray-300 bg-white rounded-md cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 sm:text-sm"
+                      >
+                        <span className="block text-left">
+                          <span className="flex font-medium text-gray-900">
+                            <permission.icon className="h-4 w-4 mr-1" />
+                            {permission.name}
+                          </span>
+                          <span className="block mt-0.5 text-xs text-gray-500">{permission.description}</span>
+                        </span>
+                        <SelectorIcon className="ml-auto w-5 h-5 text-gray-400" aria-hidden="true" />
+                      </Listbox.Button>
+                      <Listbox.Options className="absolute z-10 mt-1 w-full text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                        {VIEWS_PERMISSIONS.map((option) => (
+                          <Listbox.Option
+                            key={option.name}
+                            value={option}
+                            className={({ active, selected }) => cn(
+                              'cursor-default select-none relative py-1.5 px-4 text-left',
+                              (active || selected) ? 'bg-gray-100' : 'bg-white',
+                            )}
+                          >
+                            <div className="flex font-medium text-gray-900">
+                              <option.icon className="h-4 w-4 mr-1" />
+                              {option.name}
+                            </div>
+                            <p className="block mt-0.5 text-xs text-gray-500">{option.description}</p>
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </div>
+                  </Listbox>
+                </div>
                 <RadioGroup value={viewType} onChange={handleViewTypeChange} className="mt-2">
                   <RadioGroup.Label className="sr-only">
                     View Type
@@ -178,6 +245,35 @@ export function EditView({
                     ))}
                   </div>
                 </RadioGroup>
+                <label className="my-2 flex justify-between">
+                  <div className="cursor-pointer">
+                    <div className="text-gray-900 text-sm font-medium">
+                      Lock View
+                    </div>
+                    <p className="text-gray-500 text-xs">
+                      Lock view to avoid accidental edits for filter, sort, reorder fields, etc.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isLocked}
+                    onChange={handleToggleLocked}
+                    className={cn(
+                      'relative inline-flex flex-shrink-0 h-4 w-7 border-2 border-transparent rounded-full transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                      isLocked ? 'bg-indigo-600' : 'bg-gray-200',
+                      loading ? 'cursor-not-allowed' : 'cursor-pointer',
+                    )}
+                    disabled={loading}
+                  >
+                    <span className="sr-only">Lock View</span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'pointer-events-none inline-block h-3 w-3 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+                        isLocked ? 'translate-x-3' : 'translate-x-0',
+                      )}
+                    />
+                  </Switch>
+                </label>
                 <div className="mt-4 flex gap-2">
                   <Button
                     type="button"

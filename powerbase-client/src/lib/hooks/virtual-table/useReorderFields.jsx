@@ -11,12 +11,11 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 
 /**
  * Handles the reordering logic of the fields/columns.
- * @param {number} tableId
  * @param {array} fields
  * @param {function} setFields
  * @returns { sensors, dragging, handleDragStart, handleDragMove, handleDragEnd }
  */
-export function useReorderFields({ table, fields, setFields }) {
+export function useReorderFields({ fields, setFields }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
@@ -24,6 +23,7 @@ export function useReorderFields({ table, fields, setFields }) {
   const { data: remoteFields, mutate: mutateViewFields } = useViewFields();
   const [dragging, setDragging] = useState();
 
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const sensors = useSensors({
     keyboard: false,
     mouse: {
@@ -40,7 +40,7 @@ export function useReorderFields({ table, fields, setFields }) {
     const oldIndex = active.data.current.index;
     const newIndex = over.data.current.index;
 
-    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && baseUser?.can(PERMISSIONS.ManageViews, table)) {
+    if (oldIndex !== newIndex && newIndex !== oldIndex - 1 && canManageView) {
       saving();
 
       const hiddenFields = remoteFields.filter((item) => item.isHidden);
@@ -57,9 +57,10 @@ export function useReorderFields({ table, fields, setFields }) {
         saved();
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
-        mounted(() => setDragging(null));
       }
     }
+
+    mounted(() => setDragging(null));
   };
 
   return {

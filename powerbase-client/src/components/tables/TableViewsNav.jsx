@@ -1,20 +1,20 @@
-/* eslint-disable  */
-import React from "react";
-import { ShareIcon } from "@heroicons/react/outline";
+import React from 'react';
+import { ShareIcon } from '@heroicons/react/outline';
+import { LockClosedIcon } from '@heroicons/react/solid';
 
-import { useTableRecords } from "@models/TableRecords";
-import { useTableRecordsCount } from "@models/TableRecordsCount";
-import { useCurrentView } from "@models/views/CurrentTableView";
+import { useTableRecords } from '@models/TableRecords';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useCurrentView } from '@models/views/CurrentTableView';
 
-import { Badge } from "@components/ui/Badge";
-import { ViewMenu } from "@components/views/ViewMenu";
-import { Fields } from "@components/fields/Fields";
-import { Filter } from "@components/filter/Filter";
-import { Sort } from "@components/sort/Sort";
-import { Search } from "@components/search/Search";
+import { Badge } from '@components/ui/Badge';
+import { ViewMenu } from '@components/views/ViewMenu';
+import { Fields } from '@components/fields/Fields';
+import { Filter } from '@components/filter/Filter';
+import { Sort } from '@components/sort/Sort';
+import { Search } from '@components/search/Search';
 
 export function TableViewsNav() {
-  const { table } = useCurrentView();
+  const { table, view } = useCurrentView();
   const { data: records } = useTableRecords();
   const { data: totalRecords } = useTableRecordsCount();
 
@@ -23,6 +23,12 @@ export function TableViewsNav() {
       <div className="relative flex  py-1.5 gap-x-2">
         <div className="flex-1 flex items-center gap-x-2">
           <ViewMenu />
+          {view.isLocked && (
+            <p className="text-xs text-gray-500 hidden lg:inline-flex">
+              <LockClosedIcon className="ml-1 h-4 w-4" />
+              Locked
+            </p>
+          )}
           {!!(records && totalRecords && table.isMigrated) && (
             <p className="text-xs hidden lg:inline">
               {records.length} loaded out of {totalRecords}
@@ -36,8 +42,8 @@ export function TableViewsNav() {
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
           <Fields table={table} />
-          <Filter table={table} />
-          <Sort table={table} />
+          <Filter />
+          <Sort />
           <button
             type="button"
             className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -45,7 +51,7 @@ export function TableViewsNav() {
             <ShareIcon className="block h-4 w-4 mr-1" />
             Share View
           </button>
-          {/* TODO - Reimplement this for future field writes to remote db feature*/}
+          {/* TODO - Reimplement this for future field writes to remote db feature */}
           {/* <Sync fields={fields} table={table} /> */}
         </div>
         <div className="flex-1 flex items-center justify-end">

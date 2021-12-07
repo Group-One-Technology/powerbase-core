@@ -165,7 +165,7 @@ export const GridHeader = React.forwardRef(({
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-  } = useReorderFields({ table, fields, setFields });
+  } = useReorderFields({ fields, setFields });
   const { options, setOption } = useFieldOptions({ fields });
 
   return (
