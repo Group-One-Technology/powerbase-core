@@ -1,5 +1,5 @@
 class TableViewsController < ApplicationController
-  # before_action :authorize_access_request!
+  before_action :authorize_access_request!
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -30,7 +30,7 @@ class TableViewsController < ApplicationController
 
   # GET /tables/:table_id/views
   def index
-    # current_user.can?(:view_table, safe_params[:table_id])
+    current_user.can?(:view_table, safe_params[:table_id])
     @views = TableView.where(powerbase_table_id: safe_params[:table_id]).order(order: :asc)
     render json: @views.map {|item| format_json(item)}
   end

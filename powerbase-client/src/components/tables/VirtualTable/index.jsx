@@ -11,7 +11,6 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
 import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
-import { useBase } from '@models/Base';
 import { TableRenderer } from './TableRenderer';
 import 'react-virtualized/styles.css';
 
@@ -20,7 +19,6 @@ export function VirtualTable({ height, table }) {
   const { data: connections } = useTableConnections();
   const { data: records, highlightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
-  const { data: base } = useBase();
   const { dataListener } = useDataListener();
 
   useEffect(() => {

@@ -249,13 +249,12 @@ module Powerbase
 
         result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
       else
-        remote_records = remote_db() {|db|
+        remote_db() {|db|
           db.from(@table_name)
             .yield_self(&query.to_sequel)
             .paginate(page, limit)
             .all
         }
-        remote_records
       end
     end
 
