@@ -5,7 +5,7 @@ import cn from 'classnames';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { toSnakeCase, camelToSnakeCase, camelize } from '@lib/helpers/text/textTypeFormatters';
 import { addVirtualTable } from '@lib/api/tables';
-import { addMagicValue, addMagicRecord } from '@lib/api/records';
+import { initializeMagicValueForVirtualTable, addMagicRecord } from '@lib/api/records';
 import PropTypes from 'prop-types';
 import Upload from './UploadTable';
 import TableNameInput from './TableNameInput';
@@ -147,7 +147,7 @@ export default function NewTableModal({
             recordKeys.forEach(async (recordKey, keyIdx) => {
               const standardizedKey = recordKey.replace(/^"(.*)"$/, '$1');
               const camelizedKey = camelize(standardizedKey);
-              const magicValueResponseData = await addMagicValue({
+              const magicValueResponseData = await initializeMagicValueForVirtualTable({
                 fieldName: camelToSnakeCase(camelizedKey),
                 fieldType_id: 2,
                 tableId: newTable.id,

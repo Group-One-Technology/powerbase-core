@@ -1,6 +1,6 @@
 import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
-import { securedApi } from '@lib/api';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
+import { addOrUpdateMagicValue } from '@lib/api/records';
 
 export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
@@ -74,22 +74,19 @@ export function useEditingCell(
       formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options.precision);
     }
 
-    const payload = {
-      primary_keys: composedKeys,
-      data: {
-        [field.name]: field.options.precision
-          ? formattedNumber
-          : recordInputRef.current?.value,
-      },
-    };
-
     try {
-      const response = await securedApi.post(
-        `/tables/${field.tableId}/magic_value`,
-        payload,
-      );
+      const { data } = await addOrUpdateMagicValue({
+        tableId: field.tableId,
+        primary_keys: composedKeys,
+        data: {
+          [field.name]: field.options.precision
+            ? formattedNumber
+            : recordInputRef.current?.value,
+        },
+      });
+
       const recordsToUse = updatedRecords || records;
-      if (response.statusText === 'OK') {
+      if (data) {
         const mutatedRecords = recordsToUse?.map((recordObj) => {
           const matches = [];
           const extractedPrimaryKeys = isTurbo

@@ -44,7 +44,7 @@ export async function getTableRecordsCount({ tableId, ...payload }) {
   return undefined;
 }
 
-export async function addMagicValue(payload) {
+export async function initializeMagicValueForVirtualTable(payload) {
   const response = await securedApi.post(
     '/magic_values',
     payload,
@@ -67,5 +67,17 @@ export async function addMagicRecord(payload) {
     return response.data;
   }
 
+  return undefined;
+}
+
+export async function addOrUpdateMagicValue({ tableId, ...payload }) {
+  const response = await securedApi.post(
+    `/tables/${tableId}/magic_value`,
+    payload,
+  );
+
+  if (response.statusText === 'OK') {
+    return response;
+  }
   return undefined;
 }

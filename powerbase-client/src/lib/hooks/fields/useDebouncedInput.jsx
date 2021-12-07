@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { searchFieldByName } from '@lib/api/fields';
-import debounce from '@lib/helpers/promises/debounce';
+import debounce from 'lodash.debounce';
 import { useAsync } from 'react-async-hook';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import useConstant from '../useConstant';
@@ -16,6 +16,7 @@ export const useDebouncedInput = (setNameExists, id) => {
       return;
     } catch (error) {
       console.log(error);
+      setNameExists(false);
     }
   };
 
