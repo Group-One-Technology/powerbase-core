@@ -54,6 +54,8 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
   let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
   let mergedData = parsedData;
 
+
+ // ! TODO - Refactor to handle date aggregation on the backend
   if (!isTurbo) {
     const magicValuesResponse = useSWR(
       `/tables/${id}/magic_values`,

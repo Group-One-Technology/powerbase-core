@@ -10,7 +10,10 @@ import PropTypes from "prop-types";
 import { useAuthUser } from "@models/AuthUser";
 import { logout } from "@lib/api/auth";
 
-const USER_NAVIGATION = [];
+const USER_NAVIGATION = [
+  { name: 'Profile', href: '/profile' },
+  { name: 'Settings', href: '/settings' },
+];
 
 export function UserMenu({ list, colored }) {
   const history = useHistory();

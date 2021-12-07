@@ -194,11 +194,9 @@ export default function NewField({
         />
       </div>
 
-      <div>
-        <p className={cn(!nameExists && 'mb-4', 'text-red-500')}>
-          {nameExists && 'Field name already exists for this table.'}
-        </p>
-      </div>
+      <p className={cn(!nameExists && 'mb-4', 'text-red-500')}>
+        {nameExists && 'Field name already exists for this table.'}
+      </p>
 
       {!selected && (
         <div className="mt-2">
@@ -244,7 +242,7 @@ export default function NewField({
         >
           Cancel
         </button>
-        {/* REFACTOR eventually to use more complex loading states */}
+        {/* ! TODO - REFACTOR eventually to use more complex loading states */}
         {selected && (
           <Button
             type="submit"
