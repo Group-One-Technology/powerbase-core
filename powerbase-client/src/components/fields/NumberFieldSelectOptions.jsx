@@ -127,7 +127,7 @@ export default function NumberFieldSelectOptions({
 }
 
 NumberFieldSelectOptions.propTypes = {
-  isPrecision: PropTypes.bool.isRequired,
+  isPrecision: PropTypes.bool,
   setNumberPrecision: PropTypes.func,
   setNumberSubtype: PropTypes.func,
   isPercent: PropTypes.bool,

@@ -120,16 +120,16 @@ export default function NewTableModal({
             name: toSnakeCase(fieldName.toLowerCase()),
             description: null,
             oid: 1043,
-            db_type: "character varying",
-            default_value: "",
-            is_primary_key: false,
-            is_nullable: false,
-            powerbase_field_type_id: 2,
-            is_pii: false,
+            dbType: "character varying",
+            defaultValue: "",
+            isPrimaryKey: false,
+            isNullable: false,
+            powerbaseFieldTypeId: 2,
+            isPii: false,
             alias: fieldName,
             order: idx,
-            is_virtual: true,
-            allow_dirty_value: true,
+            isVirtual: true,
+            allowDirtyValue: true,
             precision: null,
           };
         });
@@ -148,11 +148,11 @@ export default function NewTableModal({
         csvArray.forEach(async (record, idx) => {
           let newRecordId;
           const recordParams = {
-            powerbase_table_id: table.id,
-            powerbase_database_id: table.databaseId,
-            powerbase_record_order: idx,
+            powerbaseTableId: table.id,
+            powerbaseDatabaseId: table.databaseId,
+            powerbaseRecordOrder: idx,
           };
-          // REFACTOR - to use api helper and camelcase prop names
+          // TODO - REFACTOR to use api helper and camelcase prop names
           const newRecordResponse = await securedApi.post(
             `/magic_records`,
             recordParams
@@ -164,16 +164,16 @@ export default function NewTableModal({
               const standardizedKey = key.replace(/^"(.*)"$/, "$1");
               const camelizedKey = camelize(standardizedKey);
               const payload = {
-                field_name: camelToSnakeCase(camelizedKey),
-                field_type_id: 2,
-                table_id: newTable.id,
-                field_id: newFields[camelizedKey],
-                text_value: record[key],
-                record_id: null,
-                magic_record_id: newRecordId,
-                key_type: "text_value",
-                table_type_id: "magic_record_id",
-                has_precision: false,
+                fieldName: camelToSnakeCase(camelizedKey),
+                fieldType_id: 2,
+                tableId: newTable.id,
+                fieldId: newFields[camelizedKey],
+                textValue: record[key],
+                recordId: null,
+                magicRecordId: newRecordId,
+                keyType: "text_value",
+                tableTypeId: "magic_record_id",
+                hasPrecision: false,
               };
               const response = await securedApi.post(`/magic_values`, payload);
               if (response.statusText === "OK") {
