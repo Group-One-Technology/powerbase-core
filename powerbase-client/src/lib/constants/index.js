@@ -48,14 +48,14 @@ export const BG_COLORS = {
 };
 
 export const OUTLINE_COLORS = {
-  gray: "gray-500",
-  yellow: "yellow-500",
-  red: "red-500",
-  green: "green-500",
-  blue: "blue-500",
-  indigo: "indigo-500",
-  purple: "purple-500",
-  pink: "pink-500",
+  gray: "text-gray-500",
+  yellow: "text-yellow-500",
+  red: "text-red-500",
+  green: "text-green-500",
+  blue: "text-blue-500",
+  indigo: "text-indigo-500",
+  purple: "text-purple-500",
+  pink: "text-pink-500",
 };
 
 export const SCROLLBAR_WIDTH = 15;
