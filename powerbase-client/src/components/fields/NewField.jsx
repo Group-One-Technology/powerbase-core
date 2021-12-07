@@ -1,48 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { XIcon } from '@heroicons/react/outline';
-import useConstant from '@lib/hooks/useConstant';
-import { useAsync } from 'react-async-hook';
 import cn from 'classnames';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
 import Checkbox from '@components/ui/Checkbox';
-import debounce from 'lodash.debounce';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import PropTypes from 'prop-types';
-import { searchFieldByName, addVirtualField } from '@lib/api/fields';
+import { addVirtualField } from '@lib/api/fields';
+import { useDebouncedInput } from '@lib/hooks/fields/useDebouncedInput';
 import { Button } from '@components/ui/Button';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
-const DEBOUNCED_TIMEOUT = 100; // 100ms
-
-const useDebouncedInput = (setNameExists, id) => {
-  const [fieldName, setFieldName] = useState('');
-  // eslint-disable-next-line consistent-return
-  const searchPowerbase = async (name) => {
-    try {
-      const { data } = await searchFieldByName({ id, name });
-      setNameExists(!!data?.id);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const debouncedSearchPowerbase = useConstant(() => debounce(searchPowerbase, DEBOUNCED_TIMEOUT));
-
-  const search = useAsync(async () => {
-    if (fieldName.length === 0) {
-      return [];
-    }
-    return debouncedSearchPowerbase(toSnakeCase(fieldName.toLowerCase()));
-  }, [fieldName]);
-
-  return {
-    fieldName,
-    setFieldName,
-    search,
-  };
-};
 
 const FieldTypeComponent = ({
   type,
@@ -74,14 +43,12 @@ const FieldTypeComponent = ({
         onClick={collapseSelectedField}
         type="button"
       >
-        <div>
-          <FieldTypeIcon
-            typeId={type.id}
-            fieldTypes={fieldTypes}
-            className="mr-1"
-          />
-        </div>
-        <p className="font-medium text-gray-900 cursor-default">{type.name}</p>
+        <FieldTypeIcon
+          typeId={type.id}
+          fieldTypes={fieldTypes}
+          className="mr-1"
+        />
+        <span className="font-medium text-gray-900 cursor-default">{type.name}</span>
         <XIcon className="h-4 w-4 ml-auto my-auto" aria-hidden="true" />
       </button>
       <div>
