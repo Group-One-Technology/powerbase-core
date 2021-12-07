@@ -14,7 +14,7 @@ export function useEditingCell(
       case 'text':
         return true;
       case 'number':
-        return field.options.precision
+        return field.options?.precision
           ? isValidNumberOrDecimal(val)
           : isValidInteger(val);
       default:
@@ -28,7 +28,7 @@ export function useEditingCell(
     setEditCellInput(magicInputValue);
   };
 
-  const onClickOutsideEditingCell = async (e, calendarData = null) => {
+  const onClickOutsideEditingCell = async (calendarData = null) => {
     const exitEditing = () => {
       setCellToEdit({});
       recordInputRef?.current?.blur();
@@ -68,10 +68,10 @@ export function useEditingCell(
 
     let hasPrecision = false;
     let formattedNumber;
-    if (field.options.precision && fieldType.dataType === 'number') {
+    if (field.options?.precision && fieldType.dataType === 'number') {
       hasPrecision = true;
       const sanitizedNumber = parseFloat(recordInputRef.current?.value);
-      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options.precision);
+      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
     }
 
     try {
@@ -79,7 +79,7 @@ export function useEditingCell(
         tableId: field.tableId,
         primary_keys: composedKeys,
         data: {
-          [field.name]: field.options.precision
+          [field.name]: field.options?.precision
             ? formattedNumber
             : recordInputRef.current?.value,
         },
