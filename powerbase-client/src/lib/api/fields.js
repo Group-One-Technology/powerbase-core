@@ -79,3 +79,8 @@ export async function updateFieldPermissionAllowedRoles({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function searchFieldByName({ id, name }) {
+  const response = await securedApi.get(`tables/${id}/fields/${name}`);
+  return response;
+}

@@ -13,24 +13,24 @@ import Checkbox from '@components/ui/Checkbox';
 import debounce from 'lodash.debounce';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import PropTypes from 'prop-types';
+import { searchFieldByName } from '@lib/api/fields';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
+
+const DEBOUNCED_TIMEOUT = 100; // 100ms
 
 const useDebouncedInput = (setNameExists, id) => {
   const [fieldName, setFieldName] = useState('');
   // eslint-disable-next-line consistent-return
-  const searchPowerbase = async (text) => {
+  const searchPowerbase = async (name) => {
     try {
-      const response = await securedApi.get(`tables/${id}/fields/${text}`);
-      const { data } = response;
-      if (data?.message) setNameExists(false);
-      else if (data?.id) setNameExists(true);
-      return response;
+      const { data } = await searchFieldByName({ id, name });
+      setNameExists(!!data?.id);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const debouncedSearchPowerbase = useConstant(() => debounce(searchPowerbase, 100));
+  const debouncedSearchPowerbase = useConstant(() => debounce(searchPowerbase, DEBOUNCED_TIMEOUT));
 
   const search = useAsync(async () => {
     if (fieldName.length === 0) {
