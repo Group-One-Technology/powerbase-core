@@ -65,3 +65,12 @@ export async function updateTablePermissionAllowedRoles({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function addVirtualTable({ payload }) {
+  const response = await securedApi.post('/tables/virtual_tables', payload);
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}

@@ -4,6 +4,7 @@ import React, { Fragment, useEffect, useState, ReactDOM } from "react";
 import { ArrowRightIcon, TrashIcon } from "@heroicons/react/solid";
 import NewTableFieldInput from "./NewTableFieldInput";
 import NewTableFieldSelect from "./NewTableFieldSelect";
+import cn from 'classnames'
 
 export default function Field({
   id,
@@ -12,9 +13,6 @@ export default function Field({
   setNewFields,
   count,
 }) {
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(" ");
-  }
 
   const removeField = (id) => {
     const updatedFields = newFields.filter((field) => field.id !== id);
@@ -29,7 +27,7 @@ export default function Field({
             Field Name
           </div>
           <div
-            className={classNames(
+            className={cn(
               `text-sm font-medium text-gray-600 mb-1  justify-self-start ml-2`,
               newFields.length === 1 && `ml-6 pl-0.5`
             )}

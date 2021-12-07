@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable prefer-spread */
 import React, { useState, useRef, useEffect } from 'react';
-import { securedApi } from '@lib/api';
 import { XIcon } from '@heroicons/react/outline';
 import useConstant from '@lib/hooks/useConstant';
 import { useAsync } from 'react-async-hook';
@@ -13,7 +12,7 @@ import Checkbox from '@components/ui/Checkbox';
 import debounce from 'lodash.debounce';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import PropTypes from 'prop-types';
-import { searchFieldByName } from '@lib/api/fields';
+import { searchFieldByName, addVirtualField } from '@lib/api/fields';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
 const DEBOUNCED_TIMEOUT = 100; // 100ms
@@ -204,7 +203,7 @@ export default function NewField({
       options: currency ? { style: 'currency', currency } : null,
     };
 
-    const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+    const response = await addVirtualField({ tableId, payload });
     if (response.statusText === 'OK') {
       setIsCreatingField(false);
       mutateViewFields();
@@ -250,16 +249,14 @@ export default function NewField({
               key={type.id}
               type="button"
             >
-              <div>
-                <FieldTypeIcon
-                  typeId={type.id}
-                  fieldTypes={fieldTypes}
-                  className="mr-3 mt-0.5"
-                />
-              </div>
-              <p className="font-medium text-gray-900 cursor-default">
+              <FieldTypeIcon
+                typeId={type.id}
+                fieldTypes={fieldTypes}
+                className="mr-3 mt-0.5"
+              />
+              <span className="font-medium text-gray-900 cursor-default">
                 {type.name}
-              </p>
+              </span>
             </button>
           ))}
         </div>

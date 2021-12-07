@@ -1,32 +1,15 @@
 /* eslint-disable */
 import React, { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon, PlusCircleIcon } from "@heroicons/react/outline";
+import { PlusCircleIcon } from "@heroicons/react/outline";
 import NewTableField from "./NewTableField";
 import cn from "classnames";
 import TableNameInput from "./TableNameInput";
 import { securedApi } from "@lib/api";
 import { useCurrentView } from "@models/views/CurrentTableView";
 import Upload from "./UploadTable";
-import { useTableRecords } from "@models/TableRecords";
+import { toSnakeCase, camelToSnakeCase, camelize } from "@lib/helpers/text/textTypeFormatters";
 
-const toSnakeCase = (str) =>
-  str &&
-  str
-    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-    .map((x) => x.toLowerCase())
-    .join("_");
-
-function camelize(str) {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, "");
-}
-
-const camelToSnakeCase = (str) =>
-  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 const initial = [
   {
     id: 1,
@@ -51,12 +34,6 @@ export default function NewTableModal({
   const { handleTableChange, mutateTables } = useCurrentView();
   const [csvArray, setCsvArray] = useState([]);
   const [csvFile, setCsvFile] = useState();
-  const {
-    data: records,
-    loadMore: loadMoreRows,
-    isLoading,
-    mutate: mutateTableRecords,
-  } = useTableRecords();
 
   const handleAddNewField = () => {
     setNewFields([
@@ -75,16 +52,16 @@ export default function NewTableModal({
             name: toSnakeCase(fieldName.toLowerCase()),
             description: null,
             oid: 1043,
-            db_type: "character varying",
-            default_value: "",
-            is_primary_key: false,
-            is_nullable: false,
-            powerbase_field_type_id: fieldTypeId,
-            is_pii: false,
+            dbType: "character varying",
+            defaultValue: "",
+            isPrimaryKey: false,
+            isNullable: false,
+            powerbaseFieldTypeId: fieldTypeId,
+            isPii: false,
             alias: fieldName,
             order: idx,
-            is_virtual: true,
-            allow_dirty_value: true,
+            isVirtual: true,
+            allowDirtyValue: true,
             precision: null,
           };
         });
@@ -95,11 +72,11 @@ export default function NewTableModal({
         return {
           name: toSnakeCase(tableName.toLowerCase()),
           description: null,
-          powerbase_database_id: base.id,
-          is_migrated: true,
+          powerbaseDatabaseId: base.id,
+          isMigrated: true,
           logs: null,
-          is_virtual: true,
-          page_size: 40,
+          isVirtual: true,
+          pageSize: 40,
           alias: tableName,
           order: tables.length,
         };
@@ -110,18 +87,16 @@ export default function NewTableModal({
         fields: standardizeFields(),
       };
 
-      const response = await securedApi.post(`/tables/virtual_tables`, payload);
-      if (response.data) {
+      const data = await addVirtualTable({payload});
+      if (data) {
         setOpen(false);
         mutateTables();
-        handleTableChange({ table: response.data.table });
+        handleTableChange({ table: data.table });
       }
     }
 
     if (isUploadAction) {
       const csvFieldNames = Object.getOwnPropertyNames(csvArray[0]);
-      console.log(csvArray[0]);
-      console.log(csvFieldNames);
       const standardizeTable = () => {
         return {
           name:
@@ -166,8 +141,8 @@ export default function NewTableModal({
         fields: standardizeFields(),
       };
 
-      const response = await securedApi.post(`/tables/virtual_tables`, payload);
-      if (response.data) {
+      const data = await await addVirtualTable({payload});
+      if (data) {
         const newTable = response.data.table;
         const newFields = response.data.fields;
         csvArray.forEach(async (record, idx) => {
@@ -177,6 +152,7 @@ export default function NewTableModal({
             powerbase_database_id: table.databaseId,
             powerbase_record_order: idx,
           };
+          // REFACTOR - to use api helper and camelcase prop names
           const newRecordResponse = await securedApi.post(
             `/magic_records`,
             recordParams
@@ -224,7 +200,7 @@ export default function NewTableModal({
         className="fixed z-10 inset-0 overflow-y-auto"
         onClose={setOpen}
       >
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <form className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" onSubmit={addTable}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -313,19 +289,17 @@ export default function NewTableModal({
                 </button>
 
                 <button
-                  type="button"
+                  type="submit"
                   className={cn(
-                    `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`,
-                    true && "hover:bg-indigo-700"
+                    `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:bg-indigo-700`
                   )}
-                  onClick={addTable}
                 >
                   Add Table
                 </button>
               </div>
             </div>
           </Transition.Child>
-        </div>
+        </form>
       </Dialog>
     </Transition.Root>
   );

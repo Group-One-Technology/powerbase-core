@@ -3,19 +3,14 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
-
-const people = [
-  { id: 1, name: "Single Line Text" },
-  { id: 2, name: "Long Text" },
-  { id: 8, name: "Email" },
-];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+import cn from 'classnames'
 
 export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
-  const [selected, setSelected] = useState(people[0]);
+  const { data: fieldTypes } = useFieldTypes;
+  const options = fieldTypes?.filter((item) => ['Single Line Text', 'Long Text', 'Email'].includes(item.name))
+  const [selected, setSelected] = useState(options[0]);
+
+  if (!fieldTypes) return null;
 
   const handleSelect = (item) => {
     setSelected(item);
@@ -61,7 +56,7 @@ export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
               <Listbox.Option
                 key={person.id}
                 className={({ active }) =>
-                  classNames(
+                  cn(
                     active ? "text-white bg-indigo-600" : "text-gray-900",
                     "cursor-default select-none relative py-2 pl-3 pr-9"
                   )
@@ -71,7 +66,7 @@ export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
                 {({ selected, active }) => (
                   <>
                     <span
-                      className={classNames(
+                      className={cn(
                         selected ? "font-semibold" : "font-normal",
                         "block truncate"
                       )}
@@ -81,7 +76,7 @@ export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
 
                     {selected ? (
                       <span
-                        className={classNames(
+                        className={cn(
                           active ? "text-white" : "text-indigo-600",
                           "absolute inset-y-0 right-0 flex items-center pr-4"
                         )}
