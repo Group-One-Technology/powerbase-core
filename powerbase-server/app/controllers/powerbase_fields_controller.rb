@@ -89,7 +89,7 @@ class PowerbaseFieldsController < ApplicationController
     id = safe_params[:id]
     @field = PowerbaseField.where('lower(name) = ? and powerbase_table_id = ?', name.downcase, id).first
     if !@field
-      # render json: { error: 'Field does not exist' }, status: :not_found
+      render json: { error: 'Field does not exist' }, status: :not_found
       return
     end
     render json: format_json(@field)
