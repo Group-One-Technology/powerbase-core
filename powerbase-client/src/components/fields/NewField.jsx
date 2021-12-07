@@ -216,7 +216,7 @@ export default function NewField({
   return (
     <div className="m-4">
       <div>
-        <label htmlFor="email" className="sr-only">
+        <label htmlFor="new-field-name" className="sr-only">
           New Field
         </label>
         <input
@@ -225,19 +225,19 @@ export default function NewField({
           id="new-field-name"
           className={cn(
             'shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
-            nameExists && 'focus:ring-red-500 focus:border-red-500',
-            !nameExists && 'focus:ring-indigo-500 focus:border-indigo-500',
+            nameExists ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-indigo-500',
           )}
           placeholder="Enter field name (required)"
           autoComplete="off"
           ref={fieldInputRef}
           onChange={handleChange}
+          required
         />
       </div>
 
       <div>
-        <p className="text-red-500">
-          {nameExists ? 'Field name already exists for this table.' : <br />}
+        <p className={cn(!nameExists && 'mb-4', 'text-red-500')}>
+          {nameExists && 'Field name already exists for this table.'}
         </p>
       </div>
 

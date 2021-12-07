@@ -110,6 +110,8 @@ export function BaseCoreSettings() {
     setLoading(false);
   };
 
+  const hasDatabaseNameError = !!databaseNameError.error?.message;
+
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
       <h2 className="text-xl leading-6 font-medium text-gray-900">
@@ -216,11 +218,10 @@ export function BaseCoreSettings() {
             type="submit"
             className={cn(
               'bg-sky-700 ml-5 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500',
-              databaseName.length && 'hover:bg-sky-800',
-              !databaseName.length && 'cursor-not-allowed',
+              !databaseNameError ? 'hover:bg-sky-800' : 'cursor-not-allowed',
             )}
             loading={loading}
-            disabled={!databaseName.length}
+            disabled={hasDatabaseNameError}
           >
             Update Database
           </Button>
