@@ -1,31 +1,29 @@
-/* eslint-disable quotes */
-
-import React from "react";
+import React from 'react';
 import {
   Switch,
   Route,
   Redirect,
   useRouteMatch,
   BrowserRouter as Router,
-} from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+} from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
-import { GlobalProviders } from "@components/GlobalProviders";
-import { LoginPage } from "@pages/login";
-import { RegisterPage } from "@pages/register";
-import { BasesPage } from "@pages/bases";
-import { SettingsPage } from "@pages/settings";
-import { BasePage } from "@pages/base/[id]";
-import { AddBasePage } from "@pages/base/add-base";
-import { CreateBasePage } from "@pages/base/create";
-import { ConnectBasePage } from "@pages/base/connect";
-import { ConnectURLBasePage } from "@pages/base/connect-url";
-import { ConnectIntegrationBasePage } from "@pages/base/connect-integration";
-import { BaseSettingsPage } from "@pages/base/[id]/settings";
-import { TablePage } from "@pages/base/[id]/table/[id]";
-import { Error404Page } from "@pages/404";
+import { GlobalProviders } from '@components/GlobalProviders';
+import { LoginPage } from '@pages/login';
+import { RegisterPage } from '@pages/register';
+import { BasesPage } from '@pages/bases';
+import { SettingsPage } from '@pages/settings';
+import { BasePage } from '@pages/base/[id]';
+import { AddBasePage } from '@pages/base/add-base';
+import { CreateBasePage } from '@pages/base/create';
+import { ConnectBasePage } from '@pages/base/connect';
+import { ConnectURLBasePage } from '@pages/base/connect-url';
+import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
+import { BaseSettingsPage } from '@pages/base/[id]/settings';
+import { TablePage } from '@pages/base/[id]/table/[id]';
+import { Error404Page } from '@pages/404';
 
-import "./index.css";
+import './index.css';
 
 export function App() {
   return (

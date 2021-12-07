@@ -1,14 +1,13 @@
-/* eslint-disable  */
-import React, { Fragment } from "react";
-import { useHistory, Link } from "react-router-dom";
-import { ChevronDownIcon } from "@heroicons/react/solid";
-import { Menu, Transition } from "@headlessui/react";
-import Gravatar from "react-gravatar";
-import cn from "classnames";
-import PropTypes from "prop-types";
+import React, { Fragment } from 'react';
+import { useHistory, Link } from 'react-router-dom';
+import { ChevronDownIcon } from '@heroicons/react/solid';
+import { Menu, Transition } from '@headlessui/react';
+import Gravatar from 'react-gravatar';
+import cn from 'classnames';
+import PropTypes from 'prop-types';
 
-import { useAuthUser } from "@models/AuthUser";
-import { logout } from "@lib/api/auth";
+import { useAuthUser } from '@models/AuthUser';
+import { logout } from '@lib/api/auth';
 
 const USER_NAVIGATION = [
   { name: 'Profile', href: '/profile' },
@@ -23,7 +22,7 @@ export function UserMenu({ list, colored }) {
     try {
       await logout();
       mutate(null);
-      history.push("/login");
+      history.push('/login');
     } catch (error) {
       console.error(error);
     }
@@ -37,10 +36,10 @@ export function UserMenu({ list, colored }) {
             key={item.name}
             to={item.href}
             className={cn(
-              "block px-4 py-2 text-base font-medium",
+              'block px-4 py-2 text-base font-medium',
               colored
-                ? "text-white hover:bg-gray-100 hover:bg-opacity-30"
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                ? 'text-white hover:bg-gray-100 hover:bg-opacity-30'
+                : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
             )}
           >
             {item.name}
@@ -50,10 +49,10 @@ export function UserMenu({ list, colored }) {
           type="button"
           onClick={handleLogout}
           className={cn(
-            "block w-full text-left px-4 py-2 text-base font-medium",
+            'block w-full text-left px-4 py-2 text-base font-medium',
             colored
-              ? "text-white hover:bg-gray-100 hover:bg-opacity-30"
-              : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+              ? 'text-white hover:bg-gray-100 hover:bg-opacity-30'
+              : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
           )}
         >
           Sign Out
@@ -68,8 +67,8 @@ export function UserMenu({ list, colored }) {
         <>
           <Menu.Button
             className={cn(
-              "bg-transparent flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-current",
-              !colored && "focus:ring-offset-2"
+              'bg-transparent flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-current',
+              !colored && 'focus:ring-offset-2',
             )}
           >
             <Gravatar
@@ -102,8 +101,8 @@ export function UserMenu({ list, colored }) {
                   {({ active }) => (
                     <Link
                       to={item.href}
-                      className={cn("block px-4 py-2 text-sm text-gray-700", {
-                        "bg-gray-100": active,
+                      className={cn('block px-4 py-2 text-sm text-gray-700', {
+                        'bg-gray-100': active,
                       })}
                     >
                       {item.name}
@@ -117,10 +116,10 @@ export function UserMenu({ list, colored }) {
                     type="button"
                     onClick={handleLogout}
                     className={cn(
-                      "block w-full text-left px-4 py-2 text-sm text-gray-700",
+                      'block w-full text-left px-4 py-2 text-sm text-gray-700',
                       {
-                        "bg-gray-100": active,
-                      }
+                        'bg-gray-100': active,
+                      },
                     )}
                   >
                     Sign Out

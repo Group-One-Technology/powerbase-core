@@ -1,7 +1,9 @@
-/* eslint-disable */
-import React, { Fragment, useEffect, useState, ReactDOM } from "react";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 export default function NewTableFieldInput({ id, newFields, setNewFields }) {
+  const [value, setValue] = useState('');
+
   const handleChange = (e) => {
     setValue(e.target.value);
 
@@ -18,8 +20,6 @@ export default function NewTableFieldInput({ id, newFields, setNewFields }) {
     setNewFields(updatedFields);
   };
 
-  const [value, setValue] = useState("");
-
   return (
     <div className="mt-1 w-full">
       <input
@@ -34,3 +34,9 @@ export default function NewTableFieldInput({ id, newFields, setNewFields }) {
     </div>
   );
 }
+
+NewTableFieldInput.propTypes = {
+  id: PropTypes.number.isRequired,
+  newFields: PropTypes.array.isRequired,
+  setNewFields: PropTypes.func.isRequired,
+};
