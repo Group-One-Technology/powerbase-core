@@ -151,8 +151,8 @@ ActiveRecord::Schema.define(version: 2021_12_05_191217) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_pii", default: false, null: false
     t.string "alias"
-    t.boolean "is_virtual"
     t.text "options"
+    t.boolean "is_virtual"
     t.integer "precision"
     t.boolean "allow_dirty_value"
     t.text "permissions", default: "{\"view_field\":{\"access\":\"everyone\"},\"manage_field\":{\"access\":\"admins and up\"},\"edit_field_data\":{\"access\":\"editors and up\"}}"

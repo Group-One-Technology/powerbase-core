@@ -60,17 +60,11 @@ const FieldTypeComponent = ({
   const collapseSelectedField = () => {
     setSelected(null);
   };
+  const isPercent = type.name.toLowerCase() === 'percent';
+  const isCurrency = type.name.toLowerCase() === 'currency';
+  const hasDecimal = numberSubtype?.id === 2;
+  const isNumber = type.name.toLowerCase() === 'number';
 
-  const precisionPresenceConditions = {
-    isPercent: type.name.toLowerCase() === 'percent',
-    isCurrency: type.name.toLowerCase() === 'currency',
-    hasDecimal: numberSubtype?.id === 2,
-    isNumber: type.name.toLowerCase() === 'number',
-  };
-
-  const {
-    isPercent, isCurrency, hasDecimal, isNumber,
-  } = precisionPresenceConditions;
   const hasPrecisionField = isPercent || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
   const canHaveValidation = false; // TODO - this would be true for strict-type fields for the option to allow dirty values
@@ -111,7 +105,6 @@ const FieldTypeComponent = ({
         <div className={cn('mt-4 mb-6 h-24', hasPrecisionField && 'h-56')}>
           {(isNumber || isCurrency) && (
             <NumberFieldSelectOptions
-              isPrecision={false}
               isPercent={isPercent}
               setNumberSubtype={setNumberSubtype}
               isCurrency={isCurrency}
@@ -262,8 +255,6 @@ export default function NewField({
                 <FieldTypeIcon
                   typeId={type.id}
                   fieldTypes={fieldTypes}
-                  isPrimaryKey={false}
-                  isForeignKey={false}
                   className="mr-3 mt-0.5"
                 />
               </div>
