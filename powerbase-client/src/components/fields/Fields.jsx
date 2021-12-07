@@ -123,37 +123,6 @@ export function Fields({ table }) {
                         </button>
                       </div>
                       )}
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleReorderFields}
-                      >
-                        <SortableContext
-                          items={fields}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <ul className="m-3 list-none flex flex-col">
-                            {fields.map((field) => (
-                              <FieldItem
-                                key={field.id}
-                                table={table}
-                                field={field}
-                                setFields={setFields}
-                              />
-                            ))}
-                          </ul>
-                        </SortableContext>
-                      </DndContext>
-                      {canAddFields && containsPrimaryKey && (
-                      <button
-                        type="button"
-                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                        onClick={handleAddNewField}
-                      >
-                        <PlusIcon className="mr-1 h-4 w-4" />
-                        Add a field
-                      </button>
-                      )}
                     </div>
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
                       <SortableContext items={fields} strategy={verticalListSortingStrategy}>
@@ -162,10 +131,11 @@ export function Fields({ table }) {
                         </ul>
                       </SortableContext>
                     </DndContext>
-                    {canAddFields && (
+                    {canAddFields && containsPrimaryKey && (
                     <button
                       type="button"
-                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100 cursor-not-allowed"
+                      className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                      onClick={handleAddNewField}
                     >
                       <PlusIcon className="mr-1 h-4 w-4" />
                       Add a field
