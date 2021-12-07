@@ -12,7 +12,6 @@ import { useDebouncedInput } from '@lib/hooks/fields/useDebouncedInput';
 import { Button } from '@components/ui/Button';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
-
 const FieldTypeComponent = ({
   type,
   fieldTypes,
@@ -145,7 +144,8 @@ export default function NewField({
   const addNewField = async (e) => {
     e.preventDefault();
     if (selected) {
-      const payload = {
+      const response = await addVirtualField({
+        tableId,
         name: toSnakeCase(fieldName.toLowerCase()),
         description: null,
         dbType: computeDBType(),
@@ -162,9 +162,7 @@ export default function NewField({
         precision: numberPrecision ? numberPrecision.precision : null,
         order: Math.max(...ViewFields.map((item) => item.order)) + 1,
         options: currency ? { style: 'currency', currency } : null,
-      };
-
-      const response = await addVirtualField({ tableId, payload });
+      });
       if (response.statusText === 'OK') {
         setIsCreatingField(false);
         mutateViewFields();

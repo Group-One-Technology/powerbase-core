@@ -85,7 +85,7 @@ export async function searchFieldByName({ id, name }) {
   return response;
 }
 
-export async function addVirtualField({ tableId, payload }) {
+export async function addVirtualField({ tableId, ...payload }) {
   const response = await securedApi.post(`/tables/${tableId}/field`, payload);
   return response;
 }
