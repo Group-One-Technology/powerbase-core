@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable prefer-spread */
 import React, { useState, useRef, useEffect } from 'react';
 import { XIcon } from '@heroicons/react/outline';
 import useConstant from '@lib/hooks/useConstant';
@@ -13,6 +11,7 @@ import debounce from 'lodash.debounce';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import PropTypes from 'prop-types';
 import { searchFieldByName, addVirtualField } from '@lib/api/fields';
+import { Button } from '@components/ui/Button';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
 const DEBOUNCED_TIMEOUT = 100; // 100ms
@@ -70,11 +69,10 @@ const FieldTypeComponent = ({
 
   return (
     <div className="mt-2">
-      <div
-        className="bg-indigo-200 hover:bg-indigo-300 cursor-default flex p-2 mb-2 rounded-md hover:rounded-md"
+      <button
+        className="bg-indigo-200 hover:bg-indigo-300 cursor-default flex items-center w-full p-2 mb-2 rounded-md hover:rounded-md"
         onClick={collapseSelectedField}
-        role="button"
-        tabIndex={-1}
+        type="button"
       >
         <div>
           <FieldTypeIcon
@@ -87,7 +85,7 @@ const FieldTypeComponent = ({
         </div>
         <p className="font-medium text-gray-900 cursor-default">{type.name}</p>
         <XIcon className="h-4 w-4 ml-auto my-auto" aria-hidden="true" />
-      </div>
+      </button>
       <div>
         <p className="text-xs text-gray-600 ml-2">{type.description}</p>
       </div>
@@ -179,41 +177,40 @@ export default function NewField({
     return ''; // Just an error gauard
   };
 
-  const addNewField = async () => {
-    const payload = {
-      name: toSnakeCase(fieldName.toLowerCase()),
-      description: null,
-      dbType: computeDBType(),
-      defaultValue: '',
-      isPrimaryKey: false,
-      isNullable: true,
-      powerbaseTableId: tableId,
-      powerbaseFieldTypeId: selected.id,
-      isPii: false,
-      alias: fieldName,
-      viewId: view.id,
-      isVirtual: true,
-      allowDirtyValue: isChecked,
-      precision: numberPrecision ? numberPrecision.precision : null,
-      order:
-        Math.max.apply(
-          Math,
-          ViewFields.map((item) => item.order),
-        ) + 1,
-      options: currency ? { style: 'currency', currency } : null,
-    };
+  const addNewField = async (e) => {
+    e.preventDefault();
+    if (selected) {
+      const payload = {
+        name: toSnakeCase(fieldName.toLowerCase()),
+        description: null,
+        dbType: computeDBType(),
+        defaultValue: '',
+        isPrimaryKey: false,
+        isNullable: true,
+        powerbaseTableId: tableId,
+        powerbaseFieldTypeId: selected.id,
+        isPii: false,
+        alias: fieldName,
+        viewId: view.id,
+        isVirtual: true,
+        allowDirtyValue: isChecked,
+        precision: numberPrecision ? numberPrecision.precision : null,
+        order: Math.max(...ViewFields.map((item) => item.order)) + 1,
+        options: currency ? { style: 'currency', currency } : null,
+      };
 
-    const response = await addVirtualField({ tableId, payload });
-    if (response.statusText === 'OK') {
-      setIsCreatingField(false);
-      mutateViewFields();
-      setHasAddedNewField(true);
-      close();
+      const response = await addVirtualField({ tableId, payload });
+      if (response.statusText === 'OK') {
+        setIsCreatingField(false);
+        mutateViewFields();
+        setHasAddedNewField(true);
+        close();
+      }
     }
   };
 
   return (
-    <div className="m-4">
+    <form className="m-4" onSubmit={addNewField}>
       <div>
         <label htmlFor="new-field-name" className="sr-only">
           New Field
@@ -284,23 +281,22 @@ export default function NewField({
         >
           Cancel
         </button>
-
+        {/* REFACTOR eventually to use more complex loading states */}
         {selected && (
-          <button
-            type="button"
+          <Button
+            type="submit"
             className={cn(
               'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-              (nameExists || !fieldName.length) && 'cursor-not-allowed',
-              !nameExists && fieldName.length && 'hover:bg-indigo-700',
+              (nameExists || !fieldName.length || !selected) && 'cursor-not-allowed',
+              !nameExists && fieldName.length && selected && 'hover:bg-indigo-700',
             )}
-            onClick={() => addNewField()}
-            disabled={nameExists || !fieldName.length}
+            disabled={nameExists || !fieldName.length || !selected}
           >
             Add Field
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </form>
   );
 }
 
