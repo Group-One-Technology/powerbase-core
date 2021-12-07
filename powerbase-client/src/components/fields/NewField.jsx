@@ -18,7 +18,7 @@ const DEBOUNCED_TIMEOUT = 100; // 100ms
 
 const useDebouncedInput = (setNameExists, id) => {
   const [fieldName, setFieldName] = useState('');
-  // eslint-disable-next-line consistent-return
+
   const searchPowerbase = async (name) => {
     try {
       const { data } = await searchFieldByName({ id, name });

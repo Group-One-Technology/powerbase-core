@@ -1,10 +1,9 @@
-/* eslint-disable */
-import React, { Fragment, useEffect, useState, ReactDOM } from "react";
-
-import { ArrowRightIcon, TrashIcon } from "@heroicons/react/solid";
-import NewTableFieldInput from "./NewTableFieldInput";
-import NewTableFieldSelect from "./NewTableFieldSelect";
-import cn from 'classnames'
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { ArrowRightIcon, TrashIcon } from '@heroicons/react/solid';
+import cn from 'classnames';
+import NewTableFieldInput from './NewTableFieldInput';
+import NewTableFieldSelect from './NewTableFieldSelect';
 
 export default function Field({
   id,
@@ -13,9 +12,8 @@ export default function Field({
   setNewFields,
   count,
 }) {
-
-  const removeField = (id) => {
-    const updatedFields = newFields.filter((field) => field.id !== id);
+  const removeField = (selectedId) => {
+    const updatedFields = newFields.filter((field) => field.id !== selectedId);
     setNewFields(updatedFields);
   };
 
@@ -28,8 +26,8 @@ export default function Field({
           </div>
           <div
             className={cn(
-              `text-sm font-medium text-gray-600 mb-1  justify-self-start ml-2`,
-              newFields.length === 1 && `ml-6 pl-0.5`
+              'text-sm font-medium text-gray-600 mb-1  justify-self-start ml-2',
+              newFields.length === 1 && 'ml-6 pl-0.5',
             )}
           >
             Field Type
@@ -49,8 +47,8 @@ export default function Field({
           />
         </div>
 
-        <div className={`flex flex-col justify-center`}>
-          <ArrowRightIcon className={`h-5 w-5 text-gray-400 `} />
+        <div className="flex flex-col justify-center">
+          <ArrowRightIcon className="h-5 w-5 text-gray-400 " />
         </div>
 
         <div className="editmode w-full ">
@@ -65,12 +63,12 @@ export default function Field({
         </div>
         {newFields.length > 1 && (
           <div
-            className={`flex flex-col justify-center text-gray-500 
+            className={`flex flex-col justify-center text-gray-500
         }`}
           >
             <TrashIcon
               onClick={() => removeField(id)}
-              className={`w-5 h-5  cursor-pointer`}
+              className="w-5 h-5  cursor-pointer"
             />
           </div>
         )}
@@ -78,3 +76,11 @@ export default function Field({
     </>
   );
 }
+
+Field.propTypes = {
+  id: PropTypes.any,
+  getValue: PropTypes.func,
+  newFields: PropTypes.any,
+  setNewFields: PropTypes.func,
+  count: PropTypes.number,
+};

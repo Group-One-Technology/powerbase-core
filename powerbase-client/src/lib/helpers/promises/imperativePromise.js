@@ -1,4 +1,4 @@
-/* eslint-disable */
+
 
 export default function createImperativePromise(promiseArg) {
   let resolve = null;

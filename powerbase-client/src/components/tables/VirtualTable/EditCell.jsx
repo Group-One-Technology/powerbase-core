@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, {
   useEffect,
   Fragment,
@@ -6,9 +5,9 @@ import React, {
   forwardRef,
   useRef,
 } from 'react';
+// ! FIXME: Try to create a local function for this instead for checking if it's an object. You shouldn't import the whole lodash project. Also this is not included in the package.json
 import isObject from 'lodash/isObject';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -21,29 +20,28 @@ function getValue(value) {
 }
 
 const TooltipContent = () => (
-  <>
-    <div className="flex">
-      <div className="relative mx-2">
-        <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
-          Enter a valid email
-          <svg
-            className="absolute text-black h-2 w-full left-0 top-full"
-            x="0px"
-            y="0px"
-            viewBox="0 0 255 255"
-            xmlSpace="preserve"
-          >
-            <polygon
-              className="fill-current"
-              points="0,0 127.5,127.5 255,0"
-            />
-          </svg>
-        </div>
+  <div className="flex">
+    <div className="relative mx-2">
+      <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
+        Enter a valid email
+        <svg
+          className="absolute text-black h-2 w-full left-0 top-full"
+          x="0px"
+          y="0px"
+          viewBox="0 0 255 255"
+          xmlSpace="preserve"
+        >
+          <polygon
+            className="fill-current"
+            points="0,0 127.5,127.5 255,0"
+          />
+        </svg>
       </div>
     </div>
-  </>
+  </div>
 );
 
+// ! FIXME: Missing props validation
 const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
 
@@ -71,6 +69,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
     await onClickOutsideEditingCell(formatted);
   };
 
+  // ! FIXME: You should extract this to its own component file instead.
   const CalButton = ({ onClick, value, ref }) => {
     const buttonRef = useRef(null);
     useEffect(() => {
@@ -88,6 +87,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
     );
   };
 
+  // ! FIXME: You can relocate this outside this function. Since this is a component on its own.
   const CustomInput = forwardRef(({ value, onClick }) => (
     <CalButton onClick={onClick} value={value} />
   ));

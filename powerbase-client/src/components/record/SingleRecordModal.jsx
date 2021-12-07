@@ -1,29 +1,28 @@
-/* eslint-disable  */
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import cn from "classnames";
-import { Dialog, Disclosure } from "@headlessui/react";
-import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/outline";
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { Dialog, Disclosure } from '@headlessui/react';
+import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/outline';
 
-import { useFieldTypes } from "@models/FieldTypes";
-import { TableRecordProvider } from "@models/TableRecord";
-import { TableLinkedRecordsProvider } from "@models/TableLinkedRecords";
+import { useFieldTypes } from '@models/FieldTypes';
+import { TableRecordProvider } from '@models/TableRecord';
+import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import {
   useTableConnections,
   TableConnectionsProvider,
-} from "@models/TableConnections";
+} from '@models/TableConnections';
 import {
   useTableReferencedConnections,
   TableReferencedConnectionsProvider,
-} from "@models/TableReferencedConnections";
-import { TableFieldsProvider } from "@models/TableFields";
-import { useLinkedRecord } from "@lib/hooks/record/useLinkedRecord";
-import { pluralize } from "@lib/helpers/pluralize";
+} from '@models/TableReferencedConnections';
+import { TableFieldsProvider } from '@models/TableFields';
+import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
+import { pluralize } from '@lib/helpers/pluralize';
 
-import { Modal } from "@components/ui/Modal";
-import { RecordItem } from "./RecordItem";
-import { RecordItemValue } from "./RecordItem/RecordItemValue";
-import { LinkedRecordsItem } from "./LinkedRecordsItem";
+import { Modal } from '@components/ui/Modal';
+import { RecordItem } from './RecordItem';
+import { RecordItemValue } from './RecordItem/RecordItemValue';
+import { LinkedRecordsItem } from './LinkedRecordsItem';
 
 export function SingleRecordModal({
   table,
@@ -34,8 +33,7 @@ export function SingleRecordModal({
   const { data: fieldTypes } = useFieldTypes();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
-  const { linkedRecord, handleOpenRecord, handleToggleRecord } =
-    useLinkedRecord();
+  const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
   const [record, setRecord] = useState(initialRecord);
   const hiddenFields = record.filter((item) => item.isHidden);
 
@@ -44,12 +42,10 @@ export function SingleRecordModal({
   }, [initialRecord]);
 
   const handleRecordInputChange = (fieldId, value) => {
-    setRecord((curRecord) =>
-      curRecord.map((item) => ({
-        ...item,
-        value: item.id === fieldId ? value : item.value,
-      }))
-    );
+    setRecord((curRecord) => curRecord.map((item) => ({
+      ...item,
+      value: item.id === fieldId ? value : item.value,
+    })));
   };
 
   const handleSubmit = (evt) => {
@@ -69,10 +65,7 @@ export function SingleRecordModal({
           </Dialog.Title>
           <div className="mt-8 flex flex-col gap-x-6 w-full text-gray-900">
             {record
-              .filter(
-                (item) =>
-                  !(item.isHidden || item.foreignKey?.columns.length > 1)
-              )
+              .filter((item) => !(item.isHidden || item.foreignKey?.columns.length > 1))
               .map((item) => (
                 <RecordItem
                   key={item.id}
@@ -89,22 +82,17 @@ export function SingleRecordModal({
 
               const primaryKeys = {};
               foreignKey.columns.forEach((col, index) => {
-                const curColumn = record.find(
-                  (recordItem) => recordItem.name === col
-                );
+                const curColumn = record.find((recordItem) => recordItem.name === col);
 
                 if (curColumn) {
-                  primaryKeys[foreignKey.referencedColumns[index]] =
-                    curColumn.value;
+                  primaryKeys[foreignKey.referencedColumns[index]] = curColumn.value;
                 }
               });
 
               const item = {
                 isForeignKey: true,
                 name: foreignKey.referencedTable.name,
-                fieldTypeId: fieldTypes.find(
-                  (key) => key.name === "Single Line Text"
-                ).id,
+                fieldTypeId: fieldTypes.find((key) => key.name === 'Single Line Text').id,
                 value: primaryKeys,
               };
 
@@ -115,8 +103,8 @@ export function SingleRecordModal({
                   recordId={
                     primaryKeys
                       ? Object.entries(primaryKeys)
-                          .map(([key, value]) => `${key}_${value}`)
-                          .join("-")
+                        .map(([key, value]) => `${key}_${value}`)
+                        .join('-')
                       : undefined
                   }
                   primaryKeys={primaryKeys}
@@ -150,8 +138,8 @@ export function SingleRecordModal({
                     <Disclosure.Button
                       type="button"
                       className={cn(
-                        "w-full flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500",
-                        disclosureOpen ? "mb-4" : "mb-8"
+                        'w-full flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500',
+                        disclosureOpen ? 'mb-4' : 'mb-8',
                       )}
                     >
                       {disclosureOpen ? (
@@ -165,7 +153,7 @@ export function SingleRecordModal({
                           aria-hidden="true"
                         />
                       )}
-                      {pluralize("hidden field", hiddenFields.length)}
+                      {pluralize('hidden field', hiddenFields.length)}
                     </Disclosure.Button>
                     <Disclosure.Panel>
                       {hiddenFields.map((item) => (
@@ -186,9 +174,7 @@ export function SingleRecordModal({
               const filters = {};
 
               connection.referencedColumns.forEach((col, index) => {
-                const curColumn = record.find(
-                  (recordItem) => recordItem.name === col
-                );
+                const curColumn = record.find((recordItem) => recordItem.name === col);
 
                 if (curColumn) {
                   filters[connection.columns[index]] = curColumn.value;
@@ -238,9 +224,7 @@ export function SingleRecordModal({
                 table={linkedRecord.table}
                 record={linkedRecord.record}
                 open={linkedRecord.open}
-                setOpen={(value) =>
-                  handleToggleRecord(value, linkedRecord.record)
-                }
+                setOpen={(value) => handleToggleRecord(value, linkedRecord.record)}
               />
             </TableReferencedConnectionsProvider>
           </TableConnectionsProvider>

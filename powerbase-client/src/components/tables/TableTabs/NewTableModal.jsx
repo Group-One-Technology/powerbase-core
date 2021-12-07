@@ -1,24 +1,22 @@
-/* eslint-disable */
-import React, { Fragment, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { PlusCircleIcon } from "@heroicons/react/outline";
-import NewTableField from "./NewTableField";
-import cn from "classnames";
-import TableNameInput from "./TableNameInput";
-import { securedApi } from "@lib/api";
-import { useCurrentView } from "@models/views/CurrentTableView";
-import Upload from "./UploadTable";
-import { toSnakeCase, camelToSnakeCase, camelize } from "@lib/helpers/text/textTypeFormatters";
+import React, { Fragment, useState } from 'react';
+import PropTypes from 'prop-types';
+import { Dialog, Transition } from '@headlessui/react';
+import { PlusCircleIcon } from '@heroicons/react/outline';
+import cn from 'classnames';
+import { securedApi } from '@lib/api';
+import { useCurrentView } from '@models/views/CurrentTableView';
+import { toSnakeCase, camelToSnakeCase, camelize } from '@lib/helpers/text/textTypeFormatters';
+import Upload from './UploadTable';
+import TableNameInput from './TableNameInput';
+import NewTableField from './NewTableField';
 
 const initial = [
   {
     id: 1,
-    fieldName: "",
+    fieldName: '',
     fieldTypeId: 1,
   },
 ];
-
-const types = [];
 
 export default function NewTableModal({
   open,
@@ -30,7 +28,7 @@ export default function NewTableModal({
 }) {
   const [newFields, setNewFields] = useState(initial);
   const [currentCount, setCurrentCount] = useState(1);
-  const [tableName, setTableName] = useState("");
+  const [tableName, setTableName] = useState('');
   const { handleTableChange, mutateTables } = useCurrentView();
   const [csvArray, setCsvArray] = useState([]);
   const [csvFile, setCsvFile] = useState();
@@ -38,7 +36,7 @@ export default function NewTableModal({
   const handleAddNewField = () => {
     setNewFields([
       ...newFields,
-      { id: currentCount + 1, fieldName: "", fieldTypeId: 1 },
+      { id: currentCount + 1, fieldName: '', fieldTypeId: 1 },
     ]);
     setCurrentCount(currentCount + 1);
   };
@@ -52,8 +50,8 @@ export default function NewTableModal({
             name: toSnakeCase(fieldName.toLowerCase()),
             description: null,
             oid: 1043,
-            dbType: "character varying",
-            defaultValue: "",
+            dbType: 'character varying',
+            defaultValue: '',
             isPrimaryKey: false,
             isNullable: false,
             powerbaseFieldTypeId: fieldTypeId,
@@ -68,26 +66,25 @@ export default function NewTableModal({
         return standardized;
       };
 
-      const standardizeTable = () => {
-        return {
-          name: toSnakeCase(tableName.toLowerCase()),
-          description: null,
-          powerbaseDatabaseId: base.id,
-          isMigrated: true,
-          logs: null,
-          isVirtual: true,
-          pageSize: 40,
-          alias: tableName,
-          order: tables.length,
-        };
-      };
+      const standardizeTable = () => ({
+        name: toSnakeCase(tableName.toLowerCase()),
+        description: null,
+        powerbaseDatabaseId: base.id,
+        isMigrated: true,
+        logs: null,
+        isVirtual: true,
+        pageSize: 40,
+        alias: tableName,
+        order: tables.length,
+      });
 
       const payload = {
         table: standardizeTable(),
         fields: standardizeFields(),
       };
 
-      const data = await addVirtualTable({payload});
+      // ! FIXME: addVirtualField is not defined here
+      const data = await addVirtualTable({ payload });
       if (data) {
         setOpen(false);
         mutateTables();
@@ -97,42 +94,38 @@ export default function NewTableModal({
 
     if (isUploadAction) {
       const csvFieldNames = Object.getOwnPropertyNames(csvArray[0]);
-      const standardizeTable = () => {
-        return {
-          name:
-            csvFile?.name.split(".").slice(0, -1).join(".") +
-            Math.floor(Math.random() * 10) +
-            Math.floor(Math.random() * 10),
-          description: null,
-          powerbase_database_id: base.id,
-          is_migrated: true,
-          logs: null,
-          is_virtual: true,
-          page_size: 200,
-          alias: tableName,
-          order: tables.length,
-        };
-      };
+      const standardizeTable = () => ({
+        name:
+            csvFile?.name.split('.').slice(0, -1).join('.')
+            + Math.floor(Math.random() * 10)
+            + Math.floor(Math.random() * 10),
+        description: null,
+        powerbase_database_id: base.id,
+        is_migrated: true,
+        logs: null,
+        is_virtual: true,
+        page_size: 200,
+        alias: tableName,
+        order: tables.length,
+      });
 
       const standardizeFields = () => {
-        const standardized = csvFieldNames.map((fieldName, idx) => {
-          return {
-            name: toSnakeCase(fieldName.toLowerCase()),
-            description: null,
-            oid: 1043,
-            dbType: "character varying",
-            defaultValue: "",
-            isPrimaryKey: false,
-            isNullable: false,
-            powerbaseFieldTypeId: 2,
-            isPii: false,
-            alias: fieldName,
-            order: idx,
-            isVirtual: true,
-            allowDirtyValue: true,
-            precision: null,
-          };
-        });
+        const standardized = csvFieldNames.map((fieldName, idx) => ({
+          name: toSnakeCase(fieldName.toLowerCase()),
+          description: null,
+          oid: 1043,
+          dbType: 'character varying',
+          defaultValue: '',
+          isPrimaryKey: false,
+          isNullable: false,
+          powerbaseFieldTypeId: 2,
+          isPii: false,
+          alias: fieldName,
+          order: idx,
+          isVirtual: true,
+          allowDirtyValue: true,
+          precision: null,
+        }));
         return standardized;
       };
 
@@ -141,12 +134,13 @@ export default function NewTableModal({
         fields: standardizeFields(),
       };
 
-      const data = await await addVirtualTable({payload});
+      // ! FIXME: addVirtualField is not defined here
+      const data = await addVirtualTable({ payload });
       if (data) {
+        // ! FIXME: response is not defined here
         const newTable = response.data.table;
         const newFields = response.data.fields;
         csvArray.forEach(async (record, idx) => {
-          let newRecordId;
           const recordParams = {
             powerbaseTableId: table.id,
             powerbaseDatabaseId: table.databaseId,
@@ -154,15 +148,16 @@ export default function NewTableModal({
           };
           // TODO - REFACTOR to use api helper and camelcase prop names
           const newRecordResponse = await securedApi.post(
-            `/magic_records`,
-            recordParams
+            '/magic_records',
+            recordParams,
           );
-          newRecordId = newRecordResponse.data?.id;
+          const newRecordId = newRecordResponse.data?.id;
           if (newRecordId) {
             const recordKeys = Object.getOwnPropertyNames(record);
             recordKeys.forEach(async (key, keyIdx) => {
-              const standardizedKey = key.replace(/^"(.*)"$/, "$1");
+              const standardizedKey = key.replace(/^"(.*)"$/, '$1');
               const camelizedKey = camelize(standardizedKey);
+              // ! FIXME: payload is already declared in this scope
               const payload = {
                 fieldName: camelToSnakeCase(camelizedKey),
                 fieldType_id: 2,
@@ -171,15 +166,15 @@ export default function NewTableModal({
                 textValue: record[key],
                 recordId: null,
                 magicRecordId: newRecordId,
-                keyType: "text_value",
-                tableTypeId: "magic_record_id",
+                keyType: 'text_value',
+                tableTypeId: 'magic_record_id',
                 hasPrecision: false,
               };
-              const response = await securedApi.post(`/magic_values`, payload);
-              if (response.statusText === "OK") {
+              const response = await securedApi.post('/magic_values', payload);
+              if (response.statusText === 'OK') {
                 if (
-                  idx + 1 === csvArray.length &&
-                  keyIdx + 1 === recordKeys.length
+                  idx + 1 === csvArray.length
+                  && keyIdx + 1 === recordKeys.length
                 ) {
                   // mutateTableRecords();
                   mutateTables();
@@ -257,7 +252,8 @@ export default function NewTableModal({
 
               {!isUploadAction && (
                 <div className="flex flex-row justify-center mt-2">
-                  <p
+                  <button
+                    type="button"
                     className="flex flex-row cursor-pointer"
                     onClick={handleAddNewField}
                   >
@@ -265,10 +261,10 @@ export default function NewTableModal({
                       <PlusCircleIcon className="text-indigo-400 w-6 h-6" />
                     </span>
                     <span className="text-sm text-indigo-400 ml-1 mt-0.5">
-                      {" "}
-                      Add a New Field{" "}
+                      {' '}
+                      Add a New Field{' '}
                     </span>
-                  </p>
+                  </button>
                 </div>
               )}
 
@@ -291,7 +287,7 @@ export default function NewTableModal({
                 <button
                   type="submit"
                   className={cn(
-                    `inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:bg-indigo-700`
+                    'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:bg-indigo-700',
                   )}
                 >
                   Add Table
@@ -304,3 +300,12 @@ export default function NewTableModal({
     </Transition.Root>
   );
 }
+
+NewTableModal.propTypes = {
+  open: PropTypes.bool,
+  setOpen: PropTypes.func,
+  table: PropTypes.object,
+  tables: PropTypes.array,
+  base: PropTypes.object,
+  isUploadAction: PropTypes.bool,
+};

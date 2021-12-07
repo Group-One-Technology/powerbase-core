@@ -1,13 +1,14 @@
-/* eslint-disable  */
-import React, { Fragment, useRef, useState, useEffect } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import React, {
+  Fragment, useRef, useState, useEffect,
+} from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import {
   SearchIcon,
   ExclamationIcon,
   CheckIcon,
-} from "@heroicons/react/outline";
-import PropTypes from "prop-types";
-import cn from "classnames";
+} from '@heroicons/react/outline';
+import PropTypes from 'prop-types';
+import cn from 'classnames';
 
 export default function TableSearchModal({
   modalOpen,
@@ -16,7 +17,7 @@ export default function TableSearchModal({
   handleTableChange,
   tableId,
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [hasHovered, setHasHovered] = useState(false);
   const focusRef = useRef(null);
@@ -27,11 +28,10 @@ export default function TableSearchModal({
     return acc;
   }, {});
 
-  const scrollToActiveItem = (id) =>
-    listItemRefs[id].current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+  const scrollToActiveItem = (id) => listItemRefs[id].current?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 
   const handleChange = (e) => {
     setSearchTerm(e.target.value);
@@ -42,21 +42,21 @@ export default function TableSearchModal({
   };
 
   function onKeyDown(event) {
-    const isUp = event.key === "ArrowUp";
-    const isDown = event.key === "ArrowDown";
+    const isUp = event.key === 'ArrowUp';
+    const isDown = event.key === 'ArrowDown';
     setHasHovered(true);
     const inputIsFocused = document.activeElement === searchInputRef.current;
 
     const resultsItems = Array.from(listContainerRef.current.children);
 
     const activeResultIndex = resultsItems.findIndex(
-      (child) => child.querySelector("button") === document.activeElement
+      (child) => child.querySelector('button') === document.activeElement,
     );
     if (isUp) {
       if (inputIsFocused) {
-        resultsItems[resultsItems.length - 1].querySelector("button").focus();
+        resultsItems[resultsItems.length - 1].querySelector('button').focus();
       } else if (resultsItems[activeResultIndex - 1]) {
-        resultsItems[activeResultIndex - 1].querySelector("button").focus();
+        resultsItems[activeResultIndex - 1].querySelector('button').focus();
       } else {
         searchInputRef.current.focus();
       }
@@ -64,9 +64,9 @@ export default function TableSearchModal({
 
     if (isDown) {
       if (inputIsFocused) {
-        resultsItems[0].querySelector("button").focus();
+        resultsItems[0].querySelector('button').focus();
       } else if (resultsItems[activeResultIndex + 1]) {
-        resultsItems[activeResultIndex + 1].querySelector("button").focus();
+        resultsItems[activeResultIndex + 1].querySelector('button').focus();
       } else {
         searchInputRef.current.focus();
       }
@@ -75,9 +75,8 @@ export default function TableSearchModal({
 
   useEffect(() => {
     const results = tables.filter(
-      (table) =>
-        table.alias?.toLowerCase().includes(searchTerm) ||
-        table.name.toLowerCase().includes(searchTerm)
+      (table) => table.alias?.toLowerCase().includes(searchTerm)
+        || table.name.toLowerCase().includes(searchTerm),
     );
     setSearchResults(results);
   }, [searchTerm]);
@@ -90,12 +89,12 @@ export default function TableSearchModal({
   useEffect(() => {
     if (!hasHovered) scrollToActiveItem(tableId);
     if (searchResults) {
-      document.body.addEventListener("keydown", onKeyDown);
+      document.body.addEventListener('keydown', onKeyDown);
     } else {
-      document.body.removeEventListener("keydown", onKeyDown);
+      document.body.removeEventListener('keydown', onKeyDown);
     }
     return () => {
-      document.body.removeEventListener("keydown", onKeyDown);
+      document.body.removeEventListener('keydown', onKeyDown);
     };
   }, [searchResults]);
 
@@ -170,25 +169,21 @@ export default function TableSearchModal({
                           return (
                             <li
                               className={cn(
-                                "p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12",
-                                !hasHovered && isCurrentTable && "bg-gray-200"
+                                'p-1 text-sm cursor-pointer hover:bg-gray-200 flex justify-center h-12',
+                                !hasHovered && isCurrentTable && 'bg-gray-200',
                               )}
                               key={item.id}
                               ref={listItemRefs[item.id]}
                             >
-                              {" "}
+                              {' '}
                               <button
-                                onClick={() =>
-                                  handleSearchResultClick({ table: item })
-                                }
+                                onClick={() => handleSearchResultClick({ table: item })}
                                 className="focus:bg-gray-200 w-full h-full flex justify-center items-center space-x-1.5 focus:outline-none"
                               >
                                 <span>
-                                  {isCurrentTable ? (
-                                    <CheckIcon className="h-5 w-5" />
-                                  ) : (
-                                    ""
-                                  )}
+                                  {isCurrentTable
+                                    ? <CheckIcon className="h-5 w-5" />
+                                    : ''}
                                 </span>
                                 <span>{item.alias || item.name}</span>
                               </button>
@@ -202,7 +197,7 @@ export default function TableSearchModal({
                     <div className="flex flex-col justify-center content-center items-center">
                       <ExclamationIcon className="h-6 w-6 text-gray-800" />
                       <p className="text-gray-800 text-sm mt-1">
-                        {" "}
+                        {' '}
                         There are no matching tables.
                       </p>
                     </div>

@@ -1,19 +1,14 @@
-/* eslint-disable  */
-import React, { useRef, useEffect } from "react";
-import { useState } from "react";
-import { DocumentAddIcon, PaperClipIcon } from "@heroicons/react/solid";
-import cn from "classnames";
+import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { DocumentAddIcon, PaperClipIcon } from '@heroicons/react/solid';
+import cn from 'classnames';
 
 export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
   const hiddenFileInput = useRef(null);
 
-  useEffect(() => {
-    if (csvFile) stageCsvData();
-  }, [csvFile]);
-
-  const processCSV = (str, delim = ",") => {
-    const headers = str.slice(0, str.indexOf("\n")).split(delim);
-    const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+  const processCSV = (str, delim = ',') => {
+    const headers = str.slice(0, str.indexOf('\n')).split(delim);
+    const rows = str.slice(str.indexOf('\n') + 1).split('\n');
 
     const newArray = rows.map((row) => {
       const values = row.split(delim);
@@ -31,7 +26,7 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
     const file = csvFile;
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = function processGivenCSV(e) {
       const text = e.target.result;
       processCSV(text);
     };
@@ -39,13 +34,13 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
     reader.readAsText(file);
   };
 
-  const handleClick = (event) => {
+  useEffect(() => {
+    if (csvFile) stageCsvData();
+  }, [csvFile]);
+
+  const handleClick = () => {
     hiddenFileInput.current.click();
   };
-
-  // console.log(csvArray);
-
-  // console.log(csvFile?.name);
 
   return (
     <form id="csv-form" className="flex flex-col align-center h-full">
@@ -61,11 +56,11 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
         )}
         <div
           className={cn(
-            "text-gray-600 text-sm self-center mt-1",
-            csvFile && "italic"
+            'text-gray-600 text-sm self-center mt-1',
+            csvFile && 'italic',
           )}
         >
-          {!csvFile ? "Select a CSV File to Import" : csvFile?.name}
+          {!csvFile ? 'Select a CSV File to Import' : csvFile?.name}
         </div>
       </div>
       <input
@@ -77,7 +72,13 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
         onChange={(e) => {
           setCsvFile(e.target.files[0]);
         }}
-      ></input>
+      />
     </form>
   );
 }
+
+CsvReader.propTypes = {
+  csvFile: PropTypes.any,
+  setCsvFile: PropTypes.func,
+  setCsvArray: PropTypes.func,
+};

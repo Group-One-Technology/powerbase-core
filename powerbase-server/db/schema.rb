@@ -95,6 +95,18 @@ ActiveRecord::Schema.define(version: 2021_12_06_042746) do
     t.index ["powerbase_table_id"], name: "index_magic_records_on_powerbase_table_id"
   end
 
+  create_table "magic_values", force: :cascade do |t|
+    t.integer "table_id"
+    t.integer "record_id"
+    t.integer "database_id"
+    t.boolean "is_magic_cell"
+    t.integer "field_id"
+    t.string "data_type"
+    t.text "text_value"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.string "data_type", null: false
     t.text "message", null: false
@@ -152,9 +164,6 @@ ActiveRecord::Schema.define(version: 2021_12_06_042746) do
     t.boolean "is_pii", default: false, null: false
     t.string "alias"
     t.text "options"
-    t.boolean "is_virtual"
-    t.integer "precision"
-    t.boolean "allow_dirty_value"
     t.text "permissions", default: "{\"view_field\":{\"access\":\"everyone\"},\"manage_field\":{\"access\":\"admins and up\"},\"edit_field_data\":{\"access\":\"editors and up\"}}"
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
@@ -172,7 +181,6 @@ ActiveRecord::Schema.define(version: 2021_12_06_042746) do
     t.string "alias"
     t.text "logs", default: "{}"
     t.integer "order", null: false
-    t.boolean "is_virtual", default: false
     t.text "permissions", default: "{\"view_table\":{\"access\":\"everyone\"},\"manage_table\":{\"access\":\"admins and up\"},\"add_fields\":{\"access\":\"admins and up\"},\"delete_fields\":{\"access\":\"admins and up\"},\"add_views\":{\"access\":\"editors and up\"},\"manage_views\":{\"access\":\"editors and up\"},\"delete_views\":{\"access\":\"editors and up\"},\"add_records\":{\"access\":\"editors and up\"},\"delete_records\":{\"access\":\"editors and up\"},\"comment_records\":{\"access\":\"commenters and up\"}}"
     t.boolean "is_hidden", default: false
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
@@ -229,8 +237,6 @@ ActiveRecord::Schema.define(version: 2021_12_06_042746) do
   add_foreign_key "guests", "users", column: "inviter_id"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
-  add_foreign_key "magic_records", "powerbase_databases"
-  add_foreign_key "magic_records", "powerbase_tables"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"

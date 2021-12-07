@@ -1,5 +1,5 @@
-/* eslint-disable */
-import React from 'react';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { PlusIcon } from '@heroicons/react/solid';
 import * as Popover from '@radix-ui/react-popover';
 import NewTableModal from './NewTableModal';
@@ -9,7 +9,6 @@ const AddTable = ({
   base,
   tables,
   isUploadAction,
-  setIsUploadAction,
 }) => {
   const [open, setOpen] = useState(false);
   const handleAddTable = () => {
@@ -41,21 +40,23 @@ const AddTable = ({
         </Popover.Trigger>
         <Popover.Content className="w-60 mt-3 transform sm:px-0 absolute z-10">
           <div className="shadow-lg bg-white ring-1 ring-black ring-opacity-5 mt-2 p-2">
-            <div
+            <button
+              type="button"
               className="text-xs font-medium text-gray-800 mt-2 cursor-pointer hover:bg-gray-200 p-2 cursor-not-allowed"
               onClick={handleAddTable}
             >
               Create a new table
-            </div>
+            </button>
             <div className="mt-1 py-2 px-1">
-              <div className="text-xs text-gray-500 px-1">IMPORT FROM</div>
+              <div className="text-xs text-gray-500 px-1 uppercase">Import From</div>
               <div className="text-xs text-gray-800 mt-1 font-medium">
-                <div
+                <button
+                  type="button"
                   className="mt-2 cursor-pointer hover:bg-gray-200 py-2 px-1"
                   onClick={handleImportCSV}
                 >
                   CSV File
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -66,3 +67,10 @@ const AddTable = ({
 };
 
 export default AddTable;
+
+AddTable.propTypes = {
+  table: PropTypes.object,
+  base: PropTypes.object,
+  tables: PropTypes.array,
+  isUploadAction: PropTypes.bool,
+};

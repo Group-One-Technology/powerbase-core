@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -17,8 +16,8 @@ import {
   formatToDecimalPlaces,
 } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
+import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import EditCell from './EditCell';
-import { OutsideCellClick } from '@components/ui/OutsideCellClick'
 
 function CellValue({
   value,
@@ -177,6 +176,7 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
+  // ! FIXME Below is not included in props validation
   recordInputRef,
   isEditing,
   setIsEditing,

@@ -1,94 +1,94 @@
-/* eslint-disable  */
-import constate from "constate";
-import useSWR, { useSWRInfinite } from "swr";
-import { useState } from "react";
-import { getTableRecords, getMagicValues } from "@lib/api/records";
-import { useAuthUser } from "./AuthUser";
-import { useViewOptions } from "./views/ViewOptions";
-import { getParameterCaseInsensitive } from "@lib/helpers/getParameterCaseInsensitive";
+import constate from 'constate';
+import useSWR, { useSWRInfinite } from 'swr';
+import { useState } from 'react';
+import { getTableRecords, getMagicValues } from '@lib/api/records';
+import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
+import { useAuthUser } from './AuthUser';
+import { useViewOptions } from './views/ViewOptions';
 
-function getKey({ index, tableId, query, sort, filters, pageSize }) {
+function getKey({
+  index, tableId, query, sort, filters, pageSize,
+}) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
-  const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : "";
-  const filterQuery = filters?.id ? `&filterId=${filters.id}` : "";
-  const sortQuery = sort?.id ? `&sortId=${sort.id}` : "";
+  const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : '';
+  const filterQuery = filters?.id ? `&filterId=${filters.id}` : '';
+  const sortQuery = sort?.id ? `&sortId=${sort.id}` : '';
 
   return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
 function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
   const { authUser } = useAuthUser();
-  const { viewId, query, filters, sort } = useViewOptions();
+  const {
+    viewId, query, filters, sort,
+  } = useViewOptions();
 
   const response = useSWRInfinite(
-    (index) =>
-      id && authUser && viewId
-        ? getKey({
-            index,
-            tableId: id,
-            query,
-            sort,
-            filters,
-            pageSize,
-          })
-        : null,
-    (url) =>
-      id && authUser && viewId
-        ? getTableRecords({
-            url,
-            viewId,
-            tableId: id,
-            query,
-            filters:
-              filters && filters.id && filters.value
-                ? filters.value
-                : undefined,
-            sort: sort && sort.id && sort.value ? sort.value : undefined,
-          })
-        : undefined
+    (index) => ((id && authUser && viewId)
+      ? getKey({
+        index,
+        tableId: id,
+        query,
+        sort,
+        filters,
+        pageSize,
+      })
+      : null),
+    (url) => ((id && authUser && viewId)
+      ? getTableRecords({
+        url,
+        viewId,
+        tableId: id,
+        query,
+        filters: (filters && filters.id && filters.value)
+          ? filters.value
+          : undefined,
+        sort: (sort && sort.id && sort.value)
+          ? sort.value
+          : undefined,
+      })
+      : undefined),
   );
 
-  const { data, error, size, setSize } = response;
+  const {
+    data, error, size, setSize,
+  } = response;
 
-  let parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-  let mergedData = parsedData;
+  const parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
+  const mergedData = parsedData;
 
   if (!isTurbo) {
     const magicValuesResponse = useSWR(
       `/tables/${id}/magic_values`,
-      getMagicValues
+      getMagicValues,
     );
     const { data: magicData } = magicValuesResponse;
-    parsedData?.forEach((record, idx) =>
-      magicData?.forEach((magicValue) => {
-        let matches = [];
-        const docId = magicValue.docId;
-        const primaryKeys = docId.split("---");
-        primaryKeys.forEach((key, pkIdx) => {
-          const sanitized = key.split("___");
-          const pkName = sanitized[0];
-          const pkValue = sanitized[1];
-          matches.push(
-            getParameterCaseInsensitive(record, pkName) + "" === pkValue + ""
-          );
-          if (pkIdx === primaryKeys.length - 1 && !matches.includes(false)) {
-            const { docId, ...associatedValue } = magicValue;
-            const combined = { ...record, ...associatedValue };
-            mergedData[idx] = combined;
-          }
-        });
-      })
-    );
+    parsedData?.forEach((record, idx) => magicData?.forEach((magicValue) => {
+      const matches = [];
+      const { docId } = magicValue;
+      const primaryKeys = docId.split('---');
+      primaryKeys.forEach((key, pkIdx) => {
+        const sanitized = key.split('___');
+        const pkName = sanitized[0];
+        const pkValue = sanitized[1];
+        matches.push(
+          `${getParameterCaseInsensitive(record, pkName)}` === `${pkValue}`,
+        );
+        if (pkIdx === primaryKeys.length - 1 && !matches.includes(false)) {
+          const { docId: _docId, ...associatedValue } = magicValue;
+          const combined = { ...record, ...associatedValue };
+          mergedData[idx] = combined;
+        }
+      });
+    }));
   }
 
   const isLoadingInitialData = !data && !error;
-  const isLoading =
-    isLoadingInitialData ||
-    !!(size > 0 && data && typeof data[size - 1] === "undefined");
+  const isLoading = isLoadingInitialData
+    || !!(size > 0 && data && typeof data[size - 1] === 'undefined');
   const isEmpty = data?.[0]?.length === 0;
-  const isReachingEnd =
-    isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
+  const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
   const [highlightedCell, setHighLightedCell] = useState(null);
 
@@ -103,5 +103,4 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
   };
 }
 
-export const [TableRecordsProvider, useTableRecords] =
-  constate(useTableRecordsModel);
+export const [TableRecordsProvider, useTableRecords] = constate(useTableRecordsModel);

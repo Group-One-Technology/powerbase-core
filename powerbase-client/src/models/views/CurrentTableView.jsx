@@ -1,11 +1,10 @@
-/* eslint-disable  */
-import useSWR from "swr";
-import { useState } from "react";
-import constate from "constate";
+import useSWR from 'swr';
+import { useState } from 'react';
+import constate from 'constate';
 
-import { useAuthUser } from "@models/AuthUser";
-import { getTables, updateTableDefaultView } from "@lib/api/tables";
-import { getTableViews } from "@lib/api/views";
+import { useAuthUser } from '@models/AuthUser';
+import { getTables, updateTableDefaultView } from '@lib/api/tables';
+import { getTableViews } from '@lib/api/views';
 
 function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const { authUser } = useAuthUser();
@@ -13,31 +12,25 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const [viewId, setViewId] = useState(initialViewId);
 
   const tablesResponse = useSWR(
-    baseId && authUser ? `${authUser.id}/databases/${baseId}/tables` : null,
+    (baseId && authUser) ? `${authUser.id}/databases/${baseId}/tables` : null,
     () => getTables({ databaseId: baseId }),
-    { revalidateOnFocus: true }
+    { revalidateOnFocus: true },
   );
 
   const viewsResponse = useSWR(
-    tableId && authUser ? `${authUser.id}/tables/${tableId}/views` : null,
+    (tableId && authUser) ? `${authUser.id}/tables/${tableId}/views` : null,
     () => getTableViews({ tableId }),
-    { revalidateOnFocus: true }
+    { revalidateOnFocus: true },
   );
 
-  const currentTable = tablesResponse.data?.tables.find(
-    (table) => table.id.toString() === tableId.toString()
-  );
-  const currentView = viewsResponse.data?.find(
-    (view) => view.id.toString() === viewId?.toString()
-  );
+  const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
+  const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
 
   const handleTableChange = ({ table }) => {
     window.history.replaceState(
       null,
       table.name,
-      `/base/${baseId}/table/${table.id}?${
-        table.defaultViewId ? `view=${table.defaultViewId}` : ""
-      }`
+      `/base/${baseId}/table/${table.id}?${table.defaultViewId ? `view=${table.defaultViewId}` : ''}`,
     );
 
     setTableId(table.id);
@@ -51,7 +44,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
       currentTable.defaultViewId === view.id
         ? currentTable.name
         : `${currentTable.name} - ${view.name}`,
-      `/base/${baseId}/table/${view.tableId}?view=${view.id}`
+      `/base/${baseId}/table/${view.tableId}?view=${view.id}`,
     );
 
     setViewId(view.id);
@@ -79,5 +72,4 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   };
 }
 
-export const [CurrentViewProvider, useCurrentView] =
-  constate(useCurrentViewModel);
+export const [CurrentViewProvider, useCurrentView] = constate(useCurrentViewModel);

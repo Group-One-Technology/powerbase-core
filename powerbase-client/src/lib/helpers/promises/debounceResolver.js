@@ -1,4 +1,4 @@
-/* eslint-disable */
+
 import DebouncePromise from "./debounce";
 import onlyResolvesLast from "./resolveLastPromise";
 
