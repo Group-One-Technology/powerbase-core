@@ -18,7 +18,7 @@ import {
 } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
 import EditCell from './EditCell';
-import OutsideCellClick from './OutsideCellClick';
+import { OutsideCellClick } from '@components/ui/OutsideCellClick'
 
 function CellValue({
   value,
@@ -41,6 +41,7 @@ function CellValue({
     ? 'px-2 py-0.25 bg-blue-50 rounded'
     : '';
 
+  // This is for a feature that's a WIP
   const addNewRecord = () => {
     setIsEditing(true);
     setEditCellInput('');

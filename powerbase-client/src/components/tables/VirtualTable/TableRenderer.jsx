@@ -16,16 +16,18 @@ import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useBaseUser } from '@models/BaseUser';
+import { useBase } from '@models/Base';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({
-  height, table, highlightedCell, base,
+  height, table, highlightedCell,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { baseUser } = useBaseUser();
+  const { data: base } = useBase();
   const {
     data: records,
     loadMore: loadMoreRows,
@@ -258,5 +260,4 @@ TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
   highlightedCell: PropTypes.string,
-  base: PropTypes.object.isRequired,
 };

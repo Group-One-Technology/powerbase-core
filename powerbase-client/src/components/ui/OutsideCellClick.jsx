@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-const OutsideCellClick = (props) => {
+export const OutsideCellClick = (props) => {
   let clickCaptured = false;
   let focusCaptured = false;
 
@@ -40,7 +40,7 @@ const OutsideCellClick = (props) => {
     props.children,
   );
 
-  const initialize = () => {
+  const init = () => {
     document.addEventListener('mousedown', documentClick);
     document.addEventListener('focusin', documentFocus);
     document.addEventListener('touchstart', documentClick);
@@ -53,7 +53,7 @@ const OutsideCellClick = (props) => {
   };
 
   useEffect(() => {
-    initialize();
+    init();
     return () => clear();
   }, []);
 
@@ -65,5 +65,3 @@ const OutsideCellClick = (props) => {
 
   return renderComponent();
 };
-
-export default OutsideCellClick;
