@@ -14,7 +14,7 @@ export function useEditingCell(
       case 'text':
         return true;
       case 'number':
-        return field.precision
+        return field.options.precision
           ? isValidNumberOrDecimal(val)
           : isValidInteger(val);
       default:
@@ -57,7 +57,7 @@ export function useEditingCell(
 
     /* The ids are composed in a double underscore and double hypen commas to avoid
     incomplete splits down the line for field names that have underscore already */
-    // REFACTOR to use a new identifier-composition approach with unique unicode characters
+    // ! TODO - REFACTOR to use a new identifier-composition approach with unique unicode characters
     const composedKeys = primaryKeys
       .map((primaryKey) => {
         const keyName = primaryKey.name.toLowerCase();
@@ -68,16 +68,16 @@ export function useEditingCell(
 
     let hasPrecision = false;
     let formattedNumber;
-    if (field.precision && fieldType.dataType === 'number') {
+    if (field.options.precision && fieldType.dataType === 'number') {
       hasPrecision = true;
       const sanitizedNumber = parseFloat(recordInputRef.current?.value);
-      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.precision);
+      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options.precision);
     }
 
     const payload = {
       primary_keys: composedKeys,
       data: {
-        [field.name]: field.precision
+        [field.name]: field.options.precision
           ? formattedNumber
           : recordInputRef.current?.value,
       },

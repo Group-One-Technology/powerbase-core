@@ -160,9 +160,8 @@ export default function NewField({
           viewId: view.id,
           isVirtual: true,
           allowDirtyValue: isChecked,
-          precision: numberPrecision ? numberPrecision.precision : null,
           order: Math.max(...ViewFields.map((item) => item.order)) + 1,
-          options: currency ? { style: 'currency', currency } : null,
+          options: currency ? { style: 'currency', currency } : (numberPrecision ? { style: 'precision', precision: numberPrecision.precision } : null),
         },
       });
       if (response.statusText === 'OK') {

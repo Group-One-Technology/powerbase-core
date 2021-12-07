@@ -202,7 +202,6 @@ class PowerbaseFieldsController < ApplicationController
         created_at: field.created_at,
         updated_at: field.updated_at,
         is_virtual: field.is_virtual,
-        precision: field.precision,
         allow_dirty_value: field.allow_dirty_value
       }
     end
