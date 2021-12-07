@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -17,8 +16,8 @@ import {
   formatToDecimalPlaces,
 } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
+import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import EditCell from './EditCell';
-import { OutsideCellClick } from '@components/ui/OutsideCellClick'
 
 function CellValue({
   value,
@@ -29,29 +28,10 @@ function CellValue({
   field,
   fieldType,
   handleExpandRecord,
-  rowIndex,
-  columnIndex,
-  setIsEditing,
-  setEditCellInput,
-  setCellToEdit,
-  setIsNewRecord,
-  setHoveredCell,
 }) {
   const className = value?.toString().length && field?.isForeignKey
     ? 'px-2 py-0.25 bg-blue-50 rounded'
     : '';
-
-  // This is for a feature that's a WIP
-  const addNewRecord = () => {
-    setIsEditing(true);
-    setEditCellInput('');
-    setCellToEdit({
-      row: rowIndex,
-      column: columnIndex + 1,
-    });
-    setIsNewRecord(true);
-    setHoveredCell({});
-  };
 
   if (!isLastRow && !isLoaded) {
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
@@ -216,8 +196,8 @@ export function CellRenderer({
     setHoveredCell({});
   };
 
-  const handleMagicInputValidation = (value) => {
-    if (!value) return true;
+  const handleMagicInputValidation = (val) => {
+    if (!val) return true;
     const type = fieldType.dataType;
     switch (type?.toLowerCase()) {
       case 'string':
@@ -225,17 +205,17 @@ export function CellRenderer({
         return true;
       case 'number':
         return field.precision
-          ? isValidNumberOrDecimal(value)
-          : isValidInteger(value);
+          ? isValidNumberOrDecimal(val)
+          : isValidInteger(val);
       default:
         return true;
     }
   };
 
   const onChange = (e) => {
-    const { value } = e.target;
-    if (!handleMagicInputValidation(value)) return;
-    setEditCellInput(value);
+    const magicInputValue = e.target.value;
+    if (!handleMagicInputValidation(magicInputValue)) return;
+    setEditCellInput(magicInputValue);
   };
 
   const onClickOutsideEditingCell = async (e, calendarData = null) => {
@@ -269,9 +249,9 @@ export function CellRenderer({
     incomplete splits down the line for field names that have underscore already */
     // REFACTOR to use a new identifier-composition approach with unique unicode characters
     const composedKeys = primaryKeys
-      .map((key) => {
-        const keyName = key.name.toLowerCase();
-        const keyValue = (`${key.value}`).toLocaleLowerCase();
+      .map((primaryKey) => {
+        const keyName = primaryKey.name.toLowerCase();
+        const keyValue = (`${primaryKey.value}`).toLocaleLowerCase();
         return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
       })
       .join(isTurbo ? '-' : '---');
@@ -306,11 +286,11 @@ export function CellRenderer({
             ? primaryKeys
             : composedKeys.split('---');
           let objToUse = {};
-          extractedPrimaryKeys.forEach((key, pkIdx) => {
+          extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
             let sanitized;
-            if (!isTurbo) sanitized = key.split('___');
-            const pkName = isTurbo ? key.name : sanitized[0];
-            const pkValue = isTurbo ? key.value : sanitized[1];
+            if (!isTurbo) sanitized = extractedKey.split('___');
+            const pkName = isTurbo ? extractedKey.name : sanitized[0];
+            const pkValue = isTurbo ? extractedKey.value : sanitized[1];
             matches.push(
               `${getParameterCaseInsensitive(recordObj, pkName)}`
                 === `${pkValue}`,
@@ -370,7 +350,7 @@ export function CellRenderer({
           if (isEditing && cellToEdit) onClickOutsideEditingCell();
         }
       }}
-      onDoubleClick={(evt) => {
+      onDoubleClick={() => {
         if (!isRowNo && field.isVirtual && canAddRecords && !isLastRow) {
           setIsEditing(true);
           setEditCellInput(value);
@@ -458,4 +438,24 @@ CellRenderer.propTypes = {
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
   isHighlighted: PropTypes.bool,
+  recordInputRef: PropTypes.func,
+  isEditing: PropTypes.bool,
+  setIsEditing: PropTypes.func.isRequired,
+  cellToEdit: PropTypes.object,
+  setCellToEdit: PropTypes.func.isRequired,
+  editCellInput: PropTypes.string,
+  setEditCellInput: PropTypes.func.isRequired,
+  records: PropTypes.array.isRequired,
+  validationToolTip: PropTypes.bool,
+  table: PropTypes.object.isRequired,
+  isNewRecord: PropTypes.bool,
+  setIsNewRecord: PropTypes.func.isRequired,
+  initialFields: PropTypes.array.isRequired,
+  connections: PropTypes.array.isRequired,
+  setUpdatedRecords: PropTypes.func.isRequired,
+  updatedRecords: PropTypes.array.isRequired,
+  setCalendarValue: PropTypes.func.isRequired,
+  calendarValue: PropTypes.string,
+  isTurbo: PropTypes.bool.isRequired,
+  canAddRecords: PropTypes.bool.isRequired,
 };
