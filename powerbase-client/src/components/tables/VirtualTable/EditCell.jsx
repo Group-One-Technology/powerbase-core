@@ -1,16 +1,15 @@
-/* eslint-disable */
 import React, {
   useEffect,
-  Fragment,
   useState,
   forwardRef,
   useRef,
 } from 'react';
-import isObject from 'lodash/isObject';
+import { isObject } from '@lib/helpers/isObject';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import '@css/react-datepicker.css';
 
 function getValue(value) {
   if (isObject(value)) return JSON.stringify(value);
@@ -44,6 +43,27 @@ const TooltipContent = () => (
   </>
 );
 
+const CalButton = ({ onClick, value }) => {
+  const buttonRef = useRef(null);
+  useEffect(() => {
+    buttonRef?.current?.click();
+  }, []);
+  return (
+    <button
+      className="w-full focus:outline-none text-sm leading-3"
+      onClick={onClick}
+      id="cal-button"
+      ref={buttonRef}
+    >
+      {value}
+    </button>
+  );
+};
+
+const CustomInput = forwardRef(({ value, onClick }) => (
+  <CalButton onClick={onClick} value={value} />
+));
+
 const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
 
@@ -71,26 +91,6 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
     await onClickOutsideEditingCell(formatted);
   };
 
-  const CalButton = ({ onClick, value, ref }) => {
-    const buttonRef = useRef(null);
-    useEffect(() => {
-      buttonRef?.current?.click();
-    }, []);
-    return (
-      <button
-        className="w-full focus:outline-none text-sm leading-3"
-        onClick={onClick}
-        id="cal-button"
-        ref={buttonRef}
-      >
-        {value}
-      </button>
-    );
-  };
-
-  const CustomInput = forwardRef(({ value, onClick }) => (
-    <CalButton onClick={onClick} value={value} />
-  ));
   return (
     <DatePicker
       selected={startDate}
@@ -115,6 +115,20 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       ]}
     />
   );
+};
+
+Calendar.propTypes = {
+  onClickOutsideEditingCell: PropTypes.func.isRequired,
+};
+
+CalButton.propTypes = {
+  value: PropTypes.any,
+  onClick: PropTypes.func.isRequired,
+};
+
+CustomInput.propTypes = {
+  value: PropTypes.any,
+  onClick: PropTypes.func.isRequired,
 };
 
 function TextCell(
@@ -161,5 +175,15 @@ function TextCell(
   );
   return cellInnerEl;
 }
+
+TextCell.propTypes = {
+  value: PropTypes.any,
+  isEditing: PropTypes.bool,
+  validationToolTip: PropTypes.bool,
+  onChange: PropTypes.func,
+  fieldType: PropTypes.object,
+  setCalendarValue: PropTypes.func,
+  onClickOutsideEditingCell: PropTypes.func,
+};
 
 export default React.forwardRef(TextCell);
