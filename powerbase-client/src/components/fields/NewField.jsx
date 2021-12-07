@@ -78,8 +78,6 @@ const FieldTypeComponent = ({
           <FieldTypeIcon
             typeId={type.id}
             fieldTypes={fieldTypes}
-            isPrimaryKey={false}
-            isForeignKey={false}
             className="mr-1"
           />
         </div>
