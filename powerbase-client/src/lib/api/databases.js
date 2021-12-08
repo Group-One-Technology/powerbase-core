@@ -72,6 +72,16 @@ export async function updateDatabase({ id, ...payload }) {
   return undefined;
 }
 
+export async function disconnectDatabase({ id }) {
+  const response = await securedApi.delete(`/databases/${id}`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function updateDatabasePermission({ id, ...payload }) {
   const response = await securedApi.put(`/databases/${id}/update_database_permission`, payload);
 

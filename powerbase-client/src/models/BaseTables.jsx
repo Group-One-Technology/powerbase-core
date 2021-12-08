@@ -2,6 +2,7 @@ import constate from 'constate';
 import useSWR from 'swr';
 
 import { getTables } from '@lib/api/tables';
+import { useTableMigrationListener } from '@lib/hooks/websockets/useTableMigrationListener';
 import { useAuthUser } from './AuthUser';
 
 function useBaseTablesModel({ id }) {
@@ -11,6 +12,8 @@ function useBaseTablesModel({ id }) {
     (id && authUser) ? `${authUser.id}/databases/${id}/tables` : null,
     () => getTables({ databaseId: id }),
   );
+
+  useTableMigrationListener({ tables: response.data?.tables, mutate: response.mutate });
 
   return {
     ...response,

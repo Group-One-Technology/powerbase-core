@@ -1,5 +1,6 @@
 class Fields::Creator
   include FieldTypeHelper
+  include PusherHelper
 
   attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :database, :base_migration
 
@@ -42,15 +43,19 @@ class Fields::Creator
       powerbase_field_id: field.id
     })
 
-    # Set table as migrated for non-turbo databases
-    table.is_migrated = true if !database.is_turbo
-    table.save
+    if !database.is_turbo
+      table.is_migrated = true
+      table.save
+      pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+    end
 
-    if !database.is_turbo && database.in_synced?
+    if !database.is_turbo && database.is_migrating?
       database.is_migrated = true
       database.save
       base_migration.end_time = Time.now
       base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
   end
 

@@ -1,3 +1,5 @@
+export const MAX_SMALL_DATABASE_SIZE = 1000000; // 976.56 KB
+
 export const BASE_SOURCES = [
   {
     name: 'Fresh Base',
@@ -37,5 +39,23 @@ export const BASE_SOURCES = [
   },
 ];
 
-export const NON_TURBO_REFRESH_INTERVAL = 5000; // milliseconds = 5 seconds
-export const TURBO_REFRESH_INTERVAL = 600000; // milliseconds = 10 minutes
+export const DATABASE_TYPES = [
+  { name: 'PostgreSQL', value: 'postgresql', port: 5432 },
+  { name: 'MySQL', value: 'mysql2', port: 3306 },
+  {
+    name: 'SQLite',
+    value: 'sqlite',
+    description: 'Coming Soon',
+    disabled: true,
+  },
+];
+
+export const DB_PLATFORMS = [
+  { name: 'Powerbase Cloud', description: 'A free cloud platform powered by Powerbase.', price: '$0' },
+  { name: 'AWS', description: 'Coming Soon', disabled: true },
+];
+
+export const POWERBASE_TYPE = [
+  { name: 'Powerbase Turbo', description: 'Get a faster experience with the power of Elastic Search. Great for dealing with large datasets.' },
+  { name: 'Regular', description: 'A normal experience suited for dealing with small datasets.' },
+];

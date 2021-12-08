@@ -4,7 +4,7 @@ class PowerbaseDatabasesController < ApplicationController
   before_action :check_database_access, only: [:update, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
-  schema(:show, :clear_logs) do
+  schema(:show, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
@@ -126,68 +126,47 @@ class PowerbaseDatabasesController < ApplicationController
   # POST /databases/connect
   def connect
     options = safe_params.output
-
     @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
 
     if @database
-      render json: { is_existing: true, database: format_json(@database) }
+      render json: { error: "Database with name of '#{options[:name]}' already exists in this account." }, status: :unprocessable_entity
       return
     end
 
     begin
       Powerbase.connect(options)
     rescue => exception
-      render json: { connected: false }
+      render json: { error: "Couldn't connect to \"#{options[:name]}\". Please check the information given if they are correct." }, status: :unprocessable_entity
       return;
     end
 
-    @database = PowerbaseDatabase.new({
+    options[:database_name] = Powerbase.database
+    options[:connection_string] = Powerbase.connection_string
+    options[:adapter] = Powerbase.adapter
+    is_connected = Powerbase.connected?
+    Powerbase.disconnect
+
+    if !is_connected
+      render json: { error: "Couldn't connect to \"#{options[:name]}\". Please check the information given if they are correct." }, status: :unprocessable_entity
+      return
+    end
+
+    database_creator = Databases::Creator.new({
       name: options[:name],
-      database_name: Powerbase.database,
-      connection_string: Powerbase.connection_string,
-      adapter: Powerbase.adapter,
+      database_name: options[:database_name],
+      connection_string: options[:connection_string],
+      adapter: options[:adapter],
       is_migrated: false,
       color: options[:color],
       is_turbo: options[:is_turbo],
       user_id: current_user.id,
     })
 
-    if !Powerbase.connected?
-      Powerbase.disconnect
-      render json: { connected: false, database: format_json(@database) }
-      return
-    elsif !@database.save
-      Powerbase.disconnect
-      render json: @database.errors, status: :unprocessable_entity
-      return
+    if database_creator.save
+      render json: { database: format_json(database_creator.database), db_size: database_creator.db_size }
+    else
+      render json: database_creator.errors, status: :unprocessable_entity
     end
-
-    case Powerbase.adapter
-    when "postgresql"
-      @db_size = Powerbase.DB
-        .select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
-        .first[:size]
-    when "mysql2"
-      @db_size = Powerbase.DB
-        .from(Sequel.lit("information_schema.TABLES"))
-        .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
-        .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", Powerbase.database))
-        .group(:table_schema)
-        .first[:size]
-    end
-
-    if !@database.is_migrated
-      @base_migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
-      @base_migration.powerbase_database_id = @database.id
-      @base_migration.database_size = @db_size || "0 kB"
-      @base_migration.retries = 0
-      @base_migration.save
-
-      PowerbaseDatabaseMigrationJob.perform_later(@database.id)
-    end
-
-    Powerbase.disconnect
-    render json: { connected: true, database: format_json(@database), db_size: @db_size }
   end
 
   # POST /databases/connect/hubspot
@@ -213,6 +192,15 @@ class PowerbaseDatabasesController < ApplicationController
     else
       render json: @hb_database.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /databases/:id
+  def destroy
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    raise AccessDenied if !Guest.owner?(current_user.id, @database)
+    @database.remove
+    render status: :no_content
   end
 
   # PUT /databases/:id/clear_logs

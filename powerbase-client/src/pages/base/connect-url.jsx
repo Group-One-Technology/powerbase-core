@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { connectDatabase } from '@lib/api/databases';
-import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants';
+import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants/bases';
 import { formatBytes } from '@lib/helpers/formatBytes';
 
 import { Page } from '@components/layout/Page';
@@ -50,11 +50,7 @@ export function ConnectURLBasePage() {
           color,
         });
 
-        if (response.isExisting) {
-          setError(`Database with name of "${response.database.name}" already exists in this account.`);
-        } else if (!response.connected) {
-          setError(`Couldn't connect to "${name}". Please check the information given if they are correct.`);
-        } else if (response.connected && response.database.isTurbo && response.dbSize) {
+        if (response.database.isTurbo && response.dbSize) {
           const databaseSize = +response.dbSize.split(' ')[0];
 
           if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
@@ -62,7 +58,7 @@ export function ConnectURLBasePage() {
           }
         }
       } catch (err) {
-        setError(err.response.data.exception);
+        setError(err.response.data.exception || err.response.data.error);
       }
     }
 

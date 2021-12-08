@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import cn from 'classnames';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { updateDatabase } from '@lib/api/databases';
-import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
+import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
 
@@ -16,6 +15,7 @@ import { InlineInput } from '@components/ui/InlineInput';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { StatusModal } from '@components/ui/StatusModal';
+import { DisconnectBase } from './DisconnectBase';
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -213,13 +213,11 @@ export function BaseCoreSettings() {
           onChange={(evt) => setPassword(evt.target.value)}
           className="my-6"
         />
-        <div className="mt-4 py-4 border-t border-solid flex justify-end">
+        <div className="mt-4 py-4 border-t border-solid flex justify-between">
+          <DisconnectBase />
           <Button
             type="submit"
-            className={cn(
-              'bg-sky-700 ml-5 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500',
-              !databaseNameError ? 'hover:bg-sky-800' : 'cursor-not-allowed',
-            )}
+            className="bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
             loading={loading}
             disabled={hasDatabaseNameError}
           >
@@ -227,6 +225,7 @@ export function BaseCoreSettings() {
           </Button>
         </div>
       </form>
+
       <StatusModal
         open={modal.open}
         setOpen={(value) => setModal((curVal) => ({ ...curVal, open: value }))}

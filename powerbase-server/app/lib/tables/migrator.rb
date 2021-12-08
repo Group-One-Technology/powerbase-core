@@ -7,7 +7,7 @@ class Tables::Migrator
   attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
                 :indexed_records, :total_records, :records,
-                :powerbase_database, :has_row_oid_support
+                :database, :has_row_oid_support
 
   def initialize(table)
     @table = table
@@ -16,8 +16,8 @@ class Tables::Migrator
     @primary_keys = table.primary_keys
     @order_field = primary_keys.first || fields.first
     @adapter = table.db.adapter
-    @powerbase_database = table.db
-    @has_row_oid_support = powerbase_database.has_row_oid_support?
+    @database = table.db
+    @has_row_oid_support = database.has_row_oid_support?
     @offset = 0
     @indexed_records = 0
   end
@@ -25,15 +25,17 @@ class Tables::Migrator
   def index!
     create_index!(index_name)
 
-    @total_records = sequel_connect(powerbase_database) {|db| db.from(table.name).count}
-
-    if total_records.zero?
-        puts "No record found"
-        return
-    end
+    @total_records = sequel_connect(database) {|db| db.from(table.name).count}
 
     # Reset all migration counter logs
     write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
+
+    if total_records.zero?
+      puts "No record found"
+      set_table_as_migrated
+      return
+    end
+
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
     while offset < total_records
       fetch_table_records!
@@ -80,25 +82,35 @@ class Tables::Migrator
       end
 
       @offset += DEFAULT_PAGE_SIZE
-      write_table_migration_logs!(offset: offset, indexed_records: indexed_records, end_time: Time.now)
+
+      write_table_migration_logs!(offset: offset, indexed_records: indexed_records)
     end
+
+    set_table_as_migrated
+  end
+
+  def set_table_as_migrated
+    write_table_migration_logs!(end_time: Time.now)
 
     table.is_migrated = true
     table.save
 
-    if powerbase_database.in_synced?
-      powerbase_database.is_migrated = true
-      powerbase_database.save
-      powerbase_database.base_migration.end_time = Time.now
-      powerbase_database.base_migration.save
-    end
-
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
+
+    if database.is_migrating?
+      database.is_migrated = true
+      database.save
+      database.base_migration.end_time = Time.now
+      database.base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
+    end
   end
 
   private
   def fetch_table_records!
-    sequel_connect(powerbase_database) do |db|
+    sequel_connect(database) do |db|
       @total_records = db.from(table.name).count
       table_query = db.from(table.name)
       @records = table_query.select(*default_table_select(adapter.to_sym, has_row_oid_support))
