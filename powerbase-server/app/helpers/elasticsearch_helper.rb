@@ -29,6 +29,10 @@ module ElasticsearchHelper
     client.delete(index: index, id: format_doc_id(doc_id), refresh: true)
   end
 
+  def delete_index(index)
+    client.perform_request("DELETE", "/#{index}")
+  end
+
   def format_doc_id(value)
     value
       .parameterize(separator: "_")

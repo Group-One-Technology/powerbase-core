@@ -2,6 +2,7 @@ class PowerbaseTable < ApplicationRecord
   include PusherHelper
   include Notifier
   include Indexable
+  include ElasticsearchHelper
   include TablePermissionsHelper
 
   alias_attribute :fields, :powerbase_fields
@@ -114,6 +115,7 @@ class PowerbaseTable < ApplicationRecord
     self.save
     BaseConnection.where(powerbase_table_id: self.id).destroy_all
     BaseConnection.where(referenced_table_id: self.id).destroy_all
+    delete_index(self.index_name) if self.db.is_turbo
     self.destroy
   end
 
