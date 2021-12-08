@@ -5,6 +5,7 @@ import constate from 'constate';
 import { useAuthUser } from '@models/AuthUser';
 import { getTables, updateTableDefaultView } from '@lib/api/tables';
 import { getTableViews } from '@lib/api/views';
+import { useTableMigrationListener } from '@lib/hooks/websockets/useTableMigrationListener';
 
 function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const { authUser } = useAuthUser();
@@ -22,6 +23,8 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     () => getTableViews({ tableId }),
     { revalidateOnFocus: true },
   );
+
+  useTableMigrationListener({ tables: tablesResponse.data?.tables, mutate: tablesResponse.mutate });
 
   const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
   const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());

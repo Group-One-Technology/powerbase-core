@@ -7,9 +7,7 @@ const DEFAULT_VALUE = {
 };
 
 export function useMigrationListener({ logging = false, databases, mutate } = DEFAULT_VALUE) {
-  const [migratingBases, setMigratingBases] = useState(databases
-    ?.filter((item) => !item.isMigrated)
-    .map((item) => ({ ...item, subscribed: false })));
+  const [migratingBases, setMigratingBases] = useState(databases?.filter((item) => !item.isMigrated));
 
   const migrationListener = (databaseId) => {
     if (mutate) {

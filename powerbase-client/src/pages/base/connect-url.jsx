@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { connectDatabase } from '@lib/api/databases';
-import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants';
+import { MAX_SMALL_DATABASE_SIZE, POWERBASE_TYPE } from '@lib/constants/bases';
 import { formatBytes } from '@lib/helpers/formatBytes';
 
 import { Page } from '@components/layout/Page';

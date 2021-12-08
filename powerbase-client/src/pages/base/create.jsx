@@ -4,7 +4,7 @@ import { RadioGroup } from '@headlessui/react';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
-import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants';
+import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants/bases';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
