@@ -89,6 +89,7 @@ class Fields::Creator
   def field_params
     {
       name: field_name,
+      alias: field_name.to_s.titlecase,
       oid: field_options[:oid],
       db_type: field_options[:db_type],
       default_value: field_options[:default] || nil,
