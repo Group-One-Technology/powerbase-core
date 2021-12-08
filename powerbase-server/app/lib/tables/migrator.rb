@@ -27,13 +27,15 @@ class Tables::Migrator
 
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
 
-    if total_records.zero?
-        puts "No record found"
-        return
-    end
-
     # Reset all migration counter logs
     write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
+
+    if total_records.zero?
+      puts "No record found"
+      set_table_as_migrated
+      return
+    end
+
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
     while offset < total_records
       fetch_table_records!
@@ -80,8 +82,15 @@ class Tables::Migrator
       end
 
       @offset += DEFAULT_PAGE_SIZE
-      write_table_migration_logs!(offset: offset, indexed_records: indexed_records, end_time: Time.now)
+
+      write_table_migration_logs!(offset: offset, indexed_records: indexed_records)
     end
+
+    set_table_as_migrated
+  end
+
+  def set_table_as_migrated
+    write_table_migration_logs!(end_time: Time.now)
 
     table.is_migrated = true
     table.save
