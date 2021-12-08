@@ -1,7 +1,7 @@
 class Tables::Creator
   include SequelHelper
 
-  attr_accessor :table_name, :order, :database, :table
+  attr_accessor :table_name, :order, :database, :table, :base_migration
 
   def initialize(table_name, order, database)
     @table_name = table_name

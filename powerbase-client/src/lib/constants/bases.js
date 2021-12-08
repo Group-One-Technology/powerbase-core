@@ -36,6 +36,3 @@ export const BASE_SOURCES = [
     href: '/base/integration/connect?type=shopify',
   },
 ];
-
-export const NON_TURBO_REFRESH_INTERVAL = 5000; // milliseconds = 5 seconds
-export const TURBO_REFRESH_INTERVAL = 600000; // milliseconds = 10 minutes
