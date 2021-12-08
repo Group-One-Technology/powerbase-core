@@ -86,6 +86,9 @@ class Tables::Migrator
     table.is_migrated = true
     table.save
 
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
+
     if database.is_migrating?
       database.is_migrated = true
       database.save
@@ -94,8 +97,6 @@ class Tables::Migrator
 
       pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
-
-    pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end
 
   private
