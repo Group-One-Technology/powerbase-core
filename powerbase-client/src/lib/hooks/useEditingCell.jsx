@@ -4,7 +4,7 @@ import { addOrUpdateMagicValue } from '@lib/api/records';
 
 export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord,
+  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError,
 ) {
   const handleMagicInputValidation = (val) => {
     if (!val) return true;
@@ -61,7 +61,7 @@ export function useEditingCell(
     const composedKeys = primaryKeys
       .map((primaryKey) => {
         const keyName = primaryKey.name.toLowerCase();
-        const keyValue = (`${primaryKey.value}`).toLocaleLowerCase();
+        const keyValue = (`${primaryKey.value}`).toLowerCase();
         return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
       })
       .join(isTurbo ? '-' : '---');
@@ -120,9 +120,10 @@ export function useEditingCell(
         setIsNewRecord(false);
         exitEditing();
       }
-    } catch (error) {
+    } catch (err) {
       exitEditing();
-      console.log(error);
+      catchError(err.response.data.error || err.response.data.exception);
+      console.log(err);
     }
   };
 

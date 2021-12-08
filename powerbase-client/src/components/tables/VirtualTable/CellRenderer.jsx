@@ -11,6 +11,7 @@ import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
+// import { useSaveStatus } from '@models/SaveStatus';
 import EditCell from './EditCell';
 
 function CellValue({
@@ -151,7 +152,6 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
-  // ! FIXME Below is not included in props validation
   recordInputRef,
   isEditing,
   setIsEditing,
@@ -173,6 +173,7 @@ export function CellRenderer({
   calendarValue,
   isTurbo,
   canAddRecords,
+  catchError,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -190,9 +191,9 @@ export function CellRenderer({
   const handleMouseLeave = () => {
     setHoveredCell({});
   };
-
+  // const { saving, catchError, saved } = useSaveStatus();
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord);
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit
@@ -332,4 +333,5 @@ CellRenderer.propTypes = {
   calendarValue: PropTypes.string,
   isTurbo: PropTypes.bool.isRequired,
   canAddRecords: PropTypes.bool.isRequired,
+  catchError: PropTypes.func,
 };

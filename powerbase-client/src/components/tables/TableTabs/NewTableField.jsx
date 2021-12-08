@@ -65,6 +65,7 @@ export default function NewTableField({
           <button
             onClick={() => removeField(id)}
             className="flex flex-col justify-center text-gray-500}"
+            type="button"
           >
             <TrashIcon
               className="w-5 h-5  cursor-pointer"

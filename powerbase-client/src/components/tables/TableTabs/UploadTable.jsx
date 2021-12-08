@@ -46,7 +46,7 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
     <form id="csv-form" className="flex flex-col align-center h-full">
       <div className="flex flex-col align-center h-full p-2">
         {!csvFile && (
-          <button onClick={handleClick}>
+          <button onClick={handleClick} type="button">
             <DocumentAddIcon
               className="w-12 h-12 text-gray-600 hover:text-indigo-600 align-center self-center font-light cursor-pointer"
             />

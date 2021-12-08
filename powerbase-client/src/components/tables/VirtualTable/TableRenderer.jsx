@@ -3,7 +3,6 @@ import {
   Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
-
 import { useFieldTypes } from '@models/FieldTypes';
 import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
@@ -17,6 +16,7 @@ import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useBaseUser } from '@models/BaseUser';
 import { useBase } from '@models/Base';
+import { useSaveStatus } from '@models/SaveStatus';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
@@ -58,6 +58,7 @@ export function TableRenderer({
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
   const canAddRecords = baseUser?.can('addRecords', table.id);
+  const { catchError } = useSaveStatus();
 
   useEffect(() => {
     let timer;
@@ -217,6 +218,7 @@ export function TableRenderer({
                           setCalendarValue,
                           isTurbo: base.isTurbo,
                           canAddRecords,
+                          catchError,
                           ...props,
                         });
                       }}

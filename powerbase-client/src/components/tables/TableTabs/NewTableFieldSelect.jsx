@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
@@ -27,10 +27,6 @@ export default function NewTableFieldSelect({ id, newFields, setNewFields }) {
     });
     setNewFields(updatedFields);
   };
-
-  useEffect(() => {
-    console.log('new_fields: ', newFields);
-  }, [newFields]);
 
   return (
     <Listbox value={selectedFieldItem} onChange={(item) => handleSelect(item)}>
