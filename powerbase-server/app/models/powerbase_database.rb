@@ -24,8 +24,8 @@ class PowerbaseDatabase < ApplicationRecord
   serialize :permissions, JSON
 
   belongs_to :user
-  has_many :guests
-  has_one :base_migration
+  has_many :guests, dependent: :destroy
+  has_one :base_migration, dependent: :destroy
   has_many :powerbase_tables
   has_many :powerbase_fields, through: :powerbase_tables
   has_many :connections, class_name: "BaseConnection", foreign_key: :powerbase_database_id
