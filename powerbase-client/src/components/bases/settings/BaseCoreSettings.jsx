@@ -15,6 +15,7 @@ import { InlineInput } from '@components/ui/InlineInput';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { StatusModal } from '@components/ui/StatusModal';
+import { DisconnectBase } from './DisconnectBase';
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -193,16 +194,18 @@ export function BaseCoreSettings() {
           onChange={(evt) => setPassword(evt.target.value)}
           className="my-6"
         />
-        <div className="mt-4 py-4 border-t border-solid flex justify-end">
+        <div className="mt-4 py-4 border-t border-solid flex justify-between">
+          <DisconnectBase />
           <Button
             type="submit"
-            className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+            className="bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
             loading={loading}
           >
             Update Database
           </Button>
         </div>
       </form>
+
       <StatusModal
         open={modal.open}
         setOpen={(value) => setModal((curVal) => ({ ...curVal, open: value }))}
