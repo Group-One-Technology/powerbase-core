@@ -28,9 +28,7 @@ function BaseNavbar({ base, bases }) {
   const location = useLocation();
   const { authUser } = useAuthUser();
 
-  const otherBases = base && bases
-    ? bases.filter((item) => item.id !== base.id)
-    : undefined;
+  const otherBases = base && bases ? bases.filter((item) => item.id !== base.id) : undefined;
 
   if (!authUser) {
     return null;
@@ -39,11 +37,14 @@ function BaseNavbar({ base, bases }) {
   return (
     <Disclosure
       as="nav"
-      className={cn({
-        'bg-white': !base,
-        'shadow-sm': !base,
-        'text-white': base,
-      }, base && BG_COLORS[base.color])}
+      className={cn(
+        {
+          'bg-white': !base,
+          'shadow-sm': !base,
+          'text-white': base,
+        },
+        base && BG_COLORS[base.color],
+      )}
     >
       {({ open }) => (
         <>
@@ -57,26 +58,33 @@ function BaseNavbar({ base, bases }) {
                   <SavingIndicator />
                 </div>
               </div>
-              <div className={cn('hidden sm:col-span-2 sm:justify-center sm:-my-px sm:flex sm:space-x-8', { 'h-full': !base })}>
+              <div
+                className={cn(
+                  'hidden sm:col-span-2 sm:justify-center sm:-my-px sm:flex sm:space-x-8',
+                  { 'h-full': !base },
+                )}
+              >
                 {base && <BaseMenu base={base} otherBases={otherBases} />}
-                {!base && NAVIGATION.map((item) => {
-                  const isCurrentItem = location.pathname === item.href;
+                {!base
+                  && NAVIGATION.map((item) => {
+                    const isCurrentItem = location.pathname === item.href;
 
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={cn('inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium', (
-                        isCurrentItem
-                          ? 'border-indigo-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      ))}
-                      aria-current={isCurrentItem ? 'page' : undefined}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={cn(
+                          'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
+                          isCurrentItem
+                            ? 'border-indigo-500 text-gray-900'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        )}
+                        aria-current={isCurrentItem ? 'page' : undefined}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
               </div>
               <div className="hidden sm:col-span-1 sm:justify-end sm:ml-6 sm:flex sm:items-center">
                 <NotificationsMenu colored={!!base} />

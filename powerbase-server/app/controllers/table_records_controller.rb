@@ -16,7 +16,18 @@ class TableRecordsController < ApplicationController
     required(:primary_keys)
   end
 
-  # POST /tables/:id/records
+
+  schema(:add_or_update_magic_value) do
+    optional(:id).value(:integer)
+    optional(:data)
+    required(:primary_keys)
+  end
+
+  schema(:magic_values) do
+    required(:id).value(:integer)
+  end
+
+  # POST /tables/:table_id/records
   def index
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
@@ -65,6 +76,38 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
+  # POST /tables/:id/magic_value
+  def add_or_update_magic_value
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:add_records, @table)
+    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
+    record = model.update_record({
+      primary_keys: safe_params[:primary_keys],
+      fields: safe_params[:fields],
+      data: safe_params[:data]
+    })
+    render json: record
+  end
+
+  # GET /tables/:id/magic_values
+  def magic_values
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:view_table, @table)
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    @records = model.magic_search
+    render json: @records
+  end
+
+  # POST /magic_records
+  # A test endpoint that's functional for creating magic records (virtual rows) - TO CONTINUE ON NEXT FEATURE
+  # def create_magic_record
+  #   new_magic_record = MagicRecord.create({powerbase_table_id: params[:powerbase_table_id], powerbase_database_id: params[:powerbase_database_id], powerbase_record_order: params[:powerbase_record_order]})
+  #   render json: new_magic_record
+  # end
+
   # GET /tables/:id/records_count
   def count
     @table = PowerbaseTable.find(safe_params[:id])
@@ -79,4 +122,6 @@ class TableRecordsController < ApplicationController
 
     render json: { count: total_records }
   end
+
 end
+

@@ -31,13 +31,15 @@ export function UserMenu({ list, colored }) {
   if (list) {
     return (
       <>
-        {USER_NAVIGATION.map((item) => (
+        {USER_NAVIGATION?.map((item) => (
           <Link
             key={item.name}
             to={item.href}
             className={cn(
               'block px-4 py-2 text-base font-medium',
-              colored ? 'text-white hover:bg-gray-100 hover:bg-opacity-30' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+              colored
+                ? 'text-white hover:bg-gray-100 hover:bg-opacity-30'
+                : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
             )}
           >
             {item.name}
@@ -48,7 +50,9 @@ export function UserMenu({ list, colored }) {
           onClick={handleLogout}
           className={cn(
             'block w-full text-left px-4 py-2 text-base font-medium',
-            colored ? 'text-white hover:bg-gray-100 hover:bg-opacity-30' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+            colored
+              ? 'text-white hover:bg-gray-100 hover:bg-opacity-30'
+              : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
           )}
         >
           Sign Out
@@ -72,7 +76,9 @@ export function UserMenu({ list, colored }) {
               className="h-6 w-6 rounded-full"
               alt={`${authUser.firstName}'s profile picture`}
             />
-            <span className="text-sm font-normal ml-1">{authUser.firstName}</span>
+            <span className="text-sm font-normal ml-1">
+              {authUser.firstName}
+            </span>
             <span className="sr-only">Open user menu</span>
             <ChevronDownIcon className="h-4 w-4 mt-0.5 ml-1" />
           </Menu.Button>
@@ -109,9 +115,12 @@ export function UserMenu({ list, colored }) {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className={cn('block w-full text-left px-4 py-2 text-sm text-gray-700', {
-                      'bg-gray-100': active,
-                    })}
+                    className={cn(
+                      'block w-full text-left px-4 py-2 text-sm text-gray-700',
+                      {
+                        'bg-gray-100': active,
+                      },
+                    )}
                   >
                     Sign Out
                   </button>

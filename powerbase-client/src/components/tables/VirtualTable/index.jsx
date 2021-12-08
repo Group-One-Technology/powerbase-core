@@ -12,7 +12,6 @@ import { ITable } from '@lib/propTypes/table';
 import { Loader } from '@components/ui/Loader';
 import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
 import { TableRenderer } from './TableRenderer';
-
 import 'react-virtualized/styles.css';
 
 export function VirtualTable({ height, table }) {
@@ -26,7 +25,12 @@ export function VirtualTable({ height, table }) {
     dataListener(table.id);
   }, [table.id]);
 
-  if (fields == null || connections == null || records == null || fieldTypes == null) {
+  if (
+    fields == null
+    || connections == null
+    || records == null
+    || fieldTypes == null
+  ) {
     return <Loader style={{ height }} />;
   }
 

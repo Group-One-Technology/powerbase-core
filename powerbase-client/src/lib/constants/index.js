@@ -12,6 +12,17 @@ export const BG_COLORS = {
   pink: 'bg-pink-500',
 };
 
+export const OUTLINE_COLORS = {
+  gray: 'text-gray-500',
+  yellow: 'text-yellow-500',
+  red: 'text-red-500',
+  green: 'text-green-500',
+  blue: 'text-blue-500',
+  indigo: 'text-indigo-500',
+  purple: 'text-purple-500',
+  pink: 'text-pink-500',
+};
+
 export const SCROLLBAR_WIDTH = 15;
 export const ROW_NO_CELL_WIDTH = 80;
 export const DEFAULT_CELL_WIDTH = 300;
@@ -66,4 +77,17 @@ export const MOCK_PEOPLE = [
     imageUrl:
       'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },
+];
+
+export const NUMBER_FORMAT_OPTIONS = [
+  { id: 1, name: 'Integer' },
+  { id: 2, name: 'Decimal' },
+];
+
+export const PRECISION_POINTS = [
+  { id: 1, name: '1', precision: 0 },
+  { id: 2, name: '1.0', precision: 1 },
+  { id: 3, name: '1.00', precision: 2 },
+  { id: 4, name: '1.000', precision: 3 },
+  { id: 5, name: '1.0000', precision: 4 },
 ];

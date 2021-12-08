@@ -16,6 +16,39 @@ module Powerbase
       @is_turbo = @powerbase_database.is_turbo
     end
 
+    # Updates a property in a document/table record.
+    # Accepts the following options:
+    # :primary_keys :: a specific-format string concat of the primary keys and their values.
+    def update_record(options)
+      index = "table_records_#{@table_id}"
+      id = options[:primary_keys]
+      if !@is_turbo
+        unless @esclient.indices.exists(index: index)
+          @esclient.indices.create(
+            index: index,
+            body: {
+              settings: { "index.mapping.ignore_malformed": true }
+            }
+          )
+        end
+        record = @esclient.update(index: index, id: id, body: { doc: options[:data], doc_as_upsert: true }, refresh: true,_source: true)
+        record
+      else
+        response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
+        response
+      end
+    end
+
+    # Gets all magic values for a non turbo table
+    # REFACTOR to make fetch size flexible/dynamic - it's currently fixed because of the eventual aggregation
+    # REFACTOR doc_id parameter to something else to avoid collisions
+    def magic_search
+      index = "table_records_#{@table_id}"
+      result = @esclient.search(index: index, size: 10000)
+      result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
+    end
+
+
     # * Get a document/table record.
     # Accepts the following options:
     # :id :: the document ID or the SWR key.

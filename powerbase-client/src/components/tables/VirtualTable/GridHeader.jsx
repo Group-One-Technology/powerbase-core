@@ -4,10 +4,19 @@ import PropTypes from 'prop-types';
 import { Grid } from 'react-virtualized';
 import Draggable from 'react-draggable';
 import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
-import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
+import {
+  restrictToHorizontalAxis,
+  restrictToFirstScrollableAncestor,
+} from '@dnd-kit/modifiers';
+import { SparklesIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { SCROLLBAR_WIDTH, ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants/index';
+import {
+  SCROLLBAR_WIDTH,
+  ROW_NO_CELL_WIDTH,
+  DEFAULT_CELL_WIDTH,
+  OUTLINE_COLORS,
+} from '@lib/constants/index';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { DroppableArea } from '@components/ui/DroppableArea';
 import { DraggableItem } from '@components/ui/DraggableItem';
@@ -30,9 +39,9 @@ function CellRenderer({
   handleResizeColumn,
   handleResizeStop,
   style,
+  base,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
-
   const handleClick = () => setOption(true);
 
   const droppableArea = (
@@ -41,7 +50,10 @@ function CellRenderer({
       data={{ index: columnIndex - 1, accepts: ['column'] }}
       className={cn(
         'absolute z-10 rounded-md hover:bg-indigo-400',
-        dragging && dragging.active && dragging.over?.id === `arearight-${key}` && 'bg-indigo-400',
+        dragging
+          && dragging.active
+          && dragging.over?.id === `arearight-${key}`
+          && 'bg-indigo-400',
       )}
       style={{
         height: style.height - 4,
@@ -66,8 +78,17 @@ function CellRenderer({
 
   return (
     <React.Fragment key={key}>
-      <div id={key} className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2" style={style}>
-        <GridHeaderOptions table={table} option={option} field={field} setOptionOpen={setOption} />
+      <div
+        id={key}
+        className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2"
+        style={style}
+      >
+        <GridHeaderOptions
+          table={table}
+          option={option}
+          field={field}
+          setOptionOpen={setOption}
+        />
 
         <DraggableItem
           id={key}
@@ -86,7 +107,12 @@ function CellRenderer({
           isForeignKey={field.isForeignKey}
           className="mr-1"
         />
-        <span>{field.alias || field.name}</span>
+        <span id={`field-${field.id}-name`}>{field.alias || field.name}</span>
+        {field.isVirtual && (
+          <SparklesIcon
+            className={cn('h-5 w-5 ml-auto cursor-auto select-none', OUTLINE_COLORS[base.color])}
+          />
+        )}
       </div>
       <Draggable
         axis="x"
@@ -115,6 +141,7 @@ CellRenderer.propTypes = {
   handleResizeColumn: PropTypes.func.isRequired,
   handleResizeStop: PropTypes.func.isRequired,
   style: PropTypes.object,
+  base: PropTypes.object,
 };
 
 export const GridHeader = React.forwardRef(({
@@ -126,6 +153,7 @@ export const GridHeader = React.forwardRef(({
   onScroll,
   scrollLeft,
   hasScrollbar,
+  base,
 }, ref) => {
   const { data: fieldTypes } = useFieldTypes();
   const { handleResizeColumn, handleResizeStop } = useResizeFields({ fields, setFields });
@@ -145,7 +173,10 @@ export const GridHeader = React.forwardRef(({
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
       collisionDetection={closestCorners}
-      modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
+      modifiers={[
+        restrictToHorizontalAxis,
+        restrictToFirstScrollableAncestor,
+      ]}
     >
       <Grid
         ref={ref}
@@ -179,19 +210,20 @@ export const GridHeader = React.forwardRef(({
             dragging,
             handleResizeColumn,
             handleResizeStop,
+            base,
           });
         }}
       />
 
       <DragOverlay>
         {dragging?.active.data.current?.field && (
-          <div
-            className="bg-gray-900 bg-opacity-10"
-            style={{
-              width: dragging.active.data.current.field.width,
-              height: height + GRID_HEADER_HEIGHT,
-            }}
-          />
+        <div
+          className="bg-gray-900 bg-opacity-10"
+          style={{
+            width: dragging.active.data.current.field.width,
+            height: height + GRID_HEADER_HEIGHT,
+          }}
+        />
         )}
       </DragOverlay>
     </DndContext>
@@ -207,4 +239,5 @@ GridHeader.propTypes = {
   onScroll: PropTypes.func.isRequired,
   scrollLeft: PropTypes.number,
   hasScrollbar: PropTypes.bool,
+  base: PropTypes.object,
 };

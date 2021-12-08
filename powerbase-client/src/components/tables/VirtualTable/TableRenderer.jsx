@@ -1,40 +1,76 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Grid,
-  InfiniteLoader,
-  AutoSizer,
-  ScrollSync,
+  Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
-
 import { useFieldTypes } from '@models/FieldTypes';
 import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
-
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
+import { useBaseUser } from '@models/BaseUser';
+import { useBase } from '@models/Base';
+import { useSaveStatus } from '@models/SaveStatus';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
-export function TableRenderer({ height, table, highlightedCell }) {
+export function TableRenderer({
+  height, table, highlightedCell,
+}) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
-  const { data: records, loadMore: loadMoreRows, isLoading } = useTableRecords();
-  const { initialFields, fields, setFields } = useViewFieldState();
+  const { baseUser } = useBaseUser();
+  const { data: base } = useBase();
+  const {
+    data: records,
+    loadMore: loadMoreRows,
+    isLoading,
+    mutate: mutateTableRecords,
+  } = useTableRecords();
+  const {
+    initialFields,
+    fields,
+    setFields,
+    hasAddedNewField,
+    setHasAddedNewField,
+  } = useViewFieldState();
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
+  const recordInputRef = useRef();
+  const singleCellRef = useRef();
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
+  const [isEditing, setIsEditing] = useState(false);
+  const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
+  const [editCellInput, setEditCellInput] = useState(null);
+  const [validationToolTip, setValidationToolTip] = useState(false);
+  const [isNewRecord, setIsNewRecord] = useState(false);
+  const [updatedRecords, setUpdatedRecords] = useState();
+  const [calendarValue, setCalendarValue] = useState();
+  const canAddRecords = baseUser?.can('addRecords', table.id);
+  const { catchError } = useSaveStatus();
+
+  useEffect(() => {
+    let timer;
+    if (hasAddedNewField) {
+      recordsGridRef.current.forceUpdate();
+      recordsGridRef.current.recomputeGridSize();
+      timer = setTimeout(() => {
+        setHasAddedNewField(false);
+      }, 800);
+    }
+    return () => clearTimeout(timer);
+  }, [hasAddedNewField]);
 
   const columnCount = fields && fields.length + 1;
 
@@ -60,7 +96,9 @@ export function TableRenderer({ height, table, highlightedCell }) {
   };
 
   const handleExpandRecord = (rowNo) => {
-    const updatedFields = initializeFields(initialFields, connections, { hidden: false })
+    const updatedFields = initializeFields(initialFields, connections, {
+      hidden: false,
+    })
       .map((item) => ({
         ...item,
         value: records[rowNo - 1][item.name],
@@ -72,7 +110,10 @@ export function TableRenderer({ height, table, highlightedCell }) {
   };
 
   return (
-    <div className="w-full overflow-hidden z-0">
+    <div
+      className="w-full overflow-hidden z-0"
+      id="power-base-virtualized-table"
+    >
       <AutoSizer
         disableHeight
         onResize={() => {
@@ -83,10 +124,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
         {({ width }) => (
           <ScrollSync>
             {({
-              onScroll,
-              scrollLeft,
-              scrollHeight,
-              clientHeight,
+              onScroll, scrollLeft, scrollHeight, clientHeight,
             }) => (
               <>
                 <GridHeader
@@ -99,6 +137,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
                   onScroll={onScroll}
                   scrollLeft={scrollLeft}
                   hasScrollbar={scrollHeight > clientHeight}
+                  base={base}
                 />
                 <InfiniteLoader
                   isRowLoaded={({ index }) => !!records[index]}
@@ -115,6 +154,7 @@ export function TableRenderer({ height, table, highlightedCell }) {
                       }}
                       onScroll={onScroll}
                       scrollLeft={scrollLeft}
+                      scrollToColumn={hasAddedNewField ? width : 0} // using width here and not column count because the latter is computed late and falls being the conditional-setter in the set time out
                       onSectionRendered={({
                         columnStartIndex,
                         columnStopIndex,
@@ -132,10 +172,10 @@ export function TableRenderer({ height, table, highlightedCell }) {
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
+                        const recordsToUse = updatedRecords || records;
                         let value = columnIndex !== 0 && !isLastRow
-                          ? records[rowIndex][field.name]
+                          ? recordsToUse[rowIndex][field.name]
                           : null;
-
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
                         }
@@ -155,6 +195,30 @@ export function TableRenderer({ height, table, highlightedCell }) {
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
                             : undefined,
+                          recordInputRef,
+                          isEditing,
+                          setIsEditing,
+                          cellToEdit,
+                          setCellToEdit,
+                          editCellInput,
+                          setEditCellInput,
+                          records,
+                          validationToolTip,
+                          setValidationToolTip,
+                          singleCellRef,
+                          mutateTableRecords,
+                          table,
+                          isNewRecord,
+                          setIsNewRecord,
+                          connections,
+                          initialFields,
+                          setUpdatedRecords,
+                          updatedRecords,
+                          calendarValue,
+                          setCalendarValue,
+                          isTurbo: base.isTurbo,
+                          canAddRecords,
+                          catchError,
                           ...props,
                         });
                       }}

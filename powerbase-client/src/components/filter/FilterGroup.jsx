@@ -24,12 +24,16 @@ export function FilterGroup({
   const filterGroupId = `filterGroup${level}`;
 
   const [newFilterCount, setNewFilterCount] = useState(1);
-  const [filterGroup, setFilterGroup] = useState(initializeFilterGroup({
-    id: filterGroupId,
-    filterGroup: initialFilterGroup,
-    fields,
-  }));
-  const [logicalOperator, setLogicalOperator] = useState(filterGroup?.operator || 'and');
+  const [filterGroup, setFilterGroup] = useState(
+    initializeFilterGroup({
+      id: filterGroupId,
+      filterGroup: initialFilterGroup,
+      fields,
+    }),
+  );
+  const [logicalOperator, setLogicalOperator] = useState(
+    filterGroup?.operator || 'and',
+  );
 
   useEffect(() => {
     if (initialFilterGroup?.filters.length > 0) {
@@ -37,27 +41,24 @@ export function FilterGroup({
     }
   }, [initialFilterGroup]);
 
-  const newFilterItem = ({
+  const newFilterItem = {
     id: `${filterGroupId}-${fields[0].name}-filter-${newFilterCount}`,
     field: fields[0].name,
-  });
+  };
 
   const handleAddFilter = (isGroup) => {
     if (canManageView) {
       const newFilter = isGroup
-        ? ({
+        ? {
           id: `${filterGroupId}-${fields[0].name}-filter-group-${newFilterCount}`,
           operator: 'and',
           filters: [newFilterItem],
-        })
+        }
         : newFilterItem;
 
       setFilterGroup((prevFilterGroup) => ({
         operator: prevFilterGroup.operator,
-        filters: [
-          ...(prevFilterGroup.filters || []),
-          newFilter,
-        ],
+        filters: [...(prevFilterGroup.filters || []), newFilter],
       }));
 
       setNewFilterCount((prevCount) => prevCount + 1);
@@ -75,12 +76,14 @@ export function FilterGroup({
     if (canManageView) {
       setFilterGroup((prevFilterGroup) => ({
         operator: prevFilterGroup.operator,
-        filters: prevFilterGroup.filters.filter((item) => (
-          item.id !== filterId
-        )),
+        filters: prevFilterGroup.filters.filter((item) => item.id !== filterId),
       }));
 
-      if (!root && handleParentRemoveFilter && filterGroup.filters.length <= 1) {
+      if (
+        !root
+        && handleParentRemoveFilter
+        && filterGroup.filters.length <= 1
+      ) {
         handleParentRemoveFilter(id);
       }
 
@@ -109,7 +112,12 @@ export function FilterGroup({
             ) : parentOperator}
         </div>
       )}
-      <div className={cn('flex-1', !root && 'bg-gray-50 border border-gray-300 rounded-md')}>
+      <div
+        className={cn(
+          'flex-1',
+          !root && 'bg-gray-50 border border-gray-300 rounded-md',
+        )}
+      >
         <div className="m-3 flex flex-col gap-y-2">
           {filterGroup.filters.map((item, index) => {
             if (item.filters?.length) {

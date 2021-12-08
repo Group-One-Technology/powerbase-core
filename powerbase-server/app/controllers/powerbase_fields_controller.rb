@@ -1,7 +1,8 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission]
+  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission, :create]
   before_action :check_field_permission_access, only: [:update_allowed_roles, :update_field_permission]
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   schema(:index) do
     required(:table_id).value(:integer)
@@ -32,10 +33,21 @@ class PowerbaseFieldsController < ApplicationController
     required(:access)
   end
 
+  schema(:get_single_field) do
+    required(:id).value(:integer)
+    required(:name)
+  end
+
+  # GET /tables/:id/fields
   schema(:update_allowed_roles) do
     required(:id).value(:integer)
     required(:permission)
     required(:roles)
+  end
+
+  schema(:create) do
+    required(:id).value(:integer)
+    required(:new_field_entities)
   end
 
   # GET /tables/:table_id/fields
@@ -50,6 +62,37 @@ class PowerbaseFieldsController < ApplicationController
     render json: @fields
       .select {|field| current_user.can?(:view_field, field, @guest, false)}
       .map {|item| format_json(item)}
+  end
+
+  # POST /tables/:id/field
+  def create
+    options = safe_params[:new_field_entities]
+    field_params = options.except(:order, :view_id)
+    view_field_params = {width: 300, is_frozen: false, is_hidden: false, order: options[:order], table_view_id: options[:view_id]}
+    @field = PowerbaseField.create(field_params)
+    if !@field
+      render json: { error: "Could not create a new virtual field for table '#{@table.id}'" }, status: :unprocessable_entity
+      return
+    end
+    view_field_params[:powerbase_field_id] = @field.id
+    @view_field = ViewFieldOption.create(view_field_params)
+    if !@view_field
+      render json: { error: "Could not create a view field for table '#{@table.id}'" }, status: :unprocessable_entity
+      return
+    end
+    render json: format_json(@field)
+  end
+
+  # GET /tables/:id/fields/:name
+  def get_single_field
+    name = safe_params[:name]
+    id = safe_params[:id]
+    @field = PowerbaseField.where('lower(name) = ? and powerbase_table_id = ?', name.downcase, id).first
+    if !@field
+      render json: { error: 'Field does not exist' }, status: :not_found
+      return
+    end
+    render json: format_json(@field)
   end
 
   # PUT /fields/:id/alias
@@ -132,6 +175,10 @@ class PowerbaseFieldsController < ApplicationController
       current_user.can?(:manage_field, @field)
     end
 
+    def set_table
+      @table = PowerbaseTable.find(safe_params[:table_id])
+    end
+
     def check_field_permission_access
       @field = PowerbaseField.find(safe_params[:id])
       raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
@@ -154,6 +201,8 @@ class PowerbaseFieldsController < ApplicationController
         field_type_id: field.powerbase_field_type_id,
         created_at: field.created_at,
         updated_at: field.updated_at,
+        is_virtual: field.is_virtual,
+        allow_dirty_value: field.allow_dirty_value
       }
     end
 end

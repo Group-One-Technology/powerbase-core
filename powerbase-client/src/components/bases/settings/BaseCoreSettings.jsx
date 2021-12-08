@@ -25,7 +25,7 @@ const INITIAL_MODAL_VALUE = {
     </div>
   ),
   title: 'Update Successful',
-  content: 'The database\'s information has been updated.',
+  content: "The database's information has been updated.",
 };
 
 const ERROR_ICON = (
@@ -38,7 +38,10 @@ export function BaseCoreSettings() {
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
 
-  const [name, setName, nameError] = useValidState(base.name, REQUIRED_VALIDATOR);
+  const [name, setName, nameError] = useValidState(
+    base.name,
+    REQUIRED_VALIDATOR,
+  );
   const [databaseName, setDatabaseName, databaseNameError] = useValidState(
     base.databaseName,
     SQL_IDENTIFIER_VALIDATOR,
@@ -48,7 +51,9 @@ export function BaseCoreSettings() {
   const [port, setPort] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[base.isTurbo ? 0 : 1]);
+  const [powerbaseType, setPowerbaseType] = useState(
+    POWERBASE_TYPE[base.isTurbo ? 0 : 1],
+  );
   const [color, setColor, colorError] = useValidState(base.color);
 
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
@@ -96,16 +101,22 @@ export function BaseCoreSettings() {
         open: true,
         icon: ERROR_ICON,
         title: 'Update Failed',
-        content: err?.response?.data.exception || 'Something went wrong. Please try again later.',
+        content:
+          err?.response?.data.exception
+          || 'Something went wrong. Please try again later.',
       });
     }
 
     setLoading(false);
   };
 
+  const hasDatabaseNameError = !!databaseNameError.error?.message;
+
   return (
     <div className="py-6 px-4 sm:p-6 lg:pb-8">
-      <h2 className="text-xl leading-6 font-medium text-gray-900">Core Settings</h2>
+      <h2 className="text-xl leading-6 font-medium text-gray-900">
+        Core Settings
+      </h2>
       <form onSubmit={handleSubmit}>
         <h3 className="mt-4 text-lg font-medium text-gray-900">General Info</h3>
         <InlineInput
@@ -142,11 +153,19 @@ export function BaseCoreSettings() {
           setError={colorError.setError}
           className="my-6"
         />
-        <h3 className="mt-4 text-lg font-medium text-gray-900">Connection String</h3>
+        <h3 className="mt-4 text-lg font-medium text-gray-900">
+          Connection String
+        </h3>
         <p className="text-sm text-gray-500 my-1">
-          You may leave this section blank if you do not wish to update the connection.
+          You may leave this section blank if you do not wish to update the
+          connection.
           <br />
-          {base.isTurbo && <>Updating the connection string is an <strong>irreversible</strong> action. Please check your inputs carefully.</>}
+          {base.isTurbo && (
+            <>
+              Updating the connection string is an <strong>irreversible</strong>{' '}
+              action. Please check your inputs carefully.
+            </>
+          )}
         </p>
         <InlineInput
           type="text"
@@ -200,6 +219,7 @@ export function BaseCoreSettings() {
             type="submit"
             className="bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
             loading={loading}
+            disabled={hasDatabaseNameError}
           >
             Update Database
           </Button>

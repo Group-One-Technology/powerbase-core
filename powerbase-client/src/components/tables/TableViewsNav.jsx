@@ -34,7 +34,11 @@ export function TableViewsNav() {
               {records.length} loaded out of {totalRecords}
             </p>
           )}
-          {!table.isMigrated && <Badge color="yellow" className="hidden sm:block">Migrating</Badge>}
+          {!table.isMigrated && (
+            <Badge color="yellow" className="hidden sm:block">
+              Migrating
+            </Badge>
+          )}
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
           <Fields table={table} />
@@ -47,6 +51,8 @@ export function TableViewsNav() {
             <ShareIcon className="block h-4 w-4 mr-1" />
             Share View
           </button>
+          {/* TODO - Reimplement this for future field writes to remote db feature */}
+          {/* <Sync fields={fields} table={table} /> */}
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />

@@ -79,3 +79,17 @@ export async function updateFieldPermissionAllowedRoles({ id, ...payload }) {
 
   return undefined;
 }
+
+export async function searchFieldByName({ id, name }) {
+  const response = await securedApi.get(`tables/${id}/fields/${name}`);
+  if (response.statusText === 'OK') {
+    return response;
+  }
+
+  return undefined;
+}
+
+export async function addVirtualField({ tableId, ...payload }) {
+  const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+  return response;
+}

@@ -34,6 +34,13 @@ class PowerbaseTablesController < ApplicationController
     required(:roles)
   end
 
+
+  schema(:create) do
+    required(:id).value(:integer)
+    required(:table)
+    required(:fields)
+  end
+
   # GET /databases/:database_id/tables
   def index
     @database = PowerbaseDatabase.find(safe_params[:database_id])
@@ -108,6 +115,49 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
+  # This is a functional test endpoint for now alongside its corresponding helpers
+  # TODO - add to validation schema on revisiting the feature
+  def create
+    table_params = safe_params[:table]
+    fields_params = safe_params[:fields]
+    standardized_table_params = standardize_table_params(table_params)
+    res_fields = {}
+    @table = PowerbaseTable.create(standardized_table_params)
+    if !@table
+      render json: { error: "Could not create the new virtual table'" }, status: :unprocessable_entity
+      return
+    end
+    @view = TableView.create(
+      name: "Default",
+      view_type: "grid",
+      order: @table.table_views.count,
+      powerbase_table_id: @table.id,
+    )
+    if !@view
+      render json: { error: "Could not create a view for the new virtual table'" }, status: :unprocessable_entity
+      return
+    end
+    @table.default_view_id = @view.id
+    @table.save!
+    fields_params.each_with_index do |field_param, index|
+      standardized_field_params = standardize_field_params(field_param, @table)
+      cur_field = PowerbaseField.create(standardized_field_params)
+      res_fields[cur_field.name] = cur_field.id
+      view_field = ViewFieldOption.new
+      view_field.width = case cur_field.powerbase_field_type_id
+        when 3
+          cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
+        else
+          300
+      end
+      view_field.order = index + 1
+      view_field.table_view_id = @view.id
+      view_field.powerbase_field_id = cur_field.id
+      view_field.save!
+    end
+    render json: {table: format_json(table), fields: res_fields}
+  end
+
   # PUT /tables/:id/allowed_roles
   def update_allowed_roles
     table_updater = Tables::Updater.new(@table)
@@ -152,6 +202,36 @@ class PowerbaseTablesController < ApplicationController
         created_at: table.created_at,
         updated_at: table.updated_at,
         database_id: table.powerbase_database_id,
+      }
+    end
+
+    def standardize_table_params(params)
+      {
+        powerbase_database_id: params[:powerbase_database_id],
+        is_migrated: params[:is_migrated],
+        is_virtual: params[:is_virtual],
+        alias: params[:alias],
+        name: params[:name],
+        order: params[:order],
+        page_size: params[:page_size]
+      }
+    end
+  
+    def standardize_field_params(params, table)
+     {
+        name: params[:name],
+        description: params[:description],
+        oid: params[:oid],
+        db_type: params[:db_type],
+        default_value: params[:default_value],
+        is_primary_key: params[:is_primary_key],
+        is_nullable: params[:is_nullable],
+        powerbase_table_id: table.id,
+        powerbase_field_type_id: params[:powerbase_field_type_id],
+        is_pii: params[:is_pii],
+        alias: params[:alias],
+        is_virtual: params[:is_virtual],
+        allow_dirty_value: params[:allow_dirty_value]
       }
     end
 end

@@ -8,6 +8,11 @@ import { formatCurrency } from '@lib/helpers/formatCurrency';
 import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
 import { isValidEmail } from '@lib/helpers/isValidEmail';
 import { isValidJSONString } from '@lib/helpers/isValidJSONString';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
+import { OutsideCellClick } from '@components/ui/OutsideCellClick';
+import { useEditingCell } from '@lib/hooks/useEditingCell';
+// import { useSaveStatus } from '@models/SaveStatus';
+import EditCell from './EditCell';
 
 function CellValue({
   value,
@@ -19,7 +24,7 @@ function CellValue({
   fieldType,
   handleExpandRecord,
 }) {
-  const className = (value?.toString().length && field?.isForeignKey)
+  const className = value?.toString().length && field?.isForeignKey
     ? 'px-2 py-0.25 bg-blue-50 rounded'
     : '';
 
@@ -34,7 +39,7 @@ function CellValue({
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {(isHoveredRow && !isLastRow) && (
+          {isHoveredRow && !isLastRow && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -47,7 +52,7 @@ function CellValue({
               <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">Expand Record</span>
             </button>
-          )}
+          )}{' '}
         </span>
       </>
     );
@@ -71,11 +76,7 @@ function CellValue({
   if (fieldType?.name === FieldType.DATE && !field.isPii) {
     const date = formatDate(value);
 
-    return (
-      <span className={className}>
-        {date ? `${date} UTC` : null}
-      </span>
-    );
+    return <span className={className}>{date ? `${date} UTC` : null}</span>;
   }
 
   if (fieldType?.name === FieldType.JSON_TEXT && isValidJSONString(value)) {
@@ -84,7 +85,10 @@ function CellValue({
 
   if (fieldType?.name === FieldType.EMAIL && isValidEmail(value)) {
     return (
-      <a href={`mailto:${value.toString()}`} className={cn('underline text-gray-500', className)}>
+      <a
+        href={`mailto:${value.toString()}`}
+        className={cn('underline text-gray-500', className)}
+      >
         {value.toString()}
       </a>
     );
@@ -92,7 +96,12 @@ function CellValue({
 
   if (fieldType?.name === FieldType.URL && isValidHttpUrl(value)) {
     return (
-      <a href={value.toString()} target="_blank" rel="noreferrer" className={cn('underline text-gray-500', className)}>
+      <a
+        href={value.toString()}
+        target="_blank"
+        rel="noreferrer"
+        className={cn('underline text-gray-500', className)}
+      >
         {value.toString()}
       </a>
     );
@@ -101,15 +110,17 @@ function CellValue({
   if (fieldType?.name === FieldType.CURRENCY) {
     const currency = formatCurrency(value, field?.options);
 
-    return (
-      <span className={className}>
-        {currency}
-      </span>
-    );
+    return <span className={className}>{currency}</span>;
   }
 
   return (
-    <span className={cn((value?.toString().length && field.isForeignKey) && 'px-2 py-0.25 bg-blue-50 rounded')}>
+    <span
+      className={cn(
+        value?.toString().length
+          && field.isForeignKey
+          && 'px-2 py-0.25 bg-blue-50 rounded',
+      )}
+    >
       {value?.toString()}
       {fieldType?.name === FieldType.PERCENT && '%'}
     </span>
@@ -141,10 +152,33 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
+  recordInputRef,
+  isEditing,
+  setIsEditing,
+  cellToEdit,
+  setCellToEdit,
+  editCellInput,
+  setEditCellInput,
+  records,
+  validationToolTip,
+  table,
+  isNewRecord,
+  setIsNewRecord,
+  initialFields,
+  connections,
+  setUpdatedRecords,
+  updatedRecords,
   isHighlighted,
+  setCalendarValue,
+  calendarValue,
+  isTurbo,
+  canAddRecords,
+  catchError,
 }) {
   const fieldType = field?.fieldTypeId
-    ? fieldTypes?.find((item) => item.id.toString() === field.fieldTypeId.toString())
+    ? fieldTypes?.find(
+      (item) => item.id.toString() === field.fieldTypeId.toString(),
+    )
     : undefined;
 
   const handleMouseEnter = () => {
@@ -154,17 +188,32 @@ export function CellRenderer({
     });
   };
 
+  const handleMouseLeave = () => {
+    setHoveredCell({});
+  };
+  // const { saving, catchError, saved } = useSaveStatus();
+  const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
+  const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
+
+  const isDoubleClickedCell = cellToEdit
+    && cellToEdit.row !== null
+    && cellToEdit.row === rowIndex
+    && cellToEdit.column === columnIndex;
+
   return (
     <div
       role="button"
       id={`row-${rowIndex}_col-${columnIndex}`}
       key={key}
       className={cn(
-        'single-line text-sm truncate focus:bg-gray-100 border-b border-gray-200 items-center py-1 px-2',
+        'single-line text-sm truncate focus:bg-gray-100 border-b items-center py-1 px-2',
         isHighlighted && 'update-highlight',
         isHoveredRow && 'bg-gray-50',
         isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
-        (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
+        !isRowNo && fieldType?.name !== FieldType.CHECKBOX ? 'inline' : 'flex',
+        isDoubleClickedCell && 'border border-indigo-500',
+        !isDoubleClickedCell && 'border-gray-200',
       )}
       style={style}
       tabIndex={0}
@@ -173,27 +222,78 @@ export function CellRenderer({
 
         if (evt.code === 'Enter' && !isRowNo) {
           el.contentEditable = el.contentEditable !== 'true';
+          if (isEditing && cellToEdit) onClickOutsideEditingCell();
         }
       }}
-      onDoubleClick={(evt) => {
-        if (!isRowNo) evt.target.contentEditable = true;
+      onDoubleClick={() => {
+        if (!isRowNo && field.isVirtual && canAddRecords && !isLastRow) {
+          setIsEditing(true);
+          setEditCellInput(value);
+          setHoveredCell({});
+          setCellToEdit({
+            row: rowIndex,
+            column: columnIndex,
+          });
+        }
       }}
       onBlur={(evt) => {
         if (!isRowNo) evt.target.contentEditable = false;
       }}
       onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       suppressContentEditableWarning
     >
-      <CellValue
-        value={value}
-        isLoaded={isLoaded}
-        isRowNo={isRowNo}
-        isHoveredRow={isHoveredRow}
-        isLastRow={isLastRow}
-        field={field}
-        fieldType={fieldType}
-        handleExpandRecord={handleExpandRecord}
-      />
+      {isEditing
+      && rowIndex === cellToEdit?.row
+      && field?.isVirtual
+      && columnIndex === cellToEdit?.column ? (
+        <Wrapper
+          condition={fieldType.dataType !== 'date'}
+          wrapper={(children) => (
+            <OutsideCellClick
+              onClickOutside={(e) => onClickOutsideEditingCell(e)}
+              className="h-full"
+              isCalender={fieldType.dataType === 'date'}
+            >
+              {children}
+            </OutsideCellClick>
+          )}
+        >
+          <EditCell
+            value={editCellInput}
+            isEditing={isEditing}
+            ref={recordInputRef}
+            onChange={onChange}
+            validationToolTip={validationToolTip}
+            cellToEdit={cellToEdit}
+            fieldType={fieldType}
+            setCalendarValue={setCalendarValue}
+            calendarValue={calendarValue}
+            onClickOutsideEditingCell={onClickOutsideEditingCell}
+          />
+        </Wrapper>
+        ) : (
+          <CellValue
+            value={value}
+            isLoaded={isLoaded}
+            isRowNo={isRowNo}
+            isHoveredRow={isHoveredRow}
+            isLastRow={isLastRow}
+            field={field}
+            fieldType={fieldType}
+            handleExpandRecord={handleExpandRecord}
+            table={table}
+            rowIndex={rowIndex}
+            columnIndex={columnIndex}
+            setIsEditing={setIsEditing}
+            setEditCellInput={setEditCellInput}
+            setCellToEdit={setCellToEdit}
+            isNewRecord={isNewRecord}
+            setIsNewRecord={setIsNewRecord}
+            setHoveredCell={setHoveredCell}
+            records={records}
+          />
+        )}
     </div>
   );
 }
@@ -213,4 +313,25 @@ CellRenderer.propTypes = {
   fieldTypes: PropTypes.array.isRequired,
   handleExpandRecord: PropTypes.func,
   isHighlighted: PropTypes.bool,
+  recordInputRef: PropTypes.func,
+  isEditing: PropTypes.bool,
+  setIsEditing: PropTypes.func.isRequired,
+  cellToEdit: PropTypes.object,
+  setCellToEdit: PropTypes.func.isRequired,
+  editCellInput: PropTypes.string,
+  setEditCellInput: PropTypes.func.isRequired,
+  records: PropTypes.array.isRequired,
+  validationToolTip: PropTypes.bool,
+  table: PropTypes.object.isRequired,
+  isNewRecord: PropTypes.bool,
+  setIsNewRecord: PropTypes.func.isRequired,
+  initialFields: PropTypes.array.isRequired,
+  connections: PropTypes.array.isRequired,
+  setUpdatedRecords: PropTypes.func.isRequired,
+  updatedRecords: PropTypes.array.isRequired,
+  setCalendarValue: PropTypes.func.isRequired,
+  calendarValue: PropTypes.string,
+  isTurbo: PropTypes.bool.isRequired,
+  canAddRecords: PropTypes.bool.isRequired,
+  catchError: PropTypes.func,
 };

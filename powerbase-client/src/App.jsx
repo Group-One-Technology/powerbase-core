@@ -55,8 +55,16 @@ function BasesRoute() {
       <Route exact path={`${path}/add`} component={AddBasePage} />
       <Route exact path={`${path}/create`} component={CreateBasePage} />
       <Route exact path={`${path}/connect`} component={ConnectBasePage} />
-      <Route exact path={`${path}/connect-url`} component={ConnectURLBasePage} />
-      <Route exact path={`${path}/integration/connect`} component={ConnectIntegrationBasePage} />
+      <Route
+        exact
+        path={`${path}/connect-url`}
+        component={ConnectURLBasePage}
+      />
+      <Route
+        exact
+        path={`${path}/integration/connect`}
+        component={ConnectIntegrationBasePage}
+      />
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route exact path={`${path}/:id/settings`} component={BaseSettingsPage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />

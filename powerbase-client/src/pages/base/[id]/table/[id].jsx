@@ -8,7 +8,10 @@ import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseGuestsProvider, useBaseGuests } from '@models/BaseGuests';
 import { ViewFieldsProvider } from '@models/ViewFields';
-import { CurrentViewProvider, useCurrentView } from '@models/views/CurrentTableView';
+import {
+  CurrentViewProvider,
+  useCurrentView,
+} from '@models/views/CurrentTableView';
 import { useQuery } from '@lib/hooks/useQuery';
 
 import { Page } from '@components/layout/Page';
@@ -29,7 +32,13 @@ function BaseTable() {
   const { data: baseUser } = useBaseUser();
   const { view } = useCurrentView();
 
-  if (base == null || bases == null || authUser == null || guests == null || typeof baseUser === 'undefined') {
+  if (
+    base == null
+    || bases == null
+    || authUser == null
+    || guests == null
+    || typeof baseUser === 'undefined'
+  ) {
     return <Loader className="h-screen" />;
   }
 

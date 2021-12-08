@@ -8,7 +8,10 @@ import { useTableConnections } from '@models/TableConnections';
 function useViewFieldStateModel() {
   const { data: initialFields } = useViewFields();
   const { data: connections } = useTableConnections();
-  const [fields, setFields] = useState(initializeFields(initialFields, connections));
+  const [fields, setFields] = useState(
+    initializeFields(initialFields, connections),
+  );
+  const [hasAddedNewField, setHasAddedNewField] = useState(false);
 
   useEffect(() => {
     setFields(initializeFields(initialFields, connections));
@@ -22,7 +25,11 @@ function useViewFieldStateModel() {
     initialFields,
     fields,
     setFields: updateFields,
+    hasAddedNewField,
+    setHasAddedNewField,
   };
 }
 
-export const [ViewFieldStateProvider, useViewFieldState] = constate(useViewFieldStateModel);
+export const [ViewFieldStateProvider, useViewFieldState] = constate(
+  useViewFieldStateModel,
+);

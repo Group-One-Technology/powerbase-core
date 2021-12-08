@@ -1,0 +1,2 @@
+class MagicRecord < ApplicationRecord
+end

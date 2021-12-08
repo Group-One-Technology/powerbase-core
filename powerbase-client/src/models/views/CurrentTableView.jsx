@@ -44,7 +44,9 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const handleViewChange = async (view) => {
     window.history.replaceState(
       null,
-      currentTable.defaultViewId === view.id ? currentTable.name : `${currentTable.name} - ${view.name}`,
+      currentTable.defaultViewId === view.id
+        ? currentTable.name
+        : `${currentTable.name} - ${view.name}`,
       `/base/${baseId}/table/${view.tableId}?view=${view.id}`,
     );
 
@@ -69,6 +71,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     setTableId,
     handleTableChange,
     handleViewChange,
+    mutateTables: tablesResponse.mutate,
   };
 }
 

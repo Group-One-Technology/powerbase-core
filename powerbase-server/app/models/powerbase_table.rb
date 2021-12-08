@@ -79,7 +79,7 @@ class PowerbaseTable < ApplicationRecord
   end
 
   def deleted_columns
-    columns = self.fields.map{|t| t.name.to_sym} - _sequel.schema(self.name.to_sym).map(&:first)
+    columns = self.fields.select{|field| !field[:is_virtual]}.map{|t| t.name.to_sym} - _sequel.schema(self.name.to_sym).map(&:first)
 
     self._sequel.disconnect
 

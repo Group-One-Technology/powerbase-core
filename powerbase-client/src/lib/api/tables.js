@@ -21,7 +21,10 @@ export async function getTables({ databaseId }) {
 }
 
 export async function updateTables({ databaseId, ...payload }) {
-  const response = await securedApi.put(`/databases/${databaseId}/tables/update`, payload);
+  const response = await securedApi.put(
+    `/databases/${databaseId}/tables/update`,
+    payload,
+  );
 
   if (response.statusText === 'OK') {
     return response.data;
@@ -31,7 +34,10 @@ export async function updateTables({ databaseId, ...payload }) {
 }
 
 export async function updateTableDefaultView({ tableId, viewId }) {
-  const response = await securedApi.put(`tables/${tableId}/update_default_view`, { viewId });
+  const response = await securedApi.put(
+    `tables/${tableId}/update_default_view`,
+    { viewId },
+  );
 
   if (response.statusText === 'OK') {
     return response.data;
@@ -53,6 +59,15 @@ export async function updateTablePermission({ id, ...payload }) {
 export async function updateTablePermissionAllowedRoles({ id, ...payload }) {
   const response = await securedApi.put(`/tables/${id}/allowed_roles`, payload);
 
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function addVirtualTable({ payload }) {
+  const response = await securedApi.post('/tables/virtual_tables', payload);
   if (response.statusText === 'OK') {
     return response.data;
   }

@@ -7,8 +7,14 @@ import {
   TableIcon,
 } from '@heroicons/react/solid';
 import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToHorizontalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  restrictToHorizontalAxis,
+  restrictToFirstScrollableAncestor,
+} from '@dnd-kit/modifiers';
 
 import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
@@ -32,7 +38,10 @@ export function TableTabs() {
   const [tables, setTables] = useState(initialTables);
   const [tableSearchModalOpen, setTableSearchModalOpen] = useState(false);
   const { tabsContainerEl, activeTabEl, handleScroll } = useTableTabsScroll();
-  const { sensors, handleReorderViews } = useTableTabsReorder({ base, setTables });
+  const { sensors, handleReorderViews } = useTableTabsReorder({
+    base,
+    setTables,
+  });
 
   const canAddTables = baseUser?.can(PERMISSIONS.AddTables);
 
@@ -52,14 +61,27 @@ export function TableTabs() {
 
   return (
     <TablePermissionsModalProvider>
-      <div className={cn('relative w-full overflow-hidden px-4 sm:px-6 lg:px-8', BG_COLORS[base.color])}>
+      <div
+        className={cn(
+          'relative w-full overflow-hidden px-4 sm:px-6 lg:px-8',
+          BG_COLORS[base.color],
+        )}
+      >
         <TableTabsMobile addTable={addTable} />
         <div className="hidden sm:flex">
           <button className="outline-none" onClick={() => handleSearchModal()}>
             <TableIcon className="h-6 w-6 text-white mt-1/2 " />
           </button>
           {/* The extra conditional check is meant to prevent weird behavior where async operations run even when the modal has been closed out */}
-          {tableSearchModalOpen && <TableSearchModal modalOpen={tableSearchModalOpen} setModalOpen={setTableSearchModalOpen} tables={tables} handleTableChange={handleTableChange} tableId={table.id} />}
+          {tableSearchModalOpen && (
+            <TableSearchModal
+              modalOpen={tableSearchModalOpen}
+              setModalOpen={setTableSearchModalOpen}
+              tables={tables}
+              handleTableChange={handleTableChange}
+              tableId={table.id}
+            />
+          )}
           <button
             id="tableTabsLeftArrow"
             type="button"
@@ -69,22 +91,31 @@ export function TableTabs() {
             <span className="sr-only">Previous</span>
             <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
           </button>
-          <nav ref={tabsContainerEl} className="inline-flex space-x-1 overflow-auto scrollbar-none" aria-label="Tabs">
+          <nav
+            ref={tabsContainerEl}
+            className="inline-flex space-x-1 overflow-auto scrollbar-none"
+            aria-label="Tabs"
+          >
             {tables == null && <TableTabsLoader />}
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleReorderViews}
-              modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
+              modifiers={[
+                restrictToHorizontalAxis,
+                restrictToFirstScrollableAncestor,
+              ]}
             >
               <SortableContext
                 items={tables}
                 strategy={horizontalListSortingStrategy}
               >
-                {tables?.map((item) => <TableTabItem ref={activeTabEl} key={item.id} table={item} />)}
+                {tables?.map((item) => (
+                  <TableTabItem ref={activeTabEl} key={item.id} table={item} />
+                ))}
               </SortableContext>
             </DndContext>
-            {(tables && canAddTables) && (
+            {tables && canAddTables && (
               <div className="my-auto px-2">
                 <button
                   type="button"

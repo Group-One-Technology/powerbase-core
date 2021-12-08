@@ -2,7 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Menu } from '@headlessui/react';
-import { PlusIcon, ChevronDownIcon, ViewGridAddIcon } from '@heroicons/react/outline';
+import {
+  PlusIcon,
+  ChevronDownIcon,
+  ViewGridAddIcon,
+} from '@heroicons/react/outline';
 
 export function AddFilterMenu({ root, level = 0, handleAddFilter }) {
   if (level > 1) {

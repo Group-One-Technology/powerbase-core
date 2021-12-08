@@ -21,7 +21,10 @@ export async function hideAllViewFields({ viewId }) {
 }
 
 export async function reorderViewFields({ viewId, ...payload }) {
-  const response = await securedApi.put(`/views/${viewId}/view_fields/order`, payload);
+  const response = await securedApi.put(
+    `/views/${viewId}/view_fields/order`,
+    payload,
+  );
 
   if (response.statusText === 'OK') {
     return response.data;

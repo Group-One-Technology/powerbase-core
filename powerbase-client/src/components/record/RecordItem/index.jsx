@@ -14,7 +14,10 @@ export function RecordItem({
 }) {
   const isForeignKey = !!(item.isForeignKey && item.foreignKey && item.value);
   const primaryKeys = isForeignKey
-    ? { [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]: item.value }
+    ? {
+      [item.foreignKey.referencedColumns[item.foreignKey.columnIndex]]:
+          item.value,
+    }
     : undefined;
   const referencedTable = isForeignKey
     ? item.foreignKey.referencedTable
@@ -32,11 +35,13 @@ export function RecordItem({
   return (
     <TableRecordProvider
       tableId={referencedTable?.id}
-      recordId={primaryKeys
-        ? Object.entries(primaryKeys)
-          .map(([key, value]) => `${key}_${value}`)
-          .join('-')
-        : undefined}
+      recordId={
+        primaryKeys
+          ? Object.entries(primaryKeys)
+            .map(([key, value]) => `${key}_${value}`)
+            .join('-')
+          : undefined
+      }
       primaryKeys={primaryKeys}
     >
       <TableFieldsProvider id={referencedTable?.id}>

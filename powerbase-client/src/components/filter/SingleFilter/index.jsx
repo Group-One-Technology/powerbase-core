@@ -26,15 +26,22 @@ export function SingleFilter({
   canManageViews,
 }) {
   const { data: fieldTypes } = useFieldTypes();
-  const [field, setField] = useState(filter?.field
-    ? fields.find((item) => item.name === filter.field) || fields[0]
-    : fields[0]);
+  const [field, setField] = useState(
+    filter?.field
+      ? fields.find((item) => item.name === filter.field) || fields[0]
+      : fields[0],
+  );
   const [operator, setOperator, operators, updateOperator, fieldType] = useOperator({ filter, field });
-  const [value, setValue] = useFilterValue({ value: filter?.filter?.value, fieldType });
+  const [value, setValue] = useFilterValue({
+    value: filter?.filter?.value,
+    fieldType,
+  });
 
   const updateField = (selectedField) => {
     if (canManageViews) {
-      const newFieldType = fieldTypes.find((item) => item.id.toString() === selectedField.fieldTypeId.toString());
+      const newFieldType = fieldTypes.find(
+        (item) => item.id.toString() === selectedField.fieldTypeId.toString(),
+      );
 
       setField(selectedField);
       updateOperator(newFieldType);
@@ -55,9 +62,9 @@ export function SingleFilter({
 
   const handleFieldChange = (selectedFieldId) => {
     if (canManageViews) {
-      const selectedField = fields?.find((item) => (
-        item.id.toString() === selectedFieldId.toString()
-      ));
+      const selectedField = fields?.find(
+        (item) => item.id.toString() === selectedFieldId.toString(),
+      );
 
       updateField(selectedField);
     }
@@ -99,38 +106,47 @@ export function SingleFilter({
         field: field?.name,
         filter: {
           operator,
-          value: fieldType?.name === FieldType.CHECKBOX
-            ? value.toString() === 'true'
-            : fieldType?.name === FieldType.DATE
-              ? formatDate(value, { dateOnly: true })
-              : value,
+          value:
+            fieldType?.name === FieldType.CHECKBOX
+              ? value.toString() === 'true'
+              : fieldType?.name === FieldType.DATE
+                ? formatDate(value, { dateOnly: true })
+                : value,
         },
       })}
       className="filter flex gap-2 items-center"
     >
       <div className="inline-block w-16 text-right capitalize">
-        {handleLogicalOpChange && canManageViews
-          ? (
-            <>
-              <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">Logical Operator</label>
-              <FilterLogicalOperator
-                id={`filter${id}-logicalOperator`}
-                value={logicalOperator}
-                onChange={handleLogicalOpChange}
-              />
-            </>
-          ) : <p>{first ? 'where' : logicalOperator}</p>}
+        {handleLogicalOpChange && canManageViews ? (
+          <>
+            <label htmlFor={`filter${id}-logicalOperator`} className="sr-only">
+              Logical Operator
+            </label>
+            <FilterLogicalOperator
+              id={`filter${id}-logicalOperator`}
+              value={logicalOperator}
+              onChange={handleLogicalOpChange}
+            />
+          </>
+        ) : (
+          <p>{first ? 'where' : logicalOperator}</p>
+        )}
       </div>
       <div className="flex-1 flex gap-2 items-center">
-        <label htmlFor={`filter${id}-firstOperand`} className="sr-only">First Operand (Field)</label>
+        <label htmlFor={`filter${id}-firstOperand`} className="sr-only">
+          First Operand (Field)
+        </label>
         <FilterField
           id={`filter${id}-firstOperand`}
           value={field}
           options={fields}
           onChange={handleFieldChange}
           disabled={!canManageViews}
+          first={first}
         />
-        <label htmlFor={`filter${id}-operator`} className="sr-only">Operator</label>
+        <label htmlFor={`filter${id}-operator`} className="sr-only">
+          Operator
+        </label>
         <FilterOperator
           id={`filter${id}-operator`}
           value={operator}
@@ -138,7 +154,9 @@ export function SingleFilter({
           onChange={handleOperatorChange}
           disabled={!canManageViews}
         />
-        <label htmlFor={`filter${id}-secondOperand`} className="sr-only">Second Operand (Value)</label>
+        <label htmlFor={`filter${id}-secondOperand`} className="sr-only">
+          Second Operand (Value)
+        </label>
         <FilterValue
           id={`filter${id}-secondOperand`}
           field={field}
