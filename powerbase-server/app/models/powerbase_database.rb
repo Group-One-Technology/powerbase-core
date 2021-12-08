@@ -64,6 +64,10 @@ class PowerbaseDatabase < ApplicationRecord
     "#{self.name}##{self.id}"
   end
 
+  def is_migrating?
+    migrating_tables.empty?
+  end
+
   def in_synced?
     unmigrated_tables.empty? && deleted_tables.empty?
   end
@@ -72,6 +76,10 @@ class PowerbaseDatabase < ApplicationRecord
     tb = _sequel.tables - self.tables.map{|t| t.name.to_sym}
     _sequel.disconnect
     tb
+  end
+
+  def migrating_tables
+    self.tables.where(is_migrated: false)
   end
 
   def deleted_tables

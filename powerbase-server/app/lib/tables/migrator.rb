@@ -86,7 +86,7 @@ class Tables::Migrator
     table.is_migrated = true
     table.save
 
-    if database.in_synced?
+    if database.is_migrating?
       database.is_migrated = true
       database.save
       database.base_migration.end_time = Time.now
