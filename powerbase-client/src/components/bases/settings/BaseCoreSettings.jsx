@@ -5,7 +5,7 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { updateDatabase } from '@lib/api/databases';
-import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants';
+import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
 
