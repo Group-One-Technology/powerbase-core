@@ -23,6 +23,7 @@ import { CellRenderer } from './CellRenderer';
 export function TableRenderer({
   height, table, highlightedCell,
 }) {
+  const { catchError } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
@@ -57,8 +58,7 @@ export function TableRenderer({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
-  const canAddRecords = baseUser?.can('addRecords', table.id);
-  const { catchError } = useSaveStatus();
+  const canAddRecords = baseUser?.can('addRecords', table);
 
   useEffect(() => {
     let timer;
