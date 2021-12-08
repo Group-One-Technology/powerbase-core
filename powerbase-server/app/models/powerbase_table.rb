@@ -112,8 +112,8 @@ class PowerbaseTable < ApplicationRecord
   def remove
     self.default_view_id = nil
     self.save
-    base_connections.destroy_allx
     BaseConnection.where(powerbase_table_id: self.id).destroy_all
+    BaseConnection.where(referenced_table_id: self.id).destroy_all
     self.destroy
   end
 

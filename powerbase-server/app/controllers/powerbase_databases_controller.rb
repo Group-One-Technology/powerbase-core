@@ -4,7 +4,7 @@ class PowerbaseDatabasesController < ApplicationController
   before_action :check_database_access, only: [:update, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
-  schema(:show, :clear_logs) do
+  schema(:show, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
@@ -192,6 +192,15 @@ class PowerbaseDatabasesController < ApplicationController
     else
       render json: @hb_database.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /databases/:id
+  def destroy
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    raise AccessDenied if !Guest.owner?(current_user.id, @database)
+    @database.remove
+    render status: :no_content
   end
 
   # PUT /databases/:id/clear_logs
