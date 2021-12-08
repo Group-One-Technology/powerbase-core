@@ -13,7 +13,7 @@ function useBaseTablesModel({ id }) {
     () => getTables({ databaseId: id }),
   );
 
-  useTableMigrationListener({ tables: response.data, mutate: response.mutate });
+  useTableMigrationListener({ tables: response.data?.tables, mutate: response.mutate });
 
   return {
     ...response,
