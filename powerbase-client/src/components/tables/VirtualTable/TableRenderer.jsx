@@ -3,20 +3,23 @@ import {
   Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
 import PropTypes from 'prop-types';
+
 import { useFieldTypes } from '@models/FieldTypes';
 import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableConnections } from '@models/TableConnections';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
-import { ITable } from '@lib/propTypes/table';
-import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
-import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
-import { initializeFields } from '@lib/helpers/fields/initializeFields';
-import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useBaseUser } from '@models/BaseUser';
 import { useBase } from '@models/Base';
 import { useSaveStatus } from '@models/SaveStatus';
+import { ITable } from '@lib/propTypes/table';
+import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
+import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
+import { PERMISSIONS } from '@lib/constants/permissions';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
+
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
@@ -58,7 +61,7 @@ export function TableRenderer({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [updatedRecords, setUpdatedRecords] = useState();
   const [calendarValue, setCalendarValue] = useState();
-  const canAddRecords = baseUser?.can('addRecords', table);
+  const canAddRecords = baseUser?.can(PERMISSIONS.AddFields, table);
 
   useEffect(() => {
     let timer;
