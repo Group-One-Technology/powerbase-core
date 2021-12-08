@@ -1,8 +1,5 @@
-/* eslint-disable prefer-const */
-/* eslint-disable comma-dangle */
-/* eslint-disable quotes */
 function getWait(wait) {
-  return typeof wait === "function" ? wait() : wait;
+  return typeof wait === 'function' ? wait() : wait;
 }
 
 function defer() {
@@ -27,7 +24,7 @@ export default function debounce(fn, wait = 0, options = {}) {
     Promise.resolve(
       options.accumulate
         ? fn.call(this, pendingArgs)
-        : fn.apply(this, pendingArgs[pendingArgs.length - 1])
+        : fn.apply(this, pendingArgs[pendingArgs.length - 1]),
     ).then(thisDeferred.resolve, thisDeferred.reject);
 
     pendingArgs = [];

@@ -47,7 +47,7 @@ const AddTable = ({
               Create a new table
             </button>
             <div className="mt-1 py-2 px-1">
-              <div className="text-xs text-gray-500 px-1">IMPORT FROM</div>
+              <div className="text-xs text-gray-500 px-1 uppercase">Import From</div>
               <div className="text-xs text-gray-800 mt-1 font-medium">
                 <button
                   className="mt-2 cursor-pointer hover:bg-gray-200 py-2 px-1"
@@ -72,3 +72,10 @@ AddTable.propTypes = {
 };
 
 export default AddTable;
+
+AddTable.propTypes = {
+  table: PropTypes.object,
+  base: PropTypes.object,
+  tables: PropTypes.array,
+  isUploadAction: PropTypes.bool,
+};

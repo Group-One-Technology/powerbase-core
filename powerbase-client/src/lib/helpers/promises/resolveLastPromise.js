@@ -1,4 +1,4 @@
-/* eslint-disable */
+
 import createImperativePromise from "./imperativePromise";
 
 export default function onlyResolvesLast(asyncFunction) {

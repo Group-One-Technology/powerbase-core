@@ -293,5 +293,5 @@ NewTableModal.propTypes = {
   table: PropTypes.object.isRequired,
   tables: PropTypes.array.isRequired,
   base: PropTypes.object.isRequired,
-  isUploadAction: PropTypes.bool.isRequired,
+  isUploadAction: PropTypes.bool,
 };

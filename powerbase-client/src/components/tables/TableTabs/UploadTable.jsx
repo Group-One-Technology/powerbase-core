@@ -24,7 +24,7 @@ export default function CsvReader({ csvFile, setCsvFile, setCsvArray }) {
     const file = csvFile;
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = function processGivenCSV(e) {
       const text = e.target.result;
       processCSV(text);
     };

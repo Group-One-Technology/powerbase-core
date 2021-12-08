@@ -151,6 +151,7 @@ export function CellRenderer({
   isRowNo,
   fieldTypes,
   handleExpandRecord,
+  // ! FIXME Below is not included in props validation
   recordInputRef,
   isEditing,
   setIsEditing,

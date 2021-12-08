@@ -12,31 +12,25 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const [viewId, setViewId] = useState(initialViewId);
 
   const tablesResponse = useSWR(
-    baseId && authUser ? `${authUser.id}/databases/${baseId}/tables` : null,
+    (baseId && authUser) ? `${authUser.id}/databases/${baseId}/tables` : null,
     () => getTables({ databaseId: baseId }),
     { revalidateOnFocus: true },
   );
 
   const viewsResponse = useSWR(
-    tableId && authUser ? `${authUser.id}/tables/${tableId}/views` : null,
+    (tableId && authUser) ? `${authUser.id}/tables/${tableId}/views` : null,
     () => getTableViews({ tableId }),
     { revalidateOnFocus: true },
   );
 
-  const currentTable = tablesResponse.data?.tables.find(
-    (table) => table.id.toString() === tableId.toString(),
-  );
-  const currentView = viewsResponse.data?.find(
-    (view) => view.id.toString() === viewId?.toString(),
-  );
+  const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
+  const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
 
   const handleTableChange = ({ table }) => {
     window.history.replaceState(
       null,
       table.name,
-      `/base/${baseId}/table/${table.id}?${
-        table.defaultViewId ? `view=${table.defaultViewId}` : ''
-      }`,
+      `/base/${baseId}/table/${table.id}?${table.defaultViewId ? `view=${table.defaultViewId}` : ''}`,
     );
 
     setTableId(table.id);

@@ -96,9 +96,7 @@ export function SingleRecordModal({
               const item = {
                 isForeignKey: true,
                 name: foreignKey.referencedTable.name,
-                fieldTypeId: fieldTypes.find(
-                  (key) => key.name === 'Single Line Text',
-                ).id,
+                fieldTypeId: fieldTypes.find((key) => key.name === 'Single Line Text').id,
                 value: primaryKeys,
               };
 
@@ -180,9 +178,7 @@ export function SingleRecordModal({
               const filters = {};
 
               connection.referencedColumns.forEach((col, index) => {
-                const curColumn = record.find(
-                  (recordItem) => recordItem.name === col,
-                );
+                const curColumn = record.find((recordItem) => recordItem.name === col);
 
                 if (curColumn) {
                   filters[connection.columns[index]] = curColumn.value;

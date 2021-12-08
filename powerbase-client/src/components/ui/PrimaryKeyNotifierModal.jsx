@@ -22,7 +22,7 @@ export function PrimaryKeyNotifierModal() {
               </h3>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  This table doesn't have any primary key, would you like us to add one?
+                  This table doesn&lsquo;t have any primary key, would you like us to add one?
                 </p>
               </div>
             </div>

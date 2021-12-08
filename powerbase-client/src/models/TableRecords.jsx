@@ -83,8 +83,6 @@ function useTableRecordsModel({ id, pageSize = 40, isTurbo }) {
     }));
   }
 
-  console.log(parsedData);
-
   const isLoadingInitialData = !data && !error;
   const isLoading = isLoadingInitialData
     || !!(size > 0 && data && typeof data[size - 1] === 'undefined');
