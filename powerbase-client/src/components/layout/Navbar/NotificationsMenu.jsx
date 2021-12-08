@@ -24,7 +24,7 @@ function BaseNotificationsMenu({ colored }) {
   const { authUser } = useAuthUser();
   const { listener } = useNotificationsListener();
   const { mutate: mutateSharedBases } = useSharedBases();
-  const { data: notifications } = useNotifications();
+  const { data: notifications, mutate: mutateNotifications } = useNotifications();
   const { data: initialGuestInvitations, mutate: mutateGuestInvitations } = useBaseInvitations();
   const {
     saving,
@@ -63,6 +63,7 @@ function BaseNotificationsMenu({ colored }) {
       try {
         setNotificationsCount(0);
         await readNotifications();
+        mutateNotifications();
       } catch (err) {
         console.log(err);
       }
