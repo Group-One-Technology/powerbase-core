@@ -163,9 +163,9 @@ class PowerbaseDatabasesController < ApplicationController
     })
 
     if database_creator.save
-      render json: database_creator.errors, status: :unprocessable_entity
-    else
       render json: { database: format_json(database_creator.database), db_size: database_creator.db_size }
+    else
+      render json: database_creator.errors, status: :unprocessable_entity
     end
   end
 

@@ -1,5 +1,6 @@
 class Fields::Creator
   include FieldTypeHelper
+  include PusherHelper
 
   attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :database, :base_migration
 
@@ -51,6 +52,8 @@ class Fields::Creator
       database.save
       base_migration.end_time = Time.now
       base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
   end
 

@@ -1,7 +1,7 @@
 class Databases::Creator
   include SequelHelper
 
-  mattr_accessor :database, :errors, :db_size
+  attr_accessor :database, :errors, :db_size
 
   def initialize(database)
     @database = PowerbaseDatabase.new({
@@ -44,6 +44,18 @@ class Databases::Creator
 
       PowerbaseDatabaseMigrationJob.perform_later(@database.id)
     end
+  end
+
+  def database
+    @database
+  end
+
+  def errors
+    @errors
+  end
+
+  def db_size
+    @db_size
   end
 
   def save
