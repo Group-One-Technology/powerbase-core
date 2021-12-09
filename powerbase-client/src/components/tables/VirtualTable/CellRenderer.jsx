@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -22,6 +23,7 @@ function CellValue({
   field,
   fieldType,
   handleExpandRecord,
+  changeBool,
 }) {
   const className = value?.toString().length && field?.isForeignKey
     ? 'px-2 py-0.25 bg-blue-50 rounded'
@@ -135,6 +137,7 @@ CellValue.propTypes = {
   field: PropTypes.object,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
+  changeBool: PropTypes.func,
 };
 
 export function CellRenderer({
@@ -192,6 +195,9 @@ export function CellRenderer({
   };
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
     rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
+  const changeBool = () => {
+    onClickOutsideEditingCell();
+  };
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit
@@ -224,7 +230,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && canAddRecords && !isLastRow) {
+        if (!isRowNo && canAddRecords && !isLastRow && fieldType.dataType.toLowerCase() !== 'boolean') {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
@@ -289,6 +295,7 @@ export function CellRenderer({
             setIsNewRecord={setIsNewRecord}
             setHoveredCell={setHoveredCell}
             records={records}
+            changeBool={changeBool}
           />
         )}
     </div>
