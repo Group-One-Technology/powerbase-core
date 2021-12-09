@@ -1,4 +1,5 @@
 class TableRecordsController < ApplicationController
+  include SequelHelper
   before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
@@ -25,6 +26,12 @@ class TableRecordsController < ApplicationController
 
   schema(:magic_values) do
     required(:id).value(:integer)
+  end
+
+  schema(:update_remote_values) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+    required(:data)
   end
 
   # POST /tables/:table_id/records
@@ -88,6 +95,18 @@ class TableRecordsController < ApplicationController
       data: safe_params[:data]
     })
     render json: record
+  end
+
+  # POST /tables/:id/values
+  def update_remote_values
+    @table = PowerbaseTable.find(safe_params[:id])
+    primary_keys = safe_params[:primary_keys].symbolize_keys
+    data = safe_params[:data].symbolize_keys
+    table_name = @table.name
+    @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
+    db = sequel_connect(@powerbase_database)
+    updated_value = db[table_name.to_sym].where(primary_keys).update(data)
+    render json: updated_value
   end
 
   # GET /tables/:id/magic_values

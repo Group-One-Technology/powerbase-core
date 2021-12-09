@@ -1,6 +1,7 @@
 import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
 import { addOrUpdateMagicValue } from '@lib/api/records';
+import { securedApi } from '@lib/api';
 
 export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
@@ -73,8 +74,45 @@ export function useEditingCell(
       const sanitizedNumber = parseFloat(recordInputRef.current?.value);
       formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
     }
+    const recordsToUse = updatedRecords || records;
 
-    if (!field.isVirtual) return;
+    if (!field.isVirtual) {
+      const payload = {};
+      primaryKeys
+        .forEach((primaryKey) => {
+          const keyName = primaryKey.name;
+          const keyValue = primaryKey.value;
+          payload[keyName] = keyValue;
+        });
+      const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: recordInputRef.current?.value } });
+      if (updatedValue) {
+        const mutatedRecords = recordsToUse?.map((recordObj) => {
+          const matches = [];
+          let objToUse;
+          primaryKeys.forEach((extractedKey, pkIdx) => {
+            const pkName = extractedKey.name;
+            const pkValue = extractedKey.value;
+            matches.push(
+              `${getParameterCaseInsensitive(recordObj, pkName)}`
+                === `${pkValue}`,
+            );
+            if (pkIdx === primaryKeys.length - 1) {
+              if (!matches.includes(false)) {
+                const newObj = { ...recordObj };
+                newObj[field.name] = recordInputRef.current?.value;
+                objToUse = newObj;
+              } else {
+                objToUse = recordObj;
+              }
+            }
+          });
+          return objToUse;
+        });
+        setUpdatedRecords(mutatedRecords);
+      }
+      exitEditing();
+      return;
+    }
 
     try {
       const { data } = await addOrUpdateMagicValue({
@@ -87,7 +125,6 @@ export function useEditingCell(
         },
       });
 
-      const recordsToUse = updatedRecords || records;
       if (data) {
         const mutatedRecords = recordsToUse?.map((recordObj) => {
           const matches = [];

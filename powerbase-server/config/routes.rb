@@ -112,4 +112,5 @@ Rails.application.routes.draw do
   post 'tables/:id/magic_value', to: 'table_records#add_or_update_magic_value', as: 'change_magic_value'
   post 'magic_records', to: 'table_records#create_magic_record', as: 'new_magic_records'
   get 'tables/:id/magic_values', to: 'table_records#magic_values', as: 'magic_values'
+  post 'tables/:id/values', to: 'table_records#update_remote_values', as: 'remote_values'
 end
