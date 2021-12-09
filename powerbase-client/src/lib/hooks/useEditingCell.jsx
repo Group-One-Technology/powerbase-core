@@ -74,6 +74,8 @@ export function useEditingCell(
       formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
     }
 
+    if (!field.isVirtual) return;
+
     try {
       const { data } = await addOrUpdateMagicValue({
         tableId: field.tableId,

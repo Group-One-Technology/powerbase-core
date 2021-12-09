@@ -11,7 +11,6 @@ import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
-// import { useSaveStatus } from '@models/SaveStatus';
 import EditCell from './EditCell';
 
 function CellValue({
@@ -191,7 +190,6 @@ export function CellRenderer({
   const handleMouseLeave = () => {
     setHoveredCell({});
   };
-  // const { saving, catchError, saved } = useSaveStatus();
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
     rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
@@ -226,7 +224,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && field.isVirtual && canAddRecords && !isLastRow) {
+        if (!isRowNo && canAddRecords && !isLastRow) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
@@ -245,13 +243,12 @@ export function CellRenderer({
     >
       {isEditing
       && rowIndex === cellToEdit?.row
-      && field?.isVirtual
       && columnIndex === cellToEdit?.column ? (
         <Wrapper
           condition={fieldType.dataType !== 'date'}
           wrapper={(children) => (
             <OutsideCellClick
-              onClickOutside={(e) => onClickOutsideEditingCell(e)}
+              onClickOutside={() => onClickOutsideEditingCell()}
               className="h-full"
               isCalender={fieldType.dataType === 'date'}
             >

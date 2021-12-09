@@ -144,6 +144,8 @@ function TextCell(
   useEffect(() => {
     if (fieldType.dataType !== 'date') ref.current.focus();
   }, []);
+
+  console.log('val: ', value);
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
