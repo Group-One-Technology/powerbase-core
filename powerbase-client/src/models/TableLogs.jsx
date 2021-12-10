@@ -17,10 +17,10 @@ function useTableLogsModel({ id }) {
   const { fieldMigrationListener } = useTableMigrationListener({ mutate: response.mutate });
 
   useEffect(() => {
-    if (response.data && !response.data.isMigrated) {
-      fieldMigrationListener(response.data.id);
+    if (id) {
+      fieldMigrationListener(id);
     }
-  }, [response.data]);
+  }, [id]);
 
   return {
     ...response,

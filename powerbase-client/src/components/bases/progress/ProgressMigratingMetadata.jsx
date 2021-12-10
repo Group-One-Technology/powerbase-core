@@ -45,7 +45,7 @@ function TableItem({ table }) {
 
             <div className="col-span-2">
               <p className="mr-4 text-right text-base font-medium text-gray-900">
-                {percentage ? `${percentage % 1 !== 0 ? percentage.toFixed(2) : percentage}%` : ''}
+                {(percentage != null && percentage % 1 !== 0) ? percentage.toFixed(2) : percentage}%
               </p>
             </div>
           </>
