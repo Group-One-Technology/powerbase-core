@@ -24,7 +24,7 @@ export function BaseProgressStep() {
                 {step.status === 'complete' ? (
                   <>
                     {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-indigo-600" aria-hidden="true" />}
-                    <Tab className="relative flex items-start group">
+                    <Tab className={cn('relative flex items-start group', step.disabled && 'cursor-not-allowed')} disabled={step.disabled}>
                       <span className="h-9 flex items-center">
                         <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-focus:ring-2 group-focus:outline-none ring-offset-2 ring-offset-indigo-400 ring-white ring-opacity-60">
                           <CheckIcon className="w-5 h-5 text-white" aria-hidden="true" />
@@ -83,7 +83,11 @@ export function BaseProgressStep() {
                     <div className="h-0.5 w-full bg-indigo-600" />
                   </div>
                   <Tab
-                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900 focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60"
+                    className={cn(
+                      'mr-8 relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900 focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60',
+                      step.disabled && 'cursor-not-allowed',
+                    )}
+                    disabled={step.disabled}
                   >
                     <CheckIcon className="w-6 h-6 text-white" aria-hidden="true" />
                     <span className="sr-only">{step.name} Complete</span>
