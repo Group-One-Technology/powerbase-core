@@ -10,10 +10,10 @@ import { TableLogsProvider, useTableLogs } from '@models/TableLogs';
 function TableItem({ table }) {
   const { data: tableLog } = useTableLogs();
 
-  const totalUnmigratedFields = tableLog?.unmigratedFields.length;
-  const totalMigratedFields = tableLog?.migratedFields.length;
+  const totalUnmigratedFields = tableLog?.unmigratedFields.length || 0;
+  const totalMigratedFields = tableLog?.migratedFields.length || 0;
   const totalFields = totalMigratedFields + totalUnmigratedFields;
-  const percentage = !tableLog
+  const percentage = tableLog == null
     ? undefined
     : totalMigratedFields === 0
       ? 0
