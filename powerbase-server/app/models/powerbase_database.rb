@@ -74,7 +74,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def is_migrating?
-    !migrating_tables.empty?
+    migrating_tables.any?
   end
 
   def in_synced?
@@ -88,7 +88,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def migrating_tables
-    self.tables.select {|item| item.logs["migration"]["total_fields"] != item.logs["migration"]["migrated_fields"]}
+    self.tables.where(is_migrated: false)
   end
 
   def deleted_tables

@@ -42,6 +42,8 @@ class Fields::Creator
       table_view_id: table_view.id,
       powerbase_field_id: field.id
     })
+
+    set_table_as_migrated
   end
 
   def add_field_select_options
@@ -120,6 +122,25 @@ class Fields::Creator
       field.name.length > 4 ? field.name.length * 20 : 100
     else
       300
+    end
+  end
+
+  def set_table_as_migrated
+    unmigrated_columns = table.unmigrated_columns
+
+    if unmigrated_columns.empty? && !database.is_turbo
+      table.is_migrated = true
+      table.save
+      pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+    end
+
+    if !database.is_turbo && !database.is_migrating?
+      database.is_migrated = true
+      database.save
+      base_migration.end_time = Time.now
+      base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
   end
 end
