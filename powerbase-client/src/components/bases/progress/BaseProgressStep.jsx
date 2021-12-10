@@ -1,25 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import { CheckIcon } from '@heroicons/react/solid';
+import { Tab } from '@headlessui/react';
 
-import { useProgressStep } from '@models/progress/ProgressStep';
 import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
 const steps = BASE_PROGRESS_STEPS;
 
 export function BaseProgressStep() {
-  const { setStep } = useProgressStep();
-  const currentStepIndex = steps.findIndex((item) => item.status === 'current');
-
-  const handleChangeStep = (value) => setStep(value);
-
-  useEffect(() => {
-    setStep(currentStepIndex);
-  }, []);
-
   return (
     <nav aria-label="Progress" className="mt-14 mb-8">
-      <ol className="flex items-center justify-center">
+      <ol className="hidden lg:flex lg:items-center lg:justify-center">
         {steps.map((step, index) => {
           const isLastStep = index === steps.length - 1;
 
@@ -33,14 +24,12 @@ export function BaseProgressStep() {
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
                     <div className="h-0.5 w-full bg-indigo-600" />
                   </div>
-                  <button
-                    type="button"
-                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900"
-                    onClick={() => handleChangeStep(index)}
+                  <Tab
+                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900 focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60"
                   >
                     <CheckIcon className="w-6 h-6 text-white" aria-hidden="true" />
                     <span className="sr-only">{step.name} Complete</span>
-                  </button>
+                  </Tab>
                 </>
               ) : step.status === 'current' ? (
                 <>
@@ -50,15 +39,12 @@ export function BaseProgressStep() {
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
                     <div className="h-0.5 w-full bg-gray-200" />
                   </div>
-                  <button
-                    type="button"
-                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full"
-                    aria-current="step"
-                    onClick={() => handleChangeStep(index)}
+                  <Tab
+                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60"
                   >
                     <span className="h-2.5 w-2.5 bg-indigo-600 rounded-full" aria-hidden="true" />
                     <span className="sr-only">{step.name}</span>
-                  </button>
+                  </Tab>
                 </>
               ) : (
                 <>
@@ -68,20 +54,16 @@ export function BaseProgressStep() {
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
                     <div className="h-0.5 w-full bg-gray-200" />
                   </div>
-                  <button
-                    type="button"
+                  <Tab
                     className={cn(
-                      'group relative w-12 h-12 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full cursor-not-allowed hover:border-gray-400',
+                      'relative w-12 h-12 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full cursor-not-allowed hover:border-gray-400',
                       !isLastStep && 'mr-8',
                     )}
                     disabled
                   >
-                    <span
-                      className="h-2.5 w-2.5 bg-transparent rounded-full group-hover:bg-gray-300"
-                      aria-hidden="true"
-                    />
+                    <span className="h-2.5 w-2.5 bg-transparent rounded-full" aria-hidden="true" />
                     <span className="sr-only">{step.name}</span>
-                  </button>
+                  </Tab>
                 </>
               )}
             </li>

@@ -1,24 +1,27 @@
 import React from 'react';
 import { useHistory, useParams, Redirect } from 'react-router-dom';
+import { Tab } from '@headlessui/react';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
-import { ProgressStepProvider } from '@models/progress/ProgressStep';
+import { BaseTablesProvider } from '@models/BaseTables';
+import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { BaseProgressStep } from '@components/bases/progress/BaseProgressStep';
-import { BaseProgressInfo } from '@components/bases/progress/BaseProgressInfo';
-import { BaseTablesProvider } from '@models/BaseTables';
+import { ProgressMigratingMetadata } from '@components/bases/progress/ProgressMigratingMetadata';
 
 function BaseProgress() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base, error } = useBase();
   const { baseUser } = useBaseUser();
+
+  const currentStepIndex = BASE_PROGRESS_STEPS.findIndex((item) => item.status === 'current');
 
   if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
@@ -43,10 +46,13 @@ function BaseProgress() {
         </PageHeader>
         <PageContent className="mt-4">
           <div className="max-w-screen-xl mx-auto pb-6 px-4 sm:px-6 lg:pb-16 lg:px-8">
-            <ProgressStepProvider>
+            <Tab.Group defaultIndex={currentStepIndex}>
               <BaseProgressStep />
-              <BaseProgressInfo />
-            </ProgressStepProvider>
+              <Tab.Panels>
+                <Tab.Panel />
+                <ProgressMigratingMetadata />
+              </Tab.Panels>
+            </Tab.Group>
           </div>
         </PageContent>
       </div>
