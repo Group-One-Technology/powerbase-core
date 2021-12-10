@@ -13,9 +13,11 @@ function TableItem({ table }) {
   const totalUnmigratedFields = tableLog?.unmigratedFields.length;
   const totalMigratedFields = tableLog?.migratedFields.length;
   const totalFields = totalMigratedFields + totalUnmigratedFields;
-  const percentage = tableLog
-    ? (totalUnmigratedFields / totalFields) * 100
-    : undefined;
+  const percentage = !tableLog
+    ? undefined
+    : totalMigratedFields === 0
+      ? 0
+      : (totalMigratedFields / totalFields) * 100;
 
   return (
     <li className="p-4 w-full grid grid-cols-12 items-center gap-3 bg-white hover:bg-gray-50 sm:px-6">
