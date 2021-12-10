@@ -15,7 +15,7 @@ export function BaseProgressStep() {
   if (isMobile) {
     return (
       <nav aria-label="Base Migration Progress" className="mt-14 mb-8">
-        <ol className="overflow-hidden lg:hidden">
+        <ol>
           {steps.map((step, index) => {
             const isLastStep = index === steps.length - 1;
 
@@ -24,9 +24,9 @@ export function BaseProgressStep() {
                 {step.status === 'complete' ? (
                   <>
                     {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-indigo-600" aria-hidden="true" />}
-                    <Tab className="relative flex items-start">
+                    <Tab className="relative flex items-start group">
                       <span className="h-9 flex items-center">
-                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full">
+                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-focus:ring-2 group-focus:outline-none ring-offset-2 ring-offset-indigo-400 ring-white ring-opacity-60">
                           <CheckIcon className="w-5 h-5 text-white" aria-hidden="true" />
                         </span>
                       </span>
@@ -36,9 +36,9 @@ export function BaseProgressStep() {
                 ) : step.status === 'current' ? (
                   <>
                     {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-gray-300" aria-hidden="true" />}
-                    <Tab className="relative flex items-start">
+                    <Tab className="relative flex items-start group">
                       <span className="h-9 flex items-center" aria-hidden="true">
-                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
+                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full group-focus:ring-2 group-focus:outline-none ring-offset-2 ring-offset-indigo-400 ring-white ring-opacity-60">
                           <span className="h-2.5 w-2.5 bg-indigo-600 rounded-full" />
                         </span>
                       </span>
