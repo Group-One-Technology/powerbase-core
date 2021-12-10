@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {
   ChevronRightIcon,
   ExclamationCircleIcon,
+  InformationCircleIcon,
   LightningBoltIcon,
   UserIcon,
 } from '@heroicons/react/outline';
@@ -40,6 +41,14 @@ export function BaseItem({
           >
             {base.totalCollaborators}
             <UserIcon className="h-4 w-4" />
+          </button>
+        )}
+        {!base.isMigrated && (
+          <button
+            type="button"
+            className="py-[1px] px-0.5 flex items-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
+          >
+            <InformationCircleIcon className="h-4 w-4" />
           </button>
         )}
       </div>
