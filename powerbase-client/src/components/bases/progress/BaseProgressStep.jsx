@@ -1,15 +1,11 @@
 import React, { useEffect } from 'react';
 import cn from 'classnames';
 import { CheckIcon } from '@heroicons/react/solid';
-import { useProgressStep } from '@models/progress/ProgressStep';
 
-const steps = [
-  { name: 'Analyzing base', status: 'complete' },
-  { name: 'Migrating metadata', status: 'complete' },
-  { name: 'Adding connections', status: 'current' },
-  { name: 'Creating listeners', status: 'upcoming' },
-  { name: 'Indexing records', status: 'upcoming' },
-];
+import { useProgressStep } from '@models/progress/ProgressStep';
+import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
+
+const steps = BASE_PROGRESS_STEPS;
 
 export function BaseProgressStep() {
   const { setStep } = useProgressStep();
