@@ -43,7 +43,7 @@ export function BaseItem({
             <UserIcon className="h-4 w-4" />
           </button>
         )}
-        {base.isMigrated && (
+        {!base.isMigrated && (
           <Link
             to={`/base/${base.id}/progress`}
             className="py-[1px] px-0.5 flex items-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
