@@ -12,6 +12,7 @@ import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { BaseProgressStep } from '@components/bases/progress/BaseProgressStep';
 import { BaseProgressInfo } from '@components/bases/progress/BaseProgressInfo';
+import { BaseTablesProvider } from '@models/BaseTables';
 
 function BaseProgress() {
   const history = useHistory();
@@ -59,7 +60,9 @@ export function BaseProgressPage() {
   return (
     <BaseProvider id={id}>
       <BaseUserProvider>
-        <BaseProgress />
+        <BaseTablesProvider id={id}>
+          <BaseProgress />
+        </BaseTablesProvider>
       </BaseUserProvider>
     </BaseProvider>
   );
