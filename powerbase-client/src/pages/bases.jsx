@@ -34,11 +34,7 @@ function BasesContentPage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        {sharedBases?.length !== 0 && (
-          <PageHeader>
-            Bases
-          </PageHeader>
-        )}
+        {sharedBases?.length !== 0 && <PageHeader title="Bases" />}
         <PageContent>
           {(bases?.length > 0 || sharedBases?.length > 0) && (
             <ul
