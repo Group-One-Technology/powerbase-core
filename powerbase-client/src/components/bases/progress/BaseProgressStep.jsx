@@ -1,16 +1,74 @@
 import React from 'react';
 import cn from 'classnames';
+import { useMediaQuery } from 'react-responsive';
 import { CheckIcon } from '@heroicons/react/solid';
 import { Tab } from '@headlessui/react';
 
 import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
+import { MOBILE_DEVICES } from '@lib/constants/breakpoints';
 
 const steps = BASE_PROGRESS_STEPS;
 
 export function BaseProgressStep() {
+  const isMobile = useMediaQuery({ query: MOBILE_DEVICES });
+
+  if (isMobile) {
+    return (
+      <nav aria-label="Base Migration Progress" className="mt-14 mb-8">
+        <ol className="overflow-hidden lg:hidden">
+          {steps.map((step, index) => {
+            const isLastStep = index === steps.length - 1;
+
+            return (
+              <li key={step.name} className={cn('relative', !isLastStep && 'pb-4')}>
+                {step.status === 'complete' ? (
+                  <>
+                    {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-indigo-600" aria-hidden="true" />}
+                    <Tab className="relative flex items-start">
+                      <span className="h-9 flex items-center">
+                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full">
+                          <CheckIcon className="w-5 h-5 text-white" aria-hidden="true" />
+                        </span>
+                      </span>
+                      <span className="ml-4 mt-3 min-w-0 text-xs font-semibold tracking-wide uppercase">{step.name}</span>
+                    </Tab>
+                  </>
+                ) : step.status === 'current' ? (
+                  <>
+                    {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-gray-300" aria-hidden="true" />}
+                    <Tab className="relative flex items-start">
+                      <span className="h-9 flex items-center" aria-hidden="true">
+                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full">
+                          <span className="h-2.5 w-2.5 bg-indigo-600 rounded-full" />
+                        </span>
+                      </span>
+                      <span className="ml-4 mt-3 min-w-0 text-xs font-semibold tracking-wide uppercase text-indigo-600">{step.name}</span>
+                    </Tab>
+                  </>
+                ) : (
+                  <>
+                    {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-gray-300" aria-hidden="true" />}
+                    <Tab className="relative flex items-start" disabled>
+                      <span className="h-9 flex items-center" aria-hidden="true">
+                        <span className="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full">
+                          <span className="h-2.5 w-2.5 bg-transparent rounded-full g" />
+                        </span>
+                      </span>
+                      <span className="ml-4 mt-3 min-w-0 text-xs font-semibold tracking-wide uppercase text-gray-500">{step.name}</span>
+                    </Tab>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+    );
+  }
+
   return (
-    <nav aria-label="Progress" className="mt-14 mb-8">
-      <ol className="hidden lg:flex lg:items-center lg:justify-center">
+    <nav aria-label="Base Migration Progress" className="mt-14 mb-8">
+      <ol className="flex items-center justify-center">
         {steps.map((step, index) => {
           const isLastStep = index === steps.length - 1;
 
