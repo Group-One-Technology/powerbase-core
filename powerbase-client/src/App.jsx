@@ -20,6 +20,7 @@ import { ConnectBasePage } from '@pages/base/connect';
 import { ConnectURLBasePage } from '@pages/base/connect-url';
 import { ConnectIntegrationBasePage } from '@pages/base/connect-integration';
 import { BaseSettingsPage } from '@pages/base/[id]/settings';
+import { BaseProgressPage } from '@pages/base/[id]/progress';
 import { TablePage } from '@pages/base/[id]/table/[id]';
 import { Error404Page } from '@pages/404';
 
@@ -67,6 +68,7 @@ function BasesRoute() {
       />
       <Route exact path={`${path}/:id`} component={BasePage} />
       <Route exact path={`${path}/:id/settings`} component={BaseSettingsPage} />
+      <Route exact path={`${path}/:id/progress`} component={BaseProgressPage} />
       <Route path={`${path}/:baseId/table/:id`} component={TablePage} />
       <Redirect from="*" to="/404" />
     </Switch>
