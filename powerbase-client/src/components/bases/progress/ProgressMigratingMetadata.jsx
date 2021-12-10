@@ -21,7 +21,7 @@ function TableItem({ table }) {
 
   return (
     <li className="p-4 w-full grid grid-cols-12 items-center gap-3 bg-white hover:bg-gray-50 sm:px-6">
-      <div className="col-span-10 sm:col-span-5 lg:col-span-3">
+      <div className="col-span-9 sm:col-span-5 lg:col-span-3">
         <p className="text-base text-gray-900 break-normal">{table.alias}</p>
         {tableLog && (
           <p className="text-sm text-gray-500">
@@ -32,8 +32,8 @@ function TableItem({ table }) {
 
       {totalUnmigratedFields === 0
         ? (
-          <div className="col-span-2 sm:col-span-7 lg:col-span-9">
-            <p className="mr-4 text-right text-base text-green-500">Complete</p>
+          <div className="col-span-3 sm:col-span-7 lg:col-span-9">
+            <p className="mr-4 text-right text-sm text-green-500 sm:text-base">Complete</p>
           </div>
         ) : (
           <>
@@ -43,7 +43,7 @@ function TableItem({ table }) {
               </div>
             </div>
 
-            <div className="col-span-2">
+            <div className="col-span-3 sm:col-span-2">
               <p className="mr-4 text-right text-base font-medium text-gray-900">
                 {(percentage != null && percentage % 1 !== 0) ? percentage.toFixed(2) : percentage}%
               </p>
