@@ -1,5 +1,6 @@
 class SyncTableWorker
   include Sidekiq::Worker
+  include PusherHelper
 
   def perform(table_id, reindex)
     table = PowerbaseTable.find table_id
@@ -15,6 +16,8 @@ class SyncTableWorker
           # Create field
           field = Fields::Creator.new column, table
           field.save
+
+          pusher_trigger!("table.#{table.id}", "field-migration-listener", field)
         end
       end
 
