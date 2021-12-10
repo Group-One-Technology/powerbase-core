@@ -1,8 +1,12 @@
 class SyncTableWorker
   include Sidekiq::Worker
+  include PusherHelper
+
+  attr_accessor :table, :database
 
   def perform(table_id, reindex)
-    table = PowerbaseTable.find table_id
+    @table = PowerbaseTable.find table_id
+    @database = table.db
     unmigrated_columns = table.unmigrated_columns
     deleted_columns = table.deleted_columns
 
@@ -28,7 +32,17 @@ class SyncTableWorker
         end
       end
 
+      set_table_as_migrated
       table.reindex! if reindex
     end
   end
+
+  private
+    def set_table_as_migrated
+      if !database.is_turbo
+        table.is_migrated = true
+        table.save
+        pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+      end
+    end
 end

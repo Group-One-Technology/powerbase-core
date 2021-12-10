@@ -29,6 +29,8 @@ class Tables::Creator
 
   def save
     if table.save
+      @database.update_status!("migrating_metadata") if @database.analyzing_base?
+
       if database.postgresql? && ENV["ENABLE_LISTENER"]
         table.inject_oid if database.has_row_oid_support?
         table.inject_notifier_trigger
@@ -44,38 +46,36 @@ class Tables::Creator
   end
 
   def create_base_connection!
-    sequel_connect(database) do |db|
-      table_foreign_keys = db.foreign_key_list(table.name)
-      table_foreign_keys.each do |foreign_key|
-        referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
+    table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
+    table_foreign_keys.each do |foreign_key|
+      referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
-        if referenced_table
-          base_connection = BaseConnection.find_by(
-            name: foreign_key[:name],
-            powerbase_table_id: table.id,
-            powerbase_database_id: table.powerbase_database_id,
-          ) || BaseConnection.new
-          base_connection.name = foreign_key[:name]
-          base_connection.columns = foreign_key[:columns]
-          base_connection.referenced_columns = foreign_key[:key]
-          base_connection.referenced_table_id = referenced_table.id
-          base_connection.referenced_database_id = referenced_table.powerbase_database_id
-          base_connection.powerbase_table_id = table.id
-          base_connection.powerbase_database_id = table.powerbase_database_id
+      if referenced_table
+        base_connection = BaseConnection.find_by(
+          name: foreign_key[:name],
+          powerbase_table_id: table.id,
+          powerbase_database_id: table.powerbase_database_id,
+        ) || BaseConnection.new
+        base_connection.name = foreign_key[:name]
+        base_connection.columns = foreign_key[:columns]
+        base_connection.referenced_columns = foreign_key[:key]
+        base_connection.referenced_table_id = referenced_table.id
+        base_connection.referenced_database_id = referenced_table.powerbase_database_id
+        base_connection.powerbase_table_id = table.id
+        base_connection.powerbase_database_id = table.powerbase_database_id
 
-          if !base_connection.save
-            @base_migration.logs["errors"].push({
-              type: "Active Record",
-              error: "Failed to save '#{base_connection.name}' base connection",
-              messages: base_connection.errors.messages,
-            })
-            @base_migration.save
-          end
+        if !base_connection.save
+          @base_migration.logs["errors"].push({
+            type: "Active Record",
+            error: "Failed to save '#{base_connection.name}' base connection",
+            messages: base_connection.errors.messages,
+          })
+          @base_migration.save
         end
       end
     end
 
-    @field_primary_keys = table.primary_keys
+    field_primary_keys = table.primary_keys
 
     table.fields.each do |field|
       if field.name.downcase.end_with? "id"
@@ -126,8 +126,8 @@ class Tables::Creator
           end
         end
       else
-        referenced_column = @field_primary_keys.find {|item| item.name == field.name}
-        other_referenced_columns = referenced_column && @field_primary_keys.select {|item|
+        referenced_column = field_primary_keys.find {|item| item.name == field.name}
+        other_referenced_columns = referenced_column && field_primary_keys.select {|item|
           item.id != referenced_column.id && item.powerbase_table_id == referenced_column.powerbase_table_id
         }
 

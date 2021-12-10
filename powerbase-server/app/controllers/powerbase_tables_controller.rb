@@ -50,7 +50,7 @@ class PowerbaseTablesController < ApplicationController
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 
     render json: {
-      migrated: @database.is_migrated,
+      migrated: @database.migrated?,
       tables: @database.powerbase_tables
         .order(order: :asc)
         .select {|table| current_user.can?(:view_table, table, @guest, false)}

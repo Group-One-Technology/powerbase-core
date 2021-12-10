@@ -1,6 +1,7 @@
 class PowerbaseDatabase < ApplicationRecord
   include SequelHelper
   include DatabasePermissionsHelper
+  include PusherHelper
 
   scope :turbo, -> { where(is_turbo: true) }
   alias_attribute :tables, :powerbase_tables
@@ -9,6 +10,14 @@ class PowerbaseDatabase < ApplicationRecord
   validates :database_name, presence: true
   validates :connection_string, presence: true
   enum adapter: { postgresql: "postgresql", mysql2: "mysql2" }
+  enum status: {
+    analyzing_base: "analyzing_base",
+    migrating_metadata: "migrating_metadata",
+    adding_connections: "adding_connections",
+    creating_listeners: "creating_listeners",
+    indexing_records: "indexing_records",
+    migrated: "migrated",
+  }
   enum color: {
     gray: "gray",
     red: "red",
@@ -65,7 +74,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def is_migrating?
-    migrating_tables.empty?
+    !migrating_tables.empty?
   end
 
   def in_synced?
@@ -79,7 +88,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def migrating_tables
-    self.tables.where(is_migrated: false)
+    self.tables.select {|item| item.logs["migration"]["total_fields"] != item.logs["migration"]["migrated_fields"]}
   end
 
   def deleted_tables
@@ -131,6 +140,18 @@ class PowerbaseDatabase < ApplicationRecord
 
   def create_notifier_function!
     notifier.create_notifier!
+  end
+
+  def update_status!(status)
+    self.status = status
+    self.save
+
+    if status == "migrated"
+      self.base_migration.end_time = Time.now
+      self.base_migration.save
+    end
+
+    pusher_trigger!("database.#{self.id}", "migration-listener", self)
   end
 
   def remove

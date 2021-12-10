@@ -7,9 +7,11 @@ export const ErrorType = {
 Object.freeze(ErrorType);
 
 export const BASE_PROGRESS_STEPS = [
-  { name: 'Analyzing base', status: 'complete', disabled: true },
-  { name: 'Migrating metadata', status: 'current' },
-  { name: 'Adding connections', status: 'upcoming' },
-  { name: 'Creating listeners', status: 'upcoming' },
-  { name: 'Indexing records', status: 'upcoming' },
+  {
+    id: 1, name: 'Analyzing base', value: 'analyzing_base', disabled: true,
+  },
+  { id: 2, name: 'Migrating metadata', value: 'migrating_metadata' },
+  { id: 3, name: 'Adding connections', value: 'adding_connections' },
+  { id: 4, name: 'Creating listeners', value: 'creating_listeners' },
+  { id: 5, name: 'Indexing records', value: 'indexing_records' },
 ];

@@ -9,7 +9,6 @@ class Databases::Creator
       database_name: database[:database_name],
       connection_string: database[:connection_string],
       adapter: database[:adapter],
-      is_migrated: database[:is_migrated],
       color: database[:color],
       is_turbo: database[:is_turbo],
       user_id: database[:user_id],
@@ -35,7 +34,7 @@ class Databases::Creator
       end
     end
 
-    if !@database.is_migrated
+    if !@database.migrated?
       migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
       migration.powerbase_database_id = @database.id
       migration.database_size = @db_size || "0 kB"

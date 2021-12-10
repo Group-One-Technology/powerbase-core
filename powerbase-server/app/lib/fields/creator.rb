@@ -42,21 +42,6 @@ class Fields::Creator
       table_view_id: table_view.id,
       powerbase_field_id: field.id
     })
-
-    if !database.is_turbo
-      table.is_migrated = true
-      table.save
-      pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
-    end
-
-    if !database.is_turbo && database.is_migrating?
-      database.is_migrated = true
-      database.save
-      base_migration.end_time = Time.now
-      base_migration.save
-
-      pusher_trigger!("database.#{database.id}", "migration-listener", database)
-    end
   end
 
   def add_field_select_options

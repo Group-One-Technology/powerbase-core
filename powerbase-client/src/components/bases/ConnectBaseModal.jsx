@@ -6,6 +6,7 @@ import { Modal } from '@components/ui/Modal';
 import { Dialog } from '@headlessui/react';
 
 export function ConnectBaseModal({
+  base,
   open,
   setOpen,
   error,
@@ -17,7 +18,7 @@ export function ConnectBaseModal({
     evt.preventDefault();
 
     if (!error) {
-      history.push('/');
+      history.push(base ? `/base/${base.id}/progress` : '/');
     } else {
       setOpen(false);
     }
@@ -53,6 +54,7 @@ export function ConnectBaseModal({
 }
 
 ConnectBaseModal.propTypes = {
+  base: PropTypes.object,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   error: PropTypes.string,

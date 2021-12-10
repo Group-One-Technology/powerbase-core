@@ -1,16 +1,16 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { useMediaQuery } from 'react-responsive';
 import { CheckIcon } from '@heroicons/react/solid';
 import { Tab } from '@headlessui/react';
 
-import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
+import { useBase } from '@models/Base';
 import { MOBILE_DEVICES } from '@lib/constants/breakpoints';
 
-const steps = BASE_PROGRESS_STEPS;
-
-export function BaseProgressStep() {
+export function BaseProgressStep({ steps, currentStep }) {
   const isMobile = useMediaQuery({ query: MOBILE_DEVICES });
+  const { data: base } = useBase();
 
   if (isMobile) {
     return (
@@ -18,10 +18,19 @@ export function BaseProgressStep() {
         <ol>
           {steps.map((step, index) => {
             const isLastStep = index === steps.length - 1;
+            let status = 'complete';
+
+            if (!base.isMigrated) {
+              status = currentStep.id === step.id
+                ? 'current'
+                : currentStep.id > step.id
+                  ? 'complete'
+                  : 'upcoming';
+            }
 
             return (
               <li key={step.name} className={cn('relative', !isLastStep && 'pb-4')}>
-                {step.status === 'complete' ? (
+                {status === 'complete' ? (
                   <>
                     {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-indigo-600" aria-hidden="true" />}
                     <Tab className={cn('relative flex items-start group', step.disabled && 'cursor-not-allowed')} disabled={step.disabled}>
@@ -33,7 +42,7 @@ export function BaseProgressStep() {
                       <span className="ml-4 mt-3 min-w-0 text-xs font-semibold tracking-wide uppercase">{step.name}</span>
                     </Tab>
                   </>
-                ) : step.status === 'current' ? (
+                ) : status === 'current' ? (
                   <>
                     {!isLastStep && <div className="-ml-px absolute mt-0.5 top-4 left-4 w-0.5 h-full bg-gray-300" aria-hidden="true" />}
                     <Tab className="relative flex items-start group">
@@ -71,10 +80,15 @@ export function BaseProgressStep() {
       <ol className="flex items-center justify-center">
         {steps.map((step, index) => {
           const isLastStep = index === steps.length - 1;
+          const status = currentStep.id === step.id
+            ? 'current'
+            : currentStep.id > step.id
+              ? 'complete'
+              : 'upcoming';
 
           return (
             <li key={step.name} className={cn('relative', !isLastStep && 'pr-8 sm:pr-20')}>
-              {step.status === 'complete' ? (
+              {status === 'complete' ? (
                 <>
                   <p className="w-max absolute -top-6 left-2 transform -translate-x-1/3 text-sm font-medium text-gray-900">
                     {step.name}
@@ -84,8 +98,9 @@ export function BaseProgressStep() {
                   </div>
                   <Tab
                     className={cn(
-                      'mr-8 relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900 focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60',
+                      'relative w-12 h-12 flex items-center justify-center bg-indigo-600 rounded-full hover:bg-indigo-900 focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60',
                       step.disabled && 'cursor-not-allowed',
+                      !isLastStep && 'mr-8',
                     )}
                     disabled={step.disabled}
                   >
@@ -93,7 +108,7 @@ export function BaseProgressStep() {
                     <span className="sr-only">{step.name} Complete</span>
                   </Tab>
                 </>
-              ) : step.status === 'current' ? (
+              ) : status === 'current' ? (
                 <>
                   <p className="w-max absolute -top-6 left-2 transform -translate-x-1/3 text-sm font-medium text-indigo-600">
                     {step.name}
@@ -102,7 +117,10 @@ export function BaseProgressStep() {
                     <div className="h-0.5 w-full bg-gray-200" />
                   </div>
                   <Tab
-                    className="mr-8 relative w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60"
+                    className={cn(
+                      'relative w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-600 rounded-full focus:outline-none focus:ring-2 ring-offset-4 ring-offset-indigo-400 ring-white ring-opacity-60',
+                      !isLastStep && 'mr-8',
+                    )}
                   >
                     <span className="h-2.5 w-2.5 bg-indigo-600 rounded-full" aria-hidden="true" />
                     <span className="sr-only">{step.name}</span>
@@ -135,3 +153,8 @@ export function BaseProgressStep() {
     </nav>
   );
 }
+
+BaseProgressStep.propTypes = {
+  steps: PropTypes.array.isRequired,
+  currentStep: PropTypes.object.isRequired,
+};

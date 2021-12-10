@@ -21,8 +21,6 @@ function BaseProgress() {
   const { data: base, error } = useBase();
   const { baseUser } = useBaseUser();
 
-  const currentStepIndex = BASE_PROGRESS_STEPS.findIndex((item) => item.status === 'current');
-
   if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
   }
@@ -36,6 +34,16 @@ function BaseProgress() {
     return <Loader className="h-screen" />;
   }
 
+  const steps = base.isTurbo
+    ? BASE_PROGRESS_STEPS
+    : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
+  const currentStepIndex = base.isMigrated
+    ? steps.length - 1
+    : steps.findIndex((item) => item.value === base.status) || steps.length - 1;
+  const currentStep = currentStepIndex != null
+    ? steps[currentStepIndex]
+    : steps[0];
+
   return (
     <Page authOnly>
       <div className="py-10">
@@ -46,11 +54,17 @@ function BaseProgress() {
         </PageHeader>
         <PageContent className="mt-4">
           <div className="max-w-screen-xl mx-auto pb-6 px-4 sm:px-6 lg:pb-16 lg:px-8">
-            <Tab.Group defaultIndex={currentStepIndex}>
-              <BaseProgressStep />
+            <Tab.Group defaultIndex={currentStepIndex || 0}>
+              <BaseProgressStep
+                steps={steps}
+                currentStep={currentStep}
+              />
               <Tab.Panels>
                 <Tab.Panel />
                 <ProgressMigratingMetadata />
+                <Tab.Panel />
+                <Tab.Panel />
+                <Tab.Panel />
               </Tab.Panels>
             </Tab.Group>
           </div>

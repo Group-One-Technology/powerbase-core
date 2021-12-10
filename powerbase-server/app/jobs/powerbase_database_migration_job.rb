@@ -27,7 +27,7 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       })
       @base_migration.save
       return
-    elsif @database.is_migrated
+    elsif @database.migrated?
       @base_migration.logs["errors"].push({
         type: "Status",
         error: "Database with id of #{database_id} has already been migrated.",
