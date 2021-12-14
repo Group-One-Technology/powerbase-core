@@ -1,11 +1,12 @@
 import useSWR from 'swr';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import constate from 'constate';
 
 import { useAuthUser } from '@models/AuthUser';
 import { getTables, updateTableDefaultView } from '@lib/api/tables';
 import { getTableViews } from '@lib/api/views';
 import { useTableMigrationListener } from '@lib/hooks/websockets/useTableMigrationListener';
+import { useMigrationListener } from '@lib/hooks/websockets/useMigrationListener';
 
 function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const { authUser } = useAuthUser();
@@ -25,9 +26,14 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   );
 
   useTableMigrationListener({ tables: tablesResponse.data?.tables, mutate: tablesResponse.mutate });
+  const { migrationListener } = useMigrationListener({ mutate: tablesResponse.mutate });
 
   const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
   const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
+
+  useEffect(() => {
+    migrationListener(baseId);
+  }, [baseId]);
 
   const handleTableChange = ({ table }) => {
     window.history.replaceState(

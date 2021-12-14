@@ -1,5 +1,6 @@
 class Tables::Creator
   include SequelHelper
+  include PusherHelper
 
   attr_accessor :table_name, :order, :database, :table, :base_migration
 
@@ -30,11 +31,7 @@ class Tables::Creator
   def save
     if table.save
       @database.update_status!("migrating_metadata") if @database.analyzing_base?
-
-      if database.postgresql? && ENV["ENABLE_LISTENER"]
-        table.inject_oid if database.has_row_oid_support?
-        table.inject_notifier_trigger
-      end
+      pusher_trigger!("database.#{table.db.id}", "migration-listener", database)
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

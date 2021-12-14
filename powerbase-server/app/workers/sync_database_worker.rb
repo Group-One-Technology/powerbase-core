@@ -13,10 +13,6 @@ class SyncDatabaseWorker
 
       puts "Migrating unmigrated tables of database with id of #{@database.id}..."
 
-      if new_connection && database.postgresql?
-        database.create_notifier_function!
-      end
-
       if unmigrated_tables.any?
         batch = Sidekiq::Batch.new
         batch.description = "Migrating metadata of database with id of #{database_id}"
@@ -60,6 +56,20 @@ class SyncDatabaseWorker
 
     @database.tables.each do |table|
       table.migrator.create_base_connection!
+    end
+
+    @database.update_status!("creating_listeners")
+
+    if params["new_connection"] && database.postgresql?
+      database.create_notifier_function!
+    end
+
+    if database.postgresql? && ENV["ENABLE_LISTENER"]
+      @database.tables.each do |table|
+        table.migrator.create_base_connection!
+        table.inject_oid if database.has_row_oid_support?
+        table.inject_notifier_trigger
+      end
     end
 
     if params["new_connection"] && database.is_turbo && ENV["ENABLE_LISTENER"]
