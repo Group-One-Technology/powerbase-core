@@ -5,7 +5,7 @@ import { securedApi } from '@lib/api';
 
 export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError,
+  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value,
 ) {
   const handleMagicInputValidation = (val) => {
     if (!val) return true;
@@ -22,6 +22,7 @@ export function useEditingCell(
         return true;
     }
   };
+  const isCheckbox = fieldType?.dataType.toLowerCase() === 'boolean';
 
   const onChange = (e) => {
     const magicInputValue = e.target.value;
@@ -36,7 +37,7 @@ export function useEditingCell(
       setIsEditing(false);
     };
 
-    if (!editCellInput?.length && fieldType.dataType !== 'date') {
+    if (!editCellInput?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
       exitEditing();
       return;
     }
@@ -84,7 +85,7 @@ export function useEditingCell(
           const keyValue = primaryKey.value;
           payload[keyName] = keyValue;
         });
-      const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: recordInputRef.current?.value } });
+      const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value } });
       if (updatedValue) {
         const mutatedRecords = recordsToUse?.map((recordObj) => {
           const matches = [];
@@ -99,7 +100,7 @@ export function useEditingCell(
             if (pkIdx === primaryKeys.length - 1) {
               if (!matches.includes(false)) {
                 const newObj = { ...recordObj };
-                newObj[field.name] = recordInputRef.current?.value;
+                newObj[field.name] = isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value;
                 objToUse = newObj;
               } else {
                 objToUse = recordObj;

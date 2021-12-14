@@ -69,7 +69,7 @@ function CellValue({
         type="checkbox"
         className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         checked={value?.toString() === 'true'}
-        readOnly
+        onChange={changeBool}
       />
     );
   }
@@ -188,14 +188,25 @@ export function CellRenderer({
       row: rowIndex,
       column: columnIndex,
     });
+    if (fieldType.dataType === 'boolean') {
+      setCellToEdit({
+        row: rowIndex,
+        column: columnIndex,
+      });
+    }
   };
 
   const handleMouseLeave = () => {
     setHoveredCell({});
+    if (fieldType.dataType === 'boolean') {
+      setCellToEdit({});
+    }
   };
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
-  const changeBool = () => {
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value);
+  const changeBool = (e) => {
+    setHoveredCell({});
+    e.target.value = !(value?.toString() === 'true');
     onClickOutsideEditingCell();
   };
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
