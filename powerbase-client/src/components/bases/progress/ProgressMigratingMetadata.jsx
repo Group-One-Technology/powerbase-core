@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Tab } from '@headlessui/react';
+import * as Tabs from '@radix-ui/react-tabs';
 
 import { useBaseTables } from '@models/BaseTables';
 import { useBase } from '@models/Base';
@@ -68,7 +68,7 @@ export function ProgressMigratingMetadata() {
   const { data: tables } = useBaseTables();
 
   return (
-    <Tab.Panel>
+    <Tabs.Content value="migrating_metadata">
       <div className="my-2 flex items-center justify-between">
         <h2 className="text-xl text-gray-900 font-medium">
           Tables
@@ -89,6 +89,6 @@ export function ProgressMigratingMetadata() {
           ))}
         </ul>
       </div>
-    </Tab.Panel>
+    </Tabs.Content>
   );
 }
