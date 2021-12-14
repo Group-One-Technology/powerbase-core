@@ -52,30 +52,47 @@ class SyncDatabaseWorker
     puts "Uh oh, batch has failures" if status.failures != 0
 
     @database = PowerbaseDatabase.find params["database_id"]
-    @database.update_status!("adding_connections")
 
-    @database.tables.each do |table|
-      table.migrator.create_base_connection!
+    add_connections()
+    create_listeners(params["new_connection"])
+
+    if !database.is_turbo && !database.is_migrating?
+      database.is_migrated = true
+      database.save
+      base_migration.end_time = Time.now
+      base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
+  end
 
-    @database.update_status!("creating_listeners")
-
-    if params["new_connection"] && database.postgresql?
-      database.create_notifier_function!
-    end
-
-    if database.postgresql? && ENV["ENABLE_LISTENER"]
-      @database.tables.each do |table|
+  private
+    def add_connections
+      database.update_status!("adding_connections")
+      database.tables.each do |table|
         table.migrator.create_base_connection!
-        table.inject_oid if database.has_row_oid_support?
-        table.inject_notifier_trigger
       end
     end
 
-    if params["new_connection"] && database.is_turbo && ENV["ENABLE_LISTENER"]
-      poller = Sidekiq::Cron::Job.find("Database Listeners")
-      poller.args << database.id
-      poller.save
+    def create_listeners(new_connection = false)
+      if database.postgresql?
+        database.update_status!("creating_listeners")
+
+        database.create_notifier_function! if new_connection
+
+        if ENV["ENABLE_LISTENER"]
+          database.tables.each do |table|
+            table.migrator.create_base_connection!
+            table.inject_oid if database.has_row_oid_support?
+            table.inject_notifier_trigger
+          end
+        end
+      end
+
+      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]
+        poller = Sidekiq::Cron::Job.find("Database Listeners")
+        poller.args << database.id
+        poller.save
+      end
     end
-  end
 end

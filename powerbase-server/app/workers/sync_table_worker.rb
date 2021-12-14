@@ -32,7 +32,19 @@ class SyncTableWorker
         end
       end
 
+      set_table_as_migrated
       # table.reindex! if reindex
     end
   end
+
+  private
+    def set_table_as_migrated
+      unmigrated_columns = table.unmigrated_columns
+
+      if unmigrated_columns.empty? && !database.is_turbo
+        table.is_migrated = true
+        table.save
+        pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+      end
+    end
 end

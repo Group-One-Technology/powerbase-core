@@ -90,6 +90,7 @@ class Tables::Migrator
   end
 
   def create_base_connection!
+    puts "Adding and auto linking connections of table##{table.id}"
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
