@@ -15,6 +15,9 @@ class SyncTableWorker
         puts "Unmigrated column detected at table##{table.id}..."
         puts "Saving #{unmigrated_columns.count} additional column(s)..."
 
+        table.logs["migration"]["unmigrated_columns"] = unmigrated_columns.map {|name, value| name}
+        table.save
+
         unmigrated_columns.each do |column|
           # Create field
           field = Fields::Creator.new column, table
@@ -39,7 +42,7 @@ class SyncTableWorker
 
   private
     def set_table_as_migrated
-      unmigrated_columns = table.unmigrated_columns
+      unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
 
       if unmigrated_columns.empty? && !database.is_turbo
         table.is_migrated = true
