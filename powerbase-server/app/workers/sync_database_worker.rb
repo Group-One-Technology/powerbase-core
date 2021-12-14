@@ -18,28 +18,30 @@ class SyncDatabaseWorker
       end
 
       if unmigrated_tables.any?
-        table_creators = []
-        unmigrated_tables.each_with_index do |table_name, index|
-          table = Tables::Creator.new table_name, index + 1, database
-          # Save table object
-          table.save
+        batch = Sidekiq::Batch.new
+        batch.description = "Migrating metadata of database with id of #{database_id}"
+        batch.on(:complete, SyncDatabaseWorker, :database_id => database_id, :new_connection => new_connection)
+        batch.jobs do
+          unmigrated_tables.each_with_index do |table_name, index|
+            table = Tables::Creator.new table_name, index + 1, database
+            # Save table object
+            table.save
 
-          # Create table view
-          table_view = TableViews::Creator.new table.object
-          table_view.save
+            # Create table view
+            table_view = TableViews::Creator.new table.object
+            table_view.save
 
-          # Assign default view
-          table.object.default_view_id = table_view.object.id
-          table.object.save
+            # Assign default view
+            table.object.default_view_id = table_view.object.id
+            table.object.save
 
-          # Migrate fields and records
-          # Index record to elasticsearch if on turbo
-          table.object.sync!(database.is_turbo)
-          table_creators << table
+            # Migrate fields and records
+            # Index record to elasticsearch if on turbo
+            table.object.sync!(database.is_turbo)
+          end
         end
 
-        # Create base connection / auto link
-        table_creators.each(&:create_base_connection!)
+        puts "Started Batch #{batch.bid}"
       end
 
       if deleted_tables.any?
@@ -47,12 +49,23 @@ class SyncDatabaseWorker
           table.remove
         end
       end
+    end
+  end
 
-      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]
-        poller = Sidekiq::Cron::Job.find("Database Listeners")
-        poller.args << database.id
-        poller.save
-      end
+  def on_complete(status, params)
+    puts "Uh oh, batch has failures" if status.failures != 0
+
+    @database = PowerbaseDatabase.find params["database_id"]
+    @database.update_status!("adding_connections")
+
+    @database.tables.each do |table|
+      table.migrator.create_base_connection!
+    end
+
+    if params["new_connection"] && database.is_turbo && ENV["ENABLE_LISTENER"]
+      poller = Sidekiq::Cron::Job.find("Database Listeners")
+      poller.args << database.id
+      poller.save
     end
   end
 end

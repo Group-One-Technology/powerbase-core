@@ -32,7 +32,7 @@ class SyncTableWorker
         end
       end
 
-      table.reindex! if reindex
+      # table.reindex! if reindex
     end
   end
 end

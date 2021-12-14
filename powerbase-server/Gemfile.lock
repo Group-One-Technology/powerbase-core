@@ -256,6 +256,8 @@ GEM
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
+    sidekiq-batch (0.1.6)
+      sidekiq (>= 3)
     sidekiq-cron (1.2.0)
       fugit (~> 1.1)
       sidekiq (>= 4.2.1)
@@ -303,6 +305,7 @@ DEPENDENCIES
   redis (~> 4.2, >= 4.2.5)
   sequel (~> 5.43)
   sidekiq (~> 6.2, >= 6.2.1)
+  sidekiq-batch (~> 0.1.6)
   sidekiq-cron (~> 1.1)
   spring
   tzinfo-data
