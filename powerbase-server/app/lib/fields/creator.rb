@@ -42,8 +42,6 @@ class Fields::Creator
       table_view_id: table_view.id,
       powerbase_field_id: field.id
     })
-
-    set_table_as_migrated
   end
 
   def add_field_select_options

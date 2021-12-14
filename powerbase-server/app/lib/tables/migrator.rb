@@ -233,8 +233,6 @@ class Tables::Migrator
 
     pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
-
-    @database.update_status!("migrated") if !database.is_migrating?
   end
 
   def write_table_migration_logs!(total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)

@@ -33,7 +33,7 @@ class SyncTableWorker
       end
 
       set_table_as_migrated
-      # table.reindex! if reindex
+      table.reindex! if reindex
     end
   end
 

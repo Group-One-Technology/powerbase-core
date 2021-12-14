@@ -32,8 +32,7 @@ class SyncDatabaseWorker
             table.object.save
 
             # Migrate fields and records
-            # Index record to elasticsearch if on turbo
-            table.object.sync!(database.is_turbo)
+            table.object.sync!(false)
           end
         end
 
@@ -49,11 +48,11 @@ class SyncDatabaseWorker
   end
 
   def on_complete(status, params)
-    puts "Uh oh, batch has failures" if status.failures != 0
+    puts "Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
 
     @database = PowerbaseDatabase.find params["database_id"]
 
-    add_connections()
+    add_connections
     create_listeners(params["new_connection"])
 
     if !database.is_turbo && !database.is_migrating?
@@ -64,6 +63,9 @@ class SyncDatabaseWorker
 
       pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
+
+    index_records if database.is_turbo
+    database.update_status!("migrated") if !database.is_migrating?
   end
 
   private
@@ -94,5 +96,10 @@ class SyncDatabaseWorker
         poller.args << database.id
         poller.save
       end
+    end
+
+    def index_records
+      database.update_status!("indexing_records")
+      database.tables.each(&:reindex!)
     end
 end
