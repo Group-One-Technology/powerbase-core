@@ -210,6 +210,8 @@ class Tables::Migrator
         end
       end
     end
+
+    pusher_trigger!("table.#{table.id}", "connection-migration-listener", table)
   end
 
   private
