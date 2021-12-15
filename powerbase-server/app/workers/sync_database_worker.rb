@@ -1,5 +1,6 @@
 class SyncDatabaseWorker
   include Sidekiq::Worker
+  include PusherHelper
 
   attr_accessor :database, :unmigrated_tables, :deleted_tables
 
@@ -79,16 +80,27 @@ class SyncDatabaseWorker
     def create_listeners(new_connection = false)
       if database.postgresql?
         database.update_status!("creating_listeners")
-
         database.create_notifier_function! if new_connection
 
         if ENV["ENABLE_LISTENER"]
           database.tables.each do |table|
-            table.migrator.create_base_connection!
-            table.inject_oid if database.has_row_oid_support?
+            if database.has_row_oid_support?
+              table.logs["migration"]["status"] = "injecting_oid"
+              table.save
+              table.inject_oid
+              pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+            end
+
+            table.logs["migration"]["status"] = "injecting_notifier"
+            table.save
             table.inject_notifier_trigger
+            pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
           end
         end
+
+        table.logs["migration"]["status"] = "notifiers_created"
+        table.save
+        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
       end
 
       if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]

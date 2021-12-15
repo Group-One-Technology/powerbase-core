@@ -16,6 +16,7 @@ import { PageContent } from '@components/layout/PageContent';
 import { BaseProgressStep } from '@components/bases/progress/BaseProgressStep';
 import { ProgressMigratingMetadata } from '@components/bases/progress/ProgressMigratingMetadata';
 import { ProgressAddingConnections } from '@components/bases/progress/ProgressAddingConnections';
+import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCreatingListeners';
 
 function BaseProgress() {
   const history = useHistory();
@@ -71,7 +72,7 @@ function BaseProgress() {
               <Tabs.Content value="analyzing_base" />
               <ProgressMigratingMetadata />
               <ProgressAddingConnections />
-              <Tabs.Content value="creating_listeners" />
+              <ProgressCreatingListeners />
               <Tabs.Content value="indexing_records" />
             </Tabs.Root>
           </div>

@@ -14,11 +14,12 @@ function useTableLogsModel({ id }) {
     () => getTableLogs({ id }),
   );
 
-  const { fieldMigrationListener } = useTableMigrationListener({ mutate: response.mutate });
+  const { fieldMigrationListener, notifierMigrationListener } = useTableMigrationListener({ mutate: response.mutate });
 
   useEffect(() => {
     if (id) {
       fieldMigrationListener(id);
+      notifierMigrationListener(id);
     }
   }, [id]);
 

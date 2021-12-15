@@ -42,6 +42,17 @@ export function useTableMigrationListener({ logging = false, tables, mutate } = 
     }
   };
 
+  const notifierMigrationListener = (tableId) => {
+    if (mutate) {
+      Pusher.logToConsole = logging;
+      const channel = pusher.subscribe(`table.${tableId}`);
+
+      channel.bind('notifier-migration-listener', async () => {
+        await mutate();
+      });
+    }
+  };
+
   const unsubscribe = (databaseId) => {
     pusher.unsubscribe(`database.${databaseId}`);
   };
@@ -64,5 +75,6 @@ export function useTableMigrationListener({ logging = false, tables, mutate } = 
     migrationListener,
     fieldMigrationListener,
     connectionMigrationListener,
+    notifierMigrationListener,
   };
 }

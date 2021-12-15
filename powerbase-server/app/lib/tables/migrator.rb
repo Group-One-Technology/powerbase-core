@@ -23,6 +23,9 @@ class Tables::Migrator
   end
 
   def index!
+    table.logs["migration"]["status"] = "indexing_records"
+    table.save
+
     create_index!(index_name)
 
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
@@ -91,6 +94,10 @@ class Tables::Migrator
 
   def create_base_connection!
     puts "Adding and auto linking connections of table##{table.id}"
+
+    table.logs["migration"]["status"] = "adding_connections"
+    table.save
+
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
@@ -211,7 +218,11 @@ class Tables::Migrator
       end
     end
 
+    table.logs["migration"]["status"] = "migrated_connections"
+    table.save
+
     pusher_trigger!("table.#{table.id}", "connection-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
   end
 
   private

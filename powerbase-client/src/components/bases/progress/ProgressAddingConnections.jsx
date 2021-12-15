@@ -17,12 +17,14 @@ function TableItem({ table }) {
       <div className="grid grid-cols-12 items-center gap-3">
         <div className="col-span-9 sm:col-span-5 lg:col-span-3">
           <p className="text-base text-gray-900 break-normal">{table.alias}</p>
-          <p className="text-sm text-gray-500">
-            Found {connections?.length || 0} of connection(s).
-          </p>
+          {(table.status !== 'adding_connections' && connections != null) && (
+            <p className="text-sm text-gray-500">
+              Found {connections.length || 0} of connection(s).
+            </p>
+          )}
         </div>
 
-        {connections == null && (
+        {table.status === 'adding_connections' && (
           <div className="col-span-3 sm:col-span-7 lg:col-span-9">
             <Spinner className="ml-auto mr-9 h-6 w-6 text-gray-500" />
             <span className="sr-only">Loading</span>
