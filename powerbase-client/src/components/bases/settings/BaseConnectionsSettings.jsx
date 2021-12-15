@@ -1,30 +1,23 @@
 import React, { useState } from 'react';
-import { ArrowRightIcon } from '@heroicons/react/outline';
 
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
-import { useBaseTables } from '@models/BaseTables';
 import { useBaseConnections } from '@models/BaseConnections';
 import { AddConnectionModal } from '@components/connections/AddConnectionModal';
 import { EditConnectionModal } from '@components/connections/EditConnectionModal';
 import { Loader } from '@components/ui/Loader';
-import { Badge } from '@components/ui/Badge';
 import { DeleteConnectionModal } from '@components/connections/DeleteConnectionModal';
+import { ConnectionItem } from '@components/connections/ConnectionItem';
 
 export function BaseConnectionsSettings() {
   const { data: base } = useBase();
   const { data: bases } = useBases();
-  const { data: tables } = useBaseTables();
   const { data: initialConnections } = useBaseConnections();
 
   const connections = initialConnections.map((connection) => ({
     ...connection,
     base: bases.find((item) => item.id === connection.databaseId),
-    table: tables.find((item) => item.id === connection.tableId),
-    columnName: connection.columns.join(', '),
     joinBase: bases.find((item) => item.id === connection.referencedDatabaseId),
-    joinTable: connection.referencedTable,
-    joinColumnName: connection.referencedColumns.join(', '),
   }));
   const [openAddModal, setAddModalOpen] = useState(false);
   const [openEditModal, setEditModalOpen] = useState(false);
@@ -46,46 +39,19 @@ export function BaseConnectionsSettings() {
         <>
           <ul className="mt-4 overflow-auto">
             {connections?.map((connection) => (
-              <li key={connection.id} className="block py-2 hover:bg-gray-50">
-                <div className="flex gap-3 items-center">
-                  <button
-                    type="button"
-                    className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
-                    onClick={() => handleViewConnection(connection)}
-                  >
-                    View
-                  </button>
-                  <div className="max-w-lg flex text-sm">
-                    <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
-                      {connection.base.name}
-                    </span>
-                    <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                      {connection.table.name}
-                    </span>
-                    <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
-                      {connection.columnName}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <ArrowRightIcon className="h-4 w-4 text-gray-500" />
-                  </div>
-                  <div className="max-w-lg flex text-sm">
-                    <span className="flex-none inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 whitespace-nowrap">
-                      {connection.joinBase.name}
-                    </span>
-                    <span className="inline-flex items-center px-3 text-gray-900 border border-r-0 border-gray-300 whitespace-nowrap">
-                      {connection.joinTable?.name || 'Not Found'}
-                    </span>
-                    <span className="inline-flex items-center px-3 rounded-r-md text-gray-900 border border-gray-300 whitespace-nowrap">
-                      {connection.joinColumnName}
-                    </span>
-                  </div>
-                  {connection.isAutoLinked && (
-                    <div>
-                      <Badge color="gray">Auto Linked</Badge>
-                    </div>
+              <li key={connection.id} className="hover:bg-gray-50">
+                <ConnectionItem
+                  connection={connection}
+                  action={(
+                    <button
+                      type="button"
+                      className="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50"
+                      onClick={() => handleViewConnection(connection)}
+                    >
+                      View
+                    </button>
                   )}
-                </div>
+                />
               </li>
             ))}
           </ul>
