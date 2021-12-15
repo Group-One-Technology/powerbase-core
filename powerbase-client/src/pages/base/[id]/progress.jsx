@@ -3,6 +3,7 @@ import {
   useHistory, useParams, Redirect, Link,
 } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
+import { ArrowLeftIcon } from '@heroicons/react/outline';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
@@ -21,7 +22,8 @@ import { ProgressAddingConnections } from '@components/bases/progress/ProgressAd
 import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCreatingListeners';
 import { ProgressIndexingRecords } from '@components/bases/progress/ProgressIndexingRecords';
 import { ProgressMigrated } from '@components/bases/progress/ProgressMigrated';
-import { ArrowLeftIcon } from '@heroicons/react/outline';
+
+const { ENABLE_LISTENERS } = process.env;
 
 function BaseProgress() {
   const history = useHistory();
@@ -51,7 +53,7 @@ function BaseProgress() {
     ? BASE_PROGRESS_STEPS
     : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
 
-  if (base.adapter !== 'postgresql') {
+  if (base.adapter !== 'postgresql' || ENABLE_LISTENERS !== 'true') {
     steps = steps.filter((item) => item.value !== 'creating_listeners');
   }
 

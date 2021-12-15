@@ -82,7 +82,7 @@ class SyncDatabaseWorker
         database.update_status!("creating_listeners")
         database.create_notifier_function! if new_connection
 
-        if ENV["ENABLE_LISTENER"]
+        if ENV["ENABLE_LISTENER"] == "true"
           database.tables.each do |table|
             if database.has_row_oid_support?
               table.logs["migration"]["status"] = "injecting_oid"
