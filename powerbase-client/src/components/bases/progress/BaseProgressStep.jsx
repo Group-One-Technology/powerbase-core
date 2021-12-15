@@ -83,10 +83,10 @@ export function BaseProgressStep({ steps, currentStep }) {
         <ol className="flex items-center justify-center">
           {steps.map((step, index) => {
             const isLastStep = index === steps.length - 1;
-            const status = currentStep.id === step.id
-              ? 'current'
-              : currentStep.id > step.id
-                ? 'complete'
+            const status = currentStep.id > step.id || currentStep.value === 'migrated'
+              ? 'complete'
+              : currentStep.id === step.id
+                ? 'current'
                 : 'upcoming';
 
             return (

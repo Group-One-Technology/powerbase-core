@@ -26,6 +26,9 @@ const STEPS = {
   indexing_records: {
     percentage: 100,
   },
+  migrated: {
+    percentage: 100,
+  },
 };
 
 function TableItem({ table }) {

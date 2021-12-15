@@ -38,4 +38,10 @@ export const BASE_PROGRESS_STEPS = [
     value: 'indexing_records',
     description: 'We\'re indexing your records to help you to instantly navigate records in your database.',
   },
+  {
+    id: 6,
+    name: 'Migrated',
+    value: 'migrated',
+    description: 'We\'re done migrating your database.',
+  },
 ];
