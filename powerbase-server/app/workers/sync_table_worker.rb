@@ -15,6 +15,7 @@ class SyncTableWorker
         puts "Unmigrated column detected at table##{table.id}..."
         puts "Saving #{unmigrated_columns.count} additional column(s)..."
 
+        table.logs["migration"]["status"] = 'migrating_metadata'
         table.logs["migration"]["unmigrated_columns"] = unmigrated_columns.map {|name, value| name}
         table.save
 
@@ -42,6 +43,9 @@ class SyncTableWorker
 
   private
     def set_table_as_migrated
+      table.logs["migration"]["status"] = 'migrated_metadata'
+      table.save
+
       unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
 
       if unmigrated_columns.empty? && !database.is_turbo

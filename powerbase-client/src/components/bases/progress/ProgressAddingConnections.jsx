@@ -24,7 +24,7 @@ function TableItem({ table }) {
           )}
         </div>
 
-        {table.status === 'adding_connections' && (
+        {(table.status === 'adding_connections' || table.status === 'migrated_metadata') && (
           <div className="col-span-3 sm:col-span-7 lg:col-span-9">
             <Spinner className="ml-auto mr-9 h-6 w-6 text-gray-500" />
             <span className="sr-only">Loading</span>

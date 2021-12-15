@@ -87,20 +87,22 @@ class SyncDatabaseWorker
             if database.has_row_oid_support?
               table.logs["migration"]["status"] = "injecting_oid"
               table.save
-              table.inject_oid
               pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+
+              table.inject_oid
             end
 
             table.logs["migration"]["status"] = "injecting_notifier"
             table.save
+            pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+
             table.inject_notifier_trigger
+
+            table.logs["migration"]["status"] = "notifiers_created"
+            table.save
             pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
           end
         end
-
-        table.logs["migration"]["status"] = "notifiers_created"
-        table.save
-        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
       end
 
       if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]

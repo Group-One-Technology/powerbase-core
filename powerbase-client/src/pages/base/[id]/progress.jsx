@@ -42,9 +42,14 @@ function BaseProgress() {
     return <Loader className="h-screen" />;
   }
 
-  const steps = base.isTurbo
+  let steps = base.isTurbo
     ? BASE_PROGRESS_STEPS
     : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
+
+  if (base.adapter !== 'postgresql') {
+    steps = steps.filter((item) => item.value !== 'creating_listeners');
+  }
+
   const currentStep = base.isMigrated
     ? steps[steps.length - 1]
     : steps.find((item) => item.value === base.status) || steps[0];
