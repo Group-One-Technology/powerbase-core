@@ -32,7 +32,7 @@ class SyncDatabaseWorker
             table.object.save
 
             # Migrate fields and records
-            table.object.sync!
+            table.object.sync!(false)
           end
         end
 
