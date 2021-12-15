@@ -55,11 +55,11 @@ function TableItem({ table }) {
         </div>
       ) : (
         <>
-          <div className="hidden col-span-5 sm:flex sm:items-center lg:col-span-7" aria-hidden="true">
+          <div className="hidden col-span-5 sm:flex sm:flex-col sm:items-center lg:col-span-7" aria-hidden="true">
             <div className="w-full bg-gray-200 rounded-full overflow-hidden">
               <div className="h-3 bg-indigo-600 rounded-full" style={{ width: `${step.percentage || 0}%` }} />
-              <p className="text-sm text-gray-500 text-center">{step.decsription}</p>
             </div>
+            <p className="my-1 hidden text-sm text-gray-500 text-center sm:block ">{step.description}</p>
           </div>
 
           <div className="col-span-3 sm:col-span-2">
