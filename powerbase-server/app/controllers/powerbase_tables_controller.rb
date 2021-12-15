@@ -7,7 +7,7 @@ class PowerbaseTablesController < ApplicationController
     required(:database_id).value(:string)
   end
 
-  schema(:show, :update) do
+  schema(:show, :logs, :update) do
     required(:id).value(:string)
     optional(:alias).value(:string)
   end
@@ -65,6 +65,15 @@ class PowerbaseTablesController < ApplicationController
     current_user.can?(:view_table, @table)
 
     render json: format_json(@table)
+  end
+
+  # GET /tables/:id/logs
+  def logs
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:manage_base, @table.db)
+
+    render json: logs_format_json(@table)
   end
 
   # PUT /tables/:id/update
@@ -205,6 +214,29 @@ class PowerbaseTablesController < ApplicationController
       }
     end
 
+    def logs_format_json(table)
+      {
+        id: table.id,
+        name: table.name,
+        alias: table.alias || table.name,
+        order: table.order,
+        unmigrated_fields: table.unmigrated_columns || [],
+        migrated_fields: table.fields.map {|item| field_format_json(item)},
+        logs: table.logs,
+        is_migrated: table.is_migrated,
+        created_at: table.created_at,
+        updated_at: table.updated_at,
+      }
+    end
+
+    def field_format_json(field)
+      {
+        id: field.id,
+        name: field.name,
+        alias: field.alias,
+      }
+    end
+
     def standardize_table_params(params)
       {
         powerbase_database_id: params[:powerbase_database_id],
@@ -212,11 +244,10 @@ class PowerbaseTablesController < ApplicationController
         is_virtual: params[:is_virtual],
         alias: params[:alias],
         name: params[:name],
-        order: params[:order],
         page_size: params[:page_size]
       }
     end
-  
+
     def standardize_field_params(params, table)
      {
         name: params[:name],

@@ -114,8 +114,9 @@ class Fields::Creator
 
   def save
     if field.save
-      add_to_viewfield
       add_field_select_options if field.powerbase_field_type.data_type == "enums"
+      add_to_viewfield
+      pusher_trigger!("table.#{table.id}", "field-migration-listener", field)
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

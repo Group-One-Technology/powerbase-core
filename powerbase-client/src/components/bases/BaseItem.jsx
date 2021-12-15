@@ -21,7 +21,7 @@ export function BaseItem({
 }) {
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
-      <div className="absolute top-1 right-1 flex gap-x-1">
+      <div className="absolute top-1 right-1 flex">
         {base.isTurbo && (
           <Tooltip.Root delayDuration={0}>
             <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-gray-500">
