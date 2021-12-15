@@ -16,7 +16,7 @@ const STEPS = {
   },
   injecting_notifier: {
     percentage: 50,
-    decsription: 'Injecting Table Notifier...',
+    description: 'Injecting Table Notifier...',
   },
   notifiers_created: {
     percentage: 100,
