@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useParams, Redirect } from 'react-router-dom';
-import { Tab } from '@headlessui/react';
+import * as Tabs from '@radix-ui/react-tabs';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseTablesProvider } from '@models/BaseTables';
-import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -20,8 +19,11 @@ function BaseProgress() {
   const { authUser } = useAuthUser();
   const { data: base, error } = useBase();
   const { baseUser } = useBaseUser();
+  const [currentTab, setCurrentTab] = useState(base?.status || 'analyzing_base');
 
-  const currentStepIndex = BASE_PROGRESS_STEPS.findIndex((item) => item.status === 'current');
+  useEffect(() => {
+    setCurrentTab(base?.status);
+  }, [base?.status]);
 
   if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
@@ -36,6 +38,10 @@ function BaseProgress() {
     return <Loader className="h-screen" />;
   }
 
+  const handleTabsChange = (value) => {
+    setCurrentTab(value);
+  };
+
   return (
     <Page authOnly>
       <div className="py-10">
@@ -46,13 +52,18 @@ function BaseProgress() {
         </PageHeader>
         <PageContent className="mt-4">
           <div className="max-w-screen-xl mx-auto pb-6 px-4 sm:px-6 lg:pb-16 lg:px-8">
-            <Tab.Group defaultIndex={currentStepIndex}>
+            <Tabs.Root
+              value={currentTab}
+              defaultValue={base.status}
+              onValueChange={handleTabsChange}
+            >
               <BaseProgressStep />
-              <Tab.Panels>
-                <Tab.Panel />
-                <ProgressMigratingMetadata />
-              </Tab.Panels>
-            </Tab.Group>
+              <Tabs.Content value="analyzing_base" />
+              <ProgressMigratingMetadata />
+              <Tabs.Content value="adding_connections" />
+              <Tabs.Content value="creating_listeners" />
+              <Tabs.Content value="indexing_records" />
+            </Tabs.Root>
           </div>
         </PageContent>
       </div>

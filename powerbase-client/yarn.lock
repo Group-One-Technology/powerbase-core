@@ -1112,6 +1112,17 @@
     "@radix-ui/react-primitive" "0.1.1"
     "@radix-ui/react-slot" "0.1.1"
 
+"@radix-ui/react-collection@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-collection/-/react-collection-0.1.2.tgz#2b757dc7c5aa1aebe0eaf7dda2c46776987f3187"
+  integrity sha512-sEIlbAaOBm6k9Z/tsf0FrHlsscd8u8waHKzlualgN/CIuouy4rKXoVuysevgQvY7h9HPV5x2AekWq6BABTBOkw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-compose-refs" "0.1.0"
+    "@radix-ui/react-context" "0.1.1"
+    "@radix-ui/react-primitive" "0.1.2"
+    "@radix-ui/react-slot" "0.1.2"
+
 "@radix-ui/react-compose-refs@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-compose-refs/-/react-compose-refs-0.1.0.tgz#cff6e780a0f73778b976acff2c2a5b6551caab95"
@@ -1206,6 +1217,14 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-context" "0.1.1"
 
+"@radix-ui/react-id@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-id/-/react-id-0.1.3.tgz#007c41749628ec6c2c801ad0b8f0a454bb181ae3"
+  integrity sha512-kA7erDg8S/bad9O6RTC+laW11gm2pvmEqlZA+rvzI+WEkQXStIgnVp+wA420be4q20UiLQw9cmIP01AIhDVdZQ==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-use-layout-effect" "0.1.0"
+
 "@radix-ui/react-menu@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-menu/-/react-menu-0.1.1.tgz#2146352813ac086df5f021d06bce10f7f56d2577"
@@ -1292,6 +1311,14 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-slot" "0.1.1"
 
+"@radix-ui/react-primitive@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-0.1.2.tgz#ca20fb15fc83124eead186333f917145e5e53378"
+  integrity sha512-mVgeBkuNRZRCzHuDm2DWjZEIs3ntp4m3GtKWPXUn+SgmJXIIpVLt7KhvEmNkgXURq/DJgxG9GmJJMXkACioH/A==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-slot" "0.1.2"
+
 "@radix-ui/react-roving-focus@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-roving-focus/-/react-roving-focus-0.1.1.tgz#6a7965f6315fae91061b14d6380949a4697e87b9"
@@ -1307,6 +1334,21 @@
     "@radix-ui/react-use-callback-ref" "0.1.0"
     "@radix-ui/react-use-controllable-state" "0.1.0"
 
+"@radix-ui/react-roving-focus@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-roving-focus/-/react-roving-focus-0.1.3.tgz#7dcbf5b8cd79165a0d10e61170ac2a46b1293569"
+  integrity sha512-9VAvw8z3Nufw7PD8u32tJ0VuDi+5PiPlccRNdrtkdir/M4i/9B9D7WSZyzsqusVLFUo8y9Sj61eJIvGcUG6khw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/primitive" "0.1.0"
+    "@radix-ui/react-collection" "0.1.2"
+    "@radix-ui/react-compose-refs" "0.1.0"
+    "@radix-ui/react-context" "0.1.1"
+    "@radix-ui/react-id" "0.1.3"
+    "@radix-ui/react-primitive" "0.1.2"
+    "@radix-ui/react-use-callback-ref" "0.1.0"
+    "@radix-ui/react-use-controllable-state" "0.1.0"
+
 "@radix-ui/react-slot@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-slot/-/react-slot-0.1.1.tgz#9dbc2070ccc492847f7e43747b4847bc54786a76"
@@ -1314,6 +1356,28 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-compose-refs" "0.1.0"
+
+"@radix-ui/react-slot@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-slot/-/react-slot-0.1.2.tgz#e6f7ad9caa8ce81cc8d532c854c56f9b8b6307c8"
+  integrity sha512-ADkqfL+agEzEguU3yS26jfB50hRrwf7U4VTwAOZEmi/g+ITcBWe12yM46ueS/UCIMI9Py+gFUaAdxgxafFvY2Q==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-compose-refs" "0.1.0"
+
+"@radix-ui/react-tabs@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-tabs/-/react-tabs-0.1.3.tgz#2dfc11a30f0b2c22ca3a3341a7f5da4ff323444d"
+  integrity sha512-cuI0+OWRc9baghKsQyuKui2DEHBodYtLv//bnQ5TH3guL1GeN8LbxJY7faDu+UZccMRrzjN6ebfi91Y8wqjMqQ==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/primitive" "0.1.0"
+    "@radix-ui/react-context" "0.1.1"
+    "@radix-ui/react-id" "0.1.3"
+    "@radix-ui/react-primitive" "0.1.2"
+    "@radix-ui/react-roving-focus" "0.1.3"
+    "@radix-ui/react-use-callback-ref" "0.1.0"
+    "@radix-ui/react-use-controllable-state" "0.1.0"
 
 "@radix-ui/react-tooltip@^0.1.1":
   version "0.1.1"

@@ -13,38 +13,81 @@ class SyncDatabaseWorker
 
       puts "Migrating unmigrated tables of database with id of #{@database.id}..."
 
-      if new_connection && database.postgresql?
-        database.create_notifier_function!
-      end
-
       if unmigrated_tables.any?
-        table_creators = []
-        unmigrated_tables.each_with_index do |table_name, index|
-          table = Tables::Creator.new table_name, index + 1, database
-          # Save table object
-          table.save
+        batch = Sidekiq::Batch.new
+        batch.description = "Migrating metadata of database with id of #{database_id}"
+        batch.on(:complete, SyncDatabaseWorker, :database_id => database_id, :new_connection => new_connection)
+        batch.jobs do
+          unmigrated_tables.each_with_index do |table_name, index|
+            table = Tables::Creator.new table_name, index + 1, database
+            # Save table object
+            table.save
 
-          # Create table view
-          table_view = TableViews::Creator.new table.object
-          table_view.save
+            # Create table view
+            table_view = TableViews::Creator.new table.object
+            table_view.save
 
-          # Assign default view
-          table.object.default_view_id = table_view.object.id
-          table.object.save
+            # Assign default view
+            table.object.default_view_id = table_view.object.id
+            table.object.save
 
-          # Migrate fields and records
-          # Index record to elasticsearch if on turbo
-          table.object.sync!(database.is_turbo)
-          table_creators << table
+            # Migrate fields and records
+            table.object.sync!(false)
+          end
         end
 
-        # Create base connection / auto link
-        table_creators.each(&:create_base_connection!)
+        puts "Started Batch #{batch.bid}"
       end
 
       if deleted_tables.any?
         deleted_tables.each do |table|
           table.remove
+        end
+      end
+    end
+  end
+
+  def on_complete(status, params)
+    puts "Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
+
+    @database = PowerbaseDatabase.find params["database_id"]
+
+    add_connections
+    create_listeners(params["new_connection"])
+
+    if !database.is_turbo && !database.is_migrating?
+      database.is_migrated = true
+      database.save
+      base_migration.end_time = Time.now
+      base_migration.save
+
+      pusher_trigger!("database.#{database.id}", "migration-listener", database)
+    end
+
+    index_records if database.is_turbo
+    database.update_status!("migrated") if !database.is_migrating?
+  end
+
+  private
+    def add_connections
+      database.update_status!("adding_connections")
+      database.tables.each do |table|
+        table.migrator.create_base_connection!
+      end
+    end
+
+    def create_listeners(new_connection = false)
+      if database.postgresql?
+        database.update_status!("creating_listeners")
+
+        database.create_notifier_function! if new_connection
+
+        if ENV["ENABLE_LISTENER"]
+          database.tables.each do |table|
+            table.migrator.create_base_connection!
+            table.inject_oid if database.has_row_oid_support?
+            table.inject_notifier_trigger
+          end
         end
       end
 
@@ -54,5 +97,9 @@ class SyncDatabaseWorker
         poller.save
       end
     end
-  end
+
+    def index_records
+      database.update_status!("indexing_records")
+      database.tables.each(&:reindex!)
+    end
 end

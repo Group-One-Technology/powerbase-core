@@ -50,7 +50,7 @@ class PowerbaseTablesController < ApplicationController
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 
     render json: {
-      migrated: @database.is_migrated,
+      migrated: @database.migrated?,
       tables: @database.powerbase_tables
         .order(order: :asc)
         .select {|table| current_user.can?(:view_table, table, @guest, false)}
@@ -220,7 +220,7 @@ class PowerbaseTablesController < ApplicationController
         name: table.name,
         alias: table.alias || table.name,
         order: table.order,
-        unmigrated_fields: table.unmigrated_columns || [],
+        unmigrated_fields: table.logs["migration"]["unmigrated_columns"] || [],
         migrated_fields: table.fields.map {|item| field_format_json(item)},
         logs: table.logs,
         is_migrated: table.is_migrated,

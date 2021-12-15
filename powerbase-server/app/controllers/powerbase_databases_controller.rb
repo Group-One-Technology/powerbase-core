@@ -156,7 +156,6 @@ class PowerbaseDatabasesController < ApplicationController
       database_name: options[:database_name],
       connection_string: options[:connection_string],
       adapter: options[:adapter],
-      is_migrated: false,
       color: options[:color],
       is_turbo: options[:is_turbo],
       user_id: current_user.id,
@@ -266,7 +265,8 @@ class PowerbaseDatabasesController < ApplicationController
           email: owner.email,
         },
         color: database.color,
-        is_migrated: database.is_migrated,
+        status: database.status,
+        is_migrated: database.migrated?,
         is_turbo: database.is_turbo,
         default_table: if default_table
             {
