@@ -105,7 +105,7 @@ class SyncDatabaseWorker
         end
       end
 
-      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"]
+      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"] == "true"
         poller = Sidekiq::Cron::Job.find("Database Listeners")
         poller.args << database.id
         poller.save
