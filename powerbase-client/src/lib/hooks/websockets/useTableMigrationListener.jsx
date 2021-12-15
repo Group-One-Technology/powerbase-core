@@ -53,6 +53,17 @@ export function useTableMigrationListener({ logging = false, tables, mutate } = 
     }
   };
 
+  const recordsMigrationListener = (tableId) => {
+    if (mutate) {
+      Pusher.logToConsole = logging;
+      const channel = pusher.subscribe(`table.${tableId}`);
+
+      channel.bind('records-migration-listener', async () => {
+        await mutate();
+      });
+    }
+  };
+
   const unsubscribe = (databaseId) => {
     pusher.unsubscribe(`database.${databaseId}`);
   };
@@ -76,5 +87,6 @@ export function useTableMigrationListener({ logging = false, tables, mutate } = 
     fieldMigrationListener,
     connectionMigrationListener,
     notifierMigrationListener,
+    recordsMigrationListener,
   };
 }

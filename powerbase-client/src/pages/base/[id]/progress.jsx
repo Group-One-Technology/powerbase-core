@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useParams, Redirect } from 'react-router-dom';
+import {
+  useHistory, useParams, Redirect, Link,
+} from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 
 import { BaseProvider, useBase } from '@models/Base';
@@ -17,7 +19,9 @@ import { BaseProgressStep } from '@components/bases/progress/BaseProgressStep';
 import { ProgressMigratingMetadata } from '@components/bases/progress/ProgressMigratingMetadata';
 import { ProgressAddingConnections } from '@components/bases/progress/ProgressAddingConnections';
 import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCreatingListeners';
+import { ProgressIndexingRecords } from '@components/bases/progress/ProgressIndexingRecords';
 import { ProgressMigrated } from '@components/bases/progress/ProgressMigrated';
+import { ArrowLeftIcon } from '@heroicons/react/outline';
 
 function BaseProgress() {
   const history = useHistory();
@@ -62,6 +66,12 @@ function BaseProgress() {
   return (
     <Page authOnly>
       <div className="py-10">
+        <div className="max-w-7xl mx-auto px-2">
+          <Link to="/" className="mx-2 inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-200 focus:bg-gray-200 sm:mx-8">
+            <ArrowLeftIcon className="h-4 w-4 mr-1" />
+            Return
+          </Link>
+        </div>
         <PageHeader title={`${base.name} Migration Progress`} className="text-center">
           <p className="text-center text-gray-500 text-base">
             {currentStep.description}
@@ -79,7 +89,7 @@ function BaseProgress() {
               <ProgressMigratingMetadata />
               <ProgressAddingConnections />
               <ProgressCreatingListeners />
-              <Tabs.Content value="indexing_records" />
+              <ProgressIndexingRecords />
               <ProgressMigrated />
             </Tabs.Root>
           </div>

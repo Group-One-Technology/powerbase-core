@@ -222,6 +222,8 @@ class PowerbaseTablesController < ApplicationController
         alias: table.alias || table.name,
         order: table.order,
         status: table.logs["migration"]["status"],
+        total_records: table.logs["migration"]["total_records"],
+        indexed_records: table.logs["migration"]["indexed_records"],
         unmigrated_fields: table.logs["migration"]["unmigrated_columns"] || [],
         migrated_fields: table.fields.map {|item| field_format_json(item)},
         logs: table.logs,
