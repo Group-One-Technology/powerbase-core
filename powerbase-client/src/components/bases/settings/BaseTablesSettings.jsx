@@ -135,7 +135,7 @@ export function BaseTablesSettings() {
                         }}
                       >
                         <div className="col-span-4">
-                          <p className="text-base text-gray-900">{table.name}</p>
+                          <p className="text-base text-gray-900">{table.alias}</p>
                         </div>
                         <div className="col-span-6 flex items-center">
                           <Input

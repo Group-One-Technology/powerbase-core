@@ -12,9 +12,7 @@ export function AddBasePage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          Add A Base
-        </PageHeader>
+        <PageHeader title="Add A Base" className="text-center" />
         <PageContent>
           <ul className="mt-4 flex flex-col justify-center flex-wrap gap-5 sm:flex-row sm:mx-48">
             {BASE_SOURCES.map((source) => (

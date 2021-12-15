@@ -69,9 +69,7 @@ export function ConnectURLBasePage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          Add Database
-        </PageHeader>
+        <PageHeader title="Add Database" className="text-center" />
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
             <Tabs
