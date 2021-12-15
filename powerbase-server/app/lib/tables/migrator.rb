@@ -23,6 +23,10 @@ class Tables::Migrator
   end
 
   def index!
+    table.logs["migration"]["status"] = "indexing_records"
+    table.save
+    pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+
     create_index!(index_name)
 
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
@@ -84,6 +88,7 @@ class Tables::Migrator
       @offset += DEFAULT_PAGE_SIZE
 
       write_table_migration_logs!(offset: offset, indexed_records: indexed_records)
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
     end
 
     set_table_as_migrated
@@ -91,6 +96,10 @@ class Tables::Migrator
 
   def create_base_connection!
     puts "Adding and auto linking connections of table##{table.id}"
+
+    table.logs["migration"]["status"] = "adding_connections"
+    table.save
+
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
@@ -210,6 +219,12 @@ class Tables::Migrator
         end
       end
     end
+
+    table.logs["migration"]["status"] = "migrated_connections"
+    table.save
+
+    pusher_trigger!("table.#{table.id}", "connection-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
   end
 
   private
@@ -226,7 +241,7 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    write_table_migration_logs!(end_time: Time.now)
+    write_table_migration_logs!(status: 'migrated', end_time: Time.now)
 
     table.is_migrated = true
     table.save
@@ -235,7 +250,8 @@ class Tables::Migrator
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end
 
-  def write_table_migration_logs!(total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
+  def write_table_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
+    table.logs["migration"]["status"] = status if status.present?
     table.logs["migration"]["total_records"] = total_records if total_records.present?
     table.logs["migration"]["offset"] = offset if offset.present?
     table.logs["migration"]["indexed_records"] = indexed_records if indexed_records.present?

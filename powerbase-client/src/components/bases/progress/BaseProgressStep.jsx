@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { useMediaQuery } from 'react-responsive';
 import { CheckIcon } from '@heroicons/react/solid';
@@ -6,18 +7,10 @@ import * as Tabs from '@radix-ui/react-tabs';
 
 import { useBase } from '@models/Base';
 import { MOBILE_DEVICES } from '@lib/constants/breakpoints';
-import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
-export function BaseProgressStep() {
+export function BaseProgressStep({ steps, currentStep }) {
   const { data: base } = useBase();
   const isMobile = useMediaQuery({ query: MOBILE_DEVICES });
-
-  const steps = base.isTurbo
-    ? BASE_PROGRESS_STEPS
-    : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
-  const currentStep = base.isMigrated
-    ? steps[steps.length - 1]
-    : steps.find((item) => item.value === base.status) || steps[0];
 
   if (isMobile) {
     return (
@@ -90,10 +83,10 @@ export function BaseProgressStep() {
         <ol className="flex items-center justify-center">
           {steps.map((step, index) => {
             const isLastStep = index === steps.length - 1;
-            const status = currentStep.id === step.id
-              ? 'current'
-              : currentStep.id > step.id
-                ? 'complete'
+            const status = currentStep.id > step.id || currentStep.value === 'migrated'
+              ? 'complete'
+              : currentStep.id === step.id
+                ? 'current'
                 : 'upcoming';
 
             return (
@@ -167,3 +160,8 @@ export function BaseProgressStep() {
     </nav>
   );
 }
+
+BaseProgressStep.propTypes = {
+  steps: PropTypes.array.isRequired,
+  currentStep: PropTypes.object.isRequired,
+};

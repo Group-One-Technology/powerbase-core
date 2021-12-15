@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useParams, Redirect } from 'react-router-dom';
+import {
+  useHistory, useParams, Redirect, Link,
+} from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 
 import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseTablesProvider } from '@models/BaseTables';
+import { PERMISSIONS } from '@lib/constants/permissions';
+import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -13,6 +17,11 @@ import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { BaseProgressStep } from '@components/bases/progress/BaseProgressStep';
 import { ProgressMigratingMetadata } from '@components/bases/progress/ProgressMigratingMetadata';
+import { ProgressAddingConnections } from '@components/bases/progress/ProgressAddingConnections';
+import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCreatingListeners';
+import { ProgressIndexingRecords } from '@components/bases/progress/ProgressIndexingRecords';
+import { ProgressMigrated } from '@components/bases/progress/ProgressMigrated';
+import { ArrowLeftIcon } from '@heroicons/react/outline';
 
 function BaseProgress() {
   const history = useHistory();
@@ -33,10 +42,22 @@ function BaseProgress() {
     return <Redirect to="/404" />;
   }
 
-  if (!baseUser.can('manageBase')) {
+  if (!baseUser.can(PERMISSIONS.ManageBase)) {
     history.push('/404');
     return <Loader className="h-screen" />;
   }
+
+  let steps = base.isTurbo
+    ? BASE_PROGRESS_STEPS
+    : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
+
+  if (base.adapter !== 'postgresql') {
+    steps = steps.filter((item) => item.value !== 'creating_listeners');
+  }
+
+  const currentStep = base.isMigrated
+    ? steps[steps.length - 1]
+    : steps.find((item) => item.value === base.status) || steps[0];
 
   const handleTabsChange = (value) => {
     setCurrentTab(value);
@@ -45,9 +66,15 @@ function BaseProgress() {
   return (
     <Page authOnly>
       <div className="py-10">
+        <div className="max-w-7xl mx-auto px-2">
+          <Link to="/" className="mx-2 inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-200 focus:bg-gray-200 sm:mx-8">
+            <ArrowLeftIcon className="h-4 w-4 mr-1" />
+            Return
+          </Link>
+        </div>
         <PageHeader title={`${base.name} Migration Progress`} className="text-center">
           <p className="text-center text-gray-500 text-base">
-            We&lsquo;re currently migrating the metadata of the tables and fields of your base.
+            {currentStep.description}
           </p>
         </PageHeader>
         <PageContent className="mt-4">
@@ -57,12 +84,13 @@ function BaseProgress() {
               defaultValue={base.status}
               onValueChange={handleTabsChange}
             >
-              <BaseProgressStep />
+              <BaseProgressStep steps={steps} currentStep={currentStep} />
               <Tabs.Content value="analyzing_base" />
               <ProgressMigratingMetadata />
-              <Tabs.Content value="adding_connections" />
-              <Tabs.Content value="creating_listeners" />
-              <Tabs.Content value="indexing_records" />
+              <ProgressAddingConnections />
+              <ProgressCreatingListeners />
+              <ProgressIndexingRecords />
+              <ProgressMigrated />
             </Tabs.Root>
           </div>
         </PageContent>
