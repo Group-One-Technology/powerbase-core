@@ -30,6 +30,36 @@ export function useEditingCell(
     setEditCellInput(magicInputValue);
   };
 
+  const handleLocalMutation = (recordsToCompute, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData) => recordsToCompute?.map((recordObj) => {
+    const matches = [];
+    const extractedPrimaryKeys = (isTurbo || !field.isVirtual)
+      ? primaryKeys
+      : composedKeys.split('---');
+    let objToUse;
+    extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
+      let sanitized;
+      if (!isTurbo && !field.isVirtual) sanitized = extractedKey.split('___');
+      const pkName = (isTurbo || !field.isVirtual) ? extractedKey.name : sanitized[0];
+      const pkValue = (isTurbo || !field.isVirtual) ? extractedKey.value : sanitized[1];
+      matches.push(
+        `${getParameterCaseInsensitive(recordObj, pkName)}`
+            === `${pkValue}`,
+      );
+      if (pkIdx === primaryKeys.length - 1) {
+        if (!matches.includes(false)) {
+          const newObj = { ...recordObj };
+          newObj[field.name] = isCheckbox ? !(value?.toString() === 'true') : hasPrecision && formattedNumber
+            ? formattedNumber
+            : (calendarData || recordInputRef.current?.value);
+          objToUse = newObj;
+        } else {
+          objToUse = recordObj;
+        }
+      }
+    });
+    return objToUse;
+  });
+
   const onClickOutsideEditingCell = async (calendarData = null) => {
     const exitEditing = () => {
       setCellToEdit({});
@@ -87,28 +117,7 @@ export function useEditingCell(
         });
       const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value } });
       if (updatedValue) {
-        const mutatedRecords = recordsToUse?.map((recordObj) => {
-          const matches = [];
-          let objToUse;
-          primaryKeys.forEach((extractedKey, pkIdx) => {
-            const pkName = extractedKey.name;
-            const pkValue = extractedKey.value;
-            matches.push(
-              `${getParameterCaseInsensitive(recordObj, pkName)}`
-                === `${pkValue}`,
-            );
-            if (pkIdx === primaryKeys.length - 1) {
-              if (!matches.includes(false)) {
-                const newObj = { ...recordObj };
-                newObj[field.name] = isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value;
-                objToUse = newObj;
-              } else {
-                objToUse = recordObj;
-              }
-            }
-          });
-          return objToUse;
-        });
+        const mutatedRecords = handleLocalMutation(recordsToUse);
         setUpdatedRecords(mutatedRecords);
       }
       exitEditing();
@@ -127,35 +136,7 @@ export function useEditingCell(
       });
 
       if (data) {
-        const mutatedRecords = recordsToUse?.map((recordObj) => {
-          const matches = [];
-          const extractedPrimaryKeys = isTurbo
-            ? primaryKeys
-            : composedKeys.split('---');
-          let objToUse = {};
-          extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
-            let sanitized;
-            if (!isTurbo) sanitized = extractedKey.split('___');
-            const pkName = isTurbo ? extractedKey.name : sanitized[0];
-            const pkValue = isTurbo ? extractedKey.value : sanitized[1];
-            matches.push(
-              `${getParameterCaseInsensitive(recordObj, pkName)}`
-                === `${pkValue}`,
-            );
-            if (pkIdx === extractedPrimaryKeys.length - 1) {
-              if (!matches.includes(false)) {
-                const newObj = { ...recordObj };
-                newObj[field.name] = hasPrecision && formattedNumber
-                  ? formattedNumber
-                  : calendarData || recordInputRef.current?.value;
-                objToUse = newObj;
-              } else {
-                objToUse = recordObj;
-              }
-            }
-          });
-          return objToUse;
-        });
+        const mutatedRecords = handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         setUpdatedRecords(mutatedRecords);
         setIsNewRecord(false);
         exitEditing();
