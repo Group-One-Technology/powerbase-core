@@ -6,6 +6,8 @@ import { BaseProvider, useBase } from '@models/Base';
 import { useAuthUser } from '@models/AuthUser';
 import { BaseUserProvider, useBaseUser } from '@models/BaseUser';
 import { BaseTablesProvider } from '@models/BaseTables';
+import { PERMISSIONS } from '@lib/constants/permissions';
+import { BASE_PROGRESS_STEPS } from '@lib/constants/base-migrations';
 
 import { Page } from '@components/layout/Page';
 import { Loader } from '@components/ui/Loader';
@@ -33,10 +35,17 @@ function BaseProgress() {
     return <Redirect to="/404" />;
   }
 
-  if (!baseUser.can('manageBase')) {
+  if (!baseUser.can(PERMISSIONS.ManageBase)) {
     history.push('/404');
     return <Loader className="h-screen" />;
   }
+
+  const steps = base.isTurbo
+    ? BASE_PROGRESS_STEPS
+    : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
+  const currentStep = base.isMigrated
+    ? steps[steps.length - 1]
+    : steps.find((item) => item.value === base.status) || steps[0];
 
   const handleTabsChange = (value) => {
     setCurrentTab(value);
@@ -47,7 +56,7 @@ function BaseProgress() {
       <div className="py-10">
         <PageHeader title={`${base.name} Migration Progress`} className="text-center">
           <p className="text-center text-gray-500 text-base">
-            We&lsquo;re currently migrating the metadata of the tables and fields of your base.
+            {currentStep.description}
           </p>
         </PageHeader>
         <PageContent className="mt-4">
@@ -57,7 +66,7 @@ function BaseProgress() {
               defaultValue={base.status}
               onValueChange={handleTabsChange}
             >
-              <BaseProgressStep />
+              <BaseProgressStep steps={steps} currentStep={currentStep} />
               <Tabs.Content value="analyzing_base" />
               <ProgressMigratingMetadata />
               <Tabs.Content value="adding_connections" />
