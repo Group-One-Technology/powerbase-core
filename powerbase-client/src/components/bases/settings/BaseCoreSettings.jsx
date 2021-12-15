@@ -219,7 +219,7 @@ export function BaseCoreSettings() {
             type="submit"
             className="bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
             loading={loading}
-            disabled={hasDatabaseNameError}
+            disabled={hasDatabaseNameError || !base?.isMigrated}
           >
             Update Database
           </Button>
