@@ -88,16 +88,14 @@ class SyncDatabaseWorker
     end
 
     def create_listeners(new_connection = false)
-      if database.postgresql?
-        database.update_status!("creating_listeners")
-        database.create_notifier_function! if new_connection
+      return if ENV["ENABLE_LISTENER"] != "true" || !database.postgresql?
 
-        if ENV["ENABLE_LISTENER"] == "true"
-          database.tables.each(&:create_listener_later!)
-        end
-      end
+      database.update_status!("creating_listeners")
+      database.create_notifier_function! if new_connection
 
-      if new_connection && database.is_turbo && ENV["ENABLE_LISTENER"] == "true"
+      database.tables.each(&:create_listener_later!)
+
+      if new_connection && database.is_turbo
         poller = Sidekiq::Cron::Job.find("Database Listeners")
         poller.args << database.id
         poller.save
