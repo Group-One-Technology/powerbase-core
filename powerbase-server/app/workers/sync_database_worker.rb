@@ -2,13 +2,14 @@ class SyncDatabaseWorker
   include Sidekiq::Worker
   include PusherHelper
 
-  attr_accessor :database, :unmigrated_tables, :deleted_tables
+  attr_accessor :database, :unmigrated_tables, :deleted_tables, :new_connection
 
   def perform(database_id, new_connection = false)
     return if cancelled?
 
     @database = PowerbaseDatabase.find database_id
     @base_migration = @database.base_migration
+    @new_connection = new_connection
 
     unless database.in_synced?
       @unmigrated_tables = @database.unmigrated_tables
@@ -18,8 +19,8 @@ class SyncDatabaseWorker
 
       if unmigrated_tables.any?
         batch = Sidekiq::Batch.new
-        batch.description = "Migrating metadata of database with id of #{database_id}"
-        batch.on(:complete, SyncDatabaseWorker, :database_id => database_id, :new_connection => new_connection)
+        batch.description = "Migrating metadata of database with id of #{database.id}"
+        batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "migrating_metadata", :new_connection => new_connection)
         batch.jobs do
           unmigrated_tables.each_with_index do |table_name, index|
             table = Tables::Creator.new table_name, index + 1, database
@@ -51,12 +52,20 @@ class SyncDatabaseWorker
   end
 
   def on_complete(status, params)
-    puts "Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
+    puts "Migrating batch for database##{database.id} has #{status.failures} failures" if status.failures != 0
 
     @database = PowerbaseDatabase.find params["database_id"]
+    @new_connection = params["new_connection"]
 
-    add_connections
-    create_listeners(params["new_connection"])
+    return add_connections if params["step"] == "migrating_metadata"
+
+    if params["step"] == "adding_connections"
+      if ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
+        return create_listeners
+      end
+    end
+
+    return index_records if params["step"] != "indexing_records" && database.is_turbo
 
     if !database.is_turbo && !database.is_migrating?
       database.is_migrated = true
@@ -67,7 +76,6 @@ class SyncDatabaseWorker
       pusher_trigger!("database.#{database.id}", "migration-listener", database)
     end
 
-    index_records if database.is_turbo
     database.update_status!("migrated") if !database.is_migrating?
   end
 
@@ -82,18 +90,35 @@ class SyncDatabaseWorker
   private
     def add_connections
       database.update_status!("adding_connections")
-      database.tables.each do |table|
-        table.migrator.create_base_connection_later!
+
+      batch = Sidekiq::Batch.new
+      batch.description = "Adding and auto linking connections for database##{database.id}"
+      batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "adding_connections", :new_connection => new_connection)
+      batch.jobs do
+        database.tables.each do |table|
+          table.migrator.create_base_connection_later!
+        end
       end
+
+      puts "Started Batch #{batch.bid}"
     end
 
-    def create_listeners(new_connection = false)
+    def create_listeners
       return if ENV["ENABLE_LISTENER"] != "true" || !database.postgresql?
 
       database.update_status!("creating_listeners")
       database.create_notifier_function! if new_connection
 
-      database.tables.each(&:create_listener_later!)
+      database.update_status!("adding_connections")
+
+      batch = Sidekiq::Batch.new
+      batch.description = "Creating listeners for database##{database.id}"
+      batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "creating_listeners", :new_connection => new_connection)
+      batch.jobs do
+        database.tables.each {|table| table.migrator.create_listener_later!}
+      end
+
+      puts "Started Batch #{batch.bid}"
 
       if new_connection && database.is_turbo
         poller = Sidekiq::Cron::Job.find("Database Listeners")
@@ -104,6 +129,14 @@ class SyncDatabaseWorker
 
     def index_records
       database.update_status!("indexing_records")
-      database.tables.each(&:reindex_later!)
+
+      batch = Sidekiq::Batch.new
+      batch.description = "Creating listeners for database##{database.id}"
+      batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "indexing_records", :new_connection => new_connection)
+      batch.jobs do
+        database.tables.each(&:reindex_later!)
+      end
+
+      puts "Started Batch #{batch.bid}"
     end
 end
