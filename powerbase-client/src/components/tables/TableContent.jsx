@@ -43,11 +43,7 @@ const BaseTableContent = React.memo(({ table }) => {
           <FieldTypesProvider>
             <ViewFieldStateProvider>
               <TableViewsNav />
-              {table.isMigrated ? (
-                <VirtualTable table={table} height={height} fields={fields} />
-              ) : (
-                <Loader style={{ height }} />
-              )}
+              <VirtualTable table={table} height={height} fields={fields} />
             </ViewFieldStateProvider>
           </FieldTypesProvider>
         </TableRecordsProvider>
