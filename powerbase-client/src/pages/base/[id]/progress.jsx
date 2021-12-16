@@ -23,7 +23,7 @@ import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCr
 import { ProgressIndexingRecords } from '@components/bases/progress/ProgressIndexingRecords';
 import { ProgressMigrated } from '@components/bases/progress/ProgressMigrated';
 
-const { ENABLE_LISTENERS } = process.env;
+const { ENABLE_LISTENER } = process.env;
 
 function BaseProgress() {
   const history = useHistory();
@@ -53,7 +53,7 @@ function BaseProgress() {
     ? BASE_PROGRESS_STEPS
     : BASE_PROGRESS_STEPS.filter((item) => item.value !== 'indexing_records');
 
-  if (base.adapter !== 'postgresql' || ENABLE_LISTENERS !== 'true') {
+  if (base.adapter !== 'postgresql' || ENABLE_LISTENER !== 'true') {
     steps = steps.filter((item) => item.value !== 'creating_listeners');
   }
 

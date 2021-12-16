@@ -227,6 +227,36 @@ class Tables::Migrator
     pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
   end
 
+  def create_base_connection_later!
+    TableConnectionsWorker.perform_async(table.id)
+  end
+
+  def create_listener!
+    if database.postgresql? && ENV["ENABLE_LISTENER"] == "true"
+      if database.has_row_oid_support?
+        table.logs["migration"]["status"] = "injecting_oid"
+        table.save
+        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+
+        table.inject_oid
+      end
+
+      table.logs["migration"]["status"] = "injecting_notifier"
+      table.save
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+
+      table.inject_notifier_trigger
+
+      table.logs["migration"]["status"] = "notifiers_created"
+      table.save
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+    end
+  end
+
+  def create_listener_later!
+    TableConnectionsWorker.perform_async(table.id)
+  end
+
   private
   def fetch_table_records!
     sequel_connect(database) do |db|
