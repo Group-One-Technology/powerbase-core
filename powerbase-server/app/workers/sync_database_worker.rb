@@ -5,6 +5,8 @@ class SyncDatabaseWorker
   attr_accessor :database, :unmigrated_tables, :deleted_tables
 
   def perform(database_id, new_connection = false)
+    return if cancelled?
+
     @database = PowerbaseDatabase.find database_id
     @base_migration = @database.base_migration
 
@@ -67,6 +69,14 @@ class SyncDatabaseWorker
 
     index_records if database.is_turbo
     database.update_status!("migrated") if !database.is_migrating?
+  end
+
+  def cancelled?
+    Sidekiq.redis {|c| c.exists("cancelled-#{jid}") }
+  end
+
+  def self.cancel!(jid)
+    Sidekiq.redis {|c| c.setex("cancelled-#{jid}", 86400, 1) }
   end
 
   private
