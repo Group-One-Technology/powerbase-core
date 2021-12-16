@@ -93,25 +93,7 @@ class SyncDatabaseWorker
         database.create_notifier_function! if new_connection
 
         if ENV["ENABLE_LISTENER"] == "true"
-          database.tables.each do |table|
-            if database.has_row_oid_support?
-              table.logs["migration"]["status"] = "injecting_oid"
-              table.save
-              pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
-
-              table.inject_oid
-            end
-
-            table.logs["migration"]["status"] = "injecting_notifier"
-            table.save
-            pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
-
-            table.inject_notifier_trigger
-
-            table.logs["migration"]["status"] = "notifiers_created"
-            table.save
-            pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
-          end
+          database.tables.each(&:create_listener_later!)
         end
       end
 
