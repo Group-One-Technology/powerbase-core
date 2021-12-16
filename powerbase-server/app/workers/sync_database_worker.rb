@@ -125,7 +125,7 @@ class SyncDatabaseWorker
       database.update_status!("indexing_records")
 
       batch = Sidekiq::Batch.new
-      batch.description = "Creating listeners for database##{database.id}"
+      batch.description = "Indexing records for database##{database.id}"
       batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "indexing_records", :new_connection => new_connection)
       batch.jobs do
         database.tables.each(&:reindex_later!)
