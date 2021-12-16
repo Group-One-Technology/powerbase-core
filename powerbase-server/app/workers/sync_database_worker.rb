@@ -8,7 +8,6 @@ class SyncDatabaseWorker
     return if cancelled?
 
     @database = PowerbaseDatabase.find database_id
-    @base_migration = @database.base_migration
     @new_connection = new_connection
 
     unless database.in_synced?
@@ -67,16 +66,11 @@ class SyncDatabaseWorker
 
     return index_records if params["step"] != "indexing_records" && database.is_turbo
 
-    if !database.is_turbo && !database.is_migrating?
-      database.is_migrated = true
-      database.save
-      base_migration.end_time = Time.now
-      base_migration.save
+    database.update_status!("migrated")
+    database.base_migration.end_time = Time.now
+    database.base_migration.save
 
-      pusher_trigger!("database.#{database.id}", "migration-listener", database)
-    end
-
-    database.update_status!("migrated") if !database.is_migrating?
+    pusher_trigger!("database.#{database.id}", "migration-listener", database)
   end
 
   def cancelled?

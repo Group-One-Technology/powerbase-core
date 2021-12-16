@@ -76,7 +76,7 @@ module.exports = {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         API: JSON.stringify(process.env.API),
         PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
-        ENABLE_LISTENERS: JSON.stringify(process.env.ENABLE_LISTENERS),
+        ENABLE_LISTENER: JSON.stringify(process.env.ENABLE_LISTENER),
       },
     }),
     new webpack.HotModuleReplacementPlugin(),
