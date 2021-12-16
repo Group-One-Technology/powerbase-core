@@ -227,6 +227,10 @@ class Tables::Migrator
     pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
   end
 
+  def create_base_connection_later!
+    TableConnectionsWorker.perform_async(table.id)
+  end
+
   private
   def fetch_table_records!
     sequel_connect(database) do |db|

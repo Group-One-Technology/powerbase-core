@@ -73,7 +73,7 @@ class SyncDatabaseWorker
     def add_connections
       database.update_status!("adding_connections")
       database.tables.each do |table|
-        table.migrator.create_base_connection!
+        table.migrator.create_base_connection_later!
       end
     end
 
@@ -114,6 +114,6 @@ class SyncDatabaseWorker
 
     def index_records
       database.update_status!("indexing_records")
-      database.tables.each(&:reindex!)
+      database.tables.each(&:reindex_later!)
     end
 end
