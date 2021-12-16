@@ -23,8 +23,7 @@ class Tables::Migrator
   end
 
   def index!
-    table.logs["migration"]["status"] = "indexing_records"
-    table.save
+    write_table_migration_logs(status: "indexing_records", total_records: nil)
     pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
 
     create_index!(index_name)
