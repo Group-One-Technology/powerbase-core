@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 
 import { BasesProvider, useBases } from '@models/Bases';
 import { useSharedBases } from '@models/SharedBases';
+import { useAuthUser } from '@models/AuthUser';
+
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
@@ -14,6 +16,8 @@ import { BaseErrorModal } from '@components/bases/BaseErrorModal';
 import { Loader } from '@components/ui/Loader';
 
 function BasesContentPage() {
+  const history = useHistory();
+  const { authUser } = useAuthUser();
   const { data: bases, mutate: mutateBases } = useBases();
   const { data: sharedBases, mutate: mutateSharedBases } = useSharedBases();
 
@@ -30,6 +34,11 @@ function BasesContentPage() {
       open: true,
     });
   };
+
+  if (authUser?.isOnboarded) {
+    history.push('/onboarding');
+    return <Loader className="h-screen" />;
+  }
 
   return (
     <Page authOnly>
