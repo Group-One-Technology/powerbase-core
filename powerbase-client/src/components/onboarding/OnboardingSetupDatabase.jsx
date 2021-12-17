@@ -27,13 +27,16 @@ export function OnboardingSetupDatabase({
               className={({ active }) => (cn(
                 'flex-1 bg-white relative block rounded-lg border border-gray-300 shadow-sm py-4 px-2 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
                 active && 'ring-1 ring-offset-2 ring-indigo-500',
-                option.disabled && 'cursor-not-allowed',
+                option.disabled && 'bg-gray-100 cursor-not-allowed',
               ))}
               disabled={option.disabled}
             >
               {({ checked }) => (
                 <>
                   <div className="w-full flex flex-col items-center justify-center text-center p-2">
+                    {option.disabled && (
+                      <p className="text-xs text-gray-500 px-4">Coming Soon</p>
+                    )}
                     <RadioGroup.Label as="p" className="mt-4 text-gray-900 text-xl font-bold break-words" style={{ hyphens: 'auto' }}>
                       {option.pretext && (
                         <span className="block text-xs font-normal text-gray-500">{option.pretext}</span>

@@ -17,7 +17,7 @@ export function OnboardingPage() {
   const { authUser } = useAuthUser();
 
   const [currentTab, setCurrentTab] = useState(OnboardingTabs.SETUP_DATABASE);
-  const [databaseType, setDatabaseType] = useState(BASE_SOURCES[0]);
+  const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
 
   if (!authUser?.isOnboarded) {
