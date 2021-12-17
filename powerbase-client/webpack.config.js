@@ -77,6 +77,7 @@ module.exports = {
         API: JSON.stringify(process.env.API),
         PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
         ENABLE_LISTENER: JSON.stringify(process.env.ENABLE_LISTENER),
+        EDITMODE_PROJECT_ID: JSON.stringify(process.env.EDITMODE_PROJECT_ID),
       },
     }),
     new webpack.HotModuleReplacementPlugin(),

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
+import { Chunk } from 'editmode-react';
 
 import { useAuthUser } from '@models/AuthUser';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
@@ -31,7 +32,14 @@ export function OnboardingPage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader title="Get Started with Powerbase" className="text-center" />
+        <PageHeader
+          className="text-center"
+          title={(
+            <Chunk identifier="onboarding_headline">
+              Get Started with Powerbase
+            </Chunk>
+          )}
+        />
         <PageContent>
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>
             <Tabs.List
@@ -40,6 +48,7 @@ export function OnboardingPage() {
             >
               {Object.keys(OnboardingTabs).map((key) => (
                 <Tabs.Trigger
+                  key={key}
                   value={OnboardingTabs[key]}
                   className={cn(
                     'h-1 w-full flex items-center justify-center focus:outline-none focus:ring-2 ring-offset-2 ring-offset-indigo-400 ring-white ring-opacity-60',

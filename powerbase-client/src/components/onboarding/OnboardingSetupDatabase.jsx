@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { RadioGroup } from '@headlessui/react';
+import { Chunk } from 'editmode-react';
+
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
 import { BASE_SOURCES, OnboardingTabs } from '@lib/constants/onboarding';
@@ -24,7 +26,9 @@ export function OnboardingSetupDatabase({
   return (
     <Tabs.Content value={OnboardingTabs.SETUP_DATABASE}>
       <p className="mt-8 mb-4 text-center text-base text-gray-500">
-        Start managing your database by
+        <Chunk identifier="onboarding_database_type_description">
+          Start managing your database by
+        </Chunk>
       </p>
       <RadioGroup value={databaseType} onChange={setDatabaseType}>
         <RadioGroup.Label className="sr-only">Database Type</RadioGroup.Label>
@@ -75,7 +79,9 @@ export function OnboardingSetupDatabase({
       {databaseType.name !== 'Sample Database' && (
         <>
           <p className="mt-8 mb-6 text-center text-base text-gray-500">
-            You can supercharge your database by making it <strong>Turbo</strong>.
+            <Chunk identifier="onboarding_powerbase_type_description">
+              You can supercharge your database by making it Turbo.
+            </Chunk>
           </p>
           <RadioGroup value={powerbaseType} onChange={setPowerbaseType}>
             <RadioGroup.Label className="sr-only">Powerbase Type</RadioGroup.Label>
@@ -85,13 +91,15 @@ export function OnboardingSetupDatabase({
                   key={option.name}
                   value={option}
                   className={cn(
-                    'flex-1 px-6 py-2 font-medium text-base rounded-md text-center',
+                    'flex-1 px-6 py-2 font-medium text-base rounded-md text-center cursor-pointer',
                     powerbaseType.name === option.name
                       ? 'bg-indigo-100 text-indigo-700'
                       : ' bg-gray-200 text-gray-500 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
                   )}
                 >
-                  {option.name}
+                  <Chunk identifier={option.nameId}>
+                    {option.name}
+                  </Chunk>
                 </RadioGroup.Option>
               ))}
             </div>
@@ -99,7 +107,9 @@ export function OnboardingSetupDatabase({
 
           <div className="min-h-[15rem] my-4 mx-auto max-w-md">
             <p className="my-2 px-8 text-center text-sm text-gray-500">
-              {powerbaseType.description}
+              <Chunk identifier={powerbaseType.descriptionId}>
+                {powerbaseType.description}
+              </Chunk>
             </p>
             <dl className="my-4 flex flex-col space-y-4">
               {powerbaseType.features.map((feature) => (
@@ -108,8 +118,16 @@ export function OnboardingSetupDatabase({
                     <feature.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div>
-                    <dt p className="text-base leading-6 font-medium text-gray-900">{feature.name}</dt>
-                    <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
+                    <dt p className="text-base leading-6 font-medium text-gray-900">
+                      <Chunk identifier={feature.nameId}>
+                        {feature.name}
+                      </Chunk>
+                    </dt>
+                    <dd className="mt-2 text-sm text-gray-500">
+                      <Chunk identifier={feature.descriptionId}>
+                        {feature.description}
+                      </Chunk>
+                    </dd>
                   </div>
                 </div>
               ))}
