@@ -11,6 +11,7 @@ import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
 import { Loader } from '@components/ui/Loader';
 import { OnboardingSetupDatabase } from '@components/onboarding/OnboardingSetupDatabase';
+import { OnboardingConnectDatabase } from '@components/onboarding/OnboardingConnectDatabase';
 
 export function OnboardingPage() {
   const history = useHistory();
@@ -33,7 +34,10 @@ export function OnboardingPage() {
         <PageHeader title="Get Started with Powerbase" className="text-center" />
         <PageContent>
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>
-            <Tabs.List aria-label="onboarding powerbase tabs" className="my-4 w-72 mx-auto flex flex-row justify-center space-x-4">
+            <Tabs.List
+              aria-label="onboarding powerbase tabs"
+              className={cn('my-4 w-72 mx-auto flex flex-row justify-center space-x-4', databaseType.name === 'Sample Database' && 'invisible')}
+            >
               {Object.keys(OnboardingTabs).map((key) => (
                 <Tabs.Trigger
                   value={OnboardingTabs[key]}
@@ -49,6 +53,13 @@ export function OnboardingPage() {
             <OnboardingSetupDatabase
               databaseType={databaseType}
               setDatabaseType={setDatabaseType}
+              powerbaseType={powerbaseType}
+              setPowerbaseType={setPowerbaseType}
+              setCurrentTab={setCurrentTab}
+            />
+            <OnboardingConnectDatabase
+              setCurrentTab={setCurrentTab}
+              databaseType={databaseType}
               powerbaseType={powerbaseType}
               setPowerbaseType={setPowerbaseType}
             />

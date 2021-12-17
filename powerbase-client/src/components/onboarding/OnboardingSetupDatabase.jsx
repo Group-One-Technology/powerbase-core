@@ -11,7 +11,16 @@ export function OnboardingSetupDatabase({
   setDatabaseType,
   powerbaseType,
   setPowerbaseType,
+  setCurrentTab,
 }) {
+  const handleNextStep = () => {
+    if (databaseType.name === 'Sample Database') {
+      alert('Will invite you to the imdb sample database');
+    } else {
+      setCurrentTab(OnboardingTabs.CONNECT_DATABASE);
+    }
+  };
+
   return (
     <Tabs.Content value={OnboardingTabs.SETUP_DATABASE}>
       <p className="mt-8 mb-4 text-center text-base text-gray-500">
@@ -63,52 +72,57 @@ export function OnboardingSetupDatabase({
         </div>
       </RadioGroup>
 
-      <p className="mt-8 mb-6 text-center text-base text-gray-500">
-        You can supercharge your database by making it <strong>Turbo</strong>.
-      </p>
-      <RadioGroup value={powerbaseType} onChange={setPowerbaseType}>
-        <RadioGroup.Label className="sr-only">Powerbase Type</RadioGroup.Label>
-        <div className="mx-auto w-96 flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row">
-          {POWERBASE_TYPE.map((option) => (
-            <RadioGroup.Option
-              key={option.name}
-              value={option}
-              className={cn(
-                'flex-1 px-6 py-2 font-medium text-base rounded-md text-center',
-                powerbaseType.name === option.name
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : ' bg-gray-200 text-gray-500 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
-              )}
-            >
-              {option.name}
-            </RadioGroup.Option>
-          ))}
-        </div>
-      </RadioGroup>
-
-      <div className="min-h-[15rem] my-4 mx-auto max-w-md">
-        <p className="my-2 px-8 text-center text-sm text-gray-500">
-          {powerbaseType.description}
-        </p>
-        <dl className="my-4 flex flex-col space-y-4">
-          {powerbaseType.features.map((feature) => (
-            <div key={feature.name} className="flex flex-row space-x-4">
-              <div className="flex items-center justify-center h-10 w-16 rounded-md bg-indigo-500 text-white">
-                <feature.icon className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <div>
-                <dt p className="text-base leading-6 font-medium text-gray-900">{feature.name}</dt>
-                <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
-              </div>
+      {databaseType.name !== 'Sample Database' && (
+        <>
+          <p className="mt-8 mb-6 text-center text-base text-gray-500">
+            You can supercharge your database by making it <strong>Turbo</strong>.
+          </p>
+          <RadioGroup value={powerbaseType} onChange={setPowerbaseType}>
+            <RadioGroup.Label className="sr-only">Powerbase Type</RadioGroup.Label>
+            <div className="mx-auto w-96 flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row">
+              {POWERBASE_TYPE.map((option) => (
+                <RadioGroup.Option
+                  key={option.name}
+                  value={option}
+                  className={cn(
+                    'flex-1 px-6 py-2 font-medium text-base rounded-md text-center',
+                    powerbaseType.name === option.name
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : ' bg-gray-200 text-gray-500 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
+                  )}
+                >
+                  {option.name}
+                </RadioGroup.Option>
+              ))}
             </div>
-          ))}
-        </dl>
-      </div>
+          </RadioGroup>
+
+          <div className="min-h-[15rem] my-4 mx-auto max-w-md">
+            <p className="my-2 px-8 text-center text-sm text-gray-500">
+              {powerbaseType.description}
+            </p>
+            <dl className="my-4 flex flex-col space-y-4">
+              {powerbaseType.features.map((feature) => (
+                <div key={feature.name} className="flex flex-row space-x-4">
+                  <div className="flex items-center justify-center h-10 w-16 rounded-md bg-indigo-500 text-white">
+                    <feature.icon className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <dt p className="text-base leading-6 font-medium text-gray-900">{feature.name}</dt>
+                    <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
+                  </div>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </>
+      )}
 
       <div className="my-4 flex justify-center">
         <button
           type="button"
           className="border border-transparent font-medium px-6 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          onClick={handleNextStep}
         >
           Setup Database
         </button>
@@ -122,4 +136,5 @@ OnboardingSetupDatabase.propTypes = {
   setDatabaseType: PropTypes.func.isRequired,
   powerbaseType: PropTypes.object.isRequired,
   setPowerbaseType: PropTypes.func.isRequired,
+  setCurrentTab: PropTypes.func.isRequired,
 };
