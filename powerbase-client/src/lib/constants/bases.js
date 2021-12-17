@@ -1,3 +1,5 @@
+import { LightningBoltIcon, LockClosedIcon, SearchIcon } from '@heroicons/react/outline';
+
 export const MAX_SMALL_DATABASE_SIZE = 1000000; // 976.56 KB
 
 export const BASE_SOURCES = [
@@ -56,6 +58,31 @@ export const DB_PLATFORMS = [
 ];
 
 export const POWERBASE_TYPE = [
-  { name: 'Powerbase Turbo', description: 'Get a faster experience with the power of Elastic Search. Great for dealing with large datasets.' },
-  { name: 'Regular', description: 'A normal experience suited for dealing with small datasets.' },
+  {
+    name: 'Powerbase Turbo',
+    description: 'Use Turbo to navigate tens or hundreds of millions of records instantly.',
+    features: [
+      {
+        name: 'Quickly navigate data',
+        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        icon: LightningBoltIcon,
+      },
+      {
+        name: 'Full text search',
+        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        icon: SearchIcon,
+      },
+    ],
+  },
+  {
+    name: 'Regular Database',
+    description: 'Use your imported or newly created database in navigating records.',
+    features: [
+      {
+        name: 'Data is stored where you want it to be.',
+        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        icon: LockClosedIcon,
+      },
+    ],
+  },
 ];
