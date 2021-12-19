@@ -115,7 +115,7 @@ export function useEditingCell(
           const keyValue = primaryKey.value;
           payload[keyName] = keyValue;
         });
-      const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value } });
+      const updatedValue = await securedApi.post(`tables/${field.tableId}/remote_value`, { primaryKeys: payload, data: { [field.name]: isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value } });
       if (updatedValue) {
         const mutatedRecords = handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         setUpdatedRecords(mutatedRecords);

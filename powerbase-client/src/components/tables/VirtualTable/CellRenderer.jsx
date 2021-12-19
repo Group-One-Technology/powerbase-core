@@ -209,6 +209,7 @@ export function CellRenderer({
     e.target.value = !(value?.toString() === 'true');
     onClickOutsideEditingCell();
   };
+  const isExcludedFromDoubleClickAction = fieldType?.dataType.toLowerCase() === 'boolean' || fieldType?.dataType.toLowerCase() === 'date';
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit
@@ -241,7 +242,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && canAddRecords && !isLastRow && fieldType.dataType.toLowerCase() !== 'boolean') {
+        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction && !field.isPrimaryKey) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
