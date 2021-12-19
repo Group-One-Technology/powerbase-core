@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 export const OutsideCellClick = (props) => {
-  // let clickCaptured = false;
-  // let focusCaptured = false;
   const [clickCaptured, setClickCaptured] = useState(false);
   const [focusCaptured, setFocusCaptured] = useState(false);
 
   const innerClick = () => {
-    // clickCaptured = true;
     setClickCaptured(true);
   };
 
   const innerFocus = () => {
-    // focusCaptured = true;
     setFocusCaptured(true);
   };
 
@@ -20,7 +16,6 @@ export const OutsideCellClick = (props) => {
     if (!clickCaptured && props.onClickOutside) {
       props.onClickOutside(event);
     }
-    // clickCaptured = false;
     setClickCaptured(false);
   };
 
@@ -28,7 +23,6 @@ export const OutsideCellClick = (props) => {
     if (!focusCaptured && props.onFocusOutside) {
       props.onFocusOutside(event);
     }
-    // focusCaptured = false;
     setFocusCaptured(false);
   };
 
