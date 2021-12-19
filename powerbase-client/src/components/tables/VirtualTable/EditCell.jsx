@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, {
   useEffect,
   useState,
@@ -62,7 +63,21 @@ const CustomInput = forwardRef(({ value, onClick }) => (
   <CalButton onClick={onClick} value={value} />
 ));
 
-const Calendar = ({ onClickOutsideEditingCell }) => {
+// const ExampleCustomTimeInput = () => {
+//   const [timeee, setTimeee] = useState("")
+//   const onChange = (v) => {
+//     setTimeee(v)
+//   }
+//  return ( <input
+//     value={timeee}
+//     onChange={(e) => onChange(e.target.value)}
+//     style={{ border: 'solid 1px pink' }}
+//   />)
+//  };
+
+const Calendar = ({ onClickOutsideEditingCell, value }) => {
+  console.log(value);
+  console.log(new Date());
   const [startDate, setStartDate] = useState(new Date());
 
   const formatDate = (date) => {
@@ -97,10 +112,10 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       customInput={<CustomInput />}
       timeInputLabel="Time:"
       dateFormat="MM/dd/yyyy h:mm aa"
-      portalId="root-portal"
+      portalId="root-portal-date-picker"
+      dropdownMode='select'
       showYearDropdown
-      dropdownMode="select"
-      showTimeSelect
+      showTimeInput
       popperModifiers={[
         {
           name: 'preventOverflow',
@@ -117,6 +132,7 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
 
 Calendar.propTypes = {
   onClickOutsideEditingCell: PropTypes.func.isRequired,
+  value: PropTypes.any,
 };
 
 CalButton.propTypes = {
@@ -126,7 +142,7 @@ CalButton.propTypes = {
 
 CustomInput.propTypes = {
   value: PropTypes.any,
-  onClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
 };
 
 function TextCell(
@@ -149,9 +165,10 @@ function TextCell(
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
-        {fieldType.dataType === 'date' ? (
+        {fieldType.dataType === 'date' && isEditing ? (
           <Calendar
             setCalendarValue={setCalendarValue}
+            value={value}
             onClickOutsideEditingCell={onClickOutsideEditingCell}
           />
         ) : (

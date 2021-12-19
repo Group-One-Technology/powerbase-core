@@ -38,9 +38,9 @@ export function useEditingCell(
     let objToUse;
     extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
       let sanitized;
-      if (!isTurbo && !field.isVirtual) sanitized = extractedKey.split('___');
-      const pkName = (isTurbo || !field.isVirtual) ? extractedKey.name : sanitized[0];
-      const pkValue = (isTurbo || !field.isVirtual) ? extractedKey.value : sanitized[1];
+      if (!isTurbo && field.isVirtual) sanitized = extractedKey.split('___');
+      const pkName = !sanitized ? extractedKey.name : sanitized[0];
+      const pkValue = !sanitized ? extractedKey.value : sanitized[1];
       matches.push(
         `${getParameterCaseInsensitive(recordObj, pkName)}`
             === `${pkValue}`,
@@ -117,7 +117,7 @@ export function useEditingCell(
         });
       const updatedValue = await securedApi.post(`tables/${field.tableId}/values`, { primaryKeys: payload, data: { [field.name]: isCheckbox ? !(value?.toString() === 'true') : recordInputRef.current?.value } });
       if (updatedValue) {
-        const mutatedRecords = handleLocalMutation(recordsToUse);
+        const mutatedRecords = handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         setUpdatedRecords(mutatedRecords);
       }
       exitEditing();
