@@ -188,7 +188,7 @@ export function CellRenderer({
       row: rowIndex,
       column: columnIndex,
     });
-    if (fieldType.dataType === 'boolean') {
+    if (fieldType?.dataType === 'boolean') {
       setCellToEdit({
         row: rowIndex,
         column: columnIndex,
@@ -198,7 +198,7 @@ export function CellRenderer({
 
   const handleMouseLeave = () => {
     setHoveredCell({});
-    if (fieldType.dataType === 'boolean') {
+    if (fieldType?.dataType === 'boolean') {
       setCellToEdit({});
     }
   };
@@ -209,7 +209,7 @@ export function CellRenderer({
     e.target.value = !(value?.toString() === 'true');
     onClickOutsideEditingCell();
   };
-  const isExcludedFromDoubleClickAction = fieldType?.dataType.toLowerCase() === 'boolean' || fieldType?.dataType.toLowerCase() === 'date';
+  const isExcludedFromDoubleClickAction = fieldType?.dataType.toLowerCase() === 'boolean' || fieldType?.dataType.toLowerCase() === 'date' || field?.isPrimaryKey || field?.isForeignKey;
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit
@@ -242,7 +242,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction && !field.isPrimaryKey) {
+        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
