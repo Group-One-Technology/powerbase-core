@@ -85,6 +85,7 @@ Rails.application.routes.draw do
       end
 
       member do
+        get 'logs'
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
@@ -103,7 +104,7 @@ Rails.application.routes.draw do
   get 'base_invitations', to: 'guests#base_invitations'
   get 'auth/databases/:database_id/guest', to: 'users#guest'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
-  post 'tables/virtual_tables', to: 'powerbase_tables#create_virtual_table', as: 'virtual_table' 
+  post 'tables/virtual_tables', to: 'powerbase_tables#create_virtual_table', as: 'virtual_table'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'

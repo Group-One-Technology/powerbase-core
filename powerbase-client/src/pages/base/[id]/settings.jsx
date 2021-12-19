@@ -1,5 +1,7 @@
 import React from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import {
+  Link, useHistory, useParams, Redirect,
+} from 'react-router-dom';
 import cn from 'classnames';
 import { Tab } from '@headlessui/react';
 import {
@@ -42,11 +44,15 @@ const TABS = [
 function BaseSettings() {
   const history = useHistory();
   const { authUser } = useAuthUser();
-  const { data: base } = useBase();
+  const { data: base, error } = useBase();
   const { baseUser } = useBaseUser();
 
   if (base == null || authUser == null || typeof baseUser === 'undefined') {
     return <Loader className="h-screen" />;
+  }
+
+  if (error) {
+    return <Redirect to="/404" />;
   }
 
   if (!baseUser.can('manageBase')) {
@@ -57,9 +63,7 @@ function BaseSettings() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          {base.name} - Settings
-        </PageHeader>
+        <PageHeader title={`${base.name} - Settings`} className="text-center" />
         <PageContent className="mt-4">
           <div className="max-w-screen-xl mx-auto pb-6 px-4 sm:px-6 lg:pb-16 lg:px-8">
             <div className="bg-white rounded-lg shadow overflow-hidden">

@@ -42,21 +42,6 @@ class Fields::Creator
       table_view_id: table_view.id,
       powerbase_field_id: field.id
     })
-
-    if !database.is_turbo
-      table.is_migrated = true
-      table.save
-      pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
-    end
-
-    if !database.is_turbo && database.is_migrating?
-      database.is_migrated = true
-      database.save
-      base_migration.end_time = Time.now
-      base_migration.save
-
-      pusher_trigger!("database.#{database.id}", "migration-listener", database)
-    end
   end
 
   def add_field_select_options
@@ -114,8 +99,14 @@ class Fields::Creator
 
   def save
     if field.save
-      add_to_viewfield
       add_field_select_options if field.powerbase_field_type.data_type == "enums"
+      add_to_viewfield
+
+      table.logs["migration"]["unmigrated_columns"] = Array(table.logs["migration"]["unmigrated_columns"])
+        .select {|field_name| field_name != field.name.to_s}
+      table.save
+
+      pusher_trigger!("table.#{table.id}", "field-migration-listener", field)
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

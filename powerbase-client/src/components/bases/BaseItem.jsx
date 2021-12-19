@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {
   ChevronRightIcon,
   ExclamationCircleIcon,
+  InformationCircleIcon,
   LightningBoltIcon,
   UserIcon,
 } from '@heroicons/react/outline';
@@ -20,7 +21,7 @@ export function BaseItem({
 }) {
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
-      <div className="absolute top-1 right-1 flex gap-1.5">
+      <div className="absolute top-1 right-1 flex">
         {base.isTurbo && (
           <Tooltip.Root delayDuration={0}>
             <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-gray-500">
@@ -41,6 +42,14 @@ export function BaseItem({
             {base.totalCollaborators}
             <UserIcon className="h-4 w-4" />
           </button>
+        )}
+        {!base.isMigrated && (
+          <Link
+            to={`/base/${base.id}/progress`}
+            className="py-[1px] px-0.5 flex items-center rounded text-xs text-gray-500 hover:bg-gray-100 focus:bg-gray-100"
+          >
+            <InformationCircleIcon className="h-4 w-4" />
+          </Link>
         )}
       </div>
       <Link to={`/base/${base.id}${base.defaultTable ? `/table/${base.defaultTable.id}?view=${base.defaultTable.defaultViewId}` : ''}`}>

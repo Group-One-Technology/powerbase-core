@@ -12,9 +12,7 @@ export function AddBasePage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          Add A Base
-        </PageHeader>
+        <PageHeader title="Add A Base" className="text-center" />
         <PageContent>
           <ul className="mt-4 flex flex-col justify-center flex-wrap gap-5 sm:flex-row sm:mx-48">
             {BASE_SOURCES.map((source) => (
@@ -27,8 +25,8 @@ export function AddBasePage() {
             ))}
           </ul>
 
-          <div className="w-max mx-auto mt-8">
-            <Link to="/" className="flex items-center p-2 bg-white rounded-lg shadow">
+          <div className="max-w-7xl mx-auto m-4 flex justify-center">
+            <Link to="/" className="mx-2 inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-200 focus:bg-gray-200 sm:mx-8">
               <ArrowLeftIcon className="h-4 w-4 mr-1" />
               Return
             </Link>

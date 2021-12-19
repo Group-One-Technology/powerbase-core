@@ -1,4 +1,4 @@
-if defined?(Rails::Server) && ENV["ENABLE_LISTENER"]
+if defined?(Rails::Server) && ENV["ENABLE_LISTENER"] == "true"
   puts "** STARTING DATABASE AUTOSYNC AND LISTENERS **"
   ids = PowerbaseDatabase.turbo.select(&:has_row_oid_support?).map(&:id)
 

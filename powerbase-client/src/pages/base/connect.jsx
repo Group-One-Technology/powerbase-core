@@ -35,9 +35,11 @@ export function ConnectBasePage() {
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [error, setError] = useState();
-  const [modalContent, setModalContent] = useState();
+  const [modal, setModal] = useState({
+    open: false,
+    content: '',
+    error: undefined,
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,8 +49,7 @@ export function ConnectBasePage() {
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
-    setError(undefined);
-    setModalContent(undefined);
+    setModal({ open: false });
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
@@ -75,28 +76,34 @@ export function ConnectBasePage() {
           color,
         });
 
+        setModal((val) => ({ ...val, base: response.database }));
+
         if (response.database.isTurbo && response.dbSize) {
           const databaseSize = +response.dbSize.split(' ')[0];
 
           if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
-            setModalContent(`It might take hours/days to import the database with the size of ${formatBytes(databaseSize)}`);
+            setModal((val) => ({
+              ...val,
+              content: `It might take hours/days to import the database with the size of ${formatBytes(databaseSize)}`,
+            }));
           }
         }
       } catch (err) {
-        setError(err.response.data.exception || err.response.data.error);
+        setModal((val) => ({
+          ...val,
+          error: err.response.data.exception || err.response.data.error,
+        }));
       }
     }
 
-    setIsModalOpen(true);
+    setModal((val) => ({ ...val, open: true }));
     setLoading(false);
   };
 
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          Add Database
-        </PageHeader>
+        <PageHeader title="Add Database" className="text-center" />
         <PageContent className="mt-6">
           <div className="max-w-2xl mx-auto">
             <Tabs
@@ -208,10 +215,11 @@ export function ConnectBasePage() {
         </PageContent>
       </div>
       <ConnectBaseModal
-        open={isModalOpen}
-        setOpen={setIsModalOpen}
-        content={modalContent}
-        error={error}
+        open={modal.open}
+        setOpen={(val) => setModal((prevVal) => ({ ...prevVal, open: val }))}
+        content={modal.content}
+        error={modal.error}
+        base={modal.base}
       />
     </Page>
   );

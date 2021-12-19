@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_07_234912) do
+ActiveRecord::Schema.define(version: 2021_12_15_070610) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -130,7 +130,6 @@ ActiveRecord::Schema.define(version: 2021_12_07_234912) do
     t.text "description"
     t.string "encrypted_connection_string", null: false
     t.string "adapter", default: "postgresql", null: false
-    t.boolean "is_migrated", default: false, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "color", default: "gray"
@@ -138,6 +137,7 @@ ActiveRecord::Schema.define(version: 2021_12_07_234912) do
     t.boolean "is_turbo", default: true
     t.string "database_name", null: false
     t.text "permissions", default: "{\"view_base\":{\"access\":\"everyone\"},\"manage_base\":{\"access\":\"creators only\"},\"invite_guests\":{\"access\":\"creators only\"},\"add_tables\":{\"access\":\"admins and up\"},\"delete_tables\":{\"access\":\"admins and up\"}}"
+    t.string "status", default: "analyzing_base"
     t.index ["user_id"], name: "index_powerbase_databases_on_user_id"
   end
 
@@ -185,6 +185,7 @@ ActiveRecord::Schema.define(version: 2021_12_07_234912) do
     t.integer "order", null: false
     t.text "permissions", default: "{\"view_table\":{\"access\":\"everyone\"},\"manage_table\":{\"access\":\"admins and up\"},\"add_fields\":{\"access\":\"admins and up\"},\"delete_fields\":{\"access\":\"admins and up\"},\"add_views\":{\"access\":\"editors and up\"},\"manage_views\":{\"access\":\"editors and up\"},\"delete_views\":{\"access\":\"editors and up\"},\"add_records\":{\"access\":\"editors and up\"},\"delete_records\":{\"access\":\"editors and up\"},\"comment_records\":{\"access\":\"commenters and up\"}}"
     t.boolean "is_hidden", default: false
+    t.string "status"
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end

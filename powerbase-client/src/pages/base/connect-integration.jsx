@@ -25,9 +25,7 @@ export function ConnectIntegrationBasePage() {
   return (
     <Page authOnly>
       <div className="py-10">
-        <PageHeader className="text-center">
-          Connect {BASE_INTEGRATION[integrationType].name} Account
-        </PageHeader>
+        <PageHeader title={`Connect ${BASE_INTEGRATION[integrationType].name} Account`} className="text-center" />
         <PageContent className="mt-6">
           {BASE_INTEGRATION[integrationType].component}
         </PageContent>

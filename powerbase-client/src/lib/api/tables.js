@@ -10,6 +10,16 @@ export async function getTable({ id }) {
   return undefined;
 }
 
+export async function getTableLogs({ id }) {
+  const response = await securedApi.get(`/tables/${id}/logs`);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function getTables({ databaseId }) {
   const response = await securedApi.get(`/databases/${databaseId}/tables`);
 

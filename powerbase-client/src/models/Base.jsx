@@ -17,10 +17,8 @@ function useBaseModel({ id }) {
   const { migrationListener } = useMigrationListener({ mutate: response.mutate });
 
   useEffect(() => {
-    if (response.data && !response.data.isMigrated) {
-      migrationListener(response.data.id);
-    }
-  }, [response.data]);
+    migrationListener(id);
+  }, [id]);
 
   return {
     ...response,

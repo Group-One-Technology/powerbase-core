@@ -9,4 +9,4 @@ elasticsearch_url: ""
 PUSHER_KEY: ""
 PUSHER_SECRET: ""
 PUSHER_APP_ID: ""
-ENABLE_LISTENER: true
+ENABLE_LISTENER: ""

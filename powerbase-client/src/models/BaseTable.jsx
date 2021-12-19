@@ -3,7 +3,7 @@ import constate from 'constate';
 import useSWR from 'swr';
 
 import { getTable } from '@lib/api/tables';
-import { useMigrationListener } from '@lib/hooks/websockets/useMigrationListener';
+import { useTableMigrationListener } from '@lib/hooks/websockets/useTableMigrationListener';
 import { useAuthUser } from './AuthUser';
 
 function useBaseTableModel({ id }) {
@@ -14,7 +14,7 @@ function useBaseTableModel({ id }) {
     () => getTable({ id }),
   );
 
-  const { migrationListener } = useMigrationListener({ mutate: response.mutate });
+  const { migrationListener } = useTableMigrationListener({ tables: response.data?.tables, mutate: response.mutate });
 
   useEffect(() => {
     if (response.data && !response.data.isMigrated) {
