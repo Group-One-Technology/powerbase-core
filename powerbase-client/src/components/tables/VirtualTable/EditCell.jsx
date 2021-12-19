@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, {
   useEffect,
   useState,
@@ -75,9 +74,7 @@ const CustomInput = forwardRef(({ value, onClick }) => (
 //   />)
 //  };
 
-const Calendar = ({ onClickOutsideEditingCell, value }) => {
-  console.log(value);
-  console.log(new Date());
+const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
 
   const formatDate = (date) => {
@@ -113,7 +110,7 @@ const Calendar = ({ onClickOutsideEditingCell, value }) => {
       timeInputLabel="Time:"
       dateFormat="MM/dd/yyyy h:mm aa"
       portalId="root-portal-date-picker"
-      dropdownMode='select'
+      dropdownMode="select"
       showYearDropdown
       showTimeInput
       popperModifiers={[
@@ -132,7 +129,6 @@ const Calendar = ({ onClickOutsideEditingCell, value }) => {
 
 Calendar.propTypes = {
   onClickOutsideEditingCell: PropTypes.func.isRequired,
-  value: PropTypes.any,
 };
 
 CalButton.propTypes = {
@@ -161,7 +157,6 @@ function TextCell(
     if (fieldType.dataType !== 'date') ref.current.focus();
   }, []);
 
-  console.log('val: ', value);
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
