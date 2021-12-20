@@ -222,6 +222,7 @@ export function TableRenderer({
                           isTurbo: base.isTurbo,
                           canAddRecords,
                           catchError,
+                          baseUser,
                           ...props,
                         });
                       }}

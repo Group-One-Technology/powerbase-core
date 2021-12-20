@@ -97,10 +97,10 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
       customInput={<CustomInput />}
       timeInputLabel="Time:"
       dateFormat="MM/dd/yyyy h:mm aa"
-      portalId="root-portal"
-      showYearDropdown
+      portalId="root-portal-date-picker"
       dropdownMode="select"
-      showTimeSelect
+      showYearDropdown
+      showTimeInput
       popperModifiers={[
         {
           name: 'preventOverflow',
@@ -126,7 +126,7 @@ CalButton.propTypes = {
 
 CustomInput.propTypes = {
   value: PropTypes.any,
-  onClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
 };
 
 function TextCell(
@@ -144,12 +144,14 @@ function TextCell(
   useEffect(() => {
     if (fieldType.dataType !== 'date') ref.current.focus();
   }, []);
+
   const cellInnerEl = isEditing ? (
     <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
       <TooltipPrimitive.Trigger className="w-full h-full">
-        {fieldType.dataType === 'date' ? (
+        {fieldType.dataType === 'date' && isEditing ? (
           <Calendar
             setCalendarValue={setCalendarValue}
+            value={value}
             onClickOutsideEditingCell={onClickOutsideEditingCell}
           />
         ) : (
