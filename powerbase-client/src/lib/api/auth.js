@@ -79,7 +79,7 @@ export async function getAuthGuestByDatabase({ databaseId }) {
 }
 
 export async function setAuthUserAsOnboarded() {
-  const response = await securedApi.post('/auth/onboarded');
+  const response = await securedApi.put('/auth/onboarded');
 
   if (response.statusText === 'OK') {
     return response.data;
