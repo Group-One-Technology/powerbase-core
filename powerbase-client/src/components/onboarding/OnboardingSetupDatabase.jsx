@@ -17,7 +17,11 @@ export function OnboardingSetupDatabase({
 }) {
   const handleNextStep = () => {
     if (databaseType.name === 'Sample Database') {
-      alert('Will invite you to the imdb sample database');
+      if (!databaseType.disabled) {
+        alert('Will invite you to the imdb sample database');
+      } else {
+        alert('There is no sample database.');
+      }
     } else {
       setCurrentTab(OnboardingTabs.CONNECT_DATABASE);
     }
