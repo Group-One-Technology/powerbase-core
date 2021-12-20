@@ -21,9 +21,10 @@ export function BaseConnect({
   submit,
   powerbaseType: initialPowerbaseType,
   loading,
+  setLoading,
   cancel,
 }) {
-  const [currentTab, setCurrentTab] = useState(CONNECTION_TABS[0]);
+  const [currentTab, setCurrentTab] = useState(CONNECTION_TABS[1]);
 
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
@@ -40,24 +41,42 @@ export function BaseConnect({
     setPort(databaseType.port);
   }, [databaseType]);
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+
+    if (!color.length) {
+      colorError.setError(new Error('Required'));
+      setLoading(false);
+      return;
+    }
+
+    if (currentTab === 'Link from URL') {
+      const hasErrors = !connectionString.length
+        || !!connectionStringError.error;
+      if (hasErrors) return;
+    } else {
+      const hasErrors = !!(!databaseName.length && databaseNameError.error)
+        || !!(!host.length && hostError.error)
+        || !!portError.error
+        || !databaseType;
+      if (hasErrors) return;
+    }
 
     const payload = currentTab === 'Link from URL'
       ? { connectionString }
       : {
-        databaseName,
-        databaseType,
+        database: databaseName,
+        adapter: databaseType.value,
         host,
         port,
         username,
         password,
       };
 
-    submit({
+    await submit({
       ...payload,
       name,
-      powerbaseType,
+      isTurbo: powerbaseType.name === 'Powerbase Turbo',
       color,
     });
   };
@@ -260,5 +279,6 @@ BaseConnect.propTypes = {
   submit: PropTypes.func.isRequired,
   powerbaseType: PropTypes.object,
   loading: PropTypes.bool,
+  setLoading: PropTypes.func.isRequired,
   cancel: PropTypes.func,
 };

@@ -49,6 +49,7 @@ export function OnboardingPage() {
                     'h-1 w-full flex items-center justify-center focus:outline-none focus:ring-2 ring-offset-2 ring-offset-indigo-400 ring-white ring-opacity-60',
                     OnboardingTabs[key] === currentTab ? 'bg-indigo-600 hover:bg-indigo-900' : 'bg-gray-300 hover:bg-gray-400',
                   )}
+                  disabled
                 >
                   <span className="sr-only">{OnboardingTabs[key]}</span>
                 </Tabs.Trigger>
