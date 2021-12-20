@@ -195,7 +195,7 @@ export function CellRenderer({
       });
     }
   };
-
+  const containsPrimaryKey = initialFields?.some((currField) => currField.isPrimaryKey);
   const handleMouseLeave = () => {
     setHoveredCell({});
     if (fieldType?.dataType === 'boolean') {
@@ -242,7 +242,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction) {
+        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction && containsPrimaryKey) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
