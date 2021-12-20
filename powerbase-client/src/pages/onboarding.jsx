@@ -24,7 +24,7 @@ export function OnboardingPage() {
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [base, setBase] = useState();
 
-  if (!authUser?.isOnboarded) {
+  if (authUser?.isOnboarded) {
     history.push('/');
     return <Loader className="h-screen" />;
   }

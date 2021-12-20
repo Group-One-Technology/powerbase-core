@@ -35,7 +35,7 @@ function BasesContentPage() {
     });
   };
 
-  if (authUser?.isOnboarded) {
+  if (!authUser?.isOnboarded) {
     history.push('/onboarding');
     return <Loader className="h-screen" />;
   }
