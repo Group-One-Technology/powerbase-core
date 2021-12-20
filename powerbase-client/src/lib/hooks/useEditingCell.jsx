@@ -128,7 +128,7 @@ export function useEditingCell(
           });
         try {
           const { data } = await updateRemoteValue({
-            tableId: field.tableId, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
+            tableId: field.tableId, fieldId: field.id, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
           });
           if (data) {
             handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
