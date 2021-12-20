@@ -176,6 +176,7 @@ export function CellRenderer({
   isTurbo,
   canAddRecords,
   catchError,
+  baseUser,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -203,7 +204,7 @@ export function CellRenderer({
     }
   };
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value);
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value, baseUser);
   const changeBool = (e) => {
     setHoveredCell({});
     e.target.value = !(value?.toString() === 'true');
@@ -350,4 +351,5 @@ CellRenderer.propTypes = {
   isTurbo: PropTypes.bool.isRequired,
   canAddRecords: PropTypes.bool.isRequired,
   catchError: PropTypes.func,
+  baseUser: PropTypes.any,
 };

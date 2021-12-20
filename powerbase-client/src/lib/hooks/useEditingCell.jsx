@@ -1,10 +1,11 @@
 import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
 import { addOrUpdateMagicValue, updateRemoteValue } from '@lib/api/records';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value,
+  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value, baseUser,
 ) {
   const handleMagicInputValidation = (val) => {
     if (!val) return true;
@@ -76,85 +77,88 @@ export function useEditingCell(
   };
 
   const onClickOutsideEditingCell = async (calendarData = null) => {
-    if (!editCellInput?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
-      exitEditing();
-      return;
-    }
-    const rowNo = rowIndex + 1;
-    const updatedFields = initializeFields(initialFields, connections, {
-      hidden: false,
-    })
-      .map((item) => ({
-        ...item,
-        value: records[rowNo - 1][item.name],
-      }))
-      .sort((x, y) => x.order > y.order);
-
-    const computedFields = updatedFields.filter(
-      (item) => !(item.isHidden || item.foreignKey?.columns.length > 1),
-    );
-
-    const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
-
-    /* The ids are composed in a double underscore and double hypen commas to avoid
-    incomplete splits down the line for field names that have underscore already */
-    // ! TODO - REFACTOR to use a new identifier-composition approach with unique unicode characters
-    const composedKeys = primaryKeys
-      .map((primaryKey) => {
-        const keyName = primaryKey.name.toLowerCase();
-        const keyValue = (`${primaryKey.value}`).toLowerCase();
-        return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
+    const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
+    if (canEditFieldData) {
+      if (!editCellInput?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
+        exitEditing();
+        return;
+      }
+      const rowNo = rowIndex + 1;
+      const updatedFields = initializeFields(initialFields, connections, {
+        hidden: false,
       })
-      .join(isTurbo ? '-' : '---');
+        .map((item) => ({
+          ...item,
+          value: records[rowNo - 1][item.name],
+        }))
+        .sort((x, y) => x.order > y.order);
 
-    let hasPrecision = false;
-    let formattedNumber;
-    if (field.options?.precision && fieldType.dataType === 'number') {
-      hasPrecision = true;
-      const sanitizedNumber = parseFloat(recordInputRef.current?.value);
-      formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
-    }
-    const recordsToUse = updatedRecords || records;
-    if (!field.isVirtual) {
-      const pkObject = {};
-      primaryKeys
-        .forEach((primaryKey) => {
-          const keyName = primaryKey.name;
-          const keyValue = primaryKey.value;
-          pkObject[keyName] = keyValue;
-        });
-      try {
-        const { data } = await updateRemoteValue({
-          tableId: field.tableId, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
-        });
-        if (data) {
-          handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-        }
-      } catch (err) {
-        exitEditing();
-        catchError(err.response.data.error || err.response.data.exception);
-      }
-    } else {
-      try {
-        const { data } = await addOrUpdateMagicValue({
-          tableId: field.tableId,
-          primary_keys: composedKeys,
-          data: {
-            [field.name]: field.options?.precision
-              ? formattedNumber
-              : recordInputRef.current?.value,
-          },
-        });
+      const computedFields = updatedFields.filter(
+        (item) => !(item.isHidden || item.foreignKey?.columns.length > 1),
+      );
 
-        if (data) {
-          handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-          setIsNewRecord(false);
-        }
-      } catch (err) {
-        exitEditing();
-        catchError(err.response.data.error || err.response.data.exception);
+      const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
+
+      /* The ids are composed in a double underscore and double hypen commas to avoid
+    incomplete splits down the line for field names that have underscore already */
+      // ! TODO - REFACTOR to use a new identifier-composition approach with unique unicode characters
+      const composedKeys = primaryKeys
+        .map((primaryKey) => {
+          const keyName = primaryKey.name.toLowerCase();
+          const keyValue = (`${primaryKey.value}`).toLowerCase();
+          return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
+        })
+        .join(isTurbo ? '-' : '---');
+
+      let hasPrecision = false;
+      let formattedNumber;
+      if (field.options?.precision && fieldType.dataType === 'number') {
+        hasPrecision = true;
+        const sanitizedNumber = parseFloat(recordInputRef.current?.value);
+        formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
       }
-    }
+      const recordsToUse = updatedRecords || records;
+      if (!field.isVirtual) {
+        const pkObject = {};
+        primaryKeys
+          .forEach((primaryKey) => {
+            const keyName = primaryKey.name;
+            const keyValue = primaryKey.value;
+            pkObject[keyName] = keyValue;
+          });
+        try {
+          const { data } = await updateRemoteValue({
+            tableId: field.tableId, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
+          });
+          if (data) {
+            handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
+          }
+        } catch (err) {
+          exitEditing();
+          catchError(err.response.data.error || err.response.data.exception);
+        }
+      } else {
+        try {
+          const { data } = await addOrUpdateMagicValue({
+            tableId: field.tableId,
+            primary_keys: composedKeys,
+            data: {
+              [field.name]: field.options?.precision
+                ? formattedNumber
+                : recordInputRef.current?.value,
+            },
+          });
+
+          if (data) {
+            handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
+            setIsNewRecord(false);
+          }
+        } catch (err) {
+          exitEditing();
+          catchError(err.response.data.error || err.response.data.exception);
+        }
+      }
+    } else exitEditing();
   };
 
   return { onChange, onClickOutsideEditingCell };

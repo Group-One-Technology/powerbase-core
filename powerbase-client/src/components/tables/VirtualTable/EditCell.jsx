@@ -62,18 +62,6 @@ const CustomInput = forwardRef(({ value, onClick }) => (
   <CalButton onClick={onClick} value={value} />
 ));
 
-// const ExampleCustomTimeInput = () => {
-//   const [timeee, setTimeee] = useState("")
-//   const onChange = (v) => {
-//     setTimeee(v)
-//   }
-//  return ( <input
-//     value={timeee}
-//     onChange={(e) => onChange(e.target.value)}
-//     style={{ border: 'solid 1px pink' }}
-//   />)
-//  };
-
 const Calendar = ({ onClickOutsideEditingCell }) => {
   const [startDate, setStartDate] = useState(new Date());
 
