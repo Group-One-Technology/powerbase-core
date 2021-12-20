@@ -131,6 +131,38 @@ class GuestsController < ApplicationController
     end
   end
 
+  # POST /guests/invite_sample_database
+  def invite_sample_database
+    @database = PowerbaseDatabase.find ENV["SAMPLE_DATABASE_ID"]
+    raise NotFound.new("Could not find database with id of #{ENV["SAMPLE_DATABASE_ID"]}") if !@database
+
+    if current_user.id == @database.user_id
+      render json: { error: "You already have access to the #{@database.name} sample database." }, status: :unprocessable_entity
+      return
+    end
+
+    @guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
+
+    if @guest
+      render json: { error: "You already have access to the #{@database.name} sample database." }, status: :unprocessable_entity
+      return
+    end
+
+    guest_creator = Guests::Creator.new({
+      user_id: current_user.id,
+      powerbase_database_id: @database.id,
+      access: "viewer",
+      inviter_id: @database.user_id,
+      is_accepted: true,
+    })
+
+    if guest_creator.save
+      render json: format_json(guest_creator.object), status: :created
+    else
+      render json: guest_creator.object.errors, status: :unprocessable_entity
+    end
+  end
+
   # DELETE /guests/:id/leave_base
   def leave_base
     @guest = Guest.find(safe_params[:id])

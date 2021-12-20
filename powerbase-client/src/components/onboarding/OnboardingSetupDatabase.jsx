@@ -2,11 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { RadioGroup } from '@headlessui/react';
 import { Chunk } from 'editmode-react';
+import { useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
 
 import { BASE_SOURCES, OnboardingTabs } from '@lib/constants/onboarding';
 import { POWERBASE_TYPE } from '@lib/constants/bases';
+import { inviteGuestToSampleDatabase } from '@lib/api/guests';
+import { setAuthUserAsOnboarded } from '@lib/api/auth';
+import { useSaveStatus } from '@models/SaveStatus';
+import { Button } from '@components/ui/Button';
+import { useAuthUser } from '@models/AuthUser';
+import { useSharedBases } from '@models/SharedBases';
+
+const { SAMPLE_DATABASE_ID } = process.env;
 
 export function OnboardingSetupDatabase({
   databaseType,
@@ -15,12 +24,25 @@ export function OnboardingSetupDatabase({
   setPowerbaseType,
   setCurrentTab,
 }) {
-  const handleNextStep = () => {
+  const { authUser, mutate: mutateAuthUser } = useAuthUser();
+  const { mutate: mutateSharedBases } = useSharedBases();
+  const history = useHistory();
+  const {
+    saving, saved, loading, catchError,
+  } = useSaveStatus();
+
+  const handleNextStep = async () => {
     if (databaseType.name === 'Sample Database') {
       if (!databaseType.disabled) {
-        alert('Will invite you to the imdb sample database');
+        saving();
+        await inviteGuestToSampleDatabase();
+        await setAuthUserAsOnboarded();
+        mutateAuthUser({ ...authUser, isOnboarded: true });
+        mutateSharedBases();
+        history.push(`/base/${SAMPLE_DATABASE_ID}`);
+        saved('Successfully been invited to the sample database.');
       } else {
-        alert('There is no sample database.');
+        catchError('There is no sample database.');
       }
     } else {
       setCurrentTab(OnboardingTabs.CONNECT_DATABASE);
@@ -141,13 +163,14 @@ export function OnboardingSetupDatabase({
       )}
 
       <div className="my-4 flex justify-center">
-        <button
+        <Button
           type="button"
-          className="border border-transparent font-medium px-6 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex items-center justify-center border border-transparent font-medium px-6 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           onClick={handleNextStep}
+          loading={loading}
         >
-          Setup Database
-        </button>
+          {databaseType.name !== 'Sample Database' ? 'Setup Database' : 'View Sample Base' }
+        </Button>
       </div>
     </Tabs.Content>
   );
