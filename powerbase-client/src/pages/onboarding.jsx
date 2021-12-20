@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
-import { Chunk } from 'editmode-react';
 
 import { useAuthUser } from '@models/AuthUser';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
@@ -34,11 +33,7 @@ export function OnboardingPage() {
       <div className="py-10">
         <PageHeader
           className="text-center"
-          title={(
-            <Chunk identifier="onboarding_headline">
-              Get Started with Powerbase
-            </Chunk>
-          )}
+          title="Connect to your database"
         />
         <PageContent>
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>
@@ -68,9 +63,7 @@ export function OnboardingPage() {
             />
             <OnboardingConnectDatabase
               setCurrentTab={setCurrentTab}
-              databaseType={databaseType}
               powerbaseType={powerbaseType}
-              setPowerbaseType={setPowerbaseType}
             />
           </Tabs.Root>
         </PageContent>
