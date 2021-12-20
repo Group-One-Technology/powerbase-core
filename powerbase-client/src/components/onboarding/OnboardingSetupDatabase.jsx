@@ -122,7 +122,7 @@ export function OnboardingSetupDatabase({
                     <feature.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div>
-                    <dt p className="text-base leading-6 font-medium text-gray-900">
+                    <dt className="text-base leading-6 font-medium text-gray-900">
                       <Chunk identifier={feature.nameId}>
                         {feature.name}
                       </Chunk>
