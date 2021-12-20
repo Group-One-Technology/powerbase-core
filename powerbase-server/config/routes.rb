@@ -93,6 +93,7 @@ Rails.application.routes.draw do
         put 'update_default_view'
         put 'update_table_permission', as: 'update_table_permission'
         put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_tables#update_allowed_roles'
+        post 'remote_value', to: 'table_records#update_remote_value', as: 'update_remote_value'
       end
     end
   end
@@ -113,5 +114,4 @@ Rails.application.routes.draw do
   post 'tables/:id/magic_value', to: 'table_records#add_or_update_magic_value', as: 'change_magic_value'
   post 'magic_records', to: 'table_records#create_magic_record', as: 'new_magic_records'
   get 'tables/:id/magic_values', to: 'table_records#magic_values', as: 'magic_values'
-  post 'tables/:id/remote_value', to: 'table_records#update_remote_value', as: 'remote_values'
 end

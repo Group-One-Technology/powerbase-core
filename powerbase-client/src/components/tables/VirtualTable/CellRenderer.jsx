@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -351,5 +350,5 @@ CellRenderer.propTypes = {
   isTurbo: PropTypes.bool.isRequired,
   canAddRecords: PropTypes.bool.isRequired,
   catchError: PropTypes.func,
-  baseUser: PropTypes.any,
+  baseUser: PropTypes.object,
 };
