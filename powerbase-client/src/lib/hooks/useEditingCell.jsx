@@ -94,7 +94,7 @@ export function useEditingCell(
         .sort((x, y) => x.order > y.order);
 
       const computedFields = updatedFields.filter(
-        (item) => !(item.isHidden || item.foreignKey?.columns.length > 1),
+        (item) => !(item.foreignKey?.columns.length > 1),
       );
 
       const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
