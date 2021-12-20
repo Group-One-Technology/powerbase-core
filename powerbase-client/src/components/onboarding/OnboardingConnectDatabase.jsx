@@ -10,11 +10,15 @@ import { formatBytes } from '@lib/helpers/formatBytes';
 import { BaseConnect } from '@components/bases/BaseConnect';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
 
-export function OnboardingConnectDatabase({ setCurrentTab, powerbaseType }) {
+export function OnboardingConnectDatabase({
+  setCurrentTab,
+  powerbaseType,
+  base,
+  setBase,
+}) {
   const [modal, setModal] = useState({
     open: false,
     content: '',
-    buttonText: 'Confirm',
     error: undefined,
   });
 
@@ -30,8 +34,7 @@ export function OnboardingConnectDatabase({ setCurrentTab, powerbaseType }) {
 
     try {
       const response = await connectDatabase(payload);
-
-      setModal((val) => ({ ...val, base: response.database }));
+      setBase(response.database);
 
       if (response.database.isTurbo && response.dbSize) {
         const databaseSize = +response.dbSize.split(' ')[0];
@@ -64,6 +67,9 @@ export function OnboardingConnectDatabase({ setCurrentTab, powerbaseType }) {
 
   return (
     <Tabs.Content value={OnboardingTabs.CONNECT_DATABASE}>
+      <p className="mt-8 mb-4 text-center text-base text-gray-500">
+        Connect to your database
+      </p>
       <BaseConnect
         submit={handleSubmit}
         cancel={handleCancel}
@@ -74,10 +80,10 @@ export function OnboardingConnectDatabase({ setCurrentTab, powerbaseType }) {
       <ConnectBaseModal
         open={modal.open}
         setOpen={(val) => setModal((prevVal) => ({ ...prevVal, open: val }))}
-        base={modal.base}
+        base={base}
         content={modal.content}
         error={modal.error}
-        buttonText={modal.buttonText}
+        buttonText="Confirm"
         submit={handleAlertSubmit}
       />
     </Tabs.Content>
@@ -87,4 +93,6 @@ export function OnboardingConnectDatabase({ setCurrentTab, powerbaseType }) {
 OnboardingConnectDatabase.propTypes = {
   powerbaseType: PropTypes.object.isRequired,
   setCurrentTab: PropTypes.func.isRequired,
+  base: PropTypes.object,
+  setBase: PropTypes.func.isRequired,
 };

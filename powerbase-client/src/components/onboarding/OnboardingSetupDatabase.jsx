@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { RadioGroup } from '@headlessui/react';
 import { Chunk } from 'editmode-react';
-
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
+
 import { BASE_SOURCES, OnboardingTabs } from '@lib/constants/onboarding';
 import { POWERBASE_TYPE } from '@lib/constants/bases';
 

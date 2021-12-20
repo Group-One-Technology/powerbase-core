@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
+import { Chunk } from 'editmode-react';
 
 import { useAuthUser } from '@models/AuthUser';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
@@ -12,6 +13,7 @@ import { PageContent } from '@components/layout/PageContent';
 import { Loader } from '@components/ui/Loader';
 import { OnboardingSetupDatabase } from '@components/onboarding/OnboardingSetupDatabase';
 import { OnboardingConnectDatabase } from '@components/onboarding/OnboardingConnectDatabase';
+import { OnboardingInviteGuests } from '@components/onboarding/OnboardingInviteGuests';
 
 export function OnboardingPage() {
   const history = useHistory();
@@ -20,6 +22,7 @@ export function OnboardingPage() {
   const [currentTab, setCurrentTab] = useState(OnboardingTabs.SETUP_DATABASE);
   const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
+  const [base, setBase] = useState();
 
   if (!authUser?.isOnboarded) {
     history.push('/');
@@ -33,7 +36,11 @@ export function OnboardingPage() {
       <div className="py-10">
         <PageHeader
           className="text-center"
-          title="Connect to your database"
+          title={(
+            <Chunk identifier="onboarding_headline">
+              Get Started with Powerbase
+            </Chunk>
+          )}
         />
         <PageContent>
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>
@@ -65,7 +72,10 @@ export function OnboardingPage() {
             <OnboardingConnectDatabase
               setCurrentTab={setCurrentTab}
               powerbaseType={powerbaseType}
+              base={base}
+              setBase={setBase}
             />
+            <OnboardingInviteGuests base={base} />
           </Tabs.Root>
         </PageContent>
       </div>
