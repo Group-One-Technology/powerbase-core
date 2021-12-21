@@ -33,11 +33,11 @@ function TableItem({ table }) {
           <Spinner className="ml-auto mr-9 h-6 w-6 text-gray-500" />
           <span className="sr-only">Loading</span>
         </div>
-      ) : totalRecords === totalIndexedRecords ? (
+      ) : (totalRecords !== 0 && totalRecords === totalIndexedRecords) ? (
         <div className="col-span-3 sm:col-span-7 lg:col-span-9">
           <p className="mr-4 text-right text-sm text-green-500 sm:text-base">Complete</p>
         </div>
-      ) : (
+      ) : (totalRecords !== 0) ? (
         <>
           <div className="hidden col-span-5 sm:flex sm:items-center lg:col-span-7" aria-hidden="true">
             <div className="w-full bg-gray-200 rounded-full overflow-hidden">
@@ -51,7 +51,7 @@ function TableItem({ table }) {
             </p>
           </div>
         </>
-      )}
+      ) : null}
     </li>
   );
 }
