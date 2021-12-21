@@ -123,9 +123,9 @@ export function useEditingCell(
         const pkObject = {};
         primaryKeys
           .forEach((primaryKey) => {
-            const keyName = primaryKey.name;
+            const keyId = primaryKey.fieldId;
             const keyValue = primaryKey.value;
-            pkObject[keyName] = keyValue;
+            pkObject[keyId] = keyValue;
           });
         // This is merely here as a temporal fix to make updating appear faster
         handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);

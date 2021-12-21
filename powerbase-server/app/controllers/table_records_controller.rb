@@ -105,7 +105,7 @@ class TableRecordsController < ApplicationController
     current_user.can?(:edit_field_data, @field)
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    primary_keys = safe_params[:primary_keys].symbolize_keys
+    primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
     data = sanitize_remote_field_data(safe_params[:data])
     table_name = @table.name
     @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
