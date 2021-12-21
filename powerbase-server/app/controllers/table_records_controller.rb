@@ -105,8 +105,8 @@ class TableRecordsController < ApplicationController
     current_user.can?(:edit_field_data, @field)
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    primary_keys = compute_primary_keys(safe_params[:primary_keys])
-    data = safe_params[:data].symbolize_keys
+    primary_keys = safe_params[:primary_keys].symbolize_keys
+    data = sanitize_remote_field_data(safe_params[:data])
     table_name = @table.name
     @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
     raise NotFound.new("Could not find containing database for table with id of #{safe_params[:id]}") if !@powerbase_database
@@ -153,15 +153,15 @@ class TableRecordsController < ApplicationController
   end
 
   private
-    def compute_primary_keys(primary_keys)
-      computed_primary_keys = {}
-      primary_keys.each do |key, value|
+    def sanitize_remote_field_data(field_data)
+      sanitized_data = {}
+      field_data.each do |key, value|
         curr_field = PowerbaseField.find(key)
         raise NotFound.new("Could not find field with id of #{key}") if !curr_field
         curr_field_name = curr_field.name
-        computed_primary_keys[curr_field_name] = value
+        sanitized_data[curr_field_name] = value
       end
-      computed_primary_keys.symbolize_keys
+      sanitized_data.symbolize_keys
     end
 end
 

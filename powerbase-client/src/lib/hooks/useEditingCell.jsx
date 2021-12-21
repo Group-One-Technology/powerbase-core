@@ -123,15 +123,15 @@ export function useEditingCell(
         const pkObject = {};
         primaryKeys
           .forEach((primaryKey) => {
-            const keyId = primaryKey.fieldId;
+            const keyName = primaryKey.name;
             const keyValue = primaryKey.value;
-            pkObject[keyId] = keyValue;
+            pkObject[keyName] = keyValue;
           });
         // This is merely here as a temporal fix to make updating appear faster
         handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         try {
           const { data } = await updateRemoteValue({
-            tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
+            tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.fieldId]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
           });
           // handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         } catch (err) {
