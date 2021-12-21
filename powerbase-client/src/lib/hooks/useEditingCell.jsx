@@ -8,7 +8,7 @@ export function useEditingCell(
   field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
   rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value, baseUser,
 ) {
-  const handleMagicInputValidation = (val) => {
+  const handleMagicInputValidation = (val, fieldToValidate) => {
     if (!val) return true;
     const type = fieldType.dataType;
     switch (type?.toLowerCase()) {
@@ -16,7 +16,7 @@ export function useEditingCell(
       case 'text':
         return true;
       case 'number':
-        return field.options?.precision
+        return field.options?.precision || !fieldToValidate?.isVirtual
           ? isValidNumberOrDecimal(val)
           : isValidInteger(val);
       default:
@@ -27,7 +27,7 @@ export function useEditingCell(
 
   const onChange = (e) => {
     const magicInputValue = e.target.value;
-    if (!handleMagicInputValidation(magicInputValue)) return;
+    if (!handleMagicInputValidation(magicInputValue, field)) return;
     setEditCellInput(magicInputValue);
   };
 
@@ -131,9 +131,9 @@ export function useEditingCell(
         handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         try {
           const { data } = await updateRemoteValue({
-            tableId: field.tableId, fieldId: field.id, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
+            tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.fieldId]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
           });
-          handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
+          // handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         } catch (err) {
           exitEditing();
           catchError(err.response.data.error || err.response.data.exception);

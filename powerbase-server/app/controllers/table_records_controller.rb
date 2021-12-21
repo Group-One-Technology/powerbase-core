@@ -101,11 +101,12 @@ class TableRecordsController < ApplicationController
   # POST /tables/:id/remote_value
   def update_remote_value
     @field = PowerbaseField.find(safe_params[:field_id])
+    raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     primary_keys = safe_params[:primary_keys].symbolize_keys
-    data = safe_params[:data].symbolize_keys
+    data = sanitize_remote_field_data(safe_params[:data])
     table_name = @table.name
     @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
     raise NotFound.new("Could not find containing database for table with id of #{safe_params[:id]}") if !@powerbase_database
@@ -151,5 +152,16 @@ class TableRecordsController < ApplicationController
     render json: { count: total_records }
   end
 
+  private
+    def sanitize_remote_field_data(field_data)
+      sanitized_data = {}
+      field_data.each do |key, value|
+        curr_field = PowerbaseField.find(key)
+        raise NotFound.new("Could not find field with id of #{key}") if !curr_field
+        curr_field_name = curr_field.name
+        sanitized_data[curr_field_name] = value
+      end
+      sanitized_data.symbolize_keys
+    end
 end
 
