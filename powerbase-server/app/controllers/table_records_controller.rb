@@ -105,7 +105,7 @@ class TableRecordsController < ApplicationController
     current_user.can?(:edit_field_data, @field)
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    primary_keys = safe_params[:primary_keys].symbolize_keys
+    primary_keys = compute_primary_keys(safe_params[:primary_keys])
     data = safe_params[:data].symbolize_keys
     table_name = @table.name
     @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
@@ -152,5 +152,16 @@ class TableRecordsController < ApplicationController
     render json: { count: total_records }
   end
 
+  private
+    def compute_primary_keys(primary_keys)
+      computed_primary_keys = {}
+      primary_keys.each do |key, value|
+        curr_field = PowerbaseField.find(key)
+        raise NotFound.new("Could not find field with id of #{key}") if !curr_field
+        curr_field_name = curr_field.name
+        computed_primary_keys[curr_field_name] = value
+      end
+      computed_primary_keys.symbolize_keys
+    end
 end
 
