@@ -1,33 +1,22 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
 import { Chunk } from 'editmode-react';
 
-import { useAuthUser } from '@models/AuthUser';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
 import { POWERBASE_TYPE } from '@lib/constants/bases';
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
 import { PageContent } from '@components/layout/PageContent';
-import { Loader } from '@components/ui/Loader';
 import { OnboardingSetupDatabase } from '@components/onboarding/OnboardingSetupDatabase';
 import { OnboardingConnectDatabase } from '@components/onboarding/OnboardingConnectDatabase';
 import { OnboardingInviteGuests } from '@components/onboarding/OnboardingInviteGuests';
 
 export function OnboardingPage() {
-  const history = useHistory();
-  const { authUser } = useAuthUser();
-
   const [currentTab, setCurrentTab] = useState(OnboardingTabs.SETUP_DATABASE);
   const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [base, setBase] = useState();
-
-  if (authUser?.isOnboarded) {
-    history.push('/');
-    return <Loader className="h-screen" />;
-  }
 
   const handleTabsChange = (value) => setCurrentTab(value);
 
