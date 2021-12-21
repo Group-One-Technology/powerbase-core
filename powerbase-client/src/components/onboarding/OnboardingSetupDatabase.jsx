@@ -131,13 +131,18 @@ export function OnboardingSetupDatabase({
             </div>
           </RadioGroup>
 
-          <div className="min-h-[15rem] my-4 mx-auto max-w-md">
-            <p className="my-2 px-8 text-center text-sm text-gray-500">
+          <div className="min-h-[33rem] my-4">
+            <p className="mx-auto max-w-md my-2 px-8 text-center text-sm text-gray-500">
               <Chunk identifier={powerbaseType.descriptionId}>
                 {powerbaseType.description}
               </Chunk>
             </p>
-            <dl className="my-4 flex flex-col space-y-4">
+            <img
+              src={`/public/img/${powerbaseType.name === 'Powerbase Turbo' ? 'turbo' : 'non-turbo'}-diagram.png`}
+              alt={`${powerbaseType.name} diagram`}
+              className="my-4 mx-auto max-w-3xl w-full"
+            />
+            <dl className="mx-auto max-w-md my-4 px-1 flex flex-col space-y-4">
               {powerbaseType.features.map((feature) => (
                 <div key={feature.name} className="flex flex-row space-x-4">
                   <div className="flex items-center justify-center h-10 w-16 rounded-md bg-indigo-500 text-white">
