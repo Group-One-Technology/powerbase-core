@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
 import { addOrUpdateMagicValue, updateRemoteValue } from '@lib/api/records';
@@ -126,13 +127,13 @@ export function useEditingCell(
             const keyValue = primaryKey.value;
             pkObject[keyName] = keyValue;
           });
+        // This is merely here as a temporal fix to make updating appear faster
+        handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         try {
           const { data } = await updateRemoteValue({
             tableId: field.tableId, fieldId: field.id, primaryKeys: pkObject, data: { [field.name]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
           });
-          if (data) {
-            handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-          }
+          handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
         } catch (err) {
           exitEditing();
           catchError(err.response.data.error || err.response.data.exception);
