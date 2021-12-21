@@ -97,6 +97,7 @@ Rails.application.routes.draw do
         put 'update_default_view'
         put 'update_table_permission', as: 'update_table_permission'
         put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_tables#update_allowed_roles'
+        post 'remote_value', to: 'table_records#update_remote_value', as: 'update_remote_value'
       end
     end
   end

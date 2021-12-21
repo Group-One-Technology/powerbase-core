@@ -81,3 +81,11 @@ export async function addOrUpdateMagicValue({ tableId, ...payload }) {
   }
   return undefined;
 }
+
+export async function updateRemoteValue({ tableId, ...payload }) {
+  const response = await securedApi.post(`tables/${tableId}/remote_value`, payload);
+  if (response.statusText === 'OK') {
+    return response;
+  }
+  return undefined;
+}

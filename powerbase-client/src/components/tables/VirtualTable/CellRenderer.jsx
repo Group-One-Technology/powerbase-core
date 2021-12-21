@@ -11,7 +11,6 @@ import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
-// import { useSaveStatus } from '@models/SaveStatus';
 import EditCell from './EditCell';
 
 function CellValue({
@@ -23,6 +22,7 @@ function CellValue({
   field,
   fieldType,
   handleExpandRecord,
+  changeBool,
 }) {
   const className = value?.toString().length && field?.isForeignKey
     ? 'px-2 py-0.25 bg-blue-50 rounded'
@@ -68,7 +68,7 @@ function CellValue({
         type="checkbox"
         className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         checked={value?.toString() === 'true'}
-        readOnly
+        onChange={changeBool}
       />
     );
   }
@@ -136,6 +136,7 @@ CellValue.propTypes = {
   field: PropTypes.object,
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
+  changeBool: PropTypes.func,
 };
 
 export function CellRenderer({
@@ -174,6 +175,7 @@ export function CellRenderer({
   isTurbo,
   canAddRecords,
   catchError,
+  baseUser,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -186,14 +188,28 @@ export function CellRenderer({
       row: rowIndex,
       column: columnIndex,
     });
+    if (fieldType?.dataType === 'boolean') {
+      setCellToEdit({
+        row: rowIndex,
+        column: columnIndex,
+      });
+    }
   };
-
+  const containsPrimaryKey = initialFields?.some((currField) => currField.isPrimaryKey);
   const handleMouseLeave = () => {
     setHoveredCell({});
+    if (fieldType?.dataType === 'boolean') {
+      setCellToEdit({});
+    }
   };
-  // const { saving, catchError, saved } = useSaveStatus();
   const { onChange, onClickOutsideEditingCell } = useEditingCell(field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError);
+    rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value, baseUser);
+  const changeBool = (e) => {
+    setHoveredCell({});
+    e.target.value = !(value?.toString() === 'true');
+    onClickOutsideEditingCell();
+  };
+  const isExcludedFromDoubleClickAction = fieldType?.dataType.toLowerCase() === 'boolean' || fieldType?.dataType.toLowerCase() === 'date' || field?.isPrimaryKey || field?.isForeignKey;
   const Wrapper = ({ children, condition, wrapper }) => (condition ? wrapper(children) : children);
 
   const isDoubleClickedCell = cellToEdit
@@ -226,7 +242,7 @@ export function CellRenderer({
         }
       }}
       onDoubleClick={() => {
-        if (!isRowNo && field.isVirtual && canAddRecords && !isLastRow) {
+        if (!isRowNo && canAddRecords && !isLastRow && !isExcludedFromDoubleClickAction && containsPrimaryKey) {
           setIsEditing(true);
           setEditCellInput(value);
           setHoveredCell({});
@@ -245,13 +261,12 @@ export function CellRenderer({
     >
       {isEditing
       && rowIndex === cellToEdit?.row
-      && field?.isVirtual
       && columnIndex === cellToEdit?.column ? (
         <Wrapper
           condition={fieldType.dataType !== 'date'}
           wrapper={(children) => (
             <OutsideCellClick
-              onClickOutside={(e) => onClickOutsideEditingCell(e)}
+              onClickOutside={() => onClickOutsideEditingCell()}
               className="h-full"
               isCalender={fieldType.dataType === 'date'}
             >
@@ -292,6 +307,7 @@ export function CellRenderer({
             setIsNewRecord={setIsNewRecord}
             setHoveredCell={setHoveredCell}
             records={records}
+            changeBool={changeBool}
           />
         )}
     </div>
@@ -334,4 +350,5 @@ CellRenderer.propTypes = {
   isTurbo: PropTypes.bool.isRequired,
   canAddRecords: PropTypes.bool.isRequired,
   catchError: PropTypes.func,
+  baseUser: PropTypes.object,
 };
