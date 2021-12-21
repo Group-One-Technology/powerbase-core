@@ -101,6 +101,7 @@ class TableRecordsController < ApplicationController
   # POST /tables/:id/remote_value
   def update_remote_value
     @field = PowerbaseField.find(safe_params[:field_id])
+    raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
