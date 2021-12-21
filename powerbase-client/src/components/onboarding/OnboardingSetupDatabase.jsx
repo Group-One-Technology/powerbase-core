@@ -174,7 +174,16 @@ export function OnboardingSetupDatabase({
           onClick={handleNextStep}
           loading={loading}
         >
-          {databaseType.name !== 'Sample Database' ? 'Setup Database' : 'View Sample Base' }
+          {databaseType.name !== 'Sample Database'
+            ? (
+              <Chunk identifier="onboarding_setup_button">
+                Setup Database
+              </Chunk>
+            ) : (
+              <Chunk identifier="onboarding_setup_sample_db_button">
+                View Sample Base
+              </Chunk>
+            )}
         </Button>
       </div>
     </Tabs.Content>
