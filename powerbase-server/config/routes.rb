@@ -42,6 +42,10 @@ Rails.application.routes.draw do
         put 'reject_invite'
         delete 'leave_base'
       end
+
+      collection do
+        post 'invite_multiple_guests'
+      end
     end
 
     resources :powerbase_tables, path: 'tables', as: 'tables', only: [:index, :show, :update, :create], shallow: true do

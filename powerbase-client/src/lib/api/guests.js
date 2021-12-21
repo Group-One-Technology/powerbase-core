@@ -30,6 +30,16 @@ export async function inviteGuest({ databaseId, ...payload }) {
   return undefined;
 }
 
+export async function inviteMultipleGuests({ databaseId, ...payload }) {
+  const response = await securedApi.post(`/databases/${databaseId}/guests/invite_multiple_guests`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function leaveBase({ guestId }) {
   const response = await securedApi.delete(`/guests/${guestId}/leave_base`);
 

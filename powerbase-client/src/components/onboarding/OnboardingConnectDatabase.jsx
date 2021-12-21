@@ -6,6 +6,7 @@ import { OnboardingTabs } from '@lib/constants/onboarding';
 import { connectDatabase } from '@lib/api/databases';
 import { MAX_SMALL_DATABASE_SIZE } from '@lib/constants/bases';
 import { formatBytes } from '@lib/helpers/formatBytes';
+import { setAuthUserAsOnboarded } from '@lib/api/auth';
 
 import { BaseConnect } from '@components/bases/BaseConnect';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
@@ -34,6 +35,7 @@ export function OnboardingConnectDatabase({
 
     try {
       const response = await connectDatabase(payload);
+      await setAuthUserAsOnboarded();
       setBase(response.database);
 
       if (response.database.isTurbo && response.dbSize) {
