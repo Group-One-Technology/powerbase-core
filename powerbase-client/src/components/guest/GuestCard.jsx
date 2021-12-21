@@ -7,6 +7,7 @@ import { useBaseGuests } from '@models/BaseGuests';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
+import { useSharedBases } from '@models/SharedBases';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
@@ -21,6 +22,7 @@ export function GuestCard({
 }) {
   const history = useHistory();
   const { baseUser, mutate: mutateBaseUser } = useBaseUser();
+  const { mutate: mutateSharedBases } = useSharedBases();
   const { data: guests, mutate: mutateGuests } = useBaseGuests();
   const { mutate: mutateViewFields } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
@@ -65,6 +67,7 @@ export function GuestCard({
           setGuests(updatedGuests);
 
           await removeGuest({ id: guest.id });
+          mutateSharedBases();
           mutateViewFields();
           await mutateGuests(updatedGuests);
           saved(`Successfully removed guest '${guest.firstName}'`);

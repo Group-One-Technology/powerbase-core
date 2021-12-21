@@ -43,6 +43,11 @@ class GuestsController < ApplicationController
     optional(:permissions)
   end
 
+  schema(:invite_multiple_guests) do
+    required(:database_id)
+    required(:users)
+  end
+
   schema(:accept_invite, :reject_invite, :leave_base, :destroy) do
     required(:id)
   end
@@ -122,6 +127,79 @@ class GuestsController < ApplicationController
       access: safe_params[:access],
       permissions: safe_params[:permissions],
       inviter_id: current_user.id,
+    })
+
+    if guest_creator.save
+      render json: format_json(guest_creator.object), status: :created
+    else
+      render json: guest_creator.object.errors, status: :unprocessable_entity
+    end
+  end
+
+  # POST /databases/:database_id/guests/invite_multiple_guests
+  def invite_multiple_guests
+    current_user.can?(:invite_guests, safe_params[:database_id])
+
+    safe_params[:users].each do |user_param|
+      user = User.find_by(email: user_param[:email].strip)
+
+      if !user
+        render json: { error: "Could not find user with email of '#{user_param[:email]}'." }, status: :unprocessable_entity
+        return
+      end
+
+      if user.id == current_user.id
+        render json: { error: "User with email of '#{current_user.email}' already has access to the database with id of #{safe_params[:database_id]}." }, status: :unprocessable_entity
+        return
+      end
+
+      @guest = Guest.find_by(powerbase_database_id: safe_params[:database_id], user_id: user.id)
+
+      if @guest
+        render json: { error: "User with email of '#{user.email}' is already a guest of this database." }, status: :unprocessable_entity
+        return
+      end
+
+      guest_creator = Guests::Creator.new({
+        user_id: user.id,
+        powerbase_database_id: safe_params[:database_id],
+        access: user_param[:access],
+        permissions: user_param[:permissions],
+        inviter_id: current_user.id,
+      })
+
+      if !guest_creator.save
+        render json: { error: guest_creator.object.errors }, status: :unprocessable_entity
+        return
+      end
+    end
+
+    render status: :created
+  end
+
+  # POST /guests/invite_sample_database
+  def invite_sample_database
+    @database = PowerbaseDatabase.find ENV["SAMPLE_DATABASE_ID"]
+    raise NotFound.new("Could not find database with id of #{ENV["SAMPLE_DATABASE_ID"]}") if !@database
+
+    if current_user.id == @database.user_id
+      render json: { error: "You already have access to the #{@database.name} sample database." }, status: :unprocessable_entity
+      return
+    end
+
+    @guest = Guest.find_by(powerbase_database_id: @database.id, user_id: current_user.id)
+
+    if @guest
+      render json: { error: "You already have access to the #{@database.name} sample database." }, status: :unprocessable_entity
+      return
+    end
+
+    guest_creator = Guests::Creator.new({
+      user_id: current_user.id,
+      powerbase_database_id: @database.id,
+      access: "viewer",
+      inviter_id: @database.user_id,
+      is_accepted: true,
     })
 
     if guest_creator.save

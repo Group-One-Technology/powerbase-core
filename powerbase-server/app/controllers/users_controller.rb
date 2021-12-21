@@ -36,4 +36,10 @@ class UsersController < ApplicationController
       }
     end
   end
+
+  # PUT /auth/onboarded
+  def onboarded
+    current_user.update(is_onboarded: true)
+    render status: :no_content
+  end
 end
