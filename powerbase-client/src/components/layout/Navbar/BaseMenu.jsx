@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
 import { useBases } from '@models/Bases';
+import { useSharedBases } from '@models/SharedBases';
 import { useBaseUser } from '@models/BaseUser';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBasePermissionsModal } from '@models/modals/BasePermissionsModal';
@@ -38,6 +39,7 @@ export function BaseMenu({ base, otherBases }) {
     loading,
   } = useSaveStatus();
   const { data: bases, mutate: mutateBases } = useBases();
+  const { data: sharedBases, mutate: mutateSharedBases } = useSharedBases();
   const { setOpen: setShareModalOpen } = useShareBaseModal();
   const { modal: basePermissionsModal } = useBasePermissionsModal();
   const { baseUser } = useBaseUser();
@@ -67,11 +69,13 @@ export function BaseMenu({ base, otherBases }) {
       saving();
 
       const updatedBases = bases.filter((item) => item.id !== base.id);
+      const updatedSharedBases = sharedBases.filter((item) => item.id !== base.id);
 
       try {
         await leaveBase({ guestId: baseUser.id });
         history.push('/');
         await mutateBases(updatedBases);
+        await mutateSharedBases(updatedSharedBases);
         saved(`Successfully left "${base.name}" base.`);
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);

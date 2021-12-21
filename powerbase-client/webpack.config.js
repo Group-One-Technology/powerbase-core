@@ -76,6 +76,8 @@ module.exports = {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         API: JSON.stringify(process.env.API),
         PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
+        EDITMODE_PROJECT_ID: JSON.stringify(process.env.EDITMODE_PROJECT_ID),
+        SAMPLE_DATABASE_ID: JSON.stringify(process.env.SAMPLE_DATABASE_ID),
         ENABLE_LISTENER: JSON.stringify(process.env.ENABLE_LISTENER),
       },
     }),

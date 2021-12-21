@@ -10,8 +10,28 @@ export async function getGuests({ databaseId }) {
   return undefined;
 }
 
+export async function inviteGuestToSampleDatabase() {
+  const response = await securedApi.post('/guests/invite_sample_database');
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
 export async function inviteGuest({ databaseId, ...payload }) {
   const response = await securedApi.post(`/databases/${databaseId}/guests`, payload);
+
+  if (response.statusText === 'OK') {
+    return response.data;
+  }
+
+  return undefined;
+}
+
+export async function inviteMultipleGuests({ databaseId, ...payload }) {
+  const response = await securedApi.post(`/databases/${databaseId}/guests/invite_multiple_guests`, payload);
 
   if (response.statusText === 'OK') {
     return response.data;

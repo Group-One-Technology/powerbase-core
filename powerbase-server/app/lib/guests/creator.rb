@@ -13,6 +13,7 @@ class Guests::Creator
       access: params[:access],
       permissions: params[:permissions],
       inviter_id: params[:inviter_id],
+      is_accepted: params[:is_accepted] || false,
       is_synced: params[:access] != "custom"
     })
   end
@@ -20,7 +21,7 @@ class Guests::Creator
   def update_custom_permissions
     unless @guest.custom?
       # Notify changes to client
-      notif_pusher_trigger!(guest.user_id, "base_invite", @guest)
+      notif_pusher_trigger!(guest.user_id, "base_invite", @guest) if @guest.powerbase_database_id.to_s != ENV["SAMPLE_DATABASE_ID"]
       return true
     end
 

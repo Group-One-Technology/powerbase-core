@@ -28,6 +28,7 @@
     "classnames": "^2.3.1",
     "constate": "^3.2.0",
     "dotenv": "^9.0.2",
+    "editmode-react": "^3.1.36",
     "express": "^4.17.1",
     "faker": "^5.5.3",
     "lodash.debounce": "^4.0.8",

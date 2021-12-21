@@ -3,6 +3,20 @@ class Users::AuthController < ApplicationController
 
   # GET /auth
   def index
-    render json: current_user
+    render json: format_json(current_user)
   end
+
+  private
+    def format_json(user)
+      {
+        id: user.id,
+        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        is_onboarded: user.is_onboarded,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      }
+    end
 end
