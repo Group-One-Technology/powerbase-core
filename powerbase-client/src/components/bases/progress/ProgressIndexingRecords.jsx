@@ -28,7 +28,7 @@ function TableItem({ table }) {
         )}
       </div>
 
-      {(totalRecords == null) ? (
+      {(totalRecords == null || (totalRecords === 0 && tableLog?.status === 'indexing_records')) ? (
         <div className="col-span-3 sm:col-span-7 lg:col-span-9">
           <Spinner className="ml-auto mr-9 h-6 w-6 text-gray-500" />
           <span className="sr-only">Loading</span>
