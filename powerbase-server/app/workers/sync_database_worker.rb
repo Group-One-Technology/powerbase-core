@@ -51,7 +51,7 @@ class SyncDatabaseWorker
   end
 
   def on_complete(status, params)
-    puts "Migrating batch for database##{database.id} has #{status.failures} failures" if status.failures != 0
+    puts "Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
 
     @database = PowerbaseDatabase.find params["database_id"]
     @new_connection = params["new_connection"]
