@@ -145,7 +145,13 @@ module Powerbase
           sort_column = {}
 
           if sort_field
-            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number" || @field_type[sort_field.powerbase_field_type_id] == "Date"
+            column_name = if @field_type[sort_field.powerbase_field_type_id] == "Number"
+                if sort_field.is_decimal?
+                  "#{sort_field.name}.keyword"
+                else
+                  sort_field.name
+                end
+              elsif @field_type[sort_field.powerbase_field_type_id] == "Date"
                 sort_field.name
               else
                 "#{sort_field.name}.keyword"

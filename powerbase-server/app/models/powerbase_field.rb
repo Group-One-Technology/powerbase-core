@@ -7,10 +7,17 @@ class PowerbaseField < ApplicationRecord
   serialize :options, JSON
   serialize :permissions, JSON
 
+  alias_attribute :field_type, :powerbase_field_type
+
   belongs_to :powerbase_table
   belongs_to :powerbase_field_type
   has_one :field_select_option, dependent: :destroy
   has_many :view_field_options, dependent: :destroy
+
+  def is_decimal?
+    self.field_type.name == "Number" &&
+      ["numeric", "decimal"].any? {|db_type| self.db_type.include?(db_type) }
+  end
 
   def update_guests_access(options)
     guest = options[:guest]
