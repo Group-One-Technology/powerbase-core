@@ -103,20 +103,34 @@ class TableRecordsController < ApplicationController
     @field = PowerbaseField.find(safe_params[:field_id])
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
-    @table = PowerbaseTable.find(safe_params[:id])
-    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    @table = @field.powerbase_table
+    @powerbase_database = @table.db
+    table_name = @table.name
     primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
     data = sanitize_remote_field_data(safe_params[:data])
-    table_name = @table.name
-    @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
-    raise NotFound.new("Could not find containing database for table with id of #{safe_params[:id]}") if !@powerbase_database
-    db = sequel_connect(@powerbase_database)
-    updated_value = db[table_name.to_sym].where(primary_keys).update(data)
-    if !updated_value
-      render json: { error: "Could not update value for row in '#{table_name}'" }, status: :unprocessable_entity
-      return
-    end
-    render json: updated_value
+    query = Powerbase::QueryCompiler.new({
+      table_id: @table.id,
+      adapter: @powerbase_database.adapter,
+      turbo: @powerbase_database.is_turbo
+    })
+    sequel_query = query.find_by(primary_keys).to_sequel
+    updated_value = sequel_connect(@powerbase_database) {|db|
+      db.from(table_name.to_sym)
+      .yield_self(&sequel_query)
+      .update(data)
+    }
+    # primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
+    # data = sanitize_remote_field_data(safe_params[:data])
+    # table_name = @table.name
+    # @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
+    # raise NotFound.new("Could not find containing database for table with id of #{safe_params[:id]}") if !@powerbase_database
+    # db = sequel_connect(@powerbase_database)
+    # updated_value = db[table_name.to_sym].where(primary_keys).update(data)
+    # if !updated_value
+    #   render json: { error: "Could not update value for row in '#{table_name}'" }, status: :unprocessable_entity
+    #   return
+    # end
+    # render json: updated_value
   end
 
   # GET /tables/:id/magic_values
