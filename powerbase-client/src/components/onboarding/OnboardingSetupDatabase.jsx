@@ -34,13 +34,17 @@ export function OnboardingSetupDatabase({
   const handleNextStep = async () => {
     if (databaseType.name === 'Sample Database') {
       if (!databaseType.disabled) {
-        saving();
-        await inviteGuestToSampleDatabase();
-        await setAuthUserAsOnboarded();
-        mutateAuthUser({ ...authUser, isOnboarded: true });
-        mutateSharedBases();
-        history.push(`/base/${SAMPLE_DATABASE_ID}`);
-        saved('Successfully been invited to the sample database.');
+        try {
+          saving();
+          await inviteGuestToSampleDatabase();
+          await setAuthUserAsOnboarded();
+          mutateAuthUser({ ...authUser, isOnboarded: true });
+          mutateSharedBases();
+          history.push(`/base/${SAMPLE_DATABASE_ID}`);
+          saved('Successfully been invited to the sample database.');
+        } catch (err) {
+          catchError(err.response.data.exception || err.response.data.error);
+        }
       } else {
         catchError('There is no sample database.');
       }
@@ -51,7 +55,7 @@ export function OnboardingSetupDatabase({
 
   return (
     <Tabs.Content value={OnboardingTabs.SETUP_DATABASE}>
-      <p className="mt-8 mb-4 text-center text-base text-gray-500">
+      <p className="mt-8 mb-4 text-center text-base text-gray-600">
         <Chunk identifier="onboarding_database_type_description">
           Start managing your database by
         </Chunk>
@@ -74,19 +78,19 @@ export function OnboardingSetupDatabase({
                 <>
                   <div className="w-full flex flex-col items-center justify-center text-center p-2">
                     {option.disabled && (
-                      <p className="text-xs text-gray-500 px-4">Coming Soon</p>
+                      <p className="text-xs text-gray-600 px-4">Coming Soon</p>
                     )}
                     <RadioGroup.Label as="p" className="mt-4 text-gray-900 text-xl font-bold break-words" style={{ hyphens: 'auto' }}>
                       {option.pretext && (
-                        <span className="block text-xs font-normal text-gray-500">{option.pretext}</span>
+                        <span className="block text-xs font-normal text-gray-600">{option.pretext}</span>
                       )}
                       {option.name}
                     </RadioGroup.Label>
                     {option.description && (
-                      <RadioGroup.Description as="p" className="text-xs text-gray-500">{option.description}</RadioGroup.Description>
+                      <RadioGroup.Description as="p" className="text-xs text-gray-600">{option.description}</RadioGroup.Description>
                     )}
                     {option.footnote && (
-                      <p className="mt-auto text-xs text-gray-500 px-4">{option.footnote}</p>
+                      <p className="mt-auto text-xs text-gray-600 px-4">{option.footnote}</p>
                     )}
                   </div>
                   <div
@@ -104,14 +108,14 @@ export function OnboardingSetupDatabase({
 
       {databaseType.name !== 'Sample Database' && (
         <>
-          <p className="mt-8 mb-6 text-center text-base text-gray-500">
+          <p className="mt-8 mb-6 text-center text-base text-gray-600">
             <Chunk identifier="onboarding_powerbase_type_description">
               You can supercharge your database by making it Turbo.
             </Chunk>
           </p>
           <RadioGroup value={powerbaseType} onChange={setPowerbaseType}>
             <RadioGroup.Label className="sr-only">Powerbase Type</RadioGroup.Label>
-            <div className="mx-auto w-96 flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row">
+            <div className="mx-auto w-full flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row sm:w-96">
               {POWERBASE_TYPE.map((option) => (
                 <RadioGroup.Option
                   key={option.name}
@@ -120,7 +124,7 @@ export function OnboardingSetupDatabase({
                     'flex-1 px-6 py-2 font-medium text-base rounded-md text-center cursor-pointer',
                     powerbaseType.name === option.name
                       ? 'bg-indigo-100 text-indigo-700'
-                      : ' bg-gray-200 text-gray-500 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
+                      : ' bg-gray-200 text-gray-600 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
                   )}
                 >
                   <Chunk identifier={option.nameId}>
@@ -132,7 +136,7 @@ export function OnboardingSetupDatabase({
           </RadioGroup>
 
           <div className="min-h-[33rem] my-4">
-            <p className="mx-auto max-w-md my-2 px-8 text-center text-sm text-gray-500">
+            <p className="mx-auto max-w-md my-2 px-8 text-center text-sm text-gray-600">
               <Chunk identifier={powerbaseType.descriptionId}>
                 {powerbaseType.description}
               </Chunk>
@@ -154,7 +158,7 @@ export function OnboardingSetupDatabase({
                         {feature.name}
                       </Chunk>
                     </dt>
-                    <dd className="mt-2 text-sm text-gray-500">
+                    <dd className="mt-2 text-sm text-gray-600">
                       <Chunk identifier={feature.descriptionId}>
                         {feature.description}
                       </Chunk>

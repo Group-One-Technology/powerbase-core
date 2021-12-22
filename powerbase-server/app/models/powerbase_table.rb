@@ -53,6 +53,15 @@ class PowerbaseTable < ApplicationRecord
     "table_records_#{id}"
   end
 
+  def status
+    if self.logs["migration"] == nil
+      self.logs["migration"] = { status: "migrated" }
+      self.save
+    end
+
+    self.logs["migration"]["status"] || "migrated"
+  end
+
   def connection_string
     db.connection_string
   end
