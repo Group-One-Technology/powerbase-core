@@ -76,7 +76,7 @@ export function OnboardingInviteGuests({ base }) {
     setSkipLoading(true);
     await setAuthUserAsOnboarded();
     mutateAuthUser({ ...authUser, isOnboarded: true });
-    history.push(`/base/${base.id}/progress`);
+    history.push(`/base/${base.id}/progress?onboarding=true`);
   };
 
   const handleInviteGuests = async (evt) => {
@@ -97,7 +97,7 @@ export function OnboardingInviteGuests({ base }) {
         await inviteMultipleGuests({ databaseId: base.id, users });
         await setAuthUserAsOnboarded();
         mutateAuthUser({ ...authUser, isOnboarded: true });
-        history.push(`/base/${base.id}/progress`);
+        history.push(`/base/${base.id}/progress?onboarding=true`);
         saved(`Successfully invited ${users.length} user(s) to "${base.name}" base.`);
       } catch (err) {
         catchError(err.response.data.exception || err.response.data.error);

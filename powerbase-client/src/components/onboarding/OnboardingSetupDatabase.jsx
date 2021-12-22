@@ -34,13 +34,17 @@ export function OnboardingSetupDatabase({
   const handleNextStep = async () => {
     if (databaseType.name === 'Sample Database') {
       if (!databaseType.disabled) {
-        saving();
-        await inviteGuestToSampleDatabase();
-        await setAuthUserAsOnboarded();
-        mutateAuthUser({ ...authUser, isOnboarded: true });
-        mutateSharedBases();
-        history.push(`/base/${SAMPLE_DATABASE_ID}`);
-        saved('Successfully been invited to the sample database.');
+        try {
+          saving();
+          await inviteGuestToSampleDatabase();
+          await setAuthUserAsOnboarded();
+          mutateAuthUser({ ...authUser, isOnboarded: true });
+          mutateSharedBases();
+          history.push(`/base/${SAMPLE_DATABASE_ID}`);
+          saved('Successfully been invited to the sample database.');
+        } catch (err) {
+          catchError(err.response.data.exception || err.response.data.error);
+        }
       } else {
         catchError('There is no sample database.');
       }
