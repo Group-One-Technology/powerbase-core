@@ -22,6 +22,7 @@ import { ProgressAddingConnections } from '@components/bases/progress/ProgressAd
 import { ProgressCreatingListeners } from '@components/bases/progress/ProgressCreatingListeners';
 import { ProgressIndexingRecords } from '@components/bases/progress/ProgressIndexingRecords';
 import { ProgressMigrated } from '@components/bases/progress/ProgressMigrated';
+import { OnboaringPrompt } from '@components/onboarding/OnboaringPrompt';
 
 const { ENABLE_LISTENER } = process.env;
 
@@ -97,6 +98,7 @@ function BaseProgress() {
           </div>
         </PageContent>
       </div>
+      <OnboaringPrompt />
     </Page>
   );
 }
