@@ -1,5 +1,6 @@
 class TableRecordsController < ApplicationController
   include SequelHelper
+  include ElasticsearchHelper
   before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
@@ -119,18 +120,22 @@ class TableRecordsController < ApplicationController
       .yield_self(&sequel_query)
       .update(data)
     }
-    # primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
-    # data = sanitize_remote_field_data(safe_params[:data])
-    # table_name = @table.name
-    # @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
-    # raise NotFound.new("Could not find containing database for table with id of #{safe_params[:id]}") if !@powerbase_database
-    # db = sequel_connect(@powerbase_database)
-    # updated_value = db[table_name.to_sym].where(primary_keys).update(data)
-    # if !updated_value
-    #   render json: { error: "Could not update value for row in '#{table_name}'" }, status: :unprocessable_entity
-    #   return
-    # end
-    # render json: updated_value
+    if !updated_value
+      render json: { error: "Could not update value for row in '#{table_name}'" }, status: :unprocessable_entity
+      return
+    end
+    if @powerbase_database.is_turbo
+      model = Powerbase::Model.new(ElasticsearchClient, @table)
+      doc_id = primary_keys.map{|key, value| "#{key}_#{value}"}.join("-")
+      record = model.update_record({primary_keys: format_doc_id(doc_id), data: data})
+      if !record
+        render json: { error: "Could not update value for given record in Elasticsearch'" }, status: :unprocessable_entity
+        return
+      end
+      render json: updated_value
+      return
+    end
+    render json: updated_value
   end
 
   # GET /tables/:id/magic_values
