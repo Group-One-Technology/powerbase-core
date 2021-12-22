@@ -69,7 +69,7 @@ export function OnboardingConnectDatabase({
 
   return (
     <Tabs.Content value={OnboardingTabs.CONNECT_DATABASE}>
-      <p className="mt-8 mb-4 text-center text-base text-gray-500">
+      <p className="mt-8 mb-4 text-center text-base text-gray-600">
         Connect to your database
       </p>
       <BaseConnect
