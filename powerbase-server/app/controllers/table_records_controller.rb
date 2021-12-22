@@ -1,6 +1,7 @@
 class TableRecordsController < ApplicationController
   include SequelHelper
   include ElasticsearchHelper
+  include PusherHelper
   before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
@@ -101,6 +102,7 @@ class TableRecordsController < ApplicationController
 
   # POST /tables/:id/remote_value
   def update_remote_value
+    # TODO - Refactor into a helper/module to reduce code length
     @field = PowerbaseField.find(safe_params[:field_id])
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
@@ -132,9 +134,11 @@ class TableRecordsController < ApplicationController
         render json: { error: "Could not update value for given record in Elasticsearch'" }, status: :unprocessable_entity
         return
       end
+      remote_update_client_notifier(@table.id, primary_keys)
       render json: updated_value
       return
     end
+    remote_update_client_notifier(@table.id, primary_keys)
     render json: updated_value
   end
 
@@ -181,6 +185,11 @@ class TableRecordsController < ApplicationController
         sanitized_data[curr_field_name] = value
       end
       sanitized_data.symbolize_keys
+    end
+
+    def remote_update_client_notifier(id, primary_keys)
+      doc_id = format_doc_id("#{primary_keys.keys.first.to_s}_#{primary_keys.values.first}")
+      pusher_trigger!("table.#{id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
     end
 end
 
