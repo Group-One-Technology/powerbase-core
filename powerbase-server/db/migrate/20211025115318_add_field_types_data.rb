@@ -83,12 +83,16 @@ class AddFieldTypesData < ActiveRecord::Migration[6.1]
     end
 
     number = PowerbaseFieldType.find_by(name: "Number")
-    numeric_db_type = FieldDbTypeMapping.find_or_create_by(db_type: "numeric", adapter: "sequel", powerbase_field_type_id: number.id)
 
-    fields = PowerbaseField.where("db_type ILIKE '%numeric%'")
-    fields.each do |field|
-      field.powerbase_field_type_id = number.id
-      field.save
+    if number
+      numeric_db_type = FieldDbTypeMapping.find_or_create_by(db_type: "numeric", adapter: "sequel", powerbase_field_type_id: number.id)
+
+      fields = PowerbaseField.where("db_type ILIKE '%numeric%'")
+      fields.each do |field|
+        field.powerbase_field_type_id = number.id
+        field.save
+      end
     end
+
   end
 end

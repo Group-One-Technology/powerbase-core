@@ -95,18 +95,6 @@ ActiveRecord::Schema.define(version: 2021_12_17_051039) do
     t.index ["powerbase_table_id"], name: "index_magic_records_on_powerbase_table_id"
   end
 
-  create_table "magic_values", force: :cascade do |t|
-    t.integer "table_id"
-    t.integer "record_id"
-    t.integer "database_id"
-    t.boolean "is_magic_cell"
-    t.integer "field_id"
-    t.string "data_type"
-    t.text "text_value"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "notifications", force: :cascade do |t|
     t.string "data_type", null: false
     t.text "message", null: false
@@ -183,9 +171,9 @@ ActiveRecord::Schema.define(version: 2021_12_17_051039) do
     t.string "alias"
     t.text "logs", default: "{}"
     t.integer "order", null: false
+    t.boolean "is_virtual", default: false
     t.text "permissions", default: "{\"view_table\":{\"access\":\"everyone\"},\"manage_table\":{\"access\":\"admins and up\"},\"add_fields\":{\"access\":\"admins and up\"},\"delete_fields\":{\"access\":\"admins and up\"},\"add_views\":{\"access\":\"editors and up\"},\"manage_views\":{\"access\":\"editors and up\"},\"delete_views\":{\"access\":\"editors and up\"},\"add_records\":{\"access\":\"editors and up\"},\"delete_records\":{\"access\":\"editors and up\"},\"comment_records\":{\"access\":\"commenters and up\"}}"
     t.boolean "is_hidden", default: false
-    t.string "status"
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
   end
@@ -241,6 +229,8 @@ ActiveRecord::Schema.define(version: 2021_12_17_051039) do
   add_foreign_key "guests", "users", column: "inviter_id"
   add_foreign_key "hubspot_databases", "powerbase_databases"
   add_foreign_key "hubspot_databases", "users"
+  add_foreign_key "magic_records", "powerbase_databases"
+  add_foreign_key "magic_records", "powerbase_tables"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "subject_id"
   add_foreign_key "powerbase_databases", "users"
