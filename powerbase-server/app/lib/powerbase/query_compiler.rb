@@ -79,6 +79,12 @@ module Powerbase
     # * Returns sequel proc query
     def to_sequel
       -> (db) {
+        non_pii_fields = @fields
+          .select {|field| !field.is_pii}
+          .map {|field| field.name.to_sym}
+
+        db = db.select(*non_pii_fields)
+
         # For full text search
         if @query != nil && @query.length > 0
           filters = @fields.map do |field|
