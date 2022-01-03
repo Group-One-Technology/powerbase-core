@@ -142,7 +142,13 @@ module Powerbase
 
     # * Returns elasticsearch hash query
     def to_elasticsearch
-      search_params = {}
+      pii_fields = @fields
+        .select {|field| field.is_pii}
+        .map {|field| field.name}
+
+      search_params = {
+        _source: { excludes: pii_fields }
+      }
 
       # For sorting
       if @sort.kind_of?(Array) && @sort.length > 0

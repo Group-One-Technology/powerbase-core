@@ -165,7 +165,7 @@ module Powerbase
 
       if @is_turbo
         index = "table_records_#{@table_id}"
-        search_params = query.to_elasticsearch
+        search_params = query.to_elasticsearch.except(:_source)
         response = @esclient.perform_request("GET", "#{index}/_count", {}, search_params).body
         response["count"]
       else
