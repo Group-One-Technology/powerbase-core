@@ -2,50 +2,76 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Dialog, Disclosure } from '@headlessui/react';
-import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/outline';
+import { ChevronRightIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { TableRecordProvider } from '@models/TableRecord';
+import { useMounted } from '@lib/hooks/useMounted';
+import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
-import {
-  useTableConnections,
-  TableConnectionsProvider,
-} from '@models/TableConnections';
-import {
-  useTableReferencedConnections,
-  TableReferencedConnectionsProvider,
-} from '@models/TableReferencedConnections';
+import { useBaseUser } from '@models/BaseUser';
+import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
+import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Modal } from '@components/ui/Modal';
+import { Button } from '@components/ui/Button';
 import { RecordItem } from './RecordItem';
 import { RecordItemValue } from './RecordItem/RecordItemValue';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
 
-export function SingleRecordModal({
+export function BaseSingleRecordModal({
   table,
   open,
   setOpen,
-  record: initialRecord,
+  initialRecord,
+  includePii,
+  setIncludePii,
 }) {
+  const { mounted } = useMounted();
+  const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
+  const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
+
   const [record, setRecord] = useState(initialRecord);
+  const [loading, setLoading] = useState(false);
+
+  const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
+  const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
     setRecord(initialRecord);
-  }, [initialRecord]);
+  }, [table, initialRecord]);
+
+  useEffect(() => {
+    if (remoteRecord) {
+      setRecord(record.map((item) => ({
+        ...item,
+        value: remoteRecord[item.name] || item.value,
+      })));
+    }
+  }, [remoteRecord]);
 
   const handleRecordInputChange = (fieldId, value) => {
     setRecord((curRecord) => curRecord.map((item) => ({
       ...item,
       value: item.id === fieldId ? value : item.value,
     })));
+  };
+
+  const handleViewPii = async () => {
+    setLoading(true);
+    await mutateTableRecord();
+    mounted(() => {
+      setIncludePii(true);
+      setLoading(false);
+    });
   };
 
   const handleSubmit = (evt) => {
@@ -60,9 +86,24 @@ export function SingleRecordModal({
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
         <form onSubmit={handleSubmit} className="sm:px-4 sm:mt-5">
-          <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
-            {table.name.toUpperCase()}
-          </Dialog.Title>
+          <div className="flex items-center justify-between">
+            <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
+              {table.name.toUpperCase()}
+            </Dialog.Title>
+            {(hasPIIFields && canViewPIIFields && !includePii) && (
+              <div>
+                <Button
+                  type="button"
+                  className="px-2.5 py-1.5 inline-flex items-center justify-center border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  onClick={handleViewPii}
+                  loading={loading}
+                >
+                  <EyeIcon className="h-4 w-4 mr-1" />
+                  Show PII Fields
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="mt-8 flex flex-col gap-x-6 w-full text-gray-900">
             {record
               .filter(
@@ -238,6 +279,53 @@ export function SingleRecordModal({
   );
 }
 
+BaseSingleRecordModal.propTypes = {
+  table: PropTypes.object.isRequired,
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
+  initialRecord: PropTypes.array.isRequired,
+  includePii: PropTypes.bool,
+  setIncludePii: PropTypes.func.isRequired,
+};
+
+export function SingleRecordModal({
+  table,
+  open,
+  setOpen,
+  record: initialRecord,
+}) {
+  const [includePii, setIncludePii] = useState(false);
+
+  const primaryKeys = initialRecord.filter((item) => item.isPrimaryKey)
+    .reduce((obj, item) => ({
+      ...obj,
+      [item.name]: item.value,
+    }), {});
+
+  return (
+    <TableRecordProvider
+      tableId={table.id}
+      recordId={
+        primaryKeys
+          ? Object.entries(primaryKeys)
+            .map(([key, value]) => `${key}_${value}`)
+            .join('-')
+          : undefined
+      }
+      primaryKeys={primaryKeys}
+      includePii={includePii}
+    >
+      <BaseSingleRecordModal
+        table={table}
+        open={open}
+        setOpen={setOpen}
+        initialRecord={initialRecord}
+        includePii={includePii}
+        setIncludePii={setIncludePii}
+      />
+    </TableRecordProvider>
+  );
+}
 SingleRecordModal.propTypes = {
   table: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,

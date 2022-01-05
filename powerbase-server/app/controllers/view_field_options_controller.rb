@@ -32,7 +32,7 @@ class ViewFieldOptionsController < ApplicationController
     @view_fields = ViewFieldOption.where(table_view_id: @view.id).order(:order)
 
     render json: @view_fields
-      .select {|view_field| current_user.can?(:view_field, view_field.powerbase_field, @guest, false)}
+      .select {|view_field| current_user.can?(:view_field, view_field.powerbase_field, false, @guest)}
       .map {|item| format_json(item)}
   end
 
@@ -41,7 +41,7 @@ class ViewFieldOptionsController < ApplicationController
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @view.powerbase_table.powerbase_database_id)
 
     @view.view_field_options.each do |view_field|
-      if current_user.can?(:view_field, view_field.powerbase_field, @guest, false)
+      if current_user.can?(:view_field, view_field.powerbase_field, false, @guest)
         view_field.update(is_hidden: true)
       end
     end

@@ -9,10 +9,10 @@ module Powerbase
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
     def initialize(esclient, table)
       @esclient = esclient
-      @powerbase_table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
-      @table_id = @powerbase_table.id
-      @powerbase_database = PowerbaseDatabase.find(@powerbase_table.powerbase_database_id)
-      @table_name = @powerbase_table.name
+      @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
+      @table_id = @table.id
+      @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
+      @table_name = @table.name
       @is_turbo = @powerbase_database.is_turbo
     end
 
@@ -56,11 +56,13 @@ module Powerbase
     #    Ex: { pathId: 123, userId: 1245 }
     def get(options)
       index = "table_records_#{@table_id}"
+      view_pii = options[:include_pii]
 
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         adapter: @powerbase_database.adapter,
-        turbo: @is_turbo
+        turbo: @is_turbo,
+        include_pii: view_pii,
       })
 
       if @is_turbo
@@ -122,7 +124,7 @@ module Powerbase
     def search(options)
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
-      limit = options[:limit] || @powerbase_table.page_size
+      limit = options[:limit] || @table.page_size
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         query: options[:query],
@@ -165,7 +167,7 @@ module Powerbase
 
       if @is_turbo
         index = "table_records_#{@table_id}"
-        search_params = query.to_elasticsearch
+        search_params = query.to_elasticsearch.except(:_source)
         response = @esclient.perform_request("GET", "#{index}/_count", {}, search_params).body
         response["count"]
       else

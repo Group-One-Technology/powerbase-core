@@ -60,7 +60,7 @@ class PowerbaseFieldsController < ApplicationController
     @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(:id)
 
     render json: @fields
-      .select {|field| current_user.can?(:view_field, field, @guest, false)}
+      .select {|field| current_user.can?(:view_field, field, false, @guest)}
       .map {|item| format_json(item)}
   end
 

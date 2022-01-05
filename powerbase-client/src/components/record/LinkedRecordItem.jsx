@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function LinkedRecordItem({ record, openRecord }) {
+export function LinkedRecordItem({ label, record, openRecord }) {
   return (
     <div role="button" className="p-2 border border-gray-300 rounded-lg" tabIndex={0} onClick={openRecord} onKeyPress={openRecord}>
       <p className="mb-2 text-sm font-medium text-gray-900 truncate">
-        {Object.keys(record)[0].toUpperCase()}: {record[Object.keys(record)[0]]}
+        {label || `${Object.keys(record)[0].toUpperCase()}: ${record[Object.keys(record)[0]]}`}
       </p>
       <div className="flex items-center gap-2">
         {Object.entries(record)
@@ -32,6 +32,7 @@ export function LinkedRecordItem({ record, openRecord }) {
 }
 
 LinkedRecordItem.propTypes = {
+  label: PropTypes.string,
   record: PropTypes.object,
   openRecord: PropTypes.func.isRequired,
 };

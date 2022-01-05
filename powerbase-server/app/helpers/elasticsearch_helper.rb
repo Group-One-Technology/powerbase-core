@@ -30,7 +30,7 @@ module ElasticsearchHelper
   end
 
   def delete_index(index)
-    client.perform_request("DELETE", "/#{index}")
+    client.perform_request("DELETE", "/#{index}") if client.indices.exists(index: index)
   end
 
   def format_doc_id(value)

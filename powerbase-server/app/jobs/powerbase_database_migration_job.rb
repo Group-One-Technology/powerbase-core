@@ -1,8 +1,7 @@
 class PowerbaseDatabaseMigrationJob < ApplicationJob
-  queue_as :default
+  include SequelHelper
 
-  DEFAULT_PAGE_SIZE = 40
-  DEFAULT_PAGE_SIZE_TURBO = 200
+  queue_as :default
 
   # * Migrates the given remote database.
   def perform(database_id)
@@ -42,18 +41,18 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
       case @database.adapter
       when "postgresql"
-        @db_size = connect(@database) {|db|
+        @db_size = sequel_connect(@database) do |db|
           db.select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
             .first[:size]
-        }
+        end
       when "mysql2"
-        @db_size = connect(@database) {|db|
+        @db_size = sequel_connect(@database) do |db|
           db.from(Sequel.lit("information_schema.TABLES"))
-          .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
-          .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", @database.database_name))
-          .group(:table_schema)
-          .first[:size]
-        }
+            .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
+            .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", @database.database_name))
+            .group(:table_schema)
+            .first[:size]
+        end
       end
 
       @base_migration.retries = 0
@@ -70,13 +69,4 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
     @base_migration.save
     @database.sync!(true)
   end
-
-  private
-    def connect(db, &block)
-      Powerbase.connect({
-        adapter: db.adapter,
-        connection_string: db.connection_string,
-        is_turbo: db.is_turbo,
-      }, &block)
-    end
 end

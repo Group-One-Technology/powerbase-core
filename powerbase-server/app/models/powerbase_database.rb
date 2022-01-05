@@ -46,7 +46,7 @@ class PowerbaseDatabase < ApplicationRecord
     self.powerbase_tables
       .order(order: :asc)
       .select {|table| !table.is_hidden}
-      .select {|table| user.can?(:view_table, table, @guest, false)}
+      .select {|table| user.can?(:view_table, table, false, @guest)}
       .first
   end
 

@@ -17,6 +17,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
+import { useTableRecords } from '@models/TableRecords';
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
@@ -43,6 +44,7 @@ export function GridHeaderOptions({
   const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
   const { modal: permissionsModal } = useFieldPermissionsModal();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
@@ -163,6 +165,7 @@ export function GridHeaderOptions({
         }
 
         await mutateViewFields(updatedFields);
+        await mutateTableRecords();
         saved();
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
