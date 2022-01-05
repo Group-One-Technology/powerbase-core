@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { LockClosedIcon } from '@heroicons/react/outline';
 
 import { useBase } from '@models/Base';
 import { useTableFields } from '@models/TableFields';
@@ -37,10 +39,22 @@ export function RecordItemValue({
         isForeignKey={item.isForeignKey}
         className="mr-1"
       />
-      <span className="font-normal">
+      <span className="inline-flex items-center font-normal">
         {(isLinkedRecord && isForeignDatabase) && `${item.databaseName.toUpperCase()} > `}
         {(isLinkedRecord && (item.tableName !== item.name || isForeignDatabase)) && `${item.tableName.toUpperCase()} > `}
         {item.name.toUpperCase()}
+        {item.isPii && (
+          <Tooltip.Root delayDuration={0}>
+            <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
+              <LockClosedIcon className="mr-1 h-4 w-4" />
+              PII
+            </Tooltip.Trigger>
+            <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+              <Tooltip.Arrow className="gray-900" />
+              Personal Identifiable Information (PII) can only be viewed by authorized roles/users of a base.
+            </Tooltip.Content>
+          </Tooltip.Root>
+        )}
       </span>
     </>
   );
