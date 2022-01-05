@@ -2,6 +2,18 @@
 
 Powerbase is the missing bridge to the worlds most trusted relational database.
 
+## Important
+
+- DO NOT merge multiple PRs to the remote `main` branch  with minutes time difference.
+   - Due to the nature of our deployment in Cloud66 which uses a force pushed commit approach, we should avoid merging multiple PRs all at the same time or else there would be a deployment failure. We should wait for the deployment process on Cloud66 to be finished before triggering another deployment.
+- DO NOT push commits to the remote `main` branch consecutively with minutes time difference.
+  - The same reason with above since this triggers the deployment also.
+- When creating a **database migration**, make sure `rails db:rollback` works.
+- When adding new environment variable either on the client (`.env`) or on the server (`application.yml`), make sure to do the ff:
+  - Add it to its corresponding the `.example` file.
+  - Add it our Notion workspace secrets file (or to where our files are if changed).
+  - Notify the team of the change.
+
 ## Structure
 
 | Codebase                             |      Description      |
