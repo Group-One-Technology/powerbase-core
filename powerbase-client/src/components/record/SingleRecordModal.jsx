@@ -296,6 +296,10 @@ export function SingleRecordModal({
 }) {
   const [includePii, setIncludePii] = useState(false);
 
+  useEffect(() => {
+    setIncludePii(false);
+  }, [initialRecord]);
+
   const primaryKeys = initialRecord.filter((item) => item.isPrimaryKey)
     .reduce((obj, item) => ({
       ...obj,
