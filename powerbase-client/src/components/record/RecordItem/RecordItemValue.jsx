@@ -76,7 +76,13 @@ export function RecordItemValue({
           {labelContent}
         </h4>
         {(linkedRecord == null || fields == null) && <Loader />}
-        {(linkedRecord && fields) && <LinkedRecordItem record={linkedRecord} openRecord={() => openRecord(recordArr)} />}
+        {(linkedRecord && fields) && (
+          <LinkedRecordItem
+            label={<>{item.name.toUpperCase()}: {item.value}</>}
+            record={linkedRecord}
+            openRecord={() => openRecord(recordArr)}
+          />
+        )}
       </div>
     );
   }
