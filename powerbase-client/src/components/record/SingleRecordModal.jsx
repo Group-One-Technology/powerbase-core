@@ -42,6 +42,7 @@ export function BaseSingleRecordModal({
   const [loading, setLoading] = useState(false);
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
+  const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export function BaseSingleRecordModal({
             <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
               {table.name.toUpperCase()}
             </Dialog.Title>
-            {(canViewPIIFields && !includePii) && (
+            {(hasPIIFields && canViewPIIFields && !includePii) && (
               <div>
                 <Button
                   type="button"
