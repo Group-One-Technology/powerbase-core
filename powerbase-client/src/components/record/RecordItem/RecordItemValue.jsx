@@ -81,7 +81,7 @@ export function RecordItemValue({
     );
   }
 
-  if (item.isPii) {
+  if (item.isPii && item.value == null) {
     return (
       <Input
         type="password"

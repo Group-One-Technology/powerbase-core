@@ -17,6 +17,7 @@ class TableRecordsController < ApplicationController
     required(:table_id).value(:integer)
     required(:id).value(:string)
     required(:primary_keys)
+    optional(:include_pii).value(:bool)
   end
 
 
@@ -59,12 +60,13 @@ class TableRecordsController < ApplicationController
   def show
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
-    current_user.can?(:view_table, @table)
+    include_pii = !!safe_params[:include_pii] && current_user.can?(:manage_table, @table, false)
 
     model = Powerbase::Model.new(ElasticsearchClient, @table)
     record = model.get({
       id: safe_params[:id],
       primary_keys: safe_params[:primary_keys],
+      include_pii: include_pii,
     })
 
     render json: record

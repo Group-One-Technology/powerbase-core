@@ -32,6 +32,7 @@ module Powerbase
       @sort = options[:sort] == nil ? [] : options[:sort]
       @adapter = options[:adapter] || "postgresql"
       @turbo = options[:turbo] || false
+      @include_pii = options[:include_pii] || false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id)
       @field_types = PowerbaseFieldType.all
@@ -78,12 +79,12 @@ module Powerbase
 
     # * Returns sequel proc query
     def to_sequel
-      -> (db) {
-        non_pii_fields = @fields
-          .select {|field| !field.is_pii}
-          .map {|field| field.name.to_sym}
+      non_pii_fields = @fields
+        .select {|field| !field.is_pii}
+        .map {|field| field.name.to_sym}
 
-        db = db.select(*non_pii_fields)
+      -> (db) {
+        db = db.select(*non_pii_fields) if !@include_pii
 
         # For full text search
         if @query != nil && @query.length > 0
@@ -146,9 +147,11 @@ module Powerbase
         .select {|field| field.is_pii}
         .map {|field| field.name}
 
-      search_params = {
-        _source: { excludes: pii_fields }
-      }
+      search_params = {}
+
+      if !@include_pii
+        search_params[:_source] = { excludes: pii_fields }
+      end
 
       # For sorting
       if @sort.kind_of?(Array) && @sort.length > 0
