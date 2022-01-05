@@ -53,7 +53,7 @@ export function BaseSingleRecordModal({
     if (remoteRecord) {
       setRecord(record.map((item) => ({
         ...item,
-        value: remoteRecord[item.name] || item.value,
+        value: remoteRecord[item.name] ?? item.value,
       })));
     }
   }, [remoteRecord]);

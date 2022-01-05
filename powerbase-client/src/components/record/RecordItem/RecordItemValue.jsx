@@ -99,6 +99,7 @@ export function RecordItemValue({
         className="w-full flex items-center text-gray-800"
         rootClassName="mb-8"
         readOnly
+        disabled
       />
     );
   }
