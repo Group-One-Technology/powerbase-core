@@ -28,9 +28,9 @@ class User < ApplicationRecord
   # Accepts the following options:
   # :permission :: a given ability to check whether the user can do or not.
   # :resource :: the resource to check the given permission against.
-  # :guest :: (optional) the guest object or guest_id
   # :error :: (optional) flag whether it should throw an error or not.
-  def can?(permission, resource, guest = nil, error = true)
+  # :guest :: (optional) the guest object or guest_id
+  def can?(permission, resource, error = true, guest = nil)
     resource_type = nil
     database = nil
 

@@ -53,7 +53,7 @@ class PowerbaseTablesController < ApplicationController
       migrated: @database.migrated?,
       tables: @database.powerbase_tables
         .order(order: :asc)
-        .select {|table| current_user.can?(:view_table, table, @guest, false)}
+        .select {|table| current_user.can?(:view_table, table, false, @guest)}
         .map {|item| format_json(item)}
     }
   end
