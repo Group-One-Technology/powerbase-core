@@ -12,6 +12,7 @@ export function Input({
   onBlur,
   showError,
   className,
+  readOnly,
   rootClassName,
   ...props
 }) {
@@ -47,9 +48,11 @@ export function Input({
           name={name || label || props['aria-label']}
           onFocus={focus}
           onBlur={blur}
-          className={cn('appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm', {
-            [showErrorText ? 'border-red-500' : 'border-gray-300']: true,
-          })}
+          className={cn(
+            'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+            showErrorText ? 'border-red-500' : 'border-gray-300',
+            readOnly && 'bg-gray-50',
+          )}
           {...props}
         />
         {(showErrorText && error) && (
@@ -81,6 +84,7 @@ Input.propTypes = {
   onChange: PropTypes.func,
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
+  readOnly: PropTypes.bool,
   className: PropTypes.string,
   rootClassName: PropTypes.string,
   'aria-label': PropTypes.string,

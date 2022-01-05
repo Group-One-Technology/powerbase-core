@@ -9,6 +9,7 @@ import { useTableRecord } from '@models/TableRecord';
 import { useTableConnections } from '@models/TableConnections';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
+
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
@@ -25,6 +26,7 @@ export function RecordItemValue({
   const { data: fields } = useTableFields();
   const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
+
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
   const isForeignDatabase = isLinkedRecord
@@ -51,7 +53,7 @@ export function RecordItemValue({
             </Tooltip.Trigger>
             <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
               <Tooltip.Arrow className="gray-900" />
-              Personal Identifiable Information (PII) can only be viewed by authorized roles/users of a base.
+              Personal Identifiable Information (PII) can only be viewed and edited by authorized roles/users of a base.
             </Tooltip.Content>
           </Tooltip.Root>
         )}
@@ -70,12 +72,28 @@ export function RecordItemValue({
 
     return (
       <div className="w-full mb-8">
-        <h4 htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
+        <h4 className="mb-2 flex items-center text-sm font-medium text-gray-800">
           {labelContent}
         </h4>
         {(linkedRecord == null || fields == null) && <Loader />}
         {(linkedRecord && fields) && <LinkedRecordItem record={linkedRecord} openRecord={() => openRecord(recordArr)} />}
       </div>
+    );
+  }
+
+  if (item.isPii) {
+    return (
+      <Input
+        type="password"
+        id={item.name}
+        label={labelContent}
+        name={item.name}
+        value="*****"
+        onChange={(evt) => handleRecordInputChange(item.id, evt.target.value)}
+        className="w-full flex items-center text-gray-800"
+        rootClassName="mb-8"
+        readOnly
+      />
     );
   }
 
