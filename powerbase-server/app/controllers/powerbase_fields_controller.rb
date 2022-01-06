@@ -136,6 +136,11 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/set_as_pii
   def set_as_pii
+    if !@field.table.has_primary_key?
+      render json: { error: "There must be at least one primary key in this table to set a non-primary key field as PII." }, status: :unprocessable_entity
+      return
+    end
+
     if @field.is_primary_key
       render json: { error: "Setting a primary key field as a PII is not allowed." }, status: :unprocessable_entity
       return
