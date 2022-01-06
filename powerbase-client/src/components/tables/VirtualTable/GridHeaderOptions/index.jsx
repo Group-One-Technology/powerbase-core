@@ -144,7 +144,7 @@ export function GridHeaderOptions({
   };
 
   const handleTogglePII = async () => {
-    if (canManageField) {
+    if (canManageField && !field.isPrimaryKey) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -312,7 +312,7 @@ export function GridHeaderOptions({
               Hide
             </DropdownMenu.Item>
           )}
-          {canManageField && (
+          {(canManageField && (field.isPii || !field.isPrimaryKey)) && (
             <DropdownMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
