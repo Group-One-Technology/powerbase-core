@@ -161,11 +161,28 @@ module Powerbase
 
     # * Returns elasticsearch hash query
     def to_elasticsearch
-      included_fields = filtered_fields.map {|field| field.name}
+      included_fields = filtered_fields
 
       search_params = {
-        _source: { includes: filtered_fields }
+        _source: { includes: filtered_fields.map {|field| field.name} }
       }
+
+      if !@include_json
+        json_fields = included_fields
+          .select {|field| @field_type[field.powerbase_field_type_id] == "JSON Text"}
+          .map{|field| field.name }
+
+        search_params[:script_fields] = {}
+
+        json_fields.each do |field_name|
+          search_params[:script_fields][field_name.to_sym] = {
+            script: {
+              lang: "painless",
+              source: "params._source.#{field_name}.substring(0, 40)",
+            },
+          }
+        end
+      end
 
       # For sorting
       if @sort.kind_of?(Array) && @sort.length > 0

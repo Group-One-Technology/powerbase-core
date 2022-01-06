@@ -70,9 +70,9 @@ module Powerbase
       if @is_turbo
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
 
-        result = @esclient.search(index: index, body: search_params)["hits"]["hits"][0]
-        raise StandardError.new("Record not found") if result == nil
-        result["_source"]
+        result = @esclient.search(index: index, body: search_params)
+        raise StandardError.new("Record not found") if result["hits"]["hits"][0] == nil
+        format_es_result(result)[0]
       else
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
@@ -104,7 +104,7 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
-        result["hits"]["hits"].map {|result| result["_source"]}
+        format_es_result(result)
       else
         query_string = query.find_by(options[:filters]).to_sequel
         remote_db() {|db|
@@ -141,8 +141,7 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = @esclient.search(index: index, body: search_params)
-
-        result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
+        format_es_result(result)
       else
         remote_db() {|db|
           db.from(@table_name)
@@ -169,7 +168,7 @@ module Powerbase
 
       if @is_turbo
         index = "table_records_#{@table_id}"
-        search_params = query.to_elasticsearch.except(:_source)
+        search_params = query.to_elasticsearch.except(:_source, :script_fields)
         response = @esclient.perform_request("GET", "#{index}/_count", {}, search_params).body
         response["count"]
       else
@@ -190,6 +189,18 @@ module Powerbase
 
       def sanitize(string)
         string.gsub(/['"]/,'')
+      end
+
+      def format_es_result(result)
+        result["hits"]["hits"].map do |result|
+          if result["fields"] && result["fields"].length > 0
+            result["fields"].each do |key, value|
+              result["_source"][key] = value[0]
+            end
+          end
+
+          result["_source"].merge("doc_id": result["_id"])
+        end
       end
   end
 end
