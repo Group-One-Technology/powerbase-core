@@ -32,7 +32,7 @@ export function LinkedRecordItem({ label, record, openRecord }) {
 }
 
 LinkedRecordItem.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.any,
   record: PropTypes.object,
   openRecord: PropTypes.func.isRequired,
 };
