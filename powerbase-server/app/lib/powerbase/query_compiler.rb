@@ -25,6 +25,8 @@ module Powerbase
     # :sort :: a sort hash.
     # :adapter :: the database adapter used. Can either be mysql2 or postgresql.
     # :turbo :: a boolean for turbo mode.
+    # :include_pii :: a boolean for whether to query pii fields or not.
+    # :include_json :: a boolean for whether to substring the queried json fields or not.
     def initialize(options)
       @table_id = options[:table_id] || nil
       @query = options[:query] ? sanitize(options[:query]) : nil
@@ -33,6 +35,7 @@ module Powerbase
       @adapter = options[:adapter] || "postgresql"
       @turbo = options[:turbo] || false
       @include_pii = options[:include_pii] || false
+      @include_json = options[:include_json] || false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id)
       @field_types = PowerbaseFieldType.all
@@ -79,12 +82,27 @@ module Powerbase
 
     # * Returns sequel proc query
     def to_sequel
-      non_pii_fields = @fields
-        .select {|field| !field.is_pii}
-        .map {|field| field.name.to_sym}
+      included_fields = filtered_fields
+
+      if !@include_json
+        json_fields = included_fields.select {|field| @field_type[field.powerbase_field_type_id] == "JSON Text"}
+        included_fields = included_fields.select {|field| @field_type[field.powerbase_field_type_id] != "JSON Text"}
+      end
+
+      included_fields = included_fields.map {|field| field.name.to_sym}
 
       -> (db) {
-        db = db.select(*non_pii_fields) if !@include_pii
+        db = db.select(*included_fields)
+
+        if !@include_json
+          json_fields.each do |field|
+            if @adapter == "mysql2"
+              db = db.select_append(Sequel.lit(%Q[SUBSTRING('#{field.name}', 1, 40) AS '#{field.name}']))
+            else # postgresql
+              db = db.select_append(Sequel.lit(%Q[SUBSTRING("#{field.name}", 1, 40) AS "#{field.name}"]))
+            end
+          end
+        end
 
         # For full text search
         if @query != nil && @query.length > 0
@@ -143,15 +161,11 @@ module Powerbase
 
     # * Returns elasticsearch hash query
     def to_elasticsearch
-      pii_fields = @fields
-        .select {|field| field.is_pii}
-        .map {|field| field.name}
+      included_fields = filtered_fields.map {|field| field.name}
 
-      search_params = {}
-
-      if !@include_pii
-        search_params[:_source] = { excludes: pii_fields }
-      end
+      search_params = {
+        _source: { includes: filtered_fields }
+      }
 
       # For sorting
       if @sort.kind_of?(Array) && @sort.length > 0
@@ -545,6 +559,16 @@ module Powerbase
         uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
         return true if uuid_regex.match?(uuid.to_s.downcase)
         false
+      end
+
+      def filtered_fields
+        included_fields = @fields
+
+        if !@include_pii
+          included_fields = included_fields.select {|field| !field.is_pii}
+        end
+
+        included_fields
       end
   end
 end

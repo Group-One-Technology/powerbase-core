@@ -18,6 +18,7 @@ class TableRecordsController < ApplicationController
     required(:id).value(:string)
     required(:primary_keys)
     optional(:include_pii).value(:bool)
+    optional(:include_json).value(:bool)
   end
 
 
@@ -67,6 +68,7 @@ class TableRecordsController < ApplicationController
       id: safe_params[:id],
       primary_keys: safe_params[:primary_keys],
       include_pii: include_pii,
+      include_json: !!safe_params[:include_json],
     })
 
     render json: record

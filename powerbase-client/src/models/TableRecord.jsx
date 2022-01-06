@@ -12,18 +12,19 @@ function useTableRecordModel({
   includePii,
 }) {
   const { authUser } = useAuthUser();
-  const params = queryString.stringify({
+  const params = {
     include_pii: !!includePii,
-  });
+    include_json: true,
+  };
 
   const response = useSWR(
-    (tableId && recordId && authUser) ? `/tables/${tableId}/records/${recordId}?${params}` : null,
+    (tableId && recordId && authUser) ? `/tables/${tableId}/records/${recordId}?${queryString.stringify(params)}` : null,
     () => ((tableId && authUser && recordId && primaryKeys)
       ? getTableRecord({
         tableId,
         recordId,
         primary_keys: primaryKeys,
-        include_pii: !!includePii,
+        ...params,
       })
       : undefined),
   );

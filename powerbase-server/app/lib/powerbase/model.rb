@@ -56,13 +56,15 @@ module Powerbase
     #    Ex: { pathId: 123, userId: 1245 }
     def get(options)
       index = "table_records_#{@table_id}"
-      view_pii = options[:include_pii]
+      include_pii = options[:include_pii]
+      include_json = options[:include_json]
 
       query = Powerbase::QueryCompiler.new({
         table_id: @table_id,
         adapter: @powerbase_database.adapter,
         turbo: @is_turbo,
-        include_pii: view_pii,
+        include_pii: include_pii,
+        include_json: include_json,
       })
 
       if @is_turbo

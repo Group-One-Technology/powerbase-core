@@ -131,6 +131,21 @@ export function RecordItemValue({
         />
       );
     case FieldType.JSON_TEXT:
+      return (
+        <div className="w-full mb-8">
+          <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
+            {labelContent}
+          </label>
+          <textarea
+            id={item.name}
+            name={item.name}
+            rows={3}
+            className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
+            onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
+            value={JSON.stringify(item.value)}
+          />
+        </div>
+      );
     case FieldType.LONG_TEXT:
       return (
         <div className="w-full mb-8">
@@ -143,7 +158,7 @@ export function RecordItemValue({
             rows={3}
             className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
             onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
-            defaultValue={item.value}
+            value={item.value}
           />
         </div>
       );
