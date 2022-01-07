@@ -7,7 +7,6 @@ import { formatDate } from '@lib/helpers/formatDate';
 import { formatCurrency } from '@lib/helpers/formatCurrency';
 import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
 import { isValidEmail } from '@lib/helpers/isValidEmail';
-import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
@@ -79,8 +78,8 @@ function CellValue({
     return <span className={className}>{date ? `${date} UTC` : null}</span>;
   }
 
-  if (fieldType?.name === FieldType.JSON_TEXT && isValidJSONString(value)) {
-    return <span className={className}>{'{}'}</span>;
+  if (fieldType?.name === FieldType.JSON_TEXT) {
+    return <span className={className}>{value?.toString().length > 0 ? '{ ... }' : '{}'}</span>;
   }
 
   if (fieldType?.name === FieldType.EMAIL && isValidEmail(value)) {
