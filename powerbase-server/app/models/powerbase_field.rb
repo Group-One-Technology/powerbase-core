@@ -8,6 +8,7 @@ class PowerbaseField < ApplicationRecord
   serialize :permissions, JSON
 
   alias_attribute :field_type, :powerbase_field_type
+  alias_attribute :table, :powerbase_table
 
   belongs_to :powerbase_table
   belongs_to :powerbase_field_type

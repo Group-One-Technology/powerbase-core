@@ -53,6 +53,7 @@ export function GridHeaderOptions({
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
+  const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
   const [alias, setAlias] = useState(field.alias || field.name);
 
@@ -144,7 +145,7 @@ export function GridHeaderOptions({
   };
 
   const handleTogglePII = async () => {
-    if (canManageField) {
+    if (canSetPII) {
       saving();
 
       const updatedFields = fields.map((item) => ({
@@ -312,7 +313,7 @@ export function GridHeaderOptions({
               Hide
             </DropdownMenu.Item>
           )}
-          {canManageField && (
+          {canSetPII && (
             <DropdownMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"

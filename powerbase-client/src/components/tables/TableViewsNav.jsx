@@ -1,6 +1,7 @@
 import React from 'react';
-import { ShareIcon } from '@heroicons/react/outline';
+import { ExclamationCircleIcon, ShareIcon } from '@heroicons/react/outline';
 import { LockClosedIcon } from '@heroicons/react/solid';
+import * as Popover from '@radix-ui/react-popover';
 
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
@@ -29,7 +30,25 @@ export function TableViewsNav() {
               Locked
             </p>
           )}
-          {!!(records && totalRecords && table.isMigrated) && (
+          {!table.hasPrimaryKey && (
+            <Popover.Root>
+              <Popover.Trigger className="inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-yellow-600 bg-yellow-50 ring-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2">
+                <span className="sr-only">Warning</span>
+                <ExclamationCircleIcon className="h-4 w-4" />
+              </Popover.Trigger>
+              <Popover.Content className="py-2 px-4 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
+                <div className="text-sm text-gray-900">
+                  <p className="my-2">There <strong>must</strong> be a primary key in order to:</p>
+                  <ul className="ml-4 list-outside list-disc flex flex-col gap-2">
+                    <li>Set fields as PII.</li>
+                    <li>Properly index records (for tubo bases).</li>
+                    <li>Get notified of changes in the remote database.</li>
+                  </ul>
+                </div>
+              </Popover.Content>
+            </Popover.Root>
+          )}
+          {!!(records && totalRecords) && (
             <p className="text-xs hidden lg:inline">
               {records.length} loaded out of {totalRecords}
             </p>

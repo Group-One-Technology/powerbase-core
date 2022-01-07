@@ -207,6 +207,7 @@ class PowerbaseTablesController < ApplicationController
         order: table.order,
         is_hidden: table.is_hidden,
         is_migrated: table.is_migrated,
+        has_primary_key: table.has_primary_key?,
         status: table.status,
         permissions: table.permissions,
         created_at: table.created_at,
