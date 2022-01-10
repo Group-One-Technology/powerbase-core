@@ -16,6 +16,8 @@ module SchemaModification
     return if primary_keys.sort == current_primary_keys.sort
 
     if primary_keys.length > 0
+      is_postgresql = self.db.postgresql?
+
       indexes = if self.db.postgresql?
           _sequel.fetch("
             SELECT ix.relname as index_name,
@@ -30,10 +32,21 @@ module SchemaModification
             WHERE t.relname = '#{self.name}' AND n.nspname = 'public';
           ").all
         else
-          []
+          _sequel.fetch("
+            SELECT index_name as index_name,
+              index_type AS index_algorithm,
+              CASE non_unique
+                WHEN 0 THEN 'TRUE'
+                ELSE 'FALSE'
+              END AS is_unique,
+              column_name as column_name
+            FROM information_schema.statistics
+            WHERE table_schema='#{self.db.database_name}' AND table_name='#{self.name}' ORDER BY seq_in_index ASC;
+          ").all
         end
 
-      primary_key_index = indexes.select {|index| index[:index_name].include?("pk") && index[:is_unique]}.first
+      key_query = is_postgresql ? "pk" : "primary"
+      primary_key_index = indexes.select {|index| index[:index_name].downcase.include?(key_query) && index[:is_unique]}.first
 
       if primary_key_index
         _sequel.alter_table(table_name) do
@@ -42,7 +55,7 @@ module SchemaModification
         end
       else
         _sequel.alter_table(table_name) do
-          add_primary_key primary_keys
+          add_primary_key(primary_keys)
         end
       end
 
