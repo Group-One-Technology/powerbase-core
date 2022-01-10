@@ -38,6 +38,11 @@ export function ConnectionItem({ action, connection }) {
             <Badge color="gray">Auto Linked</Badge>
           </div>
         )}
+        {connection.isConstraint && (
+          <div>
+            <Badge color="gray">Constraint</Badge>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { TablePermissionsModalProvider } from '@models/modals/TablePermissionsModal';
 import { TableKeysModalProvider } from '@models/modals/TableKeysModal';
+import { BaseConnectionsProvider } from '@models/BaseConnections';
 import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
 import { PERMISSIONS } from '@lib/constants/permissions';
@@ -119,7 +120,9 @@ export function TableTabs() {
                 </SortableContext>
               </DndContext>
 
-              <TableKeysModal />
+              <BaseConnectionsProvider baseId={base.id}>
+                <TableKeysModal />
+              </BaseConnectionsProvider>
             </TableKeysModalProvider>
             {tables && canAddTables && (
               <div className="my-auto px-2">

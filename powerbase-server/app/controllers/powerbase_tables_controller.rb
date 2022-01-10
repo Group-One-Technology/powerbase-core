@@ -175,7 +175,6 @@ class PowerbaseTablesController < ApplicationController
   # PUT /tables/:id/update_primary_keys
   def update_primary_keys
     @table.update_primary_keys(safe_params[:primary_keys])
-
     render status: :no_content
   end
 

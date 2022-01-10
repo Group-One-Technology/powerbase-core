@@ -3,6 +3,13 @@ module SchemaModification
   extend ActiveSupport::Concern
 
   def update_primary_keys(primary_keys = [])
+    constraints = self.db.connections
+      .filter {|connection| connection.referenced_table_id == self.id && connection.is_constraint}
+
+    if constraints.length > 0
+      raise StandardError.new "Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table's primary key."
+    end
+
     fields = self.fields
     table_name = self.name.to_sym
     primary_keys = Array(primary_keys)
@@ -16,8 +23,7 @@ module SchemaModification
     return if primary_keys.sort == current_primary_keys.sort
 
     is_postgresql = self.db.postgresql?
-
-    indexes = if self.db.postgresql?
+    indexes = if is_postgresql
         _sequel.fetch("
           SELECT ix.relname as index_name,
             upper(am.amname) AS index_algorithm,

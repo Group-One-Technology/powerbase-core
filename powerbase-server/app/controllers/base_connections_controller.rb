@@ -153,6 +153,7 @@ class BaseConnectionsController < ApplicationController
         referenced_table: referenced_table ? table_format_json(referenced_table) : nil,
         referenced_database_id: connection.referenced_database_id,
         is_auto_linked: connection.is_auto_linked,
+        is_constraint: connection.is_constraint,
       }
     end
 
