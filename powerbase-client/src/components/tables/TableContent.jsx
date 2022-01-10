@@ -9,7 +9,6 @@ import { TableRecordsCountProvider } from '@models/TableRecordsCount';
 import { ViewFieldStateProvider } from '@models/view/ViewFieldState';
 import { TableConnectionsProvider } from '@models/TableConnections';
 import { TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
-import { FieldTypesProvider } from '@models/FieldTypes';
 import { IView } from '@lib/propTypes/view';
 import { ITable } from '@lib/propTypes/table';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
@@ -40,12 +39,10 @@ const BaseTableContent = React.memo(({ table }) => {
           isVirtual={table.isVirtual}
           isTurbo={base.isTurbo}
         >
-          <FieldTypesProvider>
-            <ViewFieldStateProvider>
-              <TableViewsNav />
-              <VirtualTable table={table} height={height} fields={fields} />
-            </ViewFieldStateProvider>
-          </FieldTypesProvider>
+          <ViewFieldStateProvider>
+            <TableViewsNav />
+            <VirtualTable table={table} height={height} fields={fields} />
+          </ViewFieldStateProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>
     </ViewOptionsProvider>
