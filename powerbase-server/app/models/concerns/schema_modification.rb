@@ -55,7 +55,7 @@ module SchemaModification
 
     if primary_key_index
       _sequel.alter_table(table_name) do
-        drop_constraint(primary_key_index[:index_name])
+        drop_constraint(primary_key_index[:index_name], type: :primary_key)
       end
     end
 
