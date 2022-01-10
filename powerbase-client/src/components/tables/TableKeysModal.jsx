@@ -8,6 +8,7 @@ import { XIcon } from '@heroicons/react/outline';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
 import { useFieldTypes } from '@models/FieldTypes';
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { useViewFields } from '@models/ViewFields';
 import { useBaseConnections } from '@models/BaseConnections';
@@ -27,7 +28,9 @@ function FieldItem({ field, fieldTypes, action }) {
         <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
           <FieldTypeIcon isPrimaryKey={field.isPrimaryKey} typeId={field.fieldTypeId} fieldTypes={fieldTypes} />
         </div>
-        <span className="pl-6 text-sm">{field.alias || field.name}</span>
+        <span className="pl-6 text-sm">
+          {field.alias} ({field.name})
+        </span>
       </div>
       {action}
     </li>
@@ -46,6 +49,7 @@ export function TableKeysModal() {
   const {
     saving, saved, catchError, loading,
   } = useSaveStatus();
+  const { table: currentTable, tablesResponse } = useCurrentView();
   const { table, open, setOpen } = useTableKeysModal();
   const { data: remoteViewFields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
@@ -85,6 +89,9 @@ export function TableKeysModal() {
           tableId: table.id,
           primaryKeys: primaryKeys.map((item) => item.name),
         });
+        if (currentTable.id === table.id) {
+          tablesResponse.mutate();
+        }
         await mutateViewFields(viewFields);
         mounted(() => setOpen(false));
         saved(`Successfully updated primary keys for table ${table.alias}`);
