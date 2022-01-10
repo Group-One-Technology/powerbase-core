@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import PropTypes from 'prop-types';
+import { useMounted } from '@lib/hooks/useMounted';
 import { XIcon } from '@heroicons/react/outline';
 
+import { useSaveStatus } from '@models/SaveStatus';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { useViewFields } from '@models/ViewFields';
+import { updateTablePrimaryKeys } from '@lib/api/tables';
+
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -31,8 +35,10 @@ FieldItem.propTypes = {
 };
 
 export function TableKeysModal() {
+  const { mounted } = useMounted();
+  const { saving, saved, catchError } = useSaveStatus();
   const { table, open, setOpen } = useTableKeysModal();
-  const { data: remoteViewFields } = useViewFields();
+  const { data: remoteViewFields, mutate: mutateViewFields } = useViewFields();
   const { data: fieldTypes } = useFieldTypes();
 
   const [viewFields, setViewFields] = useState(remoteViewFields || []);
@@ -55,6 +61,23 @@ export function TableKeysModal() {
     })));
   };
 
+  const submit = async (evt) => {
+    evt.preventDefault();
+    saving();
+
+    try {
+      await updateTablePrimaryKeys({
+        tableId: table.id,
+        primaryKeys: primaryKeys.map((item) => item.name),
+      });
+      await mutateViewFields(viewFields);
+      mounted(() => setOpen(false));
+      saved(`Successfully updated primary keys for table ${table.alias}`);
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
+  };
+
   return (
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-flex flex-col align-bottom bg-white min-h-[400px] rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
@@ -68,7 +91,7 @@ export function TableKeysModal() {
             <XIcon className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-4">
+        <form className="p-4" onSubmit={submit}>
           <Dialog.Title as="h3" className="text-center text-xl font-medium text-gray-900">
             {table.alias}
           </Dialog.Title>
@@ -141,7 +164,7 @@ export function TableKeysModal() {
             </ul>
           </div>
 
-          <div className="mt-5 sm:mt-6">
+          <div className="mt-5 mx-3">
             <Button
               type="submit"
               className="flex items-center justify-center ml-auto rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
@@ -149,7 +172,7 @@ export function TableKeysModal() {
               Update Primary Keys
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </Modal>
   );

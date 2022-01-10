@@ -1,6 +1,6 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_table_access, only: [:update, :update_default_view]
+  before_action :check_table_access, only: [:update, :update_default_view, :update_primary_keys]
   before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
@@ -20,6 +20,11 @@ class PowerbaseTablesController < ApplicationController
   schema(:update_default_view) do
     required(:id).value(:string)
     required(:view_id)
+  end
+
+  schema(:update_primary_keys) do
+    required(:id).value(:string)
+    required(:primary_keys)
   end
 
   schema(:update_table_permission) do
@@ -165,6 +170,13 @@ class PowerbaseTablesController < ApplicationController
       view_field.save!
     end
     render json: {table: format_json(table), fields: res_fields}
+  end
+
+  # PUT /tables/:id/update_primary_keys
+  def update_primary_keys
+    @table.update_primary_keys(safe_params[:primary_keys])
+
+    render status: :no_content
   end
 
   # PUT /tables/:id/allowed_roles
