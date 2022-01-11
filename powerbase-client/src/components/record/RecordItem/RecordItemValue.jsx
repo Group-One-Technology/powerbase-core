@@ -133,38 +133,22 @@ export function RecordItemValue({
         />
       );
     case FieldType.JSON_TEXT:
-      if (isValidJSONString(item.value)) {
-        return (
-          <div key={item.id} className="w-full mb-8">
-            <label htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
-              {labelContent}
-            </label>
-            <ReactJson
-              id={item.name}
-              src={JSON.parse(item.value)}
-              onEdit={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
-              onDelete={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
-              onAdd={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
-              displayDataTypes={false}
-              enableClipboard={false}
-              collapsed
-            />
-          </div>
-        );
-      }
-
       return (
-        <div className="w-full mb-8">
-          <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
+        <div key={item.id} className="w-full mb-8">
+          <label htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
             {labelContent}
           </label>
-          <textarea
+          <ReactJson
             id={item.name}
-            name={item.name}
-            rows={3}
-            className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
-            onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
-            value={JSON.stringify(item.value) || ''}
+            src={isValidJSONString(item.value)
+              ? JSON.parse(item.value)
+              : {}}
+            onEdit={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+            onDelete={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+            onAdd={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+            displayDataTypes={false}
+            enableClipboard={false}
+            collapsed
           />
         </div>
       );
