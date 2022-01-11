@@ -37,7 +37,7 @@ module Powerbase
       @include_pii = options[:include_pii] || false
       @include_json = options[:include_json] || false
 
-      @fields = PowerbaseField.where(powerbase_table_id: @table_id)
+      @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
       @field_types = PowerbaseFieldType.all
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
