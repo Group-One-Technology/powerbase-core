@@ -2,18 +2,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import { EyeOffIcon, LockClosedIcon, TrashIcon } from '@heroicons/react/outline';
+import { KeyIcon } from '@heroicons/react/solid';
 
 import { useBaseUser } from '@models/BaseUser';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
+import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function TableTabItemMenu({ table, children }) {
   const { baseUser } = useBaseUser();
   const { modal } = useTablePermissionsModal();
+  const { setOpen: setTableKeysModalOpen, setTable } = useTableKeysModal();
 
   const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canDeleteTables = baseUser?.can(PERMISSIONS.DeleteTables);
+
+  const handleKeys = () => {
+    setTable(table);
+    setTableKeysModalOpen(true);
+  };
 
   const handlePermissions = () => {
     if (canChangeGuestAccess) {
@@ -63,6 +71,21 @@ export function TableTabItemMenu({ table, children }) {
             {table.name}
           </dd>
         </dl>
+
+        {canManageTables && (
+          <>
+            <ContextMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+              Structure
+            </ContextMenu.Label>
+            <ContextMenu.Item
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleKeys}
+            >
+              <KeyIcon className="h-4 w-4 mr-1.5" />
+              Primary Keys
+            </ContextMenu.Item>
+          </>
+        )}
 
         <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />
 

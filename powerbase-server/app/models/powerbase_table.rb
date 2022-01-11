@@ -2,6 +2,7 @@ class PowerbaseTable < ApplicationRecord
   include PusherHelper
   include Notifier
   include Indexable
+  include SchemaModification
   include ElasticsearchHelper
   include TablePermissionsHelper
 

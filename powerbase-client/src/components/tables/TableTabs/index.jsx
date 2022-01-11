@@ -20,6 +20,8 @@ import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { TablePermissionsModalProvider } from '@models/modals/TablePermissionsModal';
+import { TableKeysModalProvider } from '@models/modals/TableKeysModal';
+import { BaseConnectionsProvider } from '@models/BaseConnections';
 import { BG_COLORS } from '@lib/constants';
 import { useTableTabsScroll } from '@lib/hooks/tables/useTableTabsScroll';
 import { PERMISSIONS } from '@lib/constants/permissions';
@@ -30,6 +32,7 @@ import TableSearchModal from '../TableSearchModal';
 import { TableTabsMobile } from './TableTabsMobile';
 import { TableTabsLoader } from './TableTabsLoader';
 import { TableTabItem } from './TableTabItem';
+import { TableKeysModal } from '../TableKeysModal';
 
 export function TableTabs() {
   const { data: base } = useBase();
@@ -97,24 +100,30 @@ export function TableTabs() {
             aria-label="Tabs"
           >
             {tables == null && <TableTabsLoader />}
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleReorderViews}
-              modifiers={[
-                restrictToHorizontalAxis,
-                restrictToFirstScrollableAncestor,
-              ]}
-            >
-              <SortableContext
-                items={tables}
-                strategy={horizontalListSortingStrategy}
+            <TableKeysModalProvider>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleReorderViews}
+                modifiers={[
+                  restrictToHorizontalAxis,
+                  restrictToFirstScrollableAncestor,
+                ]}
               >
-                {tables?.map((item) => (
-                  <TableTabItem ref={activeTabEl} key={item.id} table={item} />
-                ))}
-              </SortableContext>
-            </DndContext>
+                <SortableContext
+                  items={tables}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  {tables?.map((item) => (
+                    <TableTabItem ref={activeTabEl} key={item.id} table={item} />
+                  ))}
+                </SortableContext>
+              </DndContext>
+
+              <BaseConnectionsProvider baseId={base.id}>
+                <TableKeysModal />
+              </BaseConnectionsProvider>
+            </TableKeysModalProvider>
             {tables && canAddTables && (
               <div className="my-auto px-2">
                 <button
