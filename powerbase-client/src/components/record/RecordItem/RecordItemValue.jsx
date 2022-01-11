@@ -136,13 +136,18 @@ export function RecordItemValue({
       if (isValidJSONString(item.value)) {
         return (
           <div key={item.id} className="w-full mb-8">
-            <label htmlFor={item.name} className="flex items-center text-sm font-medium text-gray-800">
+            <label htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
               {labelContent}
             </label>
             <ReactJson
               id={item.name}
               src={JSON.parse(item.value)}
               onEdit={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+              onDelete={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+              onAdd={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+              displayDataTypes={false}
+              enableClipboard={false}
+              collapsed
             />
           </div>
         );
