@@ -18,7 +18,7 @@ module.exports = {
     'import/resolver': 'webpack',
   },
   rules: {
-    'properties': 'never',
+    properties: 'off',
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'import/prefer-default-export': 'off',
     'react/jsx-one-expression-per-line': 'off',
