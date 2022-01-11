@@ -80,25 +80,26 @@ export function TableKeysModal() {
     })));
   };
 
-  const submit = async (evt) => {
+  const submit = (evt) => {
     evt.preventDefault();
     if (canUpdatePrimaryKey) {
       saving();
 
-      try {
-        await updateTablePrimaryKeys({
-          tableId: table.id,
-          primaryKeys: primaryKeys.map((item) => item.name),
-        });
-        if (currentTable.id === table.id) {
-          tablesResponse.mutate();
-        }
-        await mutateViewFields(viewFields);
-        mounted(() => setOpen(false));
-        saved(`Successfully updated primary keys for table ${table.alias}`);
-      } catch (err) {
-        catchError(err.response.data.exception || err.response.data.error);
-      }
+      updateTablePrimaryKeys({
+        tableId: table.id,
+        primaryKeys: primaryKeys.map((item) => item.name),
+      })
+        .then(async () => {
+          if (currentTable.id === table.id) {
+            tablesResponse.mutate();
+          }
+
+          await mutateViewFields(viewFields);
+          saved(`Successfully updated primary keys for table ${table.alias}`);
+        })
+        .catch((err) => catchError(err.response.data.exception || err.response.data.error));
+
+      mounted(() => setOpen(false));
     }
   };
 
