@@ -11,6 +11,12 @@ module SchemaModification
     end
 
     fields = self.fields
+
+    pii_fields = fields.select {|field| field.is_pii }
+    if pii_fields.any?
+      raise StandardError.new "Cannot set a PII field as a primary key. To proceed, please unset the selected field as PII first."
+    end
+
     table_name = self.name.to_sym
     primary_keys = Array(primary_keys)
     primary_keys = fields

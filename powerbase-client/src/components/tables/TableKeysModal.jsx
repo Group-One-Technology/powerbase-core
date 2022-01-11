@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { useMounted } from '@lib/hooks/useMounted';
 import { XIcon } from '@heroicons/react/outline';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
@@ -188,13 +189,28 @@ export function TableKeysModal() {
                   field={field}
                   fieldTypes={fieldTypes}
                   action={(canUpdatePrimaryKey && !field.isPrimaryKey) && (
-                    <button
-                      type="button"
-                      className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-                      onClick={() => handleSetAsPrimary(field, true)}
-                    >
-                      Set as Primary Key
-                    </button>
+                    <>
+                      {field.isPii
+                        ? (
+                          <Tooltip.Root delayDuration={0}>
+                            <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-900 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">
+                              Set as Primary Key
+                            </Tooltip.Trigger>
+                            <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                              <Tooltip.Arrow className="gray-900" />
+                              Cannot set a PII field as a Primary Key.
+                            </Tooltip.Content>
+                          </Tooltip.Root>
+                        ) : (
+                          <button
+                            type="button"
+                            className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+                            onClick={() => handleSetAsPrimary(field, true)}
+                          >
+                            Set as Primary Key
+                          </button>
+                        )}
+                    </>
                   )}
                 />
               ))}
