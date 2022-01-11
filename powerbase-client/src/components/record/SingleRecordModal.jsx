@@ -56,7 +56,7 @@ export function BaseSingleRecordModal({
         value: remoteRecord[item.name] ?? item.value,
       })));
     }
-  }, [remoteRecord]);
+  }, [open, remoteRecord]);
 
   const handleRecordInputChange = (fieldId, value) => {
     setRecord((curRecord) => curRecord.map((item) => ({
