@@ -94,6 +94,7 @@ Rails.application.routes.draw do
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
+        post 'upsert_magic_record'
         put 'update_default_view'
         put 'update_primary_keys'
         put 'update_table_permission', as: 'update_table_permission'
@@ -118,7 +119,5 @@ Rails.application.routes.draw do
   get 'fields/:field_id/select_options', to: 'field_select_options#index', as: 'field_select_options'
   post 'tables/:table_id/field', to: 'powerbase_fields#create', as: 'new_field'
   get 'tables/:id/fields/:name', to: 'powerbase_fields#get_single_field', as: 'get_single_field'
-  post 'tables/:id/magic_value', to: 'table_records#add_or_update_magic_value', as: 'change_magic_value'
   post 'magic_records', to: 'table_records#create_magic_record', as: 'new_magic_records'
-  get 'tables/:id/magic_values', to: 'table_records#magic_values', as: 'magic_values'
 end

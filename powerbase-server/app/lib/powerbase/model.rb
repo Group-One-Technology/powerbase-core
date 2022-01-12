@@ -18,36 +18,15 @@ module Powerbase
 
     # Updates a property in a document/table record.
     # Accepts the following options:
-    # :primary_keys :: a specific-format string concat of the primary keys and their values.
-    def update_record(options)
+    # :primary_keys :: a hash of primary keys values.
+    def update_doc_record(options)
       index = "table_records_#{@table_id}"
-      id = options[:primary_keys]
-      if !@is_turbo
-        unless @esclient.indices.exists(index: index)
-          @esclient.indices.create(
-            index: index,
-            body: {
-              settings: { "index.mapping.ignore_malformed": true }
-            }
-          )
-        end
-        record = @esclient.update(index: index, id: id, body: { doc: options[:data], doc_as_upsert: true }, refresh: true,_source: true)
-        record
-      else
-        response = @esclient.update(index: index, id: id, body: { doc: options[:data] }, _source: true)
-        response
-      end
-    end
+      primary_keys = options[:primary_keys]
 
-    # Gets all magic values for a non turbo table
-    # REFACTOR to make fetch size flexible/dynamic - it's currently fixed because of the eventual aggregation
-    # REFACTOR doc_id parameter to something else to avoid collisions
-    def magic_search
-      index = "table_records_#{@table_id}"
-      result = @esclient.search(index: index, size: 10000)
-      result["hits"]["hits"].map {|result| result["_source"].merge("doc_id": result["_id"])}
+      create_index!(index) if !@is_turbo
+      result = update_record(index, primary_keys, options[:data], !@is_turbo)
+      { doc_id: result["_id"], result: result["result"], data: options[:data] }
     end
-
 
     # * Get a document/table record.
     # Accepts the following options:
@@ -143,12 +122,24 @@ module Powerbase
         result = @esclient.search(index: index, body: search_params)
         format_es_result(result)
       else
-        remote_db() {|db|
+        magic_search_params = query.to_elasticsearch
+        magic_records = nil
+
+        if magic_search_params != nil
+          magic_search_params[:from] = (page - 1) * limit
+          magic_search_params[:size] = limit
+          magic_result = @esclient.search(index: index, body: magic_search_params)
+          magic_records = format_es_result(magic_result)
+        end
+
+        records = remote_db() {|db|
           db.from(@table_name)
             .yield_self(&query.to_sequel)
             .paginate(page, limit)
             .all
         }
+
+        merge_records(records, magic_records)
       end
     end
 
@@ -199,7 +190,20 @@ module Powerbase
             end
           end
 
-          result["_source"].merge("doc_id": result["_id"])
+          result["_source"].symbolize_keys.merge("doc_id": result["_id"])
+        end
+      end
+
+      def merge_records(records, magic_records)
+        return records if magic_records == nil
+        primary_keys = @table.primary_keys
+        fields = @table.fields
+
+        records.map do |record|
+          doc_id = get_doc_id(primary_keys, record, fields)
+          magic_record = magic_records.select {|item| item[:doc_id] == doc_id}.first || {}
+
+          { **record, **magic_record }
         end
       end
   end

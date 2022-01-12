@@ -21,15 +21,10 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
-
-  schema(:add_or_update_magic_value) do
+  schema(:upsert_magic_record) do
     optional(:id).value(:integer)
     optional(:data)
     required(:primary_keys)
-  end
-
-  schema(:magic_values) do
-    required(:id).value(:integer)
   end
 
   schema(:update_remote_value) do
@@ -90,13 +85,13 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /tables/:id/magic_value
-  def add_or_update_magic_value
+  # POST /tables/:id/upsert_magic_record
+  def upsert_magic_record
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:add_records, @table)
-    model = Powerbase::Model.new(ElasticsearchClient, safe_params[:id])
-    record = model.update_record({
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    record = model.update_doc_record({
       primary_keys: safe_params[:primary_keys],
       fields: safe_params[:fields],
       data: safe_params[:data]
@@ -132,8 +127,8 @@ class TableRecordsController < ApplicationController
     end
     if @powerbase_database.is_turbo
       model = Powerbase::Model.new(ElasticsearchClient, @table)
-      doc_id = primary_keys.map{|key, value| "#{key}_#{value}"}.join("-")
-      record = model.update_record({primary_keys: format_doc_id(doc_id), data: data})
+      record = model.update_doc_record(primary_keys: primary_keys, data: data)
+
       if !record
         render json: { error: "Could not update value for given record in Elasticsearch'" }, status: :unprocessable_entity
         return
@@ -144,17 +139,6 @@ class TableRecordsController < ApplicationController
     end
     remote_update_client_notifier(@table.id, primary_keys)
     render json: updated_value
-  end
-
-  # GET /tables/:id/magic_values
-  def magic_values
-    @table = PowerbaseTable.find(safe_params[:id])
-    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:view_table, @table)
-
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
-    @records = model.magic_search
-    render json: @records
   end
 
   # POST /magic_records
