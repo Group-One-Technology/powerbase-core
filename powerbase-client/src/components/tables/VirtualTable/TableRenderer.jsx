@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
@@ -64,15 +64,17 @@ export function TableRenderer({
     handleExitEditing,
   } = useEditingCell({ records, setRecords });
 
-  useEffect(() => {
-    setRecords(remoteRecords);
-  }, [remoteRecords]);
+  const recomputeGrid = () => {
+    headerGridRef.current.forceUpdate();
+    headerGridRef.current.recomputeGridSize();
+    recordsGridRef.current.forceUpdate();
+    recordsGridRef.current.recomputeGridSize();
+  };
 
-  useEffect(() => {
+  useDidMountEffect(() => {
     let timer;
     if (hasAddedNewField) {
-      recordsGridRef.current.forceUpdate();
-      recordsGridRef.current.recomputeGridSize();
+      recomputeGrid();
       timer = setTimeout(() => {
         setHasAddedNewField(false);
       }, 800);
@@ -84,10 +86,7 @@ export function TableRenderer({
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
-      headerGridRef.current.forceUpdate();
-      headerGridRef.current.recomputeGridSize();
-      recordsGridRef.current.forceUpdate();
-      recordsGridRef.current.recomputeGridSize();
+      recomputeGrid();
     }
   }, [fields]);
 
