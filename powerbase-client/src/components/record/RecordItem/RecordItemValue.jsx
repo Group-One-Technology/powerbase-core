@@ -142,7 +142,7 @@ export function RecordItemValue({
             </label>
             <ReactJson
               id={item.name}
-              src={JSON.parse(item.value)}
+              src={JSON.parse(item.value || {})}
               onEdit={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
               onDelete={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
               onAdd={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
