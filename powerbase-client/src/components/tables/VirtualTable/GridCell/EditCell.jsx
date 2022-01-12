@@ -1,14 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-  forwardRef,
-  useRef,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+
 import { isObject } from '@lib/helpers/isObject';
-import DatePicker from 'react-datepicker';
 import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
-import '@css/react-datepicker.css';
+import { EditCalendarCell } from './EditCalendarCell';
 
 function getValue(value) {
   if (isObject(value)) return JSON.stringify(value);
@@ -41,96 +36,7 @@ function getValue(value) {
 //   </div>
 // );
 
-const CalButton = ({ onClick, value }) => {
-  const buttonRef = useRef(null);
-  useEffect(() => {
-    buttonRef?.current?.click();
-  }, []);
-  return (
-    <button
-      className="w-full focus:outline-none text-sm leading-3"
-      onClick={onClick}
-      id="cal-button"
-      ref={buttonRef}
-    >
-      {value}
-    </button>
-  );
-};
-
-const CustomInput = forwardRef(({ value, onClick }) => (
-  <CalButton onClick={onClick} value={value} />
-));
-
-const Calendar = ({ defaultValue, handleExitCell }) => {
-  const [startDate, setStartDate] = useState(new Date(defaultValue));
-
-  const formatDate = (date) => {
-    const year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(
-      date,
-    );
-    const month = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(
-      date,
-    );
-    const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
-
-    const time = new Intl.DateTimeFormat('en', {
-      hour: 'numeric',
-      minute: 'numeric',
-    }).format(date);
-
-    const val = `${month}-${day}-${year} ${time}`;
-    return val;
-  };
-
-  const handleChange = async (date) => {
-    setStartDate(date);
-    const formattedDate = formatDate(date);
-    await handleExitCell(formattedDate);
-  };
-
-  return (
-    <DatePicker
-      selected={startDate}
-      value={startDate}
-      onChange={(date) => handleChange(date)}
-      customInput={<CustomInput />}
-      timeInputLabel="Time:"
-      dateFormat="MM/dd/yyyy h:mm aa"
-      portalId="root-portal-date-picker"
-      dropdownMode="select"
-      showYearDropdown
-      showTimeInput
-      popperModifiers={[
-        {
-          name: 'preventOverflow',
-          options: {
-            rootBoundary: 'viewport',
-            tether: false,
-            altAxis: true,
-          },
-        },
-      ]}
-    />
-  );
-};
-
-Calendar.propTypes = {
-  handleExitCell: PropTypes.func.isRequired,
-  defaultValue: PropTypes.string,
-};
-
-CalButton.propTypes = {
-  value: PropTypes.any,
-  onClick: PropTypes.func.isRequired,
-};
-
-CustomInput.propTypes = {
-  value: PropTypes.any,
-  onClick: PropTypes.func,
-};
-
-function TextCell(
+export const EditCell = React.forwardRef((
   {
     value: initialValue,
     field,
@@ -140,7 +46,7 @@ function TextCell(
     ...props
   },
   ref,
-) {
+) => {
   const [value, setValue] = useState(getValue(initialValue));
 
   useEffect(() => {
@@ -154,7 +60,7 @@ function TextCell(
   if (isEditing) {
     if (fieldType.dataType === 'date') {
       return (
-        <Calendar
+        <EditCalendarCell
           defaultValue={getValue(value)}
           handleExitCell={handleExitCell}
           {...props}
@@ -181,14 +87,12 @@ function TextCell(
   }
 
   return value;
-}
+});
 
-TextCell.propTypes = {
+EditCell.propTypes = {
   value: PropTypes.any,
   field: PropTypes.object.isRequired,
   isEditing: PropTypes.bool,
   fieldType: PropTypes.object,
   handleExitCell: PropTypes.func.isRequired,
 };
-
-export default React.forwardRef(TextCell);
