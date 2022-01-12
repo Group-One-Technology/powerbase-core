@@ -94,7 +94,7 @@ Rails.application.routes.draw do
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
-        post 'upsert_magic_record'
+        post 'upsert_magic_values', to: 'table_records#upsert_magic_values'
         put 'update_default_view'
         put 'update_primary_keys'
         put 'update_table_permission', as: 'update_table_permission'
