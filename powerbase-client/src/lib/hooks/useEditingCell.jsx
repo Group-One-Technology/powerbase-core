@@ -1,35 +1,23 @@
-/* eslint-disable no-unused-vars */
-import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
-import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
-import { upsertMagicValue, updateRemoteValue } from '@lib/api/records';
+import { useRef, useState } from 'react';
+
+import { useBaseUser } from '@models/BaseUser';
+import { useViewFieldState } from '@models/view/ViewFieldState';
+import { useTableConnections } from '@models/TableConnections';
+import { useSaveStatus } from '@models/SaveStatus';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
+import { upsertMagicValues } from '@lib/api/records';
+import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
 
-export function useEditingCell(
-  field, fieldType, setEditCellInput, setCellToEdit, setUpdatedRecords, setIsEditing, recordInputRef, editCellInput,
-  rowIndex, initialFields, initializeFields, connections, records, isTurbo, updatedRecords, setIsNewRecord, catchError, value, baseUser,
-) {
-  const handleMagicInputValidation = (val, fieldToValidate) => {
-    if (!val) return true;
-    const type = fieldType.dataType;
-    switch (type?.toLowerCase()) {
-      case 'string':
-      case 'text':
-        return true;
-      case 'number':
-        return field.options?.precision || !fieldToValidate?.isVirtual
-          ? isValidNumberOrDecimal(val)
-          : isValidInteger(val);
-      default:
-        return true;
-    }
-  };
-  const isCheckbox = fieldType?.dataType.toLowerCase() === 'boolean';
+export function useEditingCell({ records, setRecords }) {
+  const { baseUser } = useBaseUser();
+  const { saving, saved, catchError } = useSaveStatus();
+  const { data: connections } = useTableConnections();
+  const { initialFields } = useViewFieldState();
 
-  const onChange = (e) => {
-    const magicInputValue = e.target.value;
-    if (!handleMagicInputValidation(magicInputValue, field)) return;
-    setEditCellInput(magicInputValue);
-  };
+  const recordInputRef = useRef();
+  const [isEditing, setIsEditing] = useState(false);
+  const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
 
   const exitEditing = () => {
     setCellToEdit({});
@@ -37,133 +25,85 @@ export function useEditingCell(
     setIsEditing(false);
   };
 
-  const handleLocalMutation = (recordsToCompute, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData) => {
-    const mutatedRecords = recordsToCompute?.map((recordObj) => {
-      const matches = [];
-      const extractedPrimaryKeys = (isTurbo || !field.isVirtual)
-        ? primaryKeys
-        : composedKeys.split('---');
-      let objToUse;
-      extractedPrimaryKeys.forEach((extractedKey, pkIdx) => {
-        let sanitized;
-        if (!isTurbo && field.isVirtual) sanitized = extractedKey.split('___');
-        const pkName = !sanitized ? extractedKey.name : sanitized[0];
-        const pkValue = !sanitized ? extractedKey.value : sanitized[1];
-        matches.push(
-          `${getParameterCaseInsensitive(recordObj, pkName)}`
-            === `${pkValue}`,
-        );
-        if (pkIdx === primaryKeys.length - 1) {
-          if (!matches.includes(false)) {
-            const newObj = { ...recordObj };
-            newObj[field.name] = isCheckbox ? !(value?.toString() === 'true') : hasPrecision && formattedNumber
-              ? formattedNumber
-              : (calendarData || recordInputRef.current?.value);
-            objToUse = newObj;
-          } else {
-            objToUse = recordObj;
-          }
-        }
-      });
-      return objToUse;
-    });
-    setUpdatedRecords(mutatedRecords);
-    exitEditing();
-  };
-
-  const sanitizeValue = (isBool, initialValue, inputValue) => {
-    if (isBool) return !(initialValue?.toString() === 'true');
-    if (inputValue && fieldType.dataType.toLowerCase() === 'number') return parseFloat(inputValue);
-    return inputValue;
-  };
-
-  const onClickOutsideEditingCell = async (calendarData = null) => {
+  const handleExitEditing = async ({
+    rowIndex,
+    field,
+    fieldType,
+    updatedValue,
+  }) => {
     const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
-    if (canEditFieldData) {
-      if (!editCellInput?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
-        exitEditing();
-        return;
-      }
-      const rowNo = rowIndex + 1;
-      const updatedFields = initializeFields(initialFields, connections, {
-        hidden: false,
-      })
-        .map((item) => ({
-          ...item,
-          value: records[rowNo - 1][item.name],
-        }))
-        .sort((x, y) => x.order > y.order);
 
-      const computedFields = updatedFields.filter(
-        (item) => !(item.foreignKey?.columns.length > 1),
-      );
+    if (!(canEditFieldData && initialFields.length)) {
+      exitEditing();
+      return;
+    }
 
-      const primaryKeys = computedFields?.filter((item) => item.isPrimaryKey);
+    if (!updatedValue?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
+      exitEditing();
+      return;
+    }
 
-      /* The ids are composed in a double underscore and double hypen commas to avoid
-    incomplete splits down the line for field names that have underscore already */
-      // ! TODO - REFACTOR to use a new identifier-composition approach with unique unicode characters
-      const composedKeys = primaryKeys
-        .map((primaryKey) => {
-          const keyName = primaryKey.name.toLowerCase();
-          const keyValue = (`${primaryKey.value}`).toLowerCase();
-          return `${keyName}${isTurbo ? '_' : '___'}${keyValue}`;
-        })
-        .join(isTurbo ? '-' : '---');
+    if (field.foreignKey?.columns.length > 1) {
+      catchError('Cannot update a field that is used to referenced to linked records.');
+      exitEditing();
+      return;
+    }
 
-      let hasPrecision = false;
-      let formattedNumber;
-      if (field.options?.precision && fieldType.dataType === 'number') {
-        hasPrecision = true;
-        const sanitizedNumber = parseFloat(recordInputRef.current?.value);
-        formattedNumber = formatToDecimalPlaces(sanitizedNumber, field.options?.precision);
-      }
-      const recordsToUse = updatedRecords || records;
-      if (!field.isVirtual) {
-        const pkObject = {};
-        primaryKeys
-          .forEach((primaryKey) => {
-            const keyId = primaryKey.fieldId;
-            const keyValue = primaryKey.value;
-            pkObject[keyId] = keyValue;
-          });
-        // This is merely here as a temporal fix to make updating appear faster
-        handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-        try {
-          const { data } = await updateRemoteValue({
-            tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.fieldId]: sanitizeValue(isCheckbox, value, recordInputRef.current?.value) },
-          });
-          // handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-        } catch (err) {
-          exitEditing();
-          catchError(err.response.data.error || err.response.data.exception);
-        }
+    saving();
+
+    const updatedFieldValue = sanitizeValue({
+      field,
+      fieldType,
+      value: updatedValue,
+    });
+
+    const fields = initializeFields(initialFields, connections, { hidden: false })
+      .map((item) => ({
+        ...item,
+        value: records[rowIndex][item.name],
+      }));
+    const primaryKeys = fields.filter((item) => item.isPrimaryKey)
+      .reduce((keys, key) => ({
+        ...keys,
+        [key.name]: key.value,
+      }), {});
+
+    const updatedRecords = records.map((record, index) => ({
+      ...record,
+      [field.name]: index === rowIndex
+        ? updatedFieldValue
+        : record[field.name],
+    }));
+
+    setRecords(updatedRecords);
+
+    try {
+      if (field.isVirtual) {
+        await upsertMagicValues({
+          tableId: field.tableId,
+          primaryKeys,
+          data: { [field.name]: updatedFieldValue },
+        });
       } else {
-        try {
-          const { data } = await upsertMagicValue({
-            tableId: field.tableId,
-            primaryKeys: primaryKeys.reduce((keys, key) => ({
-              ...keys,
-              [key.name]: key.value,
-            }), {}),
-            data: {
-              [field.name]: field.options?.precision
-                ? formattedNumber
-                : recordInputRef.current?.value,
-            },
-          });
-
-          if (data) {
-            handleLocalMutation(recordsToUse, primaryKeys, composedKeys, formattedNumber, hasPrecision, calendarData);
-            setIsNewRecord(false);
-          }
-        } catch (err) {
-          exitEditing();
-          catchError(err.response.data.error || err.response.data.exception);
-        }
+        // const { data } = await updateRemoteValue({
+        //   tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.fieldId]: sanitizeValue(isCheckbox, value, ) },
+        // });
       }
-    } else exitEditing();
+
+      exitEditing();
+      saved();
+    } catch (err) {
+      exitEditing();
+      catchError(err.response.data.exception || err.response.data.error);
+    }
   };
 
-  return { onChange, onClickOutsideEditingCell };
+  return {
+    isEditing,
+    setIsEditing,
+    cellToEdit,
+    setCellToEdit,
+    recordInputRef,
+    handleExitEditing,
+  };
 }

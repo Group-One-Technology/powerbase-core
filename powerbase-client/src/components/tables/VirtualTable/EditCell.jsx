@@ -6,9 +6,8 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { isObject } from '@lib/helpers/isObject';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
 import '@css/react-datepicker.css';
 
 function getValue(value) {
@@ -19,27 +18,28 @@ function getValue(value) {
   return value;
 }
 
-const TooltipContent = () => (
-  <div className="flex">
-    <div className="relative mx-2">
-      <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
-        Enter a valid email
-        <svg
-          className="absolute text-black h-2 w-full left-0 top-full"
-          x="0px"
-          y="0px"
-          viewBox="0 0 255 255"
-          xmlSpace="preserve"
-        >
-          <polygon
-            className="fill-current"
-            points="0,0 127.5,127.5 255,0"
-          />
-        </svg>
-      </div>
-    </div>
-  </div>
-);
+// TODO: Use Popover for displaying validation errors instead of tooltip
+// const TooltipContent = () => (
+//   <div className="flex">
+//     <div className="relative mx-2">
+//       <div className="bg-black text-white text-xs rounded-sm py-1 px-4 right-0 bottom-full">
+//         Enter a valid email
+//         <svg
+//           className="absolute text-black h-2 w-full left-0 top-full"
+//           x="0px"
+//           y="0px"
+//           viewBox="0 0 255 255"
+//           xmlSpace="preserve"
+//         >
+//           <polygon
+//             className="fill-current"
+//             points="0,0 127.5,127.5 255,0"
+//           />
+//         </svg>
+//       </div>
+//     </div>
+//   </div>
+// );
 
 const CalButton = ({ onClick, value }) => {
   const buttonRef = useRef(null);
@@ -62,8 +62,8 @@ const CustomInput = forwardRef(({ value, onClick }) => (
   <CalButton onClick={onClick} value={value} />
 ));
 
-const Calendar = ({ onClickOutsideEditingCell }) => {
-  const [startDate, setStartDate] = useState(new Date());
+const Calendar = ({ defaultValue, handleExitCell }) => {
+  const [startDate, setStartDate] = useState(new Date(defaultValue));
 
   const formatDate = (date) => {
     const year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(
@@ -85,8 +85,8 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
 
   const handleChange = async (date) => {
     setStartDate(date);
-    const formatted = formatDate(date);
-    await onClickOutsideEditingCell(formatted);
+    const formattedDate = formatDate(date);
+    await handleExitCell(formattedDate);
   };
 
   return (
@@ -116,7 +116,8 @@ const Calendar = ({ onClickOutsideEditingCell }) => {
 };
 
 Calendar.propTypes = {
-  onClickOutsideEditingCell: PropTypes.func.isRequired,
+  handleExitCell: PropTypes.func.isRequired,
+  defaultValue: PropTypes.string,
 };
 
 CalButton.propTypes = {
@@ -131,59 +132,63 @@ CustomInput.propTypes = {
 
 function TextCell(
   {
-    isEditing,
-    onChange,
-    value,
-    validationToolTip,
+    value: initialValue,
+    field,
     fieldType,
-    setCalendarValue,
-    onClickOutsideEditingCell,
+    isEditing,
+    handleExitCell,
+    ...props
   },
   ref,
 ) {
-  useEffect(() => {
-    if (fieldType.dataType !== 'date') ref.current.focus();
-  }, []);
+  const [value, setValue] = useState(getValue(initialValue));
 
-  const cellInnerEl = isEditing ? (
-    <TooltipPrimitive.Root delayDuration={0} open={validationToolTip}>
-      <TooltipPrimitive.Trigger className="w-full h-full">
-        {fieldType.dataType === 'date' && isEditing ? (
-          <Calendar
-            setCalendarValue={setCalendarValue}
-            value={value}
-            onClickOutsideEditingCell={onClickOutsideEditingCell}
-          />
-        ) : (
-          <input
-            value={getValue(value)}
-            className="w-full focus:outline-none text-sm leading-3"
-            onChange={(newVal) => {
-              if (isObject(value)) onChange(JSON.parse(newVal));
-              else onChange(newVal);
-            }}
-            ref={ref}
-          />
-        )}
-        <TooltipPrimitive.Content side="top">
-          <TooltipContent />
-        </TooltipPrimitive.Content>
-      </TooltipPrimitive.Trigger>
-    </TooltipPrimitive.Root>
-  ) : (
-    getValue(value)
-  );
-  return cellInnerEl;
+  useEffect(() => {
+    // eslint-disable-next-line react/destructuring-assignment
+    if (fieldType.dataType !== 'date') ref.current.focus();
+    setValue(getValue((initialValue)));
+  }, [fieldType, initialValue]);
+
+  const handleValueChange = (evt) => setValue(evt.target.value);
+
+  if (isEditing) {
+    if (fieldType.dataType === 'date') {
+      return (
+        <Calendar
+          defaultValue={getValue(value)}
+          handleExitCell={handleExitCell}
+          {...props}
+        />
+      );
+    }
+
+    return (
+      <input
+        type="text"
+        ref={ref}
+        value={value}
+        onChange={handleValueChange}
+        className="text-sm items-center py-1 px-2 border border-indigo-500"
+        onKeyDown={(evt) => {
+          if (evt.code === 'Enter') {
+            if (!validateMagicValue(field, fieldType, value)) return;
+            handleExitCell(value);
+          }
+        }}
+        {...props}
+      />
+    );
+  }
+
+  return value;
 }
 
 TextCell.propTypes = {
   value: PropTypes.any,
+  field: PropTypes.object.isRequired,
   isEditing: PropTypes.bool,
-  validationToolTip: PropTypes.bool,
-  onChange: PropTypes.func,
   fieldType: PropTypes.object,
-  setCalendarValue: PropTypes.func,
-  onClickOutsideEditingCell: PropTypes.func,
+  handleExitCell: PropTypes.func.isRequired,
 };
 
 export default React.forwardRef(TextCell);
