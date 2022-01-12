@@ -72,6 +72,11 @@ export function TableRenderer({
   };
 
   useDidMountEffect(() => {
+    setRecords(remoteRecords);
+    recomputeGrid();
+  }, [remoteRecords]);
+
+  useDidMountEffect(() => {
     let timer;
     if (hasAddedNewField) {
       recomputeGrid();
