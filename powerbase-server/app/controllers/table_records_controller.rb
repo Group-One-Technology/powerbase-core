@@ -110,11 +110,7 @@ class TableRecordsController < ApplicationController
     table_name = @table.name
     primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
     data = sanitize_remote_field_data(safe_params[:data])
-    query = Powerbase::QueryCompiler.new({
-      table_id: @table.id,
-      adapter: @powerbase_database.adapter,
-      turbo: @powerbase_database.is_turbo
-    })
+    query = Powerbase::QueryCompiler.new(@table)
     sequel_query = query.find_by(primary_keys).to_sequel
     updated_value = sequel_connect(@powerbase_database) {|db|
       db.from(table_name.to_sym)

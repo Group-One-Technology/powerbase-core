@@ -11,9 +11,9 @@ module Powerbase
       @esclient = esclient
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
       @table_id = @table.id
-      @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
       @table_name = @table.name
-      @is_turbo = @powerbase_database.is_turbo
+      @database = @table.db
+      @is_turbo = @database.is_turbo
     end
 
     # Updates a property in a document/table record.
@@ -38,10 +38,7 @@ module Powerbase
       include_pii = options[:include_pii]
       include_json = options[:include_json]
 
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
+      query = Powerbase::QueryCompiler.new(@table, {
         include_pii: include_pii,
         include_json: include_json,
       })
@@ -72,11 +69,7 @@ module Powerbase
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || 5
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
-      })
+      query = Powerbase::QueryCompiler.new(@table)
 
       if @is_turbo
         search_params = query.find_by(options[:filters]).to_elasticsearch
@@ -106,13 +99,10 @@ module Powerbase
       index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || @table.page_size
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
+      query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         filter: options[:filters],
         sort: options[:sort],
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo
       })
 
       if @is_turbo
@@ -148,13 +138,10 @@ module Powerbase
     # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
     def get_count(options)
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
+      query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         sort: false,
         filter: options[:filters],
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
       })
 
       if @is_turbo
@@ -173,7 +160,7 @@ module Powerbase
 
     private
       def remote_db
-        sequel_connect(@powerbase_database) do |db|
+        sequel_connect(@database) do |db|
           yield(db) if block_given?
         end
       end
