@@ -16,6 +16,24 @@ module Powerbase
       @is_turbo = @database.is_turbo
     end
 
+    # Updates a property in a remote database table record.
+    # Accepts the following options:
+    # :primary_keys :: a hash of primary keys values.
+    # :data :: a hash of updated values.
+    def update_remote_record(options)
+      query = Powerbase::QueryCompiler.new(@table)
+      sequel_query = query.find_by(options[:primary_keys]).to_sequel
+
+      record = sequel_connect(@database) {|db|
+        db.from(@table.name.to_sym)
+          .yield_self(&sequel_query)
+          .update(options[:data])
+      }
+
+      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record
+    end
+
     # Updates a property in a document/table record.
     # Accepts the following options:
     # :primary_keys :: a hash of primary keys values.

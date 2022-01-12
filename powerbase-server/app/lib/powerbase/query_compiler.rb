@@ -24,7 +24,7 @@ module Powerbase
     # :sort :: a sort hash.
     # :include_pii :: a boolean for whether to query pii fields or not.
     # :include_json :: a boolean for whether to substring the queried json fields or not.
-    def initialize(table, options)
+    def initialize(table, options = {})
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
       @table_id = @table.id
       @database = @table.db

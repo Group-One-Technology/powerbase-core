@@ -42,20 +42,8 @@ export async function addMagicRecord(payload) {
   return undefined;
 }
 
-export async function upsertMagicValues({ tableId, ...payload }) {
-  const response = await securedApi.post(
-    `/tables/${tableId}/upsert_magic_values`,
-    payload,
-  );
-
-  if (response.statusText === 'OK') {
-    return response;
-  }
-  return undefined;
-}
-
-export async function updateRemoteValue({ tableId, ...payload }) {
-  const response = await securedApi.post(`tables/${tableId}/remote_value`, payload);
+export async function updateFieldData({ tableId, ...payload }) {
+  const response = await securedApi.post(`tables/${tableId}/update_field_data`, payload);
   if (response.statusText === 'OK') {
     return response;
   }

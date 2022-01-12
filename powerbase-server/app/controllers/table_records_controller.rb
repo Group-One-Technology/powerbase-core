@@ -1,7 +1,4 @@
 class TableRecordsController < ApplicationController
-  include SequelHelper
-  include ElasticsearchHelper
-  include PusherHelper
   before_action :authorize_access_request!
 
   schema(:index, :linked_records, :count) do
@@ -21,17 +18,11 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
-  schema(:upsert_magic_values) do
-    optional(:id).value(:integer)
-    optional(:data)
-    required(:primary_keys)
-  end
-
-  schema(:update_remote_value) do
+  schema(:update_field_data) do
     required(:id).value(:integer)
+    required(:field_id).value(:integer)
     required(:primary_keys)
     required(:data)
-    required(:field_id).value(:integer)
   end
 
   # POST /tables/:table_id/records
@@ -85,56 +76,33 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /tables/:id/upsert_magic_values
-  def upsert_magic_values
-    @table = PowerbaseTable.find(safe_params[:id])
-    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:add_records, @table)
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
-    record = model.update_doc_record({
-      primary_keys: safe_params[:primary_keys],
-      fields: safe_params[:fields],
-      data: safe_params[:data]
-    })
-    render json: record
-  end
-
   # POST /tables/:id/remote_value
-  def update_remote_value
-    # TODO - Refactor into a helper/module to reduce code length
+  def update_field_data
     @field = PowerbaseField.find(safe_params[:field_id])
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
-    @table = @field.powerbase_table
-    @powerbase_database = @table.db
-    table_name = @table.name
-    primary_keys = sanitize_remote_field_data(safe_params[:primary_keys])
-    data = sanitize_remote_field_data(safe_params[:data])
-    query = Powerbase::QueryCompiler.new(@table)
-    sequel_query = query.find_by(primary_keys).to_sequel
-    updated_value = sequel_connect(@powerbase_database) {|db|
-      db.from(table_name.to_sym)
-      .yield_self(&sequel_query)
-      .update(data)
-    }
-    if !updated_value
-      render json: { error: "Could not update value for row in '#{table_name}'" }, status: :unprocessable_entity
-      return
-    end
-    if @powerbase_database.is_turbo
-      model = Powerbase::Model.new(ElasticsearchClient, @table)
-      record = model.update_doc_record(primary_keys: primary_keys, data: data)
+    @table = @field.table
 
-      if !record
-        render json: { error: "Could not update value for given record in Elasticsearch'" }, status: :unprocessable_entity
-        return
-      end
-      remote_update_client_notifier(@table.id, primary_keys)
-      render json: updated_value
-      return
+    data = {}
+    data[@field.name.to_sym] = safe_params[:data]
+
+    payload = {
+      primary_keys: sanitize_remote_field_data(@table, safe_params[:primary_keys]),
+      data: data
+    }
+
+    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    record = if @field.is_virtual
+      model.update_doc_record(payload)
+    else
+      model.update_remote_record(payload)
     end
-    remote_update_client_notifier(@table.id, primary_keys)
-    render json: updated_value
+
+    if record
+      render json: { updated: true }
+    else
+      render json: { error: "Could not update value for row in '#{@table.name}'" }, status: :unprocessable_entity
+    end
   end
 
   # POST /magic_records
@@ -160,20 +128,14 @@ class TableRecordsController < ApplicationController
   end
 
   private
-    def sanitize_remote_field_data(field_data)
+    def sanitize_remote_field_data(table, field_data)
       sanitized_data = {}
       field_data.each do |key, value|
-        curr_field = PowerbaseField.find(key)
+        curr_field = PowerbaseField.find_by(name: key, powerbase_table_id: table.id)
         raise NotFound.new("Could not find field with id of #{key}") if !curr_field
-        curr_field_name = curr_field.name
-        sanitized_data[curr_field_name] = value
+        sanitized_data[curr_field.name] = value
       end
       sanitized_data.symbolize_keys
-    end
-
-    def remote_update_client_notifier(id, primary_keys)
-      doc_id = format_doc_id("#{primary_keys.keys.first.to_s}_#{primary_keys.values.first}")
-      pusher_trigger!("table.#{id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
     end
 end
 

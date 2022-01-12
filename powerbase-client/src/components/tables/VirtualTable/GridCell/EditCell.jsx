@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { isObject } from '@lib/helpers/isObject';
-import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
 import { EditCalendarCell } from './EditCalendarCell';
 
 function getValue(value) {
@@ -76,10 +75,7 @@ export const EditCell = React.forwardRef((
         onChange={handleValueChange}
         className="text-sm items-center py-1 px-2 border border-indigo-500"
         onKeyDown={(evt) => {
-          if (evt.code === 'Enter') {
-            if (!validateMagicValue(field, fieldType, value)) return;
-            handleExitCell(value);
-          }
+          if (evt.code === 'Enter') handleExitCell(value);
         }}
         {...props}
       />
