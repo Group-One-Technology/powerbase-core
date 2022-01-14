@@ -166,7 +166,7 @@ export function RecordItemValue({
             rows={3}
             className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
             onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
-            value={JSON.stringify(item.value || {}) || ''}
+            value={JSON.stringify(item.value) || ''}
           />
         </div>
       );

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { PlusCircleIcon } from '@heroicons/react/outline';
@@ -90,89 +91,81 @@ export default function NewTableModal({
       }
     }
 
-    if (isUploadAction) {
-      const csvFieldNames = Object.getOwnPropertyNames(csvArray[0]);
-      const standardizeTable = () => ({
-        name:
-            csvFile?.name.split('.').slice(0, -1).join('.')
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10),
-        description: null,
-        powerbase_database_id: base.id,
-        is_migrated: true,
-        logs: null,
-        is_virtual: true,
-        page_size: 200,
-        alias: tableName,
-        order: tables.length,
-      });
+    // TODO: Refactor for new merged values for table records and magic records.
+    // if (isUploadAction) {
+    //   const csvFieldNames = Object.getOwnPropertyNames(csvArray[0]);
+    //   const { data } = await addVirtualTable({
+    //     table: {
+    //       name: csvFile?.name.split('.').slice(0, -1).join('.')
+    //         + Math.floor(Math.random() * 10)
+    //         + Math.floor(Math.random() * 10),
+    //       description: null,
+    //       powerbaseDatabaseId: base.id,
+    //       isMigrated: true,
+    //       logs: null,
+    //       isVirtual: true,
+    //       pageSize: 200,
+    //       alias: tableName,
+    //       order: tables.length,
+    //     },
+    //     fields: csvFieldNames.map((fieldName, idx) => ({
+    //       name: toSnakeCase(fieldName.toLowerCase()),
+    //       description: null,
+    //       oid: 1043,
+    //       dbType: 'character varying',
+    //       defaultValue: '',
+    //       isPrimaryKey: false,
+    //       isNullable: false,
+    //       powerbaseFieldTypeId: 2,
+    //       isPii: false,
+    //       alias: fieldName,
+    //       order: idx,
+    //       isVirtual: true,
+    //       allowDirtyValue: true,
+    //       precision: null,
+    //     })),
+    //   });
 
-      const standardizeFields = () => {
-        const standardized = csvFieldNames.map((fieldName, idx) => ({
-          name: toSnakeCase(fieldName.toLowerCase()),
-          description: null,
-          oid: 1043,
-          dbType: 'character varying',
-          defaultValue: '',
-          isPrimaryKey: false,
-          isNullable: false,
-          powerbaseFieldTypeId: 2,
-          isPii: false,
-          alias: fieldName,
-          order: idx,
-          isVirtual: true,
-          allowDirtyValue: true,
-          precision: null,
-        }));
-        return standardized;
-      };
-
-      const payload = {
-        table: standardizeTable(),
-        fields: standardizeFields(),
-      };
-
-      const { data } = await addVirtualTable({ payload });
-      if (data) {
-        const newTable = data.table;
-        const newlyCreatedFields = data.fields;
-        csvArray.forEach(async (record, idx) => {
-          const { id: newRecordId } = await addMagicRecord({
-            powerbaseTableId: table.id,
-            powerbaseDatabaseId: table.databaseId,
-            powerbaseRecordOrder: idx,
-          });
-          if (newRecordId) {
-            const recordKeys = Object.getOwnPropertyNames(record);
-            recordKeys.forEach(async (recordKey, keyIdx) => {
-              const standardizedKey = recordKey.replace(/^"(.*)"$/, '$1');
-              const camelizedKey = camelize(standardizedKey);
-              const magicValueResponseData = await initializeMagicValueForVirtualTable({
-                fieldName: camelToSnakeCase(camelizedKey),
-                fieldType_id: 2,
-                tableId: newTable.id,
-                fieldId: newlyCreatedFields[camelizedKey],
-                textValue: record[recordKey],
-                recordId: null,
-                magicRecordId: newRecordId,
-                keyType: 'text_value',
-                tableTypeId: 'magic_record_id',
-                hasPrecision: false,
-              });
-              if (magicValueResponseData) {
-                if (
-                  idx + 1 === csvArray.length
-                  && keyIdx + 1 === recordKeys.length
-                ) {
-                  mutateTables();
-                  handleTableChange({ table: newTable });
-                }
-              }
-            });
-          }
-        });
-      }
-    }
+    //   if (data) {
+    //     const newTable = data.table;
+    //     const newlyCreatedFields = data.fields;
+    //     csvArray.forEach(async (record, idx) => {
+    //       const { id: newRecordId } = await addMagicRecord({
+    //         powerbaseTableId: table.id,
+    //         powerbaseDatabaseId: table.databaseId,
+    //         powerbaseRecordOrder: idx,
+    //       });
+    //       if (newRecordId) {
+    //         const recordKeys = Object.getOwnPropertyNames(record);
+    //         recordKeys.forEach(async (recordKey, keyIdx) => {
+    //           const standardizedKey = recordKey.replace(/^"(.*)"$/, '$1');
+    //           const camelizedKey = camelize(standardizedKey);
+    //           const magicValueResponseData = await initializeMagicValueForVirtualTable({
+    //             fieldName: camelToSnakeCase(camelizedKey),
+    //             fieldType_id: 2,
+    //             tableId: newTable.id,
+    //             fieldId: newlyCreatedFields[camelizedKey],
+    //             textValue: record[recordKey],
+    //             recordId: null,
+    //             magicRecordId: newRecordId,
+    //             keyType: 'text_value',
+    //             tableTypeId: 'magic_record_id',
+    //             hasPrecision: false,
+    //           });
+    //           if (magicValueResponseData) {
+    //             if (
+    //               idx + 1 === csvArray.length
+    //               && keyIdx + 1 === recordKeys.length
+    //             ) {
+    //               mutateTables();
+    //               handleTableChange({ table: newTable });
+    //             }
+    //           }
+    //         });
+    //       }
+    //     });
+    //   }
+    // }
   };
 
   return (

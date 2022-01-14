@@ -38,6 +38,7 @@ module Powerbase
       @include_json = options[:include_json] || false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
+      @magic_fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: true)
       @field_types = PowerbaseFieldType.all
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
@@ -106,7 +107,7 @@ module Powerbase
 
         # For full text search
         if @query != nil && @query.length > 0
-          filters = @fields.map do |field|
+          filters = @actual_fields.map do |field|
             field_type = @field_type[field.powerbase_field_type_id]
             column = {}
             column[field.name.to_sym] = @query
@@ -161,10 +162,12 @@ module Powerbase
 
     # * Returns elasticsearch hash query
     def to_elasticsearch
-      included_fields = filtered_fields
+      included_fields = filtered_fields(!@turbo, true)
+
+      return nil if !@turbo && included_fields.length == 0
 
       search_params = {
-        _source: { includes: filtered_fields.map {|field| field.name} }
+        _source: { includes: included_fields.map {|field| field.name} }
       }
 
       if !@include_json
@@ -187,7 +190,11 @@ module Powerbase
       # For sorting
       if @sort.kind_of?(Array) && @sort.length > 0
         sort = @sort.map do |sort_item|
-          sort_field = @fields.find {|field| field.name == sort_item[:field] }
+          sort_field = if @turbo
+              @fields.find {|field| field.name == sort_item[:field] }
+            else
+              @magic_fields.find {|field| field.name == sort_item[:field] }
+            end
           sort_column = {}
 
           if sort_field
@@ -220,7 +227,7 @@ module Powerbase
           else
             @filter
           end
-        query_string = transform_elasticsearch_filter(parsedTokens, @query)
+        query_string = transform_elasticsearch_filter(filter_group: parsedTokens, search_query: @query)
 
         search_params[:query] = {
           query_string: {
@@ -483,10 +490,14 @@ module Powerbase
           inner_filter_group = filter[:filters]
 
           if inner_filter_group && inner_filter_group.length > 0
-            next transform_elasticsearch_filter(filter)
+            next transform_elasticsearch_filter(filter_group: filter)
           end
 
-          cur_field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
+          cur_field = if is_magic_records
+              @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
+            else
+              @fields.find {|item| item.name.to_s == filter[:field].to_s}
+            end
           next if !cur_field
 
           relational_op = filter[:filter][:operator]
@@ -578,8 +589,14 @@ module Powerbase
         false
       end
 
-      def filtered_fields
-        included_fields = @fields
+      def filtered_fields(is_magic_records = false, is_elasticsearch = false)
+        included_fields =  if !is_elasticsearch
+            @fields
+          elsif is_magic_records
+            @magic_fields
+          else
+            [*@fields, *@magic_fields]
+          end
 
         if !@include_pii
           included_fields = included_fields.select {|field| !field.is_pii}

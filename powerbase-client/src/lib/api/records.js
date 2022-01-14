@@ -1,20 +1,8 @@
-import { securedApi } from './index';
+import { securedApi, isResponseSuccess } from './index';
 
 export async function getTableRecords({ url, ...payload }) {
   const response = await securedApi.post(url, payload);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
-  return undefined;
-}
-
-export async function getMagicValues(url) {
-  const response = await securedApi.get(url);
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
@@ -24,29 +12,13 @@ export async function getTableRecord({ tableId, recordId, ...payload }) {
     payload,
   );
 
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function getTableRecordsCount({ tableId, ...payload }) {
   const response = await securedApi.post(
     `/tables/${tableId}/records_count`,
-    payload,
-  );
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
-  return undefined;
-}
-
-export async function initializeMagicValueForVirtualTable(payload) {
-  const response = await securedApi.post(
-    '/magic_values',
     payload,
   );
 
@@ -70,7 +42,7 @@ export async function addMagicRecord(payload) {
   return undefined;
 }
 
-export async function addOrUpdateMagicValue({ tableId, ...payload }) {
+export async function upsertMagicValue({ tableId, ...payload }) {
   const response = await securedApi.post(
     `/tables/${tableId}/magic_value`,
     payload,

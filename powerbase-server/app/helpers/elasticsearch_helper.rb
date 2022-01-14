@@ -13,16 +13,25 @@ module ElasticsearchHelper
     client.index(index: index, id: format_doc_id(doc_id), body: body, refresh: true)
   end
 
-  def update_record(index, doc_id, body)
-    client.update(
-      index: index,
-      id: format_doc_id(doc_id),
-      body: {
-        doc: body,
-        doc_as_upsert: true
-      },
-      refresh: true
-    )
+  def update_record(index, doc_id, body, is_upsert = true)
+    if is_upsert
+      client.update(
+        index: index,
+        id: format_doc_id(doc_id),
+        body: {
+          doc: body,
+          doc_as_upsert: true
+        },
+        refresh: true
+      )
+    else
+      client.update(
+        index: index,
+        id: format_doc_id(doc_id),
+        body: { doc: body },
+        _source: true
+      )
+    end
   end
 
   def delete_record(index, doc_id)
@@ -34,6 +43,13 @@ module ElasticsearchHelper
   end
 
   def format_doc_id(value)
+    if value.is_a?(Hash)
+      value = value
+        .sort_by{|key, value| key.downcase }
+        .map {|key, value| "#{key}_#{value}" }
+        .join("-")
+    end
+
     value
       .parameterize(separator: "_")
       .truncate(ELASTICSEACH_ID_LIMIT)
@@ -50,9 +66,10 @@ module ElasticsearchHelper
     end
   end
 
-  def get_doc_id(primary_keys, record, fields, adapter)
+  def get_doc_id(primary_keys, record, fields)
     if primary_keys.length > 0
-      primary_keys
+      doc_id = primary_keys
+        .sort_by{|key| key.name.downcase }
         .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
         .join("-")
     else
@@ -61,22 +78,27 @@ module ElasticsearchHelper
       }
 
       if field_ids.length > 0
-        field_ids
+        doc_id = field_ids
+          .sort_by{|key| key.name.downcase }
           .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
           .join("-")
       else
         not_nullable_fields = fields.select {|field| !field.is_nullable }
 
         if not_nullable_fields.length > 0
-          not_nullable_fields
+          doc_id = not_nullable_fields
+            .sort_by{|key| key.name.downcase }
             .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
             .join("-")
         else
-          fields
+          doc_id = fields
+            .sort_by{|key| key.name.downcase }
             .map {|key| "#{key.name}_#{record[key.name.to_sym]}" }
             .join("-")
         end
       end
     end
+
+    format_doc_id(doc_id)
   end
 end

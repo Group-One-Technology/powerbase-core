@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { isValidNumberOrDecimal, isValidInteger, formatToDecimalPlaces } from '@lib/helpers/numbers';
 import { getParameterCaseInsensitive } from '@lib/helpers/getParameterCaseInsensitive';
-import { addOrUpdateMagicValue, updateRemoteValue } from '@lib/api/records';
+import { upsertMagicValue, updateRemoteValue } from '@lib/api/records';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
 export function useEditingCell(
@@ -140,9 +140,12 @@ export function useEditingCell(
         }
       } else {
         try {
-          const { data } = await addOrUpdateMagicValue({
+          const { data } = await upsertMagicValue({
             tableId: field.tableId,
-            primary_keys: composedKeys,
+            primaryKeys: primaryKeys.reduce((keys, key) => ({
+              ...keys,
+              [key.name]: key.value,
+            }), {}),
             data: {
               [field.name]: field.options?.precision
                 ? formattedNumber

@@ -45,7 +45,7 @@ class Tables::Migrator
 
       records.each do |record|
         oid = record.try(:[], :oid)
-        doc_id = has_row_oid_support ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields, adapter)
+        doc_id = has_row_oid_support ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields)
         puts "--- DOC_ID: #{doc_id}"
         doc = {}
         record.collect {|key, value| key }.each do |key|

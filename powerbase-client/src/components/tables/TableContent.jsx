@@ -15,13 +15,11 @@ import { useWindowSize } from '@lib/hooks/useWindowSize';
 
 import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
-import { useBase } from '@models/Base';
 import { TableViewsNav } from './TableViewsNav';
 
 const BaseTableContent = React.memo(({ table }) => {
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
-  const { data: base } = useBase();
 
   const windowSize = useWindowSize();
   const height = windowSize.height ? windowSize.height - 155 : 0;
@@ -33,12 +31,7 @@ const BaseTableContent = React.memo(({ table }) => {
   return (
     <ViewOptionsProvider view={view}>
       <TableRecordsCountProvider id={table.id} isVirtual={table.isVirtual}>
-        <TableRecordsProvider
-          id={table.id}
-          pageSize={table.pageSize}
-          isVirtual={table.isVirtual}
-          isTurbo={base.isTurbo}
-        >
+        <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
           <ViewFieldStateProvider>
             <TableViewsNav />
             <VirtualTable table={table} height={height} fields={fields} />
