@@ -10,21 +10,37 @@ module Powerbase
     def initialize(esclient, table)
       @esclient = esclient
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
-      @table_id = @table.id
-      @powerbase_database = PowerbaseDatabase.find(@table.powerbase_database_id)
+      @index = @table.index_name
       @table_name = @table.name
-      @is_turbo = @powerbase_database.is_turbo
+      @database = @table.db
+      @is_turbo = @database.is_turbo
+    end
+
+    # Updates a property in a remote database table record.
+    # Accepts the following options:
+    # :primary_keys :: a hash of primary keys values.
+    # :data :: a hash of updated values.
+    def update_remote_record(options)
+      query = Powerbase::QueryCompiler.new(@table)
+      sequel_query = query.find_by(options[:primary_keys]).to_sequel
+
+      record = sequel_connect(@database) {|db|
+        db.from(@table.name.to_sym)
+          .yield_self(&sequel_query)
+          .update(options[:data])
+      }
+
+      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record
     end
 
     # Updates a property in a document/table record.
     # Accepts the following options:
     # :primary_keys :: a hash of primary keys values.
+    # :data :: a hash of updated values.
     def update_doc_record(options)
-      index = "table_records_#{@table_id}"
-      primary_keys = options[:primary_keys]
-
-      create_index!(index) if !@is_turbo
-      result = update_record(index, primary_keys, options[:data], !@is_turbo)
+      create_index!(@index) if !@is_turbo
+      result = update_record(@index, options[:primary_keys], options[:data], !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: options[:data] }
     end
 
@@ -34,14 +50,10 @@ module Powerbase
     # :primary_keys :: an object of the table's primary keys.
     #    Ex: { pathId: 123, userId: 1245 }
     def get(options)
-      index = "table_records_#{@table_id}"
       include_pii = options[:include_pii]
       include_json = options[:include_json]
 
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
+      query = Powerbase::QueryCompiler.new(@table, {
         include_pii: include_pii,
         include_json: include_json,
       })
@@ -49,7 +61,7 @@ module Powerbase
       if @is_turbo
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
 
-        result = @esclient.search(index: index, body: search_params)
+        result = @esclient.search(index: @index, body: search_params)
         raise StandardError.new("Record not found") if result["hits"]["hits"][0] == nil
         format_es_result(result)[0]
       else
@@ -69,20 +81,15 @@ module Powerbase
     # :page :: the page number.
     # :limit :: the page count. No. of records to get per page.
     def where(options)
-      index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || 5
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
-      })
+      query = Powerbase::QueryCompiler.new(@table)
 
       if @is_turbo
         search_params = query.find_by(options[:filters]).to_elasticsearch
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
-        result = @esclient.search(index: index, body: search_params)
+        result = @esclient.search(index: @index, body: search_params)
         format_es_result(result)
       else
         query_string = query.find_by(options[:filters]).to_sequel
@@ -103,23 +110,19 @@ module Powerbase
     # :page :: the page number.
     # :limit :: the page count. No. of records to get per page.
     def search(options)
-      index = "table_records_#{@table_id}"
       page = options[:page] || 1
       limit = options[:limit] || @table.page_size
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
+      query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         filter: options[:filters],
         sort: options[:sort],
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo
       })
 
       if @is_turbo
         search_params = query.to_elasticsearch
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
-        result = @esclient.search(index: index, body: search_params)
+        result = @esclient.search(index: @index, body: search_params)
         format_es_result(result)
       else
         magic_search_params = query.to_elasticsearch
@@ -128,7 +131,7 @@ module Powerbase
         if magic_search_params != nil
           magic_search_params[:from] = (page - 1) * limit
           magic_search_params[:size] = limit
-          magic_result = @esclient.search(index: index, body: magic_search_params)
+          magic_result = @esclient.search(index: @index, body: magic_search_params)
           magic_records = format_es_result(magic_result)
         end
 
@@ -148,19 +151,15 @@ module Powerbase
     # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
     def get_count(options)
-      query = Powerbase::QueryCompiler.new({
-        table_id: @table_id,
+      query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         sort: false,
         filter: options[:filters],
-        adapter: @powerbase_database.adapter,
-        turbo: @is_turbo,
       })
 
       if @is_turbo
-        index = "table_records_#{@table_id}"
         search_params = query.to_elasticsearch.except(:_source, :script_fields)
-        response = @esclient.perform_request("GET", "#{index}/_count", {}, search_params).body
+        response = @esclient.perform_request("GET", "#{@index}/_count", {}, search_params).body
         response["count"]
       else
         remote_db() {|db|
@@ -173,7 +172,7 @@ module Powerbase
 
     private
       def remote_db
-        sequel_connect(@powerbase_database) do |db|
+        sequel_connect(@database) do |db|
           yield(db) if block_given?
         end
       end

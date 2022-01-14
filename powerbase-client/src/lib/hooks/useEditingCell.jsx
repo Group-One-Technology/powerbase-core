@@ -4,16 +4,19 @@ import { useBaseUser } from '@models/BaseUser';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useTableConnections } from '@models/TableConnections';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
-import { upsertMagicValues } from '@lib/api/records';
+import { updateFieldData } from '@lib/api/records';
 import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
+import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
 
 export function useEditingCell({ records, setRecords }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: connections } = useTableConnections();
   const { initialFields } = useViewFieldState();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const recordInputRef = useRef();
   const [isEditing, setIsEditing] = useState(false);
@@ -35,6 +38,11 @@ export function useEditingCell({ records, setRecords }) {
 
     if (!(canEditFieldData && initialFields.length)) {
       exitEditing();
+      return;
+    }
+
+    if (!validateMagicValue(field, fieldType, updatedValue)) {
+      catchError(`Invalid input for ${field.alias}`);
       return;
     }
 
@@ -78,19 +86,15 @@ export function useEditingCell({ records, setRecords }) {
     setRecords(updatedRecords);
 
     try {
-      if (field.isVirtual) {
-        await upsertMagicValues({
-          tableId: field.tableId,
-          primaryKeys,
-          data: { [field.name]: updatedFieldValue },
-        });
-      } else {
-        // const { data } = await updateRemoteValue({
-        //   tableId: field.tableId, fieldId: field.fieldId, primaryKeys: pkObject, data: { [field.fieldId]: sanitizeValue(isCheckbox, value, ) },
-        // });
-      }
+      await updateFieldData({
+        tableId: field.tableId,
+        fieldId: field.fieldId,
+        primaryKeys,
+        data: updatedFieldValue,
+      });
 
       exitEditing();
+      await mutateTableRecords(updatedRecords, false);
       saved();
     } catch (err) {
       exitEditing();

@@ -31,12 +31,7 @@ export function TableRenderer({
   const { data: connections } = useTableConnections();
   const { baseUser } = useBaseUser();
   const { data: base } = useBase();
-  const {
-    data: remoteRecords,
-    loadMore: loadMoreRows,
-    isLoading,
-    mutate: mutateTableRecords,
-  } = useTableRecords();
+  const { data: remoteRecords, loadMore: loadMoreRows, isLoading } = useTableRecords();
   const {
     initialFields,
     fields,
@@ -70,6 +65,11 @@ export function TableRenderer({
     recordsGridRef.current.forceUpdate();
     recordsGridRef.current.recomputeGridSize();
   };
+
+  useDidMountEffect(() => {
+    setRecords(remoteRecords);
+    recomputeGrid();
+  }, [remoteRecords]);
 
   useDidMountEffect(() => {
     let timer;
@@ -211,7 +211,6 @@ export function TableRenderer({
                           records,
                           setRecords,
                           singleCellRef,
-                          mutateTableRecords,
                           table,
                           isNewRecord,
                           setIsNewRecord,

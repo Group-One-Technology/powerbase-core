@@ -13,8 +13,8 @@ module Powerbase
 
 
     def listen!
-      @db = powerbase_db._sequel 
-      @db.listen("powerbase_table_update") do |ev, pid, payload| 
+      @db = powerbase_db._sequel
+      @db.listen("powerbase_table_update") do |ev, pid, payload|
         notifier_callback(@db, ev, pid, payload)
       end
     end
@@ -29,8 +29,8 @@ module Powerbase
       powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
       index_name = powerbase_table.index_name
-      doc_id = format_doc_id("#{primary_key_value.keys.first.to_s}_#{primary_key_value.values.first}")
-      
+      doc_id = format_doc_id(primary_key_value)
+
       puts "-- Data changes detect on table #{table_name}"
 
       # Just run sync and reindex if there's unmigrated columns

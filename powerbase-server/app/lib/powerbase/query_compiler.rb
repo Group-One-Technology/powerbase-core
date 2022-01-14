@@ -19,21 +19,21 @@ module Powerbase
     }
 
     # Accepts the following options:
-    # :table_id :: id of the table to be queried.
     # :query :: a query string for search.
     # :filter :: a query string or hash for filtering.
     # :sort :: a sort hash.
-    # :adapter :: the database adapter used. Can either be mysql2 or postgresql.
-    # :turbo :: a boolean for turbo mode.
     # :include_pii :: a boolean for whether to query pii fields or not.
     # :include_json :: a boolean for whether to substring the queried json fields or not.
-    def initialize(options)
-      @table_id = options[:table_id] || nil
+    def initialize(table, options = {})
+      @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
+      @table_id = @table.id
+      @database = @table.db
+      @adapter = @database.adapter || "postgresql"
+      @turbo = @database.is_turbo || false
+
       @query = options[:query] ? sanitize(options[:query]) : nil
       @filter = options[:filter] || nil
       @sort = options[:sort] == nil ? [] : options[:sort]
-      @adapter = options[:adapter] || "postgresql"
-      @turbo = options[:turbo] || false
       @include_pii = options[:include_pii] || false
       @include_json = options[:include_json] || false
 
@@ -181,7 +181,7 @@ module Powerbase
           search_params[:script_fields][field_name.to_sym] = {
             script: {
               lang: "painless",
-              source: "params._source.#{field_name}.substring(0, 40)",
+              source: "if (params._source.#{field_name} != null) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
             },
           }
         end
