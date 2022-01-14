@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Grid, InfiniteLoader, AutoSizer, ScrollSync,
 } from 'react-virtualized';
@@ -12,12 +12,12 @@ import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
 import { useBase } from '@models/Base';
-import { useSaveStatus } from '@models/SaveStatus';
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
+import { useEditingCell } from '@lib/hooks/useEditingCell';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -26,14 +26,13 @@ import { CellRenderer } from './CellRenderer';
 export function TableRenderer({
   height, table, highlightedCell,
 }) {
-  const { catchError } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { baseUser } = useBaseUser();
   const { data: base } = useBase();
   const {
-    data: records,
+    data: remoteRecords,
     loadMore: loadMoreRows,
     isLoading,
     mutate: mutateTableRecords,
@@ -48,26 +47,34 @@ export function TableRenderer({
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
-  const recordInputRef = useRef();
   const singleCellRef = useRef();
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
-  const [isEditing, setIsEditing] = useState(false);
-  const [cellToEdit, setCellToEdit] = useState({ row: null, column: null });
-  const [editCellInput, setEditCellInput] = useState(null);
-  const [validationToolTip, setValidationToolTip] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const [updatedRecords, setUpdatedRecords] = useState();
-  const [calendarValue, setCalendarValue] = useState();
-  const canAddRecords = baseUser?.can(PERMISSIONS.AddFields, table);
+  const [records, setRecords] = useState(remoteRecords);
 
-  useEffect(() => {
+  const {
+    isEditing,
+    setIsEditing,
+    cellToEdit,
+    setCellToEdit,
+    recordInputRef,
+    handleExitEditing,
+  } = useEditingCell({ records, setRecords });
+
+  const recomputeGrid = () => {
+    headerGridRef.current.forceUpdate();
+    headerGridRef.current.recomputeGridSize();
+    recordsGridRef.current.forceUpdate();
+    recordsGridRef.current.recomputeGridSize();
+  };
+
+  useDidMountEffect(() => {
     let timer;
     if (hasAddedNewField) {
-      recordsGridRef.current.forceUpdate();
-      recordsGridRef.current.recomputeGridSize();
+      recomputeGrid();
       timer = setTimeout(() => {
         setHasAddedNewField(false);
       }, 800);
@@ -79,10 +86,7 @@ export function TableRenderer({
 
   useDidMountEffect(() => {
     if (headerGridRef.current && recordsGridRef.current) {
-      headerGridRef.current.forceUpdate();
-      headerGridRef.current.recomputeGridSize();
-      recordsGridRef.current.forceUpdate();
-      recordsGridRef.current.recomputeGridSize();
+      recomputeGrid();
     }
   }, [fields]);
 
@@ -175,9 +179,10 @@ export function TableRenderer({
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
-                        const recordsToUse = updatedRecords || records;
+                        const isEditable = !isLastRow && !isRowNo && baseUser?.can(PERMISSIONS.EditFieldData, field);
+
                         let value = columnIndex !== 0 && !isLastRow
-                          ? recordsToUse[rowIndex][field.name]
+                          ? records[rowIndex][field.name]
                           : null;
                         if (columnIndex === 0) {
                           value = rowIndex + 1;
@@ -203,26 +208,15 @@ export function TableRenderer({
                           setIsEditing,
                           cellToEdit,
                           setCellToEdit,
-                          editCellInput,
-                          setEditCellInput,
                           records,
-                          validationToolTip,
-                          setValidationToolTip,
+                          setRecords,
                           singleCellRef,
                           mutateTableRecords,
                           table,
                           isNewRecord,
                           setIsNewRecord,
-                          connections,
-                          initialFields,
-                          setUpdatedRecords,
-                          updatedRecords,
-                          calendarValue,
-                          setCalendarValue,
-                          isTurbo: base.isTurbo,
-                          canAddRecords,
-                          catchError,
-                          baseUser,
+                          isEditable,
+                          handleExitEditing,
                           ...props,
                         });
                       }}

@@ -35,7 +35,7 @@ export const OutsideCellClick = (props) => {
   });
 
   const renderComponent = () => React.createElement(
-    props.component || 'span',
+    props.component || 'div',
     getProps(),
     props.children,
   );

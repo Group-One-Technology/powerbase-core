@@ -42,9 +42,9 @@ export async function addMagicRecord(payload) {
   return undefined;
 }
 
-export async function upsertMagicValue({ tableId, ...payload }) {
+export async function upsertMagicValues({ tableId, ...payload }) {
   const response = await securedApi.post(
-    `/tables/${tableId}/magic_value`,
+    `/tables/${tableId}/upsert_magic_values`,
     payload,
   );
 

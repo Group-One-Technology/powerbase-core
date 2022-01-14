@@ -21,7 +21,7 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
-  schema(:upsert_magic_record) do
+  schema(:upsert_magic_values) do
     optional(:id).value(:integer)
     optional(:data)
     required(:primary_keys)
@@ -85,8 +85,8 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /tables/:id/upsert_magic_record
-  def upsert_magic_record
+  # POST /tables/:id/upsert_magic_values
+  def upsert_magic_values
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:add_records, @table)
