@@ -4,6 +4,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useTableConnections } from '@models/TableConnections';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { updateFieldData } from '@lib/api/records';
@@ -15,6 +16,7 @@ export function useEditingCell({ records, setRecords }) {
   const { saving, saved, catchError } = useSaveStatus();
   const { data: connections } = useTableConnections();
   const { initialFields } = useViewFieldState();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const recordInputRef = useRef();
   const [isEditing, setIsEditing] = useState(false);
@@ -92,6 +94,7 @@ export function useEditingCell({ records, setRecords }) {
       });
 
       exitEditing();
+      await mutateTableRecords(updatedRecords, false);
       saved();
     } catch (err) {
       exitEditing();

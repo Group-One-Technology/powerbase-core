@@ -54,8 +54,6 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   } = response;
 
   const parsedData = data && data?.reduce((prev, cur) => prev?.concat(cur), []);
-  const mergedData = parsedData;
-
   const isLoadingInitialData = !data && !error;
   const isLoading = isLoadingInitialData
     || !!(size > 0 && data && typeof data[size - 1] === 'undefined');
@@ -66,7 +64,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
 
   return {
     ...response,
-    data: mergedData,
+    data: parsedData,
     isLoading,
     isReachingEnd,
     loadMore,
