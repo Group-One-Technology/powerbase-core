@@ -652,10 +652,12 @@ module Powerbase
         end
 
         if is_magic_values
-          @is_magic_sort = true
-          formatted_sort.select do |sort_item|
+          formatted_sort = formatted_sort.select do |sort_item|
             !!@magic_fields.find{|item| item.name == sort_item[:field].to_s}
           end
+          @is_magic_sort = true if formatted_sort.length > 0
+
+          formatted_sort
         else
           formatted_sort.select do |sort_item|
             !!@fields.find{|item| item.name == sort_item[:field].to_s}
