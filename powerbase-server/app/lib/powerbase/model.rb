@@ -163,7 +163,7 @@ module Powerbase
 
         if magic_search_params != nil
           magic_search_params[:from] = (page - 1) * limit
-          magic_search_params[:size] = limit
+          magic_search_params[:size] = limit + 100
           magic_result = @esclient.search(index: @index, body: magic_search_params)
           magic_records = format_es_result(magic_result)
         end
@@ -175,7 +175,7 @@ module Powerbase
             .all
         }
 
-        merge_records(records, magic_records)
+        query.merge_records(records, magic_records)
       end
     end
 
@@ -223,19 +223,6 @@ module Powerbase
           end
 
           result["_source"].symbolize_keys.merge("doc_id": result["_id"])
-        end
-      end
-
-      def merge_records(records, magic_records)
-        return records if magic_records == nil
-        primary_keys = @table.primary_keys
-        fields = @table.fields
-
-        records.map do |record|
-          doc_id = get_doc_id(primary_keys, record, fields)
-          magic_record = magic_records.select {|item| item[:doc_id] == doc_id}.first || {}
-
-          { **record, **magic_record }
         end
       end
   end
