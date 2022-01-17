@@ -629,6 +629,7 @@ module Powerbase
       end
 
       def format_sort(is_magic_values = false)
+        return [] if !@sort
         formatted_sort = if @sort.kind_of?(Array) && @sort.length > 0
           @sort.map do |sort_item|
             operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
