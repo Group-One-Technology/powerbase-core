@@ -185,11 +185,11 @@ module Powerbase
       end
 
       # For sorting
-      es_sort = format_sort(!@turbo)
+      es_sort = format_sort(!@turbo, true)
       if es_sort.kind_of?(Array) && es_sort.length > 0
         sort_param = es_sort.map do |sort_item|
           sort_field = if @turbo
-              @fields.find {|field| field.name == sort_item[:field] }
+              @table.fields.find {|field| field.name == sort_item[:field] }
             else
               @magic_fields.find {|field| field.name == sort_item[:field] }
             end
@@ -626,7 +626,7 @@ module Powerbase
         included_fields
       end
 
-      def format_sort(is_magic_values = false)
+      def format_sort(is_magic_values = false, is_elasticsearch = false)
         return [] if !@sort
         formatted_sort = if @sort.kind_of?(Array) && @sort.length > 0
           @sort.map do |sort_item|
@@ -654,7 +654,8 @@ module Powerbase
             !!@magic_fields.find{|item| item.name == sort_item[:field].to_s}
           end
           @is_magic_sort = true if formatted_sort.length > 0
-
+          formatted_sort
+        elsif is_elasticsearch
           formatted_sort
         else
           formatted_sort.select do |sort_item|
