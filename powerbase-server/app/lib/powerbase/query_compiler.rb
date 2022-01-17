@@ -38,7 +38,7 @@ module Powerbase
       @include_json = options[:include_json] || false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
-      @magic_fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: true)
+      @magic_fields = @table.magic_fields
       @field_types = PowerbaseFieldType.all
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
@@ -63,8 +63,10 @@ module Powerbase
 
     # * Find records by their fields.
     # Used in conjunction with to_sequel or to_elasticsearch
+    # * TODO Revert to previous veresion when primary keys are included in elasticsearch for magic values.
+    # ! Currently only works for to_sequel due to magic values not including the primary keys in indexing.
     # Ex: query_string.find_by({ is_completed: true, year: 2001 }).to_sequel
-    def find_by(filters)
+    def find_by(filters, is_magic_values = false)
       operator = @turbo ? "is" : "="
 
       updated_filters = filters
@@ -75,6 +77,16 @@ module Powerbase
             filter: { operator: operator, value: filters[field].to_s }
           }
         end
+
+      if !is_magic_values
+        updated_filters = updated_filters.select do |key, value|
+          @fields.select {|item| item.name == key.to_s}
+        end
+      else
+        updated_filters = updated_filters.select do |key, value|
+          @magic_fields.select {|item| item.name == key.to_s}
+        end
+      end
 
       @filter = { operator: "and", filters: updated_filters }
 

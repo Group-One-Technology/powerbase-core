@@ -50,11 +50,22 @@ export function BaseSingleRecordModal({
   }, [table, initialRecord]);
 
   useEffect(() => {
+    setRecord(record.map((item) => {
+      if (item.isPii) return { ...item, includePii };
+      return item;
+    }));
+  }, [includePii]);
+
+  useEffect(() => {
     if (remoteRecord) {
-      setRecord(record.map((item) => ({
-        ...item,
-        value: remoteRecord[item.name] ?? item.value,
-      })));
+      setRecord(record.map((item) => {
+        const updatedItem = {
+          ...item,
+          value: remoteRecord[item.name] ?? item.value,
+        };
+        if (updatedItem.isPii) return { ...updatedItem, includePii };
+        return updatedItem;
+      }));
     }
   }, [open, remoteRecord]);
 
@@ -113,6 +124,7 @@ export function BaseSingleRecordModal({
                 <RecordItem
                   key={item.id}
                   item={item}
+                  includePii={includePii}
                   fieldTypes={fieldTypes}
                   handleOpenRecord={handleOpenRecord}
                   handleRecordInputChange={handleRecordInputChange}

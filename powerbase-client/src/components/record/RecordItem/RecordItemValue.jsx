@@ -90,7 +90,7 @@ export function RecordItemValue({
     );
   }
 
-  if (item.isPii && item.value == null) {
+  if (item.isPii && !item.includePii) {
     return (
       <Input
         type="password"

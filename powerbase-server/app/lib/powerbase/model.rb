@@ -67,11 +67,44 @@ module Powerbase
       else
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
-        remote_db() {|db|
+        record = remote_db() {|db|
           db.from(@table_name)
             .yield_self(&sequel_query)
             .first
         }
+
+        magic_fields = @table.magic_fields
+
+        if magic_fields.length > 0
+          doc_id = format_doc_id(options[:primary_keys])
+          magic_result = get_record(@index, doc_id)
+
+          if magic_result["found"]
+            magic_record = magic_result["_source"]
+
+            # TODO: Remove when primary keys are now indexed for magic values and find_by is now working for to_elasticsearch.
+            if !include_pii
+              magic_record = magic_record.select do |key, value|
+                field = magic_fields.find {|field| field.name == key.to_s}
+                field ? !field.is_pii : false
+              end
+            end
+
+            if !include_json
+              json_text = PowerbaseFieldType.find_by(name: "JSON Text")
+              magic_record = magic_record.map do |key, value|
+                field = magic_fields.find {|field| field.name == key.to_s}
+                next value[0..40] if field.powerbase_field_type_id == json_text.id
+                next value
+              end
+
+            end
+
+            { **record, **magic_record }
+          end
+        else
+          record
+        end
       end
     end
 
