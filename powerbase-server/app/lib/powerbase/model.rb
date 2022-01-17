@@ -67,11 +67,19 @@ module Powerbase
       else
         sequel_query = query.find_by(options[:primary_keys]).to_sequel
 
-        remote_db() {|db|
+        record = remote_db() {|db|
           db.from(@table_name)
             .yield_self(&sequel_query)
             .first
         }
+
+        if @table.magic_fields.length > 0
+          doc_id = format_doc_id(options[:primary_keys])
+          magic_result = get_record(@index, doc_id)
+          record = { **record, **magic_result["_source"] } if magic_result["found"]
+        end
+
+        record
       end
     end
 
