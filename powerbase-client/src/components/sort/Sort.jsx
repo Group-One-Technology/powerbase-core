@@ -12,6 +12,7 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useTableView } from '@models/TableView';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { SORT_OPERATORS } from '@lib/constants/sort';
@@ -23,6 +24,7 @@ import { SortItem } from './SortItem';
 export function Sort() {
   const sortRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
+  const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
@@ -32,7 +34,7 @@ export function Sort() {
   const [isMagicSort, setIsMagicSort] = useState(false);
 
   useEffect(() => {
-    if (fields?.length && sort?.length) {
+    if (!base?.isTurbo && fields?.length && sort?.length) {
       setIsMagicSort(sort.some((sortItem) => {
         const field = fields.find((item) => item.name === sortItem.field);
         return field.isVirtual;

@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { SelectorIcon } from '@heroicons/react/solid';
 import { Listbox } from '@headlessui/react';
 
+import { useBase } from '@models/Base';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { truncateString } from '@lib/helpers/truncateString';
@@ -16,7 +17,9 @@ export function SortField({
   disabled,
   isFirst,
 }) {
+  const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
+  const isFilteredOptions = !base?.isTurbo && !isFirst && value;
 
   return (
     <Listbox value={value?.id} onChange={onChange} disabled={disabled}>
@@ -52,9 +55,9 @@ export function SortField({
               className={({ active, selected }) => cn(
                 'select-none relative py-1.5 pl-10 pr-6',
                 (active || selected) ? 'bg-gray-100' : 'bg-white',
-                (!isFirst && value && item.isVirtual !== value.isVirtual) ? 'cursor-not-allowed text-gray-500' : 'cursor-default text-gray-900',
+                (isFilteredOptions && item.isVirtual !== value.isVirtual) ? 'cursor-not-allowed text-gray-500' : 'cursor-default text-gray-900',
               )}
-              disabled={(!isFirst && value && item.isVirtual !== value.isVirtual)}
+              disabled={(isFilteredOptions && item.isVirtual !== value.isVirtual)}
             >
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
                 <FieldTypeIcon

@@ -88,8 +88,6 @@ module Powerbase
 
       included_fields = included_fields.map {|field| field.name.to_sym}
 
-      sequel_sort =
-
       -> (db) {
         db = db.select(*included_fields)
 
