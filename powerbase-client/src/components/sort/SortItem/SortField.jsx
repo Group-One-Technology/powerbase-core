@@ -14,6 +14,7 @@ export function SortField({
   options,
   onChange,
   disabled,
+  isFirst,
 }) {
   const { data: fieldTypes } = useFieldTypes();
 
@@ -49,9 +50,11 @@ export function SortField({
               key={item.name}
               value={item.id}
               className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 pl-10 pr-6 text-gray-900',
+                'select-none relative py-1.5 pl-10 pr-6',
                 (active || selected) ? 'bg-gray-100' : 'bg-white',
+                (!isFirst && value && item.isVirtual !== value.isVirtual) ? 'cursor-not-allowed text-gray-500' : 'cursor-default text-gray-900',
               )}
+              disabled={(!isFirst && value && item.isVirtual !== value.isVirtual)}
             >
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
                 <FieldTypeIcon
@@ -77,4 +80,5 @@ SortField.propTypes = {
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  isFirst: PropTypes.bool,
 };

@@ -1,4 +1,6 @@
-import React, { Fragment, useRef } from 'react';
+import React, {
+  Fragment, useEffect, useRef, useState,
+} from 'react';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
@@ -27,6 +29,16 @@ export function Sort() {
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
+  const [isMagicSort, setIsMagicSort] = useState(false);
+
+  useEffect(() => {
+    if (fields?.length && sort?.length) {
+      setIsMagicSort(sort.some((sortItem) => {
+        const field = fields.find((item) => item.name === sortItem.field);
+        return field.isVirtual;
+      }));
+    }
+  }, [fields, sort]);
 
   const updateSort = async (value) => {
     if (canManageView) {
@@ -34,7 +46,7 @@ export function Sort() {
 
       const updatedSort = {
         id: encodeURIComponent(parseSortQueryString(value)),
-        value,
+        value: value.filter((sortItem) => fields.some((item) => item.name === sortItem.field)),
       };
 
       setSort(updatedSort);
@@ -69,17 +81,21 @@ export function Sort() {
   } = useReorderSort({ view, sort, updateSort });
 
   const handleAddSortItem = async () => {
-    if (canManageView) {
+    const initialField = fields?.find((item) => item.isVirtual === isMagicSort);
+
+    if (canManageView && initialField) {
       const updatedSort = [
         ...sort,
         {
-          id: `${fields[0].name}-${SORT_OPERATORS[0]}-${sort.length}`,
-          field: fields[0].name,
+          field: initialField.name,
           operator: SORT_OPERATORS[0],
         },
       ];
 
-      await updateSort(updatedSort);
+      await updateSort(updatedSort.map((item, index) => ({
+        ...item,
+        id: `${fields[0].name}-${SORT_OPERATORS[0]}-${index}`,
+      })));
     }
   };
 
@@ -132,7 +148,7 @@ export function Sort() {
                       onDragEnd={handleReorderSort}
                     >
                       <SortableContext items={sort} strategy={verticalListSortingStrategy}>
-                        {sort.map((item) => (
+                        {sort.map((item, index) => (
                           <SortItem
                             key={item.id}
                             id={item.id}
@@ -141,6 +157,8 @@ export function Sort() {
                             remove={handleRemoveSortItem}
                             updateRecords={updateRecords}
                             canManageViews={canManageView}
+                            isMagicSort={isMagicSort}
+                            isFirst={index === 0}
                           />
                         ))}
                       </SortableContext>
