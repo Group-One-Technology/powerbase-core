@@ -36,29 +36,13 @@ module Powerbase
       @sort = options[:sort] == nil ? [] : options[:sort]
       @include_pii = options[:include_pii] || false
       @include_json = options[:include_json] || false
+      @is_magic_sort = false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
       @magic_fields = @table.magic_fields
       @field_types = PowerbaseFieldType.all
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
-
-      @sort = if @sort.kind_of?(Array) && @sort.length > 0
-        @sort.map do |sort_item|
-          operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
-              "desc"
-            else
-              "asc"
-            end
-
-          { field: sort_item[:field], operator: operator }
-        end
-      elsif @sort.kind_of?(Array)
-        primary_keys = @fields.select {|field| field.is_primary_key }
-        order_field = primary_keys.length > 0 ? primary_keys.first : @fields.first
-
-        [{ field: order_field.name, operator: "asc" }]
-      end
     end
 
     # * Find records by their fields.
@@ -103,6 +87,8 @@ module Powerbase
       end
 
       included_fields = included_fields.map {|field| field.name.to_sym}
+
+      sequel_sort =
 
       -> (db) {
         db = db.select(*included_fields)
@@ -158,8 +144,9 @@ module Powerbase
         end
 
         # For sorting
-        if @sort.kind_of?(Array) && @sort.length > 0
-          @sort.each do |sort_item|
+        sequel_sort = format_sort
+        if sequel_sort.kind_of?(Array) && sequel_sort.length > 0
+          sequel_sort.each do |sort_item|
             if sort_item[:operator] == "asc"
               db = db.order_append(Sequel.asc(sort_item[:field].to_sym, :nulls => :last))
             else
@@ -200,8 +187,9 @@ module Powerbase
       end
 
       # For sorting
-      if @sort.kind_of?(Array) && @sort.length > 0
-        sort = @sort.map do |sort_item|
+      es_sort = format_sort(!@turbo)
+      if es_sort.kind_of?(Array) && es_sort.length > 0
+        sort_param = es_sort.map do |sort_item|
           sort_field = if @turbo
               @fields.find {|field| field.name == sort_item[:field] }
             else
@@ -228,7 +216,7 @@ module Powerbase
           sort_column
         end
 
-        search_params[:sort] = sort
+        search_params[:sort] = sort_param
       end
 
       # For filtering
@@ -250,6 +238,29 @@ module Powerbase
       end
 
       search_params
+    end
+
+    def merge_records(records, magic_records)
+      return records if magic_records == nil
+      primary_keys = @table.primary_keys
+      fields = @table.fields
+
+      if @is_magic_sort
+        magic_records.map do |magic_record|
+          # TODO - retrieve records based on primary keys instead of doc_id when primary keys are indexed for magic values.
+          record = records.find {|item| get_doc_id(primary_keys, item, fields) == magic_record[:doc_id] }
+          next nil if !record
+          { **record, **magic_record }
+        end
+          .select {|item| item != nil}
+      else
+        records.map do |record|
+          doc_id = get_doc_id(primary_keys, record, fields)
+          magic_record = magic_records.find {|item| item[:doc_id] == doc_id} || {}
+
+          { **record, **magic_record }
+        end
+      end
     end
 
     private
@@ -615,6 +626,43 @@ module Powerbase
         end
 
         included_fields
+      end
+
+      def format_sort(is_magic_values = false)
+        return [] if !@sort
+        formatted_sort = if @sort.kind_of?(Array) && @sort.length > 0
+          @sort.map do |sort_item|
+            operator = if sort_item[:operator] == "descending" || sort_item[:operator] == "desc"
+                "desc"
+              else
+                "asc"
+              end
+
+            { field: sort_item[:field], operator: operator }
+          end
+        elsif @sort.kind_of?(Array)
+          primary_keys = @fields.select {|field| field.is_primary_key }
+          order_field = if primary_keys.length > 0
+              primary_keys.first
+            else
+              is_magic_values ? @magic_fields.first : @fields.first
+            end
+
+          [{ field: order_field.name, operator: "asc" }]
+        end
+
+        if is_magic_values
+          formatted_sort = formatted_sort.select do |sort_item|
+            !!@magic_fields.find{|item| item.name == sort_item[:field].to_s}
+          end
+          @is_magic_sort = true if formatted_sort.length > 0
+
+          formatted_sort
+        else
+          formatted_sort.select do |sort_item|
+            !!@fields.find{|item| item.name == sort_item[:field].to_s}
+          end
+        end
       end
   end
 end
