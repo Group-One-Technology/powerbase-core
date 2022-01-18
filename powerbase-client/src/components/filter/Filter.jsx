@@ -24,11 +24,10 @@ export function Filter() {
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
+  const canManageViews = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   const updateTableRecords = useCallback(debounce(async () => {
-    if (filterRef.current && canManageView) {
+    if (filterRef.current && canManageViews) {
       saving();
 
       const filters = Array.from(filterRef.current.querySelectorAll('.filter') || []).map(({ attributes }) => ({
@@ -99,7 +98,7 @@ export function Filter() {
                       filterGroup={initialFilters}
                       fields={fields}
                       updateTableRecords={updateTableRecords}
-                      canManageView={canManageView}
+                      canManageViews={canManageViews}
                     />
                   </div>
                 </div>
