@@ -1,4 +1,6 @@
-import React, { Fragment, useRef, useCallback } from 'react';
+import React, {
+  Fragment, useRef, useCallback, useState, useEffect,
+} from 'react';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
@@ -9,22 +11,37 @@ import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableView } from '@models/TableView';
+import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
+import { getFilterFieldNames } from '@lib/helpers/filter/getFilterFieldNames';
 import { FilterGroup } from './FilterGroup';
 
 export function Filter() {
   const filterRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
+  const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
+  const [isMagicFilter, setIsMagicFilter] = useState(false);
+
   const canManageViews = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
+
+  useEffect(() => {
+    if (!base?.isTurbo && fields?.length && initialFilters?.filters?.length) {
+      const filterFieldNames = getFilterFieldNames(initialFilters);
+      setIsMagicFilter(filterFieldNames.some((filterField) => {
+        const field = fields.find((item) => item.name === filterField);
+        return field.isVirtual;
+      }));
+    }
+  }, [fields, initialFilters]);
 
   const updateTableRecords = useCallback(debounce(async () => {
     if (filterRef.current && canManageViews) {
