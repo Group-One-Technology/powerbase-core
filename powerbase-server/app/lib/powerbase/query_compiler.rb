@@ -225,7 +225,7 @@ module Powerbase
           else
             @filter
           end
-        query_string = transform_elasticsearch_filter(filter_group: parsedTokens, search_query: @query)
+        query_string = transform_elasticsearch_filter(parsedTokens, @query, !@turbo)
 
         search_params[:query] = {
           query_string: {
@@ -494,7 +494,7 @@ module Powerbase
       end
 
       # * Transforms parsed tokens into elasticsearch query string
-      def transform_elasticsearch_filter(filter_group, search_query = nil)
+      def transform_elasticsearch_filter(filter_group, search_query = nil, is_magic_values = false)
         logical_op = if filter_group != nil && filter_group[:operator]
             if filter_group[:operator] == "or"
               "OR"
@@ -505,16 +505,16 @@ module Powerbase
             "AND"
           end
 
-        filters = filter_group ? filter_group[:filters] : []
+        filters = filter_group ? filter_group[:filters] || [] : []
 
         elasticsearch_filter = filters.map do |filter|
           inner_filter_group = filter[:filters]
 
           if inner_filter_group && inner_filter_group.length > 0
-            next transform_elasticsearch_filter(filter_group: filter)
+            next transform_elasticsearch_filter(filter)
           end
 
-          cur_field = if is_magic_records
+          cur_field = if is_magic_values
               @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
             else
               @fields.find {|item| item.name.to_s == filter[:field].to_s}
