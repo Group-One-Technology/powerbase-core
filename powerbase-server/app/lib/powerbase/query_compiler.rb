@@ -167,7 +167,7 @@ module Powerbase
           search_params[:script_fields][field_name.to_sym] = {
             script: {
               lang: "painless",
-              source: "if (params._source.#{field_name} != null) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
+              source: "if (params._source.#{field_name} != null && params._source.#{field_name}.length() > 40) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
             },
           }
         end
