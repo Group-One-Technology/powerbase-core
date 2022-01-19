@@ -227,12 +227,14 @@ module Powerbase
           end
         query_string = transform_elasticsearch_filter(parsedTokens, @query, !@turbo)
 
-        search_params[:query] = {
-          query_string: {
-            query: query_string,
-            time_zone: "+00:00"
+        if query_string.length > 0
+          search_params[:query] = {
+            query_string: {
+              query: query_string,
+              time_zone: "+00:00"
+            }
           }
-        }
+        end
       end
 
       search_params
