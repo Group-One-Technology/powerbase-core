@@ -30,8 +30,9 @@ export function Sort() {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const [isMagicSort, setIsMagicSort] = useState(false);
+  const isSingleSort = sort?.length === 1;
+  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   useEffect(() => {
     if (!base?.isTurbo && fields?.length && sort?.length) {
@@ -150,7 +151,7 @@ export function Sort() {
                       onDragEnd={handleReorderSort}
                     >
                       <SortableContext items={sort} strategy={verticalListSortingStrategy}>
-                        {sort.map((item, index) => (
+                        {sort.map((item) => (
                           <SortItem
                             key={item.id}
                             id={item.id}
@@ -160,7 +161,7 @@ export function Sort() {
                             updateRecords={updateRecords}
                             canManageViews={canManageView}
                             isMagicSort={isMagicSort}
-                            isFirst={index === 0}
+                            isSingleSort={isSingleSort}
                           />
                         ))}
                       </SortableContext>

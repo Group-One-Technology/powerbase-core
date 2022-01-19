@@ -48,10 +48,8 @@ module Powerbase
 
     # * Find records by their fields.
     # Used in conjunction with to_sequel or to_elasticsearch
-    # * TODO Revert to previous veresion when primary keys are included in elasticsearch for magic values.
-    # ! Currently only works for to_sequel due to magic values not including the primary keys in indexing.
     # Ex: query_string.find_by({ is_completed: true, year: 2001 }).to_sequel
-    def find_by(filters, is_magic_values = false)
+    def find_by(filters)
       operator = @turbo ? "is" : "="
 
       updated_filters = filters
@@ -62,16 +60,6 @@ module Powerbase
             filter: { operator: operator, value: filters[field].to_s }
           }
         end
-
-      if !is_magic_values
-        updated_filters = updated_filters.select do |key, value|
-          @fields.select {|item| item.name == key.to_s}
-        end
-      else
-        updated_filters = updated_filters.select do |key, value|
-          @magic_fields.select {|item| item.name == key.to_s}
-        end
-      end
 
       @filter = { operator: "and", filters: updated_filters }
 
@@ -179,7 +167,7 @@ module Powerbase
           search_params[:script_fields][field_name.to_sym] = {
             script: {
               lang: "painless",
-              source: "if (params._source.#{field_name} != null) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
+              source: "if (params._source.#{field_name} != null && params._source.#{field_name}.length() > 40) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
             },
           }
         end
@@ -244,23 +232,19 @@ module Powerbase
     def merge_records(records, magic_records)
       return records if magic_records == nil
       primary_keys = @table.primary_keys
-      fields = @table.fields
       merged_records = nil
 
       if @is_magic_sort
         merged_records = magic_records.map do |magic_record|
-          # TODO - retrieve records based on primary keys instead of doc_id when primary keys are indexed for magic values.
-          record = records.find {|item| get_doc_id(primary_keys, item, fields) == magic_record[:doc_id] }
+          record = get_record_by_key(records, magic_record, primary_keys)
           next nil if !record
-          { **record, **magic_record }
+          { **magic_record, **record }
         end
           .select {|item| item != nil}
       else
         merged_records = records.map do |record|
-          doc_id = get_doc_id(primary_keys, record, fields)
-          magic_record = magic_records.find {|item| item[:doc_id] == doc_id} || {}
-
-          { **record, **magic_record }
+          magic_record = get_record_by_key(magic_records, record, primary_keys) || {}
+          { **magic_record, **record }
         end
       end
 
@@ -628,7 +612,8 @@ module Powerbase
         included_fields =  if !is_elasticsearch
             @fields
           elsif is_magic_records
-            @magic_fields
+            primary_key_fields = @fields.select {|field| field.is_primary_key }
+            [*@magic_fields, *primary_key_fields]
           else
             [*@fields, *@magic_fields]
           end
@@ -675,6 +660,19 @@ module Powerbase
           formatted_sort.select do |sort_item|
             !!@fields.find{|item| item.name == sort_item[:field].to_s}
           end
+        end
+      end
+
+      def get_record_by_key(records, record, primary_keys)
+        records.find do |item|
+          is_found = true
+
+          primary_keys.each do |key|
+            key_name = key.name.to_sym
+            is_found = false if item[key_name] != record[key_name]
+          end
+
+          next is_found
         end
       end
   end

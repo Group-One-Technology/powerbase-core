@@ -15,11 +15,11 @@ export function SortField({
   options,
   onChange,
   disabled,
-  isFirst,
+  isSingleSort,
 }) {
   const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
-  const isFilteredOptions = !base?.isTurbo && !isFirst && value;
+  const isFilteredOptions = !base?.isTurbo && !isSingleSort && value;
 
   return (
     <Listbox value={value?.id} onChange={onChange} disabled={disabled}>
@@ -83,5 +83,5 @@ SortField.propTypes = {
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
-  isFirst: PropTypes.bool,
+  isSingleSort: PropTypes.bool,
 };

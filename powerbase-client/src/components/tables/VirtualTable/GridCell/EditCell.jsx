@@ -12,7 +12,7 @@ function getValue(value) {
   return value;
 }
 
-// TODO: Use Popover for displaying validation errors instead of tooltip
+// TODO: Use absolute positioned element for displaying validation errors instead of tooltip
 // const TooltipContent = () => (
 //   <div className="flex">
 //     <div className="relative mx-2">
