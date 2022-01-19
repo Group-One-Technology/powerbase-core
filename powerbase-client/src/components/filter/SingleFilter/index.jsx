@@ -28,7 +28,9 @@ export function SingleFilter({
   isSingleFilter,
 }) {
   const { data: fieldTypes } = useFieldTypes();
-  const initialField = fields?.find((item) => item.isVirtual === isMagicFilter);
+  const initialField = isMagicFilter != null
+    ? fields?.find((item) => item.isVirtual === isMagicFilter)
+    : fields[0];
   const [field, setField] = useState(
     filter?.field
       ? fields.find((item) => item.name === filter.field) || initialField

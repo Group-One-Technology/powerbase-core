@@ -6,6 +6,7 @@ import { Listbox } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { useBase } from '@models/Base';
 
 export function FilterField({
   id,
@@ -16,6 +17,7 @@ export function FilterField({
   isSingleFilter,
   isMagicFilter,
 }) {
+  const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
 
   return (
@@ -48,7 +50,7 @@ export function FilterField({
         </Listbox.Button>
         <Listbox.Options className="absolute z-10 mt-1 w-auto min-w-[13rem] bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
           {options?.map((item) => {
-            const isItemDisabled = !isSingleFilter && !item.isVirtual === isMagicFilter;
+            const isItemDisabled = !isSingleFilter && !base?.isTurbo && !item.isVirtual === isMagicFilter;
 
             return (
               <Listbox.Option
