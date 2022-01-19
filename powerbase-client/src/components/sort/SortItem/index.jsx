@@ -17,7 +17,7 @@ export function SortItem({
   updateRecords,
   canManageViews,
   isMagicSort,
-  isFirst,
+  isSingleSort,
 }) {
   const { data: fields } = useViewFields();
   const initialField = fields?.find((item) => item.isVirtual === isMagicSort);
@@ -72,7 +72,7 @@ export function SortItem({
         options={fields}
         onChange={handleFieldChange}
         disabled={!canManageViews}
-        isFirst={isFirst}
+        isSingleSort={isSingleSort}
       />
       <label htmlFor={`sort${id}-operator`} className="sr-only">Sort Operator</label>
       <SortOperator
@@ -104,5 +104,5 @@ SortItem.propTypes = {
   updateRecords: PropTypes.func.isRequired,
   canManageViews: PropTypes.bool,
   isMagicSort: PropTypes.bool,
-  isFirst: PropTypes.bool,
+  isSingleSort: PropTypes.bool,
 };
