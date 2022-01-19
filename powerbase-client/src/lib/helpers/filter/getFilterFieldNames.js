@@ -10,6 +10,8 @@ function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
 
-export function getFilterFieldNames(initialFilter) {
-  return extractFieldFromFilters(initialFilter?.filters).filter(onlyUnique);
+export function getFilterFieldNames(initialFilter, { unique = true } = {}) {
+  const fieldNames = extractFieldFromFilters(initialFilter?.filters);
+  if (unique) return fieldNames.filter(onlyUnique);
+  return fieldNames;
 }

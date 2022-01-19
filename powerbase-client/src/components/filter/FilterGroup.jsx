@@ -5,6 +5,7 @@ import { XIcon } from '@heroicons/react/outline';
 
 import { IViewField } from '@lib/propTypes/view-field';
 import { initializeFilterGroup } from '@lib/helpers/filter/initializeFilterGroup';
+import { getFilterFieldNames } from '@lib/helpers/filter/getFilterFieldNames';
 import { AddFilterMenu } from './AddFilterMenu';
 import { SingleFilter } from './SingleFilter';
 import { FilterLogicalOperator } from './FilterLogicalOperator';
@@ -20,6 +21,9 @@ export function FilterGroup({
   handleRemoveFilter: handleParentRemoveFilter,
   updateTableRecords,
   canManageViews,
+  isMagicFilter,
+  isSingleFilter,
+  setIsSingleFilter,
 }) {
   const filterGroupId = `filterGroup${level}`;
 
@@ -35,16 +39,17 @@ export function FilterGroup({
     filterGroup?.operator || 'and',
   );
 
+  const initialField = fields?.find((item) => item.isVirtual === isMagicFilter);
+  const newFilterItem = {
+    id: `${filterGroupId}-${initialField.name}-filter-${newFilterCount}`,
+    field: initialField.name,
+  };
+
   useEffect(() => {
     if (initialFilterGroup?.filters.length > 0) {
       setNewFilterCount(initialFilterGroup.filters.length);
     }
   }, [initialFilterGroup]);
-
-  const newFilterItem = {
-    id: `${filterGroupId}-${fields[0].name}-filter-${newFilterCount}`,
-    field: fields[0].name,
-  };
 
   const handleAddFilter = (isGroup) => {
     if (canManageViews) {
@@ -55,6 +60,11 @@ export function FilterGroup({
           filters: [newFilterItem],
         }
         : newFilterItem;
+
+      if (root) {
+        const filterFieldNames = getFilterFieldNames(filterGroup, { unique: false });
+        setIsSingleFilter(filterFieldNames.length === 0);
+      }
 
       setFilterGroup((prevFilterGroup) => ({
         operator: prevFilterGroup.operator,
@@ -139,6 +149,8 @@ export function FilterGroup({
                     ? logicalOperatorChange
                     : undefined}
                   canManageViews={canManageViews}
+                  isMagicFilter={isMagicFilter}
+                  isSingleFilter={isSingleFilter}
                 />
               );
             }
@@ -158,6 +170,8 @@ export function FilterGroup({
                   ? handleChildLogicalOpChange
                   : undefined}
                 canManageViews={canManageViews}
+                isMagicFilter={isMagicFilter}
+                isSingleFilter={isSingleFilter}
               />
             );
           })}
@@ -196,4 +210,7 @@ FilterGroup.propTypes = {
   handleRemoveFilter: PropTypes.func,
   handleLogicalOpChange: PropTypes.func,
   canManageViews: PropTypes.bool,
+  isMagicFilter: PropTypes.bool,
+  isSingleFilter: PropTypes.bool,
+  setIsSingleFilter: PropTypes.func,
 };

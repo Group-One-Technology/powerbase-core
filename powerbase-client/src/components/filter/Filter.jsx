@@ -30,13 +30,17 @@ export function Filter() {
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
   const [isMagicFilter, setIsMagicFilter] = useState(false);
+  const [isSingleFilter, setIsSingleFilter] = useState(false);
 
   const canManageViews = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   useEffect(() => {
     if (!base?.isTurbo && fields?.length && initialFilters?.filters?.length) {
-      const filterFieldNames = getFilterFieldNames(initialFilters);
-      setIsMagicFilter(filterFieldNames.some((filterField) => {
+      const filterFieldNames = getFilterFieldNames(initialFilters, { unique: false });
+      const uniqueFieldNames = filterFieldNames.filter((item, index) => filterFieldNames.indexOf(item) === index);
+
+      setIsSingleFilter(filterFieldNames.length === 1);
+      setIsMagicFilter(uniqueFieldNames.some((filterField) => {
         const field = fields.find((item) => item.name === filterField);
         return field.isVirtual;
       }));
@@ -116,6 +120,9 @@ export function Filter() {
                       fields={fields}
                       updateTableRecords={updateTableRecords}
                       canManageViews={canManageViews}
+                      isMagicFilter={isMagicFilter}
+                      isSingleFilter={isSingleFilter}
+                      setIsSingleFilter={setIsSingleFilter}
                     />
                   </div>
                 </div>
