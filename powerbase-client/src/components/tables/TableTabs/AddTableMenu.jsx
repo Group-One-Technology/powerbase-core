@@ -41,7 +41,7 @@ const AddTable = ({
         <Popover.Content className="w-60 mt-3 transform sm:px-0 absolute z-10">
           <div className="shadow-lg bg-white ring-1 ring-black ring-opacity-5 mt-2 p-2">
             <button
-              className="text-xs font-medium text-gray-800 mt-2 cursor-pointer hover:bg-gray-200 p-2 cursor-not-allowed"
+              className="text-xs font-medium text-gray-800 mt-2 cursor-pointer hover:bg-gray-200 p-2"
               onClick={handleAddTable}
             >
               Create a new table
