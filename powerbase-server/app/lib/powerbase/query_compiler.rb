@@ -37,6 +37,7 @@ module Powerbase
       @include_pii = options[:include_pii] || false
       @include_json = options[:include_json] || false
       @is_magic_sort = false
+      @is_magic_filter = false
 
       @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
       @magic_fields = @table.magic_fields
@@ -103,7 +104,7 @@ module Powerbase
 
         # For full text search
         if @query != nil && @query.length > 0
-          filters = @actual_fields.map do |field|
+          filters = @fields.map do |field|
             field_type = @field_type[field.powerbase_field_type_id]
             column = {}
             column[field.name.to_sym] = @query
@@ -138,7 +139,7 @@ module Powerbase
             end
 
           filters = transform_sequel_filter(parsedTokens)
-          db = db.where(filters)
+          db = db.where(filters) if filters != nil
         end
 
         # For sorting
@@ -213,7 +214,6 @@ module Powerbase
 
           sort_column
         end
-
         search_params[:sort] = sort_param
       end
 
@@ -228,6 +228,7 @@ module Powerbase
         query_string = transform_elasticsearch_filter(parsedTokens, @query, !@turbo)
 
         if query_string.length > 0
+          @is_magic_filter = !@turbo
           search_params[:query] = {
             query_string: {
               query: query_string,
@@ -244,9 +245,10 @@ module Powerbase
       return records if magic_records == nil
       primary_keys = @table.primary_keys
       fields = @table.fields
+      merged_records = nil
 
       if @is_magic_sort
-        magic_records.map do |magic_record|
+        merged_records = magic_records.map do |magic_record|
           # TODO - retrieve records based on primary keys instead of doc_id when primary keys are indexed for magic values.
           record = records.find {|item| get_doc_id(primary_keys, item, fields) == magic_record[:doc_id] }
           next nil if !record
@@ -254,13 +256,22 @@ module Powerbase
         end
           .select {|item| item != nil}
       else
-        records.map do |record|
+        merged_records = records.map do |record|
           doc_id = get_doc_id(primary_keys, record, fields)
           magic_record = magic_records.find {|item| item[:doc_id] == doc_id} || {}
 
           { **record, **magic_record }
         end
       end
+
+      if @is_magic_filter
+        merged_records = merged_records.select do |merged_record|
+          magic_record = magic_records.find {|item| item[:doc_id] == merged_record[:doc_id]}
+          magic_record != nil
+        end
+      end
+
+      merged_records
     end
 
     private
@@ -513,41 +524,42 @@ module Powerbase
           inner_filter_group = filter[:filters]
 
           if inner_filter_group && inner_filter_group.length > 0
-            next transform_elasticsearch_filter(filter)
+            next transform_elasticsearch_filter(filter, nil, is_magic_values)
           end
 
           cur_field = if is_magic_values
               @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
             else
-              @fields.find {|item| item.name.to_s == filter[:field].to_s}
+              @table.fields.find {|item| item.name.to_s == filter[:field].to_s}
             end
           next if !cur_field
 
           relational_op = filter[:filter][:operator]
           field = cur_field.name
           value = sanitize(filter[:filter][:value])
+          empty_string = "\"\""
 
           case relational_op
           when "is"
             "#{field}:\"#{value}\""
           when "is not"
-            "(NOT #{field}:#{value})"
+            "(NOT #{field}:#{value || empty_string})"
           when "contains"
-            "#{field}:#{value}"
+            "#{field}:#{value || empty_string}"
           when "does not contain"
-            "(NOT #{field}:#{value})"
+            "(NOT #{field}:#{value || empty_string})"
           when "="
-            "#{field}:#{value}"
+            "#{field}:#{value || empty_string}"
           when "!="
-            "(NOT #{field}:#{value})"
+            "(NOT #{field}:#{value || empty_string})"
           when ">"
-            "#{field}:>#{value}"
+            "#{field}:>#{value || empty_string}"
           when ">="
-            "#{field}:>=#{value}"
+            "#{field}:>=#{value || empty_string}"
           when "<"
-            "#{field}:<#{value}"
+            "#{field}:<#{value || empty_string}"
           when "<="
-            "#{field}:<=#{value}"
+            "#{field}:<=#{value || empty_string}"
           when "is exact date"
             "#{field}:#{format_date(value, true)}"
           when "is not exact date"
