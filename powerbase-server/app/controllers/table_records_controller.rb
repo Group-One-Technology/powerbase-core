@@ -31,7 +31,7 @@ class TableRecordsController < ApplicationController
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:view_table, @table)
 
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    model = Powerbase::Model.new(@table)
     @records = model.search({
       query: safe_params[:query],
       filters: safe_params[:filters],
@@ -49,7 +49,7 @@ class TableRecordsController < ApplicationController
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
     include_pii = !!safe_params[:include_pii] && current_user.can?(:manage_table, @table, false)
 
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    model = Powerbase::Model.new(@table)
     record = model.get({
       id: safe_params[:id],
       primary_keys: safe_params[:primary_keys],
@@ -67,7 +67,7 @@ class TableRecordsController < ApplicationController
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:view_table, @table)
 
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    model = Powerbase::Model.new(@table)
     records = model.where({
       page: safe_params[:page],
       limit: safe_params[:limit],
@@ -91,7 +91,7 @@ class TableRecordsController < ApplicationController
       data: data
     }
 
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    model = Powerbase::Model.new(@table)
     record = if @field.is_virtual
       model.update_doc_record(payload)
     else
@@ -118,7 +118,7 @@ class TableRecordsController < ApplicationController
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:view_table, @table)
 
-    model = Powerbase::Model.new(ElasticsearchClient, @table)
+    model = Powerbase::Model.new(@table)
     total_records = model.get_count({
       query: safe_params[:query],
       filters: safe_params[:filters]

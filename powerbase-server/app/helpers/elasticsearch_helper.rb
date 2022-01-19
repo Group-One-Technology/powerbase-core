@@ -5,8 +5,16 @@ module ElasticsearchHelper
     @es_client ||= ElasticsearchClient
   end
 
+  def get_records_count(index)
+    client.perform_request("GET", "#{index}/_count", {}, search_params).body
+  end
+
   def get_record(index, doc_id)
     client.get(index: index, id: doc_id)
+  end
+
+  def search_records(index, body)
+    client.search(index: index, body: body)
   end
 
   def create_new_record(index, body, doc_id)

@@ -7,8 +7,7 @@ module Powerbase
 
     # * Initialize the Powerbase::Model
     # Either connects to Elasticsearch or the remote database based on the "is_turbo" flag.
-    def initialize(esclient, table)
-      @esclient = esclient
+    def initialize(table)
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
       @index = @table.index_name
       @table_name = @table.name
@@ -58,11 +57,11 @@ module Powerbase
         include_pii: include_pii,
         include_json: include_json,
       })
+      create_index!(@index)
 
       if @is_turbo
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
-
-        result = @esclient.search(index: @index, body: search_params)
+        result = search_records(@index, search_params)
         raise StandardError.new("Record not found") if result["hits"]["hits"][0] == nil
         format_es_result(result)[0]
       else
@@ -97,10 +96,11 @@ module Powerbase
       query = Powerbase::QueryCompiler.new(@table)
 
       if @is_turbo
+        create_index!(@index)
         search_params = query.find_by(options[:filters]).to_elasticsearch
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
-        result = @esclient.search(index: @index, body: search_params)
+        result = search_records(@index, search_params)
         format_es_result(result)
       else
         query_string = query.find_by(options[:filters]).to_sequel
@@ -128,12 +128,13 @@ module Powerbase
         filter: options[:filters],
         sort: options[:sort],
       })
+      create_index!(@index)
 
       if @is_turbo
         search_params = query.to_elasticsearch
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
-        result = @esclient.search(index: @index, body: search_params)
+        result = search_records(@index, search_params)
         format_es_result(result)
       else
         magic_search_params = query.to_elasticsearch
@@ -142,7 +143,7 @@ module Powerbase
         if magic_search_params != nil
           magic_search_params[:from] = (page - 1) * limit
           magic_search_params[:size] = limit + 100
-          magic_result = @esclient.search(index: @index, body: magic_search_params)
+          magic_result = search_records(@index, magic_search_params)
           magic_records = format_es_result(magic_result)
         end
 
@@ -169,8 +170,9 @@ module Powerbase
       })
 
       if @is_turbo
+        create_index!(@index)
         search_params = query.to_elasticsearch.except(:_source, :script_fields)
-        response = @esclient.perform_request("GET", "#{@index}/_count", {}, search_params).body
+        response = get_records_count(@index)
         response["count"]
       else
         remote_db() {|db|
