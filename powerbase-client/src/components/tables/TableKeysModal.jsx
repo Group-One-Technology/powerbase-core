@@ -3,10 +3,11 @@ import { Dialog } from '@headlessui/react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { useMounted } from '@lib/hooks/useMounted';
-import { XIcon } from '@heroicons/react/outline';
+import { SparklesIcon, XIcon } from '@heroicons/react/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { useSaveStatus } from '@models/SaveStatus';
+import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useCurrentView } from '@models/views/CurrentTableView';
@@ -21,8 +22,14 @@ import { Button } from '@components/ui/Button';
 import { ConnectionItem } from '@components/connections/ConnectionItem';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { ExclamationIcon } from '@heroicons/react/solid';
+import { OUTLINE_COLORS } from '@lib/constants';
 
-function FieldItem({ field, fieldTypes, action }) {
+function FieldItem({ field, action }) {
+  const { data: base } = useBase();
+  const { data: fieldTypes } = useFieldTypes();
+
+  if (!base || !fieldTypes) return null;
+
   return (
     <li className="flex justify-between gap-1 hover:bg-gray-50">
       <div className="flex-1 py-1 relative flex items-center">
@@ -31,6 +38,9 @@ function FieldItem({ field, fieldTypes, action }) {
         </div>
         <span className="pl-6 text-sm">
           {field.alias} ({field.name})
+          {field.isVirtual && (
+            <SparklesIcon className={cn('inline h-4 w-4 ml-2 cursor-auto select-none', OUTLINE_COLORS[base.color])} />
+          )}
         </span>
       </div>
       {action}
@@ -40,12 +50,12 @@ function FieldItem({ field, fieldTypes, action }) {
 
 FieldItem.propTypes = {
   field: PropTypes.object.isRequired,
-  fieldTypes: PropTypes.array.isRequired,
   action: PropTypes.any,
 };
 
 export function TableKeysModal() {
   const { mounted } = useMounted();
+  const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const {
     saving, saved, catchError, loading,
@@ -62,7 +72,7 @@ export function TableKeysModal() {
     setViewFields(remoteViewFields || []);
   }, [table]);
 
-  if (!table || !fieldTypes) return null;
+  if (!base || !table || !fieldTypes) return null;
 
   const primaryKeys = viewFields.filter((item) => item.isPrimaryKey);
   const foreignKeys = viewFields.filter((item) => item.isForeignKey);
@@ -72,12 +82,14 @@ export function TableKeysModal() {
   const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints;
 
   const handleSetAsPrimary = (selectedField, value) => {
-    setViewFields(viewFields.map((field) => ({
-      ...field,
-      isPrimaryKey: field.id === selectedField.id
-        ? value
-        : field.isPrimaryKey,
-    })));
+    if (!selectedField.isVirtual) {
+      setViewFields(viewFields.map((field) => ({
+        ...field,
+        isPrimaryKey: field.id === selectedField.id
+          ? value
+          : field.isPrimaryKey,
+      })));
+    }
   };
 
   const submit = (evt) => {
@@ -147,7 +159,7 @@ export function TableKeysModal() {
                       key={field.id}
                       field={field}
                       fieldTypes={fieldTypes}
-                      action={canUpdatePrimaryKey && (
+                      action={(canUpdatePrimaryKey && !field.isVirtual) && (
                         <button
                           type="button"
                           className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
@@ -191,15 +203,17 @@ export function TableKeysModal() {
                   fieldTypes={fieldTypes}
                   action={(canUpdatePrimaryKey && !field.isPrimaryKey) && (
                     <>
-                      {field.isPii
+                      {field.isPii || field.isVirtual
                         ? (
                           <Tooltip.Root delayDuration={0}>
-                            <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-900 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">
+                            <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">
                               Set as Primary Key
                             </Tooltip.Trigger>
                             <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
                               <Tooltip.Arrow className="gray-900" />
-                              Cannot set a PII field as a Primary Key.
+                              {field.isVirtual
+                                ? 'Cannot set a Magic field as a Primary Key.'
+                                : 'Cannot set a PII field as a Primary Key.'}
                             </Tooltip.Content>
                           </Tooltip.Root>
                         ) : (
