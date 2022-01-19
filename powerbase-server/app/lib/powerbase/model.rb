@@ -40,8 +40,9 @@ module Powerbase
     # :data :: a hash of updated values.
     def update_doc_record(options)
       create_index!(@index) if !@is_turbo
-      result = update_record(@index, options[:primary_keys], options[:data], !@is_turbo)
-      { doc_id: result["_id"], result: result["result"], data: options[:data] }
+      data = @is_turbo ? options[:data] : { **(options[:data] || {}), **(options[:primary_keys] || {}) }
+      result = update_record(@index, options[:primary_keys], data, !@is_turbo)
+      { doc_id: result["_id"], result: result["result"], data: data }
     end
 
     # * Get a document/table record.
