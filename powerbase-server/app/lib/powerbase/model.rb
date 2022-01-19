@@ -57,9 +57,9 @@ module Powerbase
         include_pii: include_pii,
         include_json: include_json,
       })
-      create_index!(@index)
 
       if @is_turbo
+        create_index!(@index)
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
         result = search_records(@index, search_params)
         raise StandardError.new("Record not found") if result["hits"]["hits"][0] == nil
@@ -74,8 +74,8 @@ module Powerbase
         }
 
         magic_fields = @table.magic_fields
-
         if magic_fields.length > 0
+          create_index!(@index)
           doc_id = format_doc_id(options[:primary_keys])
           magic_result = get_record(@index, doc_id)
           { **record, **magic_result["_source"] }
@@ -128,9 +128,9 @@ module Powerbase
         filter: options[:filters],
         sort: options[:sort],
       })
-      create_index!(@index)
 
       if @is_turbo
+        create_index!(@index)
         search_params = query.to_elasticsearch
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
@@ -141,6 +141,7 @@ module Powerbase
         magic_records = nil
 
         if magic_search_params != nil
+          create_index!(@index)
           magic_search_params[:from] = (page - 1) * limit
           magic_search_params[:size] = limit + 100
           magic_result = search_records(@index, magic_search_params)
