@@ -82,14 +82,13 @@ export function TableKeysModal() {
   const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints;
 
   const handleSetAsPrimary = (selectedField, value) => {
-    if (!selectedField.isVirtual) {
-      setViewFields(viewFields.map((field) => ({
-        ...field,
-        isPrimaryKey: field.id === selectedField.id
-          ? value
-          : field.isPrimaryKey,
-      })));
-    }
+    if (selectedField.isVirtual) return;
+    setViewFields(viewFields.map((field) => ({
+      ...field,
+      isPrimaryKey: field.id === selectedField.id
+        ? value
+        : field.isPrimaryKey,
+    })));
   };
 
   const submit = (evt) => {
@@ -159,7 +158,7 @@ export function TableKeysModal() {
                       key={field.id}
                       field={field}
                       fieldTypes={fieldTypes}
-                      action={(canUpdatePrimaryKey && !field.isVirtual) && (
+                      action={canUpdatePrimaryKey && (
                         <button
                           type="button"
                           className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
