@@ -31,9 +31,7 @@ export function Fields({ table }) {
   const [loading, setLoading] = useState(false);
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
-  /* Setting this as a way of checking for tables with unique row identifiers
-  as it is messier to maintain witout that for now */
-  const containsPrimaryKey = initialFields?.some((field) => field.isPrimaryKey);
+  const hasPrimaryKey = table?.hasPrimaryKey;
   const [isCreatingField, setIsCreatingField] = useState(false);
 
   useEffect(() => {
@@ -41,6 +39,7 @@ export function Fields({ table }) {
   }, [initialFields]);
 
   const handleAddNewField = () => {
+    if (!hasPrimaryKey) return;
     setIsCreatingField(!isCreatingField);
   };
 
@@ -130,7 +129,7 @@ export function Fields({ table }) {
                         </ul>
                       </SortableContext>
                     </DndContext>
-                    {canAddFields && containsPrimaryKey && (
+                    {(canAddFields && hasPrimaryKey) && (
                     <button
                       type="button"
                       className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"

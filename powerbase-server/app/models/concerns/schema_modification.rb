@@ -12,16 +12,21 @@ module SchemaModification
 
     fields = self.fields
 
-    pii_fields = fields.select {|field| field.is_pii }
+    primary_keys = Array(primary_keys)
+    primary_key_fields = fields.select {|field| primary_keys.include?(field.name)}
+
+    virtual_fields = primary_key_fields.select {|field| field.is_virtual }
+    if virtual_fields.any?
+      raise StandardError.new "Cannot set a magic field as a primary key."
+    end
+
+    pii_fields = primary_key_fields.select {|field| field.is_pii }
     if pii_fields.any?
       raise StandardError.new "Cannot set a PII field as a primary key. To proceed, please unset the selected field as PII first."
     end
 
     table_name = self.name.to_sym
-    primary_keys = Array(primary_keys)
-    primary_keys = fields
-      .select {|field| primary_keys.include?(field.name)}
-      .map {|field| field.name.to_sym}
+    primary_keys = primary_key_fields.map {|field| field.name.to_sym}
     current_primary_keys = fields
       .select {|field| field.is_primary_key}
       .map {|field| field.name.to_sym}
