@@ -6,10 +6,18 @@ import { Listbox } from '@headlessui/react';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { useBase } from '@models/Base';
 
 export function FilterField({
-  id, value, options, onChange, disabled,
+  id,
+  value,
+  options,
+  onChange,
+  disabled,
+  isSingleFilter,
+  isMagicFilter,
 }) {
+  const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
 
   return (
@@ -41,27 +49,31 @@ export function FilterField({
           </span>
         </Listbox.Button>
         <Listbox.Options className="absolute z-10 mt-1 w-auto min-w-[13rem] bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-          {options?.map((item) => (
-            <Listbox.Option
-              key={item.name}
-              value={item.id}
-              className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 pl-10 pr-6 text-gray-900',
-                active || selected ? 'bg-gray-100' : 'bg-white',
-                item.isVirtual && 'text-gray-400',
-              )}
-              disabled={item.isVirtual}
-            >
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
-                <FieldTypeIcon
-                  fieldTypes={fieldTypes}
-                  typeId={item.fieldTypeId}
-                  isPrimaryKey={item.isPrimaryKey}
-                />
-              </span>
-              <span className="block truncate">{item.name}</span>
-            </Listbox.Option>
-          ))}
+          {options?.map((item) => {
+            const isItemDisabled = !isSingleFilter && !base?.isTurbo && !item.isVirtual === isMagicFilter;
+
+            return (
+              <Listbox.Option
+                key={item.name}
+                value={item.id}
+                className={({ active, selected }) => cn(
+                  'cursor-default select-none relative py-1.5 pl-10 pr-6 text-gray-900',
+                  active || selected ? 'bg-gray-100' : 'bg-white',
+                  isItemDisabled && 'text-gray-400',
+                )}
+                disabled={isItemDisabled}
+              >
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 mr-1">
+                  <FieldTypeIcon
+                    fieldTypes={fieldTypes}
+                    typeId={item.fieldTypeId}
+                    isPrimaryKey={item.isPrimaryKey}
+                  />
+                </span>
+                <span className="block truncate">{item.name}</span>
+              </Listbox.Option>
+            );
+          })}
         </Listbox.Options>
       </div>
     </Listbox>
@@ -74,4 +86,6 @@ FilterField.propTypes = {
   options: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  isSingleFilter: PropTypes.bool,
+  isMagicFilter: PropTypes.bool,
 };

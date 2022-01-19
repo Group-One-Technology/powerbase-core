@@ -24,12 +24,17 @@ export function SingleFilter({
   handleRemoveFilter,
   handleLogicalOpChange,
   canManageViews,
+  isMagicFilter,
+  isSingleFilter,
 }) {
   const { data: fieldTypes } = useFieldTypes();
+  const initialField = isMagicFilter != null
+    ? fields?.find((item) => item.isVirtual === isMagicFilter)
+    : fields[0];
   const [field, setField] = useState(
     filter?.field
-      ? fields.find((item) => item.name === filter.field) || fields[0]
-      : fields[0],
+      ? fields.find((item) => item.name === filter.field) || initialField
+      : initialField,
   );
   const [operator, setOperator, operators, updateOperator, fieldType] = useOperator({ filter, field });
   const [value, setValue] = useFilterValue({
@@ -142,7 +147,8 @@ export function SingleFilter({
           options={fields}
           onChange={handleFieldChange}
           disabled={!canManageViews}
-          first={first}
+          isSingleFilter={isSingleFilter}
+          isMagicFilter={isMagicFilter}
         />
         <label htmlFor={`filter${id}-operator`} className="sr-only">
           Operator
@@ -191,4 +197,6 @@ SingleFilter.propTypes = {
   handleRemoveFilter: PropTypes.func.isRequired,
   handleLogicalOpChange: PropTypes.func,
   canManageViews: PropTypes.bool,
+  isMagicFilter: PropTypes.bool,
+  isSingleFilter: PropTypes.bool,
 };
