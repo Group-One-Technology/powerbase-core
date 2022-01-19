@@ -24,6 +24,7 @@ export function FilterGroup({
   isMagicFilter,
   isSingleFilter,
   setIsSingleFilter,
+  first,
 }) {
   const filterGroupId = `filterGroup${level}`;
 
@@ -119,7 +120,7 @@ export function FilterGroup({
                   onChange={handleLogicalOpChange}
                 />
               </>
-            ) : parentOperator}
+            ) : first ? 'where' : parentOperator}
         </div>
       )}
       <div
@@ -151,6 +152,7 @@ export function FilterGroup({
                   canManageViews={canManageViews}
                   isMagicFilter={isMagicFilter}
                   isSingleFilter={isSingleFilter}
+                  first={index === 0}
                 />
               );
             }
@@ -213,4 +215,5 @@ FilterGroup.propTypes = {
   isMagicFilter: PropTypes.bool,
   isSingleFilter: PropTypes.bool,
   setIsSingleFilter: PropTypes.func,
+  first: PropTypes.bool,
 };
