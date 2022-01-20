@@ -29,7 +29,7 @@ module Powerbase
           .update(options[:data])
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: options[:data]) if @table.db.is_turbo
       record
     end
 
