@@ -5,7 +5,7 @@ module ElasticsearchHelper
     @es_client ||= ElasticsearchClient
   end
 
-  def get_records_count(index)
+  def get_records_count(index, search_params)
     client.perform_request("GET", "#{index}/_count", {}, search_params).body
   end
 
