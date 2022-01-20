@@ -15,6 +15,7 @@ connection_hash = {
   retry_on_failure: 3,
   request_timeout: 500,
   logger: logger,
+  retry_on_timeout: true,
 }
 
 ElasticsearchClient = Elasticsearch::Client.new(connection_hash)
