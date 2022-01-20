@@ -15,32 +15,28 @@ module Powerbase
       @is_turbo = @database.is_turbo
     end
 
-    # Updates a property in a remote database table record.
-    # Accepts the following options:
-    # :primary_keys :: a hash of primary keys values.
-    # :data :: a hash of updated values.
-    def update_remote_record(options)
+    # Updates data in a remote database table record.
+    def update_remote_record(primary_keys: nil, data: nil)
+      if primary_keys == nil || data == nil return nil
       query = Powerbase::QueryCompiler.new(@table)
-      sequel_query = query.find_by(options[:primary_keys]).to_sequel
+      sequel_query = query.find_by(primary_keys).to_sequel
 
       record = sequel_connect(@database) {|db|
         db.from(@table.name.to_sym)
           .yield_self(&sequel_query)
-          .update(options[:data])
+          .update(data)
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: options[:data]) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
       record
     end
 
-    # Updates a property in a document/table record.
-    # Accepts the following options:
-    # :primary_keys :: a hash of primary keys values.
-    # :data :: a hash of updated values.
-    def update_doc_record(options)
+    # Updates data in a document/table record.
+    def update_doc_record(primary_keys: {}, data: {})
+      if primary_keys == {} || data == {} return nil
       create_index!(@index) if !@is_turbo
-      data = @is_turbo ? options[:data] : { **(options[:data] || {}), **(options[:primary_keys] || {}) }
-      result = update_record(@index, options[:primary_keys], data, !@is_turbo)
+      data = @is_turbo ? data : { **data, **primary_keys }
+      result = update_record(@index, primary_keys, data, !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: data }
     end
 
