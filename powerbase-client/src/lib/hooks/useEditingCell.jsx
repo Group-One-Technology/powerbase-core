@@ -84,6 +84,7 @@ export function useEditingCell({ records, setRecords }) {
     }));
 
     setRecords(updatedRecords);
+    exitEditing();
 
     try {
       await updateFieldData({
@@ -92,8 +93,6 @@ export function useEditingCell({ records, setRecords }) {
         primaryKeys,
         data: updatedFieldValue,
       });
-
-      exitEditing();
       await mutateTableRecords(updatedRecords, false);
       saved();
     } catch (err) {
