@@ -17,7 +17,9 @@ module Powerbase
 
     # Updates data in a remote database table record.
     def update_remote_record(primary_keys: nil, data: nil)
-      if primary_keys == nil || data == nil return nil
+      if primary_keys == nil || data == nil
+        return nil
+      end
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
 
@@ -33,7 +35,9 @@ module Powerbase
 
     # Updates data in a document/table record.
     def update_doc_record(primary_keys: {}, data: {})
-      if primary_keys == {} || data == {} return nil
+      if primary_keys == {} || data == {}
+        return nil
+      end
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
       result = update_record(@index, primary_keys, data, !@is_turbo)
