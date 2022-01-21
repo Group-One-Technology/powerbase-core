@@ -6,6 +6,7 @@ import { ChevronRightIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/out
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useTableRecords } from '@models/TableRecords';
 import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
@@ -31,11 +32,13 @@ export function BaseSingleRecordModal({
   initialRecord,
   includePii,
   setIncludePii,
+  setRecords,
 }) {
   const { mounted } = useMounted();
   const { saved, saving, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
+  const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
@@ -50,15 +53,11 @@ export function BaseSingleRecordModal({
   const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
-    setRecord(initialRecord);
-  }, [table, initialRecord]);
-
-  useEffect(() => {
-    setRecord(record.map((item) => {
+    setRecord(initialRecord.map((item) => {
       if (item.isPii) return { ...item, includePii };
       return item;
     }));
-  }, [includePii]);
+  }, [table, includePii, initialRecord]);
 
   useEffect(() => {
     if (remoteRecord) {
@@ -111,8 +110,15 @@ export function BaseSingleRecordModal({
         ...values,
         [item.name]: item.value,
       }), {});
+    const updatedRecords = records.map((curRecord) => {
+      const isNotFound = Object.keys(primaryKeys).some((key) => primaryKeys[key] !== curRecord[key]);
+      return isNotFound
+        ? curRecord
+        : { ...curRecord, ...updatedData };
+    });
 
-    console.log({ primaryKeys, updatedData });
+    setRecords(updatedRecords);
+    setOpen(false);
 
     try {
       await updateRecord({
@@ -120,7 +126,8 @@ export function BaseSingleRecordModal({
         primaryKeys,
         data: updatedData,
       });
-      saved(`Successfully updated record in table ${table.id}`);
+      await mutateTableRecords(updatedRecords, false);
+      saved(`Successfully updated record in table ${table.id}.`);
     } catch (err) {
       catchError(err.response.data.exception || err.response.data.error);
     }
@@ -319,6 +326,7 @@ export function BaseSingleRecordModal({
                 record={linkedRecord.record}
                 open={linkedRecord.open}
                 setOpen={(value) => handleToggleRecord(value, linkedRecord.record)}
+                setRecords={setRecords}
               />
             </TableReferencedConnectionsProvider>
           </TableConnectionsProvider>
@@ -335,6 +343,7 @@ BaseSingleRecordModal.propTypes = {
   initialRecord: PropTypes.array.isRequired,
   includePii: PropTypes.bool,
   setIncludePii: PropTypes.func.isRequired,
+  setRecords: PropTypes.func.isRequired,
 };
 
 export function SingleRecordModal({
@@ -342,6 +351,7 @@ export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
+  setRecords,
 }) {
   const [includePii, setIncludePii] = useState(false);
 
@@ -375,6 +385,7 @@ export function SingleRecordModal({
         initialRecord={initialRecord}
         includePii={includePii}
         setIncludePii={setIncludePii}
+        setRecords={setRecords}
       />
     </TableRecordProvider>
   );
@@ -384,4 +395,5 @@ SingleRecordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
+  setRecords: PropTypes.func.isRequired,
 };

@@ -248,6 +248,7 @@ export function TableRenderer({
             open={isModalOpen}
             setOpen={setIsModalOpen}
             record={selectedRecord}
+            setRecords={setRecords}
           />
         </RecordsModalStateProvider>
       )}
