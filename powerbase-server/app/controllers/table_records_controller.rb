@@ -87,7 +87,7 @@ class TableRecordsController < ApplicationController
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
-    primary_keys = sanitize_field_data(safe_params[:primary_keys], @guest)
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
     data = sanitize_field_data(safe_params[:data], @guest)
 
     model = Powerbase::Model.new(@table)
