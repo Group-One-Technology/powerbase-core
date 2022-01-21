@@ -41,8 +41,9 @@ export function TableViewsNav() {
                   <p className="my-2">There <strong>must</strong> be a primary key in order to:</p>
                   <ul className="ml-4 list-outside list-disc flex flex-col gap-2">
                     <li>Set fields as PII.</li>
+                    <li>Add magic fields.</li>
                     <li>Properly update table records</li>
-                    <li>Properly index records (for tubo bases).</li>
+                    <li>Properly index records (for turbo bases).</li>
                     <li>Get notified of changes in the remote database.</li>
                   </ul>
                 </div>

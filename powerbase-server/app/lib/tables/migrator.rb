@@ -44,41 +44,51 @@ class Tables::Migrator
       fetch_table_records!
 
       records.each do |record|
-        oid = record.try(:[], :oid)
-        doc_id = has_row_oid_support ? "oid_#{record[:oid]}" : get_doc_id(primary_keys, record, fields)
-        puts "--- DOC_ID: #{doc_id}"
-        doc = {}
-        record.collect {|key, value| key }.each do |key|
-          cur_field = fields.find {|field| field.name.to_sym == key }
+        begin
+          oid = record.try(:[], :oid)
+          doc_id = has_row_oid_support ? "oid_#{oid}" : get_doc_id(primary_keys, record, fields)
+          puts "--- DOC_ID: #{doc_id}"
+          doc = {}
+          record.collect {|key, value| key }.each do |key|
+            cur_field = fields.find {|field| field.name.to_sym == key }
 
-          if cur_field
-            doc[key] = case cur_field.powerbase_field_type_id
-              when number_field_type.id
-                record[key]
-              when date_field_type.id
-                date = DateTime.parse(record[key]) rescue nil
-                if date != nil
-                  date.utc.strftime("%FT%T.%L%z")
-                else
+            if cur_field
+              doc[key] = case cur_field.powerbase_field_type_id
+                when number_field_type.id
                   record[key]
+                when date_field_type.id
+                  date = DateTime.parse(record[key]) rescue nil
+                  if date != nil
+                    date.utc.strftime("%FT%T.%L%z")
+                  else
+                    record[key]
+                  end
+                else
+                  %Q(#{record[key]})
                 end
-              else
-                %Q(#{record[key]})
-              end
+            end
           end
-        end
 
-        doc = doc.slice!(:oid)
+          doc = doc.slice!(:oid)
 
-        if doc_id.present?
-          update_record(index_name, doc_id, doc)
-          @indexed_records += 1
-        else
+          if doc_id.present?
+            update_record(index_name, doc_id, doc)
+            @indexed_records += 1
+          else
+            write_table_migration_logs!(
+              error: {
+                type: "Elasticsearch",
+                error: "Failed to generate doc_id for record in table with id of #{table.id}",
+                record: record,
+              }
+            )
+          end
+        rescue => exception
           write_table_migration_logs!(
             error: {
               type: "Elasticsearch",
-              error: "Failed to generate doc_id for record in table with id of #{table.id}",
-              record: record,
+              error: "Failed to index record in table with id of #{table.id}",
+              exception: exception,
             }
           )
         end

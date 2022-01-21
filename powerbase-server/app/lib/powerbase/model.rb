@@ -173,7 +173,7 @@ module Powerbase
       if @is_turbo
         create_index!(@index)
         search_params = query.to_elasticsearch.except(:_source, :script_fields)
-        response = get_records_count(@index)
+        response = get_records_count(@index, search_params)
         response["count"]
       else
         remote_db() {|db|
