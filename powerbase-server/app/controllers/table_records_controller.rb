@@ -86,10 +86,12 @@ class TableRecordsController < ApplicationController
   def update_record
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
-    current_user.can?(:add_records, @table)
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    primary_keys = sanitize_field_data(safe_params[:primary_keys], @guest)
+    data = sanitize_field_data(safe_params[:data], @guest)
 
     model = Powerbase::Model.new(@table)
-    if model.update_merged_record(primary_keys: safe_params[:primary_keys], data: safe_params[:data])
+    if model.update_merged_record(primary_keys: primary_keys, data: data)
       render json: { updated: true }
     else
       render json: { error: "Could not update record in '#{@table.name}'" }, status: :unprocessable_entity
@@ -102,13 +104,14 @@ class TableRecordsController < ApplicationController
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
     @table = @field.table
-    data = Hash[@field.name.to_sym, safe_params[:data]]
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
+    data = sanitize_field_data(Hash[@field.name.to_sym, safe_params[:data]])
 
     model = Powerbase::Model.new(@table)
     record = if @field.is_virtual
-      model.update_doc_record(primary_keys: safe_params[:primary_keys], data: data)
+      model.update_doc_record(primary_keys: primary_keys, data: data)
     else
-      model.update_remote_record(primary_keys: safe_params[:primary_keys], data: data)
+      model.update_remote_record(primary_keys: primary_keys, data: data)
     end
 
     if record
@@ -139,5 +142,17 @@ class TableRecordsController < ApplicationController
 
     render json: { count: total_records }
   end
+
+  private
+    def sanitize_field_data(fields, guest = nil)
+      data = {}
+      fields.each do |key, value|
+        field = PowerbaseField.find_by(name: key, powerbase_table_id: @table.id)
+        raise NotFound.new("Could not find field with id of #{key}") if !field
+        current_user.can?(:edit_field_data, field, true, guest) if guest
+        data[field.name.to_sym] = value
+      end
+      data
+    end
 end
 

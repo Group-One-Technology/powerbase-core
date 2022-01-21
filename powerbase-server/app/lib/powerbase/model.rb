@@ -17,7 +17,7 @@ module Powerbase
 
     # Updates data for both turbo/non turbo bases.
     def update_merged_record(primary_keys: nil, data: nil)
-      if primary_keys == nil || data == nil
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
         return nil
       end
 
@@ -42,12 +42,9 @@ module Powerbase
 
     # Updates data in a remote database table record.
     def update_remote_record(primary_keys: nil, data: nil)
-      if primary_keys == nil || data == nil
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
         return nil
       end
-
-      primary_keys = sanitize_field_data(primary_keys)
-      data = sanitize_field_data(data)
 
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
@@ -58,19 +55,14 @@ module Powerbase
           .update(data)
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: data, sanitize: false) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
       record
     end
 
     # Updates data in a document/table record.
-    def update_doc_record(primary_keys: nil, data: nil, sanitize: true)
-      if primary_keys == nil || data == nil
+    def update_doc_record(primary_keys: nil, data: nil)
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
         return nil
-      end
-
-      if sanitize
-        primary_keys = sanitize_field_data(primary_keys)
-        data = sanitize_field_data(data)
       end
 
       create_index!(@index) if !@is_turbo
@@ -232,16 +224,6 @@ module Powerbase
 
       def sanitize(string)
         string.gsub(/['"]/,'')
-      end
-
-      def sanitize_field_data(fields)
-        data = {}
-        fields.each do |key, value|
-          field = PowerbaseField.find_by(name: key, powerbase_table_id: @table.id)
-          raise NotFound.new("Could not find field with id of #{key}") if !field
-          data[field.name.to_sym] = value
-        end
-        data
       end
 
       def format_es_result(result)
