@@ -65,7 +65,7 @@ export function BaseSingleRecordModal({
 
   useEffect(() => {
     if (remoteRecord) {
-      setRecord(record.map((item) => {
+      setRecord(initialRecord.map((item) => {
         const updatedItem = {
           ...item,
           value: remoteRecord[item.name] ?? item.value,
