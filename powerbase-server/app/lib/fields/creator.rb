@@ -106,7 +106,7 @@ class Fields::Creator
         .select {|field_name| field_name != field.name.to_s}
       table.save
 
-      pusher_trigger!("table.#{table.id}", "field-migration-listener", field)
+      pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

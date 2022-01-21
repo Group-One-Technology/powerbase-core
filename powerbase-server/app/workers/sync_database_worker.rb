@@ -70,7 +70,7 @@ class SyncDatabaseWorker
     database.base_migration.end_time = Time.now
     database.base_migration.save
 
-    pusher_trigger!("database.#{database.id}", "migration-listener", database)
+    pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
   end
 
   def cancelled?

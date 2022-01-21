@@ -51,7 +51,7 @@ class SyncTableWorker
       if unmigrated_columns.empty? && !database.is_turbo
         table.is_migrated = true
         table.save
-        pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+        pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
       end
     end
 end

@@ -32,7 +32,7 @@ class Tables::Creator
   def save
     if table.save
       @database.update_status!("migrating_metadata") if @database.analyzing_base?
-      pusher_trigger!("database.#{table.db.id}", "migration-listener", database)
+      pusher_trigger!("database.#{table.db.id}", "migration-listener", { id: @database.id })
     else
       base_migration.logs["errors"].push({
         type: "Active Record",

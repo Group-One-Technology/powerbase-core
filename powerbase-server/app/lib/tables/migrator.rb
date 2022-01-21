@@ -24,7 +24,7 @@ class Tables::Migrator
 
   def index!
     write_table_migration_logs!(status: "indexing_records")
-    pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
 
     create_index!(index_name)
 
@@ -97,7 +97,11 @@ class Tables::Migrator
       @offset += DEFAULT_PAGE_SIZE
 
       write_table_migration_logs!(offset: offset, indexed_records: indexed_records)
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", {
+        id: table.id,
+        offset: offset,
+        indexed_records: indexed_records,
+      })
     end
 
     set_table_as_migrated
@@ -233,8 +237,8 @@ class Tables::Migrator
     table.logs["migration"]["status"] = "migrated_connections"
     table.save
 
-    pusher_trigger!("table.#{table.id}", "connection-migration-listener", table)
-    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
   end
 
   def create_base_connection_later!
@@ -246,20 +250,20 @@ class Tables::Migrator
       if database.has_row_oid_support?
         table.logs["migration"]["status"] = "injecting_oid"
         table.save
-        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
 
         table.inject_oid
       end
 
       table.logs["migration"]["status"] = "injecting_notifier"
       table.save
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
 
       table.inject_notifier_trigger
 
       table.logs["migration"]["status"] = "notifiers_created"
       table.save
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", table)
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
     end
   end
 
@@ -286,7 +290,7 @@ class Tables::Migrator
     table.is_migrated = true
     table.save
 
-    pusher_trigger!("table.#{table.id}", "table-migration-listener", table)
+    pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end
 
