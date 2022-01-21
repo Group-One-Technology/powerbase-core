@@ -133,7 +133,7 @@ export function BaseSingleRecordModal({
       });
       await mutateTableRecord(updatedRecord, false);
       await mutateTableRecords(updatedRecords, false);
-      saved(`Successfully updated record in table ${table.id}.`);
+      saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
       catchError(err.response.data.exception || err.response.data.error);
     }
