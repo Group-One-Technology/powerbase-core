@@ -5,16 +5,19 @@ import { Dialog, Disclosure } from '@headlessui/react';
 import { ChevronRightIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { useMounted } from '@lib/hooks/useMounted';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useTableRecords } from '@models/TableRecords';
 import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
+import { useMounted } from '@lib/hooks/useMounted';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -29,10 +32,13 @@ export function BaseSingleRecordModal({
   initialRecord,
   includePii,
   setIncludePii,
+  setRecords,
 }) {
   const { mounted } = useMounted();
+  const { saved, saving, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
+  const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
@@ -42,6 +48,7 @@ export function BaseSingleRecordModal({
   const [loading, setLoading] = useState(false);
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
+  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
   const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
@@ -58,7 +65,7 @@ export function BaseSingleRecordModal({
 
   useEffect(() => {
     if (remoteRecord) {
-      setRecord(record.map((item) => {
+      setRecord(initialRecord.map((item) => {
         const updatedItem = {
           ...item,
           value: remoteRecord[item.name] ?? item.value,
@@ -72,7 +79,12 @@ export function BaseSingleRecordModal({
   const handleRecordInputChange = (fieldId, value) => {
     setRecord((curRecord) => curRecord.map((item) => ({
       ...item,
-      value: item.id === fieldId ? value : item.value,
+      value: item.fieldId === fieldId
+        ? value
+        : item.value,
+      updated: item.fieldId === fieldId
+        ? true
+        : item.updated,
     })));
   };
 
@@ -85,8 +97,46 @@ export function BaseSingleRecordModal({
     });
   };
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    if (!table.hasPrimaryKey) return;
+
+    saving();
+    const primaryKeys = record
+      .filter((item) => item.isPrimaryKey)
+      .reduce((keys, item) => ({
+        ...keys,
+        [item.name]: item.value,
+      }), {});
+    const updatedData = record
+      .filter((item) => item.updated)
+      .reduce((values, item) => ({
+        ...values,
+        [item.name]: item.value,
+      }), {});
+    const updatedRecord = { ...record, ...updatedData };
+    const updatedRecords = records.map((curRecord) => {
+      const isNotFound = Object.keys(primaryKeys).some((key) => primaryKeys[key] !== curRecord[key]);
+      return isNotFound
+        ? curRecord
+        : { ...curRecord, ...updatedData };
+    });
+
+    setRecords(updatedRecords);
+    setOpen(false);
+
+    try {
+      await updateRecord({
+        tableId: table.id,
+        primaryKeys,
+        data: updatedData,
+      });
+      await mutateTableRecord(updatedRecord, false);
+      await mutateTableRecords(updatedRecords, false);
+      saved(`Successfully updated record in table ${table.id}.`);
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
   };
 
   if (connections == null || referencedConnections == null) {
@@ -265,14 +315,16 @@ export function BaseSingleRecordModal({
               );
             })}
           </div>
-          <div className="mt-4 py-4 border-t border-solid flex justify-end">
-            <button
-              type="submit"
-              className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-            >
-              Update Record
-            </button>
-          </div>
+          {canUpdateFieldData && (
+            <div className="mt-4 py-4 border-t border-solid flex justify-end">
+              <button
+                type="submit"
+                className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+              >
+                Update Record
+              </button>
+            </div>
+          )}
         </form>
         {linkedRecord.open && linkedRecord.record && (
           <TableConnectionsProvider tableId={linkedRecord.table.id}>
@@ -282,6 +334,7 @@ export function BaseSingleRecordModal({
                 record={linkedRecord.record}
                 open={linkedRecord.open}
                 setOpen={(value) => handleToggleRecord(value, linkedRecord.record)}
+                setRecords={setRecords}
               />
             </TableReferencedConnectionsProvider>
           </TableConnectionsProvider>
@@ -298,6 +351,7 @@ BaseSingleRecordModal.propTypes = {
   initialRecord: PropTypes.array.isRequired,
   includePii: PropTypes.bool,
   setIncludePii: PropTypes.func.isRequired,
+  setRecords: PropTypes.func.isRequired,
 };
 
 export function SingleRecordModal({
@@ -305,6 +359,7 @@ export function SingleRecordModal({
   open,
   setOpen,
   record: initialRecord,
+  setRecords,
 }) {
   const [includePii, setIncludePii] = useState(false);
 
@@ -338,6 +393,7 @@ export function SingleRecordModal({
         initialRecord={initialRecord}
         includePii={includePii}
         setIncludePii={setIncludePii}
+        setRecords={setRecords}
       />
     </TableRecordProvider>
   );
@@ -347,4 +403,5 @@ SingleRecordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   record: PropTypes.array.isRequired,
+  setRecords: PropTypes.func.isRequired,
 };

@@ -18,6 +18,12 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
+  schema(:update_record) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+    required(:data)
+  end
+
   schema(:update_field_data) do
     required(:id).value(:integer)
     required(:field_id).value(:integer)
@@ -76,26 +82,36 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /tables/:id/remote_value
+  # PUT /tables/:id/update_record
+  def update_record
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
+    data = sanitize_field_data(safe_params[:data], @guest)
+
+    model = Powerbase::Model.new(@table)
+    if model.update_merged_record(primary_keys: primary_keys, data: data)
+      render json: { updated: true }
+    else
+      render json: { error: "Could not update record in '#{@table.name}'" }, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /tables/:id/update_field_data
   def update_field_data
     @field = PowerbaseField.find(safe_params[:field_id])
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
     @table = @field.table
-
-    data = {}
-    data[@field.name.to_sym] = safe_params[:data]
-
-    payload = {
-      primary_keys: sanitize_remote_field_data(@table, safe_params[:primary_keys]),
-      data: data
-    }
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
+    data = sanitize_field_data(Hash[@field.name.to_sym, safe_params[:data]])
 
     model = Powerbase::Model.new(@table)
     record = if @field.is_virtual
-      model.update_doc_record(payload)
+      model.update_doc_record(primary_keys: primary_keys, data: data)
     else
-      model.update_remote_record(payload)
+      model.update_remote_record(primary_keys: primary_keys, data: data)
     end
 
     if record
@@ -128,14 +144,15 @@ class TableRecordsController < ApplicationController
   end
 
   private
-    def sanitize_remote_field_data(table, field_data)
-      sanitized_data = {}
-      field_data.each do |key, value|
-        curr_field = PowerbaseField.find_by(name: key, powerbase_table_id: table.id)
-        raise NotFound.new("Could not find field with id of #{key}") if !curr_field
-        sanitized_data[curr_field.name] = value
+    def sanitize_field_data(fields, guest = nil)
+      data = {}
+      fields.each do |key, value|
+        field = PowerbaseField.find_by(name: key, powerbase_table_id: @table.id)
+        raise NotFound.new("Could not find field with id of #{key}") if !field
+        current_user.can?(:edit_field_data, field, true, guest) if guest
+        data[field.name.to_sym] = value
       end
-      sanitized_data.symbolize_keys
+      data
     end
 end
 

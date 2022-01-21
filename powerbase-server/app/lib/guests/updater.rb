@@ -157,7 +157,7 @@ class Guests::Updater
         @guest.permissions = get_permissions(@guest)
         @guest.permissions["fields"] = {} if @guest.permissions["fields"] == nil
         @guest.permissions["fields"][field_id_key] = {} if @guest.permissions["fields"][field_id_key] == nil
-        @guest.access = "custom"
+        @guest.access = "custom" # ! TODO on change to custom, add user to restricted users in other fields -> changing from viewer -> custom
       end
 
       @guest.permissions["fields"][field_id_key][permission] = value if @guest.access == "custom"
@@ -189,7 +189,7 @@ class Guests::Updater
         @guest.permissions = get_permissions(@guest)
         @guest.permissions["tables"] = {} if @guest.permissions["tables"] == nil
         @guest.permissions["tables"][table_id_key] = {} if @guest.permissions["tables"][table_id_key] == nil
-        @guest.access = "custom"
+        @guest.access = "custom" # ! TODO on change to custom, add user to restricted users in other tables -> changing from viewer -> custom
       end
 
       @guest.permissions["tables"][table_id_key][permission] = value if @guest.access == "custom"

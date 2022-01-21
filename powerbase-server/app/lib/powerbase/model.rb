@@ -15,32 +15,59 @@ module Powerbase
       @is_turbo = @database.is_turbo
     end
 
-    # Updates a property in a remote database table record.
-    # Accepts the following options:
-    # :primary_keys :: a hash of primary keys values.
-    # :data :: a hash of updated values.
-    def update_remote_record(options)
+    # Updates data for both turbo/non turbo bases.
+    def update_merged_record(primary_keys: nil, data: nil)
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
+        return nil
+      end
+
+      remote_data = {}
+      virtual_data = {}
+
+      data.each do |key, value|
+        field = PowerbaseField.find_by(name: key.to_s, powerbase_table_id: @table.id)
+        raise StandardError.new("Field with name of #{key} could not be found.") if !field
+        if field.is_virtual
+          virtual_data[key] = value
+        else
+          remote_data[key] = value
+        end
+      end
+
+      update_remote_record(primary_keys: primary_keys, data: remote_data) if remote_data.length > 0
+      update_doc_record(primary_keys: primary_keys, data: virtual_data) if virtual_data.length > 0
+
+      true
+    end
+
+    # Updates data in a remote database table record.
+    def update_remote_record(primary_keys: nil, data: nil)
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
+        return nil
+      end
+
       query = Powerbase::QueryCompiler.new(@table)
-      sequel_query = query.find_by(options[:primary_keys]).to_sequel
+      sequel_query = query.find_by(primary_keys).to_sequel
 
       record = sequel_connect(@database) {|db|
         db.from(@table.name.to_sym)
           .yield_self(&sequel_query)
-          .update(options[:data])
+          .update(data)
       }
 
-      record = update_doc_record(primary_keys: options[:primary_keys], data: options[:data]) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
       record
     end
 
-    # Updates a property in a document/table record.
-    # Accepts the following options:
-    # :primary_keys :: a hash of primary keys values.
-    # :data :: a hash of updated values.
-    def update_doc_record(options)
+    # Updates data in a document/table record.
+    def update_doc_record(primary_keys: nil, data: nil)
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
+        return nil
+      end
+
       create_index!(@index) if !@is_turbo
-      data = @is_turbo ? options[:data] : { **(options[:data] || {}), **(options[:primary_keys] || {}) }
-      result = update_record(@index, options[:primary_keys], data, !@is_turbo)
+      data = @is_turbo ? data : { **data, **primary_keys }
+      result = update_record(@index, primary_keys, data, !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: data }
     end
 
@@ -77,8 +104,12 @@ module Powerbase
         if magic_fields.length > 0
           create_index!(@index)
           doc_id = format_doc_id(options[:primary_keys])
-          magic_result = get_record(@index, doc_id)
-          { **record, **magic_result["_source"] }
+          begin
+            magic_result = get_record(@index, doc_id)
+            { **record, **magic_result["_source"] }
+          rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+            record
+          end
         else
           record
         end

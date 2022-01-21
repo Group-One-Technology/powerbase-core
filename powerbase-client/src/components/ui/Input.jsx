@@ -13,6 +13,7 @@ export function Input({
   showError,
   className,
   readOnly,
+  disabled,
   rootClassName,
   ...props
 }) {
@@ -51,8 +52,9 @@ export function Input({
           className={cn(
             'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
             showErrorText ? 'border-red-500' : 'border-gray-300',
-            readOnly && 'bg-gray-50 cursor-not-allowed',
+            (readOnly || disabled) && 'bg-gray-100 cursor-not-allowed',
           )}
+          disabled={disabled}
           {...props}
         />
         {(showErrorText && error) && (
@@ -85,6 +87,7 @@ Input.propTypes = {
   autoComplete: PropTypes.string,
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
+  disabled: PropTypes.bool,
   className: PropTypes.string,
   rootClassName: PropTypes.string,
   'aria-label': PropTypes.string,
