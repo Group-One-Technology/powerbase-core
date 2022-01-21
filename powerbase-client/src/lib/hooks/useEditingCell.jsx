@@ -8,6 +8,7 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { updateFieldData } from '@lib/api/records';
 import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
 import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
+import { FieldType } from '@lib/constants/field-types';
 
 export function useEditingCell({ records, setRecords }) {
   const { baseUser } = useBaseUser();
@@ -38,8 +39,22 @@ export function useEditingCell({ records, setRecords }) {
       return;
     }
 
+    if (field.isPrimaryKey || field.isPii || fieldType.name === FieldType.JSON_TEXT) {
+      if (field.isPrimaryKey) {
+        catchError('Cannot update a primary key field.');
+      } else if (field.isPii) {
+        catchError('Cannot update a PII field. You can update it in the record modal instead if you have the permission.');
+      } else if (fieldType.name === FieldType.JSON_TEXT) {
+        catchError('Cannot update a JSON Text field. You can update it in the record modal instead if you have the permission.');
+      }
+
+      exitEditing();
+      return;
+    }
+
     if (!validateMagicValue(field, fieldType, updatedValue)) {
       catchError(`Invalid input for ${field.alias}`);
+      exitEditing();
       return;
     }
 
