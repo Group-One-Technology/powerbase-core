@@ -20,6 +20,10 @@ module Powerbase
       if primary_keys == nil || data == nil
         return nil
       end
+
+      primary_keys = sanitize_field_data(primary_keys)
+      data = sanitize_field_data(data)
+
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
 
@@ -29,15 +33,21 @@ module Powerbase
           .update(data)
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data, sanitize: false) if @table.db.is_turbo
       record
     end
 
     # Updates data in a document/table record.
-    def update_doc_record(primary_keys: {}, data: {})
+    def update_doc_record(primary_keys: {}, data: {}, sanitize: true)
       if primary_keys == {} || data == {}
         return nil
       end
+
+      if sanitize
+        primary_keys = sanitize_field_data(primary_keys)
+        data = sanitize_field_data(data)
+      end
+
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
       result = update_record(@index, primary_keys, data, !@is_turbo)
@@ -193,6 +203,16 @@ module Powerbase
 
       def sanitize(string)
         string.gsub(/['"]/,'')
+      end
+
+      def sanitize_field_data(fields)
+        data = {}
+        fields.each do |key, value|
+          field = PowerbaseField.find_by(name: key, powerbase_table_id: @table.id)
+          raise NotFound.new("Could not find field with id of #{key}") if !field
+          data[field.name] = value
+        end
+        data.symbolize_keys
       end
 
       def format_es_result(result)

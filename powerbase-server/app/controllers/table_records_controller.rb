@@ -86,16 +86,11 @@ class TableRecordsController < ApplicationController
     data = {}
     data[@field.name.to_sym] = safe_params[:data]
 
-    payload = {
-      primary_keys: sanitize_remote_field_data(@table, safe_params[:primary_keys]),
-      data: data
-    }
-
     model = Powerbase::Model.new(@table)
     record = if @field.is_virtual
-      model.update_doc_record(payload)
+      model.update_doc_record(primary_keys: safe_params[:primary_keys], data: data)
     else
-      model.update_remote_record(payload)
+      model.update_remote_record(primary_keys: safe_params[:primary_keys], data: data)
     end
 
     if record
@@ -126,16 +121,5 @@ class TableRecordsController < ApplicationController
 
     render json: { count: total_records }
   end
-
-  private
-    def sanitize_remote_field_data(table, field_data)
-      sanitized_data = {}
-      field_data.each do |key, value|
-        curr_field = PowerbaseField.find_by(name: key, powerbase_table_id: table.id)
-        raise NotFound.new("Could not find field with id of #{key}") if !curr_field
-        sanitized_data[curr_field.name] = value
-      end
-      sanitized_data.symbolize_keys
-    end
 end
 
