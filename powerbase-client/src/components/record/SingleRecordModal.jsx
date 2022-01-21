@@ -48,7 +48,7 @@ export function BaseSingleRecordModal({
   const [loading, setLoading] = useState(false);
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
-  const canAddRecords = baseUser?.can(PERMISSIONS.AddRecords, table);
+  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
   const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
@@ -95,7 +95,7 @@ export function BaseSingleRecordModal({
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    if (!canAddRecords || !table) return;
+    if (!table.hasPrimaryKey) return;
 
     saving();
     const primaryKeys = record
@@ -309,14 +309,16 @@ export function BaseSingleRecordModal({
               );
             })}
           </div>
-          <div className="mt-4 py-4 border-t border-solid flex justify-end">
-            <button
-              type="submit"
-              className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-            >
-              Update Record
-            </button>
-          </div>
+          {canUpdateFieldData && (
+            <div className="mt-4 py-4 border-t border-solid flex justify-end">
+              <button
+                type="submit"
+                className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+              >
+                Update Record
+              </button>
+            </div>
+          )}
         </form>
         {linkedRecord.open && linkedRecord.record && (
           <TableConnectionsProvider tableId={linkedRecord.table.id}>

@@ -1,16 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { LockClosedIcon } from '@heroicons/react/outline';
 import ReactJson from 'react-json-view';
 
 import { useBase } from '@models/Base';
+import { useBaseUser } from '@models/BaseUser';
 import { useTableFields } from '@models/TableFields';
 import { useTableRecord } from '@models/TableRecord';
 import { useTableConnections } from '@models/TableConnections';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { isValidJSONString } from '@lib/helpers/isValidJSONString';
+import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { Badge } from '@components/ui/Badge';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
@@ -26,9 +29,11 @@ export function RecordItemValue({
   openRecord,
 }) {
   const { data: base } = useBase();
+  const { baseUser } = useBaseUser();
   const { data: fields } = useTableFields();
   const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
+  const disabled = !baseUser?.can(PERMISSIONS.EditFieldData, item);
 
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
@@ -118,9 +123,13 @@ export function RecordItemValue({
             id={item.name}
             name={item.name}
             type="checkbox"
-            className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            className={cn(
+              'mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded',
+              disabled && 'bg-gray-100 cursor-not-allowed',
+            )}
             checked={item.value?.toString() === 'true'}
             onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.checked)}
+            disabled={disabled}
           />
         </div>
       );
@@ -131,6 +140,7 @@ export function RecordItemValue({
           item={item}
           labelContent={labelContent}
           handleRecordInputChange={handleRecordInputChange}
+          disabled={disabled}
         />
       );
     case FieldType.JSON_TEXT:
@@ -149,6 +159,7 @@ export function RecordItemValue({
               displayDataTypes={false}
               enableClipboard={false}
               collapsed
+              disabled={disabled}
             />
           </div>
         );
@@ -164,9 +175,13 @@ export function RecordItemValue({
             id={item.name}
             name={item.name}
             rows={3}
-            className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
+            className={cn(
+              'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
+              disabled && 'bg-gray-100 cursor-not-allowed',
+            )}
             onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
             value={JSON.stringify(item.value) || ''}
+            disabled={disabled}
           />
         </div>
       );
@@ -180,9 +195,13 @@ export function RecordItemValue({
             id={item.name}
             name={item.name}
             rows={3}
-            className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
+            className={cn(
+              'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
+              disabled && 'bg-gray-100 cursor-not-allowed',
+            )}
             onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
             value={item.value || ''}
+            disabled={disabled}
           />
         </div>
       );
@@ -207,7 +226,7 @@ export function RecordItemValue({
           onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"
-          required
+          disabled={disabled}
         />
       );
     }

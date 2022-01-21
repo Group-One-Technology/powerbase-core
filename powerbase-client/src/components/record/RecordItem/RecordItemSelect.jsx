@@ -1,5 +1,6 @@
 import React from 'react';
 import useSWR from 'swr';
+import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { useAuthUser } from '@models/AuthUser';
@@ -9,6 +10,7 @@ export function RecordItemSelect({
   item,
   labelContent,
   handleRecordInputChange,
+  disabled,
 }) {
   const { authUser } = useAuthUser();
 
@@ -29,7 +31,11 @@ export function RecordItemSelect({
         name={item.name}
         value={item.value}
         onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
-        className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
+        className={cn(
+          'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
+          disabled && 'bg-gray-100 cursor-not-allowed',
+        )}
+        disabled={disabled}
       >
         {options?.values.map((option) => (
           <option key={option} value={option}>
@@ -45,4 +51,5 @@ RecordItemSelect.propTypes = {
   item: PropTypes.object.isRequired,
   labelContent: PropTypes.any.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
 };
