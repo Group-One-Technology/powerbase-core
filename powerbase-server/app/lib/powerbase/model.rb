@@ -34,8 +34,8 @@ module Powerbase
         end
       end
 
-      update_remote_record(primary_keys: primary_keys, data: remote_data)
-      update_doc_record(primary_keys: primary_keys, data: virtual_data)
+      update_remote_record(primary_keys: primary_keys, data: remote_data) if remote_data.length > 0
+      update_doc_record(primary_keys: primary_keys, data: virtual_data) if virtual_data.length > 0
 
       true
     end
