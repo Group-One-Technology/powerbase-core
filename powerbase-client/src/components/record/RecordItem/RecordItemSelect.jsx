@@ -28,7 +28,7 @@ export function RecordItemSelect({
         id={item.name}
         name={item.name}
         value={item.value}
-        onChange={(evt) => handleRecordInputChange(item.id, evt.target.value)}
+        onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
         className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
       >
         {options?.values.map((option) => (

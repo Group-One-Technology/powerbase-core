@@ -98,7 +98,7 @@ export function RecordItemValue({
         label={labelContent}
         name={item.name}
         value="*****"
-        onChange={(evt) => handleRecordInputChange(item.id, evt.target.value)}
+        onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
         className="w-full flex items-center text-gray-800"
         rootClassName="mb-8"
         readOnly
@@ -120,7 +120,7 @@ export function RecordItemValue({
             type="checkbox"
             className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             checked={item.value?.toString() === 'true'}
-            onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
+            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.checked)}
           />
         </div>
       );
@@ -143,9 +143,9 @@ export function RecordItemValue({
             <ReactJson
               id={item.name}
               src={JSON.parse(item.value) || {}}
-              onEdit={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
-              onDelete={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
-              onAdd={({ updated_src }) => handleRecordInputChange(item.id, JSON.stringify(updated_src))}
+              onEdit={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
+              onDelete={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
+              onAdd={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
               displayDataTypes={false}
               enableClipboard={false}
               collapsed
@@ -165,7 +165,7 @@ export function RecordItemValue({
             name={item.name}
             rows={3}
             className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
-            onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
+            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
             value={JSON.stringify(item.value) || ''}
           />
         </div>
@@ -181,7 +181,7 @@ export function RecordItemValue({
             name={item.name}
             rows={3}
             className="mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
-            onChange={(evt) => handleRecordInputChange(item.id, evt.target.checked)}
+            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
             value={item.value || ''}
           />
         </div>
@@ -204,7 +204,7 @@ export function RecordItemValue({
           label={labelContent}
           name={item.name}
           value={item.value || ''}
-          onChange={(evt) => handleRecordInputChange(item.id, evt.target.value)}
+          onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"
           required
