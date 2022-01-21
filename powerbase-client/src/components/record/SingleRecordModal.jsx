@@ -53,11 +53,15 @@ export function BaseSingleRecordModal({
   const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
-    setRecord(initialRecord.map((item) => {
+    setRecord(initialRecord);
+  }, [table, initialRecord]);
+
+  useEffect(() => {
+    setRecord(record.map((item) => {
       if (item.isPii) return { ...item, includePii };
       return item;
     }));
-  }, [table, includePii, initialRecord]);
+  }, [includePii]);
 
   useEffect(() => {
     if (remoteRecord) {
@@ -110,6 +114,7 @@ export function BaseSingleRecordModal({
         ...values,
         [item.name]: item.value,
       }), {});
+    const updatedRecord = { ...record, ...updatedData };
     const updatedRecords = records.map((curRecord) => {
       const isNotFound = Object.keys(primaryKeys).some((key) => primaryKeys[key] !== curRecord[key]);
       return isNotFound
@@ -126,6 +131,7 @@ export function BaseSingleRecordModal({
         primaryKeys,
         data: updatedData,
       });
+      await mutateTableRecord(updatedRecord, false);
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.id}.`);
     } catch (err) {
