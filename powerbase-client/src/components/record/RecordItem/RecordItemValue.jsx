@@ -33,7 +33,7 @@ export function RecordItemValue({
   const { data: fields } = useTableFields();
   const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
-  const disabled = !baseUser?.can(PERMISSIONS.EditFieldData, item);
+  const disabled = item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item);
 
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
