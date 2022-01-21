@@ -112,8 +112,12 @@ module Powerbase
         if magic_fields.length > 0
           create_index!(@index)
           doc_id = format_doc_id(options[:primary_keys])
-          magic_result = get_record(@index, doc_id)
-          { **record, **magic_result["_source"] }
+          begin
+            magic_result = get_record(@index, doc_id)
+            { **record, **magic_result["_source"] }
+          rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+            record
+          end
         else
           record
         end
