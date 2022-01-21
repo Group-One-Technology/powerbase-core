@@ -88,7 +88,6 @@ class Tables::Migrator
             error: {
               type: "Elasticsearch",
               error: "Failed to index record in table with id of #{table.id}",
-              record: record,
               exception: exception,
             }
           )
