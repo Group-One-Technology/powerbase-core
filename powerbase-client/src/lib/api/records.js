@@ -43,13 +43,25 @@ export async function addMagicRecord(payload) {
 }
 
 export async function updateRecord({ tableId, primaryKeys, data }) {
-  const response = await securedApi.put(`tables/${tableId}/update_record`, { primaryKeys, data });
+  const response = await securedApi.put(`tables/${tableId}/update_record`, {
+    primary_keys: primaryKeys,
+    data,
+  });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
-export async function updateFieldData({ tableId, ...payload }) {
-  const response = await securedApi.put(`tables/${tableId}/update_field_data`, payload);
+export async function updateFieldData({
+  tableId,
+  primaryKeys,
+  fieldId,
+  data,
+}) {
+  const response = await securedApi.put(`tables/${tableId}/update_field_data`, {
+    primary_keys: primaryKeys,
+    field_id: fieldId,
+    data,
+  });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
