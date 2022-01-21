@@ -1,12 +1,10 @@
 import { useRef, useState } from 'react';
 
 import { useBaseUser } from '@models/BaseUser';
-import { useViewFieldState } from '@models/view/ViewFieldState';
-import { useTableConnections } from '@models/TableConnections';
+import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { updateFieldData } from '@lib/api/records';
 import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
 import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
@@ -14,8 +12,7 @@ import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
 export function useEditingCell({ records, setRecords }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
-  const { data: connections } = useTableConnections();
-  const { initialFields } = useViewFieldState();
+  const { data: fields } = useViewFields();
   const { mutate: mutateTableRecords } = useTableRecords();
 
   const recordInputRef = useRef();
@@ -36,7 +33,7 @@ export function useEditingCell({ records, setRecords }) {
   }) => {
     const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
 
-    if (!(canEditFieldData && initialFields.length)) {
+    if (!(canEditFieldData && fields.length)) {
       exitEditing();
       return;
     }
@@ -65,12 +62,11 @@ export function useEditingCell({ records, setRecords }) {
       value: updatedValue,
     });
 
-    const fields = initializeFields(initialFields, connections, { hidden: false })
-      .map((item) => ({
-        ...item,
-        value: records[rowIndex][item.name],
-      }));
-    const primaryKeys = fields.filter((item) => item.isPrimaryKey)
+    const primaryKeys = fields.map((item) => ({
+      ...item,
+      value: records[rowIndex][item.name],
+    }))
+      .filter((item) => item.isPrimaryKey)
       .reduce((keys, key) => ({
         ...keys,
         [key.name]: key.value,

@@ -5,16 +5,18 @@ import { Dialog, Disclosure } from '@headlessui/react';
 import { ChevronRightIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { useMounted } from '@lib/hooks/useMounted';
+import { useSaveStatus } from '@models/SaveStatus';
 import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
+import { useMounted } from '@lib/hooks/useMounted';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -31,6 +33,7 @@ export function BaseSingleRecordModal({
   setIncludePii,
 }) {
   const { mounted } = useMounted();
+  const { saved, saving, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
@@ -42,6 +45,7 @@ export function BaseSingleRecordModal({
   const [loading, setLoading] = useState(false);
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
+  const canAddRecords = baseUser?.can(PERMISSIONS.AddRecords, table);
   const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
@@ -72,7 +76,12 @@ export function BaseSingleRecordModal({
   const handleRecordInputChange = (fieldId, value) => {
     setRecord((curRecord) => curRecord.map((item) => ({
       ...item,
-      value: item.id === fieldId ? value : item.value,
+      value: item.fieldId === fieldId
+        ? value
+        : item.value,
+      updated: item.fieldId === fieldId
+        ? true
+        : item.updated,
     })));
   };
 
@@ -85,8 +94,36 @@ export function BaseSingleRecordModal({
     });
   };
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    if (!canAddRecords || !table) return;
+
+    saving();
+    const primaryKeys = record
+      .filter((item) => item.isPrimaryKey)
+      .reduce((keys, item) => ({
+        ...keys,
+        [item.name]: item.value,
+      }), {});
+    const updatedData = record
+      .filter((item) => item.updated)
+      .reduce((values, item) => ({
+        ...values,
+        [item.name]: item.value,
+      }), {});
+
+    console.log({ primaryKeys, updatedData });
+
+    try {
+      await updateRecord({
+        tableId: table.id,
+        primaryKeys,
+        data: updatedData,
+      });
+      saved(`Successfully updated record in table ${table.id}`);
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
   };
 
   if (connections == null || referencedConnections == null) {

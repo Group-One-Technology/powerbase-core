@@ -15,6 +15,31 @@ module Powerbase
       @is_turbo = @database.is_turbo
     end
 
+    # Updates data for both turbo/non turbo bases.
+    def update_merged_record(primary_keys: nil, data: nil)
+      if primary_keys == nil || data == nil
+        return nil
+      end
+
+      remote_data = {}
+      virtual_data = {}
+
+      data.each do |key, value|
+        field = PowerbaseField.find_by(name: key.to_s, powerbase_table_id: @table.id)
+        raise StandardError.new("Field with name of #{key} could not be found.") if !field
+        if field.is_virtual
+          virtual_data[key] = value
+        else
+          remote_data[key] = value
+        end
+      end
+
+      update_remote_record(primary_keys: primary_keys, data: remote_data)
+      update_doc_record(primary_keys: primary_keys, data: virtual_data)
+
+      true
+    end
+
     # Updates data in a remote database table record.
     def update_remote_record(primary_keys: nil, data: nil)
       if primary_keys == nil || data == nil
@@ -38,8 +63,8 @@ module Powerbase
     end
 
     # Updates data in a document/table record.
-    def update_doc_record(primary_keys: {}, data: {}, sanitize: true)
-      if primary_keys == {} || data == {}
+    def update_doc_record(primary_keys: nil, data: nil, sanitize: true)
+      if primary_keys == nil || data == nil
         return nil
       end
 
@@ -210,9 +235,9 @@ module Powerbase
         fields.each do |key, value|
           field = PowerbaseField.find_by(name: key, powerbase_table_id: @table.id)
           raise NotFound.new("Could not find field with id of #{key}") if !field
-          data[field.name] = value
+          data[field.name.to_sym] = value
         end
-        data.symbolize_keys
+        data
       end
 
       def format_es_result(result)

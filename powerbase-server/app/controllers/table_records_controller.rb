@@ -18,6 +18,12 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
+  schema(:update_record) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+    required(:data)
+  end
+
   schema(:update_field_data) do
     required(:id).value(:integer)
     required(:field_id).value(:integer)
@@ -76,15 +82,27 @@ class TableRecordsController < ApplicationController
     render json: records
   end
 
-  # POST /tables/:id/remote_value
+  # PUT /tables/:id/update_record
+  def update_record
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:add_records, @table)
+
+    model = Powerbase::Model.new(@table)
+    if model.update_merged_record(primary_keys: safe_params[:primary_keys], data: safe_params[:data])
+      render json: { updated: true }
+    else
+      render json: { error: "Could not update record in '#{@table.name}'" }, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /tables/:id/update_field_data
   def update_field_data
     @field = PowerbaseField.find(safe_params[:field_id])
     raise NotFound.new("Could not find field with id of #{safe_params[:field_id]}") if !@field
     current_user.can?(:edit_field_data, @field)
     @table = @field.table
-
-    data = {}
-    data[@field.name.to_sym] = safe_params[:data]
+    data = Hash[@field.name.to_sym, safe_params[:data]]
 
     model = Powerbase::Model.new(@table)
     record = if @field.is_virtual
