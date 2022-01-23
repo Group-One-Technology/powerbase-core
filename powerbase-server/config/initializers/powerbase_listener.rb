@@ -18,7 +18,7 @@ if defined?(Rails::Server)
 
   if ENV["ENABLE_LISTENER"] == "true"
     puts "** STARTING DATABASE AUTOSYNC AND LISTENERS **"
-    ids = PowerbaseDatabase.turbo.select(&:has_row_oid_support?).map(&:id)
+    ids = PowerbaseDatabase.turbo.postgresql.ids
 
     job = Sidekiq::Cron::Job.new(
       name: "Database Listeners",
