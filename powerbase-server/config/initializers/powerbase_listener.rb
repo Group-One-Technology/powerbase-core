@@ -20,17 +20,17 @@ if defined?(Rails::Server) && ENV["ENABLE_LISTENER"] == "true"
     raise job.errors
   end
 
-  notifications_job = Sidekiq::Cron::Job.new(
-    name: "Read Notifications Cleanup",
-    cron: '0 0 * * *', # Daily at 00:00
-    class: 'PollWorker'
-  )
+  # notifications_job = Sidekiq::Cron::Job.new(
+  #   name: "Read Notifications Cleanup",
+  #   cron: '0 0 * * *', # Daily at 00:00
+  #   class: 'PollWorker'
+  # )
 
-  if notifications_job.save
-    notifications_job.enque!
-    puts "Cleaning up a read notifications..."
-  else
-    puts "Can't run read notifications cleanup cron job"
-    raise job.errors
-  end
+  # if notifications_job.save
+  #   notifications_job.enque!
+  #   puts "Cleaning up a read notifications..."
+  # else
+  #   puts "Can't run read notifications cleanup cron job"
+  #   raise job.errors
+  # end
 end
