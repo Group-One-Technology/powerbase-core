@@ -17,12 +17,19 @@ class PollWorker
     
     dbs.each do |db|
       if db.postgresql?
-        if db.listener_thread.blank?
-          puts"Listening to #{db.thread_name}"
-          db.listen!
-        else
+        if db.listener_thread.present?
           puts "Listener for #{db.thread_name} already exists"
+          puts "Reseting #{db.thread_name} listener..."
+
+          # Destroy Listiner thread
+          Thread.list.delete(db.listener_thread)
+
+          puts "Reseting #{db.thread_name} listener...DONE"
+        else
+          puts"Listening to #{db.thread_name}"
         end
+
+        db.listen!
       end
     end
   end

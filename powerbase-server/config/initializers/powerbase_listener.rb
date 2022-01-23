@@ -1,6 +1,6 @@
 if defined?(Rails::Server) && ENV["ENABLE_LISTENER"] == "true"
   puts "** STARTING DATABASE AUTOSYNC AND LISTENERS **"
-  ids = PowerbaseDatabase.turbo.select(&:has_row_oid_support?).map(&:id)
+  ids = PowerbaseDatabase.turbo.postgresql.ids
 
   # Destroy existing cron job to avoid duplicate
   Sidekiq::Cron::Job.destroy_all!
