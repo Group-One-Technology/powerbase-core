@@ -9,7 +9,6 @@ class PollWorker
     @dbs = PowerbaseDatabase.where id: ids
     
     initialize_pg_listener!
-    sync_db_and_tables!
   end
 
   def initialize_pg_listener!
@@ -34,15 +33,4 @@ class PollWorker
       end
     end
   end
-
-  def sync_db_and_tables!
-    puts "Autosync Database and Tables..."
-    dbs.each do |db|
-      db.sync!
-      db.tables.each do |table|
-        table.sync!
-      end
-    end
-  end
-
 end

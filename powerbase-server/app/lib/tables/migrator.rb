@@ -103,7 +103,7 @@ class Tables::Migrator
         indexed_records: indexed_records,
       })
     end
-
+    create_listener!
     set_table_as_migrated
   end
 

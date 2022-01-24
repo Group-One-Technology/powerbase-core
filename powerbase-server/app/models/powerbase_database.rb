@@ -118,7 +118,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def sync!(new_connection = false)
-    SyncDatabaseWorker.perform_async(self.id, new_connection) unless in_synced?
+    SyncDatabaseWorker.perform_async(self.id, new_connection)
   end
 
   def has_row_oid_support?

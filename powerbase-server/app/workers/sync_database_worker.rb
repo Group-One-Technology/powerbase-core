@@ -10,7 +10,9 @@ class SyncDatabaseWorker
     @database = PowerbaseDatabase.find database_id
     @new_connection = new_connection
 
-    unless database.in_synced?
+    if database.in_synced?
+      puts "-- SyncDatabaseWorker #{database.name} is already in synced!" 
+    else
       @unmigrated_tables = @database.unmigrated_tables
       @deleted_tables = @database.deleted_tables
 

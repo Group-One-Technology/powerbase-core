@@ -10,7 +10,9 @@ class SyncTableWorker
     unmigrated_columns = table.unmigrated_columns
     deleted_columns = table.deleted_columns
 
-    unless table.in_synced?
+    if table.in_synced?
+      puts "-- SyncTableWorker #{database.name}.#{table.name} is already in synced"
+    else
       if unmigrated_columns.any?
         puts "Unmigrated column detected at table##{table.id}..."
         puts "Saving #{unmigrated_columns.count} additional column(s)..."
