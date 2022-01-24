@@ -79,14 +79,14 @@ class Tables::Migrator
           doc = doc.slice!(:oid)
 
           if doc_id.present?
-            if old_primary_keys.length > 0
-              begin
-                primary_key_fields = {}
-                old_primary_keys.each do |old_primary_key|
-                  field_key = old_primary_key.to_sym
-                  primary_key_fields[field_key] = doc[field_key] if session.key?(field_key)
-                end
+            primary_key_fields = {}
+            old_primary_keys.each do |old_primary_key|
+              field_key = old_primary_key.to_sym
+              primary_key_fields[field_key] = doc[field_key] if doc.key?(field_key)
+            end
 
+            if primary_key_fields.length > 0
+              begin
                 query = Powerbase::QueryCompiler.new(@table, {
                   include_pii: true,
                   include_json: true,
@@ -133,7 +133,6 @@ class Tables::Migrator
       })
     end
 
-    table.write_migration_logs!(old_primary_keys: [])  if old_primary_keys.length > 0
     create_listener!
     set_table_as_migrated
   end
@@ -303,7 +302,7 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    table.write_migration_logs!(status: 'migrated', end_time: Time.now)
+    table.write_migration_logs!(status: 'migrated', end_time: Time.now, old_primary_keys: [])
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end

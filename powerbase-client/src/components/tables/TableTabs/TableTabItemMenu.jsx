@@ -25,7 +25,7 @@ export function TableTabItemMenu({ table, children }) {
   const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canDeleteTables = baseUser?.can(PERMISSIONS.DeleteTables);
-  const isMigrated = table.status === 'migrated';
+  const isMigrated = table.status === 'migrated' && !table.isReindexing;
 
   const handleKeys = () => {
     setTable(table);
@@ -40,8 +40,7 @@ export function TableTabItemMenu({ table, children }) {
 
   const handleReindex = async () => {
     if (!canManageTables || !table) return;
-    reindexTable({ tableId: table.id });
-    setTable({ ...table, status: 'indexing_records' });
+    await reindexTable({ tableId: table.id });
     tablesResponse.mutate();
   };
 

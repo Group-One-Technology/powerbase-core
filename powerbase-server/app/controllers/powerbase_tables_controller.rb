@@ -228,6 +228,7 @@ class PowerbaseTablesController < ApplicationController
         is_migrated: table.is_migrated,
         has_primary_key: table.has_primary_key?,
         status: table.status,
+        is_reindexing: table.status == "indexing_records" || Array(table.logs["migration"]["old_primary_keys"]).length > 0,
         permissions: table.permissions,
         created_at: table.created_at,
         updated_at: table.updated_at,
