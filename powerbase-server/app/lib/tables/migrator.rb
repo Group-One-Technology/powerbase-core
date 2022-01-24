@@ -96,8 +96,10 @@ class Tables::Migrator
                 search_params = query.find_by(primary_key_fields).to_elasticsearch
                 es_result = search_records(index_name, search_params)
                 old_doc = format_es_result(es_result)[0]
-                delete_record(index_name, old_doc[:doc_id])
-                puts "Deleted old document with doc_id of '#{old_doc[:doc_id]}'"
+                if old_doc[:doc_id] != doc_id
+                  delete_record(index_name, old_doc[:doc_id])
+                  puts "Deleted old document with doc_id of '#{old_doc[:doc_id]}'"
+                end
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
                 puts "No old document found for doc_id of #{doc_id}"
               end
