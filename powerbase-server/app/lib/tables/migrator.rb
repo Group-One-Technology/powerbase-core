@@ -30,6 +30,8 @@ class Tables::Migrator
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
     if table.logs["migration"]["start_time"] == nil || table.status == "migrated"
+      @offset = 0
+      @indexed_records = 0
       table.write_migration_logs!(
         indexed_records: 0,
         offset: 0,
