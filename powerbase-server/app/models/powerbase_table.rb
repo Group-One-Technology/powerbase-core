@@ -209,20 +209,20 @@ class PowerbaseTable < ApplicationRecord
 
   def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil, unmigrated_columns: nil)
     if status.present?
-      table.logs["migration"]["status"] = status
-      table.is_migrated = true if status == "migrated"
+      self.logs["migration"]["status"] = status
+      self.is_migrated = true if status == "migrated"
     end
-    table.logs["migration"]["total_records"] = total_records if total_records.present?
-    table.logs["migration"]["offset"] = offset if offset.present?
-    table.logs["migration"]["indexed_records"] = indexed_records if indexed_records.present?
-    table.logs["migration"]["start_time"] = start_time if start_time.present?
-    table.logs["migration"]["end_time"] = end_time if end_time.present?
-    table.logs["migration"]["errors"] << error if error.present?
-    table.logs["migration"]["unmigrated_columns"] << unmigrated_columns if unmigrated_columns.present?
-    table.save
+    self.logs["migration"]["total_records"] = total_records if total_records.present?
+    self.logs["migration"]["offset"] = offset if offset.present?
+    self.logs["migration"]["indexed_records"] = indexed_records if indexed_records.present?
+    self.logs["migration"]["start_time"] = start_time if start_time.present?
+    self.logs["migration"]["end_time"] = end_time if end_time.present?
+    self.logs["migration"]["errors"] << error if error.present?
+    self.logs["migration"]["unmigrated_columns"] << unmigrated_columns if unmigrated_columns.present?
+    self.save
 
     if status.present?
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
+      pusher_trigger!("table.#{self.id}", "notifier-migration-listener", { id: self.id })
     end
   end
 end
