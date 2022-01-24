@@ -218,8 +218,8 @@ class PowerbaseTable < ApplicationRecord
     self.logs["migration"]["start_time"] = start_time if start_time.present?
     self.logs["migration"]["end_time"] = end_time if end_time.present?
     self.logs["migration"]["errors"] << error if error.present?
-    self.logs["migration"]["unmigrated_columns"] = unmigrated_columns if unmigrated_columns.present?
-    self.logs["migration"]["old_primary_keys"] = old_primary_keys if old_primary_keys.present?
+    self.logs["migration"]["unmigrated_columns"] = unmigrated_columns if unmigrated_columns != nil
+    self.logs["migration"]["old_primary_keys"] = old_primary_keys if old_primary_keys != nil
     self.save
 
     if status.present?
