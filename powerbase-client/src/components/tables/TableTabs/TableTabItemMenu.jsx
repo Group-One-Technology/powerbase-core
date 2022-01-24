@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { EyeOffIcon, LockClosedIcon, TrashIcon } from '@heroicons/react/outline';
+import {
+  CloudIcon, EyeOffIcon, LockClosedIcon, TrashIcon,
+} from '@heroicons/react/outline';
 import { KeyIcon } from '@heroicons/react/solid';
 
 import { useBaseUser } from '@models/BaseUser';
@@ -104,7 +106,7 @@ export function TableTabItemMenu({ table, children }) {
               onSelect={handleReindex}
               disabled={!isMigrated}
             >
-              <KeyIcon className="h-4 w-4 mr-1.5" />
+              <CloudIcon className="h-4 w-4 mr-1.5" />
               Reindex
             </ContextMenu.Item>
           </>
