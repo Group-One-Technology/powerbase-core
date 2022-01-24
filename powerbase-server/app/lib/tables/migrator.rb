@@ -18,25 +18,25 @@ class Tables::Migrator
     @adapter = table.db.adapter
     @database = table.db
     @has_row_oid_support = database.has_row_oid_support?
-    @offset = 0
-    @indexed_records = 0
+    @offset = table.logs["migration"]["offset"] || 0
+    @indexed_records = table.logs["migration"]["indexed_records"] || 0
   end
 
   def index!
-    table.write_migration_logs!(status: "indexing_records")
     create_index!(index_name)
-
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
+    table.write_migration_logs!(total_records: total_records)
 
-    # Reset all migration counter logs
-    if table.logs["migration"]["total_records"] == nil || table.logs["migration"]["offset"] == nil || table.logs["migration"]["indexed_records"] == nil
+    # Reset all migration counter logs when first time indexing or when re-indexing.
+    if table.logs["migration"]["start_time"] == nil || table.status == "migrated"
       table.write_migration_logs!(
-        total_records: total_records,
         indexed_records: 0,
         offset: 0,
         start_time: Time.now,
       )
     end
+
+    table.write_migration_logs!(status: "indexing_records")
 
     if total_records.zero?
       puts "No record found"
@@ -108,6 +108,7 @@ class Tables::Migrator
         indexed_records: indexed_records,
       })
     end
+
     create_listener!
     set_table_as_migrated
   end
