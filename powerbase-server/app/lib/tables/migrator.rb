@@ -23,15 +23,18 @@ class Tables::Migrator
   end
 
   def index!
-    write_table_migration_logs!(status: "indexing_records")
-    pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
-
+    table.write_migration_logs!(status: "indexing_records")
     create_index!(index_name)
 
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
 
     # Reset all migration counter logs
-    write_table_migration_logs!(total_records: total_records, indexed_records: 0, offset: 0, start_time: Time.now)
+    table.write_migration_logs!(
+      total_records: total_records,
+      indexed_records: 0,
+      offset: 0,
+      start_time: Time.now,
+    )
 
     if total_records.zero?
       puts "No record found"
@@ -75,7 +78,7 @@ class Tables::Migrator
             update_record(index_name, doc_id, doc)
             @indexed_records += 1
           else
-            write_table_migration_logs!(
+            table.write_migration_logs!(
               error: {
                 type: "Elasticsearch",
                 error: "Failed to generate doc_id for record in table with id of #{table.id}",
@@ -84,7 +87,7 @@ class Tables::Migrator
             )
           end
         rescue => exception
-          write_table_migration_logs!(
+          table.write_migration_logs!(
             error: {
               type: "Elasticsearch",
               error: "Failed to index record in table with id of #{table.id}",
@@ -96,7 +99,7 @@ class Tables::Migrator
 
       @offset += DEFAULT_PAGE_SIZE
 
-      write_table_migration_logs!(offset: offset, indexed_records: indexed_records)
+      table.write_migration_logs!(offset: offset, indexed_records: indexed_records)
       pusher_trigger!("table.#{table.id}", "notifier-migration-listener", {
         id: table.id,
         offset: offset,
@@ -109,9 +112,7 @@ class Tables::Migrator
 
   def create_base_connection!
     puts "Adding and auto linking connections of table##{table.id}"
-
-    table.logs["migration"]["status"] = "adding_connections"
-    table.save
+    table.write_migration_logs!(status: "adding_connections")
 
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
     table_foreign_keys.each do |foreign_key|
@@ -234,9 +235,7 @@ class Tables::Migrator
       end
     end
 
-    table.logs["migration"]["status"] = "migrated_connections"
-    table.save
-
+    table.write_migration_logs!(status: "migrated_connections")
     pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
   end
@@ -248,22 +247,13 @@ class Tables::Migrator
   def create_listener!
     if database.postgresql? && ENV["ENABLE_LISTENER"] == "true"
       if database.has_row_oid_support?
-        table.logs["migration"]["status"] = "injecting_oid"
-        table.save
-        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
-
+        table.write_migration_logs!(status: "injecting_oid")
         table.inject_oid
       end
 
-      table.logs["migration"]["status"] = "injecting_notifier"
-      table.save
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
-
+      table.write_migration_logs!(status: "injecting_notifier")
       table.inject_notifier_trigger
-
-      table.logs["migration"]["status"] = "notifiers_created"
-      table.save
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
+      table.write_migration_logs!(status: "notifiers_created")
     end
   end
 
@@ -285,23 +275,8 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    write_table_migration_logs!(status: 'migrated', end_time: Time.now)
-
-    table.is_migrated = true
-    table.save
-
+    table.write_migration_logs!(status: 'migrated', end_time: Time.now)
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
-  end
-
-  def write_table_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
-    table.logs["migration"]["status"] = status if status.present?
-    table.logs["migration"]["total_records"] = total_records if total_records.present?
-    table.logs["migration"]["offset"] = offset if offset.present?
-    table.logs["migration"]["indexed_records"] = indexed_records if indexed_records.present?
-    table.logs["migration"]["start_time"] = start_time if start_time.present?
-    table.logs["migration"]["end_time"] = end_time if end_time.present?
-    table.logs["migration"]["errors"] << error if error.present?
-    table.save
   end
 end

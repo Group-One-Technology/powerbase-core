@@ -206,4 +206,22 @@ class PowerbaseTable < ApplicationRecord
     self.permissions[permission]["restricted_guests"] = restricted_guests.uniq
     self.save
   end
+
+  def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
+    if status.present?
+      table.logs["migration"]["status"] = status
+      table.is_migrated = true if status == "migrated"
+    end
+    table.logs["migration"]["total_records"] = total_records if total_records.present?
+    table.logs["migration"]["offset"] = offset if offset.present?
+    table.logs["migration"]["indexed_records"] = indexed_records if indexed_records.present?
+    table.logs["migration"]["start_time"] = start_time if start_time.present?
+    table.logs["migration"]["end_time"] = end_time if end_time.present?
+    table.logs["migration"]["errors"] << error if error.present?
+    table.save
+
+    if status.present?
+      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", { id: table.id })
+    end
+  end
 end
