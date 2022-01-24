@@ -26,6 +26,7 @@ class Tables::Migrator
     create_index!(index_name)
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
     table.write_migration_logs!(total_records: total_records)
+    old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
     if table.logs["migration"]["start_time"] == nil || table.status == "migrated"
@@ -45,6 +46,7 @@ class Tables::Migrator
     end
 
     puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
+
     while offset < total_records
       fetch_table_records!
 
@@ -77,6 +79,28 @@ class Tables::Migrator
           doc = doc.slice!(:oid)
 
           if doc_id.present?
+            if old_primary_keys.length > 0
+              begin
+                primary_key_fields = {}
+                old_primary_keys.each do |old_primary_key|
+                  field_key = old_primary_key.to_sym
+                  primary_key_fields[field_key] = doc[field_key] if session.key?(field_key)
+                end
+
+                query = Powerbase::QueryCompiler.new(@table, {
+                  include_pii: true,
+                  include_json: true,
+                })
+                search_params = query.find_by(primary_key_fields).to_elasticsearch
+                es_result = search_records(index_name, search_params)
+                old_doc = format_es_result(es_result)[0]
+                delete_record(index_name, old_doc[:doc_id])
+                puts "Deleted old document with doc_id of '#{old_doc[:doc_id]}'"
+              rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                puts "No old document found for doc_id of #{doc_id}"
+              end
+            end
+
             update_record(index_name, doc_id, doc)
             @indexed_records += 1
           else
@@ -109,6 +133,7 @@ class Tables::Migrator
       })
     end
 
+    table.write_migration_logs!(old_primary_keys: [])  if old_primary_keys.length > 0
     create_listener!
     set_table_as_migrated
   end

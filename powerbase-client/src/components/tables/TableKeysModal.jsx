@@ -79,7 +79,7 @@ export function TableKeysModal() {
   const tableConnections = connections?.filter((item) => item.referencedTableId === table.id);
   const canManageTable = baseUser?.can(PERMISSIONS.ManageTable, table);
   const hasReferencedConstraints = tableConnections?.some((item) => item.isConstraint);
-  const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints;
+  const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints && table.status === 'migrated';
 
   const handleSetAsPrimary = (selectedField, value) => {
     if (selectedField.isVirtual) return;
@@ -133,7 +133,7 @@ export function TableKeysModal() {
           </Dialog.Title>
 
           <div className="flex-1 m-3">
-            {hasReferencedConstraints && (
+            {(hasReferencedConstraints || table.status !== 'migrated') && (
               <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0 text-yellow-700">
@@ -141,7 +141,9 @@ export function TableKeysModal() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-yellow-700">
-                      Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table&apos;s primary key.
+                      {table.status === 'migrated'
+                        ? 'Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table\'s primary key.'
+                        : 'Cannot update primary key contraint while the table is still migrating.'}
                     </p>
                   </div>
                 </div>
