@@ -23,6 +23,7 @@ class PollWorker
 
           # Destroy Listiner thread
           Thread.list.delete(db.listener_thread)
+          db.listener_thread.exit
 
           puts "Reseting #{db.thread_name} listener...DONE"
         else
