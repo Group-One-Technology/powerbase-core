@@ -14,8 +14,12 @@ module Powerbase
 
     def listen!
       @db = powerbase_db._sequel
-      @db.listen("powerbase_table_update") do |ev, pid, payload|
-        notifier_callback(@db, ev, pid, payload)
+      begin
+        @db.listen("powerbase_table_update") do |ev, pid, payload|
+          notifier_callback(@db, ev, pid, payload)
+        end
+      rescue => ex
+        puts ex
       end
     end
 
