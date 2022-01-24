@@ -22,14 +22,14 @@ class Tables::Migrator
     @indexed_records = table.logs["migration"]["indexed_records"] || 0
   end
 
-  def index!(reset = false)
+  def index!
     create_index!(index_name)
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
+    table.write_migration_logs!(total_records: total_records)
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
     if table.logs["migration"]["start_time"] == nil || table.status == "migrated"
       table.write_migration_logs!(
-        total_records: total_records,
         indexed_records: 0,
         offset: 0,
         start_time: Time.now,
