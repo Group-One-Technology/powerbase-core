@@ -29,12 +29,14 @@ class Tables::Migrator
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
 
     # Reset all migration counter logs
-    table.write_migration_logs!(
-      total_records: total_records,
-      indexed_records: 0,
-      offset: 0,
-      start_time: Time.now,
-    )
+    if table.logs["migration"]["total_records"] == nil || table.logs["migration"]["offset"] == nil || table.logs["migration"]["indexed_records"] == nil
+      table.write_migration_logs!(
+        total_records: total_records,
+        indexed_records: 0,
+        offset: 0,
+        start_time: Time.now,
+      )
+    end
 
     if total_records.zero?
       puts "No record found"
