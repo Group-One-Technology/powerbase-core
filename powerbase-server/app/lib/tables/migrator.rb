@@ -27,9 +27,10 @@ class Tables::Migrator
     create_index!(index_name)
 
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
+    table.write_migration_logs!(total_records: total_records)
 
     # Reset all migration counter logs
-    if table.logs["migration"]["total_records"] == nil || table.logs["migration"]["offset"] == nil || table.logs["migration"]["indexed_records"] == nil
+    if table.logs["migration"]["start_time"] == nil
       table.write_migration_logs!(
         total_records: total_records,
         indexed_records: 0,
