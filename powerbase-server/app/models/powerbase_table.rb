@@ -207,7 +207,7 @@ class PowerbaseTable < ApplicationRecord
     self.save
   end
 
-  def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil)
+  def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil, unmigrated_columns: nil)
     if status.present?
       table.logs["migration"]["status"] = status
       table.is_migrated = true if status == "migrated"
@@ -218,6 +218,7 @@ class PowerbaseTable < ApplicationRecord
     table.logs["migration"]["start_time"] = start_time if start_time.present?
     table.logs["migration"]["end_time"] = end_time if end_time.present?
     table.logs["migration"]["errors"] << error if error.present?
+    table.logs["migration"]["unmigrated_columns"] << unmigrated_columns if unmigrated_columns.present?
     table.save
 
     if status.present?
