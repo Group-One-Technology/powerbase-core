@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/outline';
 import { KeyIcon } from '@heroicons/react/solid';
 
+import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
@@ -15,6 +16,7 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { reindexTable } from '@lib/api/tables';
 
 export function TableTabItemMenu({ table, children }) {
+  const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const { modal } = useTablePermissionsModal();
   const { tablesResponse } = useCurrentView();
@@ -98,17 +100,19 @@ export function TableTabItemMenu({ table, children }) {
               <KeyIcon className="h-4 w-4 mr-1.5" />
               Primary Keys
             </ContextMenu.Item>
-            <ContextMenu.Item
-              className={cn(
-                'px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100',
-                isMigrated ? 'cursor-pointer' : 'text-gray-500 cursor-not-allowed',
-              )}
-              onSelect={handleReindex}
-              disabled={!isMigrated}
-            >
-              <CloudIcon className="h-4 w-4 mr-1.5" />
-              Reindex
-            </ContextMenu.Item>
+            {base.isTurbo && (
+              <ContextMenu.Item
+                className={cn(
+                  'px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100',
+                  isMigrated ? 'cursor-pointer' : 'text-gray-500 cursor-not-allowed',
+                )}
+                onSelect={handleReindex}
+                disabled={!isMigrated}
+              >
+                <CloudIcon className="h-4 w-4 mr-1.5" />
+                Reindex Records
+              </ContextMenu.Item>
+            )}
           </>
         )}
 
