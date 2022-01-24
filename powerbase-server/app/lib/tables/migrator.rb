@@ -81,25 +81,32 @@ class Tables::Migrator
           doc = doc.slice!(:oid)
 
           if doc_id.present?
-            primary_key_fields = {}
-            old_primary_keys.each do |old_primary_key|
-              field_key = old_primary_key.to_sym
-              primary_key_fields[field_key] = doc[field_key] if doc.key?(field_key)
-            end
+            old_doc_id = nil
 
-            if primary_key_fields.length > 0
-              begin
+            if old_primary_keys.length > 0
+              primary_key_fields = {}
+              old_primary_keys.each do |old_primary_key|
+                field_key = old_primary_key.to_sym
+                primary_key_fields[field_key] = doc[field_key] if doc.key?(field_key)
+              end
+
+              if primary_key_fields.length > 0
                 query = Powerbase::QueryCompiler.new(@table, {
                   include_pii: true,
                   include_json: true,
                 })
                 search_params = query.find_by(primary_key_fields).to_elasticsearch
                 es_result = search_records(index_name, search_params)
-                old_doc = format_es_result(es_result)[0]
-                if old_doc[:doc_id] != doc_id
-                  delete_record(index_name, old_doc[:doc_id])
-                  puts "Deleted old document with doc_id of '#{old_doc[:doc_id]}'"
-                end
+                old_doc_id = format_es_result(es_result)[0][:doc_id]
+              end
+            else
+              old_doc_id = get_doc_id([], record, fields)
+            end
+
+            if old_doc_id != nil && old_doc_id != doc_id
+              begin
+                delete_record(index_name, old_doc_id)
+                puts "Deleted old document with doc_id of '#{old_doc_id}'"
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
                 puts "No old document found for doc_id of #{doc_id}"
               end
