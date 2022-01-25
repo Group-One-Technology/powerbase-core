@@ -26,6 +26,7 @@ class Tables::Migrator
     create_index!(index_name)
     @total_records = sequel_connect(database) {|db| db.from(table.name).count}
     table.write_migration_logs!(total_records: total_records)
+    actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
@@ -54,8 +55,7 @@ class Tables::Migrator
 
       records.each do |record|
         begin
-          oid = record.try(:[], :oid)
-          doc_id = has_row_oid_support ? "oid_#{oid}" : get_doc_id(primary_keys, record, fields)
+          doc_id = get_doc_id(primary_keys, record, actual_fields)
           puts "--- DOC_ID: #{doc_id}"
 
           # Format doc based on record field types
@@ -113,7 +113,6 @@ class Tables::Migrator
               end
             else
               # Check if there's an existing doc with no primary keys
-              actual_fields = fields.select {|field| !field.is_virtual}
               search_doc_id = get_doc_id([], record, actual_fields)
               begin
                 old_doc = get_record(index_name, search_doc_id)
