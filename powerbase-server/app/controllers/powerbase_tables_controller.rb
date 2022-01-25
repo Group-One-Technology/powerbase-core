@@ -197,7 +197,7 @@ class PowerbaseTablesController < ApplicationController
 
   # POST /tables/:id/reindex_records
   def reindex_records
-    @table = PowerbaseTable.find safe_parmas[:id]
+    @table = PowerbaseTable.find safe_params[:id]
     @table.reindex_later!
     render status: :no_content
   end
