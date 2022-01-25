@@ -210,7 +210,11 @@ class PowerbaseTable < ApplicationRecord
   def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil, unmigrated_columns: nil, old_primary_keys: nil)
     if status.present?
       self.logs["migration"]["status"] = status
-      self.is_migrated = true if status == "migrated"
+      if status == "migrated"
+        self.is_migrated = true
+      elsif self.is_migrated
+        self.is_migrated = false
+      end
     end
     self.logs["migration"]["total_records"] = total_records if total_records.present?
     self.logs["migration"]["offset"] = offset if offset.present?
