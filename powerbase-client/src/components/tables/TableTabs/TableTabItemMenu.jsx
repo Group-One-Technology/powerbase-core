@@ -1,22 +1,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { EyeOffIcon, LockClosedIcon, TrashIcon } from '@heroicons/react/outline';
+import {
+  CloudIcon, EyeOffIcon, LockClosedIcon, TrashIcon,
+} from '@heroicons/react/outline';
 import { KeyIcon } from '@heroicons/react/solid';
 
+import { useBase } from '@models/Base';
 import { useBaseUser } from '@models/BaseUser';
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { reindexTable } from '@lib/api/tables';
 
 export function TableTabItemMenu({ table, children }) {
+  const { data: base } = useBase();
   const { baseUser } = useBaseUser();
   const { modal } = useTablePermissionsModal();
+  const { tablesResponse } = useCurrentView();
   const { setOpen: setTableKeysModalOpen, setTable } = useTableKeysModal();
 
   const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canDeleteTables = baseUser?.can(PERMISSIONS.DeleteTables);
+  const isMigrated = table.status === 'migrated';
 
   const handleKeys = () => {
     setTable(table);
@@ -27,6 +36,13 @@ export function TableTabItemMenu({ table, children }) {
     if (canChangeGuestAccess) {
       modal.open(table);
     }
+  };
+
+  const handleReindex = async () => {
+    if (!canManageTables || !table) return;
+    reindexTable({ tableId: table.id });
+    setTable({ ...table, status: 'indexing_records' });
+    tablesResponse.mutate();
   };
 
   if (!canManageTables) {
@@ -84,6 +100,19 @@ export function TableTabItemMenu({ table, children }) {
               <KeyIcon className="h-4 w-4 mr-1.5" />
               Primary Keys
             </ContextMenu.Item>
+            {base.isTurbo && (
+              <ContextMenu.Item
+                className={cn(
+                  'px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100',
+                  isMigrated ? 'cursor-pointer' : 'text-gray-500 cursor-not-allowed',
+                )}
+                onSelect={handleReindex}
+                disabled={!isMigrated}
+              >
+                <CloudIcon className="h-4 w-4 mr-1.5" />
+                Reindex Records
+              </ContextMenu.Item>
+            )}
           </>
         )}
 

@@ -11,7 +11,7 @@ class SyncDatabaseWorker
     @new_connection = new_connection
 
     if database.in_synced?
-      puts "-- SyncDatabaseWorker #{database.name} is already in synced!" 
+      puts "-- SyncDatabaseWorker #{database.name} is already in synced!"
     else
       @unmigrated_tables = @database.unmigrated_tables
       @deleted_tables = @database.deleted_tables
@@ -66,7 +66,13 @@ class SyncDatabaseWorker
       end
     end
 
-    return index_records if params["step"] != "indexing_records" && database.is_turbo
+    if database.is_turbo
+      return index_records if params["step"] != "indexing_records"
+    else
+      database.tables.each do |table|
+        table.write_migration_logs!(status: "migrated")
+      end
+    end
 
     database.update_status!("migrated")
     database.base_migration.end_time = Time.now

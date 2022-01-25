@@ -101,6 +101,7 @@ Rails.application.routes.draw do
         put 'update_primary_keys'
         put 'update_table_permission', as: 'update_table_permission'
         put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_tables#update_allowed_roles'
+        post 'reindex_records'
       end
     end
   end

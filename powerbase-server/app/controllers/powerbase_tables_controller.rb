@@ -39,11 +39,14 @@ class PowerbaseTablesController < ApplicationController
     required(:roles)
   end
 
-
   schema(:create) do
     required(:id).value(:integer)
     required(:table)
     required(:fields)
+  end
+
+  schema(:reindex_records) do
+    required(:id).value(:integer)
   end
 
   # GET /databases/:database_id/tables
@@ -182,7 +185,6 @@ class PowerbaseTablesController < ApplicationController
   def update_allowed_roles
     table_updater = Tables::Updater.new(@table)
     table_updater.update_allowed_roles!(safe_params[:permission], safe_params[:roles])
-
     render status: :no_content
   end
 
@@ -190,7 +192,13 @@ class PowerbaseTablesController < ApplicationController
   def update_table_permission
     table_updater = Tables::Updater.new(@table)
     table_updater.update_access!(safe_params[:permission], safe_params[:access])
+    render status: :no_content
+  end
 
+  # POST /tables/:id/reindex_records
+  def reindex_records
+    @table = PowerbaseTable.find safe_parmas[:id]
+    @table.reindex_later!
     render status: :no_content
   end
 

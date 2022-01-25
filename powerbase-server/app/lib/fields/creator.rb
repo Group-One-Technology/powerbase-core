@@ -102,9 +102,9 @@ class Fields::Creator
       add_field_select_options if field.powerbase_field_type.data_type == "enums"
       add_to_viewfield
 
-      table.logs["migration"]["unmigrated_columns"] = Array(table.logs["migration"]["unmigrated_columns"])
+      unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
         .select {|field_name| field_name != field.name.to_s}
-      table.save
+      table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
 
       pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
     else
