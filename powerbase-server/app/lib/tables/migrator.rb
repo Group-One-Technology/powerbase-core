@@ -57,6 +57,8 @@ class Tables::Migrator
           oid = record.try(:[], :oid)
           doc_id = has_row_oid_support ? "oid_#{oid}" : get_doc_id(primary_keys, record, fields)
           puts "--- DOC_ID: #{doc_id}"
+
+          # Format doc based on record field types
           doc = {}
           record.collect {|key, value| key }.each do |key|
             cur_field = fields.find {|field| field.name.to_sym == key }
@@ -82,14 +84,20 @@ class Tables::Migrator
 
           if doc_id.present?
             old_doc_id = nil
+            old_doc = nil
 
+            # Check if primary keys changed
             if old_primary_keys.length > 0
               primary_key_fields = {}
               old_primary_keys.each do |old_primary_key|
                 field_key = old_primary_key.to_sym
-                primary_key_fields[field_key] = doc[field_key] if doc.key?(field_key)
+                if doc.key?(field_key)
+                  cur_field = fields.find {|field| field.name.to_sym == field_key && !field.is_virtual}
+                  primary_key_fields[field_key] = doc[field_key] if cur_field != nil
+                end
               end
 
+              # Check if there's an existing doc
               if primary_key_fields.length > 0
                 query = Powerbase::QueryCompiler.new(@table, {
                   include_pii: true,
@@ -97,12 +105,29 @@ class Tables::Migrator
                 })
                 search_params = query.find_by(primary_key_fields).to_elasticsearch
                 es_result = search_records(index_name, search_params)
-                old_doc_id = format_es_result(es_result)[0][:doc_id]
+                old_doc = format_es_result(es_result)
+                if old_doc.length > 0
+                  old_doc_id = old_doc[0][:doc_id]
+                  old_doc = old_doc[0].slice!(:doc_id)
+                end
               end
             else
-              old_doc_id = get_doc_id([], record, fields)
+              # Check if there's an existing doc with no primary keys
+              actual_fields = fields.select {|field| !field.is_virtual}
+              search_doc_id = get_doc_id([], record, actual_fields)
+              begin
+                old_doc = get_record(index_name, search_doc_id)
+
+                if old_doc != nil && old_doc.key?("_source")
+                  old_doc = old_doc["_source"]
+                  old_doc_id = search_doc_id
+                end
+              rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                puts "No old document found for doc_id of #{doc_id}"
+              end
             end
 
+            # Remove the old existing doc
             if old_doc_id != nil && old_doc_id != doc_id
               begin
                 delete_record(index_name, old_doc_id)
@@ -112,6 +137,12 @@ class Tables::Migrator
               end
             end
 
+            # Merge Actual and Magic Records (if any)
+            if old_doc != nil && old_doc.length > 0
+              doc = { **old_doc, **doc }
+            end
+
+            # Upsert formatted doc
             update_record(index_name, doc_id, doc)
             @indexed_records += 1
           else
