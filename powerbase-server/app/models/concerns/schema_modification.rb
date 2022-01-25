@@ -3,6 +3,8 @@ module SchemaModification
   extend ActiveSupport::Concern
 
   def update_primary_keys(primary_keys = [])
+    raise StandardError.new "Cannot change primary key of a migrating table." if self.status != "migrated"
+
     constraints = self.db.connections
       .filter {|connection| connection.referenced_table_id == self.id && connection.is_constraint}
 
@@ -78,6 +80,11 @@ module SchemaModification
 
     self._sequel.disconnect
 
+    old_primary_keys = fields
+      .select {|field| field.is_primary_key }
+      .map {|field| field.name}
+    self.write_migration_logs!(old_primary_keys: old_primary_keys)
+
     fields.each do |field|
       is_primary_key = primary_keys.include?(field.name.to_sym)
 
@@ -85,5 +92,7 @@ module SchemaModification
         field.update(is_primary_key: is_primary_key)
       end
     end
+
+    self.reindex_later! if self.db.is_turbo
   end
 end

@@ -207,10 +207,14 @@ class PowerbaseTable < ApplicationRecord
     self.save
   end
 
-  def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil, unmigrated_columns: nil)
+  def write_migration_logs!(status: nil, total_records: nil, offset: nil, indexed_records: nil, start_time: nil, end_time: nil, error: nil, unmigrated_columns: nil, old_primary_keys: nil)
     if status.present?
       self.logs["migration"]["status"] = status
-      self.is_migrated = true if status == "migrated"
+      if status == "migrated"
+        self.is_migrated = true
+      elsif self.is_migrated
+        self.is_migrated = false
+      end
     end
     self.logs["migration"]["total_records"] = total_records if total_records.present?
     self.logs["migration"]["offset"] = offset if offset.present?
@@ -218,7 +222,8 @@ class PowerbaseTable < ApplicationRecord
     self.logs["migration"]["start_time"] = start_time if start_time.present?
     self.logs["migration"]["end_time"] = end_time if end_time.present?
     self.logs["migration"]["errors"] << error if error.present?
-    self.logs["migration"]["unmigrated_columns"] = unmigrated_columns if unmigrated_columns.present?
+    self.logs["migration"]["unmigrated_columns"] = unmigrated_columns if unmigrated_columns != nil
+    self.logs["migration"]["old_primary_keys"] = old_primary_keys if old_primary_keys != nil
     self.save
 
     if status.present?

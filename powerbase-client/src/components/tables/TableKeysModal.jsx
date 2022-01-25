@@ -79,7 +79,7 @@ export function TableKeysModal() {
   const tableConnections = connections?.filter((item) => item.referencedTableId === table.id);
   const canManageTable = baseUser?.can(PERMISSIONS.ManageTable, table);
   const hasReferencedConstraints = tableConnections?.some((item) => item.isConstraint);
-  const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints;
+  const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints && table.status === 'migrated';
 
   const handleSetAsPrimary = (selectedField, value) => {
     if (selectedField.isVirtual) return;
@@ -133,7 +133,7 @@ export function TableKeysModal() {
           </Dialog.Title>
 
           <div className="flex-1 m-3">
-            {hasReferencedConstraints && (
+            {(hasReferencedConstraints || table.status !== 'migrated') && (
               <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0 text-yellow-700">
@@ -141,7 +141,9 @@ export function TableKeysModal() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-yellow-700">
-                      Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table&apos;s primary key.
+                      {table.status === 'migrated'
+                        ? 'Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table\'s primary key.'
+                        : 'Cannot update primary key contraint while the table is still migrating.'}
                     </p>
                   </div>
                 </div>
@@ -195,39 +197,45 @@ export function TableKeysModal() {
               Fields
             </h4>
             <ul className="list-none flex flex-col gap-1">
-              {viewFields.map((field) => (
-                <FieldItem
-                  key={field.id}
-                  field={field}
-                  fieldTypes={fieldTypes}
-                  action={(canUpdatePrimaryKey && !field.isPrimaryKey) && (
-                    <>
-                      {field.isPii || field.isVirtual
-                        ? (
-                          <Tooltip.Root delayDuration={0}>
-                            <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">
+              {viewFields.map((field) => {
+                const fieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
+
+                return (
+                  <FieldItem
+                    key={field.id}
+                    field={field}
+                    fieldTypes={fieldTypes}
+                    action={(canUpdatePrimaryKey && !field.isPrimaryKey) && (
+                      <>
+                        {field.isPii || field.isVirtual || fieldType?.name === 'Date'
+                          ? (
+                            <Tooltip.Root delayDuration={0}>
+                              <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">
+                                Set as Primary Key
+                              </Tooltip.Trigger>
+                              <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                                <Tooltip.Arrow className="gray-900" />
+                                {field.isVirtual
+                                  ? 'Cannot set a Magic field as a Primary Key.'
+                                  : fieldType?.name === 'Date'
+                                    ? 'Temporarily cannot set date fields as Primary Key.'
+                                    : 'Cannot set a PII field as a Primary Key.'}
+                              </Tooltip.Content>
+                            </Tooltip.Root>
+                          ) : (
+                            <button
+                              type="button"
+                              className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+                              onClick={() => handleSetAsPrimary(field, true)}
+                            >
                               Set as Primary Key
-                            </Tooltip.Trigger>
-                            <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
-                              <Tooltip.Arrow className="gray-900" />
-                              {field.isVirtual
-                                ? 'Cannot set a Magic field as a Primary Key.'
-                                : 'Cannot set a PII field as a Primary Key.'}
-                            </Tooltip.Content>
-                          </Tooltip.Root>
-                        ) : (
-                          <button
-                            type="button"
-                            className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-pointer text-gray-900 bg-gray-100 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
-                            onClick={() => handleSetAsPrimary(field, true)}
-                          >
-                            Set as Primary Key
-                          </button>
-                        )}
-                    </>
-                  )}
-                />
-              ))}
+                            </button>
+                          )}
+                      </>
+                    )}
+                  />
+                );
+              })}
             </ul>
 
             {tableConnections && tableConnections.length > 0 && (

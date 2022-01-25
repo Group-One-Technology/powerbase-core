@@ -67,7 +67,7 @@ export async function addVirtualTable({ payload }) {
 }
 
 export async function reindexTable({ tableId }) {
-  const response = await securedApi.post(`/tables/${tableId}/reindex`);
+  const response = await securedApi.post(`/tables/${tableId}/reindex_records`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
