@@ -55,9 +55,6 @@ class Tables::Migrator
 
       records.each do |record|
         begin
-          doc_id = get_doc_id(primary_keys, record, actual_fields)
-          puts "--- DOC_ID: #{doc_id}"
-
           # Format doc based on record field types
           doc = {}
           record.collect {|key, value| key }.each do |key|
@@ -80,6 +77,8 @@ class Tables::Migrator
             end
           end
 
+          doc_id = get_doc_id(primary_keys, doc, actual_fields)
+          puts "--- DOC_ID: #{doc_id}"
           doc = doc.slice!(:oid)
 
           if doc_id.present?
@@ -113,7 +112,7 @@ class Tables::Migrator
               end
             else
               # Check if there's an existing doc with no primary keys
-              search_doc_id = get_doc_id([], record, actual_fields)
+              search_doc_id = get_doc_id([], doc, actual_fields)
               begin
                 old_doc = get_record(index_name, search_doc_id)
 
