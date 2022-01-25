@@ -56,13 +56,17 @@ class PowerbaseDatabase < ApplicationRecord
 
   def listen!
     con = Powerbase::Listener.new self
-    thread = Thread.new do
-      loop do
-        con.listen!
+    begin
+      thread = Thread.new do
+        loop do
+          con.listen!
+        end
       end
+      thread.abort_on_exception = true
+      thread.name = thread_name
+    rescue => ex
+      puts "-- Thread::Error #{ex}"
     end
-
-    thread.name = thread_name
   end
 
   def listener_thread
@@ -114,7 +118,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def sync!(new_connection = false)
-    SyncDatabaseWorker.perform_async(self.id, new_connection) unless in_synced?
+    SyncDatabaseWorker.perform_async(self.id, new_connection)
   end
 
   def has_row_oid_support?
