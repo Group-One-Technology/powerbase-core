@@ -42,7 +42,7 @@ export function TableViewsNav() {
                   <ul className="ml-4 list-outside list-disc flex flex-col gap-2">
                     <li>Set fields as PII.</li>
                     <li>Add magic fields.</li>
-                    <li>Properly update table records</li>
+                    <li>Update/delete table records</li>
                     <li>Properly index records (for turbo bases).</li>
                     <li>Get notified of changes in the remote database.</li>
                   </ul>
