@@ -93,6 +93,6 @@ module SchemaModification
       end
     end
 
-    self.reindex_later! if self.db.is_turbo
+    self.reindex_later!
   end
 end

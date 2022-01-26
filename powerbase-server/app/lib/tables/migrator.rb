@@ -135,14 +135,36 @@ class Tables::Migrator
               end
             end
 
-            # Merge Actual and Magic Records (if any)
-            if old_doc != nil && old_doc.length > 0
-              doc = { **old_doc, **doc }
+            if database.is_turbo
+              # Merge Actual and Magic Records (if any)
+              if old_doc != nil && old_doc.length > 0
+                doc = { **old_doc, **doc }
+              end
+            else
+              # Pick virtual and primary key data for doc.
+              updated_doc = {}
+
+              virtual_fields = fields.select {|field| field.is_virtual}
+              old_doc.each do |key, value|
+                field = virtual_fields.find {|item| item.name.to_sym == key}
+                updated_doc[key] = value if field != nil
+              end
+
+              if updated_doc.length > 0
+                doc.each do |key, value|
+                  field = primary_keys.find {|item| item.name.to_sym == key}
+                  updated_doc[key] = value if field != nil
+                end
+              end
+
+              doc = updated_doc
             end
 
             # Upsert formatted doc
-            update_record(index_name, doc_id, doc)
-            @indexed_records += 1
+            if doc.length > 0
+              update_record(index_name, doc_id, doc)
+              @indexed_records += 1
+            end
           else
             table.write_migration_logs!(
               error: {
