@@ -512,7 +512,11 @@ module Powerbase
           end
 
           cur_field = if is_magic_values
-              @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
+              filter_field = @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
+              if filter_field == nil
+                filter_field = @table.primary_keys.find {|item| item.name.to_s == filter[:field].to_s}
+              end
+              filter_field
             else
               @table.fields.find {|item| item.name.to_s == filter[:field].to_s}
             end
