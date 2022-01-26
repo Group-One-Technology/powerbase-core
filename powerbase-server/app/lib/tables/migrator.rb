@@ -106,7 +106,7 @@ class Tables::Migrator
               search_doc_id = get_doc_id([], doc, actual_fields)
             end
 
-            if search_doc_id != nil
+            if search_doc_id != nil && search_doc_id != doc_id
               # Search existing doc
               begin
                 old_doc = get_record(index_name, search_doc_id)
