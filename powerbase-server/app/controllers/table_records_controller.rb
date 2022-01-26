@@ -31,6 +31,11 @@ class TableRecordsController < ApplicationController
     required(:data)
   end
 
+  schema(:delete_record) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+  end
+
   # POST /tables/:table_id/records
   def index
     @table = PowerbaseTable.find(safe_params[:id])
@@ -118,6 +123,21 @@ class TableRecordsController < ApplicationController
       render json: { updated: true }
     else
       render json: { error: "Could not update value for row in '#{@table.name}'" }, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /tables/:id/delete_record
+  def delete_record
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
+
+    model = Powerbase::Model.new(@table)
+    result = model.delete_merged_record(primary_keys: primary_keys)
+    if result
+      render json: { deleted: true, result: result }
+    else
+      render json: { error: "Could not delete record in '#{@table.name}'" }, status: :unprocessable_entity
     end
   end
 

@@ -65,3 +65,13 @@ export async function updateFieldData({
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
+
+export async function deleteRecord({ tableId, primaryKeys }) {
+  const response = await securedApi.delete(`tables/${tableId}/delete_record`, {
+    data: {
+      primary_keys: primaryKeys,
+    },
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
