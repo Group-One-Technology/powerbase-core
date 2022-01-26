@@ -82,6 +82,7 @@ class Tables::Migrator
           doc = doc.slice!(:oid)
 
           if doc_id.present?
+            search_doc_id = nil
             old_doc_id = nil
             old_doc = nil
 
@@ -98,40 +99,32 @@ class Tables::Migrator
 
               # Check if there's an existing doc
               if primary_key_fields.length > 0
-                query = Powerbase::QueryCompiler.new(@table, {
-                  include_pii: true,
-                  include_json: true,
-                })
-                search_params = query.find_by(primary_key_fields).to_elasticsearch
-                es_result = search_records(index_name, search_params)
-                old_doc = format_es_result(es_result)
-                if old_doc.length > 0
-                  old_doc_id = old_doc[0][:doc_id]
-                  old_doc = old_doc[0].slice!(:doc_id)
-                end
+                search_doc_id = format_doc_id(primary_key_fields)
               end
             else
               # Check if there's an existing doc with no primary keys
               search_doc_id = get_doc_id([], doc, actual_fields)
+            end
+
+            if search_doc_id != nil
+              # Search existing doc
               begin
                 old_doc = get_record(index_name, search_doc_id)
-
-                if old_doc != nil && old_doc.key?("_source")
-                  old_doc = old_doc["_source"]
-                  old_doc_id = search_doc_id
-                end
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
                 puts "No old document found for doc_id of #{doc_id}"
               end
-            end
 
-            # Remove the old existing doc
-            if old_doc_id != nil && old_doc_id != doc_id
-              begin
-                delete_record(index_name, old_doc_id)
-                puts "Deleted old document with doc_id of '#{old_doc_id}'"
-              rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-                puts "No old document found for doc_id of #{doc_id}"
+              if old_doc != nil && old_doc.key?("_source")
+                old_doc = old_doc["_source"]
+                old_doc_id = search_doc_id
+
+                # Remove the old existing doc
+                begin
+                  delete_record(index_name, old_doc_id)
+                  puts "Deleted old doc_id: #{old_doc_id}"
+                rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                  puts "No old doc_id: #{doc_id}"
+                end
               end
             end
 
@@ -146,13 +139,14 @@ class Tables::Migrator
 
               virtual_fields = fields.select {|field| field.is_virtual}
               old_doc.each do |key, value|
-                field = virtual_fields.find {|item| item.name.to_sym == key}
+                field = virtual_fields.find {|item| item.name.to_sym == key.to_sym}
                 updated_doc[key] = value if field != nil
               end
 
+              # Prevent indexing of doc when there are no virtual fields data.
               if updated_doc.length > 0
                 doc.each do |key, value|
-                  field = primary_keys.find {|item| item.name.to_sym == key}
+                  field = primary_keys.find {|item| item.name.to_sym == key.to_sym}
                   updated_doc[key] = value if field != nil
                 end
               end
@@ -164,6 +158,7 @@ class Tables::Migrator
             if doc.length > 0
               update_record(index_name, doc_id, doc)
               @indexed_records += 1
+              puts "Saved doc_id: #{doc_id}"
             end
           else
             table.write_migration_logs!(
