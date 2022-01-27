@@ -14,11 +14,12 @@ module SchemaModification
 
 
     fields = self.fields
+    turbo = self.db.is_turbo
     primary_keys = Array(primary_keys)
     primary_key_fields = fields.select {|field| primary_keys.include?(field.name)}
     virtual_fields = fields.select {|item| item.is_virtual}
 
-    if !self.db.is_turbo && virtual_fields.any? && primary_key_fields.length == 0
+    if !turbo && virtual_fields.any? && primary_key_fields.length == 0
       raise StandardError.new "There must be at least one primary key fields because it is needed for the magic fields."
     end
 
@@ -98,6 +99,8 @@ module SchemaModification
       end
     end
 
-    self.reindex_later!
+    if turbo || (!turbo && virtual_fields.any?)
+      self.reindex_later!
+    end
   end
 end
