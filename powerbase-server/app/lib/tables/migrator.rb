@@ -330,11 +330,6 @@ class Tables::Migrator
 
   def create_listener!
     if database.postgresql? && ENV["ENABLE_LISTENER"] == "true"
-      if database.has_row_oid_support?
-        table.write_migration_logs!(status: "injecting_oid")
-        table.inject_oid
-      end
-
       table.write_migration_logs!(status: "injecting_notifier")
       table.inject_notifier_trigger
       table.write_migration_logs!(status: "notifiers_created")

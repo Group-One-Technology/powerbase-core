@@ -10,10 +10,6 @@ const STEPS = {
   preparing: {
     percentage: 0,
   },
-  injecting_oid: {
-    percentage: 25,
-    description: 'Adding OID...',
-  },
   injecting_notifier: {
     percentage: 50,
     description: 'Injecting Table Notifier...',
