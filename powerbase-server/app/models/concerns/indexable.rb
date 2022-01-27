@@ -14,9 +14,8 @@ module Indexable
   end
 
   def sequel_records(order: nil)
-    sequel_connect(self.db) do |db|
-      table_query = db.from(self.name)
-      @records = table_query.select(*default_table_select(self.db.adapter.to_sym, self.db.has_row_oid_support?))
+    @records = sequel_connect(self.db) do |db|
+      db.from(self.name)
         .order(order)
         .all
     end

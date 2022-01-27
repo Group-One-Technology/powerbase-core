@@ -7,7 +7,7 @@ class Tables::Migrator
   attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
                 :indexed_records, :total_records, :records,
-                :database, :has_row_oid_support
+                :database
 
   def initialize(table)
     @table = table
@@ -17,7 +17,6 @@ class Tables::Migrator
     @order_field = primary_keys.first || fields.first
     @adapter = table.db.adapter
     @database = table.db
-    @has_row_oid_support = database.has_row_oid_support?
     @offset = table.logs["migration"]["offset"] || 0
     @indexed_records = table.logs["migration"]["indexed_records"] || 0
   end
@@ -79,7 +78,6 @@ class Tables::Migrator
 
           doc_id = get_doc_id(primary_keys, doc, actual_fields)
           puts "--- DOC_ID: #{doc_id}"
-          doc = doc.slice!(:oid)
 
           if doc_id.present?
             search_doc_id = nil
@@ -343,9 +341,9 @@ class Tables::Migrator
   private
   def fetch_table_records!
     sequel_connect(database) do |db|
-      @total_records = db.from(table.name).count
       table_query = db.from(table.name)
-      @records = table_query.select(*default_table_select(adapter.to_sym, has_row_oid_support))
+      @total_records = table_query.count
+      @records = table_query
         .order(order_field.name.to_sym)
         .limit(DEFAULT_PAGE_SIZE)
         .offset(offset)
