@@ -12,18 +12,24 @@ module SchemaModification
       raise StandardError.new "Cannot update primary key because it is needed in a foreign key constraint. Remove referenced foreign key constraint first to update this table's primary key."
     end
 
-    fields = self.fields
 
+    fields = self.fields
+    turbo = self.db.is_turbo
     primary_keys = Array(primary_keys)
     primary_key_fields = fields.select {|field| primary_keys.include?(field.name)}
+    virtual_fields = fields.select {|item| item.is_virtual}
 
-    virtual_fields = primary_key_fields.select {|field| field.is_virtual }
-    if virtual_fields.any?
+    if !turbo && virtual_fields.any? && primary_key_fields.length == 0
+      raise StandardError.new "There must be at least one primary key fields because it is needed for the magic fields."
+    end
+
+    primary_key_virtual_fields = primary_key_fields.select {|field| field.is_virtual }
+    if primary_key_virtual_fields.any?
       raise StandardError.new "Cannot set a magic field as a primary key."
     end
 
-    pii_fields = primary_key_fields.select {|field| field.is_pii }
-    if pii_fields.any?
+    primary_key_pii_fields = primary_key_fields.select {|field| field.is_pii }
+    if primary_key_pii_fields.any?
       raise StandardError.new "Cannot set a PII field as a primary key. To proceed, please unset the selected field as PII first."
     end
 
@@ -93,6 +99,8 @@ module SchemaModification
       end
     end
 
-    self.reindex_later! if self.db.is_turbo
+    if turbo || (!turbo && virtual_fields.any?)
+      self.reindex_later!
+    end
   end
 end

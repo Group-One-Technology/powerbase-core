@@ -76,6 +76,7 @@ export function TableKeysModal() {
 
   const primaryKeys = viewFields.filter((item) => item.isPrimaryKey);
   const foreignKeys = viewFields.filter((item) => item.isForeignKey);
+  const hasMagicFields = viewFields.some((item) => item.isVirtual);
   const tableConnections = connections?.filter((item) => item.referencedTableId === table.id);
   const canManageTable = baseUser?.can(PERMISSIONS.ManageTable, table);
   const hasReferencedConstraints = tableConnections?.some((item) => item.isConstraint);
@@ -93,12 +94,19 @@ export function TableKeysModal() {
 
   const submit = (evt) => {
     evt.preventDefault();
+    const primaryKeysArray = primaryKeys.map((item) => item.name);
+
+    if (!base.isTurbo && hasMagicFields && primaryKeysArray.length === 0) {
+      catchError('There must be at least one primary key fields because it is needed for the magic fields.');
+      return;
+    }
+
     if (canUpdatePrimaryKey) {
       saving();
 
       updateTablePrimaryKeys({
         tableId: table.id,
-        primaryKeys: primaryKeys.map((item) => item.name),
+        primaryKeys: primaryKeysArray,
       })
         .then(async () => {
           if (currentTable.id === table.id) {

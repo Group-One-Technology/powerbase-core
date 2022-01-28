@@ -241,6 +241,13 @@ module Powerbase
           { **magic_record, **record }
         end
           .select {|item| item != nil}
+
+        other_records = records.filter do |record|
+          magic_record = get_record_by_key(magic_records, record, primary_keys)
+          magic_record == nil
+        end
+
+        merged_records = [*merged_records, *other_records]
       else
         merged_records = records.map do |record|
           magic_record = get_record_by_key(magic_records, record, primary_keys) || {}
@@ -512,7 +519,11 @@ module Powerbase
           end
 
           cur_field = if is_magic_values
-              @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
+              filter_field = @magic_fields.find {|item| item.name.to_s == filter[:field].to_s}
+              if filter_field == nil
+                filter_field = @table.primary_keys.find {|item| item.name.to_s == filter[:field].to_s}
+              end
+              filter_field
             else
               @table.fields.find {|item| item.name.to_s == filter[:field].to_s}
             end
@@ -612,7 +623,7 @@ module Powerbase
         included_fields =  if !is_elasticsearch
             @fields
           elsif is_magic_records
-            primary_key_fields = @fields.select {|field| field.is_primary_key }
+            primary_key_fields = @fields.select {|field| field.is_primary_key}
             [*@magic_fields, *primary_key_fields]
           else
             [*@fields, *@magic_fields]
@@ -641,11 +652,13 @@ module Powerbase
           primary_keys = @fields.select {|field| field.is_primary_key }
           order_field = if primary_keys.length > 0
               primary_keys.first
-            else
-              is_magic_values ? @magic_fields.first : @fields.first
+            elsif !@turbo
+              @fields.first
+            elsif is_magic_values
+              @magic_fields.first
             end
 
-          [{ field: order_field.name, operator: "asc" }]
+          order_field != nil ? [{ field: order_field.name, operator: "asc" }] : []
         end
 
         if is_magic_values
