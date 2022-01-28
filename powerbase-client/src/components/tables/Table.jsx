@@ -40,7 +40,7 @@ export function Table() {
         views={views}
         currentView={view}
       />
-      <TableFooter />
+      <TableFooter table={table} />
     </>
   );
 }
