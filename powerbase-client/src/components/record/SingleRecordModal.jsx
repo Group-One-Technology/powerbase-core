@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Dialog, Disclosure } from '@headlessui/react';
-import { ChevronRightIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/outline';
+import {
+  ChevronRightIcon,
+  ChevronDownIcon,
+  EyeIcon,
+  TrashIcon,
+} from '@heroicons/react/outline';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useSaveStatus } from '@models/SaveStatus';
@@ -17,7 +22,7 @@ import { useMounted } from '@lib/hooks/useMounted';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { updateRecord } from '@lib/api/records';
+import { deleteRecord, updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -97,11 +102,42 @@ export function BaseSingleRecordModal({
     });
   };
 
-  const handleSubmit = async (evt) => {
-    evt.preventDefault();
+  const handleDelete = async () => {
     if (!table.hasPrimaryKey) return;
 
     saving();
+    setLoading(true);
+    const primaryKeys = record
+      .filter((item) => item.isPrimaryKey)
+      .reduce((keys, item) => ({
+        ...keys,
+        [item.name]: item.value,
+      }), {});
+    const updatedRecords = records.map((curRecord) => {
+      const isNotFound = Object.keys(primaryKeys).some((key) => primaryKeys[key] !== curRecord[key]);
+      return isNotFound ? curRecord : null;
+    })
+      .filter((item) => item);
+
+    setRecords(updatedRecords);
+    setOpen(false);
+
+    try {
+      await deleteRecord({ tableId: table.id, primaryKeys });
+      await mutateTableRecords(updatedRecords, false);
+      saved(`Successfully deleted record in table ${table.alias}.`);
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
+
+    mounted(() => setLoading(false));
+  };
+
+  const handleSubmit = async (evt) => {
+    evt.preventDefault();
+    if (!table.hasPrimaryKey) return;
+    saving();
+    setLoading(true);
     const primaryKeys = record
       .filter((item) => item.isPrimaryKey)
       .reduce((keys, item) => ({
@@ -137,6 +173,8 @@ export function BaseSingleRecordModal({
     } catch (err) {
       catchError(err.response.data.exception || err.response.data.error);
     }
+
+    mounted(() => setLoading(false));
   };
 
   if (connections == null || referencedConnections == null) {
@@ -316,13 +354,31 @@ export function BaseSingleRecordModal({
             })}
           </div>
           {canUpdateFieldData && (
-            <div className="mt-4 py-4 border-t border-solid flex justify-end">
-              <button
+            <div className="mt-20 py-4 border-t border-solid flex gap-2">
+              <Button
+                type="button"
+                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-red-400 bg-white hover:bg-red-300 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Delete</span>
+              </Button>
+              <Button
+                type="button"
+                className="ml-auto inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+                disabled={loading}
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
                 type="submit"
-                className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={loading}
               >
                 Update Record
-              </button>
+              </Button>
             </div>
           )}
         </form>

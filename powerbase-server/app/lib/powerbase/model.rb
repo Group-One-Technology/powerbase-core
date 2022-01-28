@@ -50,7 +50,7 @@ module Powerbase
       sequel_query = query.find_by(primary_keys).to_sequel
 
       record = sequel_connect(@database) {|db|
-        db.from(@table.name.to_sym)
+        db.from(@table_name.to_sym)
           .yield_self(&sequel_query)
           .update(data)
       }
@@ -69,6 +69,32 @@ module Powerbase
       data = @is_turbo ? data : { **data, **primary_keys }
       result = update_record(@index, primary_keys, data, !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: data }
+    end
+
+    # Delete remote record and es doc.
+    def delete_merged_record(primary_keys: nil)
+      unless primary_keys && primary_keys.length > 0
+        return nil
+      end
+
+      magic_fields = @table.fields.select {|field| field.is_virtual}
+      doc_id = format_doc_id(primary_keys)
+
+      if magic_fields.length > 0 && doc_id.present?
+        begin
+          delete_record(@index, doc_id)
+        rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+          puts "Not found doc_id: #{doc_id}"
+        end
+      end
+
+      query = Powerbase::QueryCompiler.new(@table)
+      sequel_query = query.find_by(primary_keys).to_sequel
+      sequel_connect(@database) {|db|
+        db.from(@table_name.to_sym)
+          .yield_self(&sequel_query)
+          .delete()
+      }
     end
 
     # * Get a document/table record.

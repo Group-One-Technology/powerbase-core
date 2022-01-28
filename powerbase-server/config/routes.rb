@@ -97,6 +97,7 @@ Rails.application.routes.draw do
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
         put 'update_field_data', to: 'table_records#update_field_data'
         put 'update_record', to: 'table_records#update_record'
+        delete 'delete_record', to: 'table_records#delete_record'
         put 'update_default_view'
         put 'update_primary_keys'
         put 'update_table_permission', as: 'update_table_permission'
