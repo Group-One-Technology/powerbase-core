@@ -42,7 +42,7 @@ export function RecordItemValue({
     item.isNullable && 'Null',
     addRecord && (item.defaultValue?.length > 0 || item.isAutoIncrement) && 'Default',
   ].filter((val) => val);
-  const [inputType, setInputType] = useState(item.value == null && item.isNullable
+  const [inputType, setInputType] = useState(item.value == null && item.isNullable && !addRecord
     ? 'Null'
     : inputTypes[0]);
   const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
