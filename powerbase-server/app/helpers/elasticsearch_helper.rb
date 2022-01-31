@@ -1,6 +1,6 @@
-module ElasticsearchHelper
-  include FieldTypeHelper
+include FieldTypeHelper
 
+module ElasticsearchHelper
   ELASTICSEACH_ID_LIMIT = 512
 
   def client
