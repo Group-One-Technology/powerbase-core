@@ -120,6 +120,7 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -164,6 +165,7 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
