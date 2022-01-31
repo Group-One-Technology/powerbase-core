@@ -16,6 +16,7 @@ import { useWindowSize } from '@lib/hooks/useWindowSize';
 import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
 import { TableViewsNav } from './TableViewsNav';
+import { TableFooter } from './TableFooter';
 
 const BaseTableContent = React.memo(({ table }) => {
   const { data: view } = useTableView();
@@ -35,6 +36,7 @@ const BaseTableContent = React.memo(({ table }) => {
           <ViewFieldStateProvider>
             <TableViewsNav />
             <VirtualTable table={table} height={height} fields={fields} />
+            <TableFooter table={table} />
           </ViewFieldStateProvider>
         </TableRecordsProvider>
       </TableRecordsCountProvider>

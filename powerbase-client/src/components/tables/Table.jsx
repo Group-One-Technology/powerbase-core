@@ -7,7 +7,6 @@ import { TableTabs } from '@components/tables/TableTabs';
 import { TableContent } from '@components/tables/TableContent';
 import { Loader } from '@components/ui/Loader';
 import { useBaseTable } from '@models/BaseTable';
-import { TableFooter } from './TableFooter';
 
 export function Table() {
   const { data: base } = useBase();
@@ -40,7 +39,6 @@ export function Table() {
         views={views}
         currentView={view}
       />
-      <TableFooter table={table} />
     </>
   );
 }
