@@ -38,12 +38,13 @@ export function AddRecordModal({
     setRecord(viewFields);
   }, [table, viewFields]);
 
-  const handleRecordInputChange = (fieldId, value) => {
+  const handleRecordInputChange = (fieldId, value, options = {}) => {
     setRecord((curRecord) => curRecord.map((item) => ({
       ...item,
       value: item.fieldId === fieldId
         ? value
         : item.value,
+      ...(item.fieldId === fieldId ? options : {}),
     })));
   };
 
@@ -51,35 +52,50 @@ export function AddRecordModal({
     evt.preventDefault();
     saving();
 
-    const primaryKeys = record
-      .filter((item) => item.isPrimaryKey)
-      .reduce((keys, item) => ({
-        ...keys,
-        [item.name]: item.value,
-      }), {});
-    const newRecord = record.reduce((values, item) => ({
-      ...values,
-      [item.name]: item.value,
-    }), {});
-    const updatedRecords = [...records, newRecord];
+    let hasInvalidKeys = false;
+    const primaryKeys = record.filter((item) => item.isPrimaryKey && item.inputType !== 'default');
+    const isAutoIncrement = record.some((item) => item.isPrimaryKey && item.isAutoIncrement);
 
-    const hasNoPrimaryKeys = Object.keys(primaryKeys).some((key) => !primaryKeys[key]);
+    if (primaryKeys.length) {
+      if (primaryKeys.length > 1) {
+        hasInvalidKeys = primaryKeys.some((item) => item.value == null && (!item.isAutoIncrement || item.defaultValue == null));
+      } else if (primaryKeys.length === 1) {
+        const primaryKey = primaryKeys[0];
+        hasInvalidKeys = primaryKey.value == null && !primaryKey.isAutoIncrement && primaryKey.defaultValue == null;
+      }
+    }
 
-    if (hasNoPrimaryKeys) {
+    if (hasInvalidKeys) {
       catchError('Primary key fields should have a value.');
       return;
     }
 
-    setRecords(updatedRecords);
+    const newRecord = record.filter((item) => item.inputType !== 'default')
+      .reduce((values, item) => ({
+        ...values,
+        [item.name]: item.inputType === 'null'
+          ? null
+          : item.value,
+      }), {});
+
+    let updatedRecords = [...records, newRecord];
+    if (!isAutoIncrement) setRecords(updatedRecords);
     setOpen(false);
     setRecord(viewFields);
 
     try {
-      await addRecord({
+      const addedRecord = await addRecord({
         tableId: table.id,
-        primaryKeys,
+        primaryKeys: primaryKeys.reduce((keys, item) => ({
+          ...keys,
+          [item.name]: item.value,
+        }), {}),
         data: newRecord,
       });
+
+      if (isAutoIncrement) {
+        updatedRecords = [...records, { ...newRecord, ...addedRecord }];
+      }
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully added record in table ${table.alias}.`);
     } catch (err) {

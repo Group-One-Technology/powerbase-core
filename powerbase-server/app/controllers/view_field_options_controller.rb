@@ -113,6 +113,7 @@ class ViewFieldOptionsController < ApplicationController
         width: view_field.width,
         is_frozen: view_field.is_frozen,
         is_hidden: view_field.is_hidden,
+        is_auto_increment: field.is_auto_increment,
         is_pii: field.is_pii,
         options: field.options,
         permissions: field.permissions,

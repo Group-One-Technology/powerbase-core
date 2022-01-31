@@ -18,14 +18,11 @@ module Powerbase
 
     # Add record for both turbo/non turbo bases.
     def add_record(primary_keys: nil, data: nil)
-      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
-        return nil
-      end
-
       data = format_record(data, @fields)
       primary_keys = format_record(primary_keys, @fields)
 
       record = {}
+      last_inserted_id = nil
       remote_data = {}
       virtual_data = {}
 
@@ -40,13 +37,18 @@ module Powerbase
       end
 
       if remote_data.length > 0
-        sequel_connect(@database) {|db|
-          db.from(@table_name.to_sym)
-            .insert(remote_data)
+        last_inserted_id = sequel_connect(@database) {|db|
+          db.from(@table_name.to_sym).insert(remote_data)
         }
       end
 
-      if virtual_data.length > 0
+      # For auto-incremented fields, use last inserted id as primary key if empty
+      if primary_keys.length == 0 && last_inserted_id != nil
+        field = @table.primary_keys.first
+        primary_keys[field.name.to_sym] = last_inserted_id
+      end
+
+      if virtual_data.length > 0 && primary_keys.length > 0
         create_index!(@index) if !@is_turbo
         virtual_data = @is_turbo ? virtual_data : { **virtual_data, **primary_keys }
         magic_result = create_new_record(@index, virtual_data, primary_keys)
@@ -176,6 +178,7 @@ module Powerbase
         }
 
         magic_fields = @fields.select {|field| field.is_virtual}
+        magic_fields = @table.magic_fields
         if magic_fields.length > 0
           create_index!(@index)
           doc_id = format_doc_id(options[:primary_keys])
