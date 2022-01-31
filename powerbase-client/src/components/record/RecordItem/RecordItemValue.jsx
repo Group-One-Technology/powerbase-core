@@ -40,9 +40,11 @@ export function RecordItemValue({
   const inputTypes = [
     'Manual Input',
     item.isNullable && 'Null',
-    (item.defaultValue?.length > 0 || item.isAutoIncrement) && 'Default',
+    addRecord && (item.defaultValue?.length > 0 || item.isAutoIncrement) && 'Default',
   ].filter((val) => val);
-  const [inputType, setInputType] = useState(inputTypes[0]);
+  const [inputType, setInputType] = useState(item.value == null && item.isNullable
+    ? 'Null'
+    : inputTypes[0]);
   const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
 
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
@@ -275,14 +277,16 @@ export function RecordItemValue({
 
       if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
         type = 'number';
-        curValue = Number(curValue);
+        if (curValue != null) curValue = Number(curValue);
       } else if (fieldType.name === FieldType.URL) {
         type = 'url';
-        curValue = String(curValue);
+        if (curValue != null) curValue = String(curValue);
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
-        curValue = String(curValue);
+        if (curValue != null) curValue = String(curValue);
       }
+
+      if (curValue == null) curValue = '';
 
       return (
         <Input
