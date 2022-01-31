@@ -86,7 +86,7 @@ export function RecordItemValue({
           {labelContent}
         </h4>
         {(linkedRecord == null || fields == null) && <Loader />}
-        {(linkedRecord && fields) && (
+        {(linkedRecord && fields && openRecord) && (
           <LinkedRecordItem
             label={<>{item.name.toUpperCase()}: {item.value}</>}
             record={linkedRecord}

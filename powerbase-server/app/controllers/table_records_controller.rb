@@ -18,6 +18,12 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
+  schema(:add_record) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+    required(:data)
+  end
+
   schema(:update_record) do
     required(:id).value(:integer)
     required(:primary_keys)
@@ -85,6 +91,25 @@ class TableRecordsController < ApplicationController
       filters: safe_params[:filters]
     })
     render json: records
+  end
+
+  # PUT /tables/:id/add_record
+  def add_record
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:add_records, @table)
+
+    primary_keys = sanitize_field_data(safe_params[:primary_keys])
+    data = sanitize_field_data(safe_params[:data])
+
+    model = Powerbase::Model.new(@table)
+    record = model.add_record(primary_keys: primary_keys, data: data)
+
+    if record
+      render json: record
+    else
+      render json: { error: "Could not add record in '#{@table.name}'" }, status: :unprocessable_entity
+    end
   end
 
   # PUT /tables/:id/update_record

@@ -5,7 +5,11 @@ import { Dialog } from '@headlessui/react';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useBaseUser } from '@models/BaseUser';
 import { useViewFields } from '@models/ViewFields';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { useMounted } from '@lib/hooks/useMounted';
+import { addRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -15,10 +19,15 @@ export function AddRecordModal({
   table,
   open,
   setOpen,
+  records,
+  setRecords,
 }) {
+  const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
+  const { saved, saving, catchError } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: viewFields } = useViewFields();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const [record, setRecord] = useState(viewFields);
   const [loading] = useState(false);
@@ -38,12 +47,53 @@ export function AddRecordModal({
     })));
   };
 
+  const submit = async (evt) => {
+    evt.preventDefault();
+    saving();
+
+    const primaryKeys = record
+      .filter((item) => item.isPrimaryKey)
+      .reduce((keys, item) => ({
+        ...keys,
+        [item.name]: item.value,
+      }), {});
+    const newRecord = record.reduce((values, item) => ({
+      ...values,
+      [item.name]: item.value,
+    }), {});
+    const updatedRecords = [...records, newRecord];
+
+    const hasNoPrimaryKeys = Object.keys(primaryKeys).some((key) => !primaryKeys[key]);
+
+    if (hasNoPrimaryKeys) {
+      catchError('Primary key fields should have a value.');
+      return;
+    }
+
+    setRecords(updatedRecords);
+    setOpen(false);
+    setRecord(viewFields);
+
+    try {
+      await addRecord({
+        tableId: table.id,
+        primaryKeys,
+        data: newRecord,
+      });
+      await mutateTableRecords(updatedRecords, false);
+      saved(`Successfully updated record in table ${table.alias}.`);
+    } catch (err) {
+      mounted(() => setRecords(records));
+      catchError(err.response.data.exception || err.response.data.error);
+    }
+  };
+
   if (!viewFields) return null;
 
   return (
     <Modal open={open} setOpen={setOpen}>
       <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
-        <form className="sm:px-4 sm:mt-5">
+        <form onSubmit={submit} className="sm:px-4 sm:mt-5">
           <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
             {table.name.toUpperCase()}
           </Dialog.Title>
@@ -87,4 +137,6 @@ AddRecordModal.propTypes = {
   table: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
+  records: PropTypes.array,
+  setRecords: PropTypes.func.isRequired,
 };

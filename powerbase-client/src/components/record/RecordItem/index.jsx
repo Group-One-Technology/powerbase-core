@@ -75,5 +75,5 @@ RecordItem.propTypes = {
   addRecord: PropTypes.bool,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
-  handleOpenRecord: PropTypes.func.isRequired,
+  handleOpenRecord: PropTypes.func,
 };

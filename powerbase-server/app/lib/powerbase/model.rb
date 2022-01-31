@@ -15,6 +15,45 @@ module Powerbase
       @is_turbo = @database.is_turbo
     end
 
+    # Add record for both turbo/non turbo bases.
+    def add_record(primary_keys: nil, data: nil)
+      unless primary_keys && data && primary_keys.length > 0 && data.length > 0
+        return nil
+      end
+
+      record = {}
+      remote_data = {}
+      virtual_data = {}
+
+      data.each do |key, value|
+        field = PowerbaseField.find_by(name: key.to_s, powerbase_table_id: @table.id)
+        raise StandardError.new("Field with name of #{key} could not be found.") if !field
+        if field.is_virtual
+          virtual_data[key] = value
+        else
+          remote_data[key] = value
+        end
+      end
+
+      if remote_data.length > 0
+        sequel_connect(@database) {|db|
+          db.from(@table_name.to_sym)
+            .insert(remote_data)
+        }
+      end
+
+      if virtual_data.length > 0
+        create_index!(@index) if !@is_turbo
+        virtual_data = @is_turbo ? virtual_data : { **virtual_data, **primary_keys }
+        magic_result = create_new_record(@index, virtual_data, primary_keys)
+        if magic_result["result"] == "created"
+          record = { **record, **virtual_data, doc_id: magic_result["_id"] }
+        end
+      end
+
+      record
+    end
+
     # Updates data for both turbo/non turbo bases.
     def update_merged_record(primary_keys: nil, data: nil)
       unless primary_keys && data && primary_keys.length > 0 && data.length > 0

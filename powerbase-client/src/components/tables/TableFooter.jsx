@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { PlusIcon } from '@heroicons/react/outline';
 import { AddRecordModal } from '@components/record/AddRecordModal';
 
-export function TableFooter({ table }) {
+export function TableFooter({ table, records, setRecords }) {
   const [open, setOpen] = useState(false);
 
   const handleOpenAddRecord = () => setOpen(true);
@@ -24,6 +24,8 @@ export function TableFooter({ table }) {
         table={table}
         open={open}
         setOpen={setOpen}
+        records={records}
+        setRecords={setRecords}
       />
     </div>
   );
@@ -31,4 +33,6 @@ export function TableFooter({ table }) {
 
 TableFooter.propTypes = {
   table: PropTypes.object,
+  records: PropTypes.array,
+  setRecords: PropTypes.func.isRequired,
 };
