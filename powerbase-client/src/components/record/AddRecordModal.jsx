@@ -95,6 +95,7 @@ export function AddRecordModal({
 
       if (isAutoIncrement) {
         updatedRecords = [...records, { ...newRecord, ...addedRecord }];
+        setRecords(updatedRecords);
       }
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully added record in table ${table.alias}.`);
