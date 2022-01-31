@@ -11,6 +11,7 @@ module Powerbase
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
       @index = @table.index_name
       @table_name = @table.name
+      @fields = @table.fields
       @database = @table.db
       @is_turbo = @database.is_turbo
     end
@@ -21,12 +22,15 @@ module Powerbase
         return nil
       end
 
+      data = format_record(data, @fields)
+      primary_keys = format_record(primary_keys, @fields)
+
       record = {}
       remote_data = {}
       virtual_data = {}
 
       data.each do |key, value|
-        field = PowerbaseField.find_by(name: key.to_s, powerbase_table_id: @table.id)
+        field = @fields.find {|field| field.name == key.to_s}
         raise StandardError.new("Field with name of #{key} could not be found.") if !field
         if field.is_virtual
           virtual_data[key] = value
@@ -85,6 +89,9 @@ module Powerbase
         return nil
       end
 
+      data = format_record(data, @fields)
+      primary_keys = format_record(primary_keys, @fields)
+
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
 
@@ -104,6 +111,9 @@ module Powerbase
         return nil
       end
 
+      data = format_record(data, @fields)
+      primary_keys = format_record(primary_keys, @fields)
+
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
       result = update_record(@index, primary_keys, data, !@is_turbo)
@@ -116,7 +126,7 @@ module Powerbase
         return nil
       end
 
-      magic_fields = @table.fields.select {|field| field.is_virtual}
+      magic_fields = @fields.select {|field| field.is_virtual}
       doc_id = format_doc_id(primary_keys)
 
       if magic_fields.length > 0 && doc_id.present?
@@ -165,7 +175,7 @@ module Powerbase
             .first
         }
 
-        magic_fields = @table.magic_fields
+        magic_fields = @fields.select {|field| field.is_virtual}
         if magic_fields.length > 0
           create_index!(@index)
           doc_id = format_doc_id(options[:primary_keys])
