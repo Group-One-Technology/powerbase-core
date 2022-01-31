@@ -271,13 +271,17 @@ export function RecordItemValue({
       );
     default: {
       let type = 'text';
+      let curValue = item.value;
 
       if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
         type = 'number';
+        curValue = Number(curValue);
       } else if (fieldType.name === FieldType.URL) {
         type = 'url';
+        curValue = String(curValue);
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
+        curValue = String(curValue);
       }
 
       return (
@@ -286,7 +290,7 @@ export function RecordItemValue({
           id={item.name}
           label={labelContent}
           name={item.name}
-          value={item.value || ''}
+          value={curValue}
           onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"
