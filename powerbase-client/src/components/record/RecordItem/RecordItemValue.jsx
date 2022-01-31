@@ -25,6 +25,7 @@ import { LinkedRecordItem } from '../LinkedRecordItem';
 export function RecordItemValue({
   item,
   fieldTypes,
+  includePii,
   handleRecordInputChange,
   openRecord,
 }) {
@@ -95,7 +96,7 @@ export function RecordItemValue({
     );
   }
 
-  if (item.isPii && !item.includePii) {
+  if (item.isPii && !includePii) {
     return (
       <Input
         type="password"
@@ -235,6 +236,7 @@ export function RecordItemValue({
 
 RecordItemValue.propTypes = {
   item: PropTypes.object.isRequired,
+  includePii: PropTypes.bool,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
   openRecord: PropTypes.func.isRequired,
