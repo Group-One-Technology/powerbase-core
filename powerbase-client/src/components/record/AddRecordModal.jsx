@@ -35,9 +35,6 @@ export function AddRecordModal({
       value: item.fieldId === fieldId
         ? value
         : item.value,
-      updated: item.fieldId === fieldId
-        ? true
-        : item.updated,
     })));
   };
 
@@ -57,7 +54,7 @@ export function AddRecordModal({
                 item={item}
                 fieldTypes={fieldTypes}
                 handleRecordInputChange={handleRecordInputChange}
-                includePii
+                addRecord
               />
             ))}
           </div>
