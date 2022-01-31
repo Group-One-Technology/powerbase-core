@@ -81,7 +81,7 @@ export function AddRecordModal({
         data: newRecord,
       });
       await mutateTableRecords(updatedRecords, false);
-      saved(`Successfully updated record in table ${table.alias}.`);
+      saved(`Successfully added record in table ${table.alias}.`);
     } catch (err) {
       mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
