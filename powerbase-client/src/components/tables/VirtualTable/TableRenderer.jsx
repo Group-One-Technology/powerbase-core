@@ -24,14 +24,22 @@ import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({
-  height, table, highlightedCell,
+  height,
+  table,
+  records,
+  setRecords,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { baseUser } = useBaseUser();
   const { data: base } = useBase();
-  const { data: remoteRecords, loadMore: loadMoreRows, isLoading } = useTableRecords();
+  const {
+    data: remoteRecords,
+    loadMore: loadMoreRows,
+    isLoading,
+    highlightedCell,
+  } = useTableRecords();
   const {
     initialFields,
     fields,
@@ -48,7 +56,6 @@ export function TableRenderer({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const [records, setRecords] = useState(remoteRecords);
 
   const {
     isEditing,
@@ -67,7 +74,6 @@ export function TableRenderer({
   };
 
   useDidMountEffect(() => {
-    setRecords(remoteRecords);
     recomputeGrid();
   }, [remoteRecords]);
 
@@ -259,5 +265,6 @@ export function TableRenderer({
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
-  highlightedCell: PropTypes.string,
+  records: PropTypes.array,
+  setRecords: PropTypes.func.isRequired,
 };

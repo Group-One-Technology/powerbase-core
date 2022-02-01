@@ -25,6 +25,8 @@ import { LinkedRecordItem } from '../LinkedRecordItem';
 export function RecordItemValue({
   item,
   fieldTypes,
+  includePii,
+  addRecord,
   handleRecordInputChange,
   openRecord,
 }) {
@@ -33,7 +35,7 @@ export function RecordItemValue({
   const { data: fields } = useTableFields();
   const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
-  const disabled = item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item);
+  const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
 
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
@@ -69,7 +71,7 @@ export function RecordItemValue({
     </>
   );
 
-  if (item.isForeignKey && item.value && !linkedRecordError) {
+  if (!addRecord && item.isForeignKey && item.value && !linkedRecordError) {
     const recordArr = (fields && linkedRecord && connections)
       ? initializeFields(fields, connections).map((field) => ({
         ...field,
@@ -84,7 +86,7 @@ export function RecordItemValue({
           {labelContent}
         </h4>
         {(linkedRecord == null || fields == null) && <Loader />}
-        {(linkedRecord && fields) && (
+        {(linkedRecord && fields && openRecord) && (
           <LinkedRecordItem
             label={<>{item.name.toUpperCase()}: {item.value}</>}
             record={linkedRecord}
@@ -95,7 +97,7 @@ export function RecordItemValue({
     );
   }
 
-  if (item.isPii && !item.includePii) {
+  if (item.isPii && !includePii && !addRecord) {
     return (
       <Input
         type="password"
@@ -235,6 +237,8 @@ export function RecordItemValue({
 
 RecordItemValue.propTypes = {
   item: PropTypes.object.isRequired,
+  includePii: PropTypes.bool,
+  addRecord: PropTypes.bool,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
   openRecord: PropTypes.func.isRequired,

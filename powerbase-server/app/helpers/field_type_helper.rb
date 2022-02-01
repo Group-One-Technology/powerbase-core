@@ -10,5 +10,4 @@ module FieldTypeHelper
   def number_field_type
     PowerbaseFieldType.find_by(name: "Number")
   end
-
 end

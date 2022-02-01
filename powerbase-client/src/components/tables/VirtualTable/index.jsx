@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
-import { useTableRecords } from '@models/TableRecords';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldPermissionsModalProvider } from '@models/modals/FieldPermissionsModal';
 import { useDataListener } from '@lib/hooks/websockets/useDataListener';
@@ -14,10 +13,14 @@ import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsM
 import { TableRenderer } from './TableRenderer';
 import 'react-virtualized/styles.css';
 
-export function VirtualTable({ height, table }) {
+export function VirtualTable({
+  height,
+  table,
+  records,
+  setRecords,
+}) {
   const { data: fields } = useViewFields();
   const { data: connections } = useTableConnections();
-  const { data: records, highlightedCell } = useTableRecords();
   const { data: fieldTypes } = useFieldTypes();
   const { dataListener } = useDataListener();
 
@@ -25,18 +28,18 @@ export function VirtualTable({ height, table }) {
     dataListener(table.id);
   }, [table.id]);
 
-  if (
-    fields == null
-    || connections == null
-    || records == null
-    || fieldTypes == null
-  ) {
+  if (fields == null || connections == null || fieldTypes == null || records == null) {
     return <Loader style={{ height }} />;
   }
 
   return (
     <FieldPermissionsModalProvider>
-      <TableRenderer height={height} table={table} highlightedCell={highlightedCell} />
+      <TableRenderer
+        height={height}
+        table={table}
+        records={records}
+        setRecords={setRecords}
+      />
       <FieldPermissionsModal />
     </FieldPermissionsModalProvider>
   );
@@ -45,4 +48,6 @@ export function VirtualTable({ height, table }) {
 VirtualTable.propTypes = {
   height: PropTypes.number,
   table: ITable.isRequired,
+  records: PropTypes.array,
+  setRecords: PropTypes.func.isRequired,
 };

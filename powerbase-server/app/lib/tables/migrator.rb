@@ -55,28 +55,7 @@ class Tables::Migrator
 
       records.each do |record|
         begin
-          # Format doc based on record field types
-          doc = {}
-          record.collect {|key, value| key }.each do |key|
-            cur_field = fields.find {|field| field.name.to_sym == key }
-
-            if cur_field
-              doc[key] = case cur_field.powerbase_field_type_id
-                when number_field_type.id
-                  record[key]
-                when date_field_type.id
-                  date = DateTime.parse(record[key]) rescue nil
-                  if date != nil
-                    date.utc.strftime("%FT%T.%L%z")
-                  else
-                    record[key]
-                  end
-                else
-                  %Q(#{record[key]})
-                end
-            end
-          end
-
+          doc = format_record(record, fields)
           doc_id = get_doc_id(primary_keys, doc, actual_fields)
           puts "--- DOC_ID: #{doc_id}"
           doc = doc.slice!(:oid)

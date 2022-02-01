@@ -62,13 +62,6 @@ export function BaseSingleRecordModal({
   }, [table, initialRecord]);
 
   useEffect(() => {
-    setRecord(record.map((item) => {
-      if (item.isPii) return { ...item, includePii };
-      return item;
-    }));
-  }, [includePii]);
-
-  useEffect(() => {
     if (remoteRecord) {
       setRecord(initialRecord.map((item) => {
         const updatedItem = {
@@ -127,6 +120,7 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -171,6 +165,7 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -262,6 +257,7 @@ export function BaseSingleRecordModal({
                         item={item}
                         fieldTypes={fieldTypes}
                         handleRecordInputChange={handleRecordInputChange}
+                        includePii={includePii}
                         openRecord={(value) => {
                           handleOpenRecord(value, (prevVal) => ({
                             ...prevVal,
@@ -306,6 +302,7 @@ export function BaseSingleRecordModal({
                           key={item.id}
                           item={item}
                           fieldTypes={fieldTypes}
+                          includePii={includePii}
                           handleOpenRecord={handleOpenRecord}
                           handleRecordInputChange={handleRecordInputChange}
                         />
@@ -338,6 +335,7 @@ export function BaseSingleRecordModal({
                       <LinkedRecordsItem
                         connection={connection}
                         fieldTypes={fieldTypes}
+                        includePii={includePii}
                         openRecord={(value) => {
                           handleOpenRecord(value, (prevVal) => ({
                             ...prevVal,

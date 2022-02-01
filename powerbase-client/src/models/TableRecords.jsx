@@ -22,6 +22,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   const {
     viewId, query, filters, sort,
   } = useViewOptions();
+  const [highlightedCell, setHighLightedCell] = useState(null);
 
   const response = useSWRInfinite(
     (index) => (id && authUser && viewId
@@ -60,7 +61,6 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd = isEmpty || !!(data && (data[data.length - 1]?.length ?? 0) < pageSize);
   const loadMore = () => setSize((page) => page + 1);
-  const [highlightedCell, setHighLightedCell] = useState(null);
 
   return {
     ...response,
