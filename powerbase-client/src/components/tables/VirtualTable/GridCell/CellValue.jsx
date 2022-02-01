@@ -109,6 +109,10 @@ export function CellValue({
     return <span className={className}>{currency}</span>;
   }
 
+  if (fieldType?.name === FieldType.NUMBER && value != null) {
+    return <span className={className}>{Number(value)}</span>;
+  }
+
   return (
     <span
       className={cn(

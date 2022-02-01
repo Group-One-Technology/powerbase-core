@@ -1,6 +1,6 @@
-module ElasticsearchHelper
-  include FieldTypeHelper
+include FieldTypeHelper
 
+module ElasticsearchHelper
   ELASTICSEACH_ID_LIMIT = 512
 
   def client
@@ -119,6 +119,11 @@ module ElasticsearchHelper
     record.each do |record_key, record_value|
       field = fields.find {|field| field.name.to_sym == record_key }
       raise StandardError.new("Field with name of #{key} could not be found.") if !field
+
+      if record_value == nil
+        formatted_record[record_key] = nil
+        next
+      end
 
       formatted_record[record_key] = case field.powerbase_field_type_id
         when number_field_type.id

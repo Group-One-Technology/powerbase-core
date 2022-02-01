@@ -80,11 +80,11 @@ class Fields::Creator
       default_value: field_options[:default] || nil,
       is_primary_key: field_options[:primary_key],
       is_nullable: field_options[:allow_null],
+      is_auto_increment: field_options[:auto_increment] || false,
       powerbase_field_type_id: field_type,
       powerbase_table_id: table.id,
       is_pii: Pii.is_pii?(field_name)
     }
-
   end
 
   def field_type

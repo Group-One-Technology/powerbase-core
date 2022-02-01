@@ -204,6 +204,7 @@ class PowerbaseFieldsController < ApplicationController
         default_value: field.default_value,
         is_primary_key: field.is_primary_key,
         is_nullable: field.is_nullable,
+        is_auto_increment: field.is_auto_increment,
         is_pii: field.is_pii,
         options: field.options,
         permissions: field.permissions,
