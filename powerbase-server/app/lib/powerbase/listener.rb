@@ -33,6 +33,7 @@ module Powerbase
       powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
       index_name = powerbase_table.index_name
+      fields = powerbase_table.fields
       doc_id = format_doc_id(primary_key_value)
 
       puts "-- Data changes detect on table #{table_name}"
@@ -45,7 +46,7 @@ module Powerbase
       case event_type
       when "INSERT"
         record = table.where(primary_key_value.symbolize_keys).first
-        record = format_record(record)
+        record = format_record(record, fields)
 
         # Index new elasticsearch record
         create_new_record(index_name, record, doc_id)
@@ -56,7 +57,7 @@ module Powerbase
         # Query get record
         records = sequel_get_records(database, table_name)
         record = records.where(primary_key_value.symbolize_keys).first
-        record = format_record(record)
+        record = format_record(record, fields)
 
         # Update elasticsearch record
         update_record(index_name, doc_id, record)
@@ -70,7 +71,6 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
       end
-
     end
   end
 end
