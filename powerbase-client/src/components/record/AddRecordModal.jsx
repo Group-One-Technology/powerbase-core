@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 
@@ -6,10 +6,8 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { useBaseUser } from '@models/BaseUser';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
-import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { useMounted } from '@lib/hooks/useMounted';
-import { addRecord } from '@lib/api/records';
+import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
@@ -22,87 +20,20 @@ export function AddRecordModal({
   records,
   setRecords,
 }) {
-  const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
-  const { saved, saving, catchError } = useSaveStatus();
+  const { loading } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: viewFields } = useViewFields();
-  const { mutate: mutateTableRecords } = useTableRecords();
 
-  const [record, setRecord] = useState(viewFields);
-  const [loading] = useState(false);
+  const { record, handleAddRecord, handleValueChange } = useAddRecord({
+    table, records, setRecords, setOpen,
+  });
 
   const canAddRecord = baseUser?.can(PERMISSIONS.AddRecords, table);
 
-  useEffect(() => {
-    setRecord(viewFields);
-  }, [table, viewFields]);
-
-  const handleRecordInputChange = (fieldId, value, options = {}) => {
-    setRecord((curRecord) => curRecord.map((item) => ({
-      ...item,
-      value: item.fieldId === fieldId
-        ? value
-        : item.value,
-      ...(item.fieldId === fieldId ? options : {}),
-    })));
-  };
-
   const submit = async (evt) => {
     evt.preventDefault();
-    saving();
-
-    let hasInvalidKeys = false;
-    const primaryKeys = record.filter((item) => item.isPrimaryKey && item.inputType !== 'default');
-    const hasDefaultInputType = record.some((item) => item.inputType === 'default');
-
-    if (primaryKeys.length) {
-      if (primaryKeys.length > 1) {
-        hasInvalidKeys = primaryKeys.some((item) => item.value == null && (!item.isAutoIncrement || item.defaultValue == null));
-      } else if (primaryKeys.length === 1) {
-        const primaryKey = primaryKeys[0];
-        hasInvalidKeys = primaryKey.value == null && !primaryKey.isAutoIncrement && primaryKey.defaultValue == null;
-      }
-    }
-
-    if (hasInvalidKeys) {
-      catchError('Primary key fields should have a value.');
-      return;
-    }
-
-    const newRecord = record.filter((item) => item.inputType !== 'default')
-      .reduce((values, item) => ({
-        ...values,
-        [item.name]: item.inputType === 'null'
-          ? null
-          : item.value,
-      }), {});
-
-    let updatedRecords = [...records, newRecord];
-    if (!hasDefaultInputType) setRecords(updatedRecords);
-    setOpen(false);
-    setRecord(viewFields);
-
-    try {
-      const addedRecord = await addRecord({
-        tableId: table.id,
-        primaryKeys: primaryKeys.reduce((keys, item) => ({
-          ...keys,
-          [item.name]: item.value,
-        }), {}),
-        data: newRecord,
-      });
-
-      if (hasDefaultInputType) {
-        updatedRecords = [...records, { ...newRecord, ...addedRecord }];
-        setRecords(updatedRecords);
-      }
-      await mutateTableRecords(updatedRecords, false);
-      saved(`Successfully added record in table ${table.alias}.`);
-    } catch (err) {
-      mounted(() => setRecords(records));
-      catchError(err.response.data.exception || err.response.data.error);
-    }
+    handleAddRecord();
   };
 
   if (!viewFields) return null;
@@ -120,7 +51,7 @@ export function AddRecordModal({
                 key={item.id}
                 item={item}
                 fieldTypes={fieldTypes}
-                handleRecordInputChange={handleRecordInputChange}
+                handleRecordInputChange={handleValueChange}
                 addRecord
               />
             ))}

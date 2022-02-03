@@ -18,7 +18,7 @@ import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
-import { useAddRecordCell } from '@lib/hooks/virtual-table/useAddRecordCell';
+import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -70,7 +70,7 @@ export function TableRenderer({
     setIsAddRecord,
     handleValueChange,
     handleAddRecord,
-  } = useAddRecordCell({ table, records, setRecords });
+  } = useAddRecord({ table, records, setRecords });
 
   const recomputeGrid = () => {
     headerGridRef.current.forceUpdate();

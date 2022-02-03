@@ -79,7 +79,11 @@ export function CellRenderer({
 
   if (isAddRecord && isLastRow && !isRowNo) {
     return (
-      <div className="overflow-hidden border-r border-b border-gray-200 focus-within:border-2 focus-within:border-indigo-500" style={style}>
+      <div
+        key={key}
+        className="overflow-hidden border-r border-b border-gray-200 focus-within:border-2 focus-within:border-indigo-500"
+        style={style}
+      >
         <CellInput
           value={value}
           field={field}

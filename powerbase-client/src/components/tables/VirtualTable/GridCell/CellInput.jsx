@@ -36,7 +36,7 @@ export function CellInput({
       onChange={(evt) => onValueChange(field.fieldId, evt.target.value)}
       className={cn(
         'h-full w-full text-sm items-center py-1 px-2 border-none',
-        isAddRecord && 'bg-green-100',
+        isAddRecord && 'bg-green-50',
         className,
       )}
     />
