@@ -39,7 +39,6 @@ module Powerbase
       if remote_data.length > 0
         default_value_fields = @fields.find {|field| field.default_value != nil && field.default_value.length > 0}
         incremented_field = @fields.find {|field| field.is_primary_key && field.is_auto_increment}
-        incremented_field_name = incremented_field.name.to_sym
 
         query = Powerbase::QueryCompiler.new(@table)
 
@@ -49,9 +48,10 @@ module Powerbase
 
           # For auto-incremented fields, use last inserted id as primary key if empty
           if last_inserted_id != nil && primary_keys.length == 0
-            primary_keys[incremented_field_name] = last_inserted_id
+            primary_keys[incremented_field.name.to_sym] = last_inserted_id
           end
 
+          # Query inserted field to get updated record (esp default values fields)
           sequel_query = query.find_by(primary_keys).to_sequel
           table_query.yield_self(&sequel_query).first
         end
@@ -60,11 +60,12 @@ module Powerbase
       end
 
       if virtual_data.length > 0 && primary_keys.length > 0
-        create_index!(@index) if !@is_turbo
-        virtual_data = @is_turbo ? virtual_data : { **virtual_data, **primary_keys }
+        create_index!(@index)
+        virtual_data = @is_turbo ? { **record, **virtual_data } : { **virtual_data, **primary_keys }
         magic_result = create_new_record(@index, virtual_data, primary_keys)
+
         if magic_result["result"] == "created"
-          record = { **record, **virtual_data, doc_id: magic_result["_id"] }
+          record = { **virtual_data, doc_id: magic_result["_id"] }
         end
       end
 
