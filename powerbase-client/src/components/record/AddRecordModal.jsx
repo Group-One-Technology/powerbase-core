@@ -54,7 +54,7 @@ export function AddRecordModal({
 
     let hasInvalidKeys = false;
     const primaryKeys = record.filter((item) => item.isPrimaryKey && item.inputType !== 'default');
-    const isAutoIncrement = record.some((item) => item.isPrimaryKey && item.isAutoIncrement);
+    const hasDefaultInputType = record.some((item) => item.inputType === 'default');
 
     if (primaryKeys.length) {
       if (primaryKeys.length > 1) {
@@ -79,7 +79,7 @@ export function AddRecordModal({
       }), {});
 
     let updatedRecords = [...records, newRecord];
-    if (!isAutoIncrement) setRecords(updatedRecords);
+    if (!hasDefaultInputType) setRecords(updatedRecords);
     setOpen(false);
     setRecord(viewFields);
 
@@ -93,7 +93,7 @@ export function AddRecordModal({
         data: newRecord,
       });
 
-      if (isAutoIncrement) {
+      if (hasDefaultInputType) {
         updatedRecords = [...records, { ...newRecord, ...addedRecord }];
         setRecords(updatedRecords);
       }
