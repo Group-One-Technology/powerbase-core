@@ -37,15 +37,26 @@ module Powerbase
       end
 
       if remote_data.length > 0
-        last_inserted_id = sequel_connect(@database) {|db|
-          db.from(@table_name.to_sym).insert(remote_data)
-        }
-      end
+        default_value_fields = @fields.find {|field| field.default_value != nil && field.default_value.length > 0}
+        incremented_field = @fields.find {|field| field.is_primary_key && field.is_auto_increment}
+        incremented_field_name = incremented_field.name.to_sym
 
-      # For auto-incremented fields, use last inserted id as primary key if empty
-      if primary_keys.length == 0 && last_inserted_id != nil
-        field = @table.primary_keys.first
-        primary_keys[field.name.to_sym] = last_inserted_id
+        query = Powerbase::QueryCompiler.new(@table)
+
+        inserted_record = sequel_connect(@database) do |db|
+          table_query = db.from(@table_name.to_sym)
+          last_inserted_id = table_query.insert(remote_data)
+
+          # For auto-incremented fields, use last inserted id as primary key if empty
+          if last_inserted_id != nil && primary_keys.length == 0
+            primary_keys[incremented_field_name] = last_inserted_id
+          end
+
+          sequel_query = query.find_by(primary_keys).to_sequel
+          table_query.yield_self(&sequel_query).first
+        end
+
+        record = inserted_record if inserted_record != nil
       end
 
       if virtual_data.length > 0 && primary_keys.length > 0
