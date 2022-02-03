@@ -81,6 +81,7 @@ export function CellRenderer({
 
   if (isEditing && isEditableCell) {
     const condition = fieldType.dataType !== 'date';
+    const editCellClassName = 'editing-cell border-2 border-indigo-500 overflow-hidden';
 
     return (
       <Wrapper
@@ -90,6 +91,7 @@ export function CellRenderer({
           <OutsideCellClick
             style={style}
             onClickOutside={onExitEditing}
+            className={editCellClassName}
           >
             {children}
           </OutsideCellClick>
@@ -103,7 +105,8 @@ export function CellRenderer({
           field={field}
           fieldType={fieldType}
           handleExitCell={onExitEditing}
-          style={!condition ? style : { width: style.width }}
+          style={!condition ? style : undefined}
+          className={cn(!condition && editCellClassName)}
         />
       </Wrapper>
     );

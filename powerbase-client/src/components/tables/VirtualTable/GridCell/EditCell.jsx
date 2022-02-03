@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { isObject } from '@lib/helpers/isObject';
@@ -42,6 +43,7 @@ export const EditCell = React.forwardRef((
     fieldType,
     isEditing,
     handleExitCell,
+    className,
     ...props
   },
   ref,
@@ -73,7 +75,7 @@ export const EditCell = React.forwardRef((
         ref={ref}
         value={value}
         onChange={handleValueChange}
-        className="text-sm items-center py-1 px-2 border border-indigo-500"
+        className={cn('w-full text-sm items-center py-1 px-2 border-none', className)}
         onKeyDown={(evt) => {
           if (evt.code === 'Enter') handleExitCell(value);
         }}
@@ -90,5 +92,6 @@ EditCell.propTypes = {
   field: PropTypes.object.isRequired,
   isEditing: PropTypes.bool,
   fieldType: PropTypes.object,
+  className: PropTypes.string,
   handleExitCell: PropTypes.func.isRequired,
 };
