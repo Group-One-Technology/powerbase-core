@@ -143,7 +143,7 @@ module Powerbase
       magic_fields = @fields.select {|field| field.is_virtual}
       doc_id = format_doc_id(primary_keys)
 
-      if magic_fields.length > 0 && doc_id.present?
+      if (@is_turbo || magic_fields.length > 0) && doc_id.present?
         begin
           delete_record(@index, doc_id)
         rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
