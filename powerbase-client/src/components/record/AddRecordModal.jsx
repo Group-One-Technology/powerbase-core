@@ -6,6 +6,7 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { useBaseUser } from '@models/BaseUser';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useAddRecordModal } from '@models/modals/AddRecordModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
 
@@ -13,20 +14,15 @@ import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 import { RecordItem } from './RecordItem';
 
-export function AddRecordModal({
-  table,
-  open,
-  setOpen,
-  records,
-  setRecords,
-}) {
+export function AddRecordModal({ table, records, setRecords }) {
   const { baseUser } = useBaseUser();
   const { loading } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: viewFields } = useViewFields();
+  const { open, setOpen } = useAddRecordModal();
 
   const { record, handleAddRecord, handleValueChange } = useAddRecord({
-    table, records, setRecords, setOpen,
+    table, records, setRecords, setOpen, isModal: true,
   });
 
   const canAddRecord = baseUser?.can(PERMISSIONS.AddRecords, table);
@@ -83,8 +79,6 @@ export function AddRecordModal({
 
 AddRecordModal.propTypes = {
   table: PropTypes.object.isRequired,
-  open: PropTypes.bool.isRequired,
-  setOpen: PropTypes.func.isRequired,
   records: PropTypes.array,
   setRecords: PropTypes.func.isRequired,
 };

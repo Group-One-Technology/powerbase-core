@@ -5,6 +5,8 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useViewOptions } from '@models/views/ViewOptions';
+import { useAddRecordModal } from '@models/modals/AddRecordModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { addRecord } from '@lib/api/records';
 import { useDidMountEffect } from '../useDidMountEffect';
@@ -14,14 +16,16 @@ export function useAddRecord({
   table,
   records,
   setRecords,
-  setOpen,
+  isModal,
 }) {
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saved, saving, catchError } = useSaveStatus();
+  const { filters: { value: initialFilters } } = useViewOptions();
   const { data: viewFields } = useViewFields();
   const { mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
+  const { setOpen: setModalOpen } = useAddRecordModal();
 
   const [isAddRecord, setIsAddRecord] = useState(false);
   const [record, setRecord] = useState(viewFields);
@@ -43,9 +47,17 @@ export function useAddRecord({
   };
 
   const exit = () => {
-    if (setOpen) setOpen(false);
+    if (isModal) setModalOpen(false);
     setRecord(viewFields);
     setIsAddRecord(false);
+  };
+
+  const showAddRecord = () => {
+    if (initialFilters?.filters?.length) {
+      setModalOpen(true);
+    } else {
+      setIsAddRecord(true);
+    }
   };
 
   // eslint-disable-next-line consistent-return
@@ -115,6 +127,7 @@ export function useAddRecord({
     record,
     isAddRecord,
     setIsAddRecord,
+    showAddRecord,
     handleValueChange,
     handleAddRecord,
   };

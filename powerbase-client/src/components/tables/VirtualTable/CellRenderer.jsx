@@ -31,11 +31,11 @@ export function CellRenderer({
   records,
   table,
   isAddRecord,
-  setIsAddRecord,
   isHighlighted,
   isEditable,
   handleExitEditing,
   handleValueChange,
+  showAddRecord,
   handleAddRecord,
 }) {
   const fieldType = field?.fieldTypeId
@@ -173,10 +173,10 @@ export function CellRenderer({
         setIsEditing={setIsEditing}
         setCellToEdit={setCellToEdit}
         isAddRecord={isAddRecord}
-        setIsAddRecord={setIsAddRecord}
         setHoveredCell={setHoveredCell}
         records={records}
         handleChange={(updatedValue) => onExitEditing(updatedValue)}
+        showAddRecord={showAddRecord}
         handleAddRecord={handleAddRecord}
       />
     </div>
@@ -206,9 +206,9 @@ CellRenderer.propTypes = {
   records: PropTypes.array.isRequired,
   table: PropTypes.object.isRequired,
   isAddRecord: PropTypes.bool,
-  setIsAddRecord: PropTypes.func.isRequired,
   isEditable: PropTypes.bool,
   handleExitEditing: PropTypes.func.isRequired,
   handleValueChange: PropTypes.func.isRequired,
+  showAddRecord: PropTypes.func.isRequired,
   handleAddRecord: PropTypes.func.isRequired,
 };

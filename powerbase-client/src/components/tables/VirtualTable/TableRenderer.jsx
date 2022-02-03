@@ -67,7 +67,7 @@ export function TableRenderer({
   } = useEditingCell({ records, setRecords });
   const {
     isAddRecord,
-    setIsAddRecord,
+    showAddRecord,
     handleValueChange,
     handleAddRecord,
   } = useAddRecord({ table, records, setRecords });
@@ -225,7 +225,7 @@ export function TableRenderer({
                           singleCellRef,
                           table,
                           isAddRecord,
-                          setIsAddRecord,
+                          showAddRecord,
                           isEditable,
                           handleExitEditing,
                           handleValueChange,

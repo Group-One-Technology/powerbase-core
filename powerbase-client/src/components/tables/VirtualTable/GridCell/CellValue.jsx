@@ -20,7 +20,7 @@ export function CellValue({
   handleExpandRecord,
   handleChange,
   isAddRecord,
-  setIsAddRecord,
+  showAddRecord,
   handleAddRecord,
 }) {
   const className = value?.toString().length && field?.isForeignKey
@@ -37,7 +37,7 @@ export function CellValue({
         <button
           type="button"
           className="inline-flex mr-auto ml-1.5 items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          onClick={() => setIsAddRecord(true)}
+          onClick={showAddRecord}
         >
           <PlusIcon className="h-4 w-4" aria-hidden="true" />
           <span className="sr-only">Add Record</span>
@@ -169,6 +169,6 @@ CellValue.propTypes = {
   handleExpandRecord: PropTypes.func,
   handleChange: PropTypes.func.isRequired,
   isAddRecord: PropTypes.bool,
-  setIsAddRecord: PropTypes.func.isRequired,
+  showAddRecord: PropTypes.func.isRequired,
   handleAddRecord: PropTypes.func.isRequired,
 };
