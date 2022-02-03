@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { PlusIcon } from '@heroicons/react/outline';
 import { AddRecordModal } from '@components/record/AddRecordModal';
+import { useAddRecordModal } from '@models/modals/AddRecordModal';
 
 export function TableFooter({ table, records, setRecords }) {
-  const [open, setOpen] = useState(false);
+  const { setOpen } = useAddRecordModal();
 
   const handleOpenAddRecord = () => setOpen(true);
 
@@ -22,8 +23,6 @@ export function TableFooter({ table, records, setRecords }) {
       </button>
       <AddRecordModal
         table={table}
-        open={open}
-        setOpen={setOpen}
         records={records}
         setRecords={setRecords}
       />

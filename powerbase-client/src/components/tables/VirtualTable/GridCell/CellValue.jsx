@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, PlusIcon, CheckIcon } from '@heroicons/react/outline';
 
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
@@ -19,6 +19,9 @@ export function CellValue({
   fieldType,
   handleExpandRecord,
   handleChange,
+  isAddRecord,
+  showAddRecord,
+  handleAddRecord,
 }) {
   const className = value?.toString().length && field?.isForeignKey
     ? 'px-2 py-0.25 bg-blue-50 rounded'
@@ -28,6 +31,34 @@ export function CellValue({
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
   }
 
+  if (isRowNo && isLastRow) {
+    if (!isAddRecord) {
+      return (
+        <button
+          type="button"
+          className="inline-flex mr-auto ml-1.5 items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={showAddRecord}
+        >
+          <PlusIcon className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Add Record</span>
+        </button>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className="inline-flex mr-auto ml-1.5 items-center justify-center p-0.5 border border-transparent rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:bg-green-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        onClick={handleAddRecord}
+      >
+        <CheckIcon className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">Insert Record</span>
+      </button>
+    );
+  }
+
+  if (isLastRow) return <span />;
+
   if (isRowNo || !field) {
     return (
       <>
@@ -35,7 +66,7 @@ export function CellValue({
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {isHoveredRow && !isLastRow && (
+          {isHoveredRow && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -48,7 +79,7 @@ export function CellValue({
               <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">Expand Record</span>
             </button>
-          )}{' '}
+          )}
         </span>
       </>
     );
@@ -137,4 +168,7 @@ CellValue.propTypes = {
   fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
   handleChange: PropTypes.func.isRequired,
+  isAddRecord: PropTypes.bool,
+  showAddRecord: PropTypes.func.isRequired,
+  handleAddRecord: PropTypes.func.isRequired,
 };

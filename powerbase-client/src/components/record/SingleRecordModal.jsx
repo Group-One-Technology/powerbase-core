@@ -16,6 +16,7 @@ import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 import { useMounted } from '@lib/hooks/useMounted';
@@ -45,6 +46,7 @@ export function BaseSingleRecordModal({
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
+  const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
@@ -117,6 +119,7 @@ export function BaseSingleRecordModal({
 
     try {
       await deleteRecord({ tableId: table.id, primaryKeys });
+      mutateTableRecordsCount();
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {

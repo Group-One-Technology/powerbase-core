@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider, useTableRecords } from '@models/TableRecords';
+import { AddRecordModalProvider } from '@models/modals/AddRecordModal';
 import { TableViewProvider } from '@models/TableView';
 import { ViewOptionsProvider } from '@models/views/ViewOptions';
 import { TableRecordsCountProvider } from '@models/TableRecordsCount';
@@ -39,17 +40,19 @@ function BaseTableContent({ table }) {
   return (
     <ViewFieldStateProvider>
       <TableViewsNav />
-      <VirtualTable
-        table={table}
-        height={height}
-        records={records}
-        setRecords={setRecords}
-      />
-      <TableFooter
-        table={table}
-        records={records}
-        setRecords={setRecords}
-      />
+      <AddRecordModalProvider>
+        <VirtualTable
+          table={table}
+          height={height}
+          records={records}
+          setRecords={setRecords}
+        />
+        <TableFooter
+          table={table}
+          records={records}
+          setRecords={setRecords}
+        />
+      </AddRecordModalProvider>
     </ViewFieldStateProvider>
   );
 }

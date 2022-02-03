@@ -7,6 +7,7 @@ import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { Wrapper } from '@components/ui/Wrappper';
 import { EditCell } from './GridCell/EditCell';
 import { CellValue } from './GridCell/CellValue';
+import { CellInput } from './GridCell/CellInput';
 
 export function CellRenderer({
   key,
@@ -29,11 +30,13 @@ export function CellRenderer({
   setCellToEdit,
   records,
   table,
-  isNewRecord,
-  setIsNewRecord,
+  isAddRecord,
   isHighlighted,
   isEditable,
   handleExitEditing,
+  handleValueChange,
+  showAddRecord,
+  handleAddRecord,
 }) {
   const fieldType = field?.fieldTypeId
     ? fieldTypes?.find(
@@ -45,10 +48,11 @@ export function CellRenderer({
       && cellToEdit.row === rowIndex
       && cellToEdit.column === columnIndex;
   const className = cn(
-    'single-line text-sm truncate focus:bg-gray-100 border-b items-center py-1 px-2 border border-gray-200',
+    'single-line text-sm truncate focus:bg-gray-100 items-center py-1 px-2 border-r border-b border-gray-200',
     isHighlighted && 'update-highlight',
     isHoveredRow && 'bg-gray-50',
-    isRowNo ? 'justify-center text-xs text-gray-500' : 'border-r',
+    (isLastRow && isAddRecord) && 'bg-green-50',
+    isRowNo && 'justify-center text-xs text-gray-500',
     (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
   );
 
@@ -60,15 +64,9 @@ export function CellRenderer({
   });
 
   const handleMouseEnter = () => {
-    setHoveredCell({
-      row: rowIndex,
-      column: columnIndex,
-    });
+    setHoveredCell({ row: rowIndex, column: columnIndex });
     if (fieldType?.dataType === 'boolean') {
-      setCellToEdit({
-        row: rowIndex,
-        column: columnIndex,
-      });
+      setCellToEdit({ row: rowIndex, column: columnIndex });
     }
   };
 
@@ -79,9 +77,27 @@ export function CellRenderer({
     }
   };
 
+  if (isAddRecord && isLastRow && !isRowNo) {
+    return (
+      <div
+        key={key}
+        className="overflow-hidden border-r border-b border-gray-200 focus-within:border-2 focus-within:border-indigo-500"
+        style={style}
+      >
+        <CellInput
+          value={value}
+          field={field}
+          fieldType={fieldType}
+          onValueChange={handleValueChange}
+          isAddRecord
+        />
+      </div>
+    );
+  }
+
   if (isEditing && isEditableCell) {
     const condition = fieldType.dataType !== 'date';
-    const editCellClassName = 'editing-cell border-2 border-indigo-500 overflow-hidden';
+    const editCellClassName = 'border-2 border-indigo-500 overflow-hidden';
 
     return (
       <Wrapper
@@ -156,11 +172,12 @@ export function CellRenderer({
         columnIndex={columnIndex}
         setIsEditing={setIsEditing}
         setCellToEdit={setCellToEdit}
-        isNewRecord={isNewRecord}
-        setIsNewRecord={setIsNewRecord}
+        isAddRecord={isAddRecord}
         setHoveredCell={setHoveredCell}
         records={records}
         handleChange={(updatedValue) => onExitEditing(updatedValue)}
+        showAddRecord={showAddRecord}
+        handleAddRecord={handleAddRecord}
       />
     </div>
   );
@@ -188,8 +205,10 @@ CellRenderer.propTypes = {
   setCellToEdit: PropTypes.func.isRequired,
   records: PropTypes.array.isRequired,
   table: PropTypes.object.isRequired,
-  isNewRecord: PropTypes.bool,
-  setIsNewRecord: PropTypes.func.isRequired,
+  isAddRecord: PropTypes.bool,
   isEditable: PropTypes.bool,
   handleExitEditing: PropTypes.func.isRequired,
+  handleValueChange: PropTypes.func.isRequired,
+  showAddRecord: PropTypes.func.isRequired,
+  handleAddRecord: PropTypes.func.isRequired,
 };
