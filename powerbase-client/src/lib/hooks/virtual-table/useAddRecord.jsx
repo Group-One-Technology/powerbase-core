@@ -109,11 +109,8 @@ export function useAddRecord({
         }), {}),
         data: newRecord,
       });
-
-      if (hasDefaultInputType) {
-        updatedRecords = [...records, { ...newRecord, ...addedRecord }];
-        setRecords(updatedRecords);
-      }
+      updatedRecords = [...records, { ...newRecord, ...addedRecord }];
+      setRecords(updatedRecords);
       mutateTableRecordsCount();
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully added record in table ${table.alias}.`);
