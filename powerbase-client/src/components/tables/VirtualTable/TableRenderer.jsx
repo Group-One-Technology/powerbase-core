@@ -18,6 +18,7 @@ import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
+import { useAddRecordCell } from '@lib/hooks/virtual-table/useAddRecordCell';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -55,7 +56,6 @@ export function TableRenderer({
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
-  const [isNewRecord, setIsNewRecord] = useState(false);
 
   const {
     isEditing,
@@ -65,6 +65,12 @@ export function TableRenderer({
     recordInputRef,
     handleExitEditing,
   } = useEditingCell({ records, setRecords });
+  const {
+    isAddRecord,
+    setIsAddRecord,
+    handleValueChange,
+    handleAddRecord,
+  } = useAddRecordCell({ table, records, setRecords });
 
   const recomputeGrid = () => {
     headerGridRef.current.forceUpdate();
@@ -218,10 +224,12 @@ export function TableRenderer({
                           setRecords,
                           singleCellRef,
                           table,
-                          isNewRecord,
-                          setIsNewRecord,
+                          isAddRecord,
+                          setIsAddRecord,
                           isEditable,
                           handleExitEditing,
+                          handleValueChange,
+                          handleAddRecord,
                           ...props,
                         });
                       }}
