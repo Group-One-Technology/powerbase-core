@@ -48,8 +48,8 @@ module Powerbase
         record = table.where(primary_key_value.symbolize_keys).first
         record = format_record(record, fields)
 
-        # Index new elasticsearch record
-        create_new_record(index_name, record, doc_id)
+        # Upsert elasticsearch record
+        update_record(index_name, doc_id, record)
 
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
