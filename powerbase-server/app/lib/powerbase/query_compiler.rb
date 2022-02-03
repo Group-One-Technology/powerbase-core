@@ -434,7 +434,7 @@ module Powerbase
           column_value = sanitize(filter[:filter][:value])
           column = {}
 
-          if column_value == nil || (column_value.is_a(String) && column_value.length == 0)
+          if column_value == nil || (column_value.to_s.length == 0)
             next
           end
 
