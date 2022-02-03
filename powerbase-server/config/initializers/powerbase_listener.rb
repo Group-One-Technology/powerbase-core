@@ -1,4 +1,4 @@
-if defined?(Rails::Server)
+if Rails.env.production? || defined?(Rails::Server)
   # Destroy existing cron job to avoid duplicate
   Sidekiq::Cron::Job.destroy_all!
 
@@ -41,7 +41,7 @@ if defined?(Rails::Server)
       cron: '*/15 * * * *', # Run The job every 5 mins
       class: 'SyncerCronWorker'
     )
-    
+
     if syncer_job.save
       syncer_job.enque!
       puts "Powerbase Syncing #{ids.count} turbo databases..."
