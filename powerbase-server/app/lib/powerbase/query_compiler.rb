@@ -434,6 +434,10 @@ module Powerbase
           column_value = sanitize(filter[:filter][:value])
           column = {}
 
+          if column_value == nil || (column_value.is_a(String) && column_value.length == 0)
+            next
+          end
+
           if field_type == "Date"
             column_field = if @adapter == "mysql2"
                 Sequel.lit(%Q[DATE_FORMAT('#{field.name}', '%Y-%m-%d')])
@@ -532,29 +536,32 @@ module Powerbase
           relational_op = filter[:filter][:operator]
           field = cur_field.name
           value = sanitize(filter[:filter][:value])
-          empty_string = "\"\""
+
+          if value == nil || (value.to_s.length == 0)
+            next
+          end
 
           case relational_op
           when "is"
             "#{field}:\"#{value}\""
           when "is not"
-            "(NOT #{field}:#{value || empty_string})"
+            "(NOT #{field}:#{value})"
           when "contains"
-            "#{field}:#{value || empty_string}"
+            "#{field}:#{value}"
           when "does not contain"
-            "(NOT #{field}:#{value || empty_string})"
+            "(NOT #{field}:#{value})"
           when "="
-            "#{field}:#{value || empty_string}"
+            "#{field}:#{value}"
           when "!="
-            "(NOT #{field}:#{value || empty_string})"
+            "(NOT #{field}:#{value})"
           when ">"
-            "#{field}:>#{value || empty_string}"
+            "#{field}:>#{value}"
           when ">="
-            "#{field}:>=#{value || empty_string}"
+            "#{field}:>=#{value}"
           when "<"
-            "#{field}:<#{value || empty_string}"
+            "#{field}:<#{value}"
           when "<="
-            "#{field}:<=#{value || empty_string}"
+            "#{field}:<=#{value}"
           when "is exact date"
             "#{field}:#{format_date(value, true)}"
           when "is not exact date"
