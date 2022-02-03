@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, PlusIcon } from '@heroicons/react/outline';
 
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
@@ -28,14 +28,26 @@ export function CellValue({
     return <span className="h-5 bg-gray-200 rounded w-full animate-pulse" />;
   }
 
-  if (isRowNo || !field) {
+  if (isRowNo && isLastRow) {
+    return (
+      <button
+        type="button"
+        className="inline-flex mr-5 items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-gray-200"
+      >
+        <PlusIcon className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">Add Record</span>
+      </button>
+    );
+  }
+
+  if (!isLastRow && (isRowNo || !field)) {
     return (
       <>
         <span className="flex-1 mr-4 text-right truncate">
           {value?.toString()}
         </span>
         <span className="flex-1">
-          {isHoveredRow && !isLastRow && (
+          {isHoveredRow && (
             <button
               type="button"
               className="inline-flex items-center p-0.5 border border-transparent rounded-full text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-1 focus:ring-offset-2 focus:ring-indigo-100"
@@ -48,10 +60,14 @@ export function CellValue({
               <ArrowsExpandIcon className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">Expand Record</span>
             </button>
-          )}{' '}
+          )}
         </span>
       </>
     );
+  }
+
+  if (isLastRow) {
+    return <span />;
   }
 
   if (field.isPii) {
