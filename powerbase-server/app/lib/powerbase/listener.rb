@@ -44,17 +44,19 @@ module Powerbase
 
       case event_type
       when "INSERT"
-        row = table.where(primary_key_value.symbolize_keys).first
+        record = table.where(primary_key_value.symbolize_keys).first
+        record = format_record(record)
 
         # Index new elasticsearch record
-        create_new_record(index_name, row, doc_id)
+        create_new_record(index_name, record, doc_id)
 
         # Notify changes to client
-        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", row.merge(doc_id: doc_id))
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
       when "UPDATE"
         # Query get record
         records = sequel_get_records(database, table_name)
         record = records.where(primary_key_value.symbolize_keys).first
+        record = format_record(record)
 
         # Update elasticsearch record
         update_record(index_name, doc_id, record)
@@ -62,9 +64,6 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
       when "DELETE"
-        # Query get record
-        records = sequel_get_records(database, table_name)
-
         # Update elasticsearch record
         delete_record(index_name, doc_id)
 
