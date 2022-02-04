@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_31_210100) do
+ActiveRecord::Schema.define(version: 2022_01_11_074105) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,10 +34,10 @@ ActiveRecord::Schema.define(version: 2022_01_31_210100) do
   create_table "base_migrations", force: :cascade do |t|
     t.datetime "start_time"
     t.datetime "end_time"
-    t.string "database_size", null: false
     t.text "logs", default: "{}"
     t.integer "retries", default: 0, null: false
     t.bigint "powerbase_database_id", null: false
+    t.string "database_size", null: false
     t.index ["powerbase_database_id"], name: "index_base_migrations_on_powerbase_database_id"
   end
 
@@ -156,7 +156,6 @@ ActiveRecord::Schema.define(version: 2022_01_31_210100) do
     t.boolean "is_virtual", default: false, null: false
     t.boolean "allow_dirty_value"
     t.text "permissions", default: "{\"view_field\":{\"access\":\"everyone\"},\"manage_field\":{\"access\":\"admins and up\"},\"edit_field_data\":{\"access\":\"editors and up\"}}"
-    t.boolean "is_auto_increment", default: false, null: false
     t.index ["powerbase_field_type_id"], name: "index_powerbase_fields_on_powerbase_field_type_id"
     t.index ["powerbase_table_id"], name: "index_powerbase_fields_on_powerbase_table_id"
   end

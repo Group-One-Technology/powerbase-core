@@ -42,21 +42,20 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       case @database.adapter
       when "postgresql"
         @db_size = sequel_connect(@database) do |db|
-          db.select(Sequel.lit('pg_size_pretty(pg_database_size(current_database())) AS size'))
+          db.select(Sequel.lit('pg_database_size(current_database()) AS size'))
             .first[:size]
         end
       when "mysql2"
         @db_size = sequel_connect(@database) do |db|
           db.from(Sequel.lit("information_schema.TABLES"))
-            .select(Sequel.lit("concat(sum(data_length + index_length) / 1024, \" kB\") as size"))
-            .where(Sequel.lit("ENGINE=('MyISAM' || 'InnoDB' ) AND table_schema = ?", @database.database_name))
-            .group(:table_schema)
+            .select(Sequel.lit("SUM(data_length + index_length) AS size"))
+            .where(Sequel.lit("table_schema = ?", @database.database_name))
             .first[:size]
         end
       end
 
       @base_migration.retries = 0
-      @base_migration.database_size = @db_size || "0 kB"
+      @base_migration.database_size = @db_size || 0
       @base_migration.save
     end
 
