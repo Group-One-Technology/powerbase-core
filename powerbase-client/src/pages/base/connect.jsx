@@ -80,9 +80,10 @@ export function ConnectBasePage() {
 
         if (response.database.isTurbo && response.dbSize) {
           if (response.dbSize > MAX_SMALL_DATABASE_SIZE) {
+            const bytes = response.dbSize * 1024;
             setModal((val) => ({
               ...val,
-              content: `It might take hours/days to import the database with the size of ${formatBytes(response.dbSize)}`,
+              content: `It might take hours/days to import the database with the size of ${formatBytes(bytes)}`,
             }));
           }
         }

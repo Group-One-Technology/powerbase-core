@@ -39,16 +39,17 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
       @base_migration = BaseMigration.new
       @base_migration.powerbase_database_id = @database.id
 
+      # Get database size in kilobytes
       case @database.adapter
       when "postgresql"
         @db_size = sequel_connect(@database) do |db|
-          db.select(Sequel.lit('pg_database_size(current_database()) AS size'))
+          db.select(Sequel.lit('ROUND(pg_database_size(current_database()) / 1024, 2) AS size'))
             .first[:size]
         end
       when "mysql2"
         @db_size = sequel_connect(@database) do |db|
           db.from(Sequel.lit("information_schema.TABLES"))
-            .select(Sequel.lit("SUM(data_length + index_length) AS size"))
+            .select(Sequel.lit("ROUND(SUM(data_length + index_length) / 1024, 2) AS size"))
             .where(Sequel.lit("table_schema = ?", @database.database_name))
             .first[:size]
         end
