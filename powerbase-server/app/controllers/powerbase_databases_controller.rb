@@ -151,6 +151,11 @@ class PowerbaseDatabasesController < ApplicationController
       return
     end
 
+    if options[:adapter] == "mysql2"
+      render json: { error: "Couldn't connect to \"#{options[:name]}\". MySQL databases are currently not supported yet." }, status: :unprocessable_entity
+      return
+    end
+
     database_creator = Databases::Creator.new({
       name: options[:name],
       database_name: options[:database_name],

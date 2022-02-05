@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_31_210100) do
+ActiveRecord::Schema.define(version: 2022_02_04_224237) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,10 +34,10 @@ ActiveRecord::Schema.define(version: 2022_01_31_210100) do
   create_table "base_migrations", force: :cascade do |t|
     t.datetime "start_time"
     t.datetime "end_time"
-    t.string "database_size", null: false
     t.text "logs", default: "{}"
     t.integer "retries", default: 0, null: false
     t.bigint "powerbase_database_id", null: false
+    t.decimal "database_size", null: false
     t.index ["powerbase_database_id"], name: "index_base_migrations_on_powerbase_database_id"
   end
 
