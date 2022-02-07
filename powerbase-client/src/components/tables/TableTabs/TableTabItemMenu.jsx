@@ -63,15 +63,19 @@ export function TableTabItemMenu({ table, children }) {
 
   const handleHideTable = async () => {
     if (!table || !tables?.length || table.isHidden) return;
-    saving();
 
     const updatedTables = tables.filter((item) => item.id !== table.id);
-
     if (currentTable.id === table.id) {
       const nextTable = updatedTables.find((item) => item.id !== table.id);
-      handleTableChange({ table: nextTable });
+      if (nextTable) {
+        handleTableChange({ table: nextTable });
+      } else {
+        catchError('Cannot hide table. There must be at least one visible table left in a base.');
+        return;
+      }
     }
 
+    saving();
     setTables(updatedTables);
 
     try {
@@ -210,15 +214,27 @@ export function TableTabItemMenu({ table, children }) {
               Permissions
             </ContextMenu.Item>
           )}
-          {canManageTables && (
-            <ContextMenu.Item
-              className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
-              onSelect={handleHideTable}
-            >
-              <EyeOffIcon className="h-4 w-4 mr-1.5" />
-              Hide
-            </ContextMenu.Item>
-          )}
+          {canManageTables && tables.length > 1
+            ? (
+              <ContextMenu.Item
+                className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
+                onSelect={handleHideTable}
+              >
+                <EyeOffIcon className="h-4 w-4 mr-1.5" />
+                Hide
+              </ContextMenu.Item>
+            ) : canManageTables ? (
+              <Tooltip.Root delayDuration={0}>
+                <Tooltip.Trigger className="w-full px-4 py-1 text-sm flex items-center cursor-not-allowed hover:bg-gray-100 focus:bg-gray-100">
+                  <EyeOffIcon className="h-4 w-4 mr-1.5" />
+                  Hide
+                </Tooltip.Trigger>
+                <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                  <Tooltip.Arrow className="gray-900" />
+                  Cannot hide table. There must be at least one visible table left in a base.
+                </Tooltip.Content>
+              </Tooltip.Root>
+            ) : null}
           {canDeleteTables && tables.length > 1
             ? (
               <ContextMenu.Item
