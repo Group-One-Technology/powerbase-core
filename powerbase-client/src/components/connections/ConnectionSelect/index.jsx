@@ -24,11 +24,10 @@ export function ConnectionSelect({
 }) {
   const { authUser } = useAuthUser();
 
-  const tablesResponse = useSWR(
+  const { data: tables } = useSWR(
     (base && authUser) ? `/databases/${base.id}/tables` : null,
     () => getTables({ databaseId: base.id }),
   );
-  const tables = tablesResponse.data?.tables;
 
   const { data: selectedTableFields } = useSWR(
     (table?.id && authUser) ? `/tables/${table?.id}/fields` : null,

@@ -12,14 +12,22 @@ import { useBaseUser } from '@models/BaseUser';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
+import { useSaveStatus } from '@models/SaveStatus';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { reindexTable } from '@lib/api/tables';
+import { hideTable, reindexTable } from '@lib/api/tables';
 
 export function TableTabItemMenu({ table, children }) {
   const { data: base } = useBase();
   const { baseUser } = useBaseUser();
+  const { saving, saved, catchError } = useSaveStatus();
   const { modal } = useTablePermissionsModal();
-  const { tablesResponse } = useCurrentView();
+  const {
+    table: currentTable,
+    tables,
+    setTables,
+    mutateTables,
+    handleTableChange,
+  } = useCurrentView();
   const { setOpen: setTableKeysModalOpen, setTable } = useTableKeysModal();
 
   const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
@@ -38,10 +46,38 @@ export function TableTabItemMenu({ table, children }) {
     }
   };
 
+  const handleHideTable = async () => {
+    if (!table || !tables?.length || table.isHidden) return;
+    saving();
+
+    const updatedTables = tables.filter((item) => item.id !== table.id);
+
+    if (currentTable.id === table.id) {
+      const nextTable = updatedTables.find((item) => item.id !== table.id);
+      handleTableChange({ table: nextTable });
+    }
+
+    setTables(updatedTables);
+
+    try {
+      await hideTable({ tableId: table.id });
+      mutateTables(updatedTables);
+      saved();
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
+  };
+
   const handleReindex = async () => {
     if (!canManageTables || !table) return;
-    await reindexTable({ tableId: table.id });
-    tablesResponse.mutate();
+    saving();
+    try {
+      await reindexTable({ tableId: table.id });
+      mutateTables();
+      saved();
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
+    }
   };
 
   if (!canManageTables) {
@@ -128,8 +164,8 @@ export function TableTabItemMenu({ table, children }) {
         )}
         {canManageTables && (
           <ContextMenu.Item
-            className="px-4 py-1 text-sm flex items-center cursor-not-allowed hover:bg-gray-100 focus:bg-gray-100"
-            disabled
+            className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
+            onSelect={handleHideTable}
           >
             <EyeOffIcon className="h-4 w-4 mr-1.5" />
             Hide
