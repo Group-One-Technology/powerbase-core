@@ -7,6 +7,10 @@ module ElasticsearchHelper
     @es_client ||= ElasticsearchClient
   end
 
+  def index_exists?(index_name)
+    client.indices.exists(index: index_name)
+  end
+
   def get_records_count(index, search_params)
     client.perform_request("GET", "#{index}/_count", {}, search_params).body
   end
@@ -49,7 +53,7 @@ module ElasticsearchHelper
   end
 
   def delete_index(index)
-    client.perform_request("DELETE", "/#{index}") if client.indices.exists(index: index)
+    client.perform_request("DELETE", "/#{index}") if index_exists?(index)
   end
 
   def format_doc_id(value)
@@ -66,7 +70,7 @@ module ElasticsearchHelper
   end
 
   def create_index!(index_name)
-    if !client.indices.exists(index: index_name)
+    if !index_exists?(index_name)
       client.indices.create(
         index: index_name,
         body: {

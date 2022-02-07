@@ -7,7 +7,7 @@ class PowerbaseTablesController < ApplicationController
     required(:database_id).value(:integer)
   end
 
-  schema(:show, :hide, :logs, :update) do
+  schema(:show, :hide, :drop, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
   end
@@ -82,6 +82,15 @@ class PowerbaseTablesController < ApplicationController
     else
       render json: @table.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /tables/:id/drop
+  def drop
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:delete_tables, @table.db)
+    @table.drop
+    render status: :no_content
   end
 
   # GET /tables/:id/logs

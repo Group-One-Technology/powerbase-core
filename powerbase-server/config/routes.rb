@@ -92,6 +92,7 @@ Rails.application.routes.draw do
       member do
         get 'logs'
         put 'hide'
+        delete 'drop'
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'

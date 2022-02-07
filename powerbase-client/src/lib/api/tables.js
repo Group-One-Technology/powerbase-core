@@ -18,6 +18,12 @@ export async function hideTable({ tableId }) {
   return undefined;
 }
 
+export async function dropTable({ tableId }) {
+  const response = await securedApi.delete(`/tables/${tableId}/drop`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function getTables({ databaseId }) {
   const response = await securedApi.get(`/databases/${databaseId}/tables`);
   if (isResponseSuccess(response)) return response.data;
