@@ -7,7 +7,7 @@ class PowerbaseTablesController < ApplicationController
     required(:database_id).value(:integer)
   end
 
-  schema(:show, :hide, :logs, :update) do
+  schema(:show, :hide, :drop, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
   end
@@ -77,11 +77,32 @@ class PowerbaseTablesController < ApplicationController
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:manage_base, @table.db)
+
+    visible_tables = PowerbaseTable.where(is_hidden: false, powerbase_database_id: @table.powerbase_database_id)
+      .select {|item| item.id != @table.id}
+
+    raise StandardError.new("Cannot hide table. There must be at least one visible table left in a base") if visible_tables.length == 0
+
     if @table.update(is_hidden: true)
       render json: format_json(@table)
     else
       render json: @table.errors, status: :unprocessable_entity
     end
+  end
+
+  # DELETE /tables/:id/drop
+  def drop
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:delete_tables, @table.db)
+
+    visible_tables = PowerbaseTable.where(is_hidden: false, powerbase_database_id: @table.powerbase_database_id)
+      .select {|item| item.id != @table.id}
+
+    raise StandardError.new("Cannot drop table. There must be at least one visible table left in a base") if visible_tables.length == 0
+
+    @table.drop
+    render status: :no_content
   end
 
   # GET /tables/:id/logs
