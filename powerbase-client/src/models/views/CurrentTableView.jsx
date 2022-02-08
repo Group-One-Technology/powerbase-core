@@ -12,6 +12,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const { authUser } = useAuthUser();
   const [tableId, setTableId] = useState(initialTableId);
   const [viewId, setViewId] = useState(initialViewId);
+  const [tables, setTables] = useState();
 
   const tablesResponse = useSWR(
     (baseId && authUser) ? `${authUser.id}/databases/${baseId}/tables` : null,
@@ -25,15 +26,19 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     { revalidateOnFocus: true },
   );
 
-  useTableMigrationListener({ tables: tablesResponse.data?.tables, mutate: tablesResponse.mutate });
+  useTableMigrationListener({ tables: tablesResponse.data, mutate: tablesResponse.mutate });
   const { migrationListener } = useMigrationListener({ mutate: tablesResponse.mutate });
 
-  const currentTable = tablesResponse.data?.tables.find((table) => table.id.toString() === tableId.toString());
+  const currentTable = tablesResponse.data?.find((table) => table.id.toString() === tableId.toString());
   const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
 
   useEffect(() => {
     migrationListener(baseId);
   }, [baseId]);
+
+  useEffect(() => {
+    setTables(tablesResponse.data?.filter((item) => !item.isHidden));
+  }, [tablesResponse.data]);
 
   const handleTableChange = ({ table }) => {
     window.history.replaceState(
@@ -68,7 +73,8 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
 
   return {
     table: currentTable,
-    tables: tablesResponse.data?.tables.filter((item) => !item.isHidden),
+    tables,
+    setTables,
     tablesResponse,
     view: currentView,
     views: viewsResponse.data,

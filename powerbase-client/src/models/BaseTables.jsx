@@ -24,7 +24,6 @@ function useBaseTablesModel({ id }) {
 
   return {
     ...response,
-    data: response.data?.tables,
   };
 }
 
