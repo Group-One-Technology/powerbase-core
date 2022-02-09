@@ -19,7 +19,6 @@ import {
 } from '@lib/constants/index';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { DroppableArea } from '@components/ui/DroppableArea';
-import { DraggableItem } from '@components/ui/DraggableItem';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
 import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
 import { useFieldOptions } from '@lib/hooks/virtual-table/useFieldOptions';
@@ -33,8 +32,6 @@ function CellRenderer({
   columnIndex,
   field,
   fieldTypes,
-  option,
-  setOption,
   dragging,
   handleResizeColumn,
   handleResizeStop,
@@ -42,7 +39,6 @@ function CellRenderer({
   base,
 }) {
   const key = `row-${rowIndex}-column-${columnIndex}`;
-  const handleClick = () => setOption(true);
 
   const droppableArea = (
     <DroppableArea
@@ -64,7 +60,7 @@ function CellRenderer({
     />
   );
 
-  if (columnIndex === 0 || !field || !option) {
+  if (columnIndex === 0 || !field) {
     return (
       <React.Fragment key={key}>
         <div
@@ -84,20 +80,10 @@ function CellRenderer({
         style={style}
       >
         <GridHeaderOptions
-          table={table}
-          option={option}
-          field={field}
-          setOptionOpen={setOption}
-        />
-
-        <DraggableItem
           id={key}
           data={{ type: 'column', index: columnIndex - 1, field }}
-          className="absolute w-full h-full"
-          onKeyDown={(evt) => {
-            if (evt.key === 'Enter') handleClick(evt);
-          }}
-          onClick={handleClick}
+          table={table}
+          field={field}
         />
 
         <FieldTypeIcon
@@ -135,8 +121,6 @@ CellRenderer.propTypes = {
   columnIndex: PropTypes.number.isRequired,
   field: PropTypes.object,
   fieldTypes: PropTypes.array.isRequired,
-  option: PropTypes.object.isRequired,
-  setOption: PropTypes.func.isRequired,
   dragging: PropTypes.object,
   handleResizeColumn: PropTypes.func.isRequired,
   handleResizeStop: PropTypes.func.isRequired,
