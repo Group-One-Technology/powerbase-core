@@ -30,13 +30,13 @@ export function CellInput({
   }, [initialValue]);
 
   useDidMountEffect(() => {
-    if (fieldType.name === FieldType.LONG_TEXT && focus) {
+    if ((fieldType.name === FieldType.LONG_TEXT || fieldType.name === FieldType.JSON_TEXT) && focus) {
       inputRef.current?.focus();
     }
   }, [focus]);
 
   switch (fieldType.name) {
-    case FieldType.CHECKBOX:
+    case FieldType.CHECKBOX: {
       return (
         <div
           className={cn(
@@ -55,18 +55,18 @@ export function CellInput({
           />
         </div>
       );
-    case FieldType.LONG_TEXT: {
+    }
+    case FieldType.JSON_TEXT:
+    case FieldType.LONG_TEXT:
       return (
         <>
-          <textarea
-            id="mainfef"
+          <input
             ref={rootInputRef}
             onFocus={() => setFocus(true)}
             value={value}
             className={cn(
-              'absolute text-sm items-center py-1 px-2',
+              'absolute text-sm items-center py-1 px-2 border-none',
               isAddRecord && 'bg-green-50',
-              focus ? 'border border-indigo-500' : 'border-none',
               className,
             )}
           />
@@ -81,9 +81,8 @@ export function CellInput({
                 name={field.name}
                 onChange={(evt) => updateValue(evt.target.value)}
                 className={cn(
-                  'absolute text-sm items-center py-1 px-2',
+                  'absolute text-sm items-center py-1 px-2 border border-indigo-500',
                   isAddRecord && 'bg-green-50',
-                  focus ? 'border border-indigo-500' : 'border-none',
                   className,
                 )}
                 onBlur={() => setFocus(false)}
@@ -111,7 +110,6 @@ export function CellInput({
           </RelativePortal>
         </>
       );
-    }
     default: {
       let type = 'text';
       let curValue = value;
