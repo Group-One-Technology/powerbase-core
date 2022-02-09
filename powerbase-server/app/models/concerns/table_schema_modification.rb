@@ -1,6 +1,11 @@
-module SchemaModification
+module TableSchemaModification
   include SequelHelper
   extend ActiveSupport::Concern
+
+  def drop
+    _sequel.drop_table(self.name.to_sym)
+    self.remove
+  end
 
   def update_primary_keys(primary_keys = [])
     raise StandardError.new "Cannot change primary key of a migrating table." if self.status != "migrated"

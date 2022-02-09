@@ -4,11 +4,11 @@ class PowerbaseTablesController < ApplicationController
   before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
-    required(:database_id).value(:string)
+    required(:database_id).value(:integer)
   end
 
-  schema(:show, :logs, :update) do
-    required(:id).value(:string)
+  schema(:show, :hide, :drop, :logs, :update) do
+    required(:id).value(:integer)
     optional(:alias).value(:string)
   end
 
@@ -57,13 +57,10 @@ class PowerbaseTablesController < ApplicationController
 
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 
-    render json: {
-      migrated: @database.migrated?,
-      tables: @database.powerbase_tables
-        .order(order: :asc)
-        .select {|table| current_user.can?(:view_table, table, false, @guest)}
-        .map {|item| format_json(item)}
-    }
+    render json: @database.tables
+      .order(order: :asc)
+      .select {|table| current_user.can?(:view_table, table, false, @guest)}
+      .map {|item| format_json(item)}
   end
 
   # GET /tables/:id
@@ -73,6 +70,39 @@ class PowerbaseTablesController < ApplicationController
     current_user.can?(:view_table, @table)
 
     render json: format_json(@table)
+  end
+
+  # PUT /tables/:id/hide
+  def hide
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:manage_base, @table.db)
+
+    visible_tables = PowerbaseTable.where(is_hidden: false, powerbase_database_id: @table.powerbase_database_id)
+      .select {|item| item.id != @table.id}
+
+    raise StandardError.new("Cannot hide table. There must be at least one visible table left in a base") if visible_tables.length == 0
+
+    if @table.update(is_hidden: true)
+      render json: format_json(@table)
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /tables/:id/drop
+  def drop
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:delete_tables, @table.db)
+
+    visible_tables = PowerbaseTable.where(is_hidden: false, powerbase_database_id: @table.powerbase_database_id)
+      .select {|item| item.id != @table.id}
+
+    raise StandardError.new("Cannot drop table. There must be at least one visible table left in a base") if visible_tables.length == 0
+
+    @table.drop
+    render status: :no_content
   end
 
   # GET /tables/:id/logs

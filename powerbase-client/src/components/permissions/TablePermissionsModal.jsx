@@ -96,12 +96,9 @@ function BaseTablePermissionsModal() {
             ? updatedGuestPermission
             : item.permissions,
         })));
-        tablesResponse.mutate({
-          ...tablesResponse.data,
-          tables: tablesResponse.data.tables.map((item) => (item.id === table.id
-            ? updatedTable
-            : item)),
-        });
+        tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+          ? updatedTable
+          : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -121,12 +118,9 @@ function BaseTablePermissionsModal() {
         roles: allowedRoles,
         permission,
       });
-      tablesResponse.mutate({
-        ...tablesResponse.data,
-        tables: tablesResponse.data.tables.map((item) => (item.id === table.id
-          ? updatedTable
-          : item)),
-      });
+      tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+        ? updatedTable
+        : item)));
       saved(`Successfully removed "${role}" from allowed roles.`);
     } catch (err) {
       catchError(err.response.data.error || err.response.data.exception);
@@ -155,12 +149,9 @@ function BaseTablePermissionsModal() {
               roles: allowedRoles,
               permission: permissionKey,
             });
-            tablesResponse.mutate({
-              ...tablesResponse.data,
-              tables: tablesResponse.data.tables.map((item) => (item.id === table.id
-                ? updatedTable
-                : item)),
-            });
+            tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+              ? updatedTable
+              : item)));
             saved(`Successfully added "${role}" from allowed roles.`);
           } catch (err) {
             catchError(err.response.data.error || err.response.data.exception);
@@ -213,12 +204,9 @@ function BaseTablePermissionsModal() {
               ? updatedGuestPermission
               : item.permissions,
           })));
-          tablesResponse.mutate({
-            ...tablesResponse.data,
-            tables: tablesResponse.data.tables.map((item) => (item.id === table.id
-              ? updatedTable
-              : item)),
-          });
+          tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+            ? updatedTable
+            : item)));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
         } catch (err) {
           catchError(err.response.data.error || err.response.data.exception);
