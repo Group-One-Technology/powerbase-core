@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import RelativePortal from 'react-relative-portal';
+
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { FieldType } from '@lib/constants/field-types';
 
-// TODO: Expand to other types like in RecordItemValue.jsx. Then use this for EditCell.jsx
 export function CellInput({
   field,
   fieldType,
@@ -12,8 +13,12 @@ export function CellInput({
   onValueChange,
   isAddRecord,
   className,
+  style,
 }) {
+  const rootInputRef = useRef();
+  const inputRef = useRef();
   const [value, setValue] = useState(initialValue);
+  const [focus, setFocus] = useState(false);
 
   const updateValue = (updatedValue) => {
     setValue(updatedValue);
@@ -23,6 +28,12 @@ export function CellInput({
   useDidMountEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
+
+  useDidMountEffect(() => {
+    if (fieldType.name === FieldType.LONG_TEXT && focus) {
+      inputRef.current?.focus();
+    }
+  }, [focus]);
 
   switch (fieldType.name) {
     case FieldType.CHECKBOX:
@@ -35,14 +46,72 @@ export function CellInput({
           )}
         >
           <input
+            ref={inputRef}
             type="checkbox"
             name={field.name}
             className="py-1 px-2 h-4 w-4  focus:ring-indigo-500 border-gray-300 rounded"
             checked={value?.toString() === 'true'}
-            onClick={(evt) => updateValue(evt.target.checked)}
+            onChange={(evt) => updateValue(evt.target.checked)}
           />
         </div>
       );
+    case FieldType.LONG_TEXT: {
+      return (
+        <>
+          <textarea
+            id="mainfef"
+            ref={rootInputRef}
+            onFocus={() => setFocus(true)}
+            value={value}
+            className={cn(
+              'absolute text-sm items-center py-1 px-2',
+              isAddRecord && 'bg-green-50',
+              focus ? 'border border-indigo-500' : 'border-none',
+              className,
+            )}
+          />
+          <RelativePortal
+            component="div"
+            top={0}
+            left={0}
+          >
+            {focus && (
+              <textarea
+                ref={inputRef}
+                name={field.name}
+                onChange={(evt) => updateValue(evt.target.value)}
+                className={cn(
+                  'absolute text-sm items-center py-1 px-2',
+                  isAddRecord && 'bg-green-50',
+                  focus ? 'border border-indigo-500' : 'border-none',
+                  className,
+                )}
+                onBlur={() => setFocus(false)}
+                onKeyDown={(evt) => {
+                  // Add keyboard focus accessibility for tab and shift-tab
+                  if (evt.code === 'Tab') {
+                    evt.preventDefault();
+
+                    if (evt.shiftKey) {
+                      const focusableElements = rootInputRef.current?.parentElement.previousSibling.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                      focusableElements[0].focus();
+                      setFocus(false);
+                    } else {
+                      const focusableElements = rootInputRef.current?.parentElement.nextSibling.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                      focusableElements[0].focus();
+                      setFocus(false);
+                    }
+                  }
+                }}
+                value={value}
+                rows={3}
+                style={{ width: style?.width, height: 'auto' }}
+              />
+            )}
+          </RelativePortal>
+        </>
+      );
+    }
     default: {
       let type = 'text';
       let curValue = value;
@@ -62,6 +131,7 @@ export function CellInput({
 
       return (
         <input
+          ref={inputRef}
           type={type}
           name={field.name}
           value={value}
@@ -84,4 +154,5 @@ CellInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   isAddRecord: PropTypes.bool,
   className: PropTypes.string,
+  style: PropTypes.object,
 };

@@ -92,6 +92,7 @@ export function CellRenderer({
           field={field}
           fieldType={fieldType}
           onValueChange={handleValueChange}
+          style={style}
           isAddRecord
         />
       </div>
