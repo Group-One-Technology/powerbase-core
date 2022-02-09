@@ -92,8 +92,10 @@ export function TableKeysModal() {
     })));
   };
 
-  const submit = (evt) => {
+  const submit = async (evt) => {
     evt.preventDefault();
+    if (!canUpdatePrimaryKey) return;
+
     const primaryKeysArray = primaryKeys.map((item) => item.name);
 
     if (!base.isTurbo && hasMagicFields && primaryKeysArray.length === 0) {
@@ -101,25 +103,22 @@ export function TableKeysModal() {
       return;
     }
 
-    if (canUpdatePrimaryKey) {
-      saving();
+    saving();
 
-      updateTablePrimaryKeys({
+    try {
+      await updateTablePrimaryKeys({
         tableId: table.id,
         primaryKeys: primaryKeysArray,
-      })
-        .then(async () => {
-          if (currentTable.id === table.id) {
-            tablesResponse.mutate();
-          }
+      });
 
-          await mutateViewFields(viewFields);
-          saved(`Successfully updated primary keys for table ${table.alias}`);
-        })
-        .catch((err) => catchError(err.response.data.exception || err.response.data.error));
-
-      mounted(() => setOpen(false));
+      if (currentTable.id === table.id) tablesResponse.mutate();
+      await mutateViewFields(viewFields);
+      saved(`Successfully updated primary keys for table ${table.alias}`);
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
     }
+
+    mounted(() => setOpen(false));
   };
 
   return (
