@@ -28,7 +28,7 @@ export function CellInput({
 
   const handleBlur = () => {
     setFocus(false);
-    if (onSubmit) onSubmit(value);
+    if (onSubmit && value !== initialValue) onSubmit(value);
   };
 
   const handleKeyDown = (evt) => {
