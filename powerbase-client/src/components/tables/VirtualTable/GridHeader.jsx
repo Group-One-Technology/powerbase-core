@@ -21,7 +21,6 @@ import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { DroppableArea } from '@components/ui/DroppableArea';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
 import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
-import { useFieldOptions } from '@lib/hooks/virtual-table/useFieldOptions';
 import { GridHeaderOptions } from './GridHeaderOptions';
 
 const GRID_HEADER_HEIGHT = 30;
@@ -148,7 +147,6 @@ export const GridHeader = React.forwardRef(({
     handleDragMove,
     handleDragEnd,
   } = useReorderFields({ fields, setFields });
-  const { options, setOption } = useFieldOptions({ fields });
 
   return (
     <DndContext
@@ -179,9 +177,6 @@ export const GridHeader = React.forwardRef(({
         className="scrollbar-none border-gray-200 border-b"
         cellRenderer={({ columnIndex, ...props }) => {
           const field = fields[columnIndex - 1];
-          const option = field
-            ? options.find((item) => item.id === field.id)
-            : undefined;
 
           return CellRenderer({
             ...props,
@@ -189,8 +184,6 @@ export const GridHeader = React.forwardRef(({
             columnIndex,
             field,
             fieldTypes,
-            option,
-            setOption: (value) => setOption(field.id, value),
             dragging,
             handleResizeColumn,
             handleResizeStop,
