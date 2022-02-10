@@ -195,9 +195,9 @@ export function TableRenderer({
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
-                        const isEditable = !isLastRow && !isRowNo && baseUser?.can(PERMISSIONS.EditFieldData, field)
+                        const isEditable = !isLastRow && !isRowNo && field && baseUser?.can(PERMISSIONS.EditFieldData, field)
                           && !(field?.isPrimaryKey || field?.isForeignKey)
-                          && !(fieldType != null && [FieldType.CHECKBOX, FieldType.DATE].includes(fieldType.name));
+                          && fieldType != null && FieldType.CHECKBOX !== fieldType.name;
 
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
