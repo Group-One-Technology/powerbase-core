@@ -28,11 +28,11 @@ export function CellInput({
 
   const handleBlur = () => {
     setFocus(false);
-    if (onSubmit && value !== initialValue) onSubmit(value);
+    if (onSubmit) onSubmit(initialValue, value);
   };
 
   const handleKeyDown = (evt) => {
-    if (evt.code === 'Enter' && onSubmit) onSubmit(value);
+    if (evt.code === 'Enter' && !evt.shiftKey && onSubmit) onSubmit(initialValue, value);
 
     if ([FieldType.JSON_TEXT, FieldType.LONG_TEXT].includes(fieldType.name)) {
       // Add keyboard focus accessibility for tab and shift-tab
@@ -54,12 +54,11 @@ export function CellInput({
   };
 
   useEffect(() => {
-    setValue(initialValue);
     if (onSubmit) setFocus(true);
     if ([FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name)) {
       inputRef.current?.focus();
     }
-  }, [initialValue, onSubmit]);
+  }, [onSubmit]);
 
   useDidMountEffect(() => {
     if ([FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name) && focus) {

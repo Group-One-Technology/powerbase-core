@@ -108,9 +108,12 @@ export function CellRenderer({
           value={value}
           field={field}
           fieldType={fieldType}
-          onSubmit={(updatedValue) => {
+          onSubmit={(initialValue, updatedValue) => {
+            setIsEditing(false);
             setCellToEdit({});
-            onExitEditing(updatedValue);
+            if (initialValue !== updatedValue) {
+              onExitEditing(updatedValue);
+            }
           }}
           style={style}
         />
