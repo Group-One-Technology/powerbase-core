@@ -3452,7 +3452,7 @@ execa@^5.0.0:
     signal-exit "^3.0.3"
     strip-final-newline "^2.0.0"
 
-exenv@^1.2.2:
+exenv@^1.2.1, exenv@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/exenv/-/exenv-1.2.2.tgz#2ae78e85d9894158670b03d47bec1f03bd91bb9d"
   integrity sha1-KueOhdmJQVhnCwPUe+wfA72Ru50=
@@ -4890,6 +4890,11 @@ lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
+lodash.throttle@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+  integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
 
 lodash.topath@^4.5.2:
   version "4.5.2"
@@ -6373,6 +6378,15 @@ react-popper@^2.2.5:
   dependencies:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
+
+react-relative-portal@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/react-relative-portal/-/react-relative-portal-1.8.0.tgz#fa774fc6d202d818f8403e0c1b5f94a7ec28de91"
+  integrity sha512-pSyaWbtOeSrIQxpKdGt0oZL1bjCNzr/6IdzQCbN+6pRyoAJZD5dAYTmwh2Aav7bupNInQoVS3MySw01ZvSgERw==
+  dependencies:
+    exenv "^1.2.1"
+    lodash.throttle "^4.1.1"
+    prop-types "^15.6.0"
 
 react-remove-scroll-bar@^2.1.0:
   version "2.2.0"

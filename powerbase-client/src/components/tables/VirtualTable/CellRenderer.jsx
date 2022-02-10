@@ -81,7 +81,10 @@ export function CellRenderer({
     return (
       <div
         key={key}
-        className="overflow-hidden border-r border-b border-gray-200 focus-within:border-2 focus-within:border-indigo-500"
+        className={cn(
+          'overflow-hidden border-r border-b border-gray-200',
+          fieldType.name !== FieldType.CHECKBOX && 'focus-within:border-2 focus-within:border-indigo-500',
+        )}
         style={style}
       >
         <CellInput
@@ -89,6 +92,7 @@ export function CellRenderer({
           field={field}
           fieldType={fieldType}
           onValueChange={handleValueChange}
+          style={style}
           isAddRecord
         />
       </div>
