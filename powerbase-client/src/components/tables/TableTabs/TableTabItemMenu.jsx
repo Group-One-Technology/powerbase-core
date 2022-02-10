@@ -15,9 +15,15 @@ import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { useSaveStatus } from '@models/SaveStatus';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { dropTable, hideTable, reindexTable } from '@lib/api/tables';
 import { useMounted } from '@lib/hooks/useMounted';
+import {
+  dropTable,
+  hideTable,
+  reindexTable,
+  updateTableAlias,
+} from '@lib/api/tables';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 
 export function TableTabItemMenu({ table, children }) {
   const { mounted } = useMounted();
@@ -39,16 +45,51 @@ export function TableTabItemMenu({ table, children }) {
   } = useCurrentView();
   const { setOpen: setTableKeysModalOpen, setTable } = useTableKeysModal();
 
-  const canManageTables = baseUser?.can(PERMISSIONS.ManageTable);
+  const canManageTable = baseUser?.can(PERMISSIONS.ManageTable);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canDeleteTables = baseUser?.can(PERMISSIONS.DeleteTables);
   const isMigrated = table.status === 'migrated' && !table.isReindexing;
 
+  const [open, setOpen] = useState(false);
+  const [alias, setAlias] = useState(table.alias || table.name);
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     title: 'Drop Table',
     description: 'Are you sure you want to drop this table? This action cannot be undone.',
   });
+
+  useDidMountEffect(() => {
+    setAlias(table.alias || table.name);
+  }, [table]);
+
+  const handleOpenChange = async (value) => {
+    if (!value && alias !== table.alias && canManageTable) {
+      saving();
+      const updatedTables = tables.map((item) => ({
+        ...item,
+        alias: item.id === table.id
+          ? alias
+          : item.alias,
+      }));
+
+      setTables(updatedTables);
+      setOpen(value);
+
+      try {
+        await updateTableAlias({ tableId: table.id, alias });
+        await mutateTables(updatedTables);
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    } else {
+      setOpen(value);
+    }
+  };
+
+  const handleAliasChange = (evt) => {
+    setAlias(evt.target.value);
+  };
 
   const handleKeys = () => {
     setTable(table);
@@ -120,7 +161,7 @@ export function TableTabItemMenu({ table, children }) {
   };
 
   const handleReindex = async () => {
-    if (!canManageTables || !table) return;
+    if (!canManageTable || !table) return;
     saving();
     try {
       await reindexTable({ tableId: table.id });
@@ -131,32 +172,32 @@ export function TableTabItemMenu({ table, children }) {
     }
   };
 
-  if (!canManageTables) {
+  if (!canManageTable) {
     return <>{children}</>;
   }
 
   return (
     <>
-      <ContextMenu.Root>
+      <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
         <ContextMenu.Trigger>
           {children}
         </ContextMenu.Trigger>
         <ContextMenu.Content align="start" alignOffset={20} className="py-2 block overflow-hidden rounded-lg shadow-lg bg-white text-gray-900 ring-1 ring-black ring-opacity-5 w-60">
-          {canManageTables && (
+          {canManageTable && (
             <div className="px-4 w-auto">
               <input
                 type="text"
                 aria-label="Table Alias"
-                value={table.alias}
+                value={alias}
+                onChange={handleAliasChange}
                 placeholder="Table Alias"
                 className="my-2 appearance-none block w-full p-1 text-sm text-gray-900 border rounded-md shadow-sm placeholder-gray-400 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
               />
             </div>
           )}
 
           <dl>
-            {!canManageTables && (
+            {!canManageTable && (
               <>
                 <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
                   Table Alias
@@ -175,7 +216,7 @@ export function TableTabItemMenu({ table, children }) {
             </dd>
           </dl>
 
-          {canManageTables && (
+          {canManageTable && (
             <>
               <ContextMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
                 Structure
@@ -214,7 +255,7 @@ export function TableTabItemMenu({ table, children }) {
               Permissions
             </ContextMenu.Item>
           )}
-          {canManageTables && tables.length > 1
+          {canManageTable && tables.length > 1
             ? (
               <ContextMenu.Item
                 className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
@@ -223,7 +264,7 @@ export function TableTabItemMenu({ table, children }) {
                 <EyeOffIcon className="h-4 w-4 mr-1.5" />
                 Hide
               </ContextMenu.Item>
-            ) : canManageTables ? (
+            ) : canManageTable ? (
               <Tooltip.Root delayDuration={0}>
                 <Tooltip.Trigger className="w-full px-4 py-1 text-sm flex items-center cursor-not-allowed hover:bg-gray-100 focus:bg-gray-100">
                   <EyeOffIcon className="h-4 w-4 mr-1.5" />
