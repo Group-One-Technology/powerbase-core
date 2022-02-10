@@ -107,6 +107,7 @@ export function useEditingCell({ records, setRecords }) {
       await mutateTableRecords(updatedRecords, false);
       saved();
     } catch (err) {
+      setRecords(records);
       exitEditing();
       catchError(err.response.data.exception || err.response.data.error);
     }
