@@ -1,13 +1,13 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_table_access, only: [:update, :update_default_view, :update_primary_keys]
+  before_action :check_table_access, only: [:alias, :update, :update_default_view, :update_primary_keys]
   before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
     required(:database_id).value(:integer)
   end
 
-  schema(:show, :hide, :drop, :logs, :update) do
+  schema(:show, :alias, :hide, :drop, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
   end
@@ -70,6 +70,15 @@ class PowerbaseTablesController < ApplicationController
     current_user.can?(:view_table, @table)
 
     render json: format_json(@table)
+  end
+
+  # PUT /tables/:id/alias
+  def alias
+    if @table.update(alias: safe_params[:alias])
+      render json: format_json(@table)
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
   end
 
   # PUT /tables/:id/hide

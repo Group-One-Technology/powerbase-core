@@ -12,6 +12,14 @@ export async function getTableLogs({ id }) {
   return undefined;
 }
 
+export async function updateTableAlias({ tableId, alias }) {
+  const response = await securedApi.put(`/tables/${tableId}/alias`, {
+    alias,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function hideTable({ tableId }) {
   const response = await securedApi.put(`/tables/${tableId}/hide`);
   if (isResponseSuccess(response)) return response.data;
