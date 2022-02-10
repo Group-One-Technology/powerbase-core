@@ -7,6 +7,7 @@ export function DraggableItem({
   id,
   data,
   children,
+  Component,
   ...props
 }) {
   const {
@@ -20,6 +21,14 @@ export function DraggableItem({
     transform: CSS.Translate.toString(transform),
   };
 
+  if (Component) {
+    return (
+      <Component ref={setNodeRef} style={style} {...listeners} {...attributes} {...props}>
+        {children}
+      </Component>
+    );
+  }
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} {...props}>
       {children}
@@ -31,4 +40,5 @@ DraggableItem.propTypes = {
   id: PropTypes.any.isRequired,
   data: PropTypes.object,
   children: PropTypes.any,
+  Component: PropTypes.any,
 };

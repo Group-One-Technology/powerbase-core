@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as ContextMenu from '@radix-ui/react-context-menu';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import {
@@ -29,13 +29,14 @@ import {
 } from '@lib/api/fields';
 import { useTableView } from '@models/TableView';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { DraggableItem } from '@components/ui/DraggableItem';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
 export function GridHeaderOptions({
+  id,
+  data,
   table,
-  option,
   field,
-  setOptionOpen,
 }) {
   const { saving, catchError, saved } = useSaveStatus();
   const { baseUser } = useBaseUser();
@@ -55,6 +56,7 @@ export function GridHeaderOptions({
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
+  const [open, setOpen] = useState(false);
   const [alias, setAlias] = useState(field.alias || field.name);
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export function GridHeaderOptions({
       }));
 
       setFields(updatedFields);
-      setOptionOpen(value);
+      setOpen(value);
 
       try {
         await updateFieldAlias({ id: field.fieldId, alias });
@@ -82,7 +84,7 @@ export function GridHeaderOptions({
         catchError(err.response.data.error || err.response.data.exception);
       }
     } else {
-      setOptionOpen(value);
+      setOpen(value);
     }
   };
 
@@ -102,7 +104,7 @@ export function GridHeaderOptions({
       }));
 
       setFields(updatedFields);
-      setOptionOpen(false);
+      setOpen(false);
 
       try {
         await updateFieldType({ id: field.fieldId, fieldTypeId: selectedFieldType.id });
@@ -132,7 +134,7 @@ export function GridHeaderOptions({
       }));
 
       setFields(updatedFields);
-      setOptionOpen(false);
+      setOpen(false);
 
       try {
         await hideViewField({ id: field.id });
@@ -156,7 +158,7 @@ export function GridHeaderOptions({
       }));
 
       setFields(updatedFields);
-      setOptionOpen(false);
+      setOpen(false);
 
       try {
         if (!field.isPii) {
@@ -175,9 +177,14 @@ export function GridHeaderOptions({
   };
 
   return (
-    <DropdownMenu.Root open={option.open} onOpenChange={handleOpenChange}>
-      <DropdownMenu.Trigger />
-      <DropdownMenu.Content side="bottom" sideOffset={10} align="start" alignOffset={-10} className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
+    <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
+      <DraggableItem
+        id={id}
+        data={data}
+        className="absolute w-full h-full"
+        Component={ContextMenu.Trigger}
+      />
+      <ContextMenu.Content side="bottom" sideOffset={10} align="start" alignOffset={-10} className="block overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-60">
         <div className="py-2">
           {canManageField && (
             <div className="px-4 w-auto">
@@ -219,22 +226,22 @@ export function GridHeaderOptions({
             </dd>
           </dl>
 
-          <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />
+          <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />
 
-          <DropdownMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+          <ContextMenu.Label className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
             Field Type
-          </DropdownMenu.Label>
+          </ContextMenu.Label>
           {isFieldTypeConvertable && canManageField
             ? (
-              <DropdownMenu.Root>
-                <DropdownMenu.TriggerItem textValue="\t" className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+              <ContextMenu.Root>
+                <ContextMenu.TriggerItem textValue="\t" className="px-4 py-1 text-sm cursor-pointer flex items-center text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
                   <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                   {fieldType.name}
                   <ChevronRightIcon className="ml-auto h-4 w-4" />
-                </DropdownMenu.TriggerItem>
-                <DropdownMenu.Content sideOffset={-2} className="py-2 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
+                </ContextMenu.TriggerItem>
+                <ContextMenu.Content sideOffset={-2} className="py-2 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
                   {relatedFieldTypes.map((item) => (
-                    <DropdownMenu.Item
+                    <ContextMenu.Item
                       key={item.id}
                       textValue="\t"
                       className={cn(
@@ -246,92 +253,92 @@ export function GridHeaderOptions({
                     >
                       <FieldTypeIcon className="mr-1.5" fieldType={item} />
                       {item.name}
-                    </DropdownMenu.Item>
+                    </ContextMenu.Item>
                   ))}
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
+                </ContextMenu.Content>
+              </ContextMenu.Root>
             ) : (
-              <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
+              <ContextMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
                 <FieldTypeIcon fieldType={fieldType} className="mr-1.5" />
                 {fieldType.name}
-              </DropdownMenu.Item>
+              </ContextMenu.Item>
             )}
 
           {field.isPrimaryKey && (
-            <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <ContextMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isPrimaryKey />
               Primary Key
-            </DropdownMenu.Item>
+            </ContextMenu.Item>
           )}
           {field.isForeignKey && (
-            <DropdownMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
+            <ContextMenu.Item textValue="\t" className="px-4 py-1 text-sm flex items-center text-gray-900">
               <FieldTypeIcon className="mr-1.5" isForeignKey />
               Foreign Key
-            </DropdownMenu.Item>
+            </ContextMenu.Item>
           )}
 
-          {canManageView && <DropdownMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
+          {canManageView && <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
 
           {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
-              <DropdownMenu.Item
+              <ContextMenu.Item
                 textValue="\t"
                 className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
                 onSelect={handlePermissions}
               >
                 <LockClosedIcon className="h-4 w-4 mr-1.5" />
                 Permissions
-              </DropdownMenu.Item>
+              </ContextMenu.Item>
             </>
           )}
           {canAddFields && (
             <>
-              <DropdownMenu.Item
+              <ContextMenu.Item
                 textValue="\t"
                 className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
               >
                 <ArrowRightIcon className="h-4 w-4 mr-1.5" />
                 Insert right
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
+              </ContextMenu.Item>
+              <ContextMenu.Item
                 textValue="\t"
                 className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
                 Insert left
-              </DropdownMenu.Item>
+              </ContextMenu.Item>
             </>
           )}
           {canManageView && (
-            <DropdownMenu.Item
+            <ContextMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
               onSelect={handleHideField}
             >
               <EyeOffIcon className="h-4 w-4 mr-1.5" />
               Hide
-            </DropdownMenu.Item>
+            </ContextMenu.Item>
           )}
           {canSetPII && (
-            <DropdownMenu.Item
+            <ContextMenu.Item
               textValue="\t"
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
               onSelect={handleTogglePII}
             >
               <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
               {!field.isPii ? 'Set as PII' : 'Unset as PII'}
-            </DropdownMenu.Item>
+            </ContextMenu.Item>
           )}
         </div>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
+      </ContextMenu.Content>
+    </ContextMenu.Root>
   );
 }
 
 GridHeaderOptions.propTypes = {
+  id: PropTypes.any.isRequired,
+  data: PropTypes.object.isRequired,
   table: PropTypes.object.isRequired,
-  option: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
-  setOptionOpen: PropTypes.func.isRequired,
 };
