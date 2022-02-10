@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 
 import { FieldType } from '@lib/constants/field-types';
-import { OutsideCellClick } from '@components/ui/OutsideCellClick';
-import { Wrapper } from '@components/ui/Wrappper';
-import { EditCell } from './GridCell/EditCell';
 import { CellValue } from './GridCell/CellValue';
 import { CellInput } from './GridCell/CellInput';
 
@@ -21,9 +18,8 @@ export function CellRenderer({
   isHoveredRow,
   isLastRow,
   isRowNo,
-  fieldTypes,
+  fieldType,
   handleExpandRecord,
-  recordInputRef,
   isEditing,
   setIsEditing,
   cellToEdit,
@@ -38,11 +34,6 @@ export function CellRenderer({
   showAddRecord,
   handleAddRecord,
 }) {
-  const fieldType = field?.fieldTypeId
-    ? fieldTypes?.find(
-      (item) => item.id.toString() === field.fieldTypeId.toString(),
-    )
-    : undefined;
   const isEditableCell = cellToEdit
       && cellToEdit.row !== null
       && cellToEdit.row === rowIndex
@@ -56,6 +47,9 @@ export function CellRenderer({
     (!isRowNo && fieldType?.name !== FieldType.CHECKBOX) ? 'inline' : 'flex',
   );
 
+  const hasFocusEditHighlight = fieldType != null
+    && ![FieldType.CHECKBOX, FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name);
+
   const onExitEditing = (updatedValue) => handleExitEditing({
     rowIndex,
     field,
@@ -65,16 +59,17 @@ export function CellRenderer({
 
   const handleMouseEnter = () => {
     setHoveredCell({ row: rowIndex, column: columnIndex });
-    if (fieldType?.dataType === 'boolean') {
-      setCellToEdit({ row: rowIndex, column: columnIndex });
-    }
   };
 
   const handleMouseLeave = () => {
     setHoveredCell({});
-    if (fieldType?.dataType === 'boolean') {
-      setCellToEdit({});
-    }
+  };
+
+  const handleEditCell = () => {
+    if (!isEditable) return;
+    setIsEditing(true);
+    setHoveredCell({});
+    setCellToEdit({ row: rowIndex, column: columnIndex });
   };
 
   if (isAddRecord && isLastRow && !isRowNo) {
@@ -83,7 +78,7 @@ export function CellRenderer({
         key={key}
         className={cn(
           'overflow-hidden border-r border-b border-gray-200',
-          fieldType.name !== FieldType.CHECKBOX && 'focus-within:border-2 focus-within:border-indigo-500',
+          hasFocusEditHighlight && 'focus-within:border-2 focus-within:border-indigo-500',
         )}
         style={style}
       >
@@ -100,35 +95,26 @@ export function CellRenderer({
   }
 
   if (isEditing && isEditableCell) {
-    const condition = fieldType.dataType !== 'date';
-    const editCellClassName = 'border-2 border-indigo-500 overflow-hidden';
-
     return (
-      <Wrapper
+      <div
         key={key}
-        condition={condition}
-        wrapper={(children) => (
-          <OutsideCellClick
-            style={style}
-            onClickOutside={onExitEditing}
-            className={editCellClassName}
-          >
-            {children}
-          </OutsideCellClick>
+        className={cn(
+          'overflow-hidden border-r border-b border-gray-200',
+          hasFocusEditHighlight && 'focus-within:border-2 focus-within:border-indigo-500',
         )}
+        style={style}
       >
-        <EditCell
-          key={key}
-          ref={recordInputRef}
+        <CellInput
           value={value}
-          isEditing={isEditing}
           field={field}
           fieldType={fieldType}
-          handleExitCell={onExitEditing}
-          style={!condition ? style : undefined}
-          className={cn(!condition && editCellClassName)}
+          onSubmit={(updatedValue) => {
+            setCellToEdit({});
+            onExitEditing(updatedValue);
+          }}
+          style={style}
         />
-      </Wrapper>
+      </div>
     );
   }
 
@@ -140,27 +126,12 @@ export function CellRenderer({
       className={className}
       style={style}
       tabIndex={0}
-      onDoubleClick={() => {
-        const isExcludedFromDoubleClickAction = fieldType?.dataType.toLowerCase() === 'boolean'
-          || fieldType?.dataType.toLowerCase() === 'date'
-          || field?.isPrimaryKey
-          || field?.isForeignKey;
-
-        if (isEditable && !isExcludedFromDoubleClickAction) {
-          setIsEditing(true);
-          setHoveredCell({});
-          setCellToEdit({
-            row: rowIndex,
-            column: columnIndex,
-          });
-        }
-      }}
-      onBlur={(evt) => {
-        if (!isRowNo) evt.target.contentEditable = false;
+      onDoubleClick={handleEditCell}
+      onKeyDown={(evt) => {
+        if (evt.code === 'Enter') handleEditCell();
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      suppressContentEditableWarning
     >
       <CellValue
         value={value}
@@ -199,10 +170,9 @@ CellRenderer.propTypes = {
   isHoveredRow: PropTypes.bool.isRequired,
   isLastRow: PropTypes.bool.isRequired,
   isRowNo: PropTypes.bool.isRequired,
-  fieldTypes: PropTypes.array.isRequired,
+  fieldType: PropTypes.object,
   handleExpandRecord: PropTypes.func,
   isHighlighted: PropTypes.bool,
-  recordInputRef: PropTypes.func,
   isEditing: PropTypes.bool,
   setIsEditing: PropTypes.func.isRequired,
   cellToEdit: PropTypes.object,
