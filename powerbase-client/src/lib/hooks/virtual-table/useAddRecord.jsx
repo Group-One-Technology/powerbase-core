@@ -52,11 +52,15 @@ export function useAddRecord({
     setIsAddRecord(false);
   };
 
-  const showAddRecord = () => {
-    if (initialFilters?.filters?.length) {
-      setModalOpen(true);
+  const showAddRecord = (show = true) => {
+    if (show) {
+      if (initialFilters?.filters?.length) {
+        setModalOpen(true);
+      } else {
+        setIsAddRecord(true);
+      }
     } else {
-      setIsAddRecord(true);
+      exit();
     }
   };
 

@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { ArrowsExpandIcon, PlusIcon, CheckIcon } from '@heroicons/react/outline';
+import {
+  ArrowsExpandIcon,
+  PlusIcon,
+  CheckIcon,
+  XIcon,
+} from '@heroicons/react/outline';
 
 import { FieldType } from '@lib/constants/field-types';
 import { formatDate } from '@lib/helpers/formatDate';
@@ -36,8 +41,8 @@ export function CellValue({
       return (
         <button
           type="button"
-          className="inline-flex mr-auto ml-1.5 items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          onClick={showAddRecord}
+          className="inline-flex mr-auto ml-2 items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={() => showAddRecord()}
         >
           <PlusIcon className="h-4 w-4" aria-hidden="true" />
           <span className="sr-only">Add Record</span>
@@ -46,14 +51,24 @@ export function CellValue({
     }
 
     return (
-      <button
-        type="button"
-        className="inline-flex mr-auto ml-1.5 items-center justify-center p-0.5 border border-transparent rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:bg-green-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        onClick={handleAddRecord}
-      >
-        <CheckIcon className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only">Insert Record</span>
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          className="ml-2 mr-2 inline-flex items-center justify-center p-0.5 border border-transparent rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:bg-green-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={handleAddRecord}
+        >
+          <CheckIcon className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Insert Record</span>
+        </button>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center p-0.5 border border-transparent rounded-full hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={() => showAddRecord(false)}
+        >
+          <XIcon className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Cancel Insert Record</span>
+        </button>
+      </div>
     );
   }
 
