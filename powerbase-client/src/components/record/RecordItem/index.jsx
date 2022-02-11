@@ -9,6 +9,8 @@ import { RecordItemValue } from './RecordItemValue';
 export function RecordItem({
   item,
   fieldTypes,
+  includePii,
+  addRecord,
   handleRecordInputChange,
   handleOpenRecord,
 }) {
@@ -49,6 +51,8 @@ export function RecordItem({
           <RecordItemValue
             item={{ ...item, ...foreignKey }}
             fieldTypes={fieldTypes}
+            includePii={includePii}
+            addRecord={addRecord}
             handleRecordInputChange={handleRecordInputChange}
             openRecord={(value) => {
               handleOpenRecord(value, (prevVal) => ({
@@ -67,7 +71,9 @@ export function RecordItem({
 
 RecordItem.propTypes = {
   item: PropTypes.object.isRequired,
+  includePii: PropTypes.bool,
+  addRecord: PropTypes.bool,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
-  handleOpenRecord: PropTypes.func.isRequired,
+  handleOpenRecord: PropTypes.func,
 };

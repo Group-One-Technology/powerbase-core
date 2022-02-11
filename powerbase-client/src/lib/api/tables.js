@@ -12,6 +12,26 @@ export async function getTableLogs({ id }) {
   return undefined;
 }
 
+export async function updateTableAlias({ tableId, alias }) {
+  const response = await securedApi.put(`/tables/${tableId}/alias`, {
+    alias,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function hideTable({ tableId }) {
+  const response = await securedApi.put(`/tables/${tableId}/hide`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function dropTable({ tableId }) {
+  const response = await securedApi.delete(`/tables/${tableId}/drop`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function getTables({ databaseId }) {
   const response = await securedApi.get(`/databases/${databaseId}/tables`);
   if (isResponseSuccess(response)) return response.data;

@@ -91,11 +91,15 @@ Rails.application.routes.draw do
 
       member do
         get 'logs'
+        put 'alias'
+        put 'hide'
+        delete 'drop'
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
         post 'linked_records', to: 'table_records#linked_records', as: 'table_linked_records'
         post 'records_count', to: 'table_records#count', as: 'table_records_count'
         put 'update_field_data', to: 'table_records#update_field_data'
+        post 'add_record', to: 'table_records#add_record'
         put 'update_record', to: 'table_records#update_record'
         delete 'delete_record', to: 'table_records#delete_record'
         put 'update_default_view'

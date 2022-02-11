@@ -40,12 +40,11 @@ export function OnboardingConnectDatabase({
       setBase(response.database);
 
       if (response.database.isTurbo && response.dbSize) {
-        const databaseSize = +response.dbSize.split(' ')[0];
-
-        if (databaseSize > MAX_SMALL_DATABASE_SIZE) {
+        if (response.dbSize > MAX_SMALL_DATABASE_SIZE) {
+          const bytes = response.dbSize * 1024;
           setModal((val) => ({
             ...val,
-            content: `It might take hours/days to import the database with the size of ${formatBytes(databaseSize)}`,
+            content: `It might take hours/days to import the database with the size of ${formatBytes(bytes)}`,
           }));
         }
       }

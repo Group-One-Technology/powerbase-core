@@ -1,8 +1,14 @@
+include FieldTypeHelper
+
 module ElasticsearchHelper
   ELASTICSEACH_ID_LIMIT = 512
 
   def client
     @es_client ||= ElasticsearchClient
+  end
+
+  def index_exists?(index_name)
+    client.indices.exists(index: index_name)
   end
 
   def get_records_count(index, search_params)
@@ -47,7 +53,7 @@ module ElasticsearchHelper
   end
 
   def delete_index(index)
-    client.perform_request("DELETE", "/#{index}") if client.indices.exists(index: index)
+    client.perform_request("DELETE", "/#{index}") if index_exists?(index)
   end
 
   def format_doc_id(value)
@@ -64,7 +70,7 @@ module ElasticsearchHelper
   end
 
   def create_index!(index_name)
-    if !client.indices.exists(index: index_name)
+    if !index_exists?(index_name)
       client.indices.create(
         index: index_name,
         body: {
@@ -108,6 +114,41 @@ module ElasticsearchHelper
     end
 
     format_doc_id(doc_id)
+  end
+
+  # Format doc based on record field types
+  def format_record(record, fields)
+    formatted_record = {}
+
+    record.each do |record_key, record_value|
+      field = fields.find {|field| field.name.to_sym == record_key }
+      raise StandardError.new("Field with name of #{key} could not be found.") if !field
+
+      if record_value == nil
+        formatted_record[record_key] = nil
+        next
+      end
+
+      formatted_record[record_key] = case field.powerbase_field_type_id
+        when number_field_type.id
+          if record_value.is_a?(String) &&Float(record_value, exception: false) != nil
+            record_value.include?(".") ? record_value.to_f : record_value.to_i
+          else
+            record_value
+          end
+        when date_field_type.id
+          date = DateTime.parse(record_value) rescue nil
+          if date != nil
+            date.utc.strftime("%FT%T.%L%z")
+          else
+            record_value
+          end
+        else
+          %Q(#{record_value})
+        end
+    end
+
+    formatted_record
   end
 
   def format_es_result(result)

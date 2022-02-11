@@ -45,7 +45,7 @@ export function App() {
           <Redirect from="*" to="/404" />
         </Switch>
       </Router>
-      <Toaster position="bottom-left" />
+      <Toaster position="bottom-right" />
     </GlobalProviders>
   );
 }

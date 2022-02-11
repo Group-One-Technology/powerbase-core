@@ -16,6 +16,7 @@ import { TableRecordProvider, useTableRecord } from '@models/TableRecord';
 import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
+import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 import { useMounted } from '@lib/hooks/useMounted';
@@ -45,6 +46,7 @@ export function BaseSingleRecordModal({
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
+  const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
@@ -60,13 +62,6 @@ export function BaseSingleRecordModal({
   useEffect(() => {
     setRecord(initialRecord);
   }, [table, initialRecord]);
-
-  useEffect(() => {
-    setRecord(record.map((item) => {
-      if (item.isPii) return { ...item, includePii };
-      return item;
-    }));
-  }, [includePii]);
 
   useEffect(() => {
     if (remoteRecord) {
@@ -124,9 +119,11 @@ export function BaseSingleRecordModal({
 
     try {
       await deleteRecord({ tableId: table.id, primaryKeys });
+      mutateTableRecordsCount();
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -171,6 +168,7 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
+      mounted(() => setRecords(records));
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -262,6 +260,7 @@ export function BaseSingleRecordModal({
                         item={item}
                         fieldTypes={fieldTypes}
                         handleRecordInputChange={handleRecordInputChange}
+                        includePii={includePii}
                         openRecord={(value) => {
                           handleOpenRecord(value, (prevVal) => ({
                             ...prevVal,
@@ -306,6 +305,7 @@ export function BaseSingleRecordModal({
                           key={item.id}
                           item={item}
                           fieldTypes={fieldTypes}
+                          includePii={includePii}
                           handleOpenRecord={handleOpenRecord}
                           handleRecordInputChange={handleRecordInputChange}
                         />
@@ -338,6 +338,7 @@ export function BaseSingleRecordModal({
                       <LinkedRecordsItem
                         connection={connection}
                         fieldTypes={fieldTypes}
+                        includePii={includePii}
                         openRecord={(value) => {
                           handleOpenRecord(value, (prevVal) => ({
                             ...prevVal,

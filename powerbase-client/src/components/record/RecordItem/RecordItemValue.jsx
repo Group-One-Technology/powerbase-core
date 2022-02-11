@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { LockClosedIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, LockClosedIcon } from '@heroicons/react/outline';
+import { Listbox } from '@headlessui/react';
 import ReactJson from 'react-json-view';
 
 import { useBase } from '@models/Base';
@@ -25,6 +26,8 @@ import { LinkedRecordItem } from '../LinkedRecordItem';
 export function RecordItemValue({
   item,
   fieldTypes,
+  includePii,
+  addRecord,
   handleRecordInputChange,
   openRecord,
 }) {
@@ -33,43 +36,89 @@ export function RecordItemValue({
   const { data: fields } = useTableFields();
   const { data: connections } = useTableConnections();
   const { data: linkedRecord, error: linkedRecordError } = useTableRecord();
-  const disabled = item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item);
+
+  const inputTypes = [
+    'Manual Input',
+    item.isNullable && 'Null',
+    addRecord && (item.defaultValue?.length > 0 || item.isAutoIncrement) && 'Default',
+  ].filter((val) => val);
+  const [inputType, setInputType] = useState(item.value == null && item.isNullable && !addRecord
+    ? 'Null'
+    : inputTypes[0]);
+  const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
 
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
-  const isLinkedRecord = !linkedRecordError && item.databaseName && item.tableName;
+  const isLinkedRecord = item.isForeignKey && item.value && !linkedRecordError && item.databaseName && item.tableName;
   const isForeignDatabase = isLinkedRecord
     ? item.databaseName !== base.name
     : undefined;
 
   const labelContent = (
-    <>
-      <FieldTypeIcon
-        fieldType={fieldType}
-        isPrimaryKey={item.isPrimaryKey}
-        isForeignKey={item.isForeignKey}
-        className="mr-1"
-      />
-      <span className="inline-flex items-center font-normal">
-        {(isLinkedRecord && isForeignDatabase) && `${item.databaseName.toUpperCase()} > `}
-        {(isLinkedRecord && (item.tableName !== item.name || isForeignDatabase)) && `${item.tableName.toUpperCase()} > `}
-        {item.name.toUpperCase()}
-        {item.isPii && (
-          <Tooltip.Root delayDuration={0}>
-            <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
-              <LockClosedIcon className="mr-1 h-4 w-4" />
-              PII
-            </Tooltip.Trigger>
-            <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
-              <Tooltip.Arrow className="gray-900" />
-              Personal Identifiable Information (PII) can only be viewed and edited by authorized roles/users of a base.
-            </Tooltip.Content>
-          </Tooltip.Root>
-        )}
-      </span>
-    </>
+    <div className="w-full flex items-center justify-between">
+      <div className="flex items-center gap-1">
+        <FieldTypeIcon
+          fieldType={fieldType}
+          isPrimaryKey={item.isPrimaryKey}
+          isForeignKey={item.isForeignKey}
+        />
+        <span className="inline-flex items-center font-normal">
+          {(isLinkedRecord && isForeignDatabase) && `${item.databaseName.toUpperCase()} > `}
+          {(isLinkedRecord && (item.tableName !== item.name || isForeignDatabase)) && `${item.tableName.toUpperCase()} > `}
+          {item.name.toUpperCase()}
+          {item.isPii && (
+            <Tooltip.Root delayDuration={0}>
+              <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
+                <LockClosedIcon className="mr-1 h-4 w-4" />
+                PII
+              </Tooltip.Trigger>
+              <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                <Tooltip.Arrow className="gray-900" />
+                Personal Identifiable Information (PII) can only be viewed and edited by authorized roles/users of a base.
+              </Tooltip.Content>
+            </Tooltip.Root>
+          )}
+        </span>
+      </div>
+      {inputTypes.length > 1 && (
+        <div className="relative">
+          <Listbox value={inputType} onChange={setInputType}>
+            <Listbox.Button
+              type="button"
+              className="inline-flex items-center px-1 py-0.5 border border-transparent text-xs rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              {inputType}
+              <ChevronDownIcon className="h-3.5 w-3.5 ml-1" />
+            </Listbox.Button>
+            <Listbox.Options className="z-10 absolute right-0 top-5 mt-1 w-max text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+              {inputTypes.map((curInputType) => (
+                <Listbox.Option
+                  key={curInputType}
+                  value={curInputType}
+                  className={({ active, selected }) => cn(
+                    'cursor-default select-none relative py-1.5 pl-2 pr-6 text-gray-700 text-xs capitalize',
+                    (active || selected) ? 'bg-gray-100' : 'bg-white',
+                  )}
+                >
+                  {curInputType}
+                </Listbox.Option>
+              ))}
+            </Listbox.Options>
+          </Listbox>
+        </div>
+      )}
+    </div>
   );
 
-  if (item.isForeignKey && item.value && !linkedRecordError) {
+  useEffect(() => {
+    const curItemValue = inputType === 'Null'
+      ? null
+      : item.value;
+    handleRecordInputChange(item.fieldId, curItemValue, {
+      inputType: inputType.toLowerCase(),
+    });
+  }, [inputType]);
+
+  if (!addRecord && isLinkedRecord) {
     const recordArr = (fields && linkedRecord && connections)
       ? initializeFields(fields, connections).map((field) => ({
         ...field,
@@ -84,7 +133,7 @@ export function RecordItemValue({
           {labelContent}
         </h4>
         {(linkedRecord == null || fields == null) && <Loader />}
-        {(linkedRecord && fields) && (
+        {(linkedRecord && fields && openRecord) && (
           <LinkedRecordItem
             label={<>{item.name.toUpperCase()}: {item.value}</>}
             record={linkedRecord}
@@ -95,7 +144,24 @@ export function RecordItemValue({
     );
   }
 
-  if (item.isPii && !item.includePii) {
+  if (inputType !== 'Manual Input') {
+    return (
+      <Input
+        type="text"
+        id={item.name}
+        label={labelContent}
+        name={item.name}
+        value={inputType}
+        className="w-full flex items-center"
+        rootClassName="mb-8"
+        inputClassName="text-gray-500 uppercase"
+        readOnly
+        disabled
+      />
+    );
+  }
+
+  if (item.isPii && !includePii && !addRecord) {
     return (
       <Input
         type="password"
@@ -207,14 +273,20 @@ export function RecordItemValue({
       );
     default: {
       let type = 'text';
+      let curValue = item.value;
 
       if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
         type = 'number';
+        if (curValue != null) curValue = Number(curValue);
       } else if (fieldType.name === FieldType.URL) {
         type = 'url';
+        if (curValue != null) curValue = String(curValue);
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
+        if (curValue != null) curValue = String(curValue);
       }
+
+      if (curValue == null) curValue = '';
 
       return (
         <Input
@@ -222,7 +294,7 @@ export function RecordItemValue({
           id={item.name}
           label={labelContent}
           name={item.name}
-          value={item.value || ''}
+          value={curValue}
           onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"
@@ -235,6 +307,8 @@ export function RecordItemValue({
 
 RecordItemValue.propTypes = {
   item: PropTypes.object.isRequired,
+  includePii: PropTypes.bool,
+  addRecord: PropTypes.bool,
   fieldTypes: PropTypes.array.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
   openRecord: PropTypes.func.isRequired,

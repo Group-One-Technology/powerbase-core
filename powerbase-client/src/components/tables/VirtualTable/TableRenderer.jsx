@@ -18,20 +18,29 @@ import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
+import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
 import { CellRenderer } from './CellRenderer';
 
 export function TableRenderer({
-  height, table, highlightedCell,
+  height,
+  table,
+  records,
+  setRecords,
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { baseUser } = useBaseUser();
   const { data: base } = useBase();
-  const { data: remoteRecords, loadMore: loadMoreRows, isLoading } = useTableRecords();
+  const {
+    data: remoteRecords,
+    loadMore: loadMoreRows,
+    isLoading,
+    highlightedCell,
+  } = useTableRecords();
   const {
     initialFields,
     fields,
@@ -47,8 +56,6 @@ export function TableRenderer({
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState();
-  const [isNewRecord, setIsNewRecord] = useState(false);
-  const [records, setRecords] = useState(remoteRecords);
 
   const {
     isEditing,
@@ -58,6 +65,12 @@ export function TableRenderer({
     recordInputRef,
     handleExitEditing,
   } = useEditingCell({ records, setRecords });
+  const {
+    isAddRecord,
+    showAddRecord,
+    handleValueChange,
+    handleAddRecord,
+  } = useAddRecord({ table, records, setRecords });
 
   const recomputeGrid = () => {
     headerGridRef.current.forceUpdate();
@@ -67,7 +80,6 @@ export function TableRenderer({
   };
 
   useDidMountEffect(() => {
-    setRecords(remoteRecords);
     recomputeGrid();
   }, [remoteRecords]);
 
@@ -212,10 +224,12 @@ export function TableRenderer({
                           setRecords,
                           singleCellRef,
                           table,
-                          isNewRecord,
-                          setIsNewRecord,
+                          isAddRecord,
+                          showAddRecord,
                           isEditable,
                           handleExitEditing,
+                          handleValueChange,
+                          handleAddRecord,
                           ...props,
                         });
                       }}
@@ -259,5 +273,6 @@ export function TableRenderer({
 TableRenderer.propTypes = {
   height: PropTypes.number.isRequired,
   table: ITable.isRequired,
-  highlightedCell: PropTypes.string,
+  records: PropTypes.array,
+  setRecords: PropTypes.func.isRequired,
 };

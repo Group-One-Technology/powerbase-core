@@ -42,6 +42,15 @@ export async function addMagicRecord(payload) {
   return undefined;
 }
 
+export async function addRecord({ tableId, primaryKeys, data }) {
+  const response = await securedApi.post(`tables/${tableId}/add_record`, {
+    primary_keys: primaryKeys,
+    data,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function updateRecord({ tableId, primaryKeys, data }) {
   const response = await securedApi.put(`tables/${tableId}/update_record`, {
     primary_keys: primaryKeys,
