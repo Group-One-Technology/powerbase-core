@@ -121,14 +121,6 @@ class PowerbaseDatabase < ApplicationRecord
     SyncDatabaseWorker.perform_async(self.id, new_connection)
   end
 
-  def has_row_oid_support?
-    begin
-      db_version < 12
-    rescue
-      false
-    end
-  end
-
   def db_version
     if postgresql?
       sequel_connect(self) {|db| db.server_version/10000 }

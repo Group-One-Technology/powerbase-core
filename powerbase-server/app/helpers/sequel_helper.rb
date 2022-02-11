@@ -4,18 +4,11 @@ module SequelHelper
 
   def sequel_get_records(db, table_name)
     @db ||= db
-    table = db.from(table_name.to_sym)
-    table.select(*default_table_select)
+    db.from(table_name.to_sym)
   end
 
   def db
     @db
-  end
-
-  def default_table_select(adapter = @db.try(:adapter), has_row_oid_support = false)
-    table_select = [ Sequel.lit("*") ]
-    table_select << Sequel.lit("oid") if adapter.to_s.include?("postgres") && has_row_oid_support
-    table_select
   end
 
   def new_db(connection_string)

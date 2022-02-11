@@ -1,5 +1,5 @@
 namespace :database do
-  task auto_sync: :environment do 
+  task auto_sync: :environment do
     puts "Enabling auto sync.."
 
     PowerbaseDatabase.turbo.each do |db|
@@ -12,9 +12,6 @@ namespace :database do
         puts " -- Adding notifier to tables"
 
         db.tables.find_each do|table|
-          # Add oid
-          table.inject_oid if db.has_row_oid_support?
-
           # Inject notifier trigger
           table.inject_notifier_trigger
         end
