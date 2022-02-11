@@ -93,9 +93,9 @@ export function CellMenu({
       >
         {children}
       </ContextMenu.Trigger>
-      <ContextMenu.Content align="start" className="py-2 block overflow-hidden rounded-lg shadow-lg bg-white text-gray-900 ring-1 ring-black ring-opacity-5 w-60">
+      <ContextMenu.Content align="start" className="block overflow-hidden rounded shadow bg-gray-800 text-white ring-1 ring-black ring-opacity-5 w-60">
         <ContextMenu.Item
-          className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
+          className="p-2.5 text-sm flex items-center cursor-pointer hover:bg-gray-700 focus:bg-gray-700"
           onSelect={handleDelete}
           disabled={loading}
         >
