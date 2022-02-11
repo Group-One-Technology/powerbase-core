@@ -54,6 +54,9 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
       when "UPDATE"
+        # Adds half second delay to wait for update changes to reflect on db before querying.
+        sleep 0.5
+
         # Query get record
         records = sequel_get_records(database, table_name)
         record = records.where(primary_key_value.symbolize_keys).first
