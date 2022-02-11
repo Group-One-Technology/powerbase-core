@@ -363,7 +363,7 @@ export function BaseSingleRecordModal({
                 disabled={loading}
               >
                 <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                <span className="sr-only">Delete</span>
+                <span className="sr-only">Delete Record</span>
               </Button>
               <Button
                 type="button"

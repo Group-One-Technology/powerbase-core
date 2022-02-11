@@ -6,6 +6,7 @@ import { FieldType } from '@lib/constants/field-types';
 import { OutsideCellClick } from '@components/ui/OutsideCellClick';
 import { Wrapper } from '@components/ui/Wrappper';
 import { EditCell } from './GridCell/EditCell';
+import { CellMenu } from './GridCell/CellMenu';
 import { CellValue } from './GridCell/CellValue';
 import { CellInput } from './GridCell/CellInput';
 
@@ -29,6 +30,7 @@ export function CellRenderer({
   cellToEdit,
   setCellToEdit,
   records,
+  setRecords,
   table,
   isAddRecord,
   isHighlighted,
@@ -162,27 +164,34 @@ export function CellRenderer({
       onMouseLeave={handleMouseLeave}
       suppressContentEditableWarning
     >
-      <CellValue
-        value={value}
-        isLoaded={isLoaded}
-        isRowNo={isRowNo}
-        isHoveredRow={isHoveredRow}
-        isLastRow={isLastRow}
-        field={field}
-        fieldType={fieldType}
-        handleExpandRecord={handleExpandRecord}
+      <CellMenu
         table={table}
         rowIndex={rowIndex}
-        columnIndex={columnIndex}
-        setIsEditing={setIsEditing}
-        setCellToEdit={setCellToEdit}
-        isAddRecord={isAddRecord}
-        setHoveredCell={setHoveredCell}
         records={records}
-        handleChange={(updatedValue) => onExitEditing(updatedValue)}
-        showAddRecord={showAddRecord}
-        handleAddRecord={handleAddRecord}
-      />
+        setRecords={setRecords}
+      >
+        <CellValue
+          value={value}
+          isLoaded={isLoaded}
+          isRowNo={isRowNo}
+          isHoveredRow={isHoveredRow}
+          isLastRow={isLastRow}
+          field={field}
+          fieldType={fieldType}
+          handleExpandRecord={handleExpandRecord}
+          table={table}
+          rowIndex={rowIndex}
+          columnIndex={columnIndex}
+          setIsEditing={setIsEditing}
+          setCellToEdit={setCellToEdit}
+          isAddRecord={isAddRecord}
+          setHoveredCell={setHoveredCell}
+          records={records}
+          handleChange={(updatedValue) => onExitEditing(updatedValue)}
+          showAddRecord={showAddRecord}
+          handleAddRecord={handleAddRecord}
+        />
+      </CellMenu>
     </div>
   );
 }
@@ -208,6 +217,7 @@ CellRenderer.propTypes = {
   cellToEdit: PropTypes.object,
   setCellToEdit: PropTypes.func.isRequired,
   records: PropTypes.array.isRequired,
+  setRecords: PropTypes.func.isRequired,
   table: PropTypes.object.isRequired,
   isAddRecord: PropTypes.bool,
   isEditable: PropTypes.bool,
