@@ -19,6 +19,7 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
 import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
+import { FieldType } from '@lib/constants/field-types';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -187,11 +188,16 @@ export function TableRenderer({
                       onRowsRendered={onRowsRendered}
                       cellRenderer={({ rowIndex, columnIndex, ...props }) => {
                         const field = fields[columnIndex - 1];
+                        const fieldType = field?.fieldTypeId
+                          ? fieldTypes?.find((item) => item.id.toString() === field.fieldTypeId.toString())
+                          : undefined;
                         const isRowNo = columnIndex === 0;
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
-                        const isEditable = !isLastRow && !isRowNo && baseUser?.can(PERMISSIONS.EditFieldData, field);
+                        const isEditable = !isLastRow && !isRowNo && field && baseUser?.can(PERMISSIONS.EditFieldData, field)
+                          && !(field?.isPrimaryKey || field?.isForeignKey)
+                          && fieldType != null && FieldType.CHECKBOX !== fieldType.name;
 
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
@@ -211,7 +217,7 @@ export function TableRenderer({
                           isHoveredRow,
                           field,
                           isRowNo,
-                          fieldTypes,
+                          fieldType,
                           handleExpandRecord: isRowNo
                             ? handleExpandRecord
                             : undefined,
