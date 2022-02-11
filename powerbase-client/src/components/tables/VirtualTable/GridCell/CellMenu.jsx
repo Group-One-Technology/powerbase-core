@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import { TrashIcon } from '@heroicons/react/outline';
@@ -12,10 +12,14 @@ import { deleteRecord } from '@lib/api/records';
 
 export function CellMenu({
   rowIndex,
+  columnIndex,
   table,
   records,
   setRecords,
+  setHoveredCell,
   children,
+  onEditCell,
+  ...props
 }) {
   const { mounted } = useMounted();
   const { data: viewFields } = useViewFields();
@@ -24,6 +28,21 @@ export function CellMenu({
   } = useSaveStatus();
   const { mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
+
+  const [open, setOpen] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHoveredCell({ row: rowIndex, column: columnIndex });
+  };
+
+  const handleOpenChange = (value) => {
+    setOpen(value);
+    if (value) {
+      setHoveredCell({ row: rowIndex, column: columnIndex });
+    } else {
+      setHoveredCell({});
+    }
+  };
 
   const handleDelete = async () => {
     if (!table.hasPrimaryKey) return;
@@ -45,6 +64,7 @@ export function CellMenu({
     })
       .filter((item) => item);
 
+    setOpen(false);
     setRecords(updatedRecords);
 
     try {
@@ -59,11 +79,21 @@ export function CellMenu({
   };
 
   return (
-    <ContextMenu.Root>
-      <ContextMenu.Trigger>
+    <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
+      <ContextMenu.Trigger
+        role="button"
+        id={`row-${rowIndex}_col-${columnIndex}`}
+        tabIndex={0}
+        onMouseEnter={handleMouseEnter}
+        onDoubleClick={onEditCell}
+        onKeyDown={(evt) => {
+          if (evt.code === 'Enter') onEditCell();
+        }}
+        {...props}
+      >
         {children}
       </ContextMenu.Trigger>
-      <ContextMenu.Content align="start" alignOffset={20} className="py-2 block overflow-hidden rounded-lg shadow-lg bg-white text-gray-900 ring-1 ring-black ring-opacity-5 w-60">
+      <ContextMenu.Content align="start" className="py-2 block overflow-hidden rounded-lg shadow-lg bg-white text-gray-900 ring-1 ring-black ring-opacity-5 w-60">
         <ContextMenu.Item
           className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
           onSelect={handleDelete}
@@ -79,8 +109,11 @@ export function CellMenu({
 
 CellMenu.propTypes = {
   rowIndex: PropTypes.number.isRequired,
+  columnIndex: PropTypes.number.isRequired,
   table: PropTypes.object.isRequired,
   children: PropTypes.any.isRequired,
   records: PropTypes.array.isRequired,
   setRecords: PropTypes.func.isRequired,
+  setHoveredCell: PropTypes.func.isRequired,
+  onEditCell: PropTypes.func.isRequired,
 };

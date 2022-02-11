@@ -59,14 +59,6 @@ export function CellRenderer({
     updatedValue,
   });
 
-  const handleMouseEnter = () => {
-    setHoveredCell({ row: rowIndex, column: columnIndex });
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredCell({});
-  };
-
   const handleEditCell = () => {
     if (!isEditable) return;
     setIsEditing(true);
@@ -124,49 +116,40 @@ export function CellRenderer({
   }
 
   return (
-    <div
-      role="button"
-      id={`row-${rowIndex}_col-${columnIndex}`}
+    <CellMenu
       key={key}
+      table={table}
+      rowIndex={rowIndex}
+      columnIndex={columnIndex}
+      records={records}
+      setRecords={setRecords}
+      setHoveredCell={setHoveredCell}
+      onEditCell={handleEditCell}
       className={className}
       style={style}
-      tabIndex={0}
-      onDoubleClick={handleEditCell}
-      onKeyDown={(evt) => {
-        if (evt.code === 'Enter') handleEditCell();
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
-      <CellMenu
+      <CellValue
+        value={value}
+        isLoaded={isLoaded}
+        isRowNo={isRowNo}
+        isHoveredRow={isHoveredRow}
+        isLastRow={isLastRow}
+        field={field}
+        fieldType={fieldType}
+        handleExpandRecord={handleExpandRecord}
         table={table}
         rowIndex={rowIndex}
+        columnIndex={columnIndex}
+        setIsEditing={setIsEditing}
+        setCellToEdit={setCellToEdit}
+        isAddRecord={isAddRecord}
+        setHoveredCell={setHoveredCell}
         records={records}
-        setRecords={setRecords}
-      >
-        <CellValue
-          value={value}
-          isLoaded={isLoaded}
-          isRowNo={isRowNo}
-          isHoveredRow={isHoveredRow}
-          isLastRow={isLastRow}
-          field={field}
-          fieldType={fieldType}
-          handleExpandRecord={handleExpandRecord}
-          table={table}
-          rowIndex={rowIndex}
-          columnIndex={columnIndex}
-          setIsEditing={setIsEditing}
-          setCellToEdit={setCellToEdit}
-          isAddRecord={isAddRecord}
-          setHoveredCell={setHoveredCell}
-          records={records}
-          handleChange={(updatedValue) => onExitEditing(updatedValue)}
-          showAddRecord={showAddRecord}
-          handleAddRecord={handleAddRecord}
-        />
-      </CellMenu>
-    </div>
+        handleChange={(updatedValue) => onExitEditing(updatedValue)}
+        showAddRecord={showAddRecord}
+        handleAddRecord={handleAddRecord}
+      />
+    </CellMenu>
   );
 }
 
