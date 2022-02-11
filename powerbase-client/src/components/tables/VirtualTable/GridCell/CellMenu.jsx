@@ -9,6 +9,7 @@ import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useTableRecords } from '@models/TableRecords';
 import { useMounted } from '@lib/hooks/useMounted';
 import { deleteRecord } from '@lib/api/records';
+import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 
 export function CellMenu({
   rowIndex,
@@ -30,6 +31,11 @@ export function CellMenu({
   const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
 
   const [open, setOpen] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: 'Delete Record',
+    description: 'Are you sure you want to delete this record? This action cannot be undone.',
+  });
 
   const handleMouseEnter = () => {
     setHoveredCell({ row: rowIndex, column: columnIndex });
@@ -44,7 +50,11 @@ export function CellMenu({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteRecord = () => {
+    setConfirmModal((val) => ({ ...val, open: true }));
+  };
+
+  const confirmDeleteRecord = async () => {
     if (!table.hasPrimaryKey) return;
 
     saving();
@@ -58,14 +68,10 @@ export function CellMenu({
         ...keys,
         [item.name]: item.value,
       }), {});
-    const updatedRecords = records.map((curRecord) => {
-      const isNotFound = Object.keys(primaryKeys).some((key) => primaryKeys[key] !== curRecord[key]);
-      return isNotFound ? curRecord : null;
-    })
-      .filter((item) => item);
+    const updatedRecords = records.filter((curRecord, index) => index !== rowIndex);
 
-    setOpen(false);
     setRecords(updatedRecords);
+    setConfirmModal((val) => ({ ...val, open: false }));
 
     try {
       await deleteRecord({ tableId: table.id, primaryKeys });
@@ -79,31 +85,44 @@ export function CellMenu({
   };
 
   return (
-    <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
-      <ContextMenu.Trigger
-        role="button"
-        id={`row-${rowIndex}_col-${columnIndex}`}
-        tabIndex={0}
-        onMouseEnter={handleMouseEnter}
-        onDoubleClick={onEditCell}
-        onKeyDown={(evt) => {
-          if (evt.code === 'Enter') onEditCell();
-        }}
-        {...props}
-      >
-        {children}
-      </ContextMenu.Trigger>
-      <ContextMenu.Content align="start" className="block overflow-hidden rounded shadow bg-gray-800 text-white ring-1 ring-black ring-opacity-5 w-60">
-        <ContextMenu.Item
-          className="p-2.5 text-sm flex items-center cursor-pointer hover:bg-gray-700 focus:bg-gray-700"
-          onSelect={handleDelete}
-          disabled={loading}
+    <>
+      <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
+        <ContextMenu.Trigger
+          role="button"
+          id={`row-${rowIndex}_col-${columnIndex}`}
+          tabIndex={0}
+          onMouseEnter={handleMouseEnter}
+          onDoubleClick={onEditCell}
+          onKeyDown={(evt) => {
+            if (evt.code === 'Enter') onEditCell();
+          }}
+          {...props}
         >
-          <TrashIcon className="h-4 w-4 mr-1.5" />
-          Delete Record
-        </ContextMenu.Item>
-      </ContextMenu.Content>
-    </ContextMenu.Root>
+          {children}
+        </ContextMenu.Trigger>
+        <ContextMenu.Content align="start" className="block overflow-hidden rounded shadow bg-gray-800 text-white ring-1 ring-black ring-opacity-5 w-60">
+          <ContextMenu.Item
+            className="p-2.5 text-sm flex items-center cursor-pointer hover:bg-gray-700 focus:bg-gray-700"
+            onSelect={handleDeleteRecord}
+            disabled={loading}
+          >
+            <TrashIcon className="h-4 w-4 mr-1.5" />
+            Delete Record
+          </ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Root>
+
+      {confirmModal.open && (
+        <ConfirmationModal
+          open={confirmModal.open}
+          setOpen={(value) => setConfirmModal((curVal) => ({ ...curVal, open: value }))}
+          title={confirmModal.title}
+          description={confirmModal.description}
+          onConfirm={confirmDeleteRecord}
+          loading={loading}
+        />
+      )}
+    </>
   );
 }
 
