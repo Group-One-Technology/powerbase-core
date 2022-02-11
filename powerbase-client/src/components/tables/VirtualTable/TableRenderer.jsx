@@ -52,7 +52,6 @@ export function TableRenderer({
 
   const recordsGridRef = useRef(null);
   const headerGridRef = useRef(null);
-  const singleCellRef = useRef();
 
   const [hoveredCell, setHoveredCell] = useState({ row: null, column: null });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -228,7 +227,6 @@ export function TableRenderer({
                           setCellToEdit,
                           records,
                           setRecords,
-                          singleCellRef,
                           table,
                           isAddRecord,
                           showAddRecord,

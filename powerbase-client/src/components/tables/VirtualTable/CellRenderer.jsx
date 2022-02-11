@@ -5,6 +5,7 @@ import cn from 'classnames';
 import { FieldType } from '@lib/constants/field-types';
 import { CellValue } from './GridCell/CellValue';
 import { CellInput } from './GridCell/CellInput';
+import { CellMenu } from './GridCell/CellMenu';
 
 export function CellRenderer({
   key,
@@ -25,6 +26,7 @@ export function CellRenderer({
   cellToEdit,
   setCellToEdit,
   records,
+  setRecords,
   table,
   isAddRecord,
   isHighlighted,
@@ -56,14 +58,6 @@ export function CellRenderer({
     fieldType,
     updatedValue,
   });
-
-  const handleMouseEnter = () => {
-    setHoveredCell({ row: rowIndex, column: columnIndex });
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredCell({});
-  };
 
   const handleEditCell = () => {
     if (!isEditable) return;
@@ -122,19 +116,17 @@ export function CellRenderer({
   }
 
   return (
-    <div
-      role="button"
-      id={`row-${rowIndex}_col-${columnIndex}`}
+    <CellMenu
       key={key}
+      table={table}
+      rowIndex={rowIndex}
+      columnIndex={columnIndex}
+      records={records}
+      setRecords={setRecords}
+      setHoveredCell={setHoveredCell}
+      onEditCell={handleEditCell}
       className={className}
       style={style}
-      tabIndex={0}
-      onDoubleClick={handleEditCell}
-      onKeyDown={(evt) => {
-        if (evt.code === 'Enter') handleEditCell();
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <CellValue
         value={value}
@@ -157,7 +149,7 @@ export function CellRenderer({
         showAddRecord={showAddRecord}
         handleAddRecord={handleAddRecord}
       />
-    </div>
+    </CellMenu>
   );
 }
 
@@ -181,6 +173,7 @@ CellRenderer.propTypes = {
   cellToEdit: PropTypes.object,
   setCellToEdit: PropTypes.func.isRequired,
   records: PropTypes.array.isRequired,
+  setRecords: PropTypes.func.isRequired,
   table: PropTypes.object.isRequired,
   isAddRecord: PropTypes.bool,
   isEditable: PropTypes.bool,
