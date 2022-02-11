@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import RelativePortal from 'react-relative-portal';
@@ -11,6 +11,7 @@ export function CellInput({
   fieldType,
   value: initialValue,
   onValueChange,
+  onSubmit,
   isAddRecord,
   className,
   style,
@@ -18,19 +19,49 @@ export function CellInput({
   const rootInputRef = useRef();
   const inputRef = useRef();
   const [value, setValue] = useState(initialValue);
-  const [focus, setFocus] = useState(false);
+  const [focus, setFocus] = useState(!isAddRecord);
 
   const updateValue = (updatedValue) => {
     setValue(updatedValue);
-    onValueChange(field.fieldId, updatedValue);
+    if (onValueChange) onValueChange(field.fieldId, updatedValue);
   };
 
-  useDidMountEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+  const handleBlur = () => {
+    setFocus(false);
+    if (onSubmit) onSubmit(initialValue, value);
+  };
+
+  const handleKeyDown = (evt) => {
+    if (evt.code === 'Enter' && !evt.shiftKey && onSubmit) onSubmit(initialValue, value);
+
+    if ([FieldType.JSON_TEXT, FieldType.LONG_TEXT].includes(fieldType.name)) {
+      // Add keyboard focus accessibility for tab and shift-tab
+      if (evt.code === 'Tab') {
+        evt.preventDefault();
+
+        const focusableElementSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        if (evt.shiftKey) {
+          setFocus(false);
+          const focusableElements = rootInputRef.current?.parentElement.previousSibling.querySelectorAll(focusableElementSelector);
+          if (focusableElements)focusableElements[0].focus();
+        } else {
+          setFocus(false);
+          const focusableElements = rootInputRef.current?.parentElement.nextSibling.querySelectorAll(focusableElementSelector);
+          if (focusableElements)focusableElements[0].focus();
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (onSubmit) setFocus(true);
+    if ([FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name)) {
+      inputRef.current?.focus();
+    }
+  }, [onSubmit]);
 
   useDidMountEffect(() => {
-    if ((fieldType.name === FieldType.LONG_TEXT || fieldType.name === FieldType.JSON_TEXT) && focus) {
+    if ([FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name) && focus) {
       inputRef.current?.focus();
     }
   }, [focus]);
@@ -62,13 +93,14 @@ export function CellInput({
         <>
           <input
             ref={rootInputRef}
-            onFocus={() => setFocus(true)}
             value={value}
+            onFocus={() => setFocus(true)}
             className={cn(
               'absolute text-sm items-center py-1 px-2 border-none',
               isAddRecord && 'bg-green-50',
               className,
             )}
+            readOnly
           />
           <RelativePortal
             component="div"
@@ -85,23 +117,8 @@ export function CellInput({
                   isAddRecord && 'bg-green-50',
                   className,
                 )}
-                onBlur={() => setFocus(false)}
-                onKeyDown={(evt) => {
-                  // Add keyboard focus accessibility for tab and shift-tab
-                  if (evt.code === 'Tab') {
-                    evt.preventDefault();
-
-                    if (evt.shiftKey) {
-                      const focusableElements = rootInputRef.current?.parentElement.previousSibling.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-                      focusableElements[0].focus();
-                      setFocus(false);
-                    } else {
-                      const focusableElements = rootInputRef.current?.parentElement.nextSibling.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-                      focusableElements[0].focus();
-                      setFocus(false);
-                    }
-                  }
-                }}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
                 value={value}
                 rows={3}
                 style={{ width: style?.width, height: 'auto' }}
@@ -134,11 +151,15 @@ export function CellInput({
           name={field.name}
           value={value}
           onChange={(evt) => updateValue(evt.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
           className={cn(
             'h-full w-full text-sm items-center py-1 px-2 border-none',
             isAddRecord && 'bg-green-50',
             className,
           )}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={focus}
         />
       );
     }
@@ -149,7 +170,8 @@ CellInput.propTypes = {
   field: PropTypes.object.isRequired,
   fieldType: PropTypes.object.isRequired,
   value: PropTypes.any,
-  onValueChange: PropTypes.func.isRequired,
+  onValueChange: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
   isAddRecord: PropTypes.bool,
   className: PropTypes.string,
   style: PropTypes.object,
