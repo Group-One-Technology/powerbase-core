@@ -28,14 +28,10 @@ export function CellMenu({
     saved, saving, catchError, loading,
   } = useSaveStatus();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
+  const { mutate: mutateTableRecordsCount, setTotalRecords } = useTableRecordsCount();
 
   const [open, setOpen] = useState(false);
-  const [confirmModal, setConfirmModal] = useState({
-    open: false,
-    title: 'Delete Record',
-    description: 'Are you sure you want to delete this record? This action cannot be undone.',
-  });
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const handleMouseEnter = () => {
     setHoveredCell({ row: rowIndex, column: columnIndex });
@@ -51,7 +47,7 @@ export function CellMenu({
   };
 
   const handleDeleteRecord = () => {
-    setConfirmModal((val) => ({ ...val, open: true }));
+    setConfirmModalOpen(true);
   };
 
   const confirmDeleteRecord = async () => {
@@ -70,8 +66,9 @@ export function CellMenu({
       }), {});
     const updatedRecords = records.filter((curRecord, index) => index !== rowIndex);
 
+    setTotalRecords(updatedRecords.length);
     setRecords(updatedRecords);
-    setConfirmModal((val) => ({ ...val, open: false }));
+    setConfirmModalOpen(false);
 
     try {
       await deleteRecord({ tableId: table.id, primaryKeys });
@@ -79,7 +76,10 @@ export function CellMenu({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {
-      mounted(() => setRecords(records));
+      mounted(() => {
+        setTotalRecords(records.length);
+        setRecords(records);
+      });
       catchError(err.response.data.exception || err.response.data.error);
     }
   };
@@ -112,12 +112,12 @@ export function CellMenu({
         </ContextMenu.Content>
       </ContextMenu.Root>
 
-      {confirmModal.open && (
+      {confirmModalOpen && (
         <ConfirmationModal
-          open={confirmModal.open}
-          setOpen={(value) => setConfirmModal((curVal) => ({ ...curVal, open: value }))}
-          title={confirmModal.title}
-          description={confirmModal.description}
+          open={confirmModalOpen}
+          setOpen={(value) => setConfirmModalOpen(value)}
+          title="Delete Record"
+          description="Are you sure you want to delete this record? This action cannot be undone."
           onConfirm={confirmDeleteRecord}
           loading={loading}
         />
