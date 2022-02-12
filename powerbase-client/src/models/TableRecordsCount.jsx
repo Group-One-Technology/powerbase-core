@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import constate from 'constate';
 import useSWR from 'swr';
 
@@ -26,9 +27,16 @@ function useTableRecordsCountModel({ id, isVirtual }) {
       : undefined),
   );
 
+  const [totalRecords, setTotalRecords] = useState(response.data?.count);
+
+  useEffect(() => {
+    setTotalRecords(response.data?.count);
+  }, [response.data]);
+
   return {
     ...response,
-    data: response.data?.count,
+    data: totalRecords,
+    setTotalRecords,
   };
 }
 

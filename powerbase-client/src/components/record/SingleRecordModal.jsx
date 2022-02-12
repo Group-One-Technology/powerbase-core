@@ -27,6 +27,7 @@ import { deleteRecord, updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
+import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { RecordItem } from './RecordItem';
 import { RecordItemValue } from './RecordItem/RecordItemValue';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
@@ -46,13 +47,14 @@ export function BaseSingleRecordModal({
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
-  const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
+  const { setTotalRecords, mutate: mutateTableRecordsCount } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
 
   const [record, setRecord] = useState(initialRecord);
   const [loading, setLoading] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
   const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
@@ -97,7 +99,11 @@ export function BaseSingleRecordModal({
     });
   };
 
-  const handleDelete = async () => {
+  const handleDeleteRecord = () => {
+    setConfirmModalOpen(true);
+  };
+
+  const confirmDeleteRecord = async () => {
     if (!table.hasPrimaryKey) return;
 
     saving();
@@ -114,8 +120,10 @@ export function BaseSingleRecordModal({
     })
       .filter((item) => item);
 
-    setRecords(updatedRecords);
     setOpen(false);
+    setConfirmModalOpen(false);
+    setTotalRecords(updatedRecords.length);
+    setRecords(updatedRecords);
 
     try {
       await deleteRecord({ tableId: table.id, primaryKeys });
@@ -123,7 +131,10 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully deleted record in table ${table.alias}.`);
     } catch (err) {
-      mounted(() => setRecords(records));
+      mounted(() => {
+        setTotalRecords(records.length);
+        setRecords(records);
+      });
       catchError(err.response.data.exception || err.response.data.error);
     }
 
@@ -359,7 +370,7 @@ export function BaseSingleRecordModal({
               <Button
                 type="button"
                 className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-red-400 bg-white hover:bg-red-300 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
-                onClick={handleDelete}
+                onClick={handleDeleteRecord}
                 disabled={loading}
               >
                 <TrashIcon className="h-5 w-5" aria-hidden="true" />
@@ -383,6 +394,7 @@ export function BaseSingleRecordModal({
             </div>
           )}
         </form>
+
         {linkedRecord.open && linkedRecord.record && (
           <TableConnectionsProvider tableId={linkedRecord.table.id}>
             <TableReferencedConnectionsProvider tableId={linkedRecord.table.id}>
@@ -395,6 +407,16 @@ export function BaseSingleRecordModal({
               />
             </TableReferencedConnectionsProvider>
           </TableConnectionsProvider>
+        )}
+        {confirmModalOpen && (
+          <ConfirmationModal
+            open={confirmModalOpen}
+            setOpen={(value) => setConfirmModalOpen(value)}
+            title="Delete Record"
+            description="Are you sure you want to delete this record? This action cannot be undone."
+            onConfirm={confirmDeleteRecord}
+            loading={loading}
+          />
         )}
       </div>
     </Modal>
