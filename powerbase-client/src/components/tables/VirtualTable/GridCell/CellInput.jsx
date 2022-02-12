@@ -171,7 +171,7 @@ CellInput.propTypes = {
   fieldType: PropTypes.object.isRequired,
   value: PropTypes.any,
   onValueChange: PropTypes.func,
-  onSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func,
   isAddRecord: PropTypes.bool,
   className: PropTypes.string,
   style: PropTypes.object,

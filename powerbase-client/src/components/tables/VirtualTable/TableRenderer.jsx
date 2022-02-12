@@ -108,7 +108,7 @@ export function TableRenderer({
     if (
       !isLoading
       && stop + 100 > records.length
-      && records.length - 1 !== totalRecords
+      && records.length < totalRecords
     ) {
       loadMoreRows();
     }
