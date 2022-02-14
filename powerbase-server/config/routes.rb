@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     end
 
     member do
+      get 'connection_stats'
       put 'clear_logs'
       put 'update_database_permission', as: 'update_database_permission'
       put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_databases#update_allowed_roles'

@@ -4,7 +4,7 @@ class PowerbaseDatabasesController < ApplicationController
   before_action :check_database_access, only: [:update, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
-  schema(:show, :destroy, :clear_logs) do
+  schema(:show, :connection_stats, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
@@ -74,6 +74,15 @@ class PowerbaseDatabasesController < ApplicationController
     current_user.can?(:view_base, @database)
 
     render json: format_json(@database)
+  end
+
+  # GET /databases/:id/connection_stats
+  def connection_stats
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    current_user.can?(:manage_base, @database)
+    query = Databases::MetaQuery.new @database
+    render json: query.connection_stats
   end
 
   # PUT /databases/:id

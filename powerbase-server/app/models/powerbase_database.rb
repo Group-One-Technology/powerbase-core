@@ -114,7 +114,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def migration_name
-    "PendingTableMigration##{self.id}"
+    "PendingDatabaseMigration##{self.id}"
   end
 
   def sync!(new_connection = false)

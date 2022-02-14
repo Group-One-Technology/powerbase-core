@@ -41,18 +41,24 @@ export const BASE_SOURCES = [
   },
 ];
 
+export const DatabaseType = {
+  POSTGRESQL: 'postgresql',
+  MySQL: 'mysql2',
+  SQLITE: 'sqlite',
+};
+
 export const DATABASE_TYPES = [
-  { name: 'PostgreSQL', value: 'postgresql', port: 5432 },
+  { name: 'PostgreSQL', value: DatabaseType.POSTGRESQL, port: 5432 },
   {
     name: 'MySQL',
-    value: 'mysql2',
+    value: DatabaseType.MySQL,
     port: 3306,
     description: 'Coming Soon',
     disabled: true,
   },
   {
     name: 'SQLite',
-    value: 'sqlite',
+    value: DatabaseType.SQLITE,
     description: 'Coming Soon',
     disabled: true,
   },

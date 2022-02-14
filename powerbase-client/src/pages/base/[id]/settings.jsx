@@ -25,6 +25,7 @@ import { PageContent } from '@components/layout/PageContent';
 import { BaseCoreSettings } from '@components/bases/settings/BaseCoreSettings';
 import { BaseTablesSettings } from '@components/bases/settings/BaseTablesSettings';
 import { BaseConnectionsSettings } from '@components/bases/settings/BaseConnectionsSettings';
+import { BaseConnectionStatsProvider } from '@models/BaseConnectionStats';
 
 const TABS = [
   {
@@ -123,7 +124,9 @@ export function BaseSettingsPage() {
         <BaseUserProvider>
           <BaseTablesProvider id={id}>
             <BaseConnectionsProvider baseId={id}>
-              <BaseSettings />
+              <BaseConnectionStatsProvider baseId={id}>
+                <BaseSettings />
+              </BaseConnectionStatsProvider>
             </BaseConnectionsProvider>
           </BaseTablesProvider>
         </BaseUserProvider>
