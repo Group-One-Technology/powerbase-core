@@ -38,7 +38,11 @@ const ERROR_ICON = (
 export function BaseCoreSettings() {
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
-  const { data: activeConnections } = useBaseActiveConnections();
+  const {
+    data: activeConnections,
+    mutate: mutateActiveConnections,
+    isValidating: isActiveConnectionsValidating,
+  } = useBaseActiveConnections();
   const activeConnectionColumns = activeConnections != null
     ? Object.keys(activeConnections[0] || [])
     : undefined;
@@ -63,6 +67,10 @@ export function BaseCoreSettings() {
 
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
   const [loading, setLoading] = useState(false);
+
+  const handleRefreshActiveConnections = () => {
+    mutateActiveConnections();
+  };
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
@@ -233,10 +241,24 @@ export function BaseCoreSettings() {
 
       {activeConnectionColumns?.length > 0 && activeConnections?.length > 0 && (
         <div className="mt-16">
-          <h3 className="text-lg font-medium text-gray-900">Active Connections</h3>
-          <p className="my-1 text-sm text-gray-500">
-            Total active processes for {databaseName}: <strong>{activeConnections.length}</strong> process(es).
-          </p>
+          <div className="flex flex-col sm:flex-row sm:justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Active Connections</h3>
+              <p className="my-1 text-sm text-gray-500">
+                Total active processes for {databaseName}: <strong>{activeConnections.length}</strong> process(es).
+              </p>
+            </div>
+            <div className="my-1 flex items-center">
+              <Button
+                type="button"
+                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-900 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+                onClick={handleRefreshActiveConnections}
+                loading={isActiveConnectionsValidating}
+              >
+                Refresh
+              </Button>
+            </div>
+          </div>
           <div className="py-2 overflow-x-auto">
             <div className="align-middle inline-block min-w-full">
               <div className="overflow-hidden border border-gray-200 shadow sm:rounded-lg">
