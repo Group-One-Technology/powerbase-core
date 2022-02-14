@@ -7,15 +7,24 @@ class Databases::MetaQuery
     @database = database
   end
 
-  def active_connections
+  def connection_stats
     if database.postgresql?
       sequel_connect(database) do |db|
-        db.from(:pg_stat_activity)
+        list = {}
+        list[:active_connections] = db.from(:pg_stat_activity)
           .where(state: "active", datname: database.database_name)
+        list[:max_connections] = db.fetch("SHOW max_connections").first[:max_connections]
+        list
       end
     else
-      processes = sequel_connect(database) {|db| db.fetch("SHOW PROCESSLIST").all }
-      processes.select {|process| process[:db] == database.database_name}
+      sequel_connect(database) do |db|
+        list = {}
+        list[:active_connections] = db.fetch("SHOW PROCESSLIST").all
+          .select {|process| process[:db] == database.database_name}
+        list[:max_used_connections] = db.fetch("SHOW STATUS LIKE \"max_used_connections\"").first[:Value]
+        list[:max_connections] = db.fetch("SHOW VARIABLES LIKE \"max_connections\"").first[:Value]
+        list
+      end
     end
   end
 end

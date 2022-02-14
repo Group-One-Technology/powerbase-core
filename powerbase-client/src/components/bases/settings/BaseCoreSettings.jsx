@@ -8,7 +8,7 @@ import { updateDatabase } from '@lib/api/databases';
 import { DatabaseType, DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
-import { useBaseActiveConnections } from '@models/BaseActiveConnections';
+import { useBaseConnectionStats } from '@models/BaseConnectionStats';
 
 import { Button } from '@components/ui/Button';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
@@ -39,12 +39,12 @@ export function BaseCoreSettings() {
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
   const {
-    data: activeConnections,
-    mutate: mutateActiveConnections,
-    isValidating: isActiveConnectionsValidating,
-  } = useBaseActiveConnections();
-  const activeConnectionColumns = activeConnections != null
-    ? Object.keys(activeConnections[0] || [])
+    data: connectionStats,
+    mutate: mutateConnectionStats,
+    isValidating: isConnectionStatsValidating,
+  } = useBaseConnectionStats();
+  const activeConnectionColumns = connectionStats?.activeConnections != null
+    ? Object.keys(connectionStats.activeConnections[0] || [])
     : undefined;
 
   const [name, setName, nameError] = useValidState(
@@ -55,7 +55,7 @@ export function BaseCoreSettings() {
     base.databaseName,
     SQL_IDENTIFIER_VALIDATOR,
   );
-  const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
+  const [databaseType, setDatabaseType] = useState(DATABASE_TYPES.find((item) => item.value === base.adapter));
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
   const [username, setUsername] = useState('');
@@ -68,8 +68,8 @@ export function BaseCoreSettings() {
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
   const [loading, setLoading] = useState(false);
 
-  const handleRefreshActiveConnections = () => {
-    mutateActiveConnections();
+  const handleRefreshConnectionStats = () => {
+    mutateConnectionStats();
   };
 
   const handleSubmit = async (evt) => {
@@ -239,26 +239,49 @@ export function BaseCoreSettings() {
         </div>
       </form>
 
-      {activeConnectionColumns?.length > 0 && activeConnections?.length > 0 && (
+      {connectionStats && (
         <div className="mt-16">
           <div className="flex flex-col sm:flex-row sm:justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Active Connections</h3>
-              <p className="my-1 text-sm text-gray-500">
-                Total active processes for {databaseName}: <strong>{activeConnections.length}</strong> process(es).
-              </p>
+              <h4 className="text-lg font-medium text-gray-900">Connection Statistics</h4>
+              <ul className="my-1 text-sm text-gray-500">
+                {connectionStats.activeConnections != null && (
+                  <li>
+                    Total <strong>active processes</strong> for {databaseName}: <strong>{connectionStats.activeConnections.length}</strong> process(es).
+                  </li>
+                )}
+                {connectionStats.maxConnections != null && (
+                  <li>
+                    <strong>Max connections</strong> for {databaseName}: <strong>{connectionStats.maxConnections}</strong> connection(s).
+                  </li>
+                )}
+                {connectionStats.maxUsedConnections != null && (
+                  <li>
+                    <strong>Max used connections</strong> for {databaseName}: <strong>{connectionStats.maxUsedConnections}</strong> connection(s).
+                  </li>
+                )}
+              </ul>
             </div>
             <div className="my-1 flex items-center">
               <Button
                 type="button"
                 className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-900 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
-                onClick={handleRefreshActiveConnections}
-                loading={isActiveConnectionsValidating}
+                onClick={handleRefreshConnectionStats}
+                loading={isConnectionStatsValidating}
               >
                 Refresh
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {activeConnectionColumns?.length > 0 && connectionStats.activeConnections?.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-base font-medium text-gray-900">Active Connections</h4>
+          <p className="my-1 text-sm text-gray-500">
+            Total active processes for {databaseName}: <strong>{connectionStats.activeConnections.length}</strong> process(es).
+          </p>
           <div className="py-2 overflow-x-auto">
             <div className="align-middle inline-block min-w-full">
               <div className="overflow-hidden border border-gray-200 shadow sm:rounded-lg">
@@ -277,7 +300,7 @@ export function BaseCoreSettings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {activeConnections.map((connection, index) => {
+                    {connectionStats.activeConnections.map((connection, index) => {
                       const connectionKey = databaseType.value === DatabaseType.POSTGRESQL
                         ? `${connection.pid}-${connection.datid}`
                         : connection.id;
