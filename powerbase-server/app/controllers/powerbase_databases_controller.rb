@@ -82,7 +82,7 @@ class PowerbaseDatabasesController < ApplicationController
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
     current_user.can?(:manage_base, @database)
     query = Databases::MetaQuery.new @database
-    render json: { result: query.active_connections }
+    render json: query.active_connections
   end
 
   # PUT /databases/:id

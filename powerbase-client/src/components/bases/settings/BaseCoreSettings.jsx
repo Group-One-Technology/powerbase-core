@@ -8,6 +8,7 @@ import { updateDatabase } from '@lib/api/databases';
 import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
+import { useBaseActiveConnections } from '@models/BaseActiveConnections';
 
 import { Button } from '@components/ui/Button';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
@@ -37,6 +38,10 @@ const ERROR_ICON = (
 export function BaseCoreSettings() {
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
+  const { data: activeConnections } = useBaseActiveConnections();
+  const activeConnectionColumns = activeConnections != null
+    ? Object.keys(activeConnections[0] || [])
+    : undefined;
 
   const [name, setName, nameError] = useValidState(
     base.name,
@@ -225,6 +230,53 @@ export function BaseCoreSettings() {
           </Button>
         </div>
       </form>
+
+      {activeConnectionColumns?.length > 0 && activeConnections?.length > 0 && (
+        <div className="mt-16">
+          <h3 className="text-lg font-medium text-gray-900">Active Connections</h3>
+          <p className="my-1 text-sm text-gray-500">
+            List of active processes for <b>{databaseName}</b>.
+          </p>
+          <div className="py-2 overflow-x-auto">
+            <div className="align-middle inline-block min-w-full">
+              <div className="overflow-hidden border border-gray-200 shadow sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      {activeConnectionColumns.map((column) => (
+                        <th
+                          key={column}
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeConnections.map((connection, index) => (
+                      <tr
+                        key={connection.id}
+                        className={(index % 2 === 0) ? 'bg-gray-50' : 'bg-white'}
+                      >
+                        {activeConnectionColumns.map((column) => (
+                          <td
+                            key={column}
+                            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                          >
+                            {connection[column]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <StatusModal
         open={modal.open}
