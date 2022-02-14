@@ -16,6 +16,7 @@ import { InlineInput } from '@components/ui/InlineInput';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { StatusModal } from '@components/ui/StatusModal';
+import { Loader } from '@components/ui/Loader';
 import { DisconnectBase } from './DisconnectBase';
 
 const INITIAL_MODAL_VALUE = {
@@ -43,8 +44,8 @@ export function BaseCoreSettings() {
     mutate: mutateConnectionStats,
     isValidating: isConnectionStatsValidating,
   } = useBaseConnectionStats();
-  const activeConnectionColumns = connectionStats?.activeConnections != null
-    ? Object.keys(connectionStats.activeConnections[0] || [])
+  const activeConnectionColumns = connectionStats?.connections != null
+    ? Object.keys(connectionStats.connections[0] || [])
     : undefined;
 
   const [name, setName, nameError] = useValidState(
@@ -239,15 +240,15 @@ export function BaseCoreSettings() {
         </div>
       </form>
 
-      {connectionStats && (
-        <div className="mt-16">
-          <div className="flex flex-col sm:flex-row sm:justify-between">
-            <div>
-              <h4 className="text-lg font-medium text-gray-900">Connection Statistics</h4>
+      <div className="mt-16">
+        <div className="flex flex-col sm:flex-row sm:justify-between">
+          <div>
+            <h4 className="text-lg font-medium text-gray-900">Connection Statistics</h4>
+            {connectionStats && (
               <ul className="my-1 text-sm text-gray-500">
-                {connectionStats.activeConnections != null && (
+                {connectionStats.connections != null && (
                   <li>
-                    Total <strong>active processes</strong> for {databaseName}: <strong>{connectionStats.activeConnections.length}</strong> process(es).
+                    Total <strong>processes</strong> for {databaseName}: <strong>{connectionStats.connections.length}</strong> process(es).
                   </li>
                 )}
                 {connectionStats.maxConnections != null && (
@@ -261,73 +262,74 @@ export function BaseCoreSettings() {
                   </li>
                 )}
               </ul>
-            </div>
-            <div className="my-1 flex items-center">
-              <Button
-                type="button"
-                className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-900 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
-                onClick={handleRefreshConnectionStats}
-                loading={isConnectionStatsValidating}
-              >
-                Refresh
-              </Button>
-            </div>
+            )}
+          </div>
+          <div className="my-1 flex items-center">
+            <Button
+              type="button"
+              className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-gray-900 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+              onClick={handleRefreshConnectionStats}
+              loading={isConnectionStatsValidating}
+            >
+              Refresh
+            </Button>
           </div>
         </div>
-      )}
-
-      {activeConnectionColumns?.length > 0 && connectionStats.activeConnections?.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-base font-medium text-gray-900">Active Connections</h4>
-          <p className="my-1 text-sm text-gray-500">
-            Total active processes for {databaseName}: <strong>{connectionStats.activeConnections.length}</strong> process(es).
-          </p>
-          <div className="py-2 overflow-x-auto">
-            <div className="align-middle inline-block min-w-full">
-              <div className="overflow-hidden border border-gray-200 shadow sm:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      {activeConnectionColumns.map((column) => (
-                        <th
-                          key={column}
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                          {column}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {connectionStats.activeConnections.map((connection, index) => {
-                      const connectionKey = databaseType.value === DatabaseType.POSTGRESQL
-                        ? `${connection.pid}-${connection.datid}`
-                        : connection.id;
-
-                      return (
-                        <tr
-                          key={connectionKey}
-                          className={(index % 2 === 0) ? 'bg-gray-50' : 'bg-white'}
-                        >
+        {connectionStats
+          ? (
+            <div className="mt-4">
+              <h4 className="text-base font-medium text-gray-900">Connections</h4>
+              <div className="py-2 overflow-x-auto">
+                <div className="align-middle inline-block min-w-full">
+                  <div className="overflow-hidden border border-gray-200 shadow sm:rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
                           {activeConnectionColumns.map((column) => (
-                            <td
-                              key={`${connectionKey}-${column}`}
-                              className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                            <th
+                              key={column}
+                              scope="col"
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                             >
-                              {connection[column]}
-                            </td>
+                              {column}
+                            </th>
                           ))}
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {connectionStats.connections.map((connection, index) => {
+                          const connectionKey = databaseType.value === DatabaseType.POSTGRESQL
+                            ? `${connection.pid}-${connection.datid}`
+                            : connection.id;
+
+                          return (
+                            <tr
+                              key={connectionKey}
+                              className={(index % 2 === 0) ? 'bg-gray-50' : 'bg-white'}
+                            >
+                              {activeConnectionColumns.map((column) => (
+                                <td
+                                  key={`${connectionKey}-${column}`}
+                                  className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                                >
+                                  {connection[column]}
+                                </td>
+                              ))}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          ) : (
+            <div className="mt-4">
+              <Loader />
+            </div>
+          )}
+      </div>
 
       <StatusModal
         open={modal.open}
