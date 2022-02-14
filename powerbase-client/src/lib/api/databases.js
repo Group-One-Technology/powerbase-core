@@ -1,4 +1,4 @@
-import { securedApi } from './index';
+import { isResponseSuccess, securedApi } from './index';
 
 export async function connectDatabase({
   name,
@@ -24,11 +24,7 @@ export async function connectDatabase({
     isTurbo,
     color,
   });
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
@@ -44,60 +40,42 @@ export async function getDatabases() {
 
 export async function getSharedDatabases() {
   const response = await securedApi.get('/shared_databases');
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function getDatabase({ id }) {
   const response = await securedApi.get(`/databases/${id}`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
 
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+export async function getDatabaseActiveConnections({ id }) {
+  const response = await securedApi.get(`/databases/${id}/active_connections`);
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function updateDatabase({ id, ...payload }) {
   const response = await securedApi.put(`/databases/${id}`, payload);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function disconnectDatabase({ id }) {
   const response = await securedApi.delete(`/databases/${id}`);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function updateDatabasePermission({ id, ...payload }) {
   const response = await securedApi.put(`/databases/${id}/update_database_permission`, payload);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function updateDatabasePermissionAllowedRoles({ id, ...payload }) {
   const response = await securedApi.put(`/databases/${id}/allowed_roles`, payload);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
