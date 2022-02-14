@@ -5,7 +5,7 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { updateDatabase } from '@lib/api/databases';
-import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
+import { DatabaseType, DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
 import { useBaseActiveConnections } from '@models/BaseActiveConnections';
@@ -235,7 +235,7 @@ export function BaseCoreSettings() {
         <div className="mt-16">
           <h3 className="text-lg font-medium text-gray-900">Active Connections</h3>
           <p className="my-1 text-sm text-gray-500">
-            List of active processes for <b>{databaseName}</b>.
+            Total active processes for {databaseName}: <strong>{activeConnections.length}</strong> process(es).
           </p>
           <div className="py-2 overflow-x-auto">
             <div className="align-middle inline-block min-w-full">
@@ -255,21 +255,27 @@ export function BaseCoreSettings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {activeConnections.map((connection, index) => (
-                      <tr
-                        key={connection.id}
-                        className={(index % 2 === 0) ? 'bg-gray-50' : 'bg-white'}
-                      >
-                        {activeConnectionColumns.map((column) => (
-                          <td
-                            key={column}
-                            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                          >
-                            {connection[column]}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                    {activeConnections.map((connection, index) => {
+                      const connectionKey = databaseType.value === DatabaseType.POSTGRESQL
+                        ? `${connection.pid}-${connection.datid}`
+                        : connection.id;
+
+                      return (
+                        <tr
+                          key={connectionKey}
+                          className={(index % 2 === 0) ? 'bg-gray-50' : 'bg-white'}
+                        >
+                          {activeConnectionColumns.map((column) => (
+                            <td
+                              key={`${connectionKey}-${column}`}
+                              className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                            >
+                              {connection[column]}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
