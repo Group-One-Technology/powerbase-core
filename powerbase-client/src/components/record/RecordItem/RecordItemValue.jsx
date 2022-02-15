@@ -246,7 +246,7 @@ export function RecordItemValue({
               disabled && 'bg-gray-100 cursor-not-allowed',
             )}
             onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
-            value={JSON.stringify(item.value) || ''}
+            value={item.value.toString() || ''}
             disabled={disabled}
           />
         </div>
