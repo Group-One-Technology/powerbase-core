@@ -2,21 +2,18 @@ import React, { useState } from 'react';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
 import { useValidState } from '@lib/hooks/useValidState';
-import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { updateDatabase } from '@lib/api/databases';
-import { DatabaseType, DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
+import { DatabaseType, DATABASE_TYPES } from '@lib/constants/bases';
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
 import { useBaseConnectionStats } from '@models/BaseConnectionStats';
 
 import { Button } from '@components/ui/Button';
-import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { InlineInput } from '@components/ui/InlineInput';
-import { InlineRadio } from '@components/ui/InlineRadio';
-import { InlineSelect } from '@components/ui/InlineSelect';
 import { StatusModal } from '@components/ui/StatusModal';
 import { Loader } from '@components/ui/Loader';
+import { BaseGeneralInfoForm } from './core-settings/BaseGeneralInfoForm';
 import { DisconnectBase } from './DisconnectBase';
 
 const INITIAL_MODAL_VALUE = {
@@ -48,23 +45,15 @@ export function BaseCoreSettings() {
     ? Object.keys(connectionStats.connections[0] || [])
     : undefined;
 
-  const [name, setName, nameError] = useValidState(
-    base.name,
-    REQUIRED_VALIDATOR,
-  );
   const [databaseName, setDatabaseName, databaseNameError] = useValidState(
     base.databaseName,
     SQL_IDENTIFIER_VALIDATOR,
   );
-  const [databaseType, setDatabaseType] = useState(DATABASE_TYPES.find((item) => item.value === base.adapter));
+  const databaseType = DATABASE_TYPES.find((item) => item.value === base.adapter);
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [powerbaseType, setPowerbaseType] = useState(
-    POWERBASE_TYPE[base.isTurbo ? 0 : 1],
-  );
-  const [color, setColor, colorError] = useValidState(base.color);
 
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
   const [loading, setLoading] = useState(false);
@@ -73,52 +62,43 @@ export function BaseCoreSettings() {
     mutateConnectionStats();
   };
 
+  const handleSuccess = () => setModal((curVal) => ({ ...curVal, open: true }));
+
+  const handleError = (err) => {
+    setModal({
+      open: true,
+      icon: ERROR_ICON,
+      title: 'Update Failed',
+      content: err || 'Something went wrong. Please try again later.',
+    });
+  };
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
     setModal(INITIAL_MODAL_VALUE);
 
-    if (!color.length) {
-      colorError.setError(new Error('Required'));
-      setLoading(false);
-      return;
-    }
-
     try {
       const response = await updateDatabase({
         id: base.id,
-        name,
         database: databaseName,
         host,
         port,
         username,
         password,
-        color,
       });
 
       if (!response.connected || response.isExisting) {
-        setModal({
-          open: true,
-          icon: ERROR_ICON,
-          title: 'Update Failed',
-          content: response.isExisting
-            ? `Database with name of "${response.database.name}" already exists in this account.`
-            : `Couldn't connect to "${name}". Please check the information given if they are correct.`,
-        });
+        handleError(response.isExisting
+          ? `Database with name of "${response.database.name}" already exists in this account.`
+          : `Couldn't connect to "${base.name}". Please check the information given if they are correct.`);
       } else {
-        setModal((curVal) => ({ ...curVal, open: true }));
+        handleSuccess();
+        mutateBases();
         await mutateBase();
-        await mutateBases();
       }
     } catch (err) {
-      setModal({
-        open: true,
-        icon: ERROR_ICON,
-        title: 'Update Failed',
-        content:
-          err?.response?.data.exception
-          || 'Something went wrong. Please try again later.',
-      });
+      handleError(err?.response?.data.exception);
     }
 
     setLoading(false);
@@ -131,42 +111,11 @@ export function BaseCoreSettings() {
       <h2 className="text-xl leading-6 font-medium text-gray-900">
         Core Settings
       </h2>
+      <BaseGeneralInfoForm
+        handleSuccess={handleSuccess}
+        handleError={handleError}
+      />
       <form onSubmit={handleSubmit}>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">General Info</h3>
-        <InlineInput
-          type="text"
-          label="Name"
-          name="name"
-          placeholder="e.g. Powerbase or Field Projects"
-          value={name}
-          onChange={(evt) => setName(evt.target.value)}
-          error={nameError.error}
-          className="my-6"
-          required
-        />
-        <InlineSelect
-          label="Type"
-          value={databaseType}
-          setValue={setDatabaseType}
-          options={DATABASE_TYPES}
-          className="my-6"
-          disabled
-        />
-        <InlineRadio
-          label="Powerbase Type"
-          value={powerbaseType}
-          setValue={setPowerbaseType}
-          options={POWERBASE_TYPE}
-          className="my-6"
-          disabled
-        />
-        <InlineColorRadio
-          value={color}
-          setValue={setColor}
-          error={colorError.error}
-          setError={colorError.setError}
-          className="my-6"
-        />
         <h3 className="mt-4 text-lg font-medium text-gray-900">
           Connection String
         </h3>

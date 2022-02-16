@@ -62,6 +62,15 @@ export async function updateDatabase({ id, ...payload }) {
   return undefined;
 }
 
+export async function updateDatabaseGeneralInfo({ id, name, color }) {
+  const response = await securedApi.put(`/databases/${id}/general_info`, {
+    name,
+    color,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function disconnectDatabase({ id }) {
   const response = await securedApi.delete(`/databases/${id}`);
   if (isResponseSuccess(response)) return response.data;
