@@ -15,12 +15,14 @@ import { InlineSelect } from '@components/ui/InlineSelect';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
+import { DisconnectBase } from '../DisconnectBase';
 
-export function BaseGeneralInfoForm({ handleSuccess, handleError }) {
+export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) {
   const { mounted } = useMounted();
   const { data: base, mutate: mutateBase } = useBase();
   const { mutate: mutateBases } = useBases();
   const { mutate: mutateSharedBases } = useSharedBases();
+
   const [name, setName, nameError] = useValidState(base.name, REQUIRED_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES.find((item) => item.value === base.adapter));
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[base.isTurbo ? 0 : 1]);
@@ -30,6 +32,9 @@ export function BaseGeneralInfoForm({ handleSuccess, handleError }) {
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
+    if (nameError.error) return;
+
+    handleInit();
     setLoading(true);
 
     if (!color.length) {
@@ -93,10 +98,11 @@ export function BaseGeneralInfoForm({ handleSuccess, handleError }) {
         setError={colorError.setError}
         className="my-6"
       />
-      <div className="mt-4 py-4 border-t border-solid">
+      <div className="mt-4 py-4 border-t border-solid flex justify-between">
+        <DisconnectBase />
         <Button
           type="submit"
-          className="ml-auto py-2 px-4 flex justify-center border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="py-2 px-4 flex justify-center border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           loading={loading}
           disabled={!base?.isMigrated}
         >
@@ -108,6 +114,7 @@ export function BaseGeneralInfoForm({ handleSuccess, handleError }) {
 }
 
 BaseGeneralInfoForm.propTypes = {
+  handleInit: PropTypes.func.isRequired,
   handleSuccess: PropTypes.func.isRequired,
   handleError: PropTypes.func.isRequired,
 };

@@ -56,16 +56,29 @@ export async function getDatabaseConnectionStats({ id }) {
   return undefined;
 }
 
-export async function updateDatabase({ id, ...payload }) {
-  const response = await securedApi.put(`/databases/${id}`, payload);
-  if (isResponseSuccess(response)) return response.data;
-  return undefined;
-}
-
 export async function updateDatabaseGeneralInfo({ id, name, color }) {
   const response = await securedApi.put(`/databases/${id}/general_info`, {
     name,
     color,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function updateDatabaseCredentials({
+  id,
+  database,
+  host,
+  port,
+  username,
+  password,
+}) {
+  const response = await securedApi.put(`/databases/${id}/credentials`, {
+    database,
+    host,
+    port,
+    username,
+    password,
   });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
