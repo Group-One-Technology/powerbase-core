@@ -33,7 +33,7 @@ function BaseTableContent({ table }) {
     setRecords(remoteRecords);
   }, [remoteRecords]);
 
-  if (!fields || remoteRecords == null) {
+  if (!fields) {
     return <Loader style={{ height: 'calc(100vh - 80px)' }} />;
   }
 

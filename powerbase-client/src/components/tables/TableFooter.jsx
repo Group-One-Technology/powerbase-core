@@ -9,7 +9,7 @@ export function TableFooter({ table, records, setRecords }) {
 
   const handleOpenAddRecord = () => setOpen(true);
 
-  if (!table) return null;
+  if (!table || records == null) return null;
 
   return (
     <div className="py-1 px-4 flex items-center border-t border-gray-200">
