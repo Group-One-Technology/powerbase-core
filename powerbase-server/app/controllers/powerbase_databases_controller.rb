@@ -1,22 +1,26 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
-  before_action :check_database_access, only: [:update, :clear_logs]
+  before_action :check_database_access, only: [:update_general_info, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
   schema(:show, :connection_stats, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
-  schema(:update) do
+  schema(:update_general_info) do
     required(:id).value(:integer)
     required(:name).value(:string)
+    required(:color).value(:string)
+  end
+
+  schema(:update) do
+    required(:id).value(:integer)
     optional(:host).value(:string)
     optional(:port).value(:integer)
     optional(:username).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
-    required(:color).value(:string)
   end
 
   schema(:connect) do
@@ -58,7 +62,6 @@ class PowerbaseDatabasesController < ApplicationController
   # GET /databases/
   def index
     @databases = PowerbaseDatabase.where(user_id: current_user.id)
-
     render json: @databases.map {|item| format_json(item)}
   end
 
@@ -72,7 +75,6 @@ class PowerbaseDatabasesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:id])
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
     current_user.can?(:view_base, @database)
-
     render json: format_json(@database)
   end
 
@@ -85,22 +87,28 @@ class PowerbaseDatabasesController < ApplicationController
     render json: query.connection_stats
   end
 
+  # PUT /databases/:id/general_info
+  def update_general_info
+    if safe_params[:name] != @database.name
+      @database.name = safe_params[:name]
+      existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
+
+      if existing_database && existing_database.id != @database.id
+        raise StandardError.new "Database with name of \"#{safe_params[:name]}\" already exists in this account."
+      end
+    end
+
+    @database.color = safe_params[:color]
+    @database.save
+    render :no_content
+  end
+
   # PUT /databases/:id
   def update
     options = safe_params.output
     options[:adapter] = @database.adapter
     options[:is_turbo] = @database.is_turbo
     is_connection_updated = false
-
-    if options[:name] != @database.name
-      @database.name = options[:name]
-      @existing_database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
-
-      if @existing_database && @existing_database.id != @database.id
-        render json: { is_existing: true, database: format_json(@database) }
-        return
-      end
-    end
 
     if options[:username]&.length > 1 && options[:password]&.length > 1
       is_connection_updated = true
@@ -120,7 +128,6 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     @database.database_name = options[:database]
-    @database.color = options[:color]
     @database.connection_string = Powerbase.connection_string if is_connection_updated
     if !@database.save
       Powerbase.disconnect if is_connection_updated
