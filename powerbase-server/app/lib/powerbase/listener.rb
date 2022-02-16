@@ -11,42 +11,36 @@ module Powerbase
       @powerbase_db = powerbase_db
     end
 
-
     def listen!
       @db = powerbase_db._sequel
       begin
         @db.listen("powerbase_table_update", :loop => true) do |ev, pid, payload|
-          notifier_callback(@db, ev, pid, payload)
+          notifier_callback(ev, pid, payload)
         end
       rescue => ex
         puts ex
       end
     end
 
-    def notifier_callback(database, ev, pid, payload)
+    def notifier_callback(ev, pid, payload)
       payload_hash = JSON.parse(payload)
       table_name = payload_hash["table"]
       primary_key_value = payload_hash["primary_key"]
       event_type = payload_hash["type"]
-      adapter = database.adapter_scheme
-      table = database.from(table_name.to_sym)
+      record = payload_hash["data"]
       powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
       index_name = powerbase_table.index_name
-      fields = powerbase_table.fields
       doc_id = format_doc_id(primary_key_value)
 
-      puts "-- Data changes detect on table##{powerbase_table.id} #{table_name}"
-
-      # Just run sync and reindex if there's unmigrated columns
-      unless powerbase_table.in_synced?
-        powerbase_table.sync!
-      end
+      puts "#{Time.now} -- Data changes detect on table##{powerbase_table.id} #{table_name}"
 
       case event_type
       when "INSERT"
-        record = table.where(primary_key_value.symbolize_keys).first
-        record = format_record(record, fields)
+        if !record
+          puts "#{Time.now} -- No inserted record provided in payload"
+          return
+        end
 
         # Upsert elasticsearch record
         update_record(index_name, doc_id, record)
@@ -54,13 +48,10 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
       when "UPDATE"
-        # Adds half second delay to wait for update changes to reflect on db before querying.
-        sleep 0.5
-
-        # Query get record
-        records = sequel_get_records(database, table_name)
-        record = records.where(primary_key_value.symbolize_keys).first
-        record = format_record(record, fields)
+        if !record
+          puts "#{Time.now} -- No updated record provided in payload"
+          return
+        end
 
         # Update elasticsearch record
         update_record(index_name, doc_id, record)
