@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { useViewFields, ViewFieldsProvider } from '@models/ViewFields';
 import { TableRecordsProvider, useTableRecords } from '@models/TableRecords';
+import { TableFieldsProvider } from '@models/TableFields';
 import { AddRecordModalProvider } from '@models/modals/AddRecordModal';
 import { TableViewProvider } from '@models/TableView';
 import { ViewOptionsProvider } from '@models/views/ViewOptions';
@@ -73,15 +74,17 @@ export const TableContent = React.memo(
       <TableConnectionsProvider tableId={table.id}>
         <TableReferencedConnectionsProvider tableId={table.id}>
           <TableViewProvider id={currentView.id} initialData={currentView}>
-            <ViewFieldsProvider id={currentView.id}>
-              <ViewOptionsProvider view={currentView}>
-                <TableRecordsCountProvider id={table.id} isVirtual={table.isVirtual}>
-                  <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
-                    <BaseTableContent table={table} views={views} />
-                  </TableRecordsProvider>
-                </TableRecordsCountProvider>
-              </ViewOptionsProvider>
-            </ViewFieldsProvider>
+            <TableFieldsProvider tableId={table.id}>
+              <ViewFieldsProvider id={currentView.id}>
+                <ViewOptionsProvider view={currentView}>
+                  <TableRecordsCountProvider id={table.id} isVirtual={table.isVirtual}>
+                    <TableRecordsProvider id={table.id} pageSize={table.pageSize}>
+                      <BaseTableContent table={table} views={views} />
+                    </TableRecordsProvider>
+                  </TableRecordsCountProvider>
+                </ViewOptionsProvider>
+              </ViewFieldsProvider>
+            </TableFieldsProvider>
           </TableViewProvider>
         </TableReferencedConnectionsProvider>
       </TableConnectionsProvider>

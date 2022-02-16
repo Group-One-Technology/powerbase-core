@@ -656,13 +656,13 @@ module Powerbase
             { field: sort_item[:field], operator: operator }
           end
         elsif @sort.kind_of?(Array)
-          primary_keys = @fields.select {|field| field.is_primary_key }
+          primary_keys = @fields.order(name: :asc).select {|field| field.is_primary_key }
           order_field = if primary_keys.length > 0
               primary_keys.first
             elsif !@turbo
-              @fields.first
+              @fields.order(name: :asc).first
             elsif is_magic_values
-              @magic_fields.first
+              @magic_fields..order(name: :asc).first
             end
 
           order_field != nil ? [{ field: order_field.name, operator: "asc" }] : []
