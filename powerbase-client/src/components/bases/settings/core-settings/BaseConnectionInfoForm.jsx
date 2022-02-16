@@ -21,7 +21,7 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
   const [database, setDatabase, databaseError] = useValidState(base.databaseName, SQL_IDENTIFIER_VALIDATOR);
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
-  const [username, setUsername] = useState('');
+  const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -34,26 +34,20 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
     setLoading(true);
 
     try {
-      const response = await updateDatabaseCredentials({
+      await updateDatabaseCredentials({
         id: base.id,
         database,
         host,
         port,
-        username,
+        user,
         password,
       });
 
-      if (!response.connected || response.isExisting) {
-        handleError(response.isExisting
-          ? `Database with name of "${response.database.name}" already exists in this account.`
-          : `Couldn't connect to "${base.name}". Please check the information given if they are correct.`);
-      } else {
-        mounted(() => setLoading(false));
-        handleSuccess();
-        mutateBases();
-        mutateSharedBases();
-        await mutateBase();
-      }
+      mounted(() => setLoading(false));
+      handleSuccess();
+      mutateBases();
+      mutateSharedBases();
+      await mutateBase();
     } catch (err) {
       mounted(() => setLoading(false));
       handleError(err?.response?.data.exception);
@@ -85,6 +79,7 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
         onChange={(evt) => setDatabase(evt.target.value)}
         error={databaseError.error}
         className="my-6"
+        required
       />
       <InlineInput
         type="text"
@@ -94,6 +89,7 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
         value={host}
         onChange={(evt) => setHost(evt.target.value)}
         className="my-6"
+        required
       />
       <InlineInput
         type="number"
@@ -103,14 +99,15 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
         value={port}
         onChange={(evt) => setPort(evt.target.value)}
         className="my-6"
+        required
       />
       <InlineInput
         type="text"
         label="Username"
         name="username"
         placeholder="e.g. postgres"
-        value={username}
-        onChange={(evt) => setUsername(evt.target.value)}
+        value={user}
+        onChange={(evt) => setUser(evt.target.value)}
         className="my-6"
       />
       <InlineInput

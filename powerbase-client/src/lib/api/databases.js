@@ -70,14 +70,14 @@ export async function updateDatabaseCredentials({
   database,
   host,
   port,
-  username,
+  user,
   password,
 }) {
   const response = await securedApi.put(`/databases/${id}/credentials`, {
     database,
     host,
     port,
-    username,
+    user,
     password,
   });
   if (isResponseSuccess(response)) return response.data;

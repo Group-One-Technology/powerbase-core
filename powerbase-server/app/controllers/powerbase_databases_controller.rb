@@ -1,7 +1,7 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
-  before_action :check_database_access, only: [:update_general_info, :clear_logs]
+  before_action :check_database_access, only: [:update_general_info, :update_credentials, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
   schema(:show, :connection_stats, :destroy, :clear_logs) do
@@ -14,11 +14,11 @@ class PowerbaseDatabasesController < ApplicationController
     required(:color).value(:string)
   end
 
-  schema(:update) do
+  schema(:update_credentials) do
     required(:id).value(:integer)
     optional(:host).value(:string)
     optional(:port).value(:integer)
-    optional(:username).value(:string)
+    optional(:user).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
   end
@@ -99,44 +99,40 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     @database.color = safe_params[:color]
-    @database.save
-    render :no_content
+    if @database.save
+      render json: format_json(@database)
+    else
+      render json: @database.errors, status: :unprocessable_entity
+    end
   end
 
-  # PUT /databases/:id
-  def update
-    options = safe_params.output
-    options[:adapter] = @database.adapter
-    options[:is_turbo] = @database.is_turbo
-    is_connection_updated = false
+  # PUT /databases/:id/credentials
+  def update_credentials
+    validator = Databases::ConnectionValidator.new(
+      adapter: @database.adapter,
+      host: safe_params[:host],
+      user: safe_params[:user],
+      password: safe_params[:password],
+      database: safe_params[:database],
+    )
+    connection_string = validator.connection_string
 
-    if options[:username]&.length > 1 && options[:password]&.length > 1
-      is_connection_updated = true
-
-      begin
-        Powerbase.connect(options)
-      rescue => exception
-        render json: { connected: false, exception: exception }
-        return
-      end
-
-      if !Powerbase.connected?
-        Powerbase.disconnect
-        render json: { connected: false, database: format_json(@database) }
-        return
-      end
+    if connection_string == @database.connection_string
+      raise StandardError.new("The database already use the same credentials in connection.")
     end
 
-    @database.database_name = options[:database]
-    @database.connection_string = Powerbase.connection_string if is_connection_updated
-    if !@database.save
-      Powerbase.disconnect if is_connection_updated
+    if !validator.test_connection
+      raise StandardError.new("Failed to connect to #{@database.name}. Please check the information given if they are correct.")
+    end
+
+    @database.database_name = validator.database
+    @database.connection_string = connection_string
+
+    if @database.save
+      render json: format_json(@database)
+    else
       render json: @database.errors, status: :unprocessable_entity
-      return;
     end
-
-    Powerbase.disconnect if is_connection_updated
-    render json: { connected: true, database: format_json(@database) }
   end
 
   # POST /databases/connect
