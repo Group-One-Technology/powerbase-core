@@ -7,6 +7,24 @@ class Databases::MetaQuery
     @database = database
   end
 
+  # Get database size in kilobytes
+  def database_size
+    case @database.adapter
+    when "postgresql"
+      sequel_connect(@database) do |db|
+        db.select(Sequel.lit('ROUND(pg_database_size(current_database()) / 1024, 2) AS size'))
+          .first[:size]
+      end
+    when "mysql2"
+      sequel_connect(@database) do |db|
+        db.from(Sequel.lit("information_schema.TABLES"))
+          .select(Sequel.lit("ROUND(SUM(data_length + index_length) / 1024, 2) AS size"))
+          .where(Sequel.lit("table_schema = ?", @database.database_name))
+          .first[:size]
+      end
+    end
+  end
+
   def connection_stats
     if database.postgresql?
       sequel_connect(database) do |db|
