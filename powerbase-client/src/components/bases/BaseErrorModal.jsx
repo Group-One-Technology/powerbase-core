@@ -33,7 +33,7 @@ export function BaseErrorModal({
       await mutateBases();
       saved();
     } catch (err) {
-      catchError(err);
+      catchError(err.response.data.exception || err.response.data.error);
     }
 
     mounted(() => {
