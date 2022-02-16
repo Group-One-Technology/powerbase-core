@@ -32,7 +32,7 @@ export function BaseConnect({
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [host, setHost, hostError] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, portError] = useValidState(databaseType.port, REQUIRED_VALIDATOR);
-  const [username, setUsername] = useState('');
+  const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [powerbaseType, setPowerbaseType] = useState(initialPowerbaseType || POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
@@ -69,7 +69,7 @@ export function BaseConnect({
         adapter: databaseType.value,
         host,
         port,
-        username,
+        user,
         password,
       };
 
@@ -157,11 +157,11 @@ export function BaseConnect({
           />
           <InlineInput
             type="text"
-            label="Username"
-            name="username"
+            label="User"
+            name="user"
             placeholder="e.g. postgres"
-            value={username}
-            onChange={(evt) => setUsername(evt.target.value)}
+            value={user}
+            onChange={(evt) => setUser(evt.target.value)}
             className="my-6"
           />
           <InlineInput

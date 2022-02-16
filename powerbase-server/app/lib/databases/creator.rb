@@ -21,7 +21,7 @@ class Databases::Creator
     if !@database.migrated?
       migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
       migration.powerbase_database_id = @database.id
-      migration.database_size = @db_size || "0 kB"
+      migration.database_size = @db_size || 0
       migration.retries = 0
       migration.save
 
@@ -46,23 +46,10 @@ class Databases::Creator
       raise StandardError.new "Couldn't connect to \"#{@database.name}\". MySQL databases are currently not supported yet."
     end
 
-    # Get database size in kilobytes
-    case @database.adapter
-    when "postgresql"
-      @db_size = sequel_connect(@database) do |db|
-        db.select(Sequel.lit('ROUND(pg_database_size(current_database()) / 1024, 2) AS size'))
-          .first[:size]
-      end
-    when "mysql2"
-      @db_size = sequel_connect(@database) do |db|
-        db.from(Sequel.lit("information_schema.TABLES"))
-          .select(Sequel.lit("ROUND(SUM(data_length + index_length) / 1024, 2) AS size"))
-          .where(Sequel.lit("table_schema = ?", @database.database_name))
-          .first[:size]
-      end
-    end
+    query = Databases::MetaQuery.new @database
+    @db_size = query.database_size || 0
 
-    if @db_size > 2.gigabytes
+    if (@db_size * 1024) > 2.gigabytes
       raise StandardError.new "Connecting to a database with over 2GB of data is currently restricted."
     end
 

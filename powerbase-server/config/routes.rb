@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :powerbase_databases, as: "databases", path: "databases", only: [:index, :show, :update, :destroy], shallow: true do
+  resources :powerbase_databases, as: "databases", path: "databases", except: [:create, :update], shallow: true do
     collection do
       post 'connect'
       post 'connect/hubspot', to: 'powerbase_databases#connect_hubspot'
@@ -27,6 +27,8 @@ Rails.application.routes.draw do
 
     member do
       get 'connection_stats'
+      put 'general_info', as: 'update_database_general_info', to: 'powerbase_databases#update_general_info'
+      put 'credentials', as: 'update_database_credentials', to: 'powerbase_databases#update_credentials'
       put 'clear_logs'
       put 'update_database_permission', as: 'update_database_permission'
       put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_databases#update_allowed_roles'

@@ -30,7 +30,7 @@ export function ConnectBasePage() {
     : DATABASE_TYPES[0]);
   const [host, setHost, hostError] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, portError] = useValidState(databaseType.port, REQUIRED_VALIDATOR);
-  const [username, setUsername] = useState('');
+  const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
@@ -68,7 +68,7 @@ export function ConnectBasePage() {
           name,
           host,
           port,
-          username,
+          user,
           password,
           database: databaseName,
           adapter: databaseType.value,
@@ -168,11 +168,11 @@ export function ConnectBasePage() {
               />
               <InlineInput
                 type="text"
-                label="Username"
-                name="username"
+                label="User"
+                name="user"
                 placeholder="e.g. postgres"
-                value={username}
-                onChange={(evt) => setUsername(evt.target.value)}
+                value={user}
+                onChange={(evt) => setUser(evt.target.value)}
                 className="my-6"
               />
               <InlineInput

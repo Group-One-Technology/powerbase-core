@@ -1,22 +1,26 @@
 class PowerbaseDatabasesController < ApplicationController
   before_action :authorize_access_request!, except: [:connect_hubspot]
   before_action :authorize_acesss_hubspot, only: [:connect_hubspot]
-  before_action :check_database_access, only: [:update, :clear_logs]
+  before_action :check_database_access, only: [:update_general_info, :update_credentials, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
   schema(:show, :connection_stats, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
-  schema(:update) do
+  schema(:update_general_info) do
     required(:id).value(:integer)
     required(:name).value(:string)
+    required(:color).value(:string)
+  end
+
+  schema(:update_credentials) do
+    required(:id).value(:integer)
     optional(:host).value(:string)
     optional(:port).value(:integer)
-    optional(:username).value(:string)
+    optional(:user).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
-    required(:color).value(:string)
   end
 
   schema(:connect) do
@@ -24,7 +28,7 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:host).value(:string)
     optional(:port).value(:integer)
     optional(:adapter).value(:string)
-    optional(:username).value(:string)
+    optional(:user).value(:string)
     optional(:password).value(:string)
     optional(:database).value(:string)
     optional(:color).value(:string)
@@ -36,7 +40,7 @@ class PowerbaseDatabasesController < ApplicationController
     required(:api_key).value(:string)
     required(:host).value(:string)
     required(:port).value(:integer)
-    required(:username).value(:string)
+    required(:user).value(:string)
     required(:password).value(:string)
     required(:database).value(:string)
     required(:database_size).value(:integer)
@@ -58,7 +62,6 @@ class PowerbaseDatabasesController < ApplicationController
   # GET /databases/
   def index
     @databases = PowerbaseDatabase.where(user_id: current_user.id)
-
     render json: @databases.map {|item| format_json(item)}
   end
 
@@ -72,7 +75,6 @@ class PowerbaseDatabasesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:id])
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
     current_user.can?(:view_base, @database)
-
     render json: format_json(@database)
   end
 
@@ -85,93 +87,102 @@ class PowerbaseDatabasesController < ApplicationController
     render json: query.connection_stats
   end
 
-  # PUT /databases/:id
-  def update
-    options = safe_params.output
-    options[:adapter] = @database.adapter
-    options[:is_turbo] = @database.is_turbo
-    is_connection_updated = false
+  # PUT /databases/:id/general_info
+  def update_general_info
+    if safe_params[:name] != @database.name
+      @database.name = safe_params[:name]
+      existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
 
-    if options[:name] != @database.name
-      @database.name = options[:name]
-      @existing_database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
-
-      if @existing_database && @existing_database.id != @database.id
-        render json: { is_existing: true, database: format_json(@database) }
+      if existing_database && existing_database.id != @database.id
+        render json: { error: "Database with name of \"#{safe_params[:name]}\" already exists in this account." }, status: :unprocessable_entity
         return
       end
     end
 
-    if options[:username]&.length > 1 && options[:password]&.length > 1
-      is_connection_updated = true
-
-      begin
-        Powerbase.connect(options)
-      rescue => exception
-        render json: { connected: false, exception: exception }
-        return
-      end
-
-      if !Powerbase.connected?
-        Powerbase.disconnect
-        render json: { connected: false, database: format_json(@database) }
-        return
-      end
-    end
-
-    @database.database_name = options[:database]
-    @database.color = options[:color]
-    @database.connection_string = Powerbase.connection_string if is_connection_updated
-    if !@database.save
-      Powerbase.disconnect if is_connection_updated
+    @database.color = safe_params[:color]
+    if @database.save
+      render json: format_json(@database)
+    else
       render json: @database.errors, status: :unprocessable_entity
-      return;
+    end
+  end
+
+  # PUT /databases/:id/credentials
+  def update_credentials
+    validator = Databases::ConnectionValidator.new(
+      adapter: @database.adapter,
+      host: safe_params[:host],
+      port: safe_params[:port],
+      user: safe_params[:user],
+      password: safe_params[:password],
+      database: safe_params[:database],
+    )
+    connection_string = validator.connection_string
+
+    if connection_string == @database.connection_string
+      render json: { error: "The database already use the same credentials in connection." }, status: :unprocessable_entity
+      return
     end
 
-    Powerbase.disconnect if is_connection_updated
-    render json: { connected: true, database: format_json(@database) }
+    if !validator.test_connection
+      render json: { error: "Failed to connect to #{@database.name} using the updated credentials. Please check the information given if they are correct." }, status: :unprocessable_entity
+      return
+    end
+
+    @database.database_name = validator.database
+    @database.connection_string = connection_string
+
+    meta_query = Databases::MetaQuery.new @database
+    database_size = meta_query.database_size
+
+    if (database_size * 1024) > 2.gigabytes
+      render json: { error: "Connecting to a database with over 2GB of data is currently restricted." }, status: :unprocessable_entity
+      return
+    end
+
+    if @database.save
+      render json: format_json(@database)
+    else
+      render json: @database.errors, status: :unprocessable_entity
+    end
   end
 
   # POST /databases/connect
   def connect
-    options = safe_params.output
-    @database = PowerbaseDatabase.find_by(name: options[:name], user_id: current_user.id)
+    existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
 
-    if @database
-      render json: { error: "Database with name of '#{options[:name]}' already exists in this account." }, status: :unprocessable_entity
+    if existing_database
+      raise StandardError.new "Database with name of \"#{safe_params[:name]}\" already exists in this account."
+    end
+
+    validator = Databases::ConnectionValidator.new(
+      adapter: safe_params[:adapter],
+      host: safe_params[:host],
+      port: safe_params[:port],
+      user: safe_params[:user],
+      password: safe_params[:password],
+      database: safe_params[:database],
+      connection_string: safe_params[:connection_string],
+    )
+    connection_string = validator.connection_string
+
+    if !validator.test_connection
+      render json: { error: "Failed to connect to #{safe_params[:name]}. Please check the information given if they are correct." }, status: :unprocessable_entity
       return
     end
 
-    begin
-      Powerbase.connect(options)
-    rescue => exception
-      render json: { error: "Couldn't connect to \"#{options[:name]}\". Please check the information given if they are correct." }, status: :unprocessable_entity
-      return;
-    end
-
-    options[:database_name] = Powerbase.database
-    options[:connection_string] = Powerbase.connection_string
-    options[:adapter] = Powerbase.adapter
-    is_connected = Powerbase.connected?
-    Powerbase.disconnect
-
-    if !is_connected
-      render json: { error: "Couldn't connect to \"#{options[:name]}\". Please check the information given if they are correct." }, status: :unprocessable_entity
-      return
-    end
-
-    if options[:adapter] == "mysql2"
-      render json: { error: "Couldn't connect to \"#{options[:name]}\". MySQL databases are currently not supported yet." }, status: :unprocessable_entity
+    if validator.adapter == "mysql2"
+      render json: { error: "Couldn't connect to \"#{safe_params[:name]}\". MySQL databases are currently not supported yet." }, status: :unprocessable_entity
       return
     end
 
     database_creator = Databases::Creator.new({
-      name: options[:name],
-      database_name: options[:database_name],
-      connection_string: options[:connection_string],
-      adapter: options[:adapter],
-      color: options[:color],
-      is_turbo: options[:is_turbo],
+      name: safe_params[:name],
+      database_name: validator.database,
+      connection_string: validator.connection_string,
+      adapter: validator.adapter,
+      color: safe_params[:color],
+      is_turbo: safe_params[:is_turbo],
       user_id: current_user.id,
     })
 
@@ -184,16 +195,18 @@ class PowerbaseDatabasesController < ApplicationController
 
   # POST /databases/connect/hubspot
   def connect_hubspot
+    validator = Databases::ConnectionValidator.new(
+      adapter: "postgresql",
+      host: safe_params[:host],
+      port: safe_params[:port],
+      user: safe_params[:user],
+      password: safe_params[:password],
+      database: safe_params[:database],
+    )
+
     @hb_database = HubspotDatabase.new({
       name: safe_params[:database],
-      connection_string: Powerbase.connection_string({
-        adapter: "postgresql",
-        host: safe_params[:host],
-        port: safe_params[:port],
-        user: safe_params[:username],
-        password: safe_params[:password],
-        database: safe_params[:database],
-      }),
+      connection_string: validator.connection_string,
       adapter: "postgresql",
       is_migrated: false,
       database_size: safe_params[:database_size],
