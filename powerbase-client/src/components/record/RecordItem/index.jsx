@@ -46,7 +46,7 @@ export function RecordItem({
       }
       primaryKeys={primaryKeys}
     >
-      <TableFieldsProvider id={referencedTable?.id}>
+      <TableFieldsProvider tableId={referencedTable?.id}>
         <TableConnectionsProvider tableId={referencedTable?.id}>
           <RecordItemValue
             item={{ ...item, ...foreignKey }}

@@ -263,10 +263,8 @@ export function BaseSingleRecordModal({
                   }
                   primaryKeys={primaryKeys}
                 >
-                  <TableFieldsProvider id={foreignKey.referencedTableId}>
-                    <TableConnectionsProvider
-                      tableId={foreignKey.referencedTableId}
-                    >
+                  <TableFieldsProvider tableId={foreignKey.referencedTableId}>
+                    <TableConnectionsProvider tableId={foreignKey.referencedTableId}>
                       <RecordItemValue
                         item={item}
                         fieldTypes={fieldTypes}
@@ -344,7 +342,7 @@ export function BaseSingleRecordModal({
                   filters={filters}
                   isVirtual={table.isVirtual}
                 >
-                  <TableFieldsProvider id={connection.tableId}>
+                  <TableFieldsProvider tableId={connection.tableId}>
                     <TableConnectionsProvider tableId={connection.tableId}>
                       <LinkedRecordsItem
                         connection={connection}

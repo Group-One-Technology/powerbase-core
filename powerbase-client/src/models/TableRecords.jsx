@@ -4,25 +4,40 @@ import { useState } from 'react';
 import { getTableRecords } from '@lib/api/records';
 import { useAuthUser } from './AuthUser';
 import { useViewOptions } from './views/ViewOptions';
+import { useTableFields } from './TableFields';
 
 function getKey({
-  index, tableId, query, sort, filters, pageSize,
+  index,
+  tableId,
+  query,
+  sort,
+  filters,
+  pageSize,
+  sortField,
 }) {
   const page = index + 1;
   const pageQuery = `page=${page}&limit=${pageSize}`;
   const searchQuery = query?.length ? `&q=${encodeURIComponent(query)}` : '';
   const filterQuery = filters?.id ? `&filterId=${filters.id}` : '';
-  const sortQuery = sort?.id ? `&sortId=${sort.id}` : '';
+  const sortQuery = sort?.id
+    ? `&sortId=${sort.id}`
+    : sortField
+      ? `&sortId=${sortField.name}_ascending`
+      : '';
 
   return `/tables/${tableId}/records?${pageQuery}${searchQuery}${filterQuery}${sortQuery}`;
 }
 
 function useTableRecordsModel({ id, pageSize = 40 }) {
   const { authUser } = useAuthUser();
+  const { data: fields } = useTableFields();
   const {
     viewId, query, filters, sort,
   } = useViewOptions();
+
   const [highlightedCell, setHighLightedCell] = useState(null);
+  const primaryKey = fields?.find((item) => item.isPrimaryKey);
+  const sortField = primaryKey || (fields ? fields[0] : undefined);
 
   const response = useSWRInfinite(
     (index) => (id && authUser && viewId
@@ -33,6 +48,7 @@ function useTableRecordsModel({ id, pageSize = 40 }) {
         sort,
         filters,
         pageSize,
+        sortField,
       })
       : null),
     (url) => (id && authUser && viewId

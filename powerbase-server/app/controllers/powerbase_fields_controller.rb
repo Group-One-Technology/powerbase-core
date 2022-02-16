@@ -57,7 +57,7 @@ class PowerbaseFieldsController < ApplicationController
     current_user.can?(:view_table, @table)
 
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
-    @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(:id)
+    @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(name: :asc)
 
     render json: @fields
       .select {|field| current_user.can?(:view_field, field, false, @guest)}
