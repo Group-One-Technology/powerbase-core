@@ -1,10 +1,11 @@
 class Databases::ConnectionValidator
-  def initialize(adapter: nil, host: nil, database: nil, user: nil, password: nil, connection_string: nil, params: nil)
+  def initialize(adapter: nil, host: nil, port: nil, user: nil, password: nil, database: nil, params: nil, connection_string: nil)
     @connection_string_param = connection_string
     @params = params
     @options = {
       adapter: adapter,
       host: host,
+      port: port,
       database: database,
       user: user,
       password: password,
@@ -23,9 +24,17 @@ class Databases::ConnectionValidator
 
   def connection_string
     @connection_string_param ||= if @options[:user] != nil && @options[:database] != nil
-        ("%{adapter}://%{user}:%{password}@%{host}/%{database}" % @options)
+        if @options[:port] != nil
+          ("%{adapter}://%{user}:%{password}@%{host}:%{port}/%{database}" % @options)
+        else
+          ("%{adapter}://%{user}:%{password}@%{host}/%{database}" % @options)
+        end
       else
-        ("%{adapter}://@%{host}/%{database}" % @options)
+        if @options[:port] != nil
+          ("%{adapter}://@%{host}:%{port}/%{database}" % @options)
+        else
+          ("%{adapter}://@%{host}/%{database}" % @options)
+        end
       end
   end
 
@@ -44,7 +53,7 @@ class Databases::ConnectionValidator
         when "mysql"
           "mysql2"
         else
-          @adapter
+          @options[:adapter]
         end
     end
 end
