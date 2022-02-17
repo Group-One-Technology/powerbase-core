@@ -22,6 +22,12 @@ class User < ApplicationRecord
     "#{self.first_name} #{self.last_name}"
   end
 
+  def email_activate
+    self.email_confirmed = true
+    self.confirm_token = nil
+    save!(:validate => false)
+  end
+
   def shared_databases
     self.guests.map {|guest| guest.powerbase_database}
   end
@@ -207,7 +213,7 @@ class User < ApplicationRecord
   private
     def confirmation_token
       if self.confirm_token.blank?
-          self.confirm_token = SecureRandom.urlsafe_base64.to_s
+        self.confirm_token = SecureRandom.urlsafe_base64.to_s
       end
     end
 end

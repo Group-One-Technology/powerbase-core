@@ -1,0 +1,83 @@
+import React, { useEffect, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+
+import { useAuthUser } from '@models/AuthUser';
+import { useQuery } from '@lib/hooks/useQuery';
+import { confirmEmail } from '@lib/api/auth';
+import { useMounted } from '@lib/hooks/useMounted';
+import { Page } from '@components/layout/Page';
+import { Logo } from '@components/ui/Logo';
+import { Loader } from '@components/ui/Loader';
+
+export function ConfirmEmailPage() {
+  const { mounted } = useMounted();
+  const history = useHistory();
+  const query = useQuery();
+  const token = query.get('token');
+  const { authUser, mutate: mutateAuthUser } = useAuthUser();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    setLoading(true);
+    confirmEmail({ token })
+      .then(async () => {
+        await mutateAuthUser();
+        mounted(() => setLoading(false));
+      })
+      .catch((err) => {
+        mounted(() => {
+          setError(err);
+          setLoading(false);
+        });
+      });
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.signedIn) history.push('/');
+  }, [authUser]);
+
+  return (
+    <Page title="Confirm Your Email" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <Logo className="mx-auto h-12 w-auto" />
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          {!error ? 'Almost there...' : 'Something went wrong'}
+        </h2>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {loading && (
+            <div className="h-12 w-full flex items-center justify-center">
+              <Loader />
+            </div>
+          )}
+          {!error
+            ? (
+              <p className="my-4 text-gray-900 text-base">
+                Please wait a bit. We&apos;re currently verifying your email address. We&apos;ll redirect you once it is verified.
+              </p>
+            ) : (
+              <p className="my-4 text-gray-900 text-base">
+                It seems the link is invalid or has expired. Do you want to&nbsp;
+                <Link to="/user/reconfirm-email" className="text-indigo-600 hover:text-indigo-500">
+                  request a new confirm email link?
+                </Link>
+              </p>
+            )}
+        </div>
+
+        <div className="mt-4 flex justify-between">
+          <Link to="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
+            Return to login
+          </Link>
+          <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+            Forgot your password?
+          </Link>
+        </div>
+      </div>
+    </Page>
+  );
+}
