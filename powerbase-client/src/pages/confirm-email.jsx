@@ -40,7 +40,7 @@ export function ConfirmEmailNoticePage() {
           <Link to="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
             Login instead
           </Link>
-          <Link to="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
+          <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
             Forgot your password?
           </Link>
         </div>
