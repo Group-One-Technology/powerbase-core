@@ -16,6 +16,8 @@ class User < ApplicationRecord
   has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"
   has_many :views, class_name: "TableView"
 
+  before_create :confirmation_token
+
   def name
     "#{self.first_name} #{self.last_name}"
   end
@@ -201,4 +203,11 @@ class User < ApplicationRecord
     raise AccessDenied if error
     return false
   end
+
+  private
+    def confirmation_token
+      if self.confirm_token.blank?
+          self.confirm_token = SecureRandom.urlsafe_base64.to_s
+      end
+    end
 end

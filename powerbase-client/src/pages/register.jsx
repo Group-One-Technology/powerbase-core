@@ -19,7 +19,7 @@ import { Logo } from '@components/ui/Logo';
 export function RegisterPage() {
   const history = useHistory();
   const { mounted } = useMounted();
-  const { authUser, mutate: refetchAuthUser } = useAuthUser();
+  const { authUser } = useAuthUser();
 
   const [firstName, setFirstName, { error: firstNameError }] = useValidState('', REQUIRED_VALIDATOR);
   const [lastName, setLastName, { error: lastNameError }] = useValidState('', REQUIRED_VALIDATOR);
@@ -57,10 +57,9 @@ export function RegisterPage() {
           password,
           passwordConfirmation: confirmPassword,
         });
-        await refetchAuthUser();
-        history.push('/');
+        history.push('/confirm-email');
       } catch (err) {
-        setErrors(err.response.data.errors);
+        setErrors(err.response.data.exception || err.response.data.error);
       }
     }
 
