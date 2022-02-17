@@ -4,7 +4,7 @@ class UserMailer < ActionMailer::Base
   def confirm_email(user_id: nil)
     @user = User.find user_id
     raise StandardError.new "Failed to send confirm email, user##{user_id} could not be found." if !@user
-    @action_url = "#{ENV["CLIENT"]}/user/confirm?token=#{@user.confirm_token}"
+    @action_url = "#{ENV["CLIENT"]}/user/confirm-email?token=#{@user.confirm_token}"
     @support_email = "team@editmode.com"
 
     mail(
