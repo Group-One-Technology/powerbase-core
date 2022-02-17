@@ -202,6 +202,11 @@ GEM
     philtre (0.1.2)
       fastandand
       sequel
+    postmark (1.22.0)
+      json
+    postmark-rails (0.22.0)
+      actionmailer (>= 3.0.0)
+      postmark (>= 1.21.3, < 2.0)
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -301,6 +306,7 @@ DEPENDENCIES
   olive_branch (~> 4.0)
   pg (~> 1.1)
   philtre (~> 0.1.2)
+  postmark-rails (~> 0.22.0)
   pry-rails
   puma (~> 5.0)
   pusher
