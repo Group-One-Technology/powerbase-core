@@ -35,6 +35,23 @@ class User < ApplicationRecord
     save!(:validate => false)
   end
 
+  def generate_password_token!
+    self.reset_password_token = generate_token
+    self.reset_password_sent_at = Time.now.utc
+    save!
+  end
+
+  def password_token_valid?
+    (self.reset_password_sent_at + 4.hours) > Time.now.utc
+  end
+
+  def reset_password!(password: nil, password_confirmation: nil)
+    self.reset_password_token = nil
+    self.password = password
+    self.password_confirmation = password_confirmation
+    save!
+  end
+
   def shared_databases
     self.guests.map {|guest| guest.powerbase_database}
   end
@@ -218,9 +235,13 @@ class User < ApplicationRecord
   end
 
   private
+    def generate_token
+      "#{self.email.hash.abs.to_s}-#{SecureRandom.urlsafe_base64.to_s}"
+    end
+
     def confirmation_token
       if self.confirm_token.blank?
-        self.confirm_token = "#{self.email.hash.abs.to_s}-#{SecureRandom.urlsafe_base64.to_s}"
+        self.confirm_token = generate_token
       end
     end
 end
