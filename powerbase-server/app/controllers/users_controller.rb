@@ -24,18 +24,7 @@ class UsersController < ApplicationController
 
     if @user
       @user.email_activate
-      session = JWTSessions::Session.new(payload: { user_id: @user.id }, refresh_by_access_allowed: true)
-      tokens = session.login
-
-      response.set_cookie(
-        JWTSessions.access_cookie,
-        value: tokens[:access],
-        httponly: true,
-        same_site: Rails.env.production? ? :none : nil,
-        secure: Rails.env.production?
-      )
-
-      render json: { csrf: tokens[:csrf] }
+      render json: :no_content
     else
       render json: { error: "User could not be found." }, status: :unprocessable_entity
     end

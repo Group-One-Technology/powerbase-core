@@ -14,11 +14,13 @@ export function ConfirmEmailPage() {
   const history = useHistory();
   const query = useQuery();
   const token = query.get('token');
-  const { authUser, mutate: mutateAuthUser } = useAuthUser();
+  const { authUser } = useAuthUser();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!token);
   const [emailSent, setEmailSent] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState(!token
+    ? 'Missing token. Could not verify account.'
+    : undefined);
 
   useEffect(() => {
     if (authUser === null && token?.length && !emailSent) {
@@ -26,7 +28,6 @@ export function ConfirmEmailPage() {
       confirmEmail({ token })
         .then(async () => {
           mounted(() => setEmailSent(true));
-          await mutateAuthUser();
           mounted(() => setLoading(false));
         })
         .catch((err) => {
@@ -48,7 +49,11 @@ export function ConfirmEmailPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Logo className="mx-auto h-12 w-auto" />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {!error ? 'Almost there...' : 'Something went wrong'}
+          {error
+            ? 'Something went wrong'
+            : loading
+              ? 'Almost there...'
+              : 'Email Verified'}
         </h2>
       </div>
 
@@ -59,17 +64,25 @@ export function ConfirmEmailPage() {
               <Loader />
             </div>
           )}
-          {!error
+          {error
             ? (
-              <p className="my-4 text-gray-900 text-base">
-                Please wait a bit. We&apos;re currently verifying your email address. We&apos;ll redirect you once it is verified.
-              </p>
-            ) : (
               <p className="my-4 text-gray-900 text-base">
                 It seems the link is invalid or has expired. Do you want to&nbsp;
                 <Link to="/user/reconfirm-email" className="text-indigo-600 hover:text-indigo-500">
                   request a new confirm email link?
                 </Link>
+              </p>
+            ) : loading ? (
+              <p className="my-4 text-gray-900 text-base">
+                Please wait a bit. We&apos;re currently verifying your email address.
+              </p>
+            ) : (
+              <p className="my-4 text-gray-900 text-base">
+                You&apos;re email has successfully been verified. You can now&nbsp;
+                <Link to="/login" className="text-indigo-600 hover:text-indigo-500">
+                  login to your account
+                </Link>
+                .
               </p>
             )}
         </div>
