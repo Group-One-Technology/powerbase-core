@@ -17,22 +17,27 @@ export function ConfirmEmailPage() {
   const { authUser, mutate: mutateAuthUser } = useAuthUser();
 
   const [loading, setLoading] = useState(true);
+  const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState();
 
   useEffect(() => {
-    setLoading(true);
-    confirmEmail({ token })
-      .then(async () => {
-        await mutateAuthUser();
-        mounted(() => setLoading(false));
-      })
-      .catch((err) => {
-        mounted(() => {
-          setError(err);
-          setLoading(false);
+    if (authUser === null && token?.length && !emailSent) {
+      setLoading(true);
+      confirmEmail({ token })
+        .then(async () => {
+          mounted(() => setEmailSent(true));
+          await mutateAuthUser();
+          mounted(() => setLoading(false));
+        })
+        .catch((err) => {
+          mounted(() => {
+            setEmailSent(true);
+            setError(err);
+            setLoading(false);
+          });
         });
-      });
-  }, []);
+    }
+  }, [authUser]);
 
   useEffect(() => {
     if (localStorage.signedIn) history.push('/');
