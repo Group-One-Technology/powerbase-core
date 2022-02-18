@@ -56,7 +56,9 @@ export function ForgotPasswordPage() {
         <Logo className="mx-auto h-12 w-auto" />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Forgot Password</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Please enter your email address below to reset your password.
+          Please enter your email address below and we&apos;ll send you&nbsp;
+          <br />
+          a link to reset your password.
         </p>
       </div>
 

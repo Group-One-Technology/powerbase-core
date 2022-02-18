@@ -13,7 +13,7 @@ class PasswordsController < ApplicationController
     @user = User.find_by(email: safe_params[:email])
     if @user.present?
       @user.generate_password_token!
-      # Deliver email here
+      UserMailer.reset_password(user_id: @user.id).deliver_later
       render json: :no_content
     else
       render json: { error: "Email address not found. Please check and try again." }, status: :not_found
@@ -29,7 +29,7 @@ class PasswordsController < ApplicationController
     end
 
     if @user.reset_password!(password: safe_params[:password], password_confirmation: safe_params[:password_confirmation])
-      # Deliver email here
+      UserMailer.changed_password_notice(user_id: @user.id).deliver_later
       render json: :no_content
     else
       render json: { error: @user.errors.full_messages }, status: :unprocessable_entity
