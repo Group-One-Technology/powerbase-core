@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_17_090929) do
+ActiveRecord::Schema.define(version: 2022_02_18_032220) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -206,6 +206,8 @@ ActiveRecord::Schema.define(version: 2022_02_17_090929) do
     t.boolean "is_onboarded", default: false
     t.boolean "email_confirmed", default: false, null: false
     t.string "confirm_token"
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
   end
 
   create_table "view_field_options", force: :cascade do |t|
