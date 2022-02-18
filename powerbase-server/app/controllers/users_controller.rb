@@ -1,8 +1,13 @@
 class UsersController < ApplicationController
-  before_action :authorize_access_request!, except: [:confirm_email]
+  before_action :authorize_access_request!, except: [:confirm_email, :reconfirm_email]
 
   schema(:confirm_email) do
     required(:token).value(:string)
+  end
+
+  schema(:reconfirm_email) do
+    required(:email).value(:string)
+    required(:password).value(:string)
   end
 
   schema(:guest) do
@@ -33,6 +38,24 @@ class UsersController < ApplicationController
       render json: { csrf: tokens[:csrf] }
     else
       render json: { error: "User could not be found." }, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /reconfirm_email
+  def reconfirm_email
+    @user = User.find_by(email: safe_params[:email])
+
+    if !@user&.authenticate(safe_params[:password])
+      render json: { error: "Invalid email and/or password." }, status: :not_found
+      return
+    end
+
+    if !@user.email_confirmed
+      @user.reconfirm_email
+      UserMailer.confirm_email(user_id: @user.id).deliver_later
+      render json: :no_content
+    else
+      render json: { error: "Email has already been verified." }, status: :unprocessable_entity
     end
   end
 

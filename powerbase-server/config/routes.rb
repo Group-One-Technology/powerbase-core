@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   post '/logout/', to: 'users/login#destroy'
   post '/register/', to: 'users/register#create'
   put '/confirm_email/', to: 'users#confirm_email'
+  put '/reconfirm_email/', to: 'users#reconfirm_email'
 
   resources :users, only: [] do
     member do

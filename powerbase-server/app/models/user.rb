@@ -28,6 +28,13 @@ class User < ApplicationRecord
     save!(:validate => false)
   end
 
+  def reconfirm_email
+    return if self.email_confirmed
+    self.confirm_token = nil
+    confirmation_token
+    save!(:validate => false)
+  end
+
   def shared_databases
     self.guests.map {|guest| guest.powerbase_database}
   end

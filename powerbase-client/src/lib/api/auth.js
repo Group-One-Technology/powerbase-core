@@ -65,6 +65,15 @@ export async function confirmEmail({ token }) {
   return undefined;
 }
 
+export async function resendConfirmEmail({ email, password }) {
+  const response = await securedApi.put('/reconfirm_email', {
+    email,
+    password,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function getAuthGuestByDatabase({ databaseId }) {
   const response = await securedApi.get(`/auth/databases/${databaseId}/guest`);
   if (isResponseSuccess(response)) return response.data;
