@@ -23,12 +23,13 @@ class PasswordsController < ApplicationController
   def reset
     @user = User.find_by(reset_password_token: safe_params[:token])
 
-    if @user.present? && @user.password_token_valid?
-      render json: { error: "Link is not valid or has expired. Try requesting a new reset password link." }, status: :not_found
+    if !(@user.present? && @user.password_token_valid?)
+      render json: { error: "Link is invalid or has expired. Try requesting a new reset password link." }, status: :not_found
       return
     end
 
-    if @user.reset_password!(params[:password])
+    if @user.reset_password!(password: safe_params[:password], password_confirmation: safe_params[:password_confirmation])
+      # Deliver email here
       render json: :no_content
     else
       render json: { error: @user.errors.full_messages }, status: :unprocessable_entity

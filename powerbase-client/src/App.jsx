@@ -20,6 +20,7 @@ import { SettingsPage } from '@pages/settings';
 import { Error404Page } from '@pages/404';
 
 import { ConfirmEmailPage } from '@pages/user/confirm-email';
+import { ResetPasswordPage } from '@pages/user/reset-password';
 
 import { BasePage } from '@pages/base/[id]';
 import { AddBasePage } from '@pages/base/add-base';
@@ -95,6 +96,7 @@ function UserRoute() {
   return (
     <Switch>
       <Route exact path={`${path}/confirm-email`} component={ConfirmEmailPage} />
+      <Route exact path={`${path}/reset-password`} component={ResetPasswordPage} />
       <Redirect from="*" to="/404" />
     </Switch>
   );

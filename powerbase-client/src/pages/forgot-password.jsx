@@ -96,7 +96,7 @@ export function ForgotPasswordPage() {
 
         <div className="mt-4 flex justify-between">
           <Link to="/register" className="text-sm text-indigo-600 hover:text-indigo-500">
-            Create a new account
+            Create an account
           </Link>
           <Link to="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
             Login instead
