@@ -50,7 +50,7 @@ class Users::ConfirmationController < ApplicationController
     end
 
     if @user.pending_any_confirmation?
-      @user.send_confirmation_instructions
+      @user.resend_confirmation_instructions
       render status: :no_content
     else
       render json: { error: "Email has already been verified." }, status: :unprocessable_entity
