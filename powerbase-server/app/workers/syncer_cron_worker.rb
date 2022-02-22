@@ -12,7 +12,7 @@ class SyncerCronWorker
     end
 
     def initialize_sync_db_and_tables!
-        puts "Autosync Database and Tables..."
+        puts "#{Time.now} Autosync Database and Tables..."
         dbs.each do |db|
             db.sync!
             # db.tables.each(&:sync!)

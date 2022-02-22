@@ -50,8 +50,8 @@ export async function getDatabase({ id }) {
   return undefined;
 }
 
-export async function getDatabaseConnectionStats({ id }) {
-  const response = await securedApi.get(`/databases/${id}/connection_stats`);
+export async function getDatabaseConnectionStats({ id, params }) {
+  const response = await securedApi.get(`/databases/${id}/connection_stats?${params}`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }

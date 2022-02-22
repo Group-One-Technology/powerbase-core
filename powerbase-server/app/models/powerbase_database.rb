@@ -65,7 +65,7 @@ class PowerbaseDatabase < ApplicationRecord
       thread.abort_on_exception = true
       thread.name = thread_name
     rescue => ex
-      puts "-- Thread::Error #{ex}"
+      puts "#{Time.now} -- Thread::Error for database##{self.id}: #{ex}"
     end
   end
 

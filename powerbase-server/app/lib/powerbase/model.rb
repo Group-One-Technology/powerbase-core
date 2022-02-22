@@ -147,7 +147,7 @@ module Powerbase
         begin
           delete_record(@index, doc_id)
         rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-          puts "Not found doc_id: #{doc_id}"
+          puts "#{Time.now} -- Not found doc_id: #{doc_id}"
         end
       end
 

@@ -42,12 +42,12 @@ class Tables::Migrator
     table.write_migration_logs!(status: "indexing_records")
 
     if total_records.zero?
-      puts "No record found"
+      puts "#{Time.now} -- Indexing done. No record found for table##{table.id}"
       set_table_as_migrated
       return
     end
 
-    puts "#{Time.now} Saving #{total_records} documents at index #{index_name}..."
+    puts "#{Time.now} -- Saving #{total_records} documents at index #{index_name} table##{table.id}..."
 
     while offset < total_records
       fetch_table_records!
@@ -56,7 +56,7 @@ class Tables::Migrator
         begin
           doc = format_record(record, fields)
           doc_id = get_doc_id(primary_keys, doc, actual_fields)
-          puts "--- DOC_ID: #{doc_id}"
+          puts "#{Time.now} -- Record to index DOC_ID: #{doc_id}"
 
           if doc_id.present?
             search_doc_id = nil
@@ -88,7 +88,7 @@ class Tables::Migrator
               begin
                 old_doc = get_record(index_name, search_doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-                puts "No old document found for doc_id of #{doc_id}"
+                puts "#{Time.now} -- No old document found for doc_id of #{doc_id}"
               end
 
               if old_doc != nil && old_doc.key?("_source")
@@ -98,9 +98,9 @@ class Tables::Migrator
                 # Remove the old existing doc
                 begin
                   delete_record(index_name, old_doc_id)
-                  puts "Deleted old doc_id: #{old_doc_id}"
+                  puts "#{Time.now} -- Deleted old doc_id: #{old_doc_id}"
                 rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-                  puts "No old doc_id: #{doc_id}"
+                  puts "#{Time.now} -- No old doc_id: #{doc_id}"
                 end
               end
             end
@@ -135,7 +135,7 @@ class Tables::Migrator
             if doc.length > 0
               update_record(index_name, doc_id, doc)
               @indexed_records += 1
-              puts "Saved doc_id: #{doc_id}"
+              puts "#{Time.now} -- Saved doc_id: #{doc_id}"
             end
           else
             table.write_migration_logs!(
@@ -171,7 +171,7 @@ class Tables::Migrator
   end
 
   def create_base_connection!
-    puts "Adding and auto linking connections of table##{table.id}"
+    puts "#{Time.now} -- Adding and auto linking connections of table##{table.id}"
     table.write_migration_logs!(status: "adding_connections")
 
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
