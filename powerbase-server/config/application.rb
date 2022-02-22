@@ -55,5 +55,11 @@ module PowerbaseServer
 
     # Set Sidekiq for background jobs
     config.active_job.queue_adapter = :sidekiq
+
+    # Set Postmark for sending emails
+    config.action_mailer.delivery_method = :postmark
+    config.action_mailer.postmark_settings = {
+      :api_token => ENV["POSTMARK_API_TOKEN"]
+    }
   end
 end

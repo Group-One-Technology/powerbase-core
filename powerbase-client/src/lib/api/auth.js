@@ -1,12 +1,11 @@
-import { securedApi } from './index';
+import { isResponseSuccess, securedApi } from './index';
 
 export async function login({ email, password }) {
   const response = await securedApi.post('/login', {
     email,
     password,
   });
-
-  if (response.statusText === 'OK') {
+  if (isResponseSuccess(response)) {
     localStorage.csrf = response.data.csrf;
     localStorage.signedIn = true;
 
@@ -19,10 +18,9 @@ export async function login({ email, password }) {
 export async function logout() {
   const response = await securedApi.post('/logout');
 
-  if (response.statusText === 'OK') {
+  if (isResponseSuccess(response)) {
     delete localStorage.csrf;
     delete localStorage.signedIn;
-
     return true;
   }
 
@@ -30,16 +28,9 @@ export async function logout() {
 }
 
 export async function auth() {
-  if (!localStorage.signedIn) {
-    return null;
-  }
-
+  if (!localStorage.signedIn) return null;
   const response = await securedApi.get('/auth');
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
@@ -57,33 +48,38 @@ export async function register({
     password,
     passwordConfirmation,
   });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
 
-  if (response.statusText === 'OK') {
+export async function confirmEmail({ token }) {
+  const response = await securedApi.put('/confirm_email', { token });
+  if (isResponseSuccess(response)) {
     localStorage.csrf = response.data.csrf;
     localStorage.signedIn = true;
-
     return response.data;
   }
 
+  return undefined;
+}
+
+export async function resendConfirmEmail({ email, password }) {
+  const response = await securedApi.put('/reconfirm_email', {
+    email,
+    password,
+  });
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function getAuthGuestByDatabase({ databaseId }) {
   const response = await securedApi.get(`/auth/databases/${databaseId}/guest`);
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 
 export async function setAuthUserAsOnboarded() {
   const response = await securedApi.put('/auth/onboarded');
-
-  if (response.statusText === 'OK') {
-    return response.data;
-  }
-
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }

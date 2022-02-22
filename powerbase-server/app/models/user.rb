@@ -2,12 +2,14 @@ class User < ApplicationRecord
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
+  include Confirmable
 
   has_secure_password
 
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :email, presence: true
+  validates_uniqueness_of :email
 
   has_many :notifications
   has_many :unread_notifications, -> { where has_read: false }, class_name: "Notification"
