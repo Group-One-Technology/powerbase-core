@@ -2,12 +2,14 @@ class User < ApplicationRecord
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
+  include Confirmable
 
   has_secure_password
 
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :email, presence: true
+  validates_uniqueness_of :email
 
   has_many :notifications
   has_many :unread_notifications, -> { where has_read: false }, class_name: "Notification"
@@ -16,23 +18,8 @@ class User < ApplicationRecord
   has_many :guest_invitations, -> { where is_accepted: false }, class_name: "Guest"
   has_many :views, class_name: "TableView"
 
-  before_create :confirmation_token
-
   def name
     "#{self.first_name} #{self.last_name}"
-  end
-
-  def email_activate
-    self.email_confirmed = true
-    self.confirm_token = nil
-    save!(:validate => false)
-  end
-
-  def reconfirm_email
-    return if self.email_confirmed
-    self.confirm_token = nil
-    confirmation_token
-    save!(:validate => false)
   end
 
   def shared_databases
@@ -216,11 +203,4 @@ class User < ApplicationRecord
     raise AccessDenied if error
     return false
   end
-
-  private
-    def confirmation_token
-      if self.confirm_token.blank?
-        self.confirm_token = "#{self.email.hash.abs.to_s}-#{SecureRandom.urlsafe_base64.to_s}"
-      end
-    end
 end
