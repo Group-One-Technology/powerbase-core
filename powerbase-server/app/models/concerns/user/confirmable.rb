@@ -1,9 +1,10 @@
 class User
+  # Time interval the confirmation token is valid. nil = unlimited
+  mattr_accessor :confirm_within
+  @@confirm_within = 7.days
+
   # Used to check whether an account is verified or not.
-  # * Must include Authentication first before Confirmable
-  #
   # Confirmable tracks the following columns:
-  #
   # * confirmation_token   - A unique random token
   # * confirmed_at         - A timestamp when the user clicked the confirmation link
   # * confirmation_sent_at - A timestamp when the confirmation_token was generated (not sent)
@@ -106,7 +107,7 @@ class User
       if self.confirmation_token && !confirmation_period_expired?
         @raw_confirmation_token = self.confirmation_token
       else
-        self.confirmation_token = @raw_confirmation_token = friendly_token
+        self.confirmation_token = @raw_confirmation_token = Devise.friendly_token
         self.confirmation_sent_at = Time.now.utc
       end
     end

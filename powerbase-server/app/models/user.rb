@@ -3,7 +3,6 @@ class User < ApplicationRecord
   include TablePermissionsHelper
   include FieldPermissionsHelper
 
-  include Authentication
   include Confirmable
   include Recoverable
 

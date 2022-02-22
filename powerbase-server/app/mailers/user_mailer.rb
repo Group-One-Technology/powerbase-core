@@ -20,10 +20,11 @@ class UserMailer < ApplicationMailer
     )
   end
 
-  def reset_password(user_id: nil)
+  def reset_password(user_id: nil, token: nil)
     @user = User.find user_id
     raise StandardError.new "Failed to send reset password email, user##{user_id} could not be found." if !@user
-    @action_url = "#{ENV["CLIENT"]}/user/reset-password?token=#{@user.reset_password_token}"
+    raise StandardError.new "Failed to send reset password email for user##{user_id}, token is missing." if !token
+    @action_url = "#{ENV["CLIENT"]}/user/reset-password?token=#{token}"
     @support_email = "team@editmode.com"
 
     mail(
