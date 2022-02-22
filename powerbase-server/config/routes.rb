@@ -14,14 +14,8 @@ Rails.application.routes.draw do
   post '/register/', to: 'users/register#create'
   put '/confirm_email/', to: 'users/confirmation#confirm_email'
   put '/reconfirm_email/', to: 'users/confirmation#reconfirm_email'
-  put '/forgot_password/', to: 'passwords#forgot'
-  put '/reset_password/', to: 'passwords#reset'
-
-  resources :users, only: [] do
-    member do
-      put 'confirm_email'
-    end
-  end
+  put '/forgot_password/', to: 'users/passwords#forgot'
+  put '/reset_password/', to: 'users/passwords#reset'
 
   resources :notifications, only: [:index], shallow: true do
     collection do

@@ -1,4 +1,4 @@
-class PasswordsController < ApplicationController
+class Users::PasswordsController < ApplicationController
   schema(:forgot) do
     required(:email).value(:string)
   end
@@ -9,6 +9,7 @@ class PasswordsController < ApplicationController
     required(:password_confirmation).value(:string)
   end
 
+  # PUT /forgot_password
   def forgot
     @user = User.find_by(email: safe_params[:email])
     if @user.present?
@@ -20,6 +21,7 @@ class PasswordsController < ApplicationController
     end
   end
 
+  # PUT /reset_password
   def reset
     @user = User.find_by(reset_password_token: safe_params[:token])
 

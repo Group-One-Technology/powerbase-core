@@ -2,7 +2,10 @@ class User < ApplicationRecord
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
+
+  include Authentication
   include Confirmable
+  include Recoverable
 
   has_secure_password
 
@@ -20,23 +23,6 @@ class User < ApplicationRecord
 
   def name
     "#{self.first_name} #{self.last_name}"
-  end
-
-  def generate_password_token!
-    self.reset_password_token = generate_token
-    self.reset_password_sent_at = Time.now.utc
-    save!
-  end
-
-  def password_token_valid?
-    (self.reset_password_sent_at + 4.hours) > Time.now.utc
-  end
-
-  def reset_password!(password: nil, password_confirmation: nil)
-    self.reset_password_token = nil
-    self.password = password
-    self.password_confirmation = password_confirmation
-    save!
   end
 
   def shared_databases
@@ -220,9 +206,4 @@ class User < ApplicationRecord
     raise AccessDenied if error
     return false
   end
-
-  private
-    def generate_token
-      "#{self.email.hash.abs.to_s}-#{SecureRandom.urlsafe_base64.to_s}"
-    end
 end
