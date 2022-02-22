@@ -14,8 +14,8 @@ export function useDataListener(logging = false) {
     const channel = pusher.subscribe(`table.${tableId}`);
 
     channel.bind('powerbase-data-listener', async (data) => {
+      mutateViewFields();
       await mutateTableRecords();
-      await mutateViewFields();
 
       // Add highlighting to cell
       mounted(() => setHighLightedCell(data.doc_id));

@@ -54,8 +54,19 @@ module Powerbase
           return
         end
 
+
         # Update elasticsearch record
-        update_record(index_name, doc_id, record)
+        begin
+          update_record(index_name, doc_id, record)
+        rescue Elasticsearch::Transport::Transport::Errors::Conflict => error
+          puts error
+          sleep 1
+          # Try again after a few seconds.
+          update_record(index_name, doc_id, record)
+        end
+
+        # Wait for changes to reflect on Elasticsearch before querying it.
+        sleep 0.75 if Rails.env.development?
 
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
