@@ -2,7 +2,9 @@ class User < ApplicationRecord
   include DatabasePermissionsHelper
   include TablePermissionsHelper
   include FieldPermissionsHelper
+
   include Confirmable
+  include Recoverable
 
   has_secure_password
 

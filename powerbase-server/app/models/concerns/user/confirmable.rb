@@ -1,9 +1,17 @@
-
 class User
   # Time interval the confirmation token is valid. nil = unlimited
   mattr_accessor :confirm_within
   @@confirm_within = 7.days
 
+  # Used to check whether an account is verified or not.
+  # Confirmable tracks the following columns:
+  # * confirmation_token   - A unique random token
+  # * confirmed_at         - A timestamp when the user clicked the confirmation link
+  # * confirmation_sent_at - A timestamp when the confirmation_token was generated (not sent)
+  # * unconfirmed_email    - An email address copied from the email attr. After confirmation
+  #                          this value is copied to the email attr then cleared.
+  #
+  # See https://github.com/heartcombo/devise/blob/main/lib/devise/models/confirmable.rb
   module Confirmable
     extend ActiveSupport::Concern
 
@@ -99,7 +107,7 @@ class User
       if self.confirmation_token && !confirmation_period_expired?
         @raw_confirmation_token = self.confirmation_token
       else
-        self.confirmation_token = @raw_confirmation_token = friendly_token
+        self.confirmation_token = @raw_confirmation_token = Devise.friendly_token
         self.confirmation_sent_at = Time.now.utc
       end
     end
@@ -107,15 +115,5 @@ class User
     def generate_confirmation_token!
       generate_confirmation_token && save(validate: false)
     end
-
-    private
-      # Generate a friendly string randomly to be used as token.
-      # By default, length is 20 characters.
-      def friendly_token(length = 20)
-        # To calculate real characters, we must perform this operation.
-        # See SecureRandom.urlsafe_base64
-        rlength = (length * 3) / 4
-        SecureRandom.urlsafe_base64(rlength).tr('lIO0', 'sxyz')
-      end
   end
 end

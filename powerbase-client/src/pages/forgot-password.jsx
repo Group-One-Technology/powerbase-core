@@ -1,45 +1,43 @@
 import React, { useEffect, useState } from 'react';
+import cn from 'classnames';
 import { Link, useHistory } from 'react-router-dom';
 
 import { useAuthUser } from '@models/AuthUser';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
-import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 import { useMounted } from '@lib/hooks/useMounted';
 
 import { Page } from '@components/layout/Page';
 import { Input } from '@components/ui/Input';
-import { resendConfirmEmail } from '@lib/api/auth';
+import { forgotPassword } from '@lib/api/auth';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Logo } from '@components/ui/Logo';
 
-export function ReconfirmEmailPage() {
+export function ForgotPasswordPage() {
   const history = useHistory();
   const { mounted } = useMounted();
   const { authUser } = useAuthUser();
 
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
-  const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
 
   const [errors, setErrors] = useState();
+  const [emailSent, setEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onEmailChange = (evt) => setEmail(evt.target.value);
-  const onPasswordChange = (evt) => setPassword(evt.target.value);
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
     setErrors(undefined);
 
-    const hasErrors = (!email.length && emailError.error)
-      || (!password.length && passwordError.error);
+    const hasErrors = (!email.length && emailError.error);
 
     if (!hasErrors) {
       try {
-        await resendConfirmEmail({ email, password });
-        history.push('/confirm-email');
+        await forgotPassword({ email });
+        mounted(() => setEmailSent(true));
       } catch (err) {
         setErrors(err.response.data.exception || err.response.data.error);
       }
@@ -56,9 +54,11 @@ export function ReconfirmEmailPage() {
     <Page title="Login" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Logo className="mx-auto h-12 w-auto" />
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Confirm Your Email</h2>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Forgot Password</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Upon registration, you&apos;ll receive a confirmation email. If you didn&apos;t get one, unverified users can request a new one below:
+          Please enter your email address below and we&apos;ll send you&nbsp;
+          <br />
+          a link to reset your password.
         </p>
       </div>
 
@@ -77,34 +77,31 @@ export function ReconfirmEmailPage() {
               error={emailError}
               required
             />
-            <Input
-              id="password"
-              label="Password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={onPasswordChange}
-              error={passwordError}
-              required
-            />
 
             <Button
               type="submit"
-              className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className={cn(
+                'w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm',
+                (loading || emailSent)
+                  ? 'text-gray-900 bg-gray-400 cursor-not-allowed'
+                  : 'text-white bg-indigo-600 cursor-pointer hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+              )}
               loading={loading}
+              disabled={emailSent}
             >
-              Resend Confirmation Email
+              {!emailSent
+                ? 'Reset Password'
+                : 'Email sent! Please check your email.'}
             </Button>
           </form>
         </div>
 
         <div className="mt-4 flex justify-between">
+          <Link to="/register" className="text-sm text-indigo-600 hover:text-indigo-500">
+            Create an account
+          </Link>
           <Link to="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
             Login instead
-          </Link>
-          <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
-            Forgot your password?
           </Link>
         </div>
       </div>

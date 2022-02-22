@@ -1,4 +1,6 @@
 CLIENT: "http://localhost:4000"
+AUTH_TOKEN_ENCRYPTION_KEY: "secret"
+
 encryption_key: "secret"
 jwt_encryption_key: "secret"
 redis_url: "redis://localhost:6379/0"

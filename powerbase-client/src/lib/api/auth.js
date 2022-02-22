@@ -72,6 +72,26 @@ export async function resendConfirmEmail({ email, password }) {
   return undefined;
 }
 
+export async function forgotPassword({ email }) {
+  const response = await securedApi.put('/forgot_password', { email });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function resetPassword({
+  token,
+  password,
+  passwordConfirmation,
+}) {
+  const response = await securedApi.put('/reset_password', {
+    token,
+    password,
+    passwordConfirmation,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function getAuthGuestByDatabase({ databaseId }) {
   const response = await securedApi.get(`/auth/databases/${databaseId}/guest`);
   if (isResponseSuccess(response)) return response.data;

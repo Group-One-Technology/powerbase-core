@@ -64,7 +64,7 @@ export function ConfirmEmailPage() {
           {error
             ? (
               <p className="my-4 text-gray-900 text-base">
-                It seems the link is invalid or has expired. Do you want to&nbsp;
+                It seems this link is invalid or has expired. Do you want to&nbsp;
                 <Link to="/reconfirm-email" className="text-indigo-600 hover:text-indigo-500">
                   request a new confirm email link?
                 </Link>
