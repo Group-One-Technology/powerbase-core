@@ -75,8 +75,22 @@ class User
 
     # Send confirmation instructions by email
     def send_confirmation_instructions
-      generate_confirmation_token! unless @raw_confirmation_token
+      unless @raw_confirmation_token && self.confirmation_token != nil
+        generate_confirmation_token!
+      end
       UserMailer.confirm_email(user_id: id).deliver_later
+    end
+
+    # Resend confirmation token.
+    # Regenerates the token if the period is expired.
+    def resend_confirmation_instructions
+      if pending_any_confirmation?
+        if self.unconfirmed_email == nil
+          self.unconfirmed_email = self.email
+          self.save(validate: false)
+        end
+        send_confirmation_instructions
+      end
     end
 
     # Generates a new random token for confirmation, and stores
