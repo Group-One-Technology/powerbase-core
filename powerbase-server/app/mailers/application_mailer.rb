@@ -6,4 +6,5 @@ class ApplicationMailer < ActionMailer::Base
   # Support Email to be included in the viewer.
   mattr_accessor :support_email
   @@support_email = "team@trypowerbase.com"
+  helper_method :support_email
 end
