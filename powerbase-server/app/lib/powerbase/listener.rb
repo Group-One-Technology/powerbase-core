@@ -18,6 +18,7 @@ module Powerbase
           notifier_callback(ev, pid, payload)
         end
       rescue => ex
+        puts "#{Time.now} -- Listener Error for Database##{@powerbase_db.id}}"
         puts ex
       end
     end

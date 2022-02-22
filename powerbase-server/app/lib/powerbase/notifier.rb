@@ -11,7 +11,7 @@ module Powerbase
     def add_trigger(table_name)
       # Wrap in a rescuer since this command will return an error if the table already has the same trigger fucntion
       begin
-        puts "Injecting Table Update Trigger..."
+        puts "#{Time.now} -- Injecting Table Update Trigger..."
         sequel_connect(powerbase_database) do |db|
           db.run("
             CREATE TRIGGER #{table_name}_changed
@@ -21,14 +21,14 @@ module Powerbase
             EXECUTE PROCEDURE table_update_notify()
           ")
         end
-        puts "Injecting Table Update Trigger...DONE"
+        puts "#{Time.now} --Injecting Table Update Trigger...DONE"
       rescue => exception
-        puts "Notification trigger for #{table_name} already exist"
+        puts "#{Time.now} -- Notification trigger for #{table_name} already exist"
       end
     end
 
     def create_notifier!
-      puts "Injecting Table Notifier Function..."
+      puts "#{Time.now} -- Injecting Table Notifier Function..."
       sequel_connect(powerbase_database) do |db|
         db.run("
           CREATE OR REPLACE FUNCTION table_update_notify() RETURNS trigger AS $$
@@ -75,7 +75,7 @@ module Powerbase
         ")
       end
 
-      puts "Injecting Table Notifier Function...DONE"
+      puts "#{Time.now} -- Injecting Table Notifier Function...DONE"
     end
   end
 end

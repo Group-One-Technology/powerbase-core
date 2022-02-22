@@ -11,11 +11,11 @@ class SyncTableWorker
     deleted_columns = table.deleted_columns
 
     if table.in_synced?
-      puts "-- SyncTableWorker #{database.name}.#{table.name} is already in synced"
+      puts "#{Time.now} -- SyncTableWorker #{database.name}.#{table.name} is already in synced"
     else
       if unmigrated_columns.any?
-        puts "Unmigrated column detected at table##{table.id}..."
-        puts "Saving #{unmigrated_columns.count} additional column(s)..."
+        puts "#{Time.now} Unmigrated column detected at table##{table.id}..."
+        puts "#{Time.now} Saving #{unmigrated_columns.count} additional column(s)..."
 
         unmigrated_column_names = unmigrated_columns.map {|name, value| name}
         table.write_migration_logs!(status: "migrating_metadata", unmigrated_columns: unmigrated_column_names)
@@ -28,8 +28,8 @@ class SyncTableWorker
       end
 
       if deleted_columns.any?
-        puts "Deleted column(s) detected at table##{table.id}..."
-        puts "Removing #{deleted_columns.count} column(s)..."
+        puts "#{Time.now} Deleted column(s) detected at table##{table.id}..."
+        puts "#{Time.now} Removing #{deleted_columns.count} column(s)..."
 
         deleted_columns.each do |field|
           field.view_field_options.destroy_all

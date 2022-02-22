@@ -11,16 +11,16 @@ class SyncDatabaseWorker
     @new_connection = new_connection
 
     if database.in_synced?
-      puts "-- SyncDatabaseWorker #{database.name} is already in synced!"
+      puts "#{Time.now} -- SyncDatabaseWorker #{database.name} is already in synced!"
     else
       @unmigrated_tables = @database.unmigrated_tables
       @deleted_tables = @database.deleted_tables
 
-      puts "Migrating unmigrated tables of database with id of #{@database.id}..."
+      puts "#{Time.now} Migrating unmigrated tables of database with id of #{@database.id}..."
 
       if unmigrated_tables.any?
         batch = Sidekiq::Batch.new
-        batch.description = "Migrating metadata of database with id of #{database.id}"
+        batch.description = "#{Time.now} Migrating metadata of database with id of #{database.id}"
         batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "migrating_metadata", :new_connection => new_connection)
         batch.jobs do
           unmigrated_tables.each_with_index do |table_name, index|
@@ -41,7 +41,7 @@ class SyncDatabaseWorker
           end
         end
 
-        puts "Started Batch #{batch.bid}"
+        puts "#{Time.now} Started Batch #{batch.bid}"
       end
 
       if deleted_tables.any?
@@ -53,7 +53,7 @@ class SyncDatabaseWorker
   end
 
   def on_complete(status, params)
-    puts "Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
+    puts "#{Time.now} Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
 
     @database = PowerbaseDatabase.find params["database_id"]
     @new_connection = params["new_connection"]
@@ -102,7 +102,7 @@ class SyncDatabaseWorker
         end
       end
 
-      puts "Started Batch #{batch.bid}"
+      puts "#{Time.now} Started Batch #{batch.bid}"
     end
 
     def create_listeners
@@ -120,7 +120,7 @@ class SyncDatabaseWorker
         database.tables.each {|table| table.migrator.create_listener_later!}
       end
 
-      puts "Started Batch #{batch.bid}"
+      puts "#{Time.now} Started Batch #{batch.bid}"
 
       if new_connection && database.is_turbo
         poller = Sidekiq::Cron::Job.find("Database Listeners")
@@ -139,6 +139,6 @@ class SyncDatabaseWorker
         database.tables.each(&:reindex_later!)
       end
 
-      puts "Started Batch #{batch.bid}"
+      puts "#{Time.now} Started Batch #{batch.bid}"
     end
 end
