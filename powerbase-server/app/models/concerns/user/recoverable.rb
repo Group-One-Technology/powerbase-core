@@ -1,7 +1,7 @@
 class User
   # Time interval the reset password token is valid. nil = unlimited
   mattr_accessor :reset_password_within
-  @@reset_password_within = 7.days
+  @@reset_password_within = 4.hours
 
   # Used to reset a user's password.
   # Recoverable adds the following options:
