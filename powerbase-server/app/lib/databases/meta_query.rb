@@ -25,11 +25,17 @@ class Databases::MetaQuery
     end
   end
 
-  def connection_stats
+  def connection_stats(filter: nil)
+    filter = nil if ![nil, "idle", "active"].include?(filter)
+
     if database.postgresql?
       sequel_connect(database) do |db|
         list = {}
-        list[:connections] = db.from(:pg_stat_activity).where(datname: database.database_name)
+        filter_query = {
+          datname: database.database_name,
+        }
+        filter_query[:state] = filter if filter != nil
+        list[:connections] = db.from(:pg_stat_activity).where(filter_query)
         list[:max_connections] = db.fetch("SHOW max_connections").first[:max_connections]
         list
       end
