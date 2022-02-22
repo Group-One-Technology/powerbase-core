@@ -26,7 +26,7 @@ export function CELL_VALUE_VALIDATOR(value, type = FieldType.SINGLE_LINE_TEXT, i
       break;
     }
     case FieldType.DATE: {
-      if (!isValidDate(value)) throw new Error('Must be a valid date.');
+      if (!isValidDate(new Date(value))) throw new Error('Must be a valid date.');
       break;
     }
     case FieldType.JSON_TEXT: {
