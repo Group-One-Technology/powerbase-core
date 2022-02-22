@@ -17,6 +17,11 @@ class Users::ConfirmationController < ApplicationController
 
     @user = User.find_by_confirmation_token(safe_params[:token])
 
+    if !@user
+      render json: { error: "User could not be found" }, status: :unprocessable_entity
+      return
+    end
+
     if @user.confirm
       session = JWTSessions::Session.new(payload: { user_id: @user.id }, refresh_by_access_allowed: true)
       tokens = session.login
