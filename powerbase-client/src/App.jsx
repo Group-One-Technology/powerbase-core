@@ -13,6 +13,7 @@ import { OnboardingPage } from '@pages/onboarding';
 import { LoginPage } from '@pages/login';
 import { RegisterPage } from '@pages/register';
 import { ConfirmEmailNoticePage } from '@pages/confirm-email';
+import { ReconfirmEmailPage } from '@pages/reconfirm-email';
 import { BasesPage } from '@pages/bases';
 import { SettingsPage } from '@pages/settings';
 import { Error404Page } from '@pages/404';
@@ -41,6 +42,7 @@ export function App() {
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/register" component={RegisterPage} />
           <Route exact path="/confirm-email" component={ConfirmEmailNoticePage} />
+          <Route exact path="/reconfirm-email" component={ReconfirmEmailPage} />
           <Route exact path="/bases" component={BasesPage} />
           <Route exact path="/settings" component={SettingsPage} />
           <Route path="/base">

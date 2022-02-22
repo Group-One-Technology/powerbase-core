@@ -204,8 +204,12 @@ ActiveRecord::Schema.define(version: 2022_02_17_090929) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_onboarded", default: false
-    t.boolean "email_confirmed", default: false, null: false
-    t.string "confirm_token"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "unconfirmed_email"
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   create_table "view_field_options", force: :cascade do |t|

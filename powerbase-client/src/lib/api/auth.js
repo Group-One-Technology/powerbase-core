@@ -54,14 +54,21 @@ export async function register({
 
 export async function confirmEmail({ token }) {
   const response = await securedApi.put('/confirm_email', { token });
-
   if (isResponseSuccess(response)) {
     localStorage.csrf = response.data.csrf;
     localStorage.signedIn = true;
-
     return response.data;
   }
 
+  return undefined;
+}
+
+export async function resendConfirmEmail({ email, password }) {
+  const response = await securedApi.put('/reconfirm_email', {
+    email,
+    password,
+  });
+  if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
 

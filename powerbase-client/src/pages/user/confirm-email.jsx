@@ -16,23 +16,30 @@ export function ConfirmEmailPage() {
   const token = query.get('token');
   const { authUser, mutate: mutateAuthUser } = useAuthUser();
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [loading, setLoading] = useState(!!token);
+  const [emailSent, setEmailSent] = useState(false);
+  const [error, setError] = useState(!token
+    ? 'Missing token. Could not verify account.'
+    : undefined);
 
   useEffect(() => {
-    setLoading(true);
-    confirmEmail({ token })
-      .then(async () => {
-        await mutateAuthUser();
-        mounted(() => setLoading(false));
-      })
-      .catch((err) => {
-        mounted(() => {
-          setError(err);
-          setLoading(false);
+    if (authUser === null && token?.length && !emailSent) {
+      setLoading(true);
+      confirmEmail({ token })
+        .then(async () => {
+          mounted(() => setEmailSent(true));
+          await mutateAuthUser();
+          mounted(() => setLoading(false));
+        })
+        .catch((err) => {
+          mounted(() => {
+            setEmailSent(true);
+            setError(err);
+            setLoading(false);
+          });
         });
-      });
-  }, []);
+    }
+  }, [authUser]);
 
   useEffect(() => {
     if (localStorage.signedIn) history.push('/');
@@ -54,17 +61,17 @@ export function ConfirmEmailPage() {
               <Loader />
             </div>
           )}
-          {!error
+          {error
             ? (
               <p className="my-4 text-gray-900 text-base">
-                Please wait a bit. We&apos;re currently verifying your email address. We&apos;ll redirect you once it is verified.
+                It seems the link is invalid or has expired. Do you want to&nbsp;
+                <Link to="/reconfirm-email" className="text-indigo-600 hover:text-indigo-500">
+                  request a new confirm email link?
+                </Link>
               </p>
             ) : (
               <p className="my-4 text-gray-900 text-base">
-                It seems the link is invalid or has expired. Do you want to&nbsp;
-                <Link to="/user/reconfirm-email" className="text-indigo-600 hover:text-indigo-500">
-                  request a new confirm email link?
-                </Link>
+                Please wait a bit. We&apos;re currently verifying your email address.
               </p>
             )}
         </div>
