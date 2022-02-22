@@ -10,6 +10,7 @@ class UserMailer < ApplicationMailer
 
     @action_url = "#{ENV["CLIENT"]}/user/confirm-email?token=#{@user.confirmation_token}"
     @support_email = self.class.support_email
+    @confirm_within = ActiveSupport::Duration.build(@user.confirm_within).inspect
 
     mail(
       subject: 'Confirm Your Email',
