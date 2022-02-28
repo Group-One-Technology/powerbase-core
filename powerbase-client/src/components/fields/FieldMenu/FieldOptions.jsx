@@ -51,7 +51,7 @@ export function FieldOptions({ table, field, setOpen }) {
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      catchError(err.response.data.exception || err.response.data.error);
     }
   };
 
@@ -59,7 +59,8 @@ export function FieldOptions({ table, field, setOpen }) {
     if (!canSetPII) return;
     saving();
 
-    const updatedFields = fields.map((item) => ({
+    const currentFields = fields;
+    const updatedFields = currentFields.map((item) => ({
       ...item,
       isPII: item.id === field.id
         ? !field.isPii
@@ -80,14 +81,16 @@ export function FieldOptions({ table, field, setOpen }) {
       await mutateTableRecords();
       saved();
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      setFields(currentFields);
+      catchError(err.response.data.exception || err.response.data.error);
     }
   };
 
   const handleToggleNullable = async () => {
     saving();
 
-    const updatedFields = fields.map((item) => ({
+    const currentFields = fields;
+    const updatedFields = currentFields.map((item) => ({
       ...item,
       isNullable: item.id === field.id
         ? !field.isNullable
@@ -107,7 +110,8 @@ export function FieldOptions({ table, field, setOpen }) {
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      setFields(currentFields);
+      catchError(err.response.data.exception || err.response.data.error);
     }
   };
 
@@ -137,7 +141,7 @@ export function FieldOptions({ table, field, setOpen }) {
           className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
           onSelect={handleToggleNullable}
         >
-          {!field.isNullable ? 'Set as Nullable' : 'Unset as Nullable'}
+          {!field.isNullable ? 'Allow Null' : 'Set as Required'}
         </ContextMenu.Item>
       </ContextMenu.Content>
     </ContextMenu.Root>
