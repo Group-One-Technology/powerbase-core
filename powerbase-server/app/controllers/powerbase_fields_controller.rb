@@ -27,6 +27,10 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:enable_validation, :disable_validation) do
+    required(:id).value(:integer)
+  end
+
   schema(:update_field_permission) do
     required(:id).value(:integer)
     required(:permission)
@@ -162,6 +166,24 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
+  # PUT /fields/:id/enable_validation
+  def enable_validation
+    if @field.update(has_validation: true)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/disable_validation
+  def disable_validation
+    if @field.update(has_validation: false)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
   # PUT /fields/:id/allowed_roles
   def update_allowed_roles
     field_updater = Fields::Updater.new(@field)
@@ -206,6 +228,7 @@ class PowerbaseFieldsController < ApplicationController
         is_nullable: field.is_nullable,
         is_auto_increment: field.is_auto_increment,
         is_pii: field.is_pii,
+        has_validation: field.has_validation,
         options: field.options,
         permissions: field.permissions,
         table_id: field.powerbase_table_id,

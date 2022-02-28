@@ -21,7 +21,7 @@ import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { DroppableArea } from '@components/ui/DroppableArea';
 import { useReorderFields } from '@lib/hooks/virtual-table/useReorderFields';
 import { useResizeFields } from '@lib/hooks/virtual-table/useResizeFields';
-import { GridHeaderOptions } from './GridHeaderOptions';
+import { FieldMenu } from '../../fields/FieldMenu';
 
 const GRID_HEADER_HEIGHT = 30;
 
@@ -78,7 +78,7 @@ function CellRenderer({
         className="single-line bg-gray-100 focus:bg-gray-100 border-r border-gray-200 flex items-center truncate text-sm py-1 px-2"
         style={style}
       >
-        <GridHeaderOptions
+        <FieldMenu
           id={key}
           data={{ type: 'column', index: columnIndex - 1, field }}
           table={table}

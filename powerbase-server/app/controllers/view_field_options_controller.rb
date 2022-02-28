@@ -115,6 +115,7 @@ class ViewFieldOptionsController < ApplicationController
         is_hidden: view_field.is_hidden,
         is_auto_increment: field.is_auto_increment,
         is_pii: field.is_pii,
+        has_validation: field.has_validation,
         options: field.options,
         permissions: field.permissions,
         view_id: view_field.table_view_id,

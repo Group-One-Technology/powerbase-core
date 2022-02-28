@@ -6,7 +6,7 @@ import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useTableConnections } from '@models/TableConnections';
 
 function useViewFieldStateModel() {
-  const { data: initialFields } = useViewFields();
+  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
   const { data: connections } = useTableConnections();
   const [fields, setFields] = useState(
     initializeFields(initialFields, connections),
@@ -25,6 +25,7 @@ function useViewFieldStateModel() {
     initialFields,
     fields,
     setFields: updateFields,
+    mutateViewFields,
     hasAddedNewField,
     setHasAddedNewField,
   };

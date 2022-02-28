@@ -64,6 +64,8 @@ Rails.application.routes.draw do
           put 'field_type', as: 'update_field_field_type'
           put 'set_as_pii', as: 'set_as_pii_field'
           put 'unset_as_pii', as: 'unset_as_pii_field'
+          put 'enable_validation', as: 'enable_field_validation'
+          put 'disable_validation', as: 'disable_field_validation'
           put 'update_field_permission', as: 'update_field_permission'
           put 'allowed_roles', as: 'update_allowed_roles', to: 'powerbase_fields#update_allowed_roles'
         end

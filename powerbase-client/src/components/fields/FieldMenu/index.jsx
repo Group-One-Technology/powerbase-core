@@ -7,13 +7,10 @@ import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import {
   EyeOffIcon,
   ShieldCheckIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
   ChevronRightIcon,
   LockClosedIcon,
 } from '@heroicons/react/outline';
 
-import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
@@ -30,9 +27,10 @@ import {
 import { useTableView } from '@models/TableView';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { DraggableItem } from '@components/ui/DraggableItem';
+import { FieldOptions } from './FieldOptions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
-export function GridHeaderOptions({
+export function FieldMenu({
   id,
   data,
   table,
@@ -41,9 +39,8 @@ export function GridHeaderOptions({
   const { saving, catchError, saved } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
-  const { data: fields, mutate: mutateViewFields } = useViewFields();
-  const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+  const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { modal: permissionsModal } = useFieldPermissionsModal();
   const { mutate: mutateTableRecords } = useTableRecords();
 
@@ -51,7 +48,6 @@ export function GridHeaderOptions({
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
   const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
-  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
   const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
@@ -278,7 +274,7 @@ export function GridHeaderOptions({
           )}
 
           {canManageView && <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
-
+          <FieldOptions field={field} setOpen={setOpen} />
           {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
@@ -289,24 +285,6 @@ export function GridHeaderOptions({
               >
                 <LockClosedIcon className="h-4 w-4 mr-1.5" />
                 Permissions
-              </ContextMenu.Item>
-            </>
-          )}
-          {canAddFields && (
-            <>
-              <ContextMenu.Item
-                textValue="\t"
-                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              >
-                <ArrowRightIcon className="h-4 w-4 mr-1.5" />
-                Insert right
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                textValue="\t"
-                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              >
-                <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
-                Insert left
               </ContextMenu.Item>
             </>
           )}
@@ -336,7 +314,7 @@ export function GridHeaderOptions({
   );
 }
 
-GridHeaderOptions.propTypes = {
+FieldMenu.propTypes = {
   id: PropTypes.any.isRequired,
   data: PropTypes.object.isRequired,
   table: PropTypes.object.isRequired,

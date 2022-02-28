@@ -23,7 +23,12 @@ export function CellInput({
   const inputRef = useRef();
   const [value, setValue, { error }] = useValidState(
     initialValue,
-    (curVal) => CELL_VALUE_VALIDATOR(curVal, fieldType.name, !field.isNullable),
+    (curVal) => CELL_VALUE_VALIDATOR({
+      value: curVal,
+      type: fieldType.name,
+      required: !field.isNullable,
+      strict: validate,
+    }),
   );
   const [focus, setFocus] = useState(!isAddRecord);
 
@@ -73,7 +78,7 @@ export function CellInput({
     }
   }, [focus]);
 
-  const InputError = () => (validate && error
+  const InputError = () => (error
     ? (
       <p
         className="-ml-0.5 -mt-0.5 p-2 text-white text-xs bg-gray-900 border border-gray-900"
@@ -173,7 +178,7 @@ export function CellInput({
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={focus}
           />
-          {validate && error && (
+          {error && (
             <RelativePortal component="div" top={0} left={0}>
               <InputError />
             </RelativePortal>

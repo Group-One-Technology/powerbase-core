@@ -53,7 +53,12 @@ export function useEditingCell({ records, setRecords }) {
     }
 
     try {
-      CELL_VALUE_VALIDATOR(updatedValue, fieldType.name, !field.isNullable);
+      CELL_VALUE_VALIDATOR({
+        value: updatedValue,
+        type: fieldType.name,
+        required: !field.isNullable,
+        strict: field.hasValidation,
+      });
     } catch (err) {
       catchError(err.message);
       exitEditing();

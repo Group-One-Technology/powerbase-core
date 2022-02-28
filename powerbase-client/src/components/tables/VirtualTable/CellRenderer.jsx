@@ -82,7 +82,7 @@ export function CellRenderer({
           fieldType={fieldType}
           onValueChange={handleValueChange}
           style={style}
-          validate
+          validate={field.hasValidation}
           isAddRecord
         />
       </div>
@@ -111,7 +111,7 @@ export function CellRenderer({
             }
           }}
           style={style}
-          validate
+          validate={field.hasValidation}
         />
       </div>
     );

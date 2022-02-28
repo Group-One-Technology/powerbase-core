@@ -83,7 +83,8 @@ class Fields::Creator
       is_auto_increment: field_options[:auto_increment] || false,
       powerbase_field_type_id: field_type,
       powerbase_table_id: table.id,
-      is_pii: Pii.is_pii?(field_name)
+      is_pii: Pii.is_pii?(field_name),
+      has_validation: false,
     }
   end
 
