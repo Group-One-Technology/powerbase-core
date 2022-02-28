@@ -82,6 +82,7 @@ export function CellRenderer({
           fieldType={fieldType}
           onValueChange={handleValueChange}
           style={style}
+          validate
           isAddRecord
         />
       </div>
@@ -110,6 +111,7 @@ export function CellRenderer({
             }
           }}
           style={style}
+          validate
         />
       </div>
     );

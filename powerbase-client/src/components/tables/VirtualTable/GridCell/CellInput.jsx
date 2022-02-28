@@ -16,7 +16,7 @@ export function CellInput({
   onSubmit,
   isAddRecord,
   className,
-  validate = true,
+  validate,
   style,
 }) {
   const rootInputRef = useRef();
