@@ -12,6 +12,7 @@ import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
 import { useBase } from '@models/Base';
+import { useSaveStatus } from '@models/SaveStatus';
 import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { ROW_NO_CELL_WIDTH, DEFAULT_CELL_WIDTH } from '@lib/constants';
@@ -31,6 +32,7 @@ export function TableRenderer({
   records,
   setRecords,
 }) {
+  const { catchError } = useSaveStatus();
   const { data: fieldTypes } = useFieldTypes();
   const { data: totalRecords } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
@@ -195,8 +197,8 @@ export function TableRenderer({
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
                         const isEditable = !isLastRow && !isRowNo && field && baseUser?.can(PERMISSIONS.EditFieldData, field)
-                          && !(field?.isPrimaryKey || field?.isForeignKey)
-                          && fieldType != null && FieldType.CHECKBOX !== fieldType.name;
+                          && !(field?.isPrimaryKey || field?.isForeignKey || field?.isPii)
+                          && fieldType != null && ![FieldType.CHECKBOX, FieldType.JSON_TEXT].includes(fieldType.name);
 
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
@@ -234,6 +236,7 @@ export function TableRenderer({
                           handleExitEditing,
                           handleValueChange,
                           handleAddRecord,
+                          catchError,
                           ...props,
                         });
                       }}
