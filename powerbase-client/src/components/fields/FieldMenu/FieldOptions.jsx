@@ -5,16 +5,24 @@ import { CogIcon, ChevronRightIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
-import { PERMISSIONS } from '@lib/constants/permissions';
-import { disableFieldValidation, enableFieldValidation } from '@lib/api/fields';
 import { useViewFieldState } from '@models/view/ViewFieldState';
+import { useTableRecords } from '@models/TableRecords';
+import { PERMISSIONS } from '@lib/constants/permissions';
+import {
+  disableFieldValidation,
+  enableFieldValidation,
+  setFieldAsPII,
+  unsetFieldAsPII,
+} from '@lib/api/fields';
 
-export function FieldOptions({ field, setOpen }) {
+export function FieldOptions({ table, field, setOpen }) {
   const { baseUser } = useBaseUser();
   const { saving, catchError, saved } = useSaveStatus();
   const { fields, setFields, mutateViewFields } = useViewFieldState();
+  const { mutate: mutateTableRecords } = useTableRecords();
 
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
+  const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
   const handleToggleValidation = async () => {
     if (!canManageField) return;
@@ -44,6 +52,36 @@ export function FieldOptions({ field, setOpen }) {
     }
   };
 
+  const handleTogglePII = async () => {
+    if (canSetPII) {
+      saving();
+
+      const updatedFields = fields.map((item) => ({
+        ...item,
+        isPII: item.id === field.id
+          ? !field.isPii
+          : item.isPii,
+      }));
+
+      setFields(updatedFields);
+      setOpen(false);
+
+      try {
+        if (!field.isPii) {
+          await setFieldAsPII({ id: field.fieldId });
+        } else {
+          await unsetFieldAsPII({ id: field.fieldId });
+        }
+
+        await mutateViewFields(updatedFields);
+        await mutateTableRecords();
+        saved();
+      } catch (err) {
+        catchError(err.response.data.error || err.response.data.exception);
+      }
+    }
+  };
+
   return (
     <ContextMenu.Root>
       <ContextMenu.TriggerItem className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100">
@@ -58,12 +96,21 @@ export function FieldOptions({ field, setOpen }) {
         >
           {!field.hasValidation ? 'Enable Validation' : 'Disable Validation'}
         </ContextMenu.Item>
+        {canSetPII && (
+          <ContextMenu.Item
+            className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+            onSelect={handleTogglePII}
+          >
+            {!field.isPii ? 'Set as PII' : 'Unset as PII'}
+          </ContextMenu.Item>
+        )}
       </ContextMenu.Content>
     </ContextMenu.Root>
   );
 }
 
 FieldOptions.propTypes = {
+  table: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
   setOpen: PropTypes.func.isRequired,
 };

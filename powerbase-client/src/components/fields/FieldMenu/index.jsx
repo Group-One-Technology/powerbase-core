@@ -4,26 +4,15 @@ import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import {
-  EyeOffIcon,
-  ShieldCheckIcon,
-  ChevronRightIcon,
-  LockClosedIcon,
-} from '@heroicons/react/outline';
+import { EyeOffIcon, ChevronRightIcon, LockClosedIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
-import { useTableRecords } from '@models/TableRecords';
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
-import {
-  updateFieldAlias,
-  updateFieldType,
-  setFieldAsPII,
-  unsetFieldAsPII,
-} from '@lib/api/fields';
+import { updateFieldAlias, updateFieldType } from '@lib/api/fields';
 import { useTableView } from '@models/TableView';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { DraggableItem } from '@components/ui/DraggableItem';
@@ -42,7 +31,6 @@ export function FieldMenu({
   const { data: fieldTypes } = useFieldTypes();
   const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { modal: permissionsModal } = useFieldPermissionsModal();
-  const { mutate: mutateTableRecords } = useTableRecords();
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
@@ -50,7 +38,6 @@ export function FieldMenu({
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
-  const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
   const [open, setOpen] = useState(false);
   const [alias, setAlias] = useState(field.alias || field.name);
@@ -135,36 +122,6 @@ export function FieldMenu({
       try {
         await hideViewField({ id: field.id });
         await mutateViewFields(updatedFields);
-        saved();
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
-      }
-    }
-  };
-
-  const handleTogglePII = async () => {
-    if (canSetPII) {
-      saving();
-
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isPII: item.id === field.id
-          ? !field.isPii
-          : item.isPii,
-      }));
-
-      setFields(updatedFields);
-      setOpen(false);
-
-      try {
-        if (!field.isPii) {
-          await setFieldAsPII({ id: field.fieldId });
-        } else {
-          await unsetFieldAsPII({ id: field.fieldId });
-        }
-
-        await mutateViewFields(updatedFields);
-        await mutateTableRecords();
         saved();
       } catch (err) {
         catchError(err.response.data.error || err.response.data.exception);
@@ -274,7 +231,7 @@ export function FieldMenu({
           )}
 
           {canManageView && <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
-          <FieldOptions field={field} setOpen={setOpen} />
+          <FieldOptions table={table} field={field} setOpen={setOpen} />
           {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
@@ -296,16 +253,6 @@ export function FieldMenu({
             >
               <EyeOffIcon className="h-4 w-4 mr-1.5" />
               Hide
-            </ContextMenu.Item>
-          )}
-          {canSetPII && (
-            <ContextMenu.Item
-              textValue="\t"
-              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              onSelect={handleTogglePII}
-            >
-              <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-              {!field.isPii ? 'Set as PII' : 'Unset as PII'}
             </ContextMenu.Item>
           )}
         </div>
