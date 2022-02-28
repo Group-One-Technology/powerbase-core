@@ -35,6 +35,7 @@ export async function unsetFieldAsPII({ id }) {
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
+
 export async function enableFieldValidation({ id }) {
   const response = await securedApi.put(`/fields/${id}/enable_validation`);
   if (isResponseSuccess(response)) return response.data;
@@ -43,6 +44,18 @@ export async function enableFieldValidation({ id }) {
 
 export async function disableFieldValidation({ id }) {
   const response = await securedApi.put(`/fields/${id}/disable_validation`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function setFieldAsNullable({ id }) {
+  const response = await securedApi.put(`/fields/${id}/set_as_nullable`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function unsetFieldAsNullable({ id }) {
+  const response = await securedApi.put(`/fields/${id}/unset_as_nullable`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
