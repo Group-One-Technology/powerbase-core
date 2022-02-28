@@ -1,4 +1,4 @@
-class Fields::Sequel
+class Fields::Schema
   include SequelHelper
 
   attr_accessor :field
@@ -12,11 +12,13 @@ class Fields::Sequel
     table_name = table.name.to_sym
     field_name = @field.name.to_sym
 
-    sequel_connect(@field.table.db) do |db|
-      if is_nullable
-        db.alter_table(table_name) { set_column_allow_null(field_name) }
-      else
-        db.alter_table(table_name) { set_column_not_null(field_name) }
+    if !@field.is_virtual
+      sequel_connect(@field.table.db) do |db|
+        if is_nullable
+          db.alter_table(table_name) { set_column_allow_null(field_name) }
+        else
+          db.alter_table(table_name) { set_column_not_null(field_name) }
+        end
       end
     end
 

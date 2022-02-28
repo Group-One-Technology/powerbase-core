@@ -206,7 +206,7 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/set_as_nullable
   def set_as_nullable
-    field_sequel = Fields::Sequel.new @field
+    field_sequel = Fields::Schema.new @field
     if field_sequel.set_nullable(true)
       render json: format_json(@field)
     else
@@ -216,7 +216,7 @@ class PowerbaseFieldsController < ApplicationController
 
   # PUT /fields/:id/unset_as_nullable
   def unset_as_nullable
-    field_sequel = Fields::Sequel.new @field
+    field_sequel = Fields::Schema.new @field
     if field_sequel.set_nullable(false)
       render json: format_json(@field)
     else
