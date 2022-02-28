@@ -84,7 +84,7 @@ export function RecordItemValue({
         <span className="inline-flex items-center font-normal">
           {(isLinkedRecord && isForeignDatabase) && `${item.databaseName.toUpperCase()} > `}
           {(isLinkedRecord && (item.tableName !== item.name || isForeignDatabase)) && `${item.tableName.toUpperCase()} > `}
-          {item.name.toUpperCase()}
+          {(item.alias || item.name).toUpperCase()}
           {item.isPii && (
             <Tooltip.Root delayDuration={0}>
               <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
