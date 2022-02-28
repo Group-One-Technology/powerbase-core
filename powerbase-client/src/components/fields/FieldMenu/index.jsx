@@ -34,7 +34,7 @@ export function FieldMenu({
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
-  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
+  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !(field.dbType && ['uuid', 'int'].includes(field.dbType));
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
@@ -171,12 +171,16 @@ export function FieldMenu({
               {field.name}
             </dd>
 
-            <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
-              DB Type
-            </dt>
-            <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
-              {field.dbType}
-            </dd>
+            {field.dbType && (
+              <>
+                <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+                  DB Type
+                </dt>
+                <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
+                  {field.dbType}
+                </dd>
+              </>
+            )}
           </dl>
 
           <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />

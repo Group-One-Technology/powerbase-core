@@ -142,7 +142,7 @@ ActiveRecord::Schema.define(version: 2022_02_28_074310) do
     t.string "name", null: false
     t.string "description"
     t.integer "oid"
-    t.string "db_type", null: false
+    t.string "db_type"
     t.string "default_value"
     t.boolean "is_primary_key", default: false, null: false
     t.boolean "is_nullable", default: true, null: false
@@ -154,7 +154,6 @@ ActiveRecord::Schema.define(version: 2022_02_28_074310) do
     t.string "alias"
     t.text "options"
     t.boolean "is_virtual", default: false, null: false
-    t.boolean "allow_dirty_value"
     t.text "permissions", default: "{\"view_field\":{\"access\":\"everyone\"},\"manage_field\":{\"access\":\"admins and up\"},\"edit_field_data\":{\"access\":\"editors and up\"}}"
     t.boolean "is_auto_increment", default: false, null: false
     t.boolean "has_validation", default: true, null: false

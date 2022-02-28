@@ -3,7 +3,6 @@ class PowerbaseField < ApplicationRecord
   include FieldPermissionsHelper
 
   validates :name, presence: true
-  validates :db_type, presence: true
   serialize :options, JSON
   serialize :permissions, JSON
 
@@ -16,8 +15,13 @@ class PowerbaseField < ApplicationRecord
   has_many :view_field_options, dependent: :destroy
 
   def is_decimal?
-    self.field_type.name == "Number" &&
+    return false if self.field_type.name != "Number"
+
+    if self.db_type != nil
       ["numeric", "decimal"].any? {|db_type| self.db_type.include?(db_type) }
+    else
+      self.options != nil && self.options.precision != nil && self.options.precision > 0
+    end
   end
 
   def update_guests_access(options)
