@@ -16,9 +16,11 @@ export function CELL_VALUE_VALIDATOR({
   required = false,
   strict = false,
 }) {
-  if (required && !value) {
+  const isEmpty = (value == null || (typeof value === 'string' && value.length === 0));
+
+  if (required && isEmpty) {
     throw new Error('Required');
-  }
+  } else if (isEmpty) return true;
 
   if (strict) {
     switch (type) {

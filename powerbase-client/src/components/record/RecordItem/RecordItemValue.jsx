@@ -15,6 +15,8 @@ import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { FieldType } from '@lib/constants/field-types';
 import { isValidJSONString } from '@lib/helpers/isValidJSONString';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { useValidState } from '@lib/hooks/useValidState';
+import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
 
 import { Badge } from '@components/ui/Badge';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
@@ -42,16 +44,32 @@ export function RecordItemValue({
     item.isNullable && 'Null',
     addRecord && (item.defaultValue?.length > 0 || item.isAutoIncrement) && 'Default',
   ].filter((val) => val);
-  const [inputType, setInputType] = useState(item.value == null && item.isNullable && !addRecord
+  const [inputType, setInputType] = useState((item.value == null && item.isNullable && !addRecord)
     ? 'Null'
     : inputTypes[0]);
-  const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
 
+  const disabled = !addRecord && (item.isPrimaryKey || !baseUser?.can(PERMISSIONS.EditFieldData, item));
   const fieldType = fieldTypes.find((type) => type.id === item.fieldTypeId);
   const isLinkedRecord = item.isForeignKey && item.value && !linkedRecordError && item.databaseName && item.tableName;
   const isForeignDatabase = isLinkedRecord
     ? item.databaseName !== base.name
     : undefined;
+
+  const [value, setValue, { error }] = useValidState(
+    item.value || '',
+    (curVal) => CELL_VALUE_VALIDATOR({
+      value: curVal,
+      type: fieldType.name,
+      required: !item.isNullable,
+      strict: item.hasValidation,
+    }),
+  );
+
+  const updateValue = (updatedValue, options) => {
+    setValue(updatedValue);
+    if (error) return;
+    handleRecordInputChange(item.fieldId, updatedValue, options);
+  };
 
   const labelContent = (
     <div className="w-full flex items-center justify-between">
@@ -110,10 +128,8 @@ export function RecordItemValue({
   );
 
   useEffect(() => {
-    const curItemValue = inputType === 'Null'
-      ? null
-      : item.value;
-    handleRecordInputChange(item.fieldId, curItemValue, {
+    const curItemValue = inputType === 'Null' ? null : value;
+    updateValue(curItemValue, {
       inputType: inputType.toLowerCase(),
     });
   }, [inputType]);
@@ -135,7 +151,7 @@ export function RecordItemValue({
         {(linkedRecord == null || fields == null) && <Loader />}
         {(linkedRecord && fields && openRecord) && (
           <LinkedRecordItem
-            label={<>{item.name.toUpperCase()}: {item.value}</>}
+            label={<>{item.name.toUpperCase()}: {value}</>}
             record={linkedRecord}
             openRecord={() => openRecord(recordArr)}
           />
@@ -169,9 +185,10 @@ export function RecordItemValue({
         label={labelContent}
         name={item.name}
         value="*****"
-        onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
+        onChange={(evt) => updateValue(evt.target.value)}
         className="w-full flex items-center text-gray-800"
         rootClassName="mb-8"
+        error={error}
         readOnly
         disabled
       />
@@ -193,8 +210,8 @@ export function RecordItemValue({
               'mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded',
               disabled && 'bg-gray-100 cursor-not-allowed',
             )}
-            checked={item.value?.toString() === 'true'}
-            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.checked)}
+            checked={value?.toString() === 'true'}
+            onChange={(evt) => updateValue(evt.target.checked)}
             disabled={disabled}
           />
         </div>
@@ -210,7 +227,7 @@ export function RecordItemValue({
         />
       );
     case FieldType.JSON_TEXT:
-      if (isValidJSONString(item.value)) {
+      if (isValidJSONString(value)) {
         return (
           <div key={item.id} className="w-full mb-8">
             <label htmlFor={item.name} className="mb-2 flex items-center text-sm font-medium text-gray-800">
@@ -218,10 +235,10 @@ export function RecordItemValue({
             </label>
             <ReactJson
               id={item.name}
-              src={JSON.parse(item.value) || {}}
-              onEdit={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
-              onDelete={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
-              onAdd={({ updated_src }) => handleRecordInputChange(item.fieldId, JSON.stringify(updated_src))}
+              src={JSON.parse(value) || {}}
+              onEdit={({ updated_src }) => updateValue(JSON.stringify(updated_src))}
+              onDelete={({ updated_src }) => updateValue(JSON.stringify(updated_src))}
+              onAdd={({ updated_src }) => updateValue(JSON.stringify(updated_src))}
               displayDataTypes={false}
               enableClipboard={false}
               collapsed
@@ -245,10 +262,15 @@ export function RecordItemValue({
               'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
               disabled && 'bg-gray-100 cursor-not-allowed',
             )}
-            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
-            value={item.value.toString() || ''}
+            onChange={(evt) => updateValue(evt.target.value)}
+            value={value.toString()}
             disabled={disabled}
           />
+          {error && (
+            <p className="mt-2 text-xs text-red-600 my-2">
+              {error.message}
+            </p>
+          )}
         </div>
       );
     case FieldType.LONG_TEXT:
@@ -265,28 +287,25 @@ export function RecordItemValue({
               'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
               disabled && 'bg-gray-100 cursor-not-allowed',
             )}
-            onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
-            value={item.value || ''}
+            onChange={(evt) => updateValue(evt.target.value)}
+            value={value}
             disabled={disabled}
           />
+          {error && (
+            <p className="mt-2 text-xs text-red-600 my-2">
+              {error.message}
+            </p>
+          )}
         </div>
       );
     default: {
       let type = 'text';
-      let curValue = item.value;
 
-      if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
-        type = 'number';
-        if (curValue != null) curValue = Number(curValue);
-      } else if (fieldType.name === FieldType.URL) {
+      if (fieldType.name === FieldType.URL) {
         type = 'url';
-        if (curValue != null) curValue = String(curValue);
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
-        if (curValue != null) curValue = String(curValue);
       }
-
-      if (curValue == null) curValue = '';
 
       return (
         <Input
@@ -294,11 +313,13 @@ export function RecordItemValue({
           id={item.name}
           label={labelContent}
           name={item.name}
-          value={curValue}
-          onChange={(evt) => handleRecordInputChange(item.fieldId, evt.target.value)}
+          value={value}
+          onChange={(evt) => updateValue(evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"
+          error={error}
           disabled={disabled}
+          showError
         />
       );
     }

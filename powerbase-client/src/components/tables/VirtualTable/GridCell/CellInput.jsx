@@ -34,7 +34,7 @@ export function CellInput({
 
   const updateValue = (updatedValue) => {
     setValue(updatedValue);
-    if (validate && error) return;
+    if (error) return;
     if (onValueChange) onValueChange(field.fieldId, updatedValue);
   };
 

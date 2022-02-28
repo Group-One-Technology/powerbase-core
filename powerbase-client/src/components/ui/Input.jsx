@@ -35,7 +35,7 @@ export function Input({
     setFocused(false);
   };
 
-  const showErrorText = !!(showError || (!focused && error));
+  const showErrorText = !!((showError && error) || (!focused && error));
 
   return (
     <div className={cn('w-full', rootClassName)}>
