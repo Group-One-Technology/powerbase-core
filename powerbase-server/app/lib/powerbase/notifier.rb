@@ -68,7 +68,7 @@ module Powerbase
             WHERE
                 key IN(SELECT attname FROM pk_columns);
 
-            PERFORM pg_notify('powerbase_table_update', json_build_object('table', TG_TABLE_NAME, 'primary_key', COALESCE(reg_id, oid), 'type', TG_OP, 'data', NEW)::text);
+            PERFORM pg_notify('powerbase_table_update', json_build_object('table', TG_TABLE_NAME, 'primary_key', COALESCE(reg_id, oid), 'type', TG_OP)::text);
             RETURN NEW;
           END;
           $$ LANGUAGE plpgsql

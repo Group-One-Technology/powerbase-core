@@ -2,9 +2,6 @@ module Indexable
   include SequelHelper
   extend ActiveSupport::Concern
 
-  def doc_id
-  end
-
   def reindex!
     migrator.index!
   end

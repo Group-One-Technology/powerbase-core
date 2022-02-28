@@ -60,7 +60,6 @@ class User
     #
     #   # reset_password_within = 0.days
     #   reset_password_period_valid?   # will always return false
-    #
     def reset_password_period_valid?
       reset_password_sent_at && reset_password_sent_at.utc >= self.class.reset_password_within.ago.utc
     end
