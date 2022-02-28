@@ -23,11 +23,7 @@ class PowerbaseFieldsController < ApplicationController
     required(:options)
   end
 
-  schema(:set_as_pii, :unset_as_pii) do
-    required(:id).value(:integer)
-  end
-
-  schema(:enable_validation, :disable_validation) do
+  schema(:set_as_pii, :unset_as_pii, :enable_validation, :disable_validation, :set_as_nullable, :unset_as_nullable) do
     required(:id).value(:integer)
   end
 
@@ -202,6 +198,26 @@ class PowerbaseFieldsController < ApplicationController
   # PUT /fields/:id/disable_validation
   def disable_validation
     if @field.update(has_validation: false)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/set_as_nullable
+  def set_as_nullable
+    field_sequel = Fields::Sequel.new @field
+    if field_sequel.set_nullable(true)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/unset_as_nullable
+  def unset_as_nullable
+    field_sequel = Fields::Sequel.new @field
+    if field_sequel.set_nullable(false)
       render json: format_json(@field)
     else
       render json: @field.errors, status: :unprocessable_entity

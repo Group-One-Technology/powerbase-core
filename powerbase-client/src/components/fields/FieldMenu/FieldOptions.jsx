@@ -13,6 +13,8 @@ import {
   enableFieldValidation,
   setFieldAsPII,
   unsetFieldAsPII,
+  setFieldAsNullable,
+  unsetFieldAsNullable,
 } from '@lib/api/fields';
 
 export function FieldOptions({ table, field, setOpen }) {
@@ -24,8 +26,9 @@ export function FieldOptions({ table, field, setOpen }) {
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
+  if (!canManageField) return null;
+
   const handleToggleValidation = async () => {
-    if (!canManageField) return;
     saving();
 
     const updatedFields = fields.map((item) => ({
@@ -53,32 +56,58 @@ export function FieldOptions({ table, field, setOpen }) {
   };
 
   const handleTogglePII = async () => {
-    if (canSetPII) {
-      saving();
+    if (!canSetPII) return;
+    saving();
 
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isPII: item.id === field.id
-          ? !field.isPii
-          : item.isPii,
-      }));
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isPII: item.id === field.id
+        ? !field.isPii
+        : item.isPii,
+    }));
 
-      setFields(updatedFields);
-      setOpen(false);
+    setFields(updatedFields);
+    setOpen(false);
 
-      try {
-        if (!field.isPii) {
-          await setFieldAsPII({ id: field.fieldId });
-        } else {
-          await unsetFieldAsPII({ id: field.fieldId });
-        }
-
-        await mutateViewFields(updatedFields);
-        await mutateTableRecords();
-        saved();
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+    try {
+      if (!field.isPii) {
+        await setFieldAsPII({ id: field.fieldId });
+      } else {
+        await unsetFieldAsPII({ id: field.fieldId });
       }
+
+      await mutateViewFields(updatedFields);
+      await mutateTableRecords();
+      saved();
+    } catch (err) {
+      catchError(err.response.data.error || err.response.data.exception);
+    }
+  };
+
+  const handleToggleNullable = async () => {
+    saving();
+
+    const updatedFields = fields.map((item) => ({
+      ...item,
+      isNullable: item.id === field.id
+        ? !field.isNullable
+        : item.isNullable,
+    }));
+
+    setFields(updatedFields);
+    setOpen(false);
+
+    try {
+      if (!field.isNullable) {
+        await setFieldAsNullable({ id: field.fieldId });
+      } else {
+        await unsetFieldAsNullable({ id: field.fieldId });
+      }
+
+      await mutateViewFields(updatedFields);
+      saved();
+    } catch (err) {
+      catchError(err.response.data.error || err.response.data.exception);
     }
   };
 
@@ -104,6 +133,12 @@ export function FieldOptions({ table, field, setOpen }) {
             {!field.isPii ? 'Set as PII' : 'Unset as PII'}
           </ContextMenu.Item>
         )}
+        <ContextMenu.Item
+          className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+          onSelect={handleToggleNullable}
+        >
+          {!field.isNullable ? 'Set as Nullable' : 'Unset as Nullable'}
+        </ContextMenu.Item>
       </ContextMenu.Content>
     </ContextMenu.Root>
   );
