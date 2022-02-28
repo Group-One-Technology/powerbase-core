@@ -67,7 +67,6 @@ export function RecordItemValue({
 
   const updateValue = (updatedValue, options) => {
     setValue(updatedValue);
-    if (error) return;
     handleRecordInputChange(item.fieldId, updatedValue, options);
   };
 
