@@ -55,7 +55,8 @@ export function RecordItemValue({
     ? item.databaseName !== base.name
     : undefined;
 
-  const [value, setValue, { error }] = useValidState(
+  const [hasFocused, setHasFocused] = useState(false);
+  const [value, setValue, { error: valueError }] = useValidState(
     item.value || '',
     (curVal) => CELL_VALUE_VALIDATOR({
       value: curVal,
@@ -64,8 +65,10 @@ export function RecordItemValue({
       strict: item.hasValidation,
     }),
   );
+  const error = hasFocused ? valueError : undefined;
 
   const updateValue = (updatedValue, options) => {
+    if (!hasFocused && updatedValue !== value) setHasFocused(true);
     setValue(updatedValue);
     handleRecordInputChange(item.fieldId, updatedValue, options);
   };
