@@ -35,6 +35,7 @@ export function CellRenderer({
   handleValueChange,
   showAddRecord,
   handleAddRecord,
+  catchError,
 }) {
   const isEditableCell = cellToEdit
       && cellToEdit.row !== null
@@ -60,7 +61,19 @@ export function CellRenderer({
   });
 
   const handleEditCell = () => {
-    if (!isEditable) return;
+    if (!isEditable) {
+      if (field.isPrimaryKey || field.isPii || fieldType.name === FieldType.JSON_TEXT) {
+        if (field.isPrimaryKey) {
+          catchError('Cannot update a primary key field.');
+        } else if (field.isPii) {
+          catchError('Cannot update a PII field. You can update it in the record modal instead if you have the permission.');
+        } else if (fieldType.name === FieldType.JSON_TEXT) {
+          catchError('Cannot update a JSON Text field. You can update it in the record modal instead if you have the permission.');
+        }
+        return;
+      }
+    }
+
     setIsEditing(true);
     setHoveredCell({});
     setCellToEdit({ row: rowIndex, column: columnIndex });
@@ -82,6 +95,7 @@ export function CellRenderer({
           fieldType={fieldType}
           onValueChange={handleValueChange}
           style={style}
+          validate={field.hasValidation}
           isAddRecord
         />
       </div>
@@ -110,6 +124,7 @@ export function CellRenderer({
             }
           }}
           style={style}
+          validate={field.hasValidation}
         />
       </div>
     );
@@ -181,4 +196,5 @@ CellRenderer.propTypes = {
   handleValueChange: PropTypes.func.isRequired,
   showAddRecord: PropTypes.func.isRequired,
   handleAddRecord: PropTypes.func.isRequired,
+  catchError: PropTypes.func.isRequired,
 };

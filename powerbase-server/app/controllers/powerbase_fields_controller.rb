@@ -1,6 +1,6 @@
 class PowerbaseFieldsController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_field_access, except: [:index, :update_allowed_roles, :update_field_permission, :create]
+  before_action :check_field_access, except: [:index, :create, :update_allowed_roles, :update_field_permission]
   before_action :check_field_permission_access, only: [:update_allowed_roles, :update_field_permission]
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
@@ -27,6 +27,10 @@ class PowerbaseFieldsController < ApplicationController
     required(:id).value(:integer)
   end
 
+  schema(:enable_validation, :disable_validation) do
+    required(:id).value(:integer)
+  end
+
   schema(:update_field_permission) do
     required(:id).value(:integer)
     required(:permission)
@@ -46,8 +50,14 @@ class PowerbaseFieldsController < ApplicationController
   end
 
   schema(:create) do
-    required(:id).value(:integer)
-    required(:new_field_entities)
+    required(:table_id).value(:integer)
+    required(:name).value(:string)
+    optional(:is_nullable).value(:bool)
+    optional(:is_pii).value(:bool)
+    optional(:has_validation).value(:bool)
+    required(:field_type_id).value(:integer)
+    required(:is_virtual).value(:bool)
+    optional(:options)
   end
 
   # GET /tables/:table_id/fields
@@ -66,20 +76,38 @@ class PowerbaseFieldsController < ApplicationController
 
   # POST /tables/:id/field
   def create
-    options = safe_params[:new_field_entities]
-    field_params = options.except(:order, :view_id)
-    view_field_params = {width: 300, is_frozen: false, is_hidden: false, order: options[:order], table_view_id: options[:view_id]}
-    @field = PowerbaseField.create(field_params)
-    if !@field
-      render json: { error: "Could not create a new virtual field for table '#{@table.id}'" }, status: :unprocessable_entity
+    @table = PowerbaseTable.find(safe_params[:table_id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    current_user.can?(:add_fields, @table)
+
+    @field = PowerbaseField.new(
+      name: safe_params[:name].snakecase,
+      alias: safe_params[:name],
+      is_nullable: safe_params[:is_nullable],
+      is_pii: safe_params[:is_pii],
+      has_validation: safe_params[:has_validation],
+      powerbase_table_id: @table.id,
+      powerbase_field_type_id: safe_params[:field_type_id],
+      is_virtual: safe_params[:is_virtual],
+      options: safe_params[:options],
+    )
+
+    if !@field.save
+      render json: @field.errors, status: :unprocessable_entity
       return
     end
-    view_field_params[:powerbase_field_id] = @field.id
-    @view_field = ViewFieldOption.create(view_field_params)
-    if !@view_field
-      render json: { error: "Could not create a view field for table '#{@table.id}'" }, status: :unprocessable_entity
-      return
+
+    total_fields = @table.fields.count
+    views = @table.views
+    views.each do |view|
+      ViewFieldOption.create!({
+        width: 300,
+        order: total_fields,
+        table_view_id: view.id,
+        powerbase_field_id: @field.id
+      })
     end
+
     render json: format_json(@field)
   end
 
@@ -113,7 +141,7 @@ class PowerbaseFieldsController < ApplicationController
       return
     end
 
-    if @field.db_type.include?("uuid") || @field.db_type.include?("int")
+    if @field.db_type != nil && (@field.db_type.include?("uuid") || @field.db_type.include?("int"))
       render json: { error: "Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'" }, status: :unprocessable_entity
       return
     end
@@ -162,6 +190,24 @@ class PowerbaseFieldsController < ApplicationController
     end
   end
 
+  # PUT /fields/:id/enable_validation
+  def enable_validation
+    if @field.update(has_validation: true)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
+  # PUT /fields/:id/disable_validation
+  def disable_validation
+    if @field.update(has_validation: false)
+      render json: format_json(@field)
+    else
+      render json: @field.errors, status: :unprocessable_entity
+    end
+  end
+
   # PUT /fields/:id/allowed_roles
   def update_allowed_roles
     field_updater = Fields::Updater.new(@field)
@@ -185,10 +231,6 @@ class PowerbaseFieldsController < ApplicationController
       current_user.can?(:manage_field, @field)
     end
 
-    def set_table
-      @table = PowerbaseTable.find(safe_params[:table_id])
-    end
-
     def check_field_permission_access
       @field = PowerbaseField.find(safe_params[:id])
       raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
@@ -206,6 +248,7 @@ class PowerbaseFieldsController < ApplicationController
         is_nullable: field.is_nullable,
         is_auto_increment: field.is_auto_increment,
         is_pii: field.is_pii,
+        has_validation: field.has_validation,
         options: field.options,
         permissions: field.permissions,
         table_id: field.powerbase_table_id,
@@ -213,7 +256,6 @@ class PowerbaseFieldsController < ApplicationController
         created_at: field.created_at,
         updated_at: field.updated_at,
         is_virtual: field.is_virtual,
-        allow_dirty_value: field.allow_dirty_value
       }
     end
 end

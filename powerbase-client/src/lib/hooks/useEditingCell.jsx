@@ -7,8 +7,8 @@ import { useTableRecords } from '@models/TableRecords';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { updateFieldData } from '@lib/api/records';
 import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
-import { validateMagicValue } from '@lib/helpers/fields/validateMagicValue';
 import { FieldType } from '@lib/constants/field-types';
+import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
 
 export function useEditingCell({ records, setRecords }) {
   const { baseUser } = useBaseUser();
@@ -34,7 +34,7 @@ export function useEditingCell({ records, setRecords }) {
   }) => {
     const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
 
-    if (!(canEditFieldData && fields.length)) {
+    if (!(canEditFieldData && fields.length) || [FieldType.CHECKBOX].includes(fieldType.name)) {
       exitEditing();
       return;
     }
@@ -52,13 +52,15 @@ export function useEditingCell({ records, setRecords }) {
       return;
     }
 
-    if (!validateMagicValue(field, fieldType, updatedValue)) {
-      catchError(`Invalid input for ${field.alias}`);
-      exitEditing();
-      return;
-    }
-
-    if (!updatedValue?.length && fieldType.dataType !== 'date' && fieldType.dataType !== 'boolean') {
+    try {
+      CELL_VALUE_VALIDATOR({
+        value: updatedValue,
+        type: fieldType.name,
+        required: !field.isNullable,
+        strict: field.hasValidation,
+      });
+    } catch (err) {
+      catchError(err.message);
       exitEditing();
       return;
     }

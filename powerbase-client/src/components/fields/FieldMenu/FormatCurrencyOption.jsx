@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as ContextMenu from '@radix-ui/react-context-menu';
 import { CogIcon, ChevronRightIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
@@ -50,13 +50,13 @@ export function FormatCurrencyOption({ field }) {
   };
 
   return (
-    <DropdownMenu.Root>
-      <DropdownMenu.TriggerItem className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100">
+    <ContextMenu.Root>
+      <ContextMenu.TriggerItem className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100">
         <CogIcon className="h-4 w-4 mr-1.5" />
         Format Currency
         <ChevronRightIcon className="ml-auto h-4 w-4" />
-      </DropdownMenu.TriggerItem>
-      <DropdownMenu.Content sideOffset={-2} className="py-2 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
+      </ContextMenu.TriggerItem>
+      <ContextMenu.Content sideOffset={2} alignOffset={-8} className="py-2 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
         <div className="px-4 w-auto">
           <input
             type="text"
@@ -69,7 +69,7 @@ export function FormatCurrencyOption({ field }) {
           />
         </div>
         {options.map((item, index) => index < 10 && (
-          <DropdownMenu.Item
+          <ContextMenu.Item
             key={item.code}
             textValue="\t"
             className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
@@ -77,15 +77,15 @@ export function FormatCurrencyOption({ field }) {
           >
             {item.name}
             <span className="ml-auto">{item.code}</span>
-          </DropdownMenu.Item>
+          </ContextMenu.Item>
         ))}
         {options.length >= 10 && (
           <div className="px-4 py-1 text-sm flex items-center hover:bg-gray-100 focus:bg-gray-100">
             ...
           </div>
         )}
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
+      </ContextMenu.Content>
+    </ContextMenu.Root>
   );
 }
 

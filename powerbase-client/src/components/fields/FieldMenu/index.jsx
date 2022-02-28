@@ -4,35 +4,22 @@ import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import {
-  EyeOffIcon,
-  ShieldCheckIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
-  ChevronRightIcon,
-  LockClosedIcon,
-} from '@heroicons/react/outline';
+import { EyeOffIcon, ChevronRightIcon, LockClosedIcon } from '@heroicons/react/outline';
 
-import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
-import { useTableRecords } from '@models/TableRecords';
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
-import {
-  updateFieldAlias,
-  updateFieldType,
-  setFieldAsPII,
-  unsetFieldAsPII,
-} from '@lib/api/fields';
+import { updateFieldAlias, updateFieldType } from '@lib/api/fields';
 import { useTableView } from '@models/TableView';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { DraggableItem } from '@components/ui/DraggableItem';
+import { FieldOptions } from './FieldOptions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
-export function GridHeaderOptions({
+export function FieldMenu({
   id,
   data,
   table,
@@ -41,20 +28,16 @@ export function GridHeaderOptions({
   const { saving, catchError, saved } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
-  const { data: fields, mutate: mutateViewFields } = useViewFields();
-  const { setFields } = useViewFieldState();
   const { data: fieldTypes } = useFieldTypes();
+  const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { modal: permissionsModal } = useFieldPermissionsModal();
-  const { mutate: mutateTableRecords } = useTableRecords();
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
-  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !field.dbType.includes('uuid') && !field.dbType.includes('int');
+  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !(field.dbType && ['uuid', 'int'].includes(field.dbType));
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
-  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
-  const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
 
   const [open, setOpen] = useState(false);
   const [alias, setAlias] = useState(field.alias || field.name);
@@ -146,36 +129,6 @@ export function GridHeaderOptions({
     }
   };
 
-  const handleTogglePII = async () => {
-    if (canSetPII) {
-      saving();
-
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isPII: item.id === field.id
-          ? !field.isPii
-          : item.isPii,
-      }));
-
-      setFields(updatedFields);
-      setOpen(false);
-
-      try {
-        if (!field.isPii) {
-          await setFieldAsPII({ id: field.fieldId });
-        } else {
-          await unsetFieldAsPII({ id: field.fieldId });
-        }
-
-        await mutateViewFields(updatedFields);
-        await mutateTableRecords();
-        saved();
-      } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
-      }
-    }
-  };
-
   return (
     <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
       <DraggableItem
@@ -218,12 +171,16 @@ export function GridHeaderOptions({
               {field.name}
             </dd>
 
-            <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
-              DB Type
-            </dt>
-            <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
-              {field.dbType}
-            </dd>
+            {field.dbType && (
+              <>
+                <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
+                  DB Type
+                </dt>
+                <dd className="px-4 py-1 text-sm flex items-center text-gray-900">
+                  {field.dbType}
+                </dd>
+              </>
+            )}
           </dl>
 
           <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />
@@ -278,7 +235,7 @@ export function GridHeaderOptions({
           )}
 
           {canManageView && <ContextMenu.Separator className="my-2 h-0.5 bg-gray-100" />}
-
+          <FieldOptions table={table} field={field} setOpen={setOpen} />
           {canChangeGuestAccess && (
             <>
               {fieldType.name === FieldType.CURRENCY && <FormatCurrencyOption field={field} />}
@@ -292,24 +249,6 @@ export function GridHeaderOptions({
               </ContextMenu.Item>
             </>
           )}
-          {canAddFields && (
-            <>
-              <ContextMenu.Item
-                textValue="\t"
-                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              >
-                <ArrowRightIcon className="h-4 w-4 mr-1.5" />
-                Insert right
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                textValue="\t"
-                className="px-4 py-1 text-sm cursor-not-allowed flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              >
-                <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
-                Insert left
-              </ContextMenu.Item>
-            </>
-          )}
           {canManageView && (
             <ContextMenu.Item
               textValue="\t"
@@ -320,23 +259,13 @@ export function GridHeaderOptions({
               Hide
             </ContextMenu.Item>
           )}
-          {canSetPII && (
-            <ContextMenu.Item
-              textValue="\t"
-              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-              onSelect={handleTogglePII}
-            >
-              <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-              {!field.isPii ? 'Set as PII' : 'Unset as PII'}
-            </ContextMenu.Item>
-          )}
         </div>
       </ContextMenu.Content>
     </ContextMenu.Root>
   );
 }
 
-GridHeaderOptions.propTypes = {
+FieldMenu.propTypes = {
   id: PropTypes.any.isRequired,
   data: PropTypes.object.isRequired,
   table: PropTypes.object.isRequired,

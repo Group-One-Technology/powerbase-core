@@ -97,7 +97,7 @@ module Powerbase
             column = {}
             column[field.name.to_sym] = @query
 
-            if field.db_type == "uuid"
+            if field.db_type && field.db_type == "uuid"
               next if !validate_uuid_format(@query)
               next Sequel[column]
             end

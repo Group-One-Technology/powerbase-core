@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { XIcon } from '@heroicons/react/outline';
 import cn from 'classnames';
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import PropTypes from 'prop-types';
+import { XIcon } from '@heroicons/react/outline';
+
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
-import Checkbox from '@components/ui/Checkbox';
-import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
-import PropTypes from 'prop-types';
+import { useSaveStatus } from '@models/SaveStatus';
 import { addVirtualField } from '@lib/api/fields';
 import { useDebouncedInput } from '@lib/hooks/fields/useDebouncedInput';
+import { useMounted } from '@lib/hooks/useMounted';
+import { Checkbox } from '@components/ui/Checkbox';
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Button } from '@components/ui/Button';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
@@ -19,8 +21,12 @@ const FieldTypeComponent = ({
   setNumberSubtype,
   setNumberPrecision,
   numberSubtype,
-  setIsChecked,
-  isChecked,
+  hasValidation,
+  setHasValidation,
+  isNullable,
+  setIsNullable,
+  isPii,
+  setIsPii,
   setCurrency,
 }) => {
   const collapseSelectedField = () => {
@@ -33,7 +39,6 @@ const FieldTypeComponent = ({
 
   const hasPrecisionField = isPercent || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
-  const canHaveValidation = false; // TODO - this would be true for strict-type fields for the option to allow dirty values
 
   return (
     <div className="mt-2">
@@ -45,65 +50,83 @@ const FieldTypeComponent = ({
         <FieldTypeIcon
           typeId={type.id}
           fieldTypes={fieldTypes}
-          className="mr-1"
+          className="mr-3"
         />
         <span className="font-medium text-gray-900 cursor-default">{type.name}</span>
         <XIcon className="h-4 w-4 ml-auto my-auto" aria-hidden="true" />
       </button>
-      <div>
-        <p className="text-xs text-gray-600 ml-2">{type.description}</p>
-      </div>
-      {canHaveValidation && (
-        <div>
+      <div className="ml-2">
+        <p className="text-xs text-gray-600">
+          {type.description}
+        </p>
+        {hasFormatOptions && (
+          <div className="my-4">
+            {(isNumber || isCurrency) && (
+              <NumberFieldSelectOptions
+                isPercent={isPercent}
+                setNumberSubtype={setNumberSubtype}
+                isCurrency={isCurrency}
+                setCurrency={setCurrency}
+              />
+            )}
+            {hasPrecisionField && (
+              <NumberFieldSelectOptions
+                isPrecision
+                isPercent={isPercent}
+                setNumberPrecision={setNumberPrecision}
+                isCurrency={isCurrency}
+              />
+            )}
+          </div>
+        )}
+        <div className="my-4">
           <Checkbox
-            setIsChecked={setIsChecked}
-            isChecked={isChecked}
-            label="Disable cell validation"
+            id="newFieldHasValidation"
+            label="Enable Cell Validation"
+            value={hasValidation}
+            setValue={setHasValidation}
+          />
+          <Checkbox
+            id="newFieldIsNullable"
+            label="Set as Nullable"
+            value={isNullable}
+            setValue={setIsNullable}
+          />
+          <Checkbox
+            id="newFieldIsPII"
+            label="Set as PII"
+            value={isPii}
+            setValue={setIsPii}
           />
         </div>
-      )}
-      {hasFormatOptions && (
-        <div className={cn('mt-4 mb-6 h-24', hasPrecisionField && 'h-56')}>
-          {(isNumber || isCurrency) && (
-            <NumberFieldSelectOptions
-              isPercent={isPercent}
-              setNumberSubtype={setNumberSubtype}
-              isCurrency={isCurrency}
-              setCurrency={setCurrency}
-            />
-          )}
-          {hasPrecisionField && (
-            <NumberFieldSelectOptions
-              isPrecision
-              isPercent={isPercent}
-              setNumberPrecision={setNumberPrecision}
-              isCurrency={isCurrency}
-            />
-          )}
-        </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default function NewField({
   tableId,
-  view,
   setIsCreatingField,
   close,
   setHasAddedNewField,
 }) {
-  const [selected, setSelected] = useState(null);
+  const { mounted } = useMounted();
+  const { catchError } = useSaveStatus();
+  const { data: fieldTypes } = useFieldTypes();
+  const { mutate: mutateViewFields } = useViewFields();
+  const fieldInputRef = useRef(null);
+
   const [nameExists, setNameExists] = useState(false);
+  const [selected, setSelected] = useState(null);
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
-  const [isChecked, setIsChecked] = useState(false);
-  const { fieldName, setFieldName } = useDebouncedInput(setNameExists, tableId);
-  const fieldInputRef = useRef(null);
-  const { data: ViewFields, mutate: mutateViewFields } = useViewFields();
-  const { data: fieldTypes } = useFieldTypes();
+  const [hasValidation, setHasValidation] = useState(false);
+  const [isNullable, setIsNullable] = useState(false);
+  const [isPii, setIsPii] = useState(false);
   const [supportedNewFieldTypes, setSupportedNewFieldTypes] = useState();
   const [currency, setCurrency] = useState(null);
+
+  const { fieldName, setFieldName } = useDebouncedInput(setNameExists, tableId);
 
   useEffect(() => {
     fieldInputRef.current?.focus();
@@ -112,64 +135,49 @@ export default function NewField({
   useEffect(() => {
     // Excluded date for now
     const supported = ['string', 'number'];
-    // Also exlcuding long text for now until I implement rich text / container editing for it later on
     setSupportedNewFieldTypes(
       fieldTypes?.filter(
-        (item) => supported.includes(item.dataType.toLowerCase())
-          && item.name.toLowerCase() !== 'long text',
+        (item) => supported.includes(item.dataType.toLowerCase()),
       ),
     );
   }, [fieldTypes]);
 
-  const handleChange = (e) => {
-    setFieldName(e.target.value);
+  const handleChange = (evt) => {
+    setFieldName(evt.target.value);
   };
 
   const handleFieldTypeClick = (fieldType) => {
     setSelected(fieldType);
   };
 
-  // REFACTOR eventually to acccount for a wider variety of types with byte considerations
-  const computeDBType = () => {
-    if (selected?.dataType.toLowerCase() === 'string') return 'text';
-    if (selected?.dataType.toLowerCase() === 'number') {
-      if (numberPrecision?.precision) {
-        const precision = `${numberPrecision?.precision}`;
-        return `numeric(10,${precision})`;
-      } return 'integer';
-    }
-    return ''; // Just an error gauard
-  };
+  const addNewField = async (evt) => {
+    evt.preventDefault();
+    if (!selected) return;
 
-  const addNewField = async (e) => {
-    e.preventDefault();
-    if (selected) {
-      const response = await addVirtualField({
+    try {
+      await addVirtualField({
         tableId,
-        newFieldEntities: {
-          name: toSnakeCase(fieldName.toLowerCase()),
-          description: null,
-          dbType: computeDBType(),
-          defaultValue: '',
-          isPrimaryKey: false,
-          isNullable: true,
-          powerbaseTableId: tableId,
-          powerbaseFieldTypeId: selected.id,
-          isPii: false,
-          alias: fieldName,
-          viewId: view.id,
-          isVirtual: true,
-          allowDirtyValue: isChecked,
-          order: Math.max(...ViewFields.map((item) => item.order)) + 1,
-          options: currency ? { style: 'currency', currency } : (numberPrecision ? { style: 'precision', precision: numberPrecision.precision } : null),
-        },
+        name: fieldName,
+        isNullable,
+        isPii,
+        hasValidation,
+        fieldTypeId: selected.id,
+        isVirtual: true,
+        options: currency
+          ? { style: 'currency', currency }
+          : (numberPrecision
+            ? { style: 'precision', precision: numberPrecision.precision }
+            : null),
       });
-      if (response.statusText === 'OK') {
+
+      mounted(() => {
         setIsCreatingField(false);
         mutateViewFields();
         setHasAddedNewField(true);
         close();
-      }
+      });
+    } catch (err) {
+      catchError(err.response.data.exception || err.response.data.error);
     }
   };
 
@@ -187,7 +195,7 @@ export default function NewField({
             'shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
             nameExists ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-indigo-500',
           )}
-          placeholder="Enter field name (required)"
+          placeholder="Enter magic field name (required)"
           autoComplete="off"
           ref={fieldInputRef}
           onChange={handleChange}
@@ -229,8 +237,12 @@ export default function NewField({
           setNumberPrecision={setNumberPrecision}
           setNumberSubtype={setNumberSubtype}
           numberSubtype={numberSubtype}
-          setIsChecked={setIsChecked}
-          isChecked={isChecked}
+          hasValidation={hasValidation}
+          setHasValidation={setHasValidation}
+          isNullable={isNullable}
+          setIsNullable={setIsNullable}
+          isPii={isPii}
+          setIsPii={setIsPii}
           setCurrency={setCurrency}
         />
       )}
@@ -254,7 +266,7 @@ export default function NewField({
             )}
             disabled={nameExists || !fieldName.length || !selected}
           >
-            Add Field
+            Add Magic Field
           </Button>
         )}
       </div>
@@ -269,14 +281,17 @@ FieldTypeComponent.propTypes = {
   setNumberSubtype: PropTypes.func.isRequired,
   setNumberPrecision: PropTypes.func.isRequired,
   numberSubtype: PropTypes.any,
-  setIsChecked: PropTypes.func.isRequired,
-  isChecked: PropTypes.bool.isRequired,
+  hasValidation: PropTypes.bool,
+  setHasValidation: PropTypes.func.isRequired,
+  isNullable: PropTypes.bool,
+  setIsNullable: PropTypes.func.isRequired,
+  isPii: PropTypes.bool,
+  setIsPii: PropTypes.func.isRequired,
   setCurrency: PropTypes.func.isRequired,
 };
 
 NewField.propTypes = {
   tableId: PropTypes.number.isRequired,
-  view: PropTypes.object.isRequired,
   setIsCreatingField: PropTypes.func.isRequired,
   close: PropTypes.func.isRequired,
   setHasAddedNewField: PropTypes.func.isRequired,

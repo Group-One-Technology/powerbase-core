@@ -1,14 +1,16 @@
-import { formatToDecimalPlaces } from '@lib/helpers/numbers/formatToDecimalPlaces';
+import { FieldType } from '@lib/constants/field-types';
 
 export function sanitizeValue({ field, fieldType, value }) {
-  if (fieldType?.dataType.toLowerCase() === 'boolean') return value?.toString() === 'true';
-  if (value && fieldType.dataType.toLowerCase() === 'number') {
-    if (field.options?.precision && fieldType.dataType === 'number') {
-      return formatToDecimalPlaces(parseFloat(value), field.options?.precision);
+  switch (fieldType?.name) {
+    case FieldType.CHECKBOX: return value?.toString() === 'true';
+    case FieldType.NUMBER: {
+      if (field.options?.precision) {
+        return parseFloat(value).toFixed(field.options.precision);
+      }
+      return parseFloat(value);
     }
-
-    return parseFloat(value);
+    default: {
+      return value;
+    }
   }
-
-  return value;
 }

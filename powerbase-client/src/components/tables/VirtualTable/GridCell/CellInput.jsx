@@ -5,6 +5,8 @@ import RelativePortal from 'react-relative-portal';
 
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { FieldType } from '@lib/constants/field-types';
+import { useValidState } from '@lib/hooks/useValidState';
+import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
 
 export function CellInput({
   field,
@@ -14,15 +16,25 @@ export function CellInput({
   onSubmit,
   isAddRecord,
   className,
+  validate,
   style,
 }) {
   const rootInputRef = useRef();
   const inputRef = useRef();
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue, { error }] = useValidState(
+    initialValue,
+    (curVal) => CELL_VALUE_VALIDATOR({
+      value: curVal,
+      type: fieldType.name,
+      required: !field.isNullable,
+      strict: validate,
+    }),
+  );
   const [focus, setFocus] = useState(!isAddRecord);
 
   const updateValue = (updatedValue) => {
     setValue(updatedValue);
+    if (error) return;
     if (onValueChange) onValueChange(field.fieldId, updatedValue);
   };
 
@@ -66,6 +78,16 @@ export function CellInput({
     }
   }, [focus]);
 
+  const InputError = () => (error
+    ? (
+      <p
+        className="-ml-0.5 -mt-0.5 p-2 text-white text-xs bg-gray-900 border border-gray-900"
+        style={{ width: style?.width }}
+      >
+        {error?.message}
+      </p>
+    ) : null);
+
   switch (fieldType.name) {
     case FieldType.CHECKBOX: {
       return (
@@ -80,7 +102,7 @@ export function CellInput({
             ref={inputRef}
             type="checkbox"
             name={field.name}
-            className="py-1 px-2 h-4 w-4  focus:ring-indigo-500 border-gray-300 rounded"
+            className="py-1 px-2 h-4 w-4 focus:ring-indigo-500 border-gray-300 rounded"
             checked={value?.toString() === 'true'}
             onChange={(evt) => updateValue(evt.target.checked)}
           />
@@ -102,27 +124,26 @@ export function CellInput({
             )}
             readOnly
           />
-          <RelativePortal
-            component="div"
-            top={0}
-            left={0}
-          >
+          <RelativePortal component="div" top={0} left={0}>
             {focus && (
-              <textarea
-                ref={inputRef}
-                name={field.name}
-                onChange={(evt) => updateValue(evt.target.value)}
-                className={cn(
-                  'absolute text-sm items-center py-1 px-2 border border-indigo-500',
-                  isAddRecord && 'bg-green-50',
-                  className,
-                )}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                value={value}
-                rows={3}
-                style={{ width: style?.width, height: 'auto' }}
-              />
+              <>
+                <textarea
+                  ref={inputRef}
+                  name={field.name}
+                  onChange={(evt) => updateValue(evt.target.value)}
+                  className={cn(
+                    'text-sm items-center py-1 px-2 border border-indigo-500',
+                    isAddRecord && 'bg-green-50',
+                    className,
+                  )}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  value={value}
+                  rows={3}
+                  style={{ width: style?.width, height: 'auto' }}
+                />
+                <InputError />
+              </>
             )}
           </RelativePortal>
         </>
@@ -131,36 +152,38 @@ export function CellInput({
       let type = 'text';
       let curValue = value;
 
-      if (fieldType.name === FieldType.NUMBER || fieldType.name === FieldType.PERCENT || fieldType.name === FieldType.CURRENCY) {
-        type = 'number';
-        if (curValue != null) curValue = Number(curValue);
-      } else if (fieldType.name === FieldType.URL) {
+      if (fieldType.name === FieldType.URL) {
         type = 'url';
-        if (curValue != null) curValue = String(curValue);
       } else if (fieldType.name === FieldType.EMAIL) {
         type = 'email';
-        if (curValue != null) curValue = String(curValue);
       }
 
       if (curValue == null) curValue = '';
 
       return (
-        <input
-          ref={inputRef}
-          type={type}
-          name={field.name}
-          value={value}
-          onChange={(evt) => updateValue(evt.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          className={cn(
-            'h-full w-full text-sm items-center py-1 px-2 border-none',
-            isAddRecord && 'bg-green-50',
-            className,
+        <>
+          <input
+            ref={inputRef}
+            type={type}
+            name={field.name}
+            value={curValue}
+            onChange={(evt) => updateValue(evt.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            className={cn(
+              'h-full w-full text-sm items-center py-1 px-2 border-none',
+              isAddRecord && 'bg-green-50',
+              className,
+            )}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus={focus}
+          />
+          {error && (
+            <RelativePortal component="div" top={0} left={0}>
+              <InputError />
+            </RelativePortal>
           )}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus={focus}
-        />
+        </>
       );
     }
   }
@@ -174,5 +197,6 @@ CellInput.propTypes = {
   onSubmit: PropTypes.func,
   isAddRecord: PropTypes.bool,
   className: PropTypes.string,
+  validate: PropTypes.bool,
   style: PropTypes.object,
 };

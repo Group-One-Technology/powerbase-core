@@ -326,7 +326,6 @@ class PowerbaseTablesController < ApplicationController
         is_pii: params[:is_pii],
         alias: params[:alias],
         is_virtual: params[:is_virtual],
-        allow_dirty_value: params[:allow_dirty_value]
       }
     end
 end
