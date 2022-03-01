@@ -80,7 +80,7 @@ export function CellMenu({
         setTotalRecords(records.length);
         setRecords(records);
       });
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

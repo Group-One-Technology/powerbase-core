@@ -40,6 +40,8 @@ gem 'philtre', '~> 0.1.2'
 # gem 'jbuilder', '~> 2.7'
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
+# Use logtail to capture the logs
+gem 'logtail-rails', '~> 0.1.6'
 # Use Pusher for notifying the client
 gem "pusher"
 # Use Postmark RAils for sending emails

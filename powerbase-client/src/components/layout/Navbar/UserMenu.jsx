@@ -7,6 +7,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { useAuthUser } from '@models/AuthUser';
+import { useSaveStatus } from '@models/SaveStatus';
 import { logout } from '@lib/api/auth';
 
 const USER_NAVIGATION = [
@@ -17,6 +18,7 @@ const USER_NAVIGATION = [
 export function UserMenu({ list, colored }) {
   const history = useHistory();
   const { authUser, mutate } = useAuthUser();
+  const { catchError } = useSaveStatus();
 
   const handleLogout = async () => {
     try {
@@ -24,7 +26,7 @@ export function UserMenu({ list, colored }) {
       mutate(null);
       history.push('/login');
     } catch (error) {
-      console.error(error);
+      catchError(error, { silent: true });
     }
   };
 

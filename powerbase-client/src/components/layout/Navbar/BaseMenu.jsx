@@ -78,7 +78,7 @@ export function BaseMenu({ base, otherBases }) {
         await mutateSharedBases(updatedSharedBases);
         saved(`Successfully left "${base.name}" base.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
 
       mounted(() => setConfirmModal((val) => ({ ...val, open: false })));

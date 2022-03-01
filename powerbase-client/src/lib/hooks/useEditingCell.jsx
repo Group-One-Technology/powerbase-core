@@ -111,7 +111,7 @@ export function useEditingCell({ records, setRecords }) {
     } catch (err) {
       setRecords(records);
       exitEditing();
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

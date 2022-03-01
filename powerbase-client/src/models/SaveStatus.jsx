@@ -1,9 +1,14 @@
 import { useRef, useState } from 'react';
 import constate from 'constate';
 import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/outline';
+
 import { useMounted } from '@lib/hooks/useMounted';
+import { logger } from '@lib/logger';
+import { IS_PRODUCTION } from '@lib/constants';
 import { Spinner } from '@components/ui/Spinner';
+import { useAuthUser } from './AuthUser';
 
 const IDLE_TIME = 30000; // milliseconds = 30 seconds
 
@@ -21,6 +26,8 @@ export const SaveStatus = {
 };
 
 function useSaveStateModel() {
+  const { authUser } = useAuthUser();
+  const location = useLocation();
   const [saveStatus, setSaveStatus] = useState(SaveStatus.IDLE);
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
@@ -72,15 +79,33 @@ function useSaveStateModel() {
     });
   };
 
-  const catchError = (err) => {
-    mounted(() => {
-      setError(new Error('Something went wrong.'));
-      setLoading(false);
-      updateState(SaveStatus.ERROR);
-      toast(Array.isArray(err) ? err.join('. ') : err, {
-        icon: '⚠️',
-        className: 'bg-gray-800 text-sm text-white rounded-md',
+  const catchError = (err, { silent } = { silent: false }) => {
+    const errorMessage = err?.response.data
+      ? err.response.data.exception || err.response.data.error
+      : err;
+
+    if (IS_PRODUCTION) {
+      logger.error(errorMessage, {
+        userId: authUser?.id,
+        error: err,
+        location,
       });
+    } else {
+      console.error(err);
+    }
+
+    mounted(() => {
+      setLoading(false);
+      updateState(SaveStatus.IDLE);
+
+      if (!silent) {
+        setError(new Error('Something went wrong.'));
+        updateState(SaveStatus.ERROR);
+        toast(Array.isArray(errorMessage) ? err.join('. ') : errorMessage, {
+          icon: '⚠️',
+          className: 'bg-gray-800 text-sm text-white rounded-md',
+        });
+      }
     });
   };
 

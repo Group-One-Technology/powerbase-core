@@ -14,7 +14,6 @@ export const useDebouncedInput = (setNameExists, id) => {
       const { data } = await searchFieldByName({ id, name });
       setNameExists(!!data?.id);
     } catch (error) {
-      console.log(error);
       setNameExists(false);
     }
   };

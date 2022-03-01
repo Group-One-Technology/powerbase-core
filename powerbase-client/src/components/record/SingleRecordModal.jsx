@@ -135,7 +135,7 @@ export function BaseSingleRecordModal({
         setTotalRecords(records.length);
         setRecords(records);
       });
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
 
     mounted(() => setLoading(false));
@@ -180,7 +180,7 @@ export function BaseSingleRecordModal({
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
       mounted(() => setRecords(records));
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
 
     mounted(() => setLoading(false));

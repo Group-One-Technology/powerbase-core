@@ -51,7 +51,7 @@ function BaseFieldPermissionsModal() {
           await mutateViewField();
           saved(`Successfully updated field "${field.name}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
       }
     }
@@ -98,7 +98,7 @@ function BaseFieldPermissionsModal() {
           : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -120,7 +120,7 @@ function BaseFieldPermissionsModal() {
         : item)));
       saved(`Successfully removed "${role}" from allowed roles.`);
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      catchError(err);
     }
   };
 
@@ -151,7 +151,7 @@ function BaseFieldPermissionsModal() {
               : item)));
             saved(`Successfully added "${role}" from allowed roles.`);
           } catch (err) {
-            catchError(err.response.data.error || err.response.data.exception);
+            catchError(err);
           }
 
           setGuestModalOpen(false);
@@ -206,7 +206,7 @@ function BaseFieldPermissionsModal() {
             : item)));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
 
         setGuestModalOpen(false);

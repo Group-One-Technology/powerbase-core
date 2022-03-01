@@ -74,7 +74,7 @@ export function Filter() {
         await mutateTableRecords();
         saved();
       } catch (err) {
-        catchError(err.response.data.exception || err.response.data.error);
+        catchError(err);
       }
     }
   }, 500), [view]);

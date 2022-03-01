@@ -36,8 +36,8 @@ import './index.css';
 
 export function App() {
   return (
-    <GlobalProviders>
-      <Router>
+    <Router>
+      <GlobalProviders>
         <Switch>
           <Route exact path="/" component={BasesPage} />
           <Route exact path="/onboarding" component={OnboardingPage} />
@@ -57,9 +57,9 @@ export function App() {
           <Route path="/404" component={Error404Page} />
           <Redirect from="*" to="/404" />
         </Switch>
-      </Router>
-      <Toaster position="bottom-right" />
-    </GlobalProviders>
+        <Toaster position="bottom-right" />
+      </GlobalProviders>
+    </Router>
   );
 }
 

@@ -68,7 +68,7 @@ export function ViewMenu() {
         await updateViewsOrder({ tableId: table.id, views: updatedViews.map((item) => item.id) });
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };

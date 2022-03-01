@@ -65,7 +65,7 @@ function BaseNotificationsMenu({ colored }) {
         await readNotifications();
         mutateNotifications();
       } catch (err) {
-        console.log(err);
+        catchError(err, { silent: true });
       }
     }
   };
@@ -83,7 +83,7 @@ function BaseNotificationsMenu({ colored }) {
         mutateGuestInvitations(updatedGuestInvitations);
         saved(`Successfully accepted invite to ${guest.databaseName} base.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -101,7 +101,7 @@ function BaseNotificationsMenu({ colored }) {
         mutateGuestInvitations(updatedGuestInvitations);
         saved(`Successfully rejected invite to ${guest.databaseName} base.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
 
       mounted(() => setDeleteModal((val) => ({ ...val, open: false })));
