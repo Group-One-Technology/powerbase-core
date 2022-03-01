@@ -87,11 +87,13 @@ function useSaveStateModel() {
     if (IS_PRODUCTION) {
       logger.error(errorMessage, {
         userId: authUser?.id,
-        error: err,
+        error: err?.response.data
+          ? err.response.data
+          : err,
         location,
       });
     } else {
-      console.error(err);
+      console.log({ err });
     }
 
     mounted(() => {
