@@ -3,8 +3,10 @@ import constate from 'constate';
 import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/outline';
+
 import { useMounted } from '@lib/hooks/useMounted';
 import { logger } from '@lib/logger';
+import { IS_PRODUCTION } from '@lib/constants';
 import { Spinner } from '@components/ui/Spinner';
 import { useAuthUser } from './AuthUser';
 
@@ -82,11 +84,15 @@ function useSaveStateModel() {
       ? err.response.data.exception || err.response.data.error
       : err;
 
-    logger.error(errorMessage, {
-      userId: authUser?.id,
-      error: err,
-      location,
-    });
+    if (IS_PRODUCTION) {
+      logger.error(errorMessage, {
+        userId: authUser?.id,
+        error: err,
+        location,
+      });
+    } else {
+      console.error(err);
+    }
 
     mounted(() => {
       setLoading(false);
