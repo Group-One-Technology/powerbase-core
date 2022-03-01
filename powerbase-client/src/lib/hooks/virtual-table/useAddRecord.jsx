@@ -120,7 +120,7 @@ export function useAddRecord({
       saved(`Successfully added record in table ${table.alias}.`);
     } catch (err) {
       mounted(() => setRecords(records));
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

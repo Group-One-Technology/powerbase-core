@@ -56,7 +56,7 @@ export function useReorderFields({ fields, setFields }) {
         await mutateViewFields();
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
 

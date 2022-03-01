@@ -80,7 +80,7 @@ export function TableTabItemMenu({ table, children }) {
         await mutateTables(updatedTables);
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     } else {
       setOpen(value);
@@ -124,7 +124,7 @@ export function TableTabItemMenu({ table, children }) {
       mutateTables(updatedTables);
       saved();
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 
@@ -156,7 +156,7 @@ export function TableTabItemMenu({ table, children }) {
       mutateTables(updatedTables);
       saved();
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 
@@ -168,7 +168,7 @@ export function TableTabItemMenu({ table, children }) {
       mutateTables();
       saved();
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

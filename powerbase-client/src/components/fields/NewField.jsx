@@ -177,7 +177,7 @@ export default function NewField({
         close();
       });
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

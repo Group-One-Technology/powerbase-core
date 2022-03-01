@@ -142,7 +142,7 @@ function usePermissionsStateModalModel() {
         saved(`Successfully updated ${guest.firstName}'s permissions.`);
         mounted(() => setOpen(false));
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };

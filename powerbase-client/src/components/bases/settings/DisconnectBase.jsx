@@ -38,7 +38,7 @@ export function DisconnectBase() {
         history.push('/');
         saved(`Successfully disconnect the "${name}" base.`);
       } catch (err) {
-        catchError(err.response.data.exception || err.response.data.error);
+        catchError(err);
       }
     }
   };

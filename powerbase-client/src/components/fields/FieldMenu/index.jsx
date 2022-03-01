@@ -64,7 +64,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     } else {
       setOpen(value);
@@ -94,7 +94,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -124,7 +124,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };

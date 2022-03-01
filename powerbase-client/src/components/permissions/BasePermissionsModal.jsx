@@ -54,7 +54,7 @@ function BasePermissionsModalContent() {
           await mutateBase();
           saved(`Successfully updated base "${base.name}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
       }
     }
@@ -89,7 +89,7 @@ function BasePermissionsModalContent() {
         await mutateBase(updatedBase);
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -109,7 +109,7 @@ function BasePermissionsModalContent() {
       await mutateBase(updatedBase);
       saved(`Successfully removed "${role}" from allowed roles.`);
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      catchError(err);
     }
   };
 
@@ -138,7 +138,7 @@ function BasePermissionsModalContent() {
             await mutateBase(updatedBase);
             saved(`Successfully added "${role}" from allowed roles.`);
           } catch (err) {
-            catchError(err.response.data.error || err.response.data.exception);
+            catchError(err);
           }
 
           setGuestModalOpen(false);
@@ -181,7 +181,7 @@ function BasePermissionsModalContent() {
           })));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
 
         setGuestModalOpen(false);

@@ -51,7 +51,7 @@ export function FieldOptions({ table, field, setOpen }) {
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 
@@ -82,7 +82,7 @@ export function FieldOptions({ table, field, setOpen }) {
       saved();
     } catch (err) {
       setFields(currentFields);
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 
@@ -111,7 +111,7 @@ export function FieldOptions({ table, field, setOpen }) {
       saved();
     } catch (err) {
       setFields(currentFields);
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 

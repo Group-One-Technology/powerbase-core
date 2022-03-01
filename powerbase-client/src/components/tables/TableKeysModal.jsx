@@ -115,7 +115,7 @@ export function TableKeysModal() {
       await mutateViewFields(viewFields);
       saved(`Successfully updated primary keys for table ${table.alias}`);
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
 
     mounted(() => setOpen(false));

@@ -48,7 +48,7 @@ export function GuestCard({
         await mutateGuests(updatedGuests);
         saved(`Successfully changed guest ${guest.firstName}'s access to '${value}'.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -73,7 +73,7 @@ export function GuestCard({
           saved(`Successfully removed guest '${guest.firstName}'`);
         }
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };

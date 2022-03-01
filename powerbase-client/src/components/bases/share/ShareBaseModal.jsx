@@ -77,7 +77,7 @@ function BaseShareBaseModal() {
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
 
       mounted(() => setLoading(false));

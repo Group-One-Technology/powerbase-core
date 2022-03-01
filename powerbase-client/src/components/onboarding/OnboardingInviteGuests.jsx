@@ -100,7 +100,7 @@ export function OnboardingInviteGuests({ base }) {
         history.push(`/base/${base.id}/progress?onboarding=true`);
         saved(`Successfully invited ${users.length} user(s) to "${base.name}" base.`);
       } catch (err) {
-        catchError(err.response.data.exception || err.response.data.error);
+        catchError(err);
       }
     } else {
       catchError('You must have at least one user to invite.');

@@ -45,7 +45,7 @@ export function FormatCurrencyOption({ field }) {
       await mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      catchError(err.response.data.errors || err.response.data.exception);
+      catchError(err);
     }
   };
 

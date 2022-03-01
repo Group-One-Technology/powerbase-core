@@ -54,7 +54,7 @@ function BaseTablePermissionsModal() {
           await tablesResponse.mutate();
           saved(`Successfully updated table "${table.alias}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
       }
     }
@@ -101,7 +101,7 @@ function BaseTablePermissionsModal() {
           : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };
@@ -123,7 +123,7 @@ function BaseTablePermissionsModal() {
         : item)));
       saved(`Successfully removed "${role}" from allowed roles.`);
     } catch (err) {
-      catchError(err.response.data.error || err.response.data.exception);
+      catchError(err);
     }
   };
 
@@ -154,7 +154,7 @@ function BaseTablePermissionsModal() {
               : item)));
             saved(`Successfully added "${role}" from allowed roles.`);
           } catch (err) {
-            catchError(err.response.data.error || err.response.data.exception);
+            catchError(err);
           }
 
           setGuestModalOpen(false);
@@ -209,7 +209,7 @@ function BaseTablePermissionsModal() {
             : item)));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);
         } catch (err) {
-          catchError(err.response.data.error || err.response.data.exception);
+          catchError(err);
         }
 
         setGuestModalOpen(false);

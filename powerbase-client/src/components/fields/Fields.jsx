@@ -62,7 +62,7 @@ export function Fields({ table }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
-        catchError(err.response.data.error || err.response.data.exception);
+        catchError(err);
       }
     }
   };

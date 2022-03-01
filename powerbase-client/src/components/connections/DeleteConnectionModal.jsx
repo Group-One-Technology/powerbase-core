@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Dialog } from '@headlessui/react';
 import { ExclamationIcon } from '@heroicons/react/outline';
 
-import { deleteBaseConnection } from '@lib/api/base-connections';
+import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseConnections } from '@models/BaseConnections';
+import { deleteBaseConnection } from '@lib/api/base-connections';
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 
@@ -14,6 +15,7 @@ export function DeleteConnectionModal({
   connection,
   setEditModalOpen,
 }) {
+  const { catchError } = useSaveStatus();
   const cancelButtonRef = useRef();
   const { mutate: refetchConnections } = useBaseConnections();
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export function DeleteConnectionModal({
       await deleteBaseConnection({ id: connection.id });
       await refetchConnections();
     } catch (err) {
-      console.log(err);
+      catchError(err);
     }
 
     setOpen(false);

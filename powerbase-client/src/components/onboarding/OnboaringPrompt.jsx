@@ -30,7 +30,7 @@ export function OnboaringPrompt() {
       history.push(`/base/${SAMPLE_DATABASE_ID}`);
       saved('Successfully been invited to the sample database.');
     } catch (err) {
-      catchError(err.response.data.exception || err.response.data.error);
+      catchError(err);
     }
   };
 
