@@ -80,14 +80,14 @@ function useSaveStateModel() {
   };
 
   const catchError = (err, { silent } = { silent: false }) => {
-    const errorMessage = err?.response.data
+    const errorMessage = err.response?.data
       ? err.response.data.exception || err.response.data.error
       : err;
 
     if (IS_PRODUCTION) {
       logger.error(errorMessage, {
         userId: authUser?.id,
-        error: err?.response.data
+        error: err.response?.data
           ? err.response.data
           : err,
         location,
