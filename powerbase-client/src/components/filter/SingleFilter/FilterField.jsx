@@ -22,7 +22,7 @@ export function FilterField({
 
   return (
     <Listbox value={value?.id} onChange={onChange} disabled={disabled}>
-      <div className="block w-full">
+      <div className="flex-1">
         <Listbox.Button
           id={id}
           className={cn(
@@ -39,7 +39,7 @@ export function FilterField({
               typeId={value.fieldTypeId}
               className="mr-1.5"
             />
-            {value?.name}
+            {value?.alias}
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <SelectorIcon
@@ -70,7 +70,7 @@ export function FilterField({
                     isPrimaryKey={item.isPrimaryKey}
                   />
                 </span>
-                <span className="block truncate">{item.name}</span>
+                <span className="block truncate">{item.alias}</span>
               </Listbox.Option>
             );
           })}

@@ -44,7 +44,7 @@ export function FitlerValueDate({
     : new Date();
 
   return (
-    <div className="w-full">
+    <div className="flex-1">
       <DatePicker
         id={id}
         selected={selectedDate}

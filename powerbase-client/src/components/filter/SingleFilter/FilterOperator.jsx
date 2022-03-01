@@ -9,7 +9,7 @@ export function FilterOperator({
 }) {
   return (
     <Listbox value={value} onChange={onChange} disabled={disabled}>
-      <div className="block w-full">
+      <div className="flex-1">
         <Listbox.Button
           id={id}
           className={cn(

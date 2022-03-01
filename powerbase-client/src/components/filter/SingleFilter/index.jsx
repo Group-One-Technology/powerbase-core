@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
@@ -7,6 +7,7 @@ import { IViewField } from '@lib/propTypes/view-field';
 import { useOperator } from '@lib/hooks/filter/useOperator';
 import { useFilterValue } from '@lib/hooks/filter/useFilterValue';
 import { FieldType } from '@lib/constants/field-types';
+import { NULL_OPERATORS } from '@lib/constants/filter';
 import { formatDate } from '@lib/helpers/formatDate';
 import { FilterField } from './FilterField';
 import { FilterOperator } from './FilterOperator';
@@ -42,6 +43,12 @@ export function SingleFilter({
     fieldType,
   });
 
+  useEffect(() => {
+    if (NULL_OPERATORS.includes(operator)) {
+      setValue(null);
+    }
+  }, [operator]);
+
   const updateField = (selectedField) => {
     if (canManageViews) {
       const newFieldType = fieldTypes.find(
@@ -60,8 +67,6 @@ export function SingleFilter({
       } else {
         setValue('');
       }
-
-      updateTableRecords();
     }
   };
 
@@ -166,6 +171,7 @@ export function SingleFilter({
         <FilterValue
           id={`filter${id}-secondOperand`}
           field={field}
+          operator={operator}
           value={value}
           onChange={handleValueChange}
           fieldType={fieldType?.name}
