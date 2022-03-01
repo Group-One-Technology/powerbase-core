@@ -438,6 +438,7 @@ module Powerbase
 
           if relational_op == "is empty"
             column[column_field.to_sym] = nil
+            next Sequel[column]
           elsif relational_op == "is not empty"
             column[column_field.to_sym] = nil
             next Sequel.~(column)
