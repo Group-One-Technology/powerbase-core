@@ -1,7 +1,9 @@
 module Powerbase
   class QueryCompiler
     PARENTHESIS = ['(', ')']
+    NULL_OPERATORS = ['is empty', 'is not empty']
     RELATIONAL_OPERATORS = [
+      ...NULL_OPERATORS,
       '<', '>', '=', '<=', '>=', '!=',
       'is', 'is not', 'contains', 'does not contain',
       'is exact date', 'is not exact date', 'is before', 'is after', 'is on or before', 'is on or after',
@@ -298,7 +300,7 @@ module Powerbase
                   type: token == "(" ? TOKEN[:open_parenthesis] : TOKEN[:close_parenthesis],
                   value: token
                 }
-              elsif RELATIONAL_OPERATORS.include?(token)
+              elsif RELATIONAL_OPERATORS.include?(token) || DATE_OPERATORS.include(token)
                 next { type: TOKEN[:relational_operator], value: token }
               elsif LOGICAL_OPERATORS.include?(token)
                 next { type: TOKEN[:logical_operator], value: token }
@@ -434,9 +436,16 @@ module Powerbase
           column_value = sanitize(filter[:filter][:value])
           column = {}
 
-          if column_value == nil || (column_value.to_s.length == 0)
+          if relational_op == "is empty"
+            column[column_field.to_sym] = nil
+          elsif relational_op == "is not empty"
+            column[column_field.to_sym] = nil
+            next Sequel.~(column)
+          elsif column_value == nil || (column_value.to_s.length == 0)
             next
           end
+
+          column[column_field.to_sym] = column_value
 
           if field_type == "Date"
             column_field = if @adapter == "mysql2"
@@ -452,10 +461,8 @@ module Powerbase
 
             case relational_op
             when "is exact date"
-              column[column_field] = column_value
               next Sequel[column]
             when "is not exact date"
-              column[column_field] = column_value
               next Sequel.~(column)
             when "is before"
               next Sequel::SQL::BooleanExpression.new(:<, column_field, column_value)
@@ -467,8 +474,6 @@ module Powerbase
               next Sequel::SQL::BooleanExpression.new(:>=, column_field, column_value)
             end
           end
-
-          column[column_field.to_sym] = column_value
 
           case relational_op
           when "is"
@@ -537,7 +542,11 @@ module Powerbase
           field = cur_field.name
           value = sanitize(filter[:filter][:value])
 
-          if value == nil || (value.to_s.length == 0)
+          if relational_op == "is empty"
+            next "((NOT _exists_:#{field}) OR #{field}.keyword:\"\")"
+          elsif relational_op == "is not empty"
+            next "(_exists_:#{field} OR NOT #{field}.keyword:\"\")"
+          elsif value == nil || (value.to_s.length == 0)
             next
           end
 
@@ -545,7 +554,7 @@ module Powerbase
           when "is"
             "#{field}:\"#{value}\""
           when "is not"
-            "(NOT #{field}:#{value})"
+            "(NOT #{field}:\"#{value}\")"
           when "contains"
             "#{field}:#{value}"
           when "does not contain"

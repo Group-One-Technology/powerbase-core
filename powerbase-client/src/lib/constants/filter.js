@@ -1,8 +1,10 @@
 import { FieldType } from './field-types';
 
-const GENERAL_OPERATORS = ['is', 'is not'];
-const TEXT_OPERATORS = [
-  ...GENERAL_OPERATORS,
+export const NULL_OPERATORS = ['is empty', 'is not empty'];
+export const EXACT_OPERATORS = ['is', 'is not'];
+export const TEXT_OPERATORS = [
+  ...EXACT_OPERATORS,
+  ...NULL_OPERATORS,
   'contains',
   'does not contain',
 ];
@@ -17,9 +19,10 @@ export const OPERATOR = {
     '>=',
     '<',
     '<=',
+    ...NULL_OPERATORS,
   ],
-  [FieldType.CHECKBOX]: GENERAL_OPERATORS,
-  [FieldType.SINGLE_SELECT]: GENERAL_OPERATORS,
+  [FieldType.CHECKBOX]: EXACT_OPERATORS,
+  [FieldType.SINGLE_SELECT]: EXACT_OPERATORS,
   [FieldType.MULTIPLE_SELECT]: TEXT_OPERATORS,
   [FieldType.DATE]: [
     'is exact date',
@@ -28,6 +31,7 @@ export const OPERATOR = {
     'is after',
     'is on or before',
     'is on or after',
+    ...NULL_OPERATORS,
   ],
   [FieldType.EMAIL]: TEXT_OPERATORS,
   [FieldType.PLUGIN]: TEXT_OPERATORS,
