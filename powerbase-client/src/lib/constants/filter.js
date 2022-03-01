@@ -11,6 +11,7 @@ export const TEXT_OPERATORS = [
 
 export const OPERATOR = {
   [FieldType.SINGLE_LINE_TEXT]: TEXT_OPERATORS,
+  [FieldType.JSON_TEXT]: TEXT_OPERATORS,
   [FieldType.LONG_TEXT]: TEXT_OPERATORS,
   [FieldType.NUMBER]: [
     '=',
