@@ -19,6 +19,7 @@ import { SORT_OPERATORS } from '@lib/constants/sort';
 import { useReorderSort } from '@lib/hooks/sort/useReorderSort';
 import { parseSortQueryString } from '@lib/helpers/sort/parseSortQueryString';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 import { SortItem } from './SortItem';
 
 export function Sort() {
@@ -59,6 +60,7 @@ export function Sort() {
         await mutateTableRecords();
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

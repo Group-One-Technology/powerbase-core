@@ -8,6 +8,7 @@ import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useMounted } from '@lib/hooks/useMounted';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 /**
  * Handles the reordering logic of the fields/columns.
@@ -56,6 +57,7 @@ export function useReorderFields({ fields, setFields }) {
         await mutateViewFields();
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

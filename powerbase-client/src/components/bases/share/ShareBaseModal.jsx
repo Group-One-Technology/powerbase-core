@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import cn from 'classnames';
 import { Listbox, Dialog } from '@headlessui/react';
+import { captureError } from '@lib/helpers/captureError';
 import { ChevronDownIcon, CogIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline';
 
 import { useShareBaseModal } from '@models/modals/ShareBaseModal';
@@ -11,8 +12,8 @@ import { useViewFields } from '@models/ViewFields';
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { PermissionsStateModalProvider, usePermissionsStateModal } from '@models/modals/PermissionsStateModal';
 import { inviteGuest } from '@lib/api/guests';
-import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
+import { ACCESS_LEVEL, PERMISSIONS } from '@lib/constants/permissions';
 import { useBase } from '@models/Base';
 
 import { Modal } from '@components/ui/Modal';
@@ -77,6 +78,7 @@ function BaseShareBaseModal() {
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
 

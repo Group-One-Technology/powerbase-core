@@ -2,20 +2,22 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { useFieldTypes } from '@models/FieldTypes';
-import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { EyeOffIcon, ChevronRightIcon, LockClosedIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
 import { useFieldPermissionsModal } from '@models/modals/FieldPermissionsModal';
+import { useTableView } from '@models/TableView';
+import { useFieldTypes } from '@models/FieldTypes';
 import { hideViewField } from '@lib/api/view-fields';
 import { FieldType } from '@lib/constants/field-types';
 import { updateFieldAlias, updateFieldType } from '@lib/api/fields';
-import { useTableView } from '@models/TableView';
+import { captureError } from '@lib/helpers/captureError';
 import { PERMISSIONS } from '@lib/constants/permissions';
+
 import { DraggableItem } from '@components/ui/DraggableItem';
+import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { FieldOptions } from './FieldOptions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 
@@ -64,6 +66,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     } else {
@@ -94,6 +97,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }
@@ -124,6 +128,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

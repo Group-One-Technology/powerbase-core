@@ -5,6 +5,7 @@ import { useTableView } from '@models/TableView';
 import { useBaseUser } from '@models/BaseUser';
 import { resizeViewField } from '@lib/api/view-fields';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 /**
  * Handles the resizing of field/column logic.
@@ -59,6 +60,7 @@ export function useResizeFields({ fields, setFields }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

@@ -16,6 +16,7 @@ import {
   setFieldAsNullable,
   unsetFieldAsNullable,
 } from '@lib/api/fields';
+import { captureError } from '@lib/helpers/captureError';
 
 export function FieldOptions({ table, field, setOpen }) {
   const { baseUser } = useBaseUser();
@@ -111,6 +112,7 @@ export function FieldOptions({ table, field, setOpen }) {
       saved();
     } catch (err) {
       setFields(currentFields);
+      captureError(err);
       catchError(err);
     }
   };

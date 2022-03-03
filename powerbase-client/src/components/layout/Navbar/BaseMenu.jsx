@@ -25,6 +25,7 @@ import { leaveBase } from '@lib/api/guests';
 import { useMounted } from '@lib/hooks/useMounted';
 import { DOCUMENTATION_LINK } from '@lib/constants/links';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 import { Badge } from '@components/ui/Badge';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
@@ -78,6 +79,7 @@ export function BaseMenu({ base, otherBases }) {
         await mutateSharedBases(updatedSharedBases);
         saved(`Successfully left "${base.name}" base.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
 

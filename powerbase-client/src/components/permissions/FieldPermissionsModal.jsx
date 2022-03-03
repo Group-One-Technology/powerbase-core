@@ -21,6 +21,7 @@ import { changeGuestAccess, updateGuestFieldPermissions } from '@lib/api/guests'
 import { doesGuestHaveAccess } from '@lib/helpers/guests/doesGuestHaveAccess';
 import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
+import { captureError } from '@lib/helpers/captureError';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -98,6 +99,7 @@ function BaseFieldPermissionsModal() {
           : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { captureError } from '@lib/helpers/captureError';
 
 import { useBase } from '@models/Base';
 import { useSaveStatus } from '@models/SaveStatus';
@@ -38,6 +39,7 @@ export function DisconnectBase() {
         history.push('/');
         saved(`Successfully disconnect the "${name}" base.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

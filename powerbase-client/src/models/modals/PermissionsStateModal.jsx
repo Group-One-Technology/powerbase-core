@@ -1,5 +1,6 @@
 import constate from 'constate';
 import { useEffect, useState } from 'react';
+import { captureError } from '@lib/helpers/captureError';
 
 import { useBase } from '@models/Base';
 import { useCurrentView } from '@models/views/CurrentTableView';
@@ -142,6 +143,7 @@ function usePermissionsStateModalModel() {
         saved(`Successfully updated ${guest.firstName}'s permissions.`);
         mounted(() => setOpen(false));
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }
