@@ -2,10 +2,10 @@ module NotificationsHelper
   include PusherHelper
 
   def create_notification!(data, object)
-    Notification.create!({
+    notification = Notification.create!({
       data_type: data[:data_type],
       message: data[:message],
-      object: data[:object_type],
+      object: object,
       subject_id: data[:subject_id],
       user_id: data[:user_id]
     })
