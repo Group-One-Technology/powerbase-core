@@ -156,14 +156,16 @@ module ElasticsearchHelper
   end
 
   def format_es_result(result)
-    result["hits"]["hits"].map do |result|
-      if result["fields"] && result["fields"].length > 0
-        result["fields"].each do |key, value|
-          result["_source"][key] = value[0]
+    if result != nil
+      result["hits"]["hits"].map do |result|
+        if result["fields"] && result["fields"].length > 0
+          result["fields"].each do |key, value|
+            result["_source"][key] = value[0]
+          end
         end
-      end
 
-      result["_source"].symbolize_keys.merge("doc_id": result["_id"])
+        result["_source"].symbolize_keys.merge("doc_id": result["_id"])
+      end
     end
   end
 end
