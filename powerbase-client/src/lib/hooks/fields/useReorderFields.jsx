@@ -3,6 +3,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableView } from '@models/TableView';
+import { captureError } from '@lib/helpers/captureError';
 import { reorderViewFields } from '@lib/api/view-fields';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { PERMISSIONS } from '@lib/constants/permissions';
@@ -36,6 +37,7 @@ export function useReorderFields({ fields, setFields }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

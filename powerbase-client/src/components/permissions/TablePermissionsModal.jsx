@@ -21,6 +21,7 @@ import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
 import { updateTablePermission, updateTablePermissionAllowedRoles } from '@lib/api/tables';
 import { updateGuestTablePermissions } from '@lib/api/guests';
+import { captureError } from '@lib/helpers/captureError';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -101,6 +102,7 @@ function BaseTablePermissionsModal() {
           : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

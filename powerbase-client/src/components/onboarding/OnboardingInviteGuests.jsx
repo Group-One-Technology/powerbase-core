@@ -11,9 +11,10 @@ import { ACCESS_LEVEL } from '@lib/constants/permissions';
 import { setAuthUserAsOnboarded } from '@lib/api/auth';
 import { useAuthUser } from '@models/AuthUser';
 import { Button } from '@components/ui/Button';
-import { GuestInviteInput } from '@components/guest/GuestInviteInput';
 import { useSaveStatus } from '@models/SaveStatus';
 import { inviteMultipleGuests } from '@lib/api/guests';
+import { captureError } from '@lib/helpers/captureError';
+import { GuestInviteInput } from '@components/guest/GuestInviteInput';
 
 export function OnboardingInviteGuests({ base }) {
   const history = useHistory();
@@ -100,6 +101,7 @@ export function OnboardingInviteGuests({ base }) {
         history.push(`/base/${base.id}/progress?onboarding=true`);
         saved(`Successfully invited ${users.length} user(s) to "${base.name}" base.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     } else {

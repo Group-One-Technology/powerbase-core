@@ -6,6 +6,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 export function useReorderSort({ view, sort, updateSort }) {
   const { mounted } = useMounted();
@@ -31,6 +32,7 @@ export function useReorderSort({ view, sort, updateSort }) {
         await updateSort(updatedSort);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

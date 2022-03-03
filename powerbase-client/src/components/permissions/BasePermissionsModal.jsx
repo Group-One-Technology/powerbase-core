@@ -21,6 +21,7 @@ import { useHoverItem } from '@lib/hooks/useHoverItem';
 import { PERMISSIONS_LINK } from '@lib/constants/links';
 import { updateDatabasePermission, updateDatabasePermissionAllowedRoles } from '@lib/api/databases';
 import { updateGuestDatabasePermissions } from '@lib/api/guests';
+import { captureError } from '@lib/helpers/captureError';
 
 import { Modal } from '@components/ui/Modal';
 import { GuestCard } from '@components/guest/GuestCard';
@@ -89,6 +90,7 @@ function BasePermissionsModalContent() {
         await mutateBase(updatedBase);
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

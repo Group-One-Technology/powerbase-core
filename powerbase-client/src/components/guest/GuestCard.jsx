@@ -10,6 +10,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useSharedBases } from '@models/SharedBases';
 import { changeGuestAccess, removeGuest } from '@lib/api/guests';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 import { GuestAccessMenu } from '@components/ui/GuestAccessMenu';
 import { Badge } from '@components/ui/Badge';
@@ -48,6 +49,7 @@ export function GuestCard({
         await mutateGuests(updatedGuests);
         saved(`Successfully changed guest ${guest.firstName}'s access to '${value}'.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }
@@ -73,6 +75,7 @@ export function GuestCard({
           saved(`Successfully removed guest '${guest.firstName}'`);
         }
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

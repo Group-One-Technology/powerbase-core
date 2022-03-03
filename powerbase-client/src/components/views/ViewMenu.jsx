@@ -12,6 +12,7 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { updateViewsOrder } from '@lib/api/views';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
@@ -68,6 +69,7 @@ export function ViewMenu() {
         await updateViewsOrder({ tableId: table.id, views: updatedViews.map((item) => item.id) });
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

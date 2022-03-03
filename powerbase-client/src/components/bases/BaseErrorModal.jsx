@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { ExclamationIcon } from '@heroicons/react/outline';
 import { Dialog } from '@headlessui/react';
+import { captureError } from '@lib/helpers/captureError';
 import PropTypes from 'prop-types';
 
 import { useSaveStatus } from '@models/SaveStatus';
@@ -33,6 +34,7 @@ export function BaseErrorModal({
       await mutateBases();
       saved();
     } catch (err) {
+      captureError(err);
       catchError(err);
     }
 

@@ -16,6 +16,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { updateTableView } from '@lib/api/views';
 import { parseQueryString } from '@lib/helpers/filter/parseQueryString';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { getFilterFieldNames } from '@lib/helpers/filter/getFilterFieldNames';
 import { FilterGroup } from './FilterGroup';
@@ -74,6 +75,7 @@ export function Filter() {
         await mutateTableRecords();
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

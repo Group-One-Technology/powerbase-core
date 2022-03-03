@@ -13,6 +13,7 @@ import { startsWithVowel } from '@lib/helpers/startsWithVowel';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useNotificationsListener } from '@lib/hooks/websockets/useNotificationsListener';
 import { acceptGuestInvitation, rejectGuestInvitation } from '@lib/api/guests';
+import { captureError } from '@lib/helpers/captureError';
 
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
@@ -83,6 +84,7 @@ function BaseNotificationsMenu({ colored }) {
         mutateGuestInvitations(updatedGuestInvitations);
         saved(`Successfully accepted invite to ${guest.databaseName} base.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }
@@ -101,6 +103,7 @@ function BaseNotificationsMenu({ colored }) {
         mutateGuestInvitations(updatedGuestInvitations);
         saved(`Successfully rejected invite to ${guest.databaseName} base.`);
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
 

@@ -2,12 +2,14 @@ import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
+import { captureError } from '@lib/helpers/captureError';
 import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableView } from '@models/TableView';
@@ -16,6 +18,7 @@ import { useBaseUser } from '@models/BaseUser';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { PERMISSIONS } from '@lib/constants/permissions';
+
 import { FieldItem } from './FieldItem';
 import NewField from './NewField';
 
@@ -62,6 +65,7 @@ export function Fields({ table }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }

@@ -22,6 +22,7 @@ import {
   reindexTable,
   updateTableAlias,
 } from '@lib/api/tables';
+import { captureError } from '@lib/helpers/captureError';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 
@@ -80,6 +81,7 @@ export function TableTabItemMenu({ table, children }) {
         await mutateTables(updatedTables);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     } else {

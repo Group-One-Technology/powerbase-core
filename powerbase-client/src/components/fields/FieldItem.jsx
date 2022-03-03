@@ -10,6 +10,7 @@ import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
 import { hideViewField, unhideViewField } from '@lib/api/view-fields';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { captureError } from '@lib/helpers/captureError';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
@@ -51,6 +52,7 @@ export function FieldItem({ view, field, setFields }) {
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        captureError(err);
         catchError(err);
       }
     }
