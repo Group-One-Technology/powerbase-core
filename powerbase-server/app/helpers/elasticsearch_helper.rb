@@ -71,12 +71,16 @@ module ElasticsearchHelper
 
   def create_index!(index_name)
     if !index_exists?(index_name)
-      client.indices.create(
-        index: index_name,
-        body: {
-          settings: { "index.mapping.ignore_malformed": true },
-        }
-      )
+      begin
+        client.indices.create(
+          index: index_name,
+          body: {
+            settings: { "index.mapping.ignore_malformed": true },
+          }
+        )
+      rescue Elasticsearch::Transport::Transport::Errors::BadRequest => error
+        puts "#{Time.now} -- Index #{index_name} already exists."
+      end
     end
   end
 

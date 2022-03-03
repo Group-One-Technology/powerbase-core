@@ -13,13 +13,19 @@ module Powerbase
 
     def listen!
       @db = powerbase_db._sequel
+
+      if !@db == nil
+        # TODO drop trigger for undefined bases.
+        raise StandardError.new("#{Time.now} -- Unable to listen to database##{@powerbase_db.id}. Sequel db is undefined")
+      end
+
       begin
         @db.listen("powerbase_table_update", :loop => true) do |ev, pid, payload|
           notifier_callback(@db, ev, pid, payload)
         end
       rescue => ex
-        puts "#{Time.now} -- Listener Error for Database##{@powerbase_db.id}}"
-        puts ex
+        puts "#{Time.now} -- Listener Error for Database##{@powerbase_db.id}"
+        raise ex
       end
     end
 

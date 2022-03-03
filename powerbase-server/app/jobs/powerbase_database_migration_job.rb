@@ -5,6 +5,10 @@ class PowerbaseDatabaseMigrationJob < ApplicationJob
 
   # * Migrates the given remote database.
   def perform(database_id)
+    Sentry.set_context("database", {
+      database_id: database_id,
+    })
+
     @database = PowerbaseDatabase.find(database_id);
     @base_migration = BaseMigration.find_by(powerbase_database_id: database_id)
 
