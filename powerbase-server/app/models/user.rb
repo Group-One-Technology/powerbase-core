@@ -25,7 +25,8 @@ class User < ApplicationRecord
   end
 
   def shared_databases
-    self.guests.map {|guest| guest.powerbase_database}
+    database_ids = self.guests.map {|guest| guest.powerbase_database_id}.uniq
+    PowerbaseDatabase.where(id: database_ids)
   end
 
   # * Checks whether the current user has access to the ff:
