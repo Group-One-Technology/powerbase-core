@@ -5,7 +5,7 @@ module NotificationsHelper
     notification = Notification.create!({
       data_type: data[:data_type],
       message: data[:message],
-      object: object_format_json(data[:object_type], object),
+      object: data[:object_type],
       subject_id: data[:subject_id],
       user_id: data[:user_id]
     })
