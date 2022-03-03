@@ -6,7 +6,23 @@ class ApplicationController < ActionController::API
   rescue_from PermissionsHelper::NotFound, with: :not_found
 
   def current_user
-    @current_user || User.find(payload['user_id'])
+    @current_user || User.find(payload["user_id"])
+  end
+
+  def authorize_access_request!
+    super
+    set_user_context
+  end
+
+  def set_user_context
+    if !@user_tracked && current_user != nil
+      Sentry.set_user(
+        user_id: current_user.id,
+        name: current_user.name,
+        email: current_user.email,
+      )
+      @user_tracked = true
+    end
   end
 
   private
