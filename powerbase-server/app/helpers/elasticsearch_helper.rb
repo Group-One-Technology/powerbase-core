@@ -84,6 +84,16 @@ module ElasticsearchHelper
     end
   end
 
+  def is_indexable?(doc_size, limit = 100.bytes)
+    # Default maximum size of HTTP request body in Elasticsearch is 100mb
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html
+    doc_size < limit
+  end
+
+  def get_doc_size(doc)
+    doc.to_json.bytesize
+  end
+
   def get_doc_id(primary_keys, record, fields)
     if primary_keys.length > 0
       doc_id = primary_keys

@@ -105,6 +105,14 @@ module Powerbase
 
       data = format_record(data, @fields)
       primary_keys = format_record(primary_keys, @fields)
+      is_turbo = @table.db.is_turbo
+
+      if is_turbo
+        doc_size = get_doc_size(data)
+        if !is_indexable?(doc_size)
+          raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 100MB"
+        end
+      end
 
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
@@ -115,7 +123,7 @@ module Powerbase
           .update(data)
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data) if is_turbo
       record
     end
 
@@ -130,6 +138,12 @@ module Powerbase
 
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
+
+      doc_size = get_doc_size(data)
+      if !is_indexable?(doc_size)
+        raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 100MB"
+      end
+
       result = update_record(@index, primary_keys, data, !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: data }
     end

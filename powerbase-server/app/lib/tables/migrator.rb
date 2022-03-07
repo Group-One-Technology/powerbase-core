@@ -58,6 +58,15 @@ class Tables::Migrator
           doc_id = get_doc_id(primary_keys, doc, actual_fields)
           puts "#{Time.now} -- Record to index DOC_ID: #{doc_id}"
 
+          doc_size = get_doc_size(doc)
+          if !is_indexable?(doc_size)
+            error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 100MB"
+            puts error_message
+            Sentry.capture_message(error_message)
+            table.write_migration_logs!(error: { type: "Elasticsearch", error: error_message })
+            next
+          end
+
           if doc_id.present?
             search_doc_id = nil
             old_doc_id = nil
