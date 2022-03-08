@@ -12,6 +12,12 @@ export async function getTableLogs({ id }) {
   return undefined;
 }
 
+export async function clearTableErrorLogs({ tableId }) {
+  const response = await securedApi.put(`/tables/${tableId}/clear_error_logs`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function updateTableAlias({ tableId, alias }) {
   const response = await securedApi.put(`/tables/${tableId}/alias`, {
     alias,

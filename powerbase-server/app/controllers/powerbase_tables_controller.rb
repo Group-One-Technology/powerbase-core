@@ -1,13 +1,13 @@
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
-  before_action :check_table_access, only: [:alias, :update, :update_default_view, :update_primary_keys]
+  before_action :check_table_access, only: [:alias, :clear_error_logs, :update, :update_default_view, :update_primary_keys]
   before_action :check_table_permission_access, only: [:update_allowed_roles, :update_table_permission]
 
   schema(:index) do
     required(:database_id).value(:integer)
   end
 
-  schema(:show, :alias, :hide, :drop, :logs, :update) do
+  schema(:show, :alias, :hide, :drop, :clear_error_logs, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
   end
@@ -119,8 +119,19 @@ class PowerbaseTablesController < ApplicationController
     @table = PowerbaseTable.find(safe_params[:id])
     raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
     current_user.can?(:manage_base, @table.db)
-
     render json: logs_format_json(@table)
+  end
+
+  # PUT /tables/:id/clear_error_logs
+  def clear_error_logs
+    logs = @table.logs
+    logs["migration"] = {} if logs["migration"] == nil
+    logs["migration"]["errors"] = []
+    if @table.update(logs: logs)
+      render status: :no_content
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
   end
 
   # PUT /tables/:id/update
@@ -268,6 +279,7 @@ class PowerbaseTablesController < ApplicationController
         has_primary_key: table.has_primary_key?,
         status: table.status,
         is_reindexing: table.status == "indexing_records" || Array(table.logs["migration"]["old_primary_keys"]).length > 0,
+        logs: table.logs,
         permissions: table.permissions,
         created_at: table.created_at,
         updated_at: table.updated_at,

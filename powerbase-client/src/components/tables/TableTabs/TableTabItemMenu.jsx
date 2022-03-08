@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import {
-  CloudIcon, EyeOffIcon, LockClosedIcon, TrashIcon,
+  CloudIcon, ExclamationCircleIcon, EyeOffIcon, LockClosedIcon, TrashIcon,
 } from '@heroicons/react/outline';
 import { KeyIcon } from '@heroicons/react/solid';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -14,6 +14,7 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useTablePermissionsModal } from '@models/modals/TablePermissionsModal';
 import { useTableKeysModal } from '@models/modals/TableKeysModal';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useTableErrorModal } from '@models/modals/TableErrorModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { useMounted } from '@lib/hooks/useMounted';
 import {
@@ -45,6 +46,7 @@ export function TableTabItemMenu({ table, children }) {
     handleTableChange,
   } = useCurrentView();
   const { setOpen: setTableKeysModalOpen, setTable } = useTableKeysModal();
+  const { openErrorModal } = useTableErrorModal();
 
   const canManageTable = baseUser?.can(PERMISSIONS.ManageTable);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
@@ -92,6 +94,8 @@ export function TableTabItemMenu({ table, children }) {
   const handleAliasChange = (evt) => {
     setAlias(evt.target.value);
   };
+
+  const handleErrorLogs = () => openErrorModal(table);
 
   const handleKeys = () => {
     setTable(table);
@@ -255,6 +259,15 @@ export function TableTabItemMenu({ table, children }) {
             >
               <LockClosedIcon className="h-4 w-4 mr-1.5" />
               Permissions
+            </ContextMenu.Item>
+          )}
+          {(canManageTable && table.logs?.migration.errors.length > 0) && (
+            <ContextMenu.Item
+              className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onSelect={handleErrorLogs}
+            >
+              <ExclamationCircleIcon className="h-4 w-4 mr-1.5" />
+              Error Logs
             </ContextMenu.Item>
           )}
           {canManageTable && tables.length > 1
