@@ -268,6 +268,9 @@ export function TableTabItemMenu({ table, children }) {
             >
               <ExclamationCircleIcon className="h-4 w-4 mr-1.5" />
               Error Logs
+              <span className="ml-auto h-4 w-4 p-1 inline-flex items-center justify-center text-xs text-white font-medium bg-red-500 rounded-full">
+                {table.logs?.migration.errors.length}
+              </span>
             </ContextMenu.Item>
           )}
           {canManageTable && tables.length > 1
