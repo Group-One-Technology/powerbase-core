@@ -1,12 +1,13 @@
 include SequelHelper
 
 class Tables::Syncer
-  attr_accessor :table, :schema, :fields
+  attr_accessor :table, :schema, :fields, :new_conn
 
-  def initialize(table, schema)
+  def initialize(table, schema, new_conn = false)
+    @new_conn = new_conn
     @table = table
     @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
-    @fields = table.fields.reload.select {|field| !field.is_virtual}
+    @fields = @table.fields.reload.select {|field| !field.is_virtual}
   end
 
   def sync!
@@ -15,6 +16,7 @@ class Tables::Syncer
 
     if added_columns.count > 0
       puts "#{Time.now} -- Migrating #{added_columns.count} added columns"
+
       columns = schema.select{|col| added_columns.include? col.first}
       columns.each do |column|
         field = Fields::Creator.new column, table
@@ -30,9 +32,23 @@ class Tables::Syncer
       end
     end
 
+    set_table_as_migrated
+
     if added_columns.count > 0 || dropped_columns.count > 0
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     end
   end
+
+  private
+    def set_table_as_migrated
+      if new_conn && !database.is_turbo
+        unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
+
+        if unmigrated_columns.empty?
+          table.write_migration_logs!(status: "migrated")
+          pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
+        end
+      end
+    end
 end

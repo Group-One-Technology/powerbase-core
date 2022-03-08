@@ -41,14 +41,34 @@ module Powerbase
       object_identity = payload["object"]
       command_tag = payload["command_tag"]
       object_type = payload["object_type"]
-      powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
-      puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}"
+      case command_tag
+      when "CREATE TABLE"
+        puts "#{Time.now} -- New table named #{table_name} detected."
 
-      # Migrate added/dropped columns
-      schema = database.schema(table_name.to_sym)
-      table = Tables::Syncer.new powerbase_table, schema
-      table.sync!
+        # Create powerbase table
+        table_creator = Tables::Creator.new table_name, powerbase_db.tables.length + 1, powerbase_db
+        table_creator.save
+
+        table_schema = database.schema(table_name.to_sym)
+
+        # Migrate added/dropped columns
+        table = Tables::Syncer.new table_creator.object, table_schema
+        table.sync!
+      when "ALTER TABLE"
+        powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+        puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}"
+
+        table_schema = database.schema(table_name.to_sym)
+
+        # Migrate added/dropped columns
+        table = Tables::Syncer.new powerbase_table, table_schema
+        table.sync!
+      # when "DROP TABLE"
+      #   powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+      #   puts "#{Time.now} -- Dropped table##{powerbase_table.id} named #{table_name}"
+      #   table.remove
+      end
 
       # Clear cached table schema
       database.instance_variable_get(:@schemas).clear

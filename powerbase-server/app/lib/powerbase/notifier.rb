@@ -41,7 +41,7 @@ module Powerbase
           db.run("
             CREATE EVENT TRIGGER #{table_name}_schema_changed
             ON ddl_command_end
-            WHEN TAG IN ('CREATE TABLE', 'ALTER TABLE', 'DROP TABLE')
+            WHEN TAG IN ('CREATE TABLE', 'ALTER TABLE')
             EXECUTE PROCEDURE table_schema_update_notify()
           ")
         end
@@ -127,7 +127,7 @@ module Powerbase
             object_identity TEXT;
             object_type TEXT;
           BEGIN
-            FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands() LOOP
+            FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands() WHERE command_tag IN ('CREATE TABLE', 'ALTER TABLE') LOOP
               tbl = obj.objid::regclass;
               colnum = obj.objsubid::regclass;
               schma = obj.schema_name;
