@@ -11,8 +11,8 @@ class Fields::Creator
     @field_options = column[1]
     @database = table.db
     @base_migration = @database.base_migration
-    @table_view = find_or_create_table_view
 
+    find_or_create_table_view
     create_field_object
   end
 
@@ -32,16 +32,19 @@ class Fields::Creator
   end
 
   def add_to_viewfield
-    ViewFieldOption.find_by(
-      table_view_id: table_view.id,
-      powerbase_field_id: field.id,
-    ) ||
-    ViewFieldOption.create!({
-      width: set_view_field_width,
-      order: table.fields.count,
-      table_view_id: table_view.id,
-      powerbase_field_id: field.id
-    })
+    views = TableView.all
+    views.each do |view|
+      ViewFieldOption.find_by(
+        table_view_id: view.id,
+        powerbase_field_id: field.id,
+      ) ||
+      ViewFieldOption.create!({
+        width: set_view_field_width,
+        order: table.fields.count,
+        table_view_id: view.id,
+        powerbase_field_id: field.id
+      })
+    end
   end
 
   def add_field_select_options
