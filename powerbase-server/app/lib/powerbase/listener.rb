@@ -21,19 +21,43 @@ module Powerbase
 
       begin
         @db.listen("powerbase_table_update", :loop => true) do |ev, pid, payload|
-          notifier_callback(@db, ev, pid, payload)
+          payload_hash = JSON.parse(payload)
+
+          if payload_hash["trigger_type"] == "event_trigger"
+            event_notifier_callback(@db, ev, pid, payload_hash)
+          else
+            notifier_callback(@db, ev, pid, payload_hash)
+          end
         end
       rescue => ex
-        puts "#{Time.now} -- Listener Error for Database##{@powerbase_db.id}"
+        puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}" if powerbase_db
         raise ex
       end
     end
 
+    def event_notifier_callback(database, ev, pid, payload)
+      table_name = payload["table"]
+      column_name = payload["column"]
+      object_identity = payload["object"]
+      command_tag = payload["command_tag"]
+      object_type = payload["object_type"]
+      powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+
+      puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}"
+
+      # Migrate added/dropped columns
+      schema = database.schema(table_name.to_sym)
+      table = Tables::Syncer.new powerbase_table, schema
+      table.sync!
+
+      # Clear cached table schema
+      database.instance_variable_get(:@schemas).clear
+    end
+
     def notifier_callback(database, ev, pid, payload)
-      payload_hash = JSON.parse(payload)
-      table_name = payload_hash["table"]
-      primary_key_value = payload_hash["primary_key"]
-      event_type = payload_hash["type"]
+      table_name = payload["table"]
+      primary_key_value = payload["primary_key"]
+      event_type = payload["type"]
       table = database.from(table_name.to_sym)
       powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
@@ -41,7 +65,7 @@ module Powerbase
       fields = powerbase_table.fields
       doc_id = format_doc_id(primary_key_value)
 
-      puts "#{Time.now} -- Data changes detect on table##{powerbase_table.id} #{table_name}"
+      puts "#{Time.now} -- Data changes detected on table##{powerbase_table.id} #{table_name}"
 
       case event_type
       when "INSERT"

@@ -22,9 +22,8 @@ module Powerbase
         end
         puts "#{Time.now} -- Injecting Table Update Trigger... DONE"
       rescue Sequel::Error => exception
-        puts "#{Time.now} -- Error for table #{table_name} in db##{@powerbase_database.id}: #{exception.message}"
-
         if !exception.message.include?("PG::DuplicateObject")
+          puts "#{Time.now} -- Error for table #{table_name} in db##{@powerbase_database.id}: #{exception.message}"
           Sentry.capture_exception(exception)
         end
       end
@@ -48,9 +47,8 @@ module Powerbase
         end
         puts "#{Time.now} -- Injecting Table Update Event Trigger... DONE"
       rescue Sequel::Error => exception
-        puts "#{Time.now} -- Error for table #{table_name} in db##{@powerbase_database.id}: #{exception.message}"
-
         if !exception.message.include?("PG::DuplicateObject")
+          puts "#{Time.now} -- Error for table #{table_name} in db##{@powerbase_database.id}: #{exception.message}"
           Sentry.capture_exception(exception)
         end
       end

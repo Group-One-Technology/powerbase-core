@@ -6,5 +6,4 @@ class TableIndexWorker
     table = PowerbaseTable.find table_id
     table.reindex!
   end
-
 end
