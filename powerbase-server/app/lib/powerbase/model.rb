@@ -105,6 +105,14 @@ module Powerbase
 
       data = format_record(data, @fields)
       primary_keys = format_record(primary_keys, @fields)
+      is_turbo = @table.db.is_turbo
+
+      if is_turbo
+        doc_size = get_doc_size(data)
+        if !is_indexable?(doc_size)
+          raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 100MB"
+        end
+      end
 
       query = Powerbase::QueryCompiler.new(@table)
       sequel_query = query.find_by(primary_keys).to_sequel
@@ -115,7 +123,7 @@ module Powerbase
           .update(data)
       }
 
-      record = update_doc_record(primary_keys: primary_keys, data: data) if @table.db.is_turbo
+      record = update_doc_record(primary_keys: primary_keys, data: data) if is_turbo
       record
     end
 
@@ -130,6 +138,12 @@ module Powerbase
 
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
+
+      doc_size = get_doc_size(data)
+      if !is_indexable?(doc_size)
+        raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 100MB"
+      end
+
       result = update_record(@index, primary_keys, data, !@is_turbo)
       { doc_id: result["_id"], result: result["result"], data: data }
     end
@@ -249,6 +263,7 @@ module Powerbase
         filter: options[:filters],
         sort: options[:sort],
       })
+      result = nil
 
       if @is_turbo
         create_index!(@index)
@@ -256,7 +271,7 @@ module Powerbase
         search_params[:from] = (page - 1) * limit
         search_params[:size] = limit
         result = search_records(@index, search_params)
-        format_es_result(result)
+        result = format_es_result(result)
       else
         magic_search_params = query.to_elasticsearch
         magic_records = nil
@@ -276,8 +291,13 @@ module Powerbase
             .all
         }
 
-        query.merge_records(records, magic_records)
+        result = query.merge_records(records, magic_records)
       end
+
+      doc_size = get_doc_size(result)
+      raise StandardError.new("Could not query data of #{doc_size} bytes. Payload is too large. Limit is 100MB.") if !is_indexable?(doc_size)
+
+      result
     end
 
     # * Get total table records.

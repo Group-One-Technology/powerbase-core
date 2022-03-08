@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { useViewFields } from '@models/ViewFields';
 import { useTableConnections } from '@models/TableConnections';
 import { useFieldTypes } from '@models/FieldTypes';
+import { useTableRecords } from '@models/TableRecords';
 import { FieldPermissionsModalProvider } from '@models/modals/FieldPermissionsModal';
 import { useDataListener } from '@lib/hooks/websockets/useDataListener';
 import { ITable } from '@lib/propTypes/table';
@@ -23,10 +24,21 @@ export function VirtualTable({
   const { data: connections } = useTableConnections();
   const { data: fieldTypes } = useFieldTypes();
   const { dataListener } = useDataListener();
+  const { error: recordsError } = useTableRecords();
 
   useEffect(() => {
     dataListener(table.id);
   }, [table.id]);
+
+  if (recordsError?.response.data.exception) {
+    return (
+      <div className="w-full flex items-center justify-center" style={{ height }}>
+        <p className="text-sm text-gray-900">
+          {recordsError.response.data.exception}
+        </p>
+      </div>
+    );
+  }
 
   if (fields == null || connections == null || fieldTypes == null || records == null) {
     return <Loader style={{ height }} />;

@@ -102,6 +102,7 @@ Rails.application.routes.draw do
 
       member do
         get 'logs'
+        put 'clear_error_logs'
         put 'alias'
         put 'hide'
         delete 'drop'

@@ -53,6 +53,8 @@ module Powerbase
           return
         end
 
+        return if !can_index?(record, doc_id, table)
+
         # Upsert elasticsearch record
         update_record(index_name, doc_id, record)
 
@@ -69,6 +71,7 @@ module Powerbase
           return
         end
 
+        return if !can_index?(record, doc_id, table)
 
         # Update elasticsearch record
         begin
@@ -92,6 +95,19 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
       end
+    end
+  end
+
+  def can_index?(record, doc_id, table)
+    doc_size = get_doc_size(record)
+    if !is_indexable?(doc_size)
+      error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 100MB"
+      puts error_message
+      Sentry.capture_message(error_message)
+      table.write_migration_logs!(error: { type: "Elasticsearch", error: error_message })
+      false
+    else
+      true
     end
   end
 end
