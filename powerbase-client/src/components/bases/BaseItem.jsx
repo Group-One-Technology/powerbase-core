@@ -24,6 +24,20 @@ export function BaseItem({
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
       <div className="absolute top-1 right-1 flex">
+        {!base.isSuperuser && (
+          <Tooltip.Root delayDuration={0}>
+            <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-yellow-500">
+              <span className="sr-only">Warning</span>
+              <ExclamationCircleIcon className="h-4 w-4" />
+            </Tooltip.Trigger>
+            <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs text-center rounded">
+              <Tooltip.Arrow className="gray-900" />
+              Can&apos;t listen to table/schema updates as a non-superuser.&nbsp;
+              <br />
+              Connect a superuser in order to fix this.
+            </Tooltip.Content>
+          </Tooltip.Root>
+        )}
         {base.isTurbo && (
           <Tooltip.Root delayDuration={0}>
             <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-gray-500">

@@ -11,6 +11,7 @@ class Databases::Creator
       adapter: database[:adapter],
       color: database[:color],
       is_turbo: database[:is_turbo],
+      is_superuser: database[:is_superuser],
       user_id: database[:user_id],
     })
     @errors = nil
