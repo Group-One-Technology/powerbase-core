@@ -25,19 +25,10 @@ class SyncDatabaseWorker
         batch.jobs do
           unmigrated_tables.each_with_index do |table_name, index|
             table = Tables::Creator.new table_name, index + 1, database
-            # Save table object
             table.save
 
-            # Create table view
-            table_view = TableViews::Creator.new table.object
-            table_view.save
-
-            # Assign default view
-            table.object.default_view_id = table_view.object.id
-            table.object.save
-
             # Migrate fields and records
-            table.object.sync!(false)
+            table.sync!(false)
           end
         end
 
