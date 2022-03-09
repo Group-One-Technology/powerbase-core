@@ -69,6 +69,8 @@ class SyncDatabaseWorker
     database.base_migration.end_time = Time.now
     database.base_migration.save
 
+    listen!
+
     pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
   end
 
@@ -81,6 +83,23 @@ class SyncDatabaseWorker
   end
 
   private
+    def listen!
+      listener_job = Sidekiq::Cron::Job.new(
+        name: "Database #{database.id} Listener",
+        args: [database.id],
+        cron: '*/5 * * * *', # Run The job every 5 mins
+        class: 'PollWorker'
+      )
+
+      if listener_job.save
+        listener_job.enque!
+        puts "#{Time.now} -- Powerbase listening to database##{database.id}..."
+      else
+        puts "#{Time.now} -- Can't run database listener cron job"
+        raise listener_job.errors
+      end
+    end
+
     def add_connections
       database.update_status!("adding_connections")
 
