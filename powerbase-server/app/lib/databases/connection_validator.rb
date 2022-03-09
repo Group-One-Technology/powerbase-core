@@ -42,6 +42,15 @@ class Databases::ConnectionValidator
     Sequel.connect(connection_string) {|db| db.test_connection}
   end
 
+  def is_superuser
+    Sequel.connect(connection_string) {|db|
+      db.from(Sequel.lit("pg_user"))
+        .select(Sequel.lit("usesuper"))
+        .where(Sequel.lit("usename = CURRENT_USER"))
+        .first[:usesuper]
+    }
+  end
+
   private
     def extract_credentials
       @options[:adapter], rest_connection = @connection_string_param.split('://')

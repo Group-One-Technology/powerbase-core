@@ -170,6 +170,7 @@ class PowerbaseDatabasesController < ApplicationController
       connection_string: safe_params[:connection_string],
     )
     connection_string = validator.connection_string
+    is_superuser = validator.is_superuser
 
     if !validator.test_connection
       render json: { error: "Failed to connect to #{safe_params[:name]}. Please check the information given if they are correct." }, status: :unprocessable_entity
@@ -181,6 +182,11 @@ class PowerbaseDatabasesController < ApplicationController
       return
     end
 
+    if !is_superuser
+      render json: { error: "User must be a superuser in order to listen to table/schema changes in \"#{safe_params[:name]}\". Grant a superuser role to the user or connect a different superuser." }, status: :unprocessable_entity
+      return
+    end
+
     database_creator = Databases::Creator.new({
       name: safe_params[:name],
       database_name: validator.database,
@@ -188,6 +194,7 @@ class PowerbaseDatabasesController < ApplicationController
       adapter: validator.adapter,
       color: safe_params[:color],
       is_turbo: safe_params[:is_turbo],
+      is_superuser: validator.is_superuser,
       user_id: current_user.id,
     })
 
@@ -300,6 +307,7 @@ class PowerbaseDatabasesController < ApplicationController
         status: database.status,
         is_migrated: database.migrated?,
         is_turbo: database.is_turbo,
+        is_superuser: database.is_superuser,
         default_table: if default_table
             {
               id: default_table.id,

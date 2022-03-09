@@ -25,19 +25,10 @@ class SyncDatabaseWorker
         batch.jobs do
           unmigrated_tables.each_with_index do |table_name, index|
             table = Tables::Creator.new table_name, index + 1, database
-            # Save table object
             table.save
 
-            # Create table view
-            table_view = TableViews::Creator.new table.object
-            table_view.save
-
-            # Assign default view
-            table.object.default_view_id = table_view.object.id
-            table.object.save
-
             # Migrate fields and records
-            table.object.sync!(false)
+            table.sync!(false)
           end
         end
 
@@ -78,6 +69,8 @@ class SyncDatabaseWorker
     database.base_migration.end_time = Time.now
     database.base_migration.save
 
+    listen!
+
     pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
   end
 
@@ -90,6 +83,23 @@ class SyncDatabaseWorker
   end
 
   private
+    def listen!
+      listener_job = Sidekiq::Cron::Job.new(
+        name: "Database #{database.id} Listener",
+        args: [database.id],
+        cron: '*/5 * * * *', # Run The job every 5 mins
+        class: 'PollWorker'
+      )
+
+      if listener_job.save
+        listener_job.enque!
+        puts "#{Time.now} -- Powerbase listening to database##{database.id}..."
+      else
+        puts "#{Time.now} -- Can't run database listener cron job"
+        raise listener_job.errors
+      end
+    end
+
     def add_connections
       database.update_status!("adding_connections")
 

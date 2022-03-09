@@ -5,7 +5,7 @@ module PusherHelper
       key: ENV["PUSHER_KEY"],
       secret: ENV["PUSHER_SECRET"],
       cluster: 'ap1',
-      encrypted: true
+      use_tls: true
     )
   end
 

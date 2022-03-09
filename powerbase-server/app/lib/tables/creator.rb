@@ -1,7 +1,7 @@
-class Tables::Creator
-  include SequelHelper
-  include PusherHelper
+include SequelHelper
+include PusherHelper
 
+class Tables::Creator
   attr_accessor :table_name, :order, :database, :table, :base_migration
 
   def initialize(table_name, order, database)
@@ -29,8 +29,20 @@ class Tables::Creator
     table
   end
 
+  def create_view!
+    # Create table view
+    table_view = TableViews::Creator.new table
+    table_view.save
+
+    # Assign default view
+    table.default_view_id = table_view.object.id
+    table.save
+  end
+
   def save
     if table.save
+      create_view!
+
       @database.update_status!("migrating_metadata") if @database.analyzing_base?
       pusher_trigger!("database.#{table.db.id}", "migration-listener", { id: @database.id })
     else
@@ -43,7 +55,7 @@ class Tables::Creator
     end
   end
 
-  def sync!
-    table.sync!
+  def sync!(reindex = false)
+    table.sync!(reindex)
   end
 end

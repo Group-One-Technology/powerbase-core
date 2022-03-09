@@ -32,14 +32,6 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   const currentTable = tablesResponse.data?.find((table) => table.id.toString() === tableId.toString());
   const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
 
-  useEffect(() => {
-    migrationListener(baseId);
-  }, [baseId]);
-
-  useEffect(() => {
-    setTables(tablesResponse.data?.filter((item) => !item.isHidden));
-  }, [tablesResponse.data]);
-
   const handleTableChange = ({ table }) => {
     window.history.replaceState(
       null,
@@ -70,6 +62,18 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    migrationListener(baseId);
+  }, [baseId]);
+
+  useEffect(() => {
+    setTables(tablesResponse.data?.filter((item) => !item.isHidden));
+    if (tablesResponse.data && currentTable == null) {
+      const firstTable = tablesResponse.data[0];
+      handleTableChange({ table: firstTable });
+    }
+  }, [tablesResponse.data]);
 
   return {
     table: currentTable,

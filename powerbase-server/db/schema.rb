@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_28_074310) do
+ActiveRecord::Schema.define(version: 2022_03_08_063113) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -127,6 +127,7 @@ ActiveRecord::Schema.define(version: 2022_02_28_074310) do
     t.string "database_name", null: false
     t.text "permissions", default: "{\"view_base\":{\"access\":\"everyone\"},\"manage_base\":{\"access\":\"creators only\"},\"invite_guests\":{\"access\":\"creators only\"},\"add_tables\":{\"access\":\"admins and up\"},\"delete_tables\":{\"access\":\"admins and up\"}}"
     t.string "status", default: "analyzing_base"
+    t.boolean "is_superuser", default: false, null: false
     t.index ["user_id"], name: "index_powerbase_databases_on_user_id"
   end
 

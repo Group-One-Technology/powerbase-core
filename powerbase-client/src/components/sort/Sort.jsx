@@ -174,7 +174,7 @@ export function Sort() {
                       </p>
                     )}
                   </ul>
-                  {canManageView && (
+                  {(canManageView && fields.length > 0) && (
                     <button
                       type="button"
                       className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
