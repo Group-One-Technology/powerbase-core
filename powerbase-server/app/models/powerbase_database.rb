@@ -135,8 +135,7 @@ class PowerbaseDatabase < ApplicationRecord
   end
 
   def create_notifier_function!
-    notifier.create_notifier!
-    notifier.create_event_notifier!
+    notifier.create_notifiers!
   end
 
   def update_status!(status)

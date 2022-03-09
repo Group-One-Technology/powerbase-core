@@ -53,6 +53,7 @@ module Powerbase
       table_name = payload["table"]
       column_name = payload["column"]
       object_identity = payload["object"]
+      schema_name = payload["schema_name"]
       command_tag = payload["command_tag"]
       object_type = payload["object_type"]
 
@@ -62,23 +63,48 @@ module Powerbase
         # Create powerbase table
         table_creator = Tables::Creator.new table_name, powerbase_db.tables.length + 1, powerbase_db
         table_creator.save
+        powerbase_table = table_creator.object
 
-        # Migrate added/dropped columns
+        # Migrate added columns
         table_schema = database.schema(table_name.to_sym)
-        table = Tables::Syncer.new table_creator.object, table_schema
+        table = Tables::Syncer.new powerbase_table, table_schema
         table.sync!
+
+        # Clear cached table schema
+        database.instance_variable_get(:@schemas).clear
+
+        # Notify changes to client
+        pusher_trigger!("table.#{powerbase_table.id}", "table-migration-listener", { table_id: powerbase_table.id }.to_json)
       when "ALTER TABLE"
         powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
         puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}."
 
-        # Migrate added/dropped columns
+        # Migrate added/dropped/renamed columns
         table_schema = database.schema(table_name.to_sym)
         table = Tables::Syncer.new powerbase_table, table_schema
         table.sync!
-      end
 
-      # Clear cached table schema
-      database.instance_variable_get(:@schemas).clear
+        # Clear cached table schema
+        database.instance_variable_get(:@schemas).clear
+
+        # Notify changes to client
+        pusher_trigger!("table.#{powerbase_table.id}", "table-migration-listener", { table_id: powerbase_table.id }.to_json)
+      when "DROP TABLE"
+        schema_name, table_name = object_identity.split(".")
+        powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+        if !powerbase_table
+          # TODO: resync database
+        end
+
+        puts "#{Time.now} -- Dropped table##{powerbase_table.id} #{table_name} detected."
+        table_id = powerbase_table.id
+
+        # Remove powerbase table
+        powerbase_table.remove
+
+        # Notify changes to client
+        pusher_trigger!("database.#{powerbase_db.id}", "migration-listener", { table_id: table_id, action: "drop" }.to_json)
+      end
     end
 
     def notifier_callback(database, ev, pid, payload)
