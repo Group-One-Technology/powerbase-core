@@ -261,7 +261,7 @@ export function TableTabItemMenu({ table, children }) {
               Permissions
             </ContextMenu.Item>
           )}
-          {(canManageTable && table.logs?.migration.errors.length > 0) && (
+          {(canManageTable && table.logs?.migration.errors?.length > 0) && (
             <ContextMenu.Item
               className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
               onSelect={handleErrorLogs}

@@ -19,7 +19,7 @@ export function TableErrorModal() {
   const { table, open, setOpen } = useTableErrorModal();
   const [loading, setLoading] = useState(false);
 
-  const hasErrorLogs = table && table.logs?.migration.errors.length > 0;
+  const hasErrorLogs = table && table.logs?.migration.errors?.length > 0;
 
   const closeModal = () => setOpen(false);
 
@@ -56,7 +56,7 @@ export function TableErrorModal() {
           {hasErrorLogs
             ? (
               <ul className="mt-2 ml-2 text-sm text-gray-500 list-disc pl-5 space-y-1">
-                {table?.logs?.migration.errors.map((item) => (
+                {table?.logs?.migration.errors?.map((item) => (
                   <li key={item.error}>{item.error}</li>
                 ))}
               </ul>
