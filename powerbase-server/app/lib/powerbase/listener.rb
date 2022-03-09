@@ -35,6 +35,9 @@ module Powerbase
 
       begin
         @db.listen("powerbase_table_update", :loop => true) do |ev, pid, payload|
+          # Checking if listening database has been disconnected
+          existing_db = PowerbaseDatabase.find powerbase_db.id
+
           payload_hash = JSON.parse(payload)
 
           if payload_hash["trigger_type"] == "event_trigger"
@@ -43,8 +46,14 @@ module Powerbase
             notifier_callback(@db, ev, pid, payload_hash)
           end
         end
+      rescue ActiveRecord::RecordNotFound => ex
+        if ex.message.include?("Couldn't find PowerbaseDatabase")
+          puts "#{Time.now} -- Database listener disconnected. #{ex.message}."
+        else
+          raise ex
+        end
       rescue => ex
-        puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}" if powerbase_db
+        puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}"
         raise ex
       end
     end
@@ -66,7 +75,16 @@ module Powerbase
         powerbase_table = table_creator.object
 
         # Migrate added columns
-        table_schema = database.schema(table_name.to_sym)
+        begin
+          table_schema = database.schema(table_name.to_sym)
+        rescue Sequel::Error => ex
+          if ex.message.include?("schema parsing returned no columns")
+            table_schema = []
+          else
+            raise ex
+          end
+        end
+
         table = Tables::Syncer.new powerbase_table, table_schema
         table.sync!
 
@@ -80,7 +98,16 @@ module Powerbase
         puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}."
 
         # Migrate added/dropped/renamed columns
-        table_schema = database.schema(table_name.to_sym)
+        begin
+          table_schema = database.schema(table_name.to_sym)
+        rescue Sequel::Error => ex
+          if ex.message.include?("schema parsing returned no columns")
+            table_schema = []
+          else
+            raise ex
+          end
+        end
+
         table = Tables::Syncer.new powerbase_table, table_schema
         table.sync!
 
@@ -114,11 +141,11 @@ module Powerbase
       table = database.from(table_name.to_sym)
       powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
 
+      puts "#{Time.now} -- Data changes detected on table##{powerbase_table.id} #{table_name}"
+
       index_name = powerbase_table.index_name
       fields = powerbase_table.fields
       doc_id = format_doc_id(primary_key_value)
-
-      puts "#{Time.now} -- Data changes detected on table##{powerbase_table.id} #{table_name}"
 
       case event_type
       when "INSERT"
