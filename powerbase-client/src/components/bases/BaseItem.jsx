@@ -24,7 +24,7 @@ export function BaseItem({
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
       <div className="absolute top-1 right-1 flex">
-        {!base.isSuperuser && (
+        {/* {!base.isSuperuser && (
           <Tooltip.Root delayDuration={0}>
             <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-yellow-500">
               <span className="sr-only">Warning</span>
@@ -37,7 +37,7 @@ export function BaseItem({
               Connect a superuser in order to fix this.
             </Tooltip.Content>
           </Tooltip.Root>
-        )}
+        )} */}
         {base.isTurbo && (
           <Tooltip.Root delayDuration={0}>
             <Tooltip.Trigger className="py-[1px] px-0.5 rounded text-gray-500">
