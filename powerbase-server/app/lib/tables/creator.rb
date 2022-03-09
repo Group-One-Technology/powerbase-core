@@ -51,7 +51,7 @@ class Tables::Creator
     end
   end
 
-  def sync!
-    table.sync!
+  def sync!(reindex = false)
+    table.sync!(reindex)
   end
 end
