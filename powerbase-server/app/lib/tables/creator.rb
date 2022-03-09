@@ -25,6 +25,10 @@ class Tables::Creator
     table.logs = { migration: { total_records: nil } }
   end
 
+  def object
+    table
+  end
+
   def create_view!
     # Create table view
     table_view = TableViews::Creator.new table
