@@ -43,12 +43,17 @@ class Databases::ConnectionValidator
   end
 
   def is_superuser
-    Sequel.connect(connection_string) {|db|
-      db.from(Sequel.lit("pg_user"))
-        .select(Sequel.lit("usesuper"))
-        .where(Sequel.lit("usename = CURRENT_USER"))
-        .first[:usesuper]
-    }
+    if adapter == "postgresql"
+      Sequel.connect(connection_string) {|db|
+        db.from(Sequel.lit("pg_user"))
+          .select(Sequel.lit("usesuper"))
+          .where(Sequel.lit("usename = CURRENT_USER"))
+          .first[:usesuper]
+      }
+    else
+      # TODO Add superuser checker for mysql
+      false
+    end
   end
 
   private

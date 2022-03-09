@@ -6,8 +6,10 @@ class AddIsSuperUserToDatabase < ActiveRecord::Migration[6.1]
 
     databases = PowerbaseDatabase.all
     databases.each do |db|
-      validator = Databases::ConnectionValidator.new(connection_string: db.connection_string)
-      db.update(is_superuser: validator.is_superuser)
+      if db.postgresql?
+        validator = Databases::ConnectionValidator.new(connection_string: db.connection_string)
+        db.update(is_superuser: validator.is_superuser)
+      end
     end
   end
 end
