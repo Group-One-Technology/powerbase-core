@@ -56,6 +56,7 @@ export function BaseConnectionStats() {
             <div className="relative z-0 inline-flex shadow-sm rounded-md">
               {FILTERS.map((item, index) => (
                 <button
+                  key={item}
                   type="button"
                   className={cn(
                     'relative inline-flex items-center px-4 py-2 border  text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500',

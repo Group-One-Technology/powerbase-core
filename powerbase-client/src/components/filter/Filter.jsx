@@ -115,18 +115,25 @@ export function Filter() {
                       {view.name}
                     </strong>
                   </h4>
-                  <div ref={filterRef}>
-                    <FilterGroup
-                      root
-                      filterGroup={initialFilters}
-                      fields={fields}
-                      updateTableRecords={updateTableRecords}
-                      canManageViews={canManageViews}
-                      isMagicFilter={isMagicFilter}
-                      isSingleFilter={isSingleFilter}
-                      setIsSingleFilter={setIsSingleFilter}
-                    />
-                  </div>
+                  {fields.length > 0
+                    ? (
+                      <div ref={filterRef}>
+                        <FilterGroup
+                          root
+                          filterGroup={initialFilters}
+                          fields={fields}
+                          updateTableRecords={updateTableRecords}
+                          canManageViews={canManageViews}
+                          isMagicFilter={isMagicFilter}
+                          isSingleFilter={isSingleFilter}
+                          setIsSingleFilter={setIsSingleFilter}
+                        />
+                      </div>
+                    ) : (
+                      <p className="mt-3 mb-6 text-center text-sm font-medium">
+                        No fields.
+                      </p>
+                    )}
                 </div>
               </div>
             </Popover.Panel>

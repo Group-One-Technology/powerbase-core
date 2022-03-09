@@ -114,7 +114,7 @@ export function Fields({ table }) {
                               {view.name}
                             </strong>
                           </h4>
-                          {canManageView && (
+                          {canManageView && fields.length > 0 && (
                           <div className="mx-2 flex justify-end">
                             <button
                               type="button"
@@ -127,23 +127,28 @@ export function Fields({ table }) {
                           </div>
                           )}
                         </div>
-                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
-                          <SortableContext items={fields} strategy={verticalListSortingStrategy}>
-                            <ul className="m-3 list-none flex flex-col">
-                              {fields.map((field) => <FieldItem key={field.id} view={view} field={field} setFields={setFields} />)}
-                            </ul>
-                          </SortableContext>
-                        </DndContext>
+                        {fields.length > 0
+                          ? (
+                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
+                              <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+                                <ul className="m-3 list-none flex flex-col">
+                                  {fields.map((field) => <FieldItem key={field.id} view={view} field={field} setFields={setFields} />)}
+                                </ul>
+                              </SortableContext>
+                            </DndContext>
+                          ) : (
+                            <p className="m-3 text-sm font-medium text-center">No fields.</p>
+                          )}
                       </div>
                       {(canAddFields && hasPrimaryKey) && (
-                      <button
-                        type="button"
-                        className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                        onClick={handleAddNewField}
-                      >
-                        <PlusIcon className="mr-1 h-4 w-4" />
-                        Add a magic field
-                      </button>
+                        <button
+                          type="button"
+                          className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                          onClick={handleAddNewField}
+                        >
+                          <PlusIcon className="mr-1 h-4 w-4" />
+                          Add a magic field
+                        </button>
                       )}
                     </>
                   )}

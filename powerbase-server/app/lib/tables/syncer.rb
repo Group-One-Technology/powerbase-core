@@ -6,8 +6,17 @@ class Tables::Syncer
   def initialize(table, schema, new_conn = false)
     @new_conn = new_conn
     @table = table
-    @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
+
+    begin
+      @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
+    rescue Sequel::Error => ex
+      if ex.message.include?("schema parsing returned no columns")
+        @schema = []
+      else
+        raise ex
+      end
+    end
   end
 
   def sync!
