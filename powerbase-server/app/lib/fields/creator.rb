@@ -32,8 +32,7 @@ class Fields::Creator
   end
 
   def add_to_viewfield
-    views = TableView.all
-    views.each do |view|
+    @table.views.each do |view|
       ViewFieldOption.find_by(
         table_view_id: view.id,
         powerbase_field_id: field.id,
