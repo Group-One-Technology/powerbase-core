@@ -32,9 +32,10 @@ class Tables::Syncer
       end
     end
 
-    set_table_as_migrated
-
     if added_columns.count > 0 || dropped_columns.count > 0
+      table.migrator.create_base_connection!
+      set_table_as_migrated
+
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     end
