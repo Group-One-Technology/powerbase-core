@@ -1,14 +1,28 @@
 
+include ElasticsearchHelper
+include SequelHelper
+include PusherHelper
+
 module Powerbase
   class Listener
-    include ElasticsearchHelper
-    include SequelHelper
-    include PusherHelper
 
     attr_accessor :db, :powerbase_db
 
     def initialize(powerbase_db)
       @powerbase_db = powerbase_db
+    end
+
+    def can_index?(record, doc_id, table)
+      doc_size = get_doc_size(record)
+      if !is_indexable?(doc_size)
+        error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 100MB"
+        puts error_message
+        Sentry.capture_message(error_message)
+        table.write_migration_logs!(error: { type: "Elasticsearch", error: error_message })
+        false
+      else
+        true
+      end
     end
 
     def listen!
@@ -45,29 +59,22 @@ module Powerbase
       case command_tag
       when "CREATE TABLE"
         puts "#{Time.now} -- New table named #{table_name} detected."
-
         # Create powerbase table
         table_creator = Tables::Creator.new table_name, powerbase_db.tables.length + 1, powerbase_db
         table_creator.save
 
-        table_schema = database.schema(table_name.to_sym)
-
         # Migrate added/dropped columns
+        table_schema = database.schema(table_name.to_sym)
         table = Tables::Syncer.new table_creator.object, table_schema
         table.sync!
       when "ALTER TABLE"
         powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
-        puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}"
-
-        table_schema = database.schema(table_name.to_sym)
+        puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}."
 
         # Migrate added/dropped columns
+        table_schema = database.schema(table_name.to_sym)
         table = Tables::Syncer.new powerbase_table, table_schema
         table.sync!
-      # when "DROP TABLE"
-      #   powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
-      #   puts "#{Time.now} -- Dropped table##{powerbase_table.id} named #{table_name}"
-      #   table.remove
       end
 
       # Clear cached table schema
@@ -139,19 +146,6 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
       end
-    end
-  end
-
-  def can_index?(record, doc_id, table)
-    doc_size = get_doc_size(record)
-    if !is_indexable?(doc_size)
-      error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 100MB"
-      puts error_message
-      Sentry.capture_message(error_message)
-      table.write_migration_logs!(error: { type: "Elasticsearch", error: error_message })
-      false
-    else
-      true
     end
   end
 end
