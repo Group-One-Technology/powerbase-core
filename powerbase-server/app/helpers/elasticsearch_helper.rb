@@ -136,7 +136,7 @@ module ElasticsearchHelper
 
     record.each do |record_key, record_value|
       field = fields.find {|field| field.name.to_sym == record_key }
-      raise StandardError.new("Field with name of #{key} could not be found.") if !field
+      raise StandardError.new("Field with name of #{record_key} could not be found.") if !field
 
       if record_value == nil
         formatted_record[record_key] = nil
