@@ -161,13 +161,13 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     validator = Databases::ConnectionValidator.new(
-      adapter: safe_params[:adapter],
-      host: safe_params[:host],
-      port: safe_params[:port],
-      user: safe_params[:user],
+      adapter: safe_params[:adapter]&.strip,
+      host: safe_params[:host]&.strip,
+      port: safe_params[:port]&.strip,
+      user: safe_params[:user]&.strip,
       password: safe_params[:password],
-      database: safe_params[:database],
-      connection_string: safe_params[:connection_string],
+      database: safe_params[:database]&.strip,
+      connection_string: safe_params[:connection_string]&.strip,
     )
     connection_string = validator.connection_string
     is_superuser = validator.is_superuser
