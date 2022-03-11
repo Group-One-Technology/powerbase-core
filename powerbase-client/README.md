@@ -23,5 +23,5 @@ yarn
 4. Run the app and you're all set!
 
 ```bash
-yarn start
+yarn dev
 ```
