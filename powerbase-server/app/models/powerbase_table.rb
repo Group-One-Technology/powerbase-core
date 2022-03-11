@@ -72,32 +72,6 @@ class PowerbaseTable < ApplicationRecord
     primary_keys.any?
   end
 
-  def in_synced?
-    # check if table still exist if not return true this table will be deleted eventually no need to re-sync
-    return true if !_sequel.tables.include?(self.name.to_sym)
-    _sequel.disconnect
-
-    unmigrated_columns.empty? && deleted_columns.empty?
-  end
-
-  def unmigrated_columns
-    schema = _sequel.schema(self.name.to_sym)
-    columns = schema.map(&:first) - self.fields.map{|t| t.name.to_sym}
-
-    # Disconnect after query
-    self._sequel.disconnect
-
-    schema.select{|col| columns.include? col.first}
-  end
-
-  def deleted_columns
-    columns = self.fields.select{|field| !field[:is_virtual]}.map{|t| t.name.to_sym} - _sequel.schema(self.name.to_sym).map(&:first)
-
-    self._sequel.disconnect
-
-    fields.where(name: columns.map(&:to_s))
-  end
-
   def _sequel_table
     self._sequel.from(self.name.to_sym)
   end
