@@ -18,10 +18,6 @@ const STEPS = {
     percentage: 75,
     description: 'Injecting Table Event Notifier...',
   },
-  injecting_event_notifier: {
-    percentage: 75,
-    description: 'Injecting Table Event Notifier...',
-  },
   injecting_drop_event_notifier: {
     percentage: 90,
     description: 'Injecting Table Drop Event Notifier...',

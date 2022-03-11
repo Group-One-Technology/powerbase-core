@@ -20,17 +20,19 @@ class SyncDatabaseWorker < ApplicationWorker
       return add_connections
     elsif params["step"] == "adding_connections" && ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
       return create_listeners
-    elsif params["step"] != "indexing_records"
-      if database.is_turbo
-        puts "INDEXING RECORDS NOW."
-      else
-        database.tables.each do |table|
-          table.write_migration_logs!(status: "migrated")
-        end
-      end
-
-      return
+    elsif params["step"] != "indexing_records" && database.is_turbo
+      return index_records
     end
+
+    database.tables.each do |table|
+      table.write_migration_logs!(status: "migrated")
+    end
+
+    database.update_status!("migrated")
+    database.base_migration.end_time = Time.now
+    database.base_migration.save
+
+    pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
 
     listen!
   end
@@ -110,13 +112,17 @@ class SyncDatabaseWorker < ApplicationWorker
       database.update_status!("indexing_records")
 
       batch = Sidekiq::Batch.new
-      batch.description = "Indexing records for database##{database.id}"
-      batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "indexing_records", :new_connection => new_connection)
+      batch.description = " for database##{database.id}"
+      batch.on(:complete, SyncDatabaseWorker,
+        :database_id => database.id,
+        :new_connection => new_connection,
+        :step => "indexing_records",
+      )
       batch.jobs do
         database.tables.each(&:reindex_later!)
       end
 
-      puts "#{Time.now} Started Batch #{batch.bid}"
+      puts "#{Time.now} -- Started Batch #{batch.bid} -- Indexing records for database##{database.id}"
     end
 
     def listen!
