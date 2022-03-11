@@ -62,6 +62,7 @@ class SyncDatabaseWorker < ApplicationWorker
 
       if db_syncer.in_synced?
         puts "#{Time.now} -- Database with id of #{database.id} is already in synced."
+        # TODO Add checker for each table if synced
         return if database.status == "migrated"
         return on_complete(nil, ({ new_connection: new_connection }).to_json)
       end
