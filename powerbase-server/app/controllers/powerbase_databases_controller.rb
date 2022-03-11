@@ -182,11 +182,6 @@ class PowerbaseDatabasesController < ApplicationController
       return
     end
 
-    if !is_superuser
-      render json: { error: "User must be a superuser in order to listen to table/schema changes in \"#{safe_params[:name]}\". Grant a superuser role to the user or connect a different superuser." }, status: :unprocessable_entity
-      return
-    end
-
     database_creator = Databases::Creator.new({
       name: safe_params[:name],
       database_name: validator.database,
