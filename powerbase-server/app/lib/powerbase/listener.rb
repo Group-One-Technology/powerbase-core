@@ -193,8 +193,12 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
       when "DELETE"
-        # Update elasticsearch record
-        delete_record(index_name, doc_id)
+        # Delete elasticsearch record
+        begin
+          delete_record(index_name, doc_id)
+        rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+          puts "#{Time.now} -- Not found doc_id: #{doc_id}"
+        end
 
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
