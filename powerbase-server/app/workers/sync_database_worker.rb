@@ -12,7 +12,11 @@ class SyncDatabaseWorker < ApplicationWorker
   end
 
   def on_complete(status, params)
-    puts "#{Time.now} -- Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
+    if status != nil && status.failures != 0
+      error_message = "#{Time.now} -- Migrating batch for database##{params["database_id"]} has #{status.failures} failures"
+      puts error_message
+      Sentry.capture_message(error_message)
+    end
 
     set_database(params["database_id"])
     @new_connection = params["new_connection"]
@@ -54,7 +58,7 @@ class SyncDatabaseWorker < ApplicationWorker
       if db_syncer.in_synced?
         puts "#{Time.now} -- Database with id of #{database.id} is already in synced."
         return if database.status == "migrated"
-        return on_complete({}, ({ new_connection: new_connection }).to_json)
+        return on_complete(nil, ({ new_connection: new_connection }).to_json)
       end
 
       database.update_status!("migrating_metadata")
