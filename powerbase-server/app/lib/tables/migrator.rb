@@ -347,7 +347,6 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    create_listener!
     table.write_migration_logs!(status: 'migrated', end_time: Time.now, old_primary_keys: [])
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
