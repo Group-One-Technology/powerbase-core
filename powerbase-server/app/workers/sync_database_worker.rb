@@ -44,6 +44,11 @@ class SyncDatabaseWorker < ApplicationWorker
 
   private
     def set_database(database_id)
+      if database_id == nil
+        puts "#{Time.now} -- Could not sync database with no given id."
+        return
+      end
+
       @database = PowerbaseDatabase.find database_id
 
       if !@database
