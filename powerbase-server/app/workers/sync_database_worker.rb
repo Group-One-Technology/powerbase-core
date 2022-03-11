@@ -17,9 +17,9 @@ class SyncDatabaseWorker < ApplicationWorker
     set_database(params["database_id"])
 
     if params["step"] == "migrating_metadata"
-      add_connections
+      return add_connections
     elsif params["step"] == "adding_connections" && ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
-      puts "SHOULD CREATE LISTENERS NOW."
+      return create_listeners
     elsif params["step"] != "indexing_records"
       if database.is_turbo
         puts "INDEXING RECORDS NOW."
@@ -28,7 +28,11 @@ class SyncDatabaseWorker < ApplicationWorker
           table.write_migration_logs!(status: "migrated")
         end
       end
+
+      return
     end
+
+    listen!
   end
 
   private
@@ -84,45 +88,22 @@ class SyncDatabaseWorker < ApplicationWorker
       puts "#{Time.now} -- Started Batch #{batch.bid} -- Adding and auto linking connections for db##{database.id}"
     end
 
-    def listen!
-      listener_job = Sidekiq::Cron::Job.new(
-        name: "Database #{database.id} Listener",
-        args: [database.id],
-        cron: '*/5 * * * *', # Run The job every 5 mins
-        class: 'PollWorker'
-      )
-
-      if listener_job.save
-        listener_job.enque!
-        puts "#{Time.now} -- Powerbase listening to database##{database.id}..."
-      else
-        puts "#{Time.now} -- Can't run database listener cron job"
-        raise listener_job.errors
-      end
-    end
-
     def create_listeners
-      return if ENV["ENABLE_LISTENER"] != "true" || !database.postgresql?
-
       database.update_status!("creating_listeners")
       database.create_notifier_function! if new_connection
 
-      database.update_status!("adding_connections")
-
       batch = Sidekiq::Batch.new
       batch.description = "Creating listeners for database##{database.id}"
-      batch.on(:complete, SyncDatabaseWorker, :database_id => database.id, :step => "creating_listeners", :new_connection => new_connection)
+      batch.on(:complete, SyncDatabaseWorker,
+        :database_id => database.id,
+        :new_connection => new_connection,
+        :step => "creating_listeners",
+      )
       batch.jobs do
         database.tables.each {|table| table.migrator.create_listener_later!}
       end
 
-      puts "#{Time.now} Started Batch #{batch.bid}"
-
-      if new_connection && database.is_turbo
-        poller = Sidekiq::Cron::Job.find("Database Listeners")
-        poller.args << database.id
-        poller.save
-      end
+      puts "#{Time.now} -- Started Batch #{batch.bid} -- Creating listeners for database##{database.id}"
     end
 
     def index_records
@@ -136,5 +117,13 @@ class SyncDatabaseWorker < ApplicationWorker
       end
 
       puts "#{Time.now} Started Batch #{batch.bid}"
+    end
+
+    def listen!
+      if new_connection
+        poller = Sidekiq::Cron::Job.find("Database Listeners")
+        poller.args << database.id
+        poller.save
+      end
     end
 end

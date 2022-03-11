@@ -315,8 +315,16 @@ class Tables::Migrator
 
   def create_listener!
     if database.postgresql? && ENV["ENABLE_LISTENER"] == "true"
-      table.write_migration_logs!(status: "injecting_notifier")
+      table.write_migration_logs!(status: "injecting_data_notifier")
       table.inject_notifier_trigger
+
+      if database.is_superuser
+        table.write_migration_logs!(status: "injecting_event_notifier")
+        table.inject_notifier_event_trigger
+        table.write_migration_logs!(status: "injecting_drop_event_notifier")
+        table.inject_notifier_drop_event_trigger
+      end
+
       table.write_migration_logs!(status: "notifiers_created")
     end
   end
