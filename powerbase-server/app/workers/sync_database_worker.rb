@@ -15,12 +15,13 @@ class SyncDatabaseWorker < ApplicationWorker
     puts "#{Time.now} -- Migrating batch for database##{params["database_id"]} has #{status.failures} failures" if status.failures != 0
 
     set_database(params["database_id"])
+    @new_connection = params["new_connection"]
 
-    if params["step"] == "migrating_metadata"
+    if database.status == "migrating_metadata"
       return add_connections
-    elsif params["step"] == "adding_connections" && ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
+    elsif database.status == "adding_connections" && ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
       return create_listeners
-    elsif params["step"] != "indexing_records" && database.is_turbo
+    elsif database.status != "indexing_records" && database.is_turbo
       return index_records
     end
 
@@ -52,7 +53,8 @@ class SyncDatabaseWorker < ApplicationWorker
 
       if db_syncer.in_synced?
         puts "#{Time.now} -- Database with id of #{database.id} is already in synced."
-        return
+        return if database.status == "migrated"
+        return on_complete({}, ({ new_connection: new_connection }).to_json)
       end
 
       database.update_status!("migrating_metadata")
@@ -62,7 +64,6 @@ class SyncDatabaseWorker < ApplicationWorker
       batch.on(:complete, SyncDatabaseWorker,
         :database_id => database.id,
         :new_connection => new_connection,
-        :step => "migrating_metadata",
       )
       batch.jobs do
         db_syncer.sync!
@@ -79,7 +80,6 @@ class SyncDatabaseWorker < ApplicationWorker
       batch.on(:complete, SyncDatabaseWorker,
         :database_id => database.id,
         :new_connection => new_connection,
-        :step => "adding_connections",
       )
       batch.jobs do
         database.tables.each do |table|
@@ -99,7 +99,6 @@ class SyncDatabaseWorker < ApplicationWorker
       batch.on(:complete, SyncDatabaseWorker,
         :database_id => database.id,
         :new_connection => new_connection,
-        :step => "creating_listeners",
       )
       batch.jobs do
         database.tables.each {|table| table.migrator.create_listener_later!}
@@ -116,7 +115,6 @@ class SyncDatabaseWorker < ApplicationWorker
       batch.on(:complete, SyncDatabaseWorker,
         :database_id => database.id,
         :new_connection => new_connection,
-        :step => "indexing_records",
       )
       batch.jobs do
         database.tables.each(&:reindex_later!)
@@ -129,7 +127,14 @@ class SyncDatabaseWorker < ApplicationWorker
       if new_connection
         poller = Sidekiq::Cron::Job.find("Database Listeners")
         poller.args << database.id
-        poller.save
+
+        if poller.save
+          poller.enque!
+          puts "Powerbase Listening to database##{database.id}..."
+        else
+          puts "Can't run database listener cron job"
+          raise poller.errors
+        end
       end
     end
 end
