@@ -106,8 +106,8 @@ class PowerbaseTable < ApplicationRecord
     @_sequel = db._sequel(refresh: true)
   end
 
-  def sync!(reindex = true)
-    SyncTableWorker.perform_async(self.id, reindex) unless in_synced?
+  def sync!(new_connection: false, reindex: true)
+    SyncTableWorker.perform_async(self.id, new_connection, reindex)
   end
 
   def migration_worker_name
