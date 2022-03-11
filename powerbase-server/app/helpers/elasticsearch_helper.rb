@@ -65,7 +65,7 @@ module ElasticsearchHelper
     end
 
     value
-      .parameterize(separator: "_")
+      &.parameterize(separator: "_")
       .truncate(ELASTICSEACH_ID_LIMIT)
   end
 

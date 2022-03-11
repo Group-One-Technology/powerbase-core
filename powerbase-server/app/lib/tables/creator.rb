@@ -54,8 +54,4 @@ class Tables::Creator
       base_migration.save
     end
   end
-
-  def sync!(reindex = false)
-    table.sync!(reindex)
-  end
 end

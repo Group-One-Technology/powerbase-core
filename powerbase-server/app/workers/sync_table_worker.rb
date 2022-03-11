@@ -1,55 +1,19 @@
-class SyncTableWorker
-  include Sidekiq::Worker
-  include PusherHelper
+class SyncTableWorker < ApplicationWorker
+  def perform(table_id, new_connection, reindex = false)
+    super
 
-  attr_accessor :table, :database
+    table = PowerbaseTable.find table_id
 
-  def perform(table_id, reindex)
-    @table = PowerbaseTable.find table_id
-    @database = table.db
-    unmigrated_columns = table.unmigrated_columns
-    deleted_columns = table.deleted_columns
+    if !table
+      puts "Could not find table with id of #{table_id}"
+      return
+    end
 
-    if table.in_synced?
-      puts "#{Time.now} -- SyncTableWorker #{database.name}.#{table.name} is already in synced"
+    table_syncer = Tables::Syncer.new table, new_connection: new_connection, reindex: reindex
+    if !table_syncer.in_synced?
+      table_syncer.sync!
     else
-      if unmigrated_columns.any?
-        puts "#{Time.now} Unmigrated column detected at table##{table.id}..."
-        puts "#{Time.now} Saving #{unmigrated_columns.count} additional column(s)..."
-
-        unmigrated_column_names = unmigrated_columns.map {|name, value| name}
-        table.write_migration_logs!(status: "migrating_metadata", unmigrated_columns: unmigrated_column_names)
-
-        unmigrated_columns.each do |column|
-          # Create field
-          field = Fields::Creator.new column, table
-          field.save
-        end
-      end
-
-      if deleted_columns.any?
-        puts "#{Time.now} Deleted column(s) detected at table##{table.id}..."
-        puts "#{Time.now} Removing #{deleted_columns.count} column(s)..."
-
-        deleted_columns.each do |field|
-          field.view_field_options.destroy_all
-          field.destroy
-        end
-      end
-
-      set_table_as_migrated
-      table.reindex! if reindex
+      puts "#{Time.now} -- Table with id of #{table_id} is already in synced."
     end
   end
-
-  private
-    def set_table_as_migrated
-      table.write_migration_logs!(status: "migrated_metadata")
-      unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
-
-      if unmigrated_columns.empty? && !database.is_turbo
-        table.write_migration_logs!(status: "migrated")
-        pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
-      end
-    end
 end

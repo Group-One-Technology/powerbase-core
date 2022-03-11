@@ -20,13 +20,9 @@ class Databases::Creator
 
   def database_migration
     if !@database.migrated?
-      migration = BaseMigration.find_by(powerbase_database_id: @database.id) || BaseMigration.new
-      migration.powerbase_database_id = @database.id
-      migration.database_size = @db_size || 0
-      migration.retries = 0
-      migration.save
-
-      PowerbaseDatabaseMigrationJob.perform_later(@database.id)
+      migration_creator = BaseMigration::Creator.new @database, @db_size
+      migration_creator.save
+      DatabaseMigrationWorker.perform_async(@database.id)
     end
   end
 

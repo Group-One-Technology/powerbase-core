@@ -315,8 +315,16 @@ class Tables::Migrator
 
   def create_listener!
     if database.postgresql? && ENV["ENABLE_LISTENER"] == "true"
-      table.write_migration_logs!(status: "injecting_notifier")
+      table.write_migration_logs!(status: "injecting_data_notifier")
       table.inject_notifier_trigger
+
+      if database.is_superuser
+        table.write_migration_logs!(status: "injecting_event_notifier")
+        table.inject_notifier_event_trigger
+        table.write_migration_logs!(status: "injecting_drop_event_notifier")
+        table.inject_notifier_drop_event_trigger
+      end
+
       table.write_migration_logs!(status: "notifiers_created")
     end
   end
@@ -339,7 +347,6 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    create_listener!
     table.write_migration_logs!(status: 'migrated', end_time: Time.now, old_primary_keys: [])
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")

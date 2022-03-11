@@ -12,7 +12,7 @@ namespace :database do
         puts "#{Time.now} -- Adding notifier to tables"
 
         db.tables.find_each do|table|
-          table.inject_notifier_trigger
+          table.inject_notifier_triggers
         end
       end
     end
