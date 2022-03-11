@@ -5,7 +5,7 @@ class SyncTableWorker < ApplicationWorker
     table = PowerbaseTable.find table_id
 
     if !table
-      puts"Could not find table with id of #{table_id}"
+      puts "Could not find table with id of #{table_id}"
       return
     end
 
