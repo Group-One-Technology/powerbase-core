@@ -1,21 +1,22 @@
-class SyncerCronWorker
-    include Sidekiq::Worker
+class SyncerCronWorker < ApplicationWorker
+  attr_accessor :ids, :dbs
 
-    attr_accessor :ids, :dbs
+  def perform(*ids)
+    super
 
-    def perform(*ids)
-        @ids = ids
-        @dbs = PowerbaseDatabase.where id: ids
-
-
-        initialize_sync_db_and_tables!
+    if ids.count == 0
+      puts "#{Time.now} -- Could not sync database with no given ids."
+      return
     end
 
-    def initialize_sync_db_and_tables!
-        puts "#{Time.now} Autosync Database and Tables..."
-        dbs.each do |db|
-            db.sync!
-            # db.tables.each(&:sync!)
-        end
-    end
+    @ids = ids
+    @dbs = PowerbaseDatabase.where id: ids
+
+    initialize_sync_db_and_tables!
+  end
+
+  def initialize_sync_db_and_tables!
+    puts "#{Time.now} Autosync Database and Tables..."
+    dbs.each(&:sync!)
+  end
 end
