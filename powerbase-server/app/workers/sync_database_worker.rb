@@ -1,3 +1,4 @@
+include SequelHelper
 include PusherHelper
 
 class SyncDatabaseWorker < ApplicationWorker
@@ -21,7 +22,10 @@ class SyncDatabaseWorker < ApplicationWorker
     set_database(params["database_id"])
     @new_connection = params["new_connection"]
 
-    if database.status == "migrating_metadata"
+    if database.status == "migrated"
+      pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
+      return
+    elsif database.status == "migrating_metadata"
       return add_connections
     elsif database.status == "adding_connections" && ENV["ENABLE_LISTENER"] == "true" && database.postgresql?
       return create_listeners
@@ -61,9 +65,49 @@ class SyncDatabaseWorker < ApplicationWorker
       db_syncer = Databases::Syncer.new database, new_connection: new_connection
 
       if db_syncer.in_synced?
-        puts "#{Time.now} -- Database with id of #{database.id} is already in synced."
-        # TODO Add checker for each table if synced
-        return if database.status == "migrated"
+        # Re-checking tables if in-synced
+        unsynced_table_schemas = {}
+        tables = database.tables
+        tables.each do |table|
+          table_name = table.name.to_sym
+
+          begin
+            table_schema = sequel_connect(database) {|db| db.schema(table_name)}
+          rescue Sequel::Error => ex
+            if ex.message.include?("schema parsing returned no columns")
+              table_schema = []
+            else
+              raise ex
+            end
+          end
+
+          table_syncer = Tables::Syncer.new table, schema: table_schema
+          if !table_syncer.in_synced?
+            unsynced_table_schemas[table_name] = table_schema
+          end
+        end
+
+        if unsynced_table_schemas.length > 0
+          puts "#{Time.now} -- Re-migrating #{unsynced_table_schemas.count} unsynced metadata for db##{database.id}."
+          batch = Sidekiq::Batch.new
+          batch.description = "Re-migrating metadata for db##{database.id}"
+          batch.on(:complete, SyncDatabaseWorker,
+            :database_id => database.id,
+            :new_connection => new_connection,
+          )
+          batch.jobs do
+            unsynced_table_schemas.each do |table_name, table_schema|
+              table = tables.find {|table| table.name.to_sym == table_name}
+              table_syncer = Tables::Syncer.new table, schema: table_schema
+              table_syncer.sync!
+            end
+          end
+        end
+
+        if database.status == "migrated"
+          puts "#{Time.now} -- Database with id of #{database.id} is already in synced."
+          return
+        end
         return on_complete(nil, ({ new_connection: new_connection }).to_json)
       end
 
