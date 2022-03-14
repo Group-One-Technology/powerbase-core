@@ -163,7 +163,7 @@ module Powerbase
         update_record(index_name, doc_id, record)
 
         # Notify changes to client
-        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener",  {doc_id: doc_id}.to_json)
       when "UPDATE"
         # Query get record
         records = sequel_get_records(database, table_name)
@@ -201,7 +201,7 @@ module Powerbase
         end
 
         # Notify changes to client
-        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
       end
     end
   end
