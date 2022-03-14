@@ -53,7 +53,12 @@ module Powerbase
           raise ex
         end
       rescue => ex
-        puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}"
+        if powerbase_db != nil && @db&.pool != nil
+          pool_size = @db.pool.size
+          puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}. Current Pool Size: #{pool_size}"
+          powerbase_db.update(max_connections: pool_size || 0)
+        end
+
         raise ex
       end
     end
@@ -163,7 +168,7 @@ module Powerbase
         update_record(index_name, doc_id, record)
 
         # Notify changes to client
-        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", record.merge(doc_id: doc_id))
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener",  {doc_id: doc_id}.to_json)
       when "UPDATE"
         # Query get record
         records = sequel_get_records(database, table_name)
@@ -201,7 +206,7 @@ module Powerbase
         end
 
         # Notify changes to client
-        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id})
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
       end
     end
   end
