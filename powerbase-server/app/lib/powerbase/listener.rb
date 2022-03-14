@@ -53,7 +53,12 @@ module Powerbase
           raise ex
         end
       rescue => ex
-        puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}"
+        if powerbase_db != nil && @db&.pool != nil
+          pool_size = @db.pool.size
+          puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}. Current Pool Size: #{pool_size}"
+          powerbase_db.update(max_connections: pool_size || 0)
+        end
+
         raise ex
       end
     end
