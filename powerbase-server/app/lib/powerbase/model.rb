@@ -304,7 +304,7 @@ module Powerbase
     # Accepts the following options:
     # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
-    def get_count(options)
+    def get_count(options = {})
       query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         sort: false,
