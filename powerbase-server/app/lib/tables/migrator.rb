@@ -220,7 +220,6 @@ class Tables::Migrator
     table.write_migration_logs!(status: "adding_connections")
 
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
-    binding.pry
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
