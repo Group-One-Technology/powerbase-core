@@ -77,6 +77,8 @@ class Tables::Syncer
     if !is_records_synced && reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
+    else
+      set_table_as_migrated(true)
     end
   end
 
