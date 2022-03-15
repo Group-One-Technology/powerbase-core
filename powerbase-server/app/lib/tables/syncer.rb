@@ -1,5 +1,6 @@
 include SequelHelper
 include PusherHelper
+include ElasticsearchHelper
 
 class Tables::Syncer
   attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced,
@@ -31,6 +32,7 @@ class Tables::Syncer
   end
 
   def in_synced?
+    set_table_as_migrated(true)
     unmigrated_columns.empty? && dropped_columns.empty? && is_records_synced
   end
 
@@ -53,13 +55,21 @@ class Tables::Syncer
 
     if dropped_columns.count > 0
       puts "#{Time.now} -- Migrating #{dropped_columns.count} dropped columns"
+      index_name = table.index_name
       powerbase_fields = fields.select{|field| dropped_columns.include?(field.name.to_sym)}
       powerbase_fields.each do |field|
+        field_name = field.name
         field.destroy
+
+        # Remove field for every doc under index_name in elasticsearch
+        remove_column(index_name, field_name)
       end
     end
 
-    table.migrator.create_base_connection! if !new_connection
+    if !new_connection && unmigrated_columns.count > 0
+      table.migrator.create_base_connection!
+    end
+
     set_table_as_migrated
 
     return if new_connection
@@ -71,8 +81,8 @@ class Tables::Syncer
   end
 
   private
-    def set_table_as_migrated
-      if new_connection && !table.db.is_turbo
+    def set_table_as_migrated(should_set = false)
+      if (should_set && !table.is_migrated) || (new_connection && !table.db.is_turbo)
         table.write_migration_logs!(status: "migrated")
         pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
       end

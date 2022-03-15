@@ -35,6 +35,7 @@ class Tables::Migrator
 
     if in_synced?
       puts "#{Time.now} -- Table##{table.id} records is already in-synced."
+      set_table_as_migrated
       return
     end
 
@@ -219,6 +220,7 @@ class Tables::Migrator
     table.write_migration_logs!(status: "adding_connections")
 
     table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
+    binding.pry
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
@@ -382,7 +384,9 @@ class Tables::Migrator
   end
 
   def set_table_as_migrated
-    table.write_migration_logs!(status: 'migrated', end_time: Time.now, old_primary_keys: [])
+    if !table.is_migrated
+      table.write_migration_logs!(status: 'migrated', end_time: Time.now, old_primary_keys: [])
+    end
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "powerbase-data-listener")
   end
