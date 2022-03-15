@@ -131,7 +131,7 @@ module ElasticsearchHelper
   end
 
   # Format doc based on record field types
-  def format_record(record, fields)
+  def format_record(record = {}, fields)
     formatted_record = {}
 
     record.each do |record_key, record_value|
