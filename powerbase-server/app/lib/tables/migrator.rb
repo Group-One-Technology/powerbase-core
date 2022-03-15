@@ -27,12 +27,17 @@ class Tables::Migrator
   end
 
   def in_synced?
-    # TODO: Add checker for deleted records.
-    @in_synced ||= @total_records > total_indexed_records
+    @in_synced ||= @total_records == total_indexed_records
   end
 
   def index!
     create_index!(index_name)
+
+    if in_synced?
+      puts "#{Time.now} -- Table##{table.id} records is already in-synced."
+      return
+    end
+
     table.write_migration_logs!(total_records: total_records)
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
@@ -46,6 +51,10 @@ class Tables::Migrator
         offset: 0,
         start_time: Time.now,
       )
+
+      # Set every doc under index to be _in_synced = false
+      # This is to detect deleted records on re-indexing.
+      batch_update_records(index_name, "ctx._source._in_synced = false")
     end
 
     table.write_migration_logs!(status: "indexing_records")
@@ -151,7 +160,7 @@ class Tables::Migrator
 
             # Upsert formatted doc
             if doc.length > 0
-              update_record(index_name, doc_id, doc)
+              update_record(index_name, doc_id, { **doc, _in_synced: true })
               @indexed_records += 1
               puts "#{Time.now} -- Saved doc_id: #{doc_id}"
             end
@@ -184,6 +193,23 @@ class Tables::Migrator
         indexed_records: indexed_records,
       })
     end
+
+    # Remove deleted indexed records based on _in_synced
+    result = search_records(index_name, {
+      query: { query_string: {
+        query: "_in_synced:false"
+      }}
+    })
+    deleted_records = format_es_result(result)
+    if deleted_records.length > 0
+      puts "#{Time.now} -- Removing #{deleted_records.count} deleted indexed records."
+      deleted_records.each do |record|
+        delete_record(index_name, record[:doc_id])
+      end
+    end
+
+    # Remove _in_synced column for every doc under index_name
+    remove_column(index_name, "_in_synced")
 
     set_table_as_migrated
   end
