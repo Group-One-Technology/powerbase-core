@@ -19,11 +19,16 @@ class Tables::Migrator
     @database = table.db
     @offset = table.logs["migration"]["offset"] || 0
     @indexed_records = table.logs["migration"]["indexed_records"] || 0
+    @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
+  end
+
+  def in_synced?
+    total_indexed_records = Powerbase::Model.new(@table).get_count
+    total_indexed_records == @total_records
   end
 
   def index!
     create_index!(index_name)
-    @total_records = sequel_connect(database) {|db| db.from(table.name).count}
     table.write_migration_logs!(total_records: total_records)
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
