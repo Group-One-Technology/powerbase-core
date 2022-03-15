@@ -55,10 +55,13 @@ module Powerbase
       rescue => ex
         if powerbase_db != nil && @db&.pool != nil
           pool_size = @db.pool.size
-          puts "#{Time.now} -- Listener Error for Database##{powerbase_db.id}. Current Pool Size: #{pool_size}"
+          error_message = "#{Time.now} -- Listener Error for Database##{powerbase_db.id}. Current Pool Size: #{pool_size}"
+          puts error_message
           powerbase_db.update(max_connections: pool_size || 0)
+          Sentry.capture_message(error_message)
         end
 
+        Sentry.capture_exception(ex)
         raise ex
       end
     end
