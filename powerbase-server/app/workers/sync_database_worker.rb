@@ -23,6 +23,7 @@ class SyncDatabaseWorker < ApplicationWorker
     @new_connection = params["new_connection"]
 
     if database.status == "migrated"
+      puts "#{Time.now} -- Database##{database.id} has been migrated"
       pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
       return
     elsif database.status == "migrating_metadata"
@@ -41,6 +42,7 @@ class SyncDatabaseWorker < ApplicationWorker
     database.base_migration.end_time = Time.now
     database.base_migration.save
 
+    puts "#{Time.now} -- Database##{database.id} has been migrated"
     pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
 
     listen!

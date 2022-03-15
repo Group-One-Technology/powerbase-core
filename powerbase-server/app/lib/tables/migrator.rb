@@ -7,7 +7,7 @@ class Tables::Migrator
   attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
                 :indexed_records, :total_records, :records,
-                :database
+                :database, :in_synced
 
   def initialize(table)
     @table = table
@@ -22,9 +22,13 @@ class Tables::Migrator
     @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
   end
 
+  def total_indexed_records
+    Powerbase::Model.new(@table).get_count
+  end
+
   def in_synced?
-    total_indexed_records = Powerbase::Model.new(@table).get_count
-    total_indexed_records == @total_records
+    # TODO: Add checker for deleted records.
+    @in_synced ||= @total_records > total_indexed_records
   end
 
   def index!
@@ -34,7 +38,7 @@ class Tables::Migrator
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
-    if table.logs["migration"]["start_time"] == nil || table.status == "migrated"
+    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records")
       @offset = 0
       @indexed_records = 0
       table.write_migration_logs!(
