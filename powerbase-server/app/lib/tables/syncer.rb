@@ -74,7 +74,7 @@ class Tables::Syncer
 
     return if new_connection
 
-    if !is_records_synced && reindex
+    if !is_records_synced || reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else

@@ -39,7 +39,7 @@ if defined?(Rails::Server)
       syncer_job = Sidekiq::Cron::Job.new(
         name: "Database Syncer",
         args: ids,
-        cron: '*/15 * * * *', # Run The job every 5 mins
+        cron: '*/30 * * * *', # Run The job every 30 mins
         class: 'SyncerCronWorker'
       )
 
