@@ -3,12 +3,10 @@ require 'elasticsearch/model'
 elasticsearch_url = ENV["elasticsearch_url"]
 connection_hash = {
   url: elasticsearch_url,
-  port: 443,
-  scheme: "https",
-  retry_on_failure: true,
-  transport_options: {
-    request: { timeout: 10 }
-  }
+  reload_connections: true,
+  retry_on_failure: 3,
+  request_timeout: 50,
+  retry_on_timeout: true,
 }
 
 ElasticsearchClient = Elasticsearch::Client.new(connection_hash)
