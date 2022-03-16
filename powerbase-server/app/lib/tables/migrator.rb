@@ -48,7 +48,13 @@ class Tables::Migrator
 
       # Set every doc under index to be _in_synced = false
       # This is to detect deleted records on re-indexing.
-      batch_update_records(index_name, "ctx._source._in_synced = false")
+      batch_update_records(index_name, {
+        conflicts: "proceed",
+        script: "ctx._source._in_synced = false",
+        query: {
+          query_string: { query: "NOT _exists_:_in_synced" }
+        },
+      })
     end
 
     table.write_migration_logs!(status: "indexing_records")

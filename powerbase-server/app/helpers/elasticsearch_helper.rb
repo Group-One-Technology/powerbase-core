@@ -54,11 +54,8 @@ module ElasticsearchHelper
     })
   end
 
-  def batch_update_records(index, script, query = { match_all: {} })
-    client.perform_request("POST", "#{index}/_update_by_query", {}, {
-      script: script,
-      query: query,
-    })
+  def batch_update_records(index, query)
+    client.perform_request("POST", "#{index}/_update_by_query", {}, query)
   end
 
   def delete_record(index, doc_id)
