@@ -67,10 +67,13 @@ class SyncDatabaseWorker < ApplicationWorker
       db_syncer = Databases::Syncer.new database, new_connection: new_connection
 
       if db_syncer.in_synced?
+        puts "#{Time.now} -- No unmigrated/dropped tables detected for db##{database.id}. Now checking tables if in synced."
+
         # Re-checking tables if in-synced
         unsynced_table_schemas = {}
         tables = database.tables
         tables.each do |table|
+          puts "#{Time.now} -- Checking if table##{table.id} is in synced for db##{database.id}"
           table_name = table.name.to_sym
 
           begin
