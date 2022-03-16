@@ -23,6 +23,7 @@ class SyncDatabaseWorker < ApplicationWorker
     @new_connection = params["new_connection"]
 
     if database.status == "migrated"
+      puts "#{Time.now} -- Database##{database.id} has been migrated"
       pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
       return
     elsif database.status == "migrating_metadata"
@@ -41,6 +42,7 @@ class SyncDatabaseWorker < ApplicationWorker
     database.base_migration.end_time = Time.now
     database.base_migration.save
 
+    puts "#{Time.now} -- Database##{database.id} has been migrated"
     pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
 
     listen!
@@ -65,10 +67,13 @@ class SyncDatabaseWorker < ApplicationWorker
       db_syncer = Databases::Syncer.new database, new_connection: new_connection
 
       if db_syncer.in_synced?
+        puts "#{Time.now} -- No unmigrated/dropped tables detected for db##{database.id}. Now checking tables if in synced."
+
         # Re-checking tables if in-synced
         unsynced_table_schemas = {}
         tables = database.tables
         tables.each do |table|
+          puts "#{Time.now} -- Checking if table##{table.id} is in synced for db##{database.id}"
           table_name = table.name.to_sym
 
           begin

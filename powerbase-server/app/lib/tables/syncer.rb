@@ -2,9 +2,11 @@ include SequelHelper
 include PusherHelper
 
 class Tables::Syncer
-  attr_accessor :table, :schema, :fields, :unmigrated_columns, :dropped_columns, :new_connection, :reindex
+  attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced,
+                :schema, :new_connection, :reindex
 
   # Accepts the ff options:
+  # - schema :: symbol array - array of column names for the given table.
   # - new_connection :: boolean - if the table syncer is called during a newly migrated database or not.
   # - reindex :: boolean - if the table should reindex after migration
   def initialize(table, schema: nil, new_connection: false, reindex: true)
@@ -12,6 +14,7 @@ class Tables::Syncer
     @new_connection = new_connection
     @reindex = reindex
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
+    @is_records_synced = @table.migrator.in_synced?
 
     begin
       @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
@@ -28,11 +31,11 @@ class Tables::Syncer
   end
 
   def in_synced?
-    unmigrated_columns.empty? && dropped_columns.empty?
+    unmigrated_columns.empty? && dropped_columns.empty? && is_records_synced
   end
 
   def sync!
-    if unmigrated_columns.empty? && dropped_columns.empty?
+    if in_synced?
       puts "#{Time.now} -- Table##{table.id} is already in synced."
       return
     end
@@ -59,7 +62,9 @@ class Tables::Syncer
     table.migrator.create_base_connection! if !new_connection
     set_table_as_migrated
 
-    if !new_connection && reindex
+    return if new_connection
+
+    if !is_records_synced || reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     end
