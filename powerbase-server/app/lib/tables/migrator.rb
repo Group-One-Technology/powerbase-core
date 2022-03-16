@@ -32,12 +32,6 @@ class Tables::Migrator
 
   def index!
     create_index!(index_name)
-
-    if in_synced?
-      puts "#{Time.now} -- Table##{table.id} records is already in-synced."
-      return
-    end
-
     table.write_migration_logs!(total_records: total_records)
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
