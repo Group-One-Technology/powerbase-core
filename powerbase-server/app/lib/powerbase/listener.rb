@@ -93,7 +93,7 @@ module Powerbase
           end
         end
 
-        table = Tables::Syncer.new powerbase_table, schema: table_schema
+        table = Tables::Syncer.new powerbase_table, schema: table_schema, new_table: true
         table.sync!
 
         # Clear cached table schema

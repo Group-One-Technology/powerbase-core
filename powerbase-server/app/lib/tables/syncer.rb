@@ -4,18 +4,20 @@ include ElasticsearchHelper
 
 class Tables::Syncer
   attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced,
-                :schema, :new_connection, :reindex
+                :schema, :new_connection, :reindex, :new_table
 
   # Accepts the ff options:
   # - schema :: symbol array - array of column names for the given table.
   # - new_connection :: boolean - if the table syncer is called during a newly migrated database or not.
-  # - reindex :: boolean - if the table should reindex after migration
-  def initialize(table, schema: nil, new_connection: false, reindex: true)
+  # - reindex :: boolean - if the table should reindex after migration.
+  # - new_table :: boolean - if the table is newly createdl.
+  def initialize(table, schema: nil, new_connection: false, reindex: true, new_table: false)
     @table = table
     @new_connection = new_connection
     @reindex = reindex
+    @new_table = new_table
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
-    @is_records_synced = @table.migrator.in_synced?
+    @is_records_synced = new_table ? false : @table.migrator.in_synced?
 
     begin
       @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
@@ -72,6 +74,7 @@ class Tables::Syncer
 
     set_table_as_migrated
 
+    table.migrator.create_listener! if new_table
     return if new_connection
 
     if !is_records_synced || reindex
