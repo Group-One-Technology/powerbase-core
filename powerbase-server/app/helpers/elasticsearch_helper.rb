@@ -76,7 +76,7 @@ module ElasticsearchHelper
 
     value
       &.parameterize(separator: "_")
-      .truncate(ELASTICSEACH_ID_LIMIT)
+      &.truncate(ELASTICSEACH_ID_LIMIT)
   end
 
   def create_index!(index_name)
@@ -190,7 +190,7 @@ module ElasticsearchHelper
           end
         end
 
-        result["_source"].symbolize_keys.merge("doc_id": result["_id"])
+        result["_source"]&.symbolize_keys.merge("doc_id": result["_id"])
       end
     end
   end
