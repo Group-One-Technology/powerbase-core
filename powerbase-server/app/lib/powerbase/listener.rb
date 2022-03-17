@@ -5,7 +5,6 @@ include PusherHelper
 
 module Powerbase
   class Listener
-
     attr_accessor :db, :powerbase_db
 
     def initialize(powerbase_db)
@@ -15,7 +14,7 @@ module Powerbase
     def can_index?(record, doc_id, table)
       doc_size = get_doc_size(record)
       if !is_indexable?(doc_size)
-        error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 100MB"
+        error_message = "#{Time.now} -- Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 80MB"
         puts error_message
         Sentry.capture_message(error_message)
         table.write_migration_logs!(error: { type: "Elasticsearch", error: error_message })
@@ -55,13 +54,14 @@ module Powerbase
       rescue => ex
         if powerbase_db != nil && @db&.pool != nil
           pool_size = @db.pool.size
-          error_message = "#{Time.now} -- Listener Error for Database##{powerbase_db.id}. Current Pool Size: #{pool_size}"
-          puts error_message
           powerbase_db.update(max_connections: pool_size || 0)
-          Sentry.capture_message(error_message)
+
+          Sentry.set_context('pool_size', {
+            pool_size: pool_size,
+            database_id: powerbase_db.id,
+          })
         end
 
-        Sentry.capture_exception(ex)
         raise ex
       end
     end
@@ -154,6 +154,12 @@ module Powerbase
       index_name = powerbase_table.index_name
       fields = powerbase_table.fields
       doc_id = format_doc_id(primary_key_value)
+      Sentry.set_context('record', {
+        doc_id: doc_id,
+        table_id: powerbase_table.id,
+        database_id: powerbase_db.id,
+        action: event_type
+      })
 
       case event_type
       when "INSERT"
@@ -165,7 +171,8 @@ module Powerbase
           return
         end
 
-        return if !can_index?(record, doc_id, table)
+        return if !can_index?(record, doc_id, powerbase_table)
+        Sentry.set_context('doc_size', { doc_size: get_doc_size(record) })
 
         # Upsert elasticsearch record
         update_record(index_name, doc_id, record)
@@ -183,7 +190,8 @@ module Powerbase
           return
         end
 
-        return if !can_index?(record, doc_id, table)
+        return if !can_index?(record, doc_id, powerbase_table)
+        Sentry.set_context('doc_size', { doc_size: get_doc_size(record) })
 
         # Update elasticsearch record
         begin

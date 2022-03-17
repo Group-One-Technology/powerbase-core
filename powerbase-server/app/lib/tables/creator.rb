@@ -21,7 +21,7 @@ class Tables::Creator
     table.alias = table_name.to_s.titlecase
     table.powerbase_database_id = database.id
     table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
-    table.order = order
+    table.order = table.order || order
     table.logs = { migration: { total_records: nil } }
   end
 
