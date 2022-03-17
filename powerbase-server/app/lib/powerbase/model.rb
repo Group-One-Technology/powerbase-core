@@ -141,7 +141,7 @@ module Powerbase
 
       doc_size = get_doc_size(data)
       if !is_indexable?(doc_size)
-        raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 100MB"
+        raise StandardError.new "Failed to update record of size #{doc_size} bytes for '#{@table.alias}'. The record size limit is 80MB"
       end
 
       result = update_record(@index, primary_keys, data, !@is_turbo)
@@ -295,7 +295,7 @@ module Powerbase
       end
 
       doc_size = get_doc_size(result)
-      raise StandardError.new("Could not query data of #{doc_size} bytes. Payload is too large. Limit is 100MB.") if !is_indexable?(doc_size)
+      raise StandardError.new("Could not query data of #{doc_size} bytes. Payload is too large. Limit is 80MB.") if !is_indexable?(doc_size)
 
       result
     end
