@@ -175,7 +175,14 @@ module Powerbase
         Sentry.set_context('doc_size', { doc_size: get_doc_size(record) })
 
         # Upsert elasticsearch record
-        update_record(index_name, doc_id, record)
+        begin
+          update_record(index_name, doc_id, record)
+        rescue Elasticsearch::Transport::Transport::Errors::Conflict => error
+          puts error
+          sleep 1
+          # Try again after a few seconds.
+          update_record(index_name, doc_id, record)
+        end
 
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener",  {doc_id: doc_id}.to_json)
