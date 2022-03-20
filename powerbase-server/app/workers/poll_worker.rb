@@ -1,10 +1,13 @@
 
-class PollWorker
-  include Sidekiq::Worker
+class PollWorker < ApplicationWorker
+  sidekiq_options queue: :critical
 
   attr_accessor :ids, :dbs
 
   def perform(*ids)
+    super
+    return if ids == nil || (id && id.count == 0)
+
     @ids = ids
     @dbs = PowerbaseDatabase.where id: ids
 
