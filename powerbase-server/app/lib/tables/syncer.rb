@@ -3,7 +3,7 @@ include PusherHelper
 include ElasticsearchHelper
 
 class Tables::Syncer
-  attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced,
+  attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced, :is_turbo,
                 :schema, :new_connection, :reindex, :new_table
 
   # Accepts the ff options:
@@ -17,7 +17,14 @@ class Tables::Syncer
     @reindex = reindex
     @new_table = new_table
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
-    @is_records_synced = new_table ? false : @table.migrator.in_synced?
+    @is_turbo = table.db.is_turbo
+    @is_records_synced = if !@is_turbo
+        true
+      elsif new_table
+        false
+      else
+        @table.migrator.in_synced?
+      end
 
     begin
       @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
@@ -77,19 +84,20 @@ class Tables::Syncer
     table.migrator.create_listener! if new_table
     return if new_connection
 
-    if !is_records_synced || reindex
+    if (!is_records_synced || reindex) && is_turbo
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
       set_table_as_migrated(true)
     end
+
+    pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
   end
 
   private
     def set_table_as_migrated(should_set = false)
-      if (should_set && !table.is_migrated) || (new_connection && !table.db.is_turbo)
+      if (should_set && !table.is_migrated) || (new_connection && !is_turbo)
         table.write_migration_logs!(status: "migrated")
-        pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
       end
     end
 end
