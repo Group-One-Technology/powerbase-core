@@ -6,7 +6,7 @@ class PollWorker < ApplicationWorker
 
   def perform(*ids)
     super
-    return if ids == nil || (id && id.count == 0)
+    return if ids == nil || (ids && ids.count == 0)
 
     @ids = ids
     @dbs = PowerbaseDatabase.where id: ids
