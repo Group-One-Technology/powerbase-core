@@ -18,7 +18,7 @@ if defined?(Rails::Server)
 
   if ENV["ENABLE_LISTENER"] == "true"
     puts "** STARTING DATABASE AUTOSYNC AND LISTENERS **"
-    ids = PowerbaseDatabase.turbo.postgresql.ids
+    ids = PowerbaseDatabase.postgresql.ids
 
     if ids.length > 0
       listener_job = Sidekiq::Cron::Job.new(
@@ -30,7 +30,7 @@ if defined?(Rails::Server)
 
       if listener_job.save
         listener_job.enque!
-        puts "Powerbase Listening to #{ids.count} turbo databases..."
+        puts "Powerbase Listening to #{ids.count} databases..."
       else
         puts "Can't run database listener cron job"
         raise listener_job.errors
@@ -45,7 +45,7 @@ if defined?(Rails::Server)
 
       if syncer_job.save
         syncer_job.enque!
-        puts "Powerbase Syncing #{ids.count} turbo databases..."
+        puts "Powerbase Syncing #{ids.count} databases..."
       else
         puts "Can't run database database syncer cron job"
         raise syncer_job.errors

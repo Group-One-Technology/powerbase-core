@@ -102,7 +102,7 @@ module Powerbase
         # Notify changes to client
         pusher_trigger!("table.#{powerbase_table.id}", "table-migration-listener", { table_id: powerbase_table.id }.to_json)
       when "ALTER TABLE"
-        powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+        powerbase_table = powerbase_db.tables.find_by name: table_name
         puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}."
 
         # Migrate added/dropped/renamed columns
@@ -126,7 +126,7 @@ module Powerbase
         pusher_trigger!("table.#{powerbase_table.id}", "table-migration-listener", { table_id: powerbase_table.id }.to_json)
       when "DROP TABLE"
         schema_name, table_name = object_identity.split(".")
-        powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+        powerbase_table = powerbase_db.tables.find_by name: table_name
         if !powerbase_table
           # TODO: resync database
         end
@@ -147,7 +147,7 @@ module Powerbase
       primary_key_value = payload["primary_key"]
       event_type = payload["type"]
       table = database.from(table_name.to_sym)
-      powerbase_table = powerbase_db.tables.turbo.find_by name: table_name
+      powerbase_table = powerbase_db.tables.find_by name: table_name
 
       puts "#{Time.now} -- Data changes detected on table##{powerbase_table.id} #{table_name}"
 
@@ -160,6 +160,12 @@ module Powerbase
         database_id: powerbase_db.id,
         action: event_type
       })
+
+      # Notify client for inserted/updated records in remote db for non turbo bases.
+      if !powerbase_db.is_turbo && event_type != "DELETE"
+        pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener",  {doc_id: doc_id}.to_json)
+        return
+      end
 
       case event_type
       when "INSERT"
