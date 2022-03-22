@@ -71,11 +71,11 @@ class Tables::Migrator
       fetch_table_records!
 
       records.each do |record|
-        begin
-          doc = format_record(record, fields)
-          doc_id = get_doc_id(primary_keys, doc, actual_fields)
-          puts "#{Time.now} -- Record to index DOC_ID: #{doc_id}"
+        doc = format_record(record, fields)
+        doc_id = get_doc_id(primary_keys, doc, actual_fields)
+        puts "#{Time.now} -- Record to index at #{index_name} DOC_ID: #{doc_id}"
 
+        begin
           doc_size = get_doc_size(doc)
           if !is_indexable?(doc_size)
             error_message = "Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 80MB"
@@ -114,16 +114,17 @@ class Tables::Migrator
               search_doc_id = get_doc_id([], doc, actual_fields)
             end
 
+            # Search and remove doc with old primary keys
             if search_doc_id != nil && search_doc_id != doc_id
               # Search existing doc
               begin
-                old_doc = get_record(index_name, search_doc_id)
+                found_doc = get_record(index_name, search_doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
                 puts "#{Time.now} -- No old document found for doc_id of #{doc_id}"
               end
 
-              if old_doc != nil && old_doc.key?("_source")
-                old_doc = old_doc["_source"]
+              if found_doc != nil && found_doc.key?("_source")
+                old_doc = found_doc["_source"]
                 old_doc_id = search_doc_id
 
                 # Remove the old existing doc
@@ -137,23 +138,39 @@ class Tables::Migrator
             end
 
             if database.is_turbo
-              # Merge Actual and Magic Records (if any)
+              # Merge old document's data with updated doc - Actual and Magic Values (if any)
               if old_doc != nil && old_doc.length > 0
                 doc = { **old_doc, **doc }
               end
             else
               # Pick virtual and primary key data for doc.
               updated_doc = {}
+              existing_doc = {}
 
               virtual_fields = fields.select {|field| field.is_virtual}
-              old_doc.each do |key, value|
+
+              # Search existing doc.
+              begin
+                found_doc = get_record(index_name, doc_id)
+                if found_doc != nil && found_doc.key?("_source")
+                  if old_doc != nil
+                    existing_doc = { **old_doc, **found_doc["_source"] }
+                  else
+                    existing_doc = found_doc["_source"]
+                  end
+                end
+              rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                puts "#{Time.now} -- No existing document found for doc_id of #{doc_id}"
+              end
+
+              existing_doc&.each do |key, value|
                 field = virtual_fields.find {|item| item.name.to_sym == key.to_sym}
                 updated_doc[key] = value if field != nil
               end
 
               # Prevent indexing of doc when there are no virtual fields data.
               if updated_doc.length > 0
-                doc.each do |key, value|
+                doc&.each do |key, value|
                   field = primary_keys.find {|item| item.name.to_sym == key.to_sym}
                   updated_doc[key] = value if field != nil
                 end
@@ -181,7 +198,7 @@ class Tables::Migrator
           table.write_migration_logs!(
             error: {
               type: "Elasticsearch",
-              error: "Failed to index record in table with id of #{table.id}",
+              error: "Failed to index record #{doc_id} in table with id of #{table.id}",
               exception: exception,
             }
           )
