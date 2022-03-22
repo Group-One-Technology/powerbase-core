@@ -4,6 +4,9 @@ include PusherHelper
 class SyncDatabaseWorker < ApplicationWorker
   attr_accessor :database, :new_connection, :in_synced
 
+  sidekiq_options lock: :until_and_while_executing,
+                  on_conflict: { client: :log, server: :reject }
+
   def perform(database_id, new_connection = false)
     super
 
