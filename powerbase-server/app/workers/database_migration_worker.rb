@@ -1,5 +1,7 @@
 class DatabaseMigrationWorker < ApplicationWorker
   sidekiq_options queue: :critical
+  sidekiq_options lock: :until_and_while_executing,
+                  on_conflict: { client: :log, server: :reject }
 
   attr_accessor :database, :base_migration
 
