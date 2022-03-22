@@ -50,6 +50,22 @@ if defined?(Rails::Server)
         puts "Can't run database database syncer cron job"
         raise syncer_job.errors
       end
+
+      non_turbo_bases_ids = PowerbaseDatabase.postgresql.where(is_turbo: false).ids
+      non_turbo_base_syncer_job = Sidekiq::Cron::Job.new(
+        name: "Non-turbo Database Deleted Records Syncer",
+        args: non_turbo_bases_ids,
+        cron: '0 0 * * FRI', # Run The job every Friday at 00:00
+        class: 'NonTurboDbRecordsSyncerCronWorker'
+      )
+
+      if non_turbo_base_syncer_job.save
+        non_turbo_base_syncer_job.enque!
+        puts "Powerbase Syncing #{ids.count} non-turbo databases' deleted table records..."
+      else
+        puts "Can't run Non-turbo Database Deleted Records Syncer cron job"
+        raise non_turbo_base_syncer_job.errors
+      end
     end
   end
 end

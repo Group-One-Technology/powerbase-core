@@ -27,7 +27,11 @@ class Tables::Migrator
   end
 
   def in_synced?
-    @in_synced ||= @total_records == total_indexed_records
+    if @database.is_turbo
+      @in_synced ||= @total_records == total_indexed_records
+    else
+      @in_synced ||= @total_records >= total_indexed_records
+    end
   end
 
   def index!
