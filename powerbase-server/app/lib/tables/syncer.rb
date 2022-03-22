@@ -18,13 +18,7 @@ class Tables::Syncer
     @new_table = new_table
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
     @is_turbo = table.db.is_turbo
-    @is_records_synced = if !@is_turbo
-        true
-      elsif new_table
-        false
-      else
-        @table.migrator.in_synced?
-      end
+    @is_records_synced = new_table ? false : @table.migrator.in_synced?
 
     begin
       @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
@@ -84,7 +78,7 @@ class Tables::Syncer
     table.migrator.create_listener! if new_table
     return if new_connection
 
-    if (!is_records_synced || reindex) && is_turbo
+    if !is_records_synced || reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
