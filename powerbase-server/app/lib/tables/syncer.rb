@@ -84,7 +84,7 @@ class Tables::Syncer
     table.migrator.create_listener! if new_table
     return if new_connection
 
-    if (!is_records_synced || reindex) && is_turbo
+    if !is_records_synced || reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
