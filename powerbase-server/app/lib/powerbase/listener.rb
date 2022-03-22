@@ -48,10 +48,8 @@ module Powerbase
       rescue ActiveRecord::RecordNotFound => ex
         if ex.message.include?("Couldn't find PowerbaseDatabase")
           puts "#{Time.now} -- Database listener disconnected. #{ex.message}."
-        else
-          raise ex
         end
-      rescue => ex
+      rescue Sequel::DatabaseConnectionError => ex
         if powerbase_db != nil && @db&.pool != nil
           pool_size = @db.pool.size
           powerbase_db.update(max_connections: pool_size || 0)
@@ -62,7 +60,9 @@ module Powerbase
           })
         end
 
-        raise ex
+        Sentry.capture_exception(ex)
+      rescue => ex
+        Sentry.capture_exception(ex)
       end
     end
 
@@ -233,5 +233,10 @@ module Powerbase
         pusher_trigger!("table.#{powerbase_table.id}", "powerbase-data-listener", {doc_id: doc_id}.to_json)
       end
     end
+
+    protected
+      def deny_access(exception)
+      # ...
+      end
   end
 end
