@@ -1,6 +1,9 @@
 class SyncerCronWorker < ApplicationWorker
   attr_accessor :ids, :dbs
 
+  sidekiq_options lock: :until_executing,
+                  on_conflict: { client: :log, server: :reject }
+
   def perform(*ids)
     super
 
