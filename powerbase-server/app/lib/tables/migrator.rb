@@ -30,7 +30,7 @@ class Tables::Migrator
     if @database.is_turbo
       @in_synced ||= @total_records == total_indexed_records
     else
-      @in_synced ||= @total_records >= total_indexed_records
+      @in_synced ||= (@total_records >= total_indexed_records && fields.any?{|field| field.is_virtual})
     end
   end
 

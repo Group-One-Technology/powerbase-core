@@ -3,8 +3,10 @@ include PusherHelper
 include ElasticsearchHelper
 
 class Tables::Syncer
-  attr_accessor :table, :fields, :unmigrated_columns, :dropped_columns, :is_records_synced, :is_turbo,
-                :schema, :new_connection, :reindex, :new_table
+  attr_accessor :table, :schema, :new_connection, :reindex, :new_table,
+                :fields, :primary_keys, :primary_keys_fields, :unmigrated_columns, :dropped_columns,
+                :is_records_synced, :has_primary_key_changed, :is_turbo
+
 
   # Accepts the ff options:
   # - schema :: symbol array - array of column names for the given table.
@@ -17,6 +19,8 @@ class Tables::Syncer
     @reindex = reindex
     @new_table = new_table
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
+    @primary_keys_fields = @fields.select{|field| field.is_primary_key}
+      .map{|field| field.name.to_sym}
     @is_turbo = table.db.is_turbo
     @is_records_synced = new_table ? false : @table.migrator.in_synced?
 
@@ -30,13 +34,19 @@ class Tables::Syncer
       end
     end
 
+    @primary_keys =  @schema.select{|name, options| options[:primary_key]}.map(&:first)
     @unmigrated_columns = @schema.map(&:first) - fields.map{|field| field.name.to_sym}
     @dropped_columns = fields.map{|field| field.name.to_sym} - @schema.map(&:first)
   end
 
+  def has_primary_key_changed?
+    @primary_keys != @primary_keys_fields
+  end
+
   def in_synced?
     set_table_as_migrated(true)
-    unmigrated_columns.empty? && dropped_columns.empty? && is_records_synced
+    @has_primary_key_changed ||= has_primary_key_changed?
+    unmigrated_columns.empty? && dropped_columns.empty? && is_records_synced && !@has_primary_key_changed
   end
 
   def sync!
@@ -73,12 +83,29 @@ class Tables::Syncer
       table.migrator.create_base_connection!
     end
 
+    if has_primary_key_changed
+      puts "#{Time.now} -- Migrating changed primary key(s)"
+      # Record old primary keys for reindexing to know the old doc_id
+      table.write_migration_logs!(old_primary_keys: primary_keys_fields)
+
+      # Update primary key fields
+      fields.each do |field|
+        is_primary_key = primary_keys.include?(field.name.to_sym)
+
+        if field.is_primary_key != is_primary_key
+          field.update(is_primary_key: is_primary_key)
+        end
+      end
+    end
+
     set_table_as_migrated
 
     table.migrator.create_listener! if new_table
     return if new_connection
 
-    if !is_records_synced || reindex
+    has_virtual_fields = fields.any?{|field| field.is_virtual}
+
+    if !is_records_synced || reindex || (!is_turbo && has_virtual_fields && has_primary_key_changed)
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
