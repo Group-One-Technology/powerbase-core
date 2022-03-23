@@ -169,8 +169,8 @@ module Powerbase
                 schma = obj.schema_name;
                 object_identity = obj.object_identity;
                 cmd_tag = obj.command_tag;
+                object_type = obj.object_type;
               END IF;
-            object_type = obj.object_type;
             END LOOP;
             col := (SELECT attname FROM pg_attribute WHERE attrelid = tbl::regclass AND attnum = colnum);
 
