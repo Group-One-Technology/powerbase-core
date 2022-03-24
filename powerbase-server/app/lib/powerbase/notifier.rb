@@ -167,12 +167,14 @@ module Powerbase
                 schma = obj.schema_name;
                 object_identity = obj.object_identity;
                 cmd_tag = obj.command_tag;
+                object_type = obj.object_type;
               END IF;
-            object_type = obj.object_type;
             END LOOP;
             col := (SELECT attname FROM pg_attribute WHERE attrelid = tbl::regclass AND attnum = colnum);
 
-            PERFORM pg_notify('powerbase_table_update', json_build_object('trigger_type', 'event_trigger', 'schema_name', schma, 'table', tbl, 'column', col, 'object', object_identity, 'command_tag', cmd_tag, 'object_type', object_type)::text);
+            IF object_identity IS NOT NULL THEN
+              PERFORM pg_notify('powerbase_table_update', json_build_object('trigger_type', 'event_trigger', 'schema_name', schma, 'table', tbl, 'column', col, 'object', object_identity, 'command_tag', cmd_tag, 'object_type', object_type)::text);
+            END IF;
           END;
           $function$
         ")

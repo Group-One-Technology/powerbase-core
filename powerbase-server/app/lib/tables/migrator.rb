@@ -30,7 +30,7 @@ class Tables::Migrator
     if @database.is_turbo
       @in_synced ||= @total_records == total_indexed_records
     else
-      @in_synced ||= @total_records >= total_indexed_records
+      @in_synced ||= (@total_records >= total_indexed_records && fields.any?{|field| field.is_virtual})
     end
   end
 
@@ -156,15 +156,16 @@ class Tables::Migrator
               # Search existing doc.
               begin
                 found_doc = get_record(index_name, doc_id)
-                if found_doc != nil && found_doc.key?("_source")
-                  if old_doc != nil
-                    existing_doc = { **old_doc, **found_doc["_source"] }
-                  else
-                    existing_doc = found_doc["_source"]
-                  end
-                end
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
                 puts "#{Time.now} -- No existing document found for doc_id of #{doc_id}"
+              end
+
+              if found_doc != nil && found_doc.key?("_source")
+                if old_doc != nil
+                  existing_doc = { **old_doc, **found_doc["_source"] }
+                else
+                  existing_doc = found_doc["_source"]
+                end
               end
 
               existing_doc&.each do |key, value|
