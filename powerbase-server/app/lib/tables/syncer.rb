@@ -24,7 +24,7 @@ class Tables::Syncer
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
     @primary_keys_fields = @fields.select{|field| field.is_primary_key}
       .map{|field| field.name.to_sym}
-    @connections = @table.connections
+    @connections = @table.connections.select {|conn| conn.is_constraint}
     @is_turbo = @database.is_turbo
     @is_records_synced = new_table ? false : @table.migrator.in_synced?
 
@@ -49,7 +49,7 @@ class Tables::Syncer
   end
 
   def has_foreign_key_changed?
-    @has_foreign_key_changed ||= @foreign_keys.any? do |fkey|
+    @has_foreign_key_changed ||= @foreign_keys.count != @connections.count || @foreign_keys.any? do |fkey|
       !@connections.any?{|conn| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key] }
     end
   end
@@ -110,14 +110,44 @@ class Tables::Syncer
 
       if has_foreign_key_changed
         puts "#{Time.now} -- Migrating changed foreign key(s)"
-        # TODO: Migrate changed foreign keys
-        # 1. Remove constraint connections that are not found on the foreign key list from remote db.
-        # 2. Migrate found foreign key list from remote db.
-        # -> call create_base_connection!
+        unmigrated_fkeys = foreign_keys.select do |fkey|
+          !connections.any?{|conn| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key]}
+        end
+        deleted_connections = connections.select do |conn|
+          !foreign_keys.any?{|fkey| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key]}
+        end
+
+        if unmigrated_fkeys.count > 0
+          puts "#{Time.now} -- Migrating #{unmigrated_fkeys.count} unmigrated foreign key(s)"
+          tables = database.tables
+
+          unmigrated_fkeys.each do |foreign_key|
+            referenced_table = tables.find_by(name: foreign_key[:table].to_s)
+
+            if referenced_table
+              conn_creator = BaseConnection::Creator.new table, {
+                name: foreign_key[:name],
+                columns:  foreign_key[:columns],
+                powerbase_table_id: table.id,
+                powerbase_database_id: table.powerbase_database_id,
+                referenced_columns: foreign_key[:key],
+                referenced_table_id:  referenced_table.id,
+                referenced_database_id:  referenced_table.powerbase_database_id,
+                is_constraint: true,
+              }
+              conn_creator.save
+            end
+          end
+        end
+
+        if deleted_connections.count > 0
+          puts "#{Time.now} -- Migrating #{deleted_connections.count} deleted foreign key(s)"
+          deleted_connections.map(&:destroy)
+        end
       end
 
       if unmigrated_columns.count > 0
-        table.migrator.create_base_connection!
+        table.migrator.create_base_connection!(foreign_keys)
       end
     end
 

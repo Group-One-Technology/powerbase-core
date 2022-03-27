@@ -85,6 +85,7 @@ module Powerbase
         # Migrate added columns
         begin
           table_schema = database.schema(table_name.to_sym)
+          table_foreign_keys = database.foreign_key_list(table_name.to_sym)
         rescue Sequel::Error => ex
           if ex.message.include?("schema parsing returned no columns")
             table_schema = []
@@ -93,7 +94,7 @@ module Powerbase
           end
         end
 
-        table = Tables::Syncer.new powerbase_table, schema: table_schema, new_table: true
+        table = Tables::Syncer.new powerbase_table, schema: table_schema, foreign_keys: table_foreign_keys, new_table: true
         table.sync!
 
         # Clear cached table schema
@@ -108,6 +109,7 @@ module Powerbase
         # Migrate added/dropped/renamed columns
         begin
           table_schema = database.schema(table_name.to_sym)
+          table_foreign_keys = database.foreign_key_list(table_name.to_sym)
         rescue Sequel::Error => ex
           if ex.message.include?("schema parsing returned no columns")
             table_schema = []
@@ -116,7 +118,7 @@ module Powerbase
           end
         end
 
-        table = Tables::Syncer.new powerbase_table, schema: table_schema
+        table = Tables::Syncer.new powerbase_table, schema: table_schema, foreign_keys: table_foreign_keys
         table.sync!
 
         # Clear cached table schema
@@ -127,9 +129,6 @@ module Powerbase
       when "DROP TABLE"
         schema_name, table_name = object_identity.split(".")
         powerbase_table = powerbase_db.tables.find_by name: table_name
-        if !powerbase_table
-          # TODO: resync database
-        end
 
         puts "#{Time.now} -- Dropped table##{powerbase_table.id} #{table_name} detected."
         table_id = powerbase_table.id

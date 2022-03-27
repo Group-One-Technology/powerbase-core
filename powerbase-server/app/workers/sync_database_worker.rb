@@ -74,6 +74,7 @@ class SyncDatabaseWorker < ApplicationWorker
 
         # Re-checking tables if in-synced
         unsynced_table_schemas = {}
+        unsynced_table_keys = {}
         tables = database.tables
         tables.each do |table|
           puts "#{Time.now} -- Checking if table##{table.id} is in synced for db##{database.id}"
@@ -81,6 +82,7 @@ class SyncDatabaseWorker < ApplicationWorker
 
           begin
             table_schema = sequel_connect(database) {|db| db.schema(table_name)}
+            table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table_name)}
           rescue Sequel::Error => ex
             if ex.message.include?("schema parsing returned no columns")
               table_schema = []
@@ -89,9 +91,10 @@ class SyncDatabaseWorker < ApplicationWorker
             end
           end
 
-          table_syncer = Tables::Syncer.new table, schema: table_schema
+          table_syncer = Tables::Syncer.new table, schema: table_schema, foreign_keys: table_foreign_keys
           if !table_syncer.in_synced?
             unsynced_table_schemas[table_name] = table_schema
+            unsynced_table_keys[table_name] = table_foreign_keys
           end
         end
 
@@ -106,7 +109,7 @@ class SyncDatabaseWorker < ApplicationWorker
           batch.jobs do
             unsynced_table_schemas.each do |table_name, table_schema|
               table = tables.find {|table| table.name.to_sym == table_name}
-              table_syncer = Tables::Syncer.new table, schema: table_schema
+              table_syncer = Tables::Syncer.new table, schema: table_schema, foreign_keys: unsynced_table_keys[table_name]
               table_syncer.sync!
             end
           end
