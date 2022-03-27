@@ -9,7 +9,7 @@ export function LinkedRecordItem({ label, record, openRecord }) {
       </p>
       <div className="flex items-center gap-2">
         {Object.entries(record)
-          .map(([key, value], recordIndex) => (recordIndex <= 3 && key != 'doc_id') && (
+          .map(([key, value], recordIndex) => (recordIndex <= 3 && key !== 'doc_id') && (
             <div key={key} className="flex-1 overflow-hidden">
               <p className="text-xs text-gray-500 truncate">{key.toUpperCase()}</p>
               <p className="text-xs text-gray-800 truncate h-[24px]">
