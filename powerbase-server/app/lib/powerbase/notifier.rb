@@ -128,9 +128,7 @@ module Powerbase
             WHERE
                 key IN(SELECT attname FROM pk_columns);
 
-            IF object_identity IS NOT NULL THEN
-              PERFORM pg_notify('powerbase_table_update', json_build_object('table', TG_TABLE_NAME, 'primary_key', COALESCE(reg_id, oid), 'type', TG_OP, 'trigger_type', 'trigger')::text);
-            END IF;
+            PERFORM pg_notify('powerbase_table_update', json_build_object('table', TG_TABLE_NAME, 'primary_key', COALESCE(reg_id, oid), 'type', TG_OP, 'trigger_type', 'trigger')::text);
             RETURN NEW;
           END;
           $$ LANGUAGE plpgsql
@@ -174,7 +172,9 @@ module Powerbase
             END LOOP;
             col := (SELECT attname FROM pg_attribute WHERE attrelid = tbl::regclass AND attnum = colnum);
 
-            PERFORM pg_notify('powerbase_table_update', json_build_object('trigger_type', 'event_trigger', 'schema_name', schma, 'table', tbl, 'column', col, 'object', object_identity, 'command_tag', cmd_tag, 'object_type', object_type)::text);
+            IF object_identity IS NOT NULL THEN
+              PERFORM pg_notify('powerbase_table_update', json_build_object('trigger_type', 'event_trigger', 'schema_name', schma, 'table', tbl, 'column', col, 'object', object_identity, 'command_tag', cmd_tag, 'object_type', object_type)::text);
+            END IF;
           END;
           $function$
         ")
