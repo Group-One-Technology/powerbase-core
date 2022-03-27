@@ -158,14 +158,18 @@ class Tables::Syncer
 
     has_virtual_fields = fields.any?{|field| field.is_virtual}
 
-    if !is_records_synced || reindex || (!is_turbo && has_virtual_fields && has_primary_key_changed)
+    if (!is_records_synced || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))) && reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
       set_table_as_migrated(true)
     end
 
-    pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
+    if has_foreign_key_changed || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))
+      pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
+    else
+      pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
+    end
   end
 
   private
