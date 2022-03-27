@@ -30,7 +30,8 @@ class Tables::Migrator
     if @database.is_turbo
       @in_synced ||= @total_records == total_indexed_records
     else
-      @in_synced ||= (@total_records >= total_indexed_records && fields.any?{|field| field.is_virtual})
+      has_virtual_fields = fields.any?{|field| field.is_virtual}
+      @in_synced ||= has_virtual_fields ? @total_records >= total_indexed_records : true
     end
   end
 
@@ -240,37 +241,26 @@ class Tables::Migrator
     set_table_as_migrated
   end
 
-  def create_base_connection!
+  def create_base_connection!(foreign_keys = nil)
     puts "#{Time.now} -- Adding and auto linking connections of table##{table.id}"
     table.write_migration_logs!(status: "adding_connections")
 
-    table_foreign_keys = sequel_connect(database) {|db| db.foreign_key_list(table.name) }
+    table_foreign_keys = foreign_keys || sequel_connect(database) {|db| db.foreign_key_list(table.name) }
     table_foreign_keys.each do |foreign_key|
       referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
       if referenced_table
-        base_connection = BaseConnection.find_by(
+        conn_creator = BaseConnection::Creator.new table, {
           name: foreign_key[:name],
+          columns: foreign_key[:columns],
           powerbase_table_id: table.id,
           powerbase_database_id: table.powerbase_database_id,
-        ) || BaseConnection.new
-        base_connection.name = foreign_key[:name]
-        base_connection.columns = foreign_key[:columns]
-        base_connection.referenced_columns = foreign_key[:key]
-        base_connection.referenced_table_id = referenced_table.id
-        base_connection.referenced_database_id = referenced_table.powerbase_database_id
-        base_connection.powerbase_table_id = table.id
-        base_connection.powerbase_database_id = table.powerbase_database_id
-        base_connection.is_constraint = true
-
-        if !base_connection.save
-          @base_migration.logs["errors"].push({
-            type: "Active Record",
-            error: "Failed to save '#{base_connection.name}' base connection",
-            messages: base_connection.errors.messages,
-          })
-          @base_migration.save
-        end
+          referenced_columns: foreign_key[:key],
+          referenced_table_id:  referenced_table.id,
+          referenced_database_id:  referenced_table.powerbase_database_id,
+          is_constraint: true,
+        }
+        conn_creator.save
       end
     end
 

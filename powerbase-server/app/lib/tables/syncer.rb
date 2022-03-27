@@ -3,29 +3,33 @@ include PusherHelper
 include ElasticsearchHelper
 
 class Tables::Syncer
-  attr_accessor :table, :schema, :new_connection, :reindex, :new_table,
-                :fields, :primary_keys, :primary_keys_fields, :unmigrated_columns, :dropped_columns,
-                :is_records_synced, :has_primary_key_changed, :is_turbo
+  attr_accessor :database, :table, :schema, :foreign_keys, :new_connection, :reindex, :new_table,
+                :fields, :primary_keys, :connections, :primary_keys_fields, :unmigrated_columns, :dropped_columns,
+                :is_records_synced, :has_primary_key_changed, :has_foreign_key_changed, :is_turbo
 
 
   # Accepts the ff options:
   # - schema :: symbol array - array of column names for the given table.
+  # - foreign_keys :: object array - array of foreign keys of the given table.
   # - new_connection :: boolean - if the table syncer is called during a newly migrated database or not.
   # - reindex :: boolean - if the table should reindex after migration.
   # - new_table :: boolean - if the table is newly createdl.
-  def initialize(table, schema: nil, new_connection: false, reindex: true, new_table: false)
+  def initialize(table, schema: nil, foreign_keys: nil, new_connection: false, reindex: true, new_table: false)
     @table = table
+    @database = table.db
     @new_connection = new_connection
     @reindex = reindex
     @new_table = new_table
+
     @fields = @table.fields.reload.select {|field| !field.is_virtual}
     @primary_keys_fields = @fields.select{|field| field.is_primary_key}
       .map{|field| field.name.to_sym}
-    @is_turbo = table.db.is_turbo
+    @connections = @table.connections.select {|conn| conn.is_constraint}
+    @is_turbo = @database.is_turbo
     @is_records_synced = new_table ? false : @table.migrator.in_synced?
 
     begin
-      @schema = schema || sequel_connect(@table.db) {|db| db.schema(@table.name.to_sym)}
+      @schema = schema || sequel_connect(@database) {|db| db.schema(@table.name.to_sym)}
     rescue Sequel::Error => ex
       if ex.message.include?("schema parsing returned no columns")
         @schema = []
@@ -34,19 +38,28 @@ class Tables::Syncer
       end
     end
 
+    @foreign_keys = foreign_keys || sequel_connect(@database) {|db| db.foreign_key_list(@table.name) }
     @primary_keys =  @schema.select{|name, options| options[:primary_key]}.map(&:first)
     @unmigrated_columns = @schema.map(&:first) - fields.map{|field| field.name.to_sym}
     @dropped_columns = fields.map{|field| field.name.to_sym} - @schema.map(&:first)
   end
 
   def has_primary_key_changed?
-    @primary_keys != @primary_keys_fields
+    @has_primary_key_changed ||= @primary_keys != @primary_keys_fields
+  end
+
+  def has_foreign_key_changed?
+    @has_foreign_key_changed ||= @foreign_keys.count != @connections.count || @foreign_keys.any? do |fkey|
+      !@connections.any?{|conn| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key] }
+    end
   end
 
   def in_synced?
     set_table_as_migrated(true)
-    @has_primary_key_changed ||= has_primary_key_changed?
-    unmigrated_columns.empty? && dropped_columns.empty? && is_records_synced && !@has_primary_key_changed
+    !new_connection && unmigrated_columns.empty? && dropped_columns.empty? &&
+      is_records_synced &&
+      !has_primary_key_changed? &&
+      !has_foreign_key_changed?
   end
 
   def sync!
@@ -79,22 +92,62 @@ class Tables::Syncer
       end
     end
 
-    if !new_connection && unmigrated_columns.count > 0
-      table.migrator.create_base_connection!
-    end
+    if !new_connection
+      if has_primary_key_changed
+        puts "#{Time.now} -- Migrating changed primary key(s)"
+        # Record old primary keys for reindexing to know the old doc_id
+        table.write_migration_logs!(old_primary_keys: primary_keys_fields)
 
-    if has_primary_key_changed
-      puts "#{Time.now} -- Migrating changed primary key(s)"
-      # Record old primary keys for reindexing to know the old doc_id
-      table.write_migration_logs!(old_primary_keys: primary_keys_fields)
+        # Update primary key fields
+        fields.each do |field|
+          is_primary_key = primary_keys.include?(field.name.to_sym)
 
-      # Update primary key fields
-      fields.each do |field|
-        is_primary_key = primary_keys.include?(field.name.to_sym)
-
-        if field.is_primary_key != is_primary_key
-          field.update(is_primary_key: is_primary_key)
+          if field.is_primary_key != is_primary_key
+            field.update(is_primary_key: is_primary_key)
+          end
         end
+      end
+
+      if has_foreign_key_changed
+        puts "#{Time.now} -- Migrating changed foreign key(s)"
+        unmigrated_fkeys = foreign_keys.select do |fkey|
+          !connections.any?{|conn| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key]}
+        end
+        deleted_connections = connections.select do |conn|
+          !foreign_keys.any?{|fkey| conn.columns.map(&:to_sym) == fkey[:columns] && conn.referenced_columns.map(&:to_sym) == fkey[:key]}
+        end
+
+        if unmigrated_fkeys.count > 0
+          puts "#{Time.now} -- Migrating #{unmigrated_fkeys.count} unmigrated foreign key(s)"
+          tables = database.tables
+
+          unmigrated_fkeys.each do |foreign_key|
+            referenced_table = tables.find_by(name: foreign_key[:table].to_s)
+
+            if referenced_table
+              conn_creator = BaseConnection::Creator.new table, {
+                name: foreign_key[:name],
+                columns:  foreign_key[:columns],
+                powerbase_table_id: table.id,
+                powerbase_database_id: table.powerbase_database_id,
+                referenced_columns: foreign_key[:key],
+                referenced_table_id:  referenced_table.id,
+                referenced_database_id:  referenced_table.powerbase_database_id,
+                is_constraint: true,
+              }
+              conn_creator.save
+            end
+          end
+        end
+
+        if deleted_connections.count > 0
+          puts "#{Time.now} -- Migrating #{deleted_connections.count} deleted foreign key(s)"
+          deleted_connections.map(&:destroy)
+        end
+      end
+
+      if unmigrated_columns.count > 0
+        table.migrator.create_base_connection!(foreign_keys)
       end
     end
 
@@ -105,14 +158,18 @@ class Tables::Syncer
 
     has_virtual_fields = fields.any?{|field| field.is_virtual}
 
-    if !is_records_synced || reindex || (!is_turbo && has_virtual_fields && has_primary_key_changed)
+    if (!is_records_synced || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))) && reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
       set_table_as_migrated(true)
     end
 
-    pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
+    if has_foreign_key_changed || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))
+      pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
+    else
+      pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
+    end
   end
 
   private
