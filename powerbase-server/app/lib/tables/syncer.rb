@@ -210,7 +210,7 @@ class Tables::Syncer
       set_table_as_migrated(true)
     end
 
-    if has_foreign_key_changed || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))
+    if !updated_columns.empty? || has_foreign_key_changed || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))
       pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
     else
       pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
