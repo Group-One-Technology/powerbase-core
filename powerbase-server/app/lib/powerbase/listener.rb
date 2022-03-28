@@ -106,7 +106,7 @@ module Powerbase
         powerbase_table = powerbase_db.tables.find_by name: table_name
         puts "#{Time.now} -- Schema changes detected on table##{powerbase_table.id} #{table_name}."
 
-        # Migrate added/dropped/renamed columns
+        # Migrate added/dropped/renamed/updated columns
         begin
           table_schema = database.schema(table_name.to_sym)
           table_foreign_keys = database.foreign_key_list(table_name.to_sym)

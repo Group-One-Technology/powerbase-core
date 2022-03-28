@@ -4,7 +4,7 @@ include ElasticsearchHelper
 
 class Tables::Syncer
   attr_accessor :database, :table, :schema, :foreign_keys, :new_connection, :reindex, :new_table,
-                :fields, :primary_keys, :connections, :primary_keys_fields, :unmigrated_columns, :dropped_columns,
+                :fields, :primary_keys, :connections, :primary_keys_fields, :unmigrated_columns, :dropped_columns, :updated_columns,
                 :is_records_synced, :has_primary_key_changed, :has_foreign_key_changed, :is_turbo
 
 
@@ -42,6 +42,17 @@ class Tables::Syncer
     @primary_keys =  @schema.select{|name, options| options[:primary_key]}.map(&:first)
     @unmigrated_columns = @schema.map(&:first) - fields.map{|field| field.name.to_sym}
     @dropped_columns = fields.map{|field| field.name.to_sym} - @schema.map(&:first)
+    @updated_columns = fields.select do |field|
+      column = @schema.find {|col_name, col_options| col_name == field.name.to_sym}
+      return false if !column
+      col_name, col_options = column
+
+      # Check if field options changed
+      col_options[:oid] != field.oid || col_options[:db_type] != field.db_type ||
+        col_options[:allow_null] != field.is_nullable ||
+        (col_options[:default] || nil) != field.default_value ||
+        (col_options[:auto_increment] || false) != field.is_auto_increment
+    end
   end
 
   def has_primary_key_changed?
@@ -56,7 +67,7 @@ class Tables::Syncer
 
   def in_synced?
     set_table_as_migrated(true)
-    !new_connection && unmigrated_columns.empty? && dropped_columns.empty? &&
+    !new_connection && unmigrated_columns.empty? && dropped_columns.empty? && updated_columns.empty? &&
       is_records_synced &&
       !has_primary_key_changed? &&
       !has_foreign_key_changed?
@@ -146,6 +157,36 @@ class Tables::Syncer
         end
       end
 
+      if updated_columns.count > 0
+        puts "#{Time.now} -- Migrating #{updated_columns.count} updated columns"
+        updated_columns.each do |field|
+          column = schema.find {|col_name, col_options| col_name == field.name.to_sym}
+          next if !column
+          col_name, col_options = column
+
+          # Update field based on retrieved schema
+          if col_options[:db_type] != field.db_type
+            column_type = FieldDbTypeMapping.includes(:powerbase_field_type)
+              .where("? ILIKE CONCAT('%', db_type, '%')", "%#{col_options[:db_type]}%")
+              .take
+
+            single_line_text_field = PowerbaseFieldType.find_by(name: "Single Line Text")
+            field_type = PowerbaseFieldType.find_by(
+              name: column_type ? column_type.powerbase_field_type.name : "Others"
+            )
+
+            field.db_type = col_options[:db_type]
+            field.powerbase_field_type_id = field_type.id || single_line_text_field.id
+          end
+
+          field.oid = col_options[:oid]
+          field.default_value = col_options[:default] || nil
+          field.is_nullable = col_options[:allow_null]
+          field.is_auto_increment = col_options[:auto_increment] || false
+          field.save
+        end
+      end
+
       if unmigrated_columns.count > 0
         table.migrator.create_base_connection!(foreign_keys)
       end
@@ -157,8 +198,12 @@ class Tables::Syncer
     return if new_connection
 
     has_virtual_fields = fields.any?{|field| field.is_virtual}
+    should_reindex = !is_records_synced ||
+      !unmigrated_columns.empty? ||
+      !updated_columns.empty? ||
+      ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))
 
-    if (!is_records_synced || ((is_turbo && has_primary_key_changed) || (!is_turbo && has_virtual_fields && has_primary_key_changed))) && reindex
+    if reindex && should_reindex
       puts "#{Time.now} -- Reindexing table##{table.id}"
       table.reindex_later!
     else
