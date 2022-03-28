@@ -57,7 +57,7 @@ export function RecordItemValue({
 
   const [hasFocused, setHasFocused] = useState(false);
   const [value, setValue, { error: valueError }] = useValidState(
-    item.value || '',
+    item.value ?? '',
     (curVal) => CELL_VALUE_VALIDATOR({
       value: curVal,
       type: fieldType.name,
