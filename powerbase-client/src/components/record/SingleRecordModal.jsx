@@ -31,10 +31,10 @@ import { deleteRecord, updateRecord } from '@lib/api/records';
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { Loader } from '@components/ui/Loader';
 import { RecordItem } from './RecordItem';
 import { RecordItemValue } from './RecordItem/RecordItemValue';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
-import { Loader } from '@components/ui/Loader';
 
 export function BaseSingleRecordModal({
   table,
@@ -58,7 +58,7 @@ export function BaseSingleRecordModal({
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
 
   const [record, setRecord] = useState(initialRecord);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
