@@ -11,6 +11,7 @@ export function RecordItemSelect({
   labelContent,
   handleRecordInputChange,
   disabled,
+  endEnhancer,
 }) {
   const { authUser } = useAuthUser();
 
@@ -42,6 +43,7 @@ export function RecordItemSelect({
             {option}
           </option>
         ))}
+        {endEnhancer}
       </select>
     </div>
   );
@@ -52,4 +54,5 @@ RecordItemSelect.propTypes = {
   labelContent: PropTypes.any.isRequired,
   handleRecordInputChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  endEnhancer: PropTypes.any,
 };

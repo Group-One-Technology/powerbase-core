@@ -82,7 +82,7 @@ Input.propTypes = {
   value: PropTypes.any,
   error: PropTypes.object,
   showError: PropTypes.bool,
-  caption: PropTypes.string,
+  caption: PropTypes.any,
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,

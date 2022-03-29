@@ -26,6 +26,7 @@ import { useMounted } from '@lib/hooks/useMounted';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { useSyncRecord } from '@lib/hooks/record/useSyncRecord';
 import { deleteRecord, updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
@@ -58,9 +59,17 @@ export function BaseSingleRecordModal({
   const { linkedRecord, handleOpenRecord, handleToggleRecord } = useLinkedRecord();
 
   const [record, setRecord] = useState(initialRecord);
-  const [isSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+
+  const { isSyncing } = useSyncRecord({
+    tableId: table.id,
+    record: initialRecord,
+    records,
+    setRecord,
+    setRecords,
+    includePii,
+  });
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
   const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
