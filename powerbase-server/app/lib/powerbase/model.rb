@@ -231,6 +231,7 @@ module Powerbase
       return if !@is_turbo
       indexed_record = get(options)
       remote_record = get({ **options, is_remote_record: true })
+      has_synced = false
 
       # Only get the actual fields for the indexed record.
       doc_id = indexed_record[:doc_id]
@@ -240,10 +241,12 @@ module Powerbase
 
       if indexed_record != remote_record
         puts "#{Time.now} -- Syncing record with doc_id '#{doc_id}'"
-        # Reindex a single record
+        record = format_record(remote_record, @fields)
+        update_record(@index, doc_id, record, !@is_turbo)
+        has_synced = true
       end
 
-      # Returned updated record
+      { **indexed_record, **remote_record, doc_id: doc_id, has_synced: has_synced }
     end
 
     # * Get document/table records based on the given columns.

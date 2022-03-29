@@ -18,6 +18,13 @@ class TableRecordsController < ApplicationController
     optional(:include_json).value(:bool)
   end
 
+  schema(:sync_record) do
+    required(:id).value(:integer)
+    required(:primary_keys)
+    optional(:include_pii).value(:bool)
+    optional(:include_json).value(:bool)
+  end
+
   schema(:add_record) do
     required(:id).value(:integer)
     required(:primary_keys)
@@ -91,6 +98,22 @@ class TableRecordsController < ApplicationController
       filters: safe_params[:filters]
     })
     render json: records
+  end
+
+  # POST /tables/:id/sync_record
+  def sync_record
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
+    include_pii = !!safe_params[:include_pii] && current_user.can?(:manage_table, @table, false)
+
+    model = Powerbase::Model.new(@table)
+    record = model.sync_record({
+      primary_keys: safe_params[:primary_keys],
+      include_pii: include_pii,
+      include_json: !!safe_params[:include_json],
+    })
+
+    render json: record
   end
 
   # PUT /tables/:id/add_record
