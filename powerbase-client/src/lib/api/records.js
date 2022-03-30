@@ -16,6 +16,22 @@ export async function getTableRecord({ tableId, recordId, ...payload }) {
   return undefined;
 }
 
+export async function syncTableRecord({
+  tableId,
+  primaryKeys,
+  includePii,
+  includeJson,
+}) {
+  const response = await securedApi.put(`/tables/${tableId}/sync_record`, {
+    primary_keys: primaryKeys,
+    include_pii: includePii,
+    include_json: includeJson,
+  });
+
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function getTableRecordsCount({ tableId, ...payload }) {
   const response = await securedApi.post(
     `/tables/${tableId}/records_count`,

@@ -56,8 +56,10 @@ export function RecordItemValue({
     : undefined;
 
   const [hasFocused, setHasFocused] = useState(false);
+  const [initialValue, setInitialValue] = useState(item.value);
+  const [newChange, setNewChange] = useState();
   const [value, setValue, { error: valueError }] = useValidState(
-    item.value || '',
+    item.value ?? '',
     (curVal) => CELL_VALUE_VALIDATOR({
       value: curVal,
       type: fieldType.name,
@@ -67,10 +69,30 @@ export function RecordItemValue({
   );
   const error = hasFocused ? valueError : undefined;
 
+  useEffect(() => {
+    if (item.value !== value) {
+      if (value === initialValue) {
+        setValue(item.value);
+      } else {
+        setNewChange(item.value);
+      }
+    }
+  }, [item]);
+
+  useEffect(() => {
+    setInitialValue(item.value);
+  }, [item.id]);
+
   const updateValue = (updatedValue, options) => {
     if (!hasFocused && updatedValue !== value) setHasFocused(true);
     setValue(updatedValue);
     handleRecordInputChange(item.fieldId, updatedValue, options);
+  };
+
+  const handleIgnoreNewChange = () => setNewChange(null);
+  const handleApplyNewChange = () => {
+    setValue(newChange);
+    setNewChange(null);
   };
 
   const labelContent = (
@@ -128,6 +150,32 @@ export function RecordItemValue({
       )}
     </div>
   );
+
+  const endEnhancer = newChange != null
+    ? (
+      <div>
+        <p className="mt-2 text-xs text-gray-500 my-2">
+          New data change detected: {newChange}
+        </p>
+        <div>
+          <button
+            type="button"
+            className="mr-2 px-2.5 py-1.5 inline-flex items-center justify-center border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            onClick={handleApplyNewChange}
+          >
+            Apply change
+          </button>
+          <button
+            type="button"
+            className="px-2.5 py-1.5 inline-flex items-center justify-center border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            onClick={handleIgnoreNewChange}
+          >
+            Keep current change
+          </button>
+        </div>
+      </div>
+    )
+    : null;
 
   useEffect(() => {
     const curItemValue = inputType === 'Null' ? null : value;
@@ -216,6 +264,7 @@ export function RecordItemValue({
             onChange={(evt) => updateValue(evt.target.checked)}
             disabled={disabled}
           />
+          {endEnhancer}
         </div>
       );
     case FieldType.SINGLE_SELECT:
@@ -226,6 +275,7 @@ export function RecordItemValue({
           labelContent={labelContent}
           handleRecordInputChange={handleRecordInputChange}
           disabled={disabled}
+          endEnhancer={endEnhancer}
         />
       );
     case FieldType.JSON_TEXT:
@@ -246,6 +296,7 @@ export function RecordItemValue({
               collapsed
               disabled={disabled}
             />
+            {endEnhancer}
           </div>
         );
       }
@@ -273,6 +324,7 @@ export function RecordItemValue({
               {error.message}
             </p>
           )}
+          {endEnhancer}
         </div>
       );
     case FieldType.LONG_TEXT:
@@ -298,6 +350,7 @@ export function RecordItemValue({
               {error.message}
             </p>
           )}
+          {endEnhancer}
         </div>
       );
     default: {
@@ -321,6 +374,7 @@ export function RecordItemValue({
           rootClassName="mb-8"
           error={error}
           disabled={disabled}
+          caption={endEnhancer}
           showError
         />
       );

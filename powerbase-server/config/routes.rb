@@ -132,6 +132,7 @@ Rails.application.routes.draw do
   put 'auth/onboarded', to: 'users#onboarded'
   post '/guests/invite_sample_database', to: 'guests#invite_sample_database'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
+  put 'tables/:id/sync_record', to: 'table_records#sync_record', as: 'sync_table_record'
   post 'tables/virtual_tables', to: 'powerbase_tables#create_virtual_table', as: 'virtual_table'
   get 'tables/:table_id/connections', to: 'base_connections#table_connections', as: 'table_connections'
   get 'tables/:table_id/referenced_connections', to: 'base_connections#referenced_table_connections', as: 'table_referenced_connections'

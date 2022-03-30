@@ -39,7 +39,8 @@ module PowerbaseServer
 
     # Allows the conversion between camel case to snake case and vice versa.
     excluded_routes = -> (env) {
-      env["PATH_INFO"].match(%r{^\/tables\/\S+\/(records|add_record|linked_records|update_record|update_field_data|delete_record)\S*})
+      env["PATH_INFO"].match(%r{^\/tables\/\S+\/(sync_record|records|add_record|linked_records|update_record|update_field_data|delete_record)\S*})
+       # /tables/:id/sync_record
        # /tables/:id/records
        # /tables/:id/linked_records
        # /tables/:id/add_record

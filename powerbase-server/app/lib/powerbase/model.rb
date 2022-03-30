@@ -178,17 +178,19 @@ module Powerbase
     # Accepts the following options:
     # :id :: the document ID or the SWR key.
     # :primary_keys :: an object of the table's primary keys.
+    # :is_remote_record :: whether to get the remote record or not regardless if its turbo or not.
     #    Ex: { pathId: 123, userId: 1245 }
     def get(options)
       include_pii = options[:include_pii]
       include_json = options[:include_json]
+      is_remote_record = options[:is_remote_record] || false
 
       query = Powerbase::QueryCompiler.new(@table, {
         include_pii: include_pii,
         include_json: include_json,
       })
 
-      if @is_turbo
+      if @is_turbo && !is_remote_record
         create_index!(@index)
         search_params = query.find_by(options[:primary_keys]).to_elasticsearch
         result = search_records(@index, search_params)
@@ -218,6 +220,33 @@ module Powerbase
           record
         end
       end
+    end
+
+    # * Get and sync record for a turbo base.
+    # Accepts the following options:
+    # :id :: the document ID or the SWR key.
+    # :primary_keys :: an object of the table's primary keys.
+    #    Ex: { pathId: 123, userId: 1245 }
+    def sync_record(options)
+      return if !@is_turbo
+      indexed_record = get(options)
+      remote_record = get({ **options, is_remote_record: true })
+      has_synced = false
+
+      # Only get the actual fields for the indexed record.
+      doc_id = indexed_record[:doc_id]
+      indexed_record = indexed_record.select do |key, value|
+        @fields.any? {|item| item.name.to_sym == key && !item.is_virtual}
+      end
+
+      if indexed_record != remote_record
+        puts "#{Time.now} -- Syncing record with doc_id '#{doc_id}'"
+        record = format_record(remote_record, @fields)
+        update_record(@index, doc_id, record, !@is_turbo)
+        has_synced = true
+      end
+
+      { **indexed_record, **remote_record, doc_id: doc_id, has_synced: has_synced }
     end
 
     # * Get document/table records based on the given columns.

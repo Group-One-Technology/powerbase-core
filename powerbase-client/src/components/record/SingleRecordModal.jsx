@@ -7,7 +7,9 @@ import {
   ChevronDownIcon,
   EyeIcon,
   TrashIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/outline';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useSaveStatus } from '@models/SaveStatus';
@@ -17,17 +19,20 @@ import { TableLinkedRecordsProvider } from '@models/TableLinkedRecords';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableConnections, TableConnectionsProvider } from '@models/TableConnections';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useBase } from '@models/Base';
 import { useTableReferencedConnections, TableReferencedConnectionsProvider } from '@models/TableReferencedConnections';
 import { TableFieldsProvider } from '@models/TableFields';
 import { useMounted } from '@lib/hooks/useMounted';
 import { useLinkedRecord } from '@lib/hooks/record/useLinkedRecord';
 import { pluralize } from '@lib/helpers/pluralize';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { useSyncRecord } from '@lib/hooks/record/useSyncRecord';
 import { deleteRecord, updateRecord } from '@lib/api/records';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { Loader } from '@components/ui/Loader';
 import { RecordItem } from './RecordItem';
 import { RecordItemValue } from './RecordItem/RecordItemValue';
 import { LinkedRecordsItem } from './LinkedRecordsItem';
@@ -44,6 +49,7 @@ export function BaseSingleRecordModal({
   const { mounted } = useMounted();
   const { saved, saving, catchError } = useSaveStatus();
   const { baseUser } = useBaseUser();
+  const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
   const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
@@ -55,6 +61,15 @@ export function BaseSingleRecordModal({
   const [record, setRecord] = useState(initialRecord);
   const [loading, setLoading] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+
+  const { isSyncing } = useSyncRecord({
+    tableId: table.id,
+    record: initialRecord,
+    records,
+    setRecord,
+    setRecords,
+    includePii,
+  });
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
   const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
@@ -195,9 +210,27 @@ export function BaseSingleRecordModal({
       <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full sm:p-6">
         <form onSubmit={handleSubmit} className="sm:px-4 sm:mt-5">
           <div className="flex items-center justify-between">
-            <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
-              {table.name.toUpperCase()}
-            </Dialog.Title>
+            <div className="w-full flex items-center justify-between gap-1">
+              <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
+                {table.name.toUpperCase()}
+              </Dialog.Title>
+              {base.isTurbo && (
+                <Tooltip.Root delayDuration={0}>
+                  <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
+                    <span className="sr-only">{isSyncing ? 'Syncing record' : 'Record synced'}</span>
+                    {isSyncing
+                      ? <Loader className="h-5 w-5" />
+                      : <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />}
+                  </Tooltip.Trigger>
+                  <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                    <Tooltip.Arrow className="gray-900" />
+                    {isSyncing
+                      ? 'Checking if the record is in synced.'
+                      : 'Record is in-synced.'}
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              )}
+            </div>
             {(hasPIIFields && canViewPIIFields && !includePii) && (
               <div>
                 <Button
