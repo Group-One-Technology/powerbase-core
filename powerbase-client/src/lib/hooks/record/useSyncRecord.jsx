@@ -29,24 +29,22 @@ export function useSyncRecord({
         includePii,
       })
         .then((response) => {
-          const { hasSynced, ...updatedData } = response;
+          const { has_synced, ...updatedData } = response;
 
-          if (hasSynced) {
-            const updatedRecord = record.map((item) => {
+          if (has_synced) {
+            setRecord(record.map((item) => {
               const updatedItem = {
                 ...item,
                 value: updatedData[item.name] ?? item.value,
               };
               if (updatedItem.isPii) return { ...updatedItem, includePii };
               return updatedItem;
-            });
-            const updatedRecords = records.map((curRecord) => (curRecord.doc_id === updatedData.doc_id
-              ? { ...curRecord, ...updatedRecord }
-              : curRecord
-            ));
+            }));
 
-            setRecord(updatedRecord);
-            setRecords(updatedRecords);
+            setRecords(records.map((curRecord) => (curRecord.doc_id === updatedData.doc_id
+              ? { ...curRecord, ...updatedData }
+              : curRecord
+            )));
           }
 
           setIsSyncing(false);
