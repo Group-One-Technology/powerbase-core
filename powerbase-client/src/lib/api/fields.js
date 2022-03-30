@@ -78,8 +78,29 @@ export async function searchFieldByName({ id, name }) {
   return undefined;
 }
 
-export async function addVirtualField({ tableId, ...payload }) {
-  const response = await securedApi.post(`/tables/${tableId}/field`, payload);
+export async function addField({
+  tableId,
+  name,
+  alias,
+  isNullable,
+  isPii,
+  hasValidation,
+  fieldTypeId,
+  isVirtual,
+  dbType,
+  options,
+}) {
+  const response = await securedApi.post(`/tables/${tableId}/field`, {
+    name,
+    alias,
+    isNullable,
+    isPii,
+    hasValidation,
+    fieldTypeId,
+    isVirtual,
+    dbType,
+    options,
+  });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }

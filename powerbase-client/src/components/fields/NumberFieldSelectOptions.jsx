@@ -51,12 +51,12 @@ export default function NumberFieldSelectOptions({
   return (
     <Listbox value={selectedItem} onChange={(item) => handleSelect(item)}>
       {!isPrecision && (
-        <Listbox.Label className="block text-sm font-normal text-gray-700">
+        <Listbox.Label className="block text-sm font-normal text-gray-900">
           Format
         </Listbox.Label>
       )}
       {isPrecision && (
-        <Listbox.Label className="block text-sm font-normal text-gray-700 mt-1">
+        <Listbox.Label className="block text-sm font-normal text-gray-900 mt-1">
           Precision
         </Listbox.Label>
       )}

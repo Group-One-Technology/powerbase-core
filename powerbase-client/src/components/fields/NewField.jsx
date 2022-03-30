@@ -6,10 +6,11 @@ import { XIcon } from '@heroicons/react/outline';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useViewFields } from '@models/ViewFields';
 import { useSaveStatus } from '@models/SaveStatus';
-import { addVirtualField } from '@lib/api/fields';
+import { addField } from '@lib/api/fields';
 import { useDebouncedInput } from '@lib/hooks/fields/useDebouncedInput';
 import { useMounted } from '@lib/hooks/useMounted';
 import { COLUMN_TYPE } from '@lib/constants/field';
+import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 
 import { Checkbox } from '@components/ui/Checkbox';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
@@ -33,6 +34,11 @@ const FieldTypeComponent = ({
   setCurrency,
   columnType,
   setColumnType,
+  isVirtual,
+  fieldName,
+  setFieldName,
+  dbType,
+  setDbType,
 }) => {
   const collapseSelectedField = () => {
     setSelected(null);
@@ -44,6 +50,9 @@ const FieldTypeComponent = ({
 
   const hasPrecisionField = isPercent || hasDecimal;
   const hasFormatOptions = isPercent || isCurrency || isNumber;
+
+  const handleNameChange = (evt) => setFieldName(evt.target.value);
+  const handleDBTypeChange = (evt) => setDbType(evt.target.value);
 
   return (
     <div className="mt-2">
@@ -64,6 +73,52 @@ const FieldTypeComponent = ({
         <p className="text-xs text-gray-600">
           {type.description}
         </p>
+        <InlineRadio
+          aria-label="Field Type"
+          value={columnType}
+          setValue={setColumnType}
+          options={COLUMN_TYPE}
+          className="my-6"
+        />
+        {!isVirtual && (
+          <div>
+            <div className="my-2">
+              <label htmlFor="newFieldName" className="text-sm font-normal text-gray-900">
+                Column Name
+              </label>
+              <input
+                id="newFieldName"
+                type="text"
+                name="new-field-name"
+                className={cn(
+                  'my-2 shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
+                  // nameExists ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-indigo-500',
+                )}
+                placeholder="e.g. first_name"
+                autoComplete="off"
+                value={fieldName}
+                onChange={handleNameChange}
+                required
+              />
+            </div>
+            <div className="my-2">
+              <label htmlFor="newFieldName" className="text-sm font-normal text-gray-900">
+                Data Type
+              </label>
+              <input
+                id="newDataType"
+                type="text"
+                name="new-data-type"
+                className="my-2 shadow-sm block w-full sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g. integer"
+                autoComplete="off"
+                value={dbType}
+                onChange={handleDBTypeChange}
+                required
+              />
+            </div>
+          </div>
+        )}
         {hasFormatOptions && (
           <div className="my-4">
             {(isNumber || isCurrency) && (
@@ -84,13 +139,6 @@ const FieldTypeComponent = ({
             )}
           </div>
         )}
-        <InlineRadio
-          aria-label="Field Type"
-          value={columnType}
-          setValue={setColumnType}
-          options={COLUMN_TYPE}
-          className="my-6"
-        />
         <div className="my-4">
           <Checkbox
             id="newFieldHasValidation"
@@ -130,6 +178,8 @@ export default function NewField({
 
   const [nameExists, setNameExists] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [alias, setAlias] = useState('');
+  const [dbType, setDbType] = useState('');
   const [numberSubtype, setNumberSubtype] = useState(null);
   const [numberPrecision, setNumberPrecision] = useState(null);
   const [hasValidation, setHasValidation] = useState(false);
@@ -140,6 +190,7 @@ export default function NewField({
   const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
 
   const { fieldName, setFieldName } = useDebouncedInput(setNameExists, tableId);
+  const isVirtual = columnType.nameId === 'magic_field';
 
   useEffect(() => {
     fieldInputRef.current?.focus();
@@ -155,8 +206,9 @@ export default function NewField({
     );
   }, [fieldTypes]);
 
-  const handleChange = (evt) => {
-    setFieldName(evt.target.value);
+  const handleAliasChange = (evt) => {
+    setAlias(evt.target.value);
+    setFieldName(toSnakeCase(evt.target.value));
   };
 
   const handleFieldTypeClick = (fieldType) => {
@@ -168,14 +220,16 @@ export default function NewField({
     if (!selected) return;
 
     try {
-      await addVirtualField({
+      await addField({
         tableId,
-        name: fieldName,
+        name: isVirtual ? alias : fieldName,
+        alias,
         isNullable,
         isPii,
         hasValidation,
         fieldTypeId: selected.id,
-        isVirtual: true,
+        isVirtual,
+        dbType,
         options: currency
           ? { style: 'currency', currency }
           : (numberPrecision
@@ -197,21 +251,21 @@ export default function NewField({
   return (
     <form className="m-4" onSubmit={addNewField}>
       <div>
-        <label htmlFor="new-field-name" className="sr-only">
+        <label htmlFor="newFieldAlias" className="sr-only">
           New Field
         </label>
         <input
           type="text"
-          name="field-name"
-          id="new-field-name"
+          name="field-alias"
+          id="newFieldAlias"
           className={cn(
             'shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
             nameExists ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-indigo-500',
           )}
-          placeholder="Enter field name (required)"
+          placeholder="Enter field name (e.g. First Name)"
           autoComplete="off"
           ref={fieldInputRef}
-          onChange={handleChange}
+          onChange={handleAliasChange}
           required
         />
       </div>
@@ -259,6 +313,11 @@ export default function NewField({
           setCurrency={setCurrency}
           columnType={columnType}
           setColumnType={setColumnType}
+          isVirtual={isVirtual}
+          fieldName={fieldName}
+          setFieldName={setFieldName}
+          dbType={dbType}
+          setDbType={setDbType}
         />
       )}
 
@@ -305,6 +364,11 @@ FieldTypeComponent.propTypes = {
   setCurrency: PropTypes.func.isRequired,
   columnType: PropTypes.object,
   setColumnType: PropTypes.func.isRequired,
+  isVirtual: PropTypes.bool,
+  fieldName: PropTypes.string,
+  setFieldName: PropTypes.func.isRequired,
+  dbType: PropTypes.string,
+  setDbType: PropTypes.func.isRequired,
 };
 
 NewField.propTypes = {

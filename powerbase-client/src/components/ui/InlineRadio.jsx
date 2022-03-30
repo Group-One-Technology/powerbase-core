@@ -105,7 +105,7 @@ const IValue = PropTypes.shape({
 });
 
 InlineRadio.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   value: IValue,
   setValue: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(IValue),
