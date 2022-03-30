@@ -26,11 +26,20 @@ export function InlineRadio({
       className={cn('grid grid-cols-12', className)}
       disabled={disabled}
     >
-      <div className="col-span-3">
-        {label && <RadioGroup.Label className="text-base font-medium text-gray-700">{label}</RadioGroup.Label>}
-        {(!label && props['aria-label']) && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
-      </div>
-      <div className="col-span-9 flex space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row">
+      {label && (
+        <div className="col-span-3">
+          <RadioGroup.Label className="text-base font-medium text-gray-700">
+            {label}
+          </RadioGroup.Label>
+        </div>
+      )}
+      {props['aria-label'] && <RadioGroup.Label className="sr-only">{props['aria-label']}</RadioGroup.Label>}
+      <div
+        className={cn(
+          'flex space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row',
+          label ? 'col-span-9' : 'col-span-12',
+        )}
+      >
         {options.map((option) => (
           <RadioGroup.Option
             key={option.name}

@@ -9,9 +9,12 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { addVirtualField } from '@lib/api/fields';
 import { useDebouncedInput } from '@lib/hooks/fields/useDebouncedInput';
 import { useMounted } from '@lib/hooks/useMounted';
+import { COLUMN_TYPE } from '@lib/constants/field';
+
 import { Checkbox } from '@components/ui/Checkbox';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { Button } from '@components/ui/Button';
+import { InlineRadio } from '@components/ui/InlineRadio';
 import NumberFieldSelectOptions from './NumberFieldSelectOptions';
 
 const FieldTypeComponent = ({
@@ -28,6 +31,8 @@ const FieldTypeComponent = ({
   isPii,
   setIsPii,
   setCurrency,
+  columnType,
+  setColumnType,
 }) => {
   const collapseSelectedField = () => {
     setSelected(null);
@@ -79,6 +84,13 @@ const FieldTypeComponent = ({
             )}
           </div>
         )}
+        <InlineRadio
+          aria-label="Field Type"
+          value={columnType}
+          setValue={setColumnType}
+          options={COLUMN_TYPE}
+          className="my-6"
+        />
         <div className="my-4">
           <Checkbox
             id="newFieldHasValidation"
@@ -125,6 +137,7 @@ export default function NewField({
   const [isPii, setIsPii] = useState(false);
   const [supportedNewFieldTypes, setSupportedNewFieldTypes] = useState();
   const [currency, setCurrency] = useState(null);
+  const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
 
   const { fieldName, setFieldName } = useDebouncedInput(setNameExists, tableId);
 
@@ -195,7 +208,7 @@ export default function NewField({
             'shadow-sm block w-full sm:text-sm border-gray-300 rounded-md',
             nameExists ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-indigo-500 focus:border-indigo-500',
           )}
-          placeholder="Enter magic field name (required)"
+          placeholder="Enter field name (required)"
           autoComplete="off"
           ref={fieldInputRef}
           onChange={handleChange}
@@ -211,7 +224,7 @@ export default function NewField({
         <div className="mt-2">
           {supportedNewFieldTypes?.map((type) => (
             <button
-              className="flex items-center w-full p-2 mb-2 hover:rounded-md hover:bg-indigo-200 focus:bg-indigo-200 cursor-default "
+              className="flex items-center w-full p-2 mb-2 hover:rounded-md hover:bg-indigo-100 focus:bg-indigo-100 cursor-default "
               onClick={() => handleFieldTypeClick(type)}
               key={type.id}
               type="button"
@@ -244,6 +257,8 @@ export default function NewField({
           isPii={isPii}
           setIsPii={setIsPii}
           setCurrency={setCurrency}
+          columnType={columnType}
+          setColumnType={setColumnType}
         />
       )}
 
@@ -266,7 +281,7 @@ export default function NewField({
             )}
             disabled={nameExists || !fieldName.length || !selected}
           >
-            Add Magic Field
+            Add Field
           </Button>
         )}
       </div>
@@ -288,6 +303,8 @@ FieldTypeComponent.propTypes = {
   isPii: PropTypes.bool,
   setIsPii: PropTypes.func.isRequired,
   setCurrency: PropTypes.func.isRequired,
+  columnType: PropTypes.object,
+  setColumnType: PropTypes.func.isRequired,
 };
 
 NewField.propTypes = {

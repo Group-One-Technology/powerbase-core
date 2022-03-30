@@ -147,7 +147,7 @@ export function Fields({ table }) {
                           onClick={handleAddNewField}
                         >
                           <PlusIcon className="mr-1 h-4 w-4" />
-                          Add a magic field
+                          Add a field
                         </button>
                       )}
                     </>
