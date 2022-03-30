@@ -265,7 +265,7 @@ export default function NewField({
       <div className="mt-8 flex justify-end items-baseline">
         <button
           type="button"
-          className="mr-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="mr-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           onClick={() => setIsCreatingField(false)}
         >
           Cancel
@@ -275,8 +275,8 @@ export default function NewField({
           <Button
             type="submit"
             className={cn(
-              'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-sm shadow-sm text-white bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-              (nameExists || !fieldName.length || !selected) && 'cursor-not-allowed',
+              'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+              (nameExists || !fieldName.length || !selected) ? 'cursor-not-allowed bg-gray-300' : 'cursor-pointer bg-indigo-600 hover:bg-indigo-500',
               !nameExists && fieldName.length && selected && 'hover:bg-indigo-700',
             )}
             disabled={nameExists || !fieldName.length || !selected}
