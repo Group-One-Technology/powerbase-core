@@ -48,11 +48,14 @@ class PowerbaseFieldsController < ApplicationController
   schema(:create) do
     required(:table_id).value(:integer)
     required(:name).value(:string)
+    required(:alias).value(:string)
+    optional(:db_type).value(:string)
     optional(:is_nullable).value(:bool)
     optional(:is_pii).value(:bool)
     optional(:has_validation).value(:bool)
     required(:field_type_id).value(:integer)
     required(:is_virtual).value(:bool)
+    required(:is_primary_key).value(:bool)
     optional(:options)
   end
 
@@ -76,35 +79,25 @@ class PowerbaseFieldsController < ApplicationController
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
     current_user.can?(:add_fields, @table)
 
-    @field = PowerbaseField.new(
-      name: safe_params[:name].snakecase,
-      alias: safe_params[:name],
-      is_nullable: safe_params[:is_nullable],
+    field_name = safe_params[:is_virtual] ? safe_params[:name].snakecase : safe_params[:name]
+    field_creator = Fields::Creator.new([field_name, {
+      alias: safe_params[:alias],
+      allow_null: safe_params[:is_nullable],
       is_pii: safe_params[:is_pii],
       has_validation: safe_params[:has_validation],
-      powerbase_table_id: @table.id,
-      powerbase_field_type_id: safe_params[:field_type_id],
+      field_type_id: safe_params[:field_type_id],
       is_virtual: safe_params[:is_virtual],
+      db_type: safe_params[:db_type],
+      primary_key: safe_params[:is_primary_key],
       options: safe_params[:options],
-    )
+    }], @table)
 
-    if !@field.save
-      render json: @field.errors, status: :unprocessable_entity
+    if !field_creator.save
+      render json: field_creator.field.errors, status: :unprocessable_entity
       return
     end
 
-    total_fields = @table.fields.count
-    views = @table.views
-    views.each do |view|
-      ViewFieldOption.create!({
-        width: 300,
-        order: total_fields,
-        table_view_id: view.id,
-        powerbase_field_id: @field.id
-      })
-    end
-
-    render json: format_json(@field)
+    render json: format_json(field_creator.field)
   end
 
   # GET /tables/:id/fields/:name
