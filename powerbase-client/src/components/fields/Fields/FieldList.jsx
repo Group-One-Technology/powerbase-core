@@ -16,16 +16,10 @@ import { useBaseUser } from '@models/BaseUser';
 import { hideAllViewFields } from '@lib/api/view-fields';
 import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
 import { PERMISSIONS } from '@lib/constants/permissions';
-import { FIELDS_SCREEN } from '@lib/constants/field';
 
 import { FieldItem } from './FieldItem';
 
-export function FieldList({
-  table,
-  fields,
-  setFields,
-  setScreen,
-}) {
+export function FieldList({ fields, setFields, children }) {
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { saving, saved, catchError } = useSaveStatus();
@@ -35,13 +29,7 @@ export function FieldList({
   const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
   const [loading, setLoading] = useState(false);
 
-  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
-
-  const handleAddField = () => {
-    if (!canAddFields) return;
-    setScreen(FIELDS_SCREEN.AddField);
-  };
 
   const handleHideAll = async () => {
     if (canManageView) {
@@ -106,23 +94,13 @@ export function FieldList({
           )}
       </div>
 
-      {canAddFields && (
-        <button
-          type="button"
-          className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-          onClick={handleAddField}
-        >
-          <PlusIcon className="mr-1 h-4 w-4" />
-          Add a field
-        </button>
-      )}
+      {children}
     </div>
   );
 }
 
 FieldList.propTypes = {
-  table: PropTypes.object.isRequired,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
-  setScreen: PropTypes.func.isRequired,
+  children: PropTypes.any,
 };

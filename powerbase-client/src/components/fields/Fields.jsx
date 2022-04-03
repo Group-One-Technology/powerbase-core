@@ -2,18 +2,27 @@ import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
-import { AdjustmentsIcon } from '@heroicons/react/outline';
+import { AdjustmentsIcon, PlusIcon } from '@heroicons/react/outline';
 
+import { useBaseUser } from '@models/BaseUser';
 import { useViewFields } from '@models/ViewFields';
 import { FIELDS_SCREEN } from '@lib/constants/field';
+import { PERMISSIONS } from '@lib/constants/permissions';
 import { FieldList } from './Fields/FieldList';
 // import { CreateField } from './CreateField';
 
 export function Fields({ table }) {
+  const { baseUser } = useBaseUser();
   const { data: initialFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
 
   const [screen, setScreen] = useState(FIELDS_SCREEN.Fields);
+  const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
+
+  const handleAddField = () => {
+    if (!canAddFields) return;
+    setScreen(FIELDS_SCREEN.AddField);
+  };
 
   useEffect(() => {
     setFields(initialFields);
@@ -46,12 +55,18 @@ export function Fields({ table }) {
               {({ close }) => (
                 <div className="rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                   {screen === FIELDS_SCREEN.Fields && (
-                    <FieldList
-                      table={table}
-                      fields={fields}
-                      setFields={setFields}
-                      setScreen={setScreen}
-                    />
+                    <FieldList fields={fields} setFields={setFields}>
+                      {canAddFields && (
+                        <button
+                          type="button"
+                          className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
+                          onClick={handleAddField}
+                        >
+                          <PlusIcon className="mr-1 h-4 w-4" />
+                          Add a field
+                        </button>
+                      )}
+                    </FieldList>
                   )}
                   {/* {screen === FIELDS_SCREEN.AddField && (
                     <CreateField
