@@ -6,6 +6,7 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { Button } from '@components/ui/Button';
 import { CreateFieldAlias } from './CreateField/CreateFieldAlias';
+import { CreateFieldType } from './CreateField/CreateFieldType';
 
 export function CreateField({
   table,
@@ -15,9 +16,11 @@ export function CreateField({
 }) {
   const [fieldName, setFieldName] = useState('');
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
+  const [fieldType, setFieldType] = useState();
 
   const hasPrimaryKey = table?.hasPrimaryKey;
-  const disabled = !!(!alias.length || aliasError.error);
+  const disabled = !!(!alias.length || aliasError.error
+    || !fieldType);
 
   return (
     <form className="p-4 text-sm text-gray-900">
@@ -28,6 +31,7 @@ export function CreateField({
         aliasError={aliasError}
         setFieldName={setFieldName}
       />
+      <CreateFieldType fieldType={fieldType} setFieldType={setFieldType} />
 
       <div className="mt-8 flex justify-end items-baseline">
         <button
