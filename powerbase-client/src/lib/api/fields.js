@@ -1,3 +1,4 @@
+import queryString from 'query-string';
 import { isResponseSuccess, securedApi } from './index';
 
 export async function getTableFields({ tableId }) {
@@ -72,8 +73,9 @@ export async function updateFieldPermissionAllowedRoles({ id, ...payload }) {
   return undefined;
 }
 
-export async function searchFieldByName({ id, name }) {
-  const response = await securedApi.get(`tables/${id}/fields/${name}`);
+export async function getFieldByName({ tableId, alias, name }) {
+  const params = queryString.stringify({ alias, name });
+  const response = await securedApi.get(`tables/${tableId}/fields?${params}`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }

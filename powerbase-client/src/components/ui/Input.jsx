@@ -7,6 +7,7 @@ export function Input({
   label,
   name,
   caption,
+  success,
   error,
   onFocus,
   onBlur,
@@ -69,6 +70,11 @@ export function Input({
             {caption}
           </p>
         )}
+        {success && !(showErrorText && error) && (
+          <p className="mt-2 text-xs text-green-500 my-2">
+            {success}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -83,6 +89,7 @@ Input.propTypes = {
   error: PropTypes.object,
   showError: PropTypes.bool,
   caption: PropTypes.any,
+  success: PropTypes.any,
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,

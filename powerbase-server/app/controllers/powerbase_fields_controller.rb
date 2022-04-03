@@ -6,6 +6,8 @@ class PowerbaseFieldsController < ApplicationController
 
   schema(:index) do
     required(:table_id).value(:integer)
+    optional(:name).value(:string)
+    optional(:alias).value(:string)
   end
 
   schema(:alias) do
@@ -64,6 +66,12 @@ class PowerbaseFieldsController < ApplicationController
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
     current_user.can?(:view_table, @table)
+
+    if safe_params[:name] != nil || safe_params[:alias] != nil
+      @field = PowerbaseField.find_by("alias = ? OR name = ?", safe_params[:alias], (safe_params[:name] || safe_params[:alias].snakecase))
+      render json: @field
+      return
+    end
 
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @table.powerbase_database_id)
     @fields = PowerbaseField.where(powerbase_table_id: @table.id).order(name: :asc)

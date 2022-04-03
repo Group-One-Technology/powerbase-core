@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const BASE_URL = process.env.API;
 
-export const isResponseSuccess = (response) => response.status >= 200 && response.status < 300;
+export const isResponseSuccess = (response) => (response.status >= 200 && response.status < 300) || response.status === 304;
 
 export const api = axios.create({
   baseURL: BASE_URL,
