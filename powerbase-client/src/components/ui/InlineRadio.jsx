@@ -46,7 +46,7 @@ export function InlineRadio({
             value={option}
             className={({ active }) => (
               cn(
-                'flex-1 relative block rounded-lg border border-gray-300 shadow-sm px-6 py-4 hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
+                'flex-1 relative block rounded-lg border border-gray-300 shadow-sm p-4 hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
                 active && 'ring-1 ring-offset-2 ring-indigo-500',
                 (option.disabled || disabled) ? 'cursor-not-allowed' : 'cursor-pointer',
                 option.className || 'bg-white',

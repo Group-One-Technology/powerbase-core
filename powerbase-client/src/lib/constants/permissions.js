@@ -151,7 +151,7 @@ export const CUSTOM_PERMISSIONS = {
     },
     {
       name: 'Add Fields',
-      description: 'who can create an actual field and magic field for this table.',
+      description: 'who can create an persistent and magic field for this table.',
       access: 'admins and up',
       key: 'addFields',
       value: false,
