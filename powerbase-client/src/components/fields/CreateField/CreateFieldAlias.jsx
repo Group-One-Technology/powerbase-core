@@ -31,7 +31,9 @@ export function CreateFieldAlias({
   useEffect(() => {
     if (search.status === 'success' && search.result?.id != null) {
       aliasError.setError(new Error(`Field with name of "${alias}" already exists`));
-    } else if (aliasError.error === `Field with name of "${alias}" already exists`) {
+    } else if (search.status === 'loading' && alias.length) {
+      aliasError.setError(new Error('Still checking for existing field'));
+    } else if (search.status === 'success' && search.result == null) {
       aliasError.setError(null);
     }
   }, [search.status]);
@@ -52,7 +54,7 @@ export function CreateFieldAlias({
       placeholder="Enter Field Name (e.g. First Name)"
       onChange={handleAliasChange}
       className="w-full"
-      showError
+      showError={search.status === 'success'}
       error={aliasError.error}
       caption={search.status === 'loading' && (
         <span className="flex">
