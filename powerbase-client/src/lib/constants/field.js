@@ -16,7 +16,7 @@ export const COLUMN_TYPE = [
     nameId: 'magic_field',
     descriptionId: 'magic_field_description',
     name: 'Magic Field',
-    description: 'Accessible through powerbase but will not affect your current database.',
+    description: 'Accessible thru powerbase but will not affect your current database.',
   },
 ];
 

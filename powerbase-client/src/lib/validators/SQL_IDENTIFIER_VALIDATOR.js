@@ -1,4 +1,4 @@
-const regex = /[a-zA-z|_]+[a-zA-z|0-9|_]+/;
+const regex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 /**
  * Validates an SQL identifer.

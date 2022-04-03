@@ -6,72 +6,66 @@ import useConstant from 'use-constant';
 import { CheckIcon } from '@heroicons/react/solid';
 
 import { Input } from '@components/ui/Input';
-import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 import { getFieldByName } from '@lib/api/fields';
 import { Loader } from '@components/ui/Loader';
 
 const DEBOUNCED_TIMEOUT = 300; // 300ms
 
-export function CreateFieldAlias({
+export function CreateFieldName({
   tableId,
-  alias,
-  setAlias,
-  aliasError,
+  fieldName,
   setFieldName,
+  fieldNameError,
 }) {
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
     async (abortSignal, id, text) => {
       if (!id || text.length === 0) return null;
-      return debouncedGetFieldByName({ tableId: id, alias: text }, abortSignal);
+      return debouncedGetFieldByName({ tableId: id, name: fieldName }, abortSignal);
     },
-    [tableId, alias],
+    [tableId, fieldName],
   );
 
   useEffect(() => {
     if (search.status === 'success' && search.result?.id != null) {
-      if (!aliasError.error) {
-        aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
+      if (!fieldNameError.error) {
+        fieldNameError.setError(new Error(`Search Error: Field with column name of "${fieldName}" already exists`));
       }
-    } else if (search.status === 'loading' && alias.length) {
-      if (!aliasError.error) {
-        aliasError.setError(new Error('Search Error: Still checking for existing field'));
+    } else if (search.status === 'loading' && fieldName.length) {
+      if (!fieldNameError.error) {
+        fieldNameError.setError(new Error('Search Error: Still checking for existing field'));
       }
     } else if (search.status === 'success' && search.result == null) {
-      if (aliasError.error?.message.includes('Search Error')) {
-        aliasError.setError(null);
+      if (fieldNameError.error?.message.includes('Search Error')) {
+        fieldNameError.setError(null);
       }
     }
   }, [search.status]);
 
-  const handleAliasChange = (evt) => {
-    const { value } = evt.target;
-    setAlias(value);
-    setFieldName(toSnakeCase(value));
-  };
+  const handleNameChange = (evt) => setFieldName(evt.target.value);
 
   return (
     <Input
       type="text"
-      id="create-field-alias"
-      name="create-field-alias"
-      aria-label="Field Name"
-      value={alias}
-      placeholder="Enter Field Name (e.g. First Name)"
-      onChange={handleAliasChange}
+      id="create-field-column-name"
+      name="create-field-column-name"
+      label="Column Name"
+      placeholder="e.g. first_name or firstName"
+      value={fieldName}
+      onChange={handleNameChange}
       className="w-full"
-      showError={!aliasError.error?.message.includes('Still checking for existing field')}
-      error={aliasError.error}
+      showError={!fieldNameError.error?.message.includes('Still checking for existing field')}
+      error={fieldNameError.error}
       caption={search.status === 'loading' && (
         <span className="flex">
           <Loader className="h-4 w-4 mr-1" aria-hidden="true" />
-          Checking if field name already exists...
+          Checking if column name already exists...
         </span>
       )}
-      success={alias.length > 0 && search.result == null && search.status === 'success' && (
+      success={fieldName.length > 0 && search.result == null && search.status === 'success' && (
         <span className="flex">
           <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />
-          Field name is available.
+          Column name is available.
         </span>
       )}
       autoFocus
@@ -79,10 +73,9 @@ export function CreateFieldAlias({
   );
 }
 
-CreateFieldAlias.propTypes = {
+CreateFieldName.propTypes = {
   tableId: PropTypes.number,
-  alias: PropTypes.string,
-  setAlias: PropTypes.func.isRequired,
-  aliasError: PropTypes.any,
+  fieldName: PropTypes.string,
   setFieldName: PropTypes.func.isRequired,
+  fieldNameError: PropTypes.any,
 };
