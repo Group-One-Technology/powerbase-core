@@ -4,7 +4,10 @@ import cn from 'classnames';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { COLUMN_TYPE } from '@lib/constants/field';
+
 import { Button } from '@components/ui/Button';
+import { InlineRadio } from '@components/ui/InlineRadio';
 import { CreateFieldAlias } from './CreateField/CreateFieldAlias';
 import { CreateFieldType } from './CreateField/CreateFieldType';
 
@@ -14,11 +17,13 @@ export function CreateField({
   close,
   cancel,
 }) {
+  const hasPrimaryKey = table?.hasPrimaryKey;
+
   const [fieldName, setFieldName] = useState('');
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [fieldType, setFieldType] = useState();
+  const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
 
-  const hasPrimaryKey = table?.hasPrimaryKey;
   const disabled = !!(!alias.length || aliasError.error
     || !fieldType);
 
@@ -32,6 +37,25 @@ export function CreateField({
         setFieldName={setFieldName}
       />
       <CreateFieldType fieldType={fieldType} setFieldType={setFieldType} />
+
+      {fieldType && (
+        <div className="mx-2">
+          <p className="text-sm text-gray-700">
+            {fieldType.description}
+          </p>
+          <InlineRadio
+            aria-label="Field Type"
+            value={columnType}
+            setValue={setColumnType}
+            options={COLUMN_TYPE.map((item) => (
+              item.nameId === 'magic_field' && !hasPrimaryKey
+                ? { ...item, disabled: 'There must be at least one primary key to create a magic field.' }
+                : item
+            ))}
+            className="my-6"
+          />
+        </div>
+      )}
 
       <div className="mt-8 flex justify-end items-baseline">
         <button
