@@ -103,12 +103,12 @@ class Fields::Creator
   end
 
   def save
-    if field.save
-      if !field.is_virtual
-        table_schema = Tables::Schema.new table
-        table_schema.add_column(field.name, field.db_type)
-      end
+    if !field.is_virtual
+      table_schema = Tables::Schema.new table
+      table_schema.add_column(field.name, field.db_type)
+    end
 
+    if field.save
       if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
         add_field_select_options
       end
