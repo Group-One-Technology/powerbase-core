@@ -119,32 +119,37 @@ class Fields::Creator
   end
 
   def save
-    if !field.is_virtual
-      table_schema = Tables::Schema.new table
-      table_schema.add_column(field.name, field.db_type)
-    end
+    begin
+      if field.save
+        if !field.is_virtual
+          table_schema = Tables::Schema.new table
+          table_schema.add_column(field.name, field.db_type)
+        end
 
-    if field.save
-      if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
-        add_field_select_options
+        if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
+          add_field_select_options
+        end
+
+        add_to_viewfield
+
+        unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
+          .select {|field_name| field_name != field.name.to_s}
+        table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
+
+        pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
+        true
+      else
+        base_migration.logs["errors"].push({
+          type: "Active Record",
+          error: "Failed to save '#{field_name}' field",
+          messages: field.errors.messages,
+        })
+        base_migration.save
+        false
       end
-
-      add_to_viewfield
-
-      unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
-        .select {|field_name| field_name != field.name.to_s}
-      table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
-
-      pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
-      true
-    else
-      base_migration.logs["errors"].push({
-        type: "Active Record",
-        error: "Failed to save '#{field_name}' field",
-        messages: field.errors.messages,
-      })
-      base_migration.save
-      false
+    rescue Sequel::DatabaseError => ex
+      field.destroy
+      raise ex
     end
   end
 
