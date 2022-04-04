@@ -22,12 +22,7 @@ import { CreateFieldName } from './CreateField/CreateFieldName';
 import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
 import { NumberFieldSelectOptions } from './CreateField/NumberFieldSelectOptions';
 
-export function CreateField({
-  table,
-  fields,
-  close,
-  cancel,
-}) {
+export function CreateField({ table, close, cancel }) {
   const { mounted } = useMounted();
   const { status, error, dispatch } = useData();
   const { mutate: mutateViewFields } = useViewFields();
@@ -42,6 +37,8 @@ export function CreateField({
   const [hasValidation, setHasValidation] = useState(false);
   const [isNullable, setIsNullable] = useState(false);
   const [isPii, setIsPii] = useState(false);
+
+  const isVirtual = columnType.nameId === 'magic_field';
 
   const isDecimal = options?.type === 'Decimal';
   const disabled = !!(!alias.length || aliasError.error
@@ -60,7 +57,7 @@ export function CreateField({
         name: fieldName,
         alias,
         fieldTypeId: fieldType.id,
-        isVirtual: columnType.nameId === 'magic_field',
+        isVirtual,
         dbType: dataType,
         isNullable,
         isPii,
@@ -125,7 +122,7 @@ export function CreateField({
               )}
             </>
           )}
-          {columnType.nameId !== 'magic_field' && (
+          {!isVirtual && (
             <>
               <CreateFieldName
                 tableId={table.id}
@@ -200,7 +197,6 @@ export function CreateField({
 
 CreateField.propTypes = {
   table: PropTypes.object.isRequired,
-  fields: PropTypes.array.isRequired,
   close: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
 };

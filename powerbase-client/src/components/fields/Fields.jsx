@@ -75,7 +75,6 @@ export function Fields({ table }) {
                   {screen === FIELDS_SCREEN.AddField && (
                     <CreateField
                       table={table}
-                      fields={fields}
                       close={() => {
                         handleCloseAddField();
                         close();
