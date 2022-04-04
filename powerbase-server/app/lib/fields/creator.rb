@@ -80,14 +80,30 @@ class Fields::Creator
       oid: field_options[:oid],
       db_type: field_options[:db_type],
       default_value: field_options[:default] || nil,
-      is_primary_key: field_options[:primary_key] || false,
       is_nullable: field_options[:allow_null] || true,
-      is_auto_increment: field_options[:auto_increment] || false,
-      powerbase_field_type_id: field_options[:field_type_id] || field_type,
+      powerbase_field_type_id: if field_options[:is_virtual]
+          field_options[:field_type_id]
+        else
+          field_type
+        end,
       powerbase_table_id: table.id,
-      is_pii: field_options[:is_pii] || (field_options[:primary_key] ? false : Pii.is_pii?(field_name)),
       has_validation: field_options[:has_validation] || true,
       is_virtual: field_options[:is_virtual] || false,
+      is_primary_key: if field_options[:is_virtual]
+          false
+        else
+          field_options[:primary_key] || false
+        end,
+      is_auto_increment: if field_options[:is_virtual]
+          false
+        else
+          field_options[:auto_increment] || false
+        end,
+      is_pii: if table.has_primary_key?
+          field_options[:is_pii] || (field_options[:primary_key] ? false : Pii.is_pii?(field_name))
+        else
+          false
+        end,
       options: field_options[:options] || nil,
     }
   end
@@ -106,7 +122,12 @@ class Fields::Creator
     if !field.is_virtual
       table_schema = Tables::Schema.new table
       table_schema.add_column(field.name, field.db_type)
+
+      if field.is_primary_key
+
+      end
     end
+
 
     if field.save
       if field.powerbase_field_type.data_type == "enums" && !field.is_virtual

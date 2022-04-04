@@ -155,12 +155,14 @@ export function CreateField({
               value={isNullable}
               setValue={setIsNullable}
             />
-            <Checkbox
-              id="create-field-is-pii"
-              label="Set as PII"
-              value={isPii}
-              setValue={setIsPii}
-            />
+            {hasPrimaryKey && (
+              <Checkbox
+                id="create-field-is-pii"
+                label="Set as PII"
+                value={isPii}
+                setValue={setIsPii}
+              />
+            )}
           </div>
         </div>
       )}
