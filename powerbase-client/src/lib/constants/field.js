@@ -34,9 +34,9 @@ export const COLUMN_DATA_TYPES = {
   [FieldType.EMAIL]: TEXT_DATA_TYPES,
   [FieldType.URL]: TEXT_DATA_TYPES,
   [FieldType.JSON_TEXT]: TEXT_DATA_TYPES,
-  [FieldType.LONG_TEXT]: TEXT_DATA_TYPES,
+  [FieldType.LONG_TEXT]: ['text', ...TEXT_DATA_TYPES],
   [FieldType.SINGLE_SELECT]: TEXT_DATA_TYPES,
   [FieldType.MULTIPLE_SELECT]: TEXT_DATA_TYPES,
-  [FieldType.PLUGIN]: ['bool', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
-  [FieldType.OTHERS]: ['bool', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
+  [FieldType.PLUGIN]: ['bool', 'text', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
+  [FieldType.OTHERS]: ['bool', 'text', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
 };
