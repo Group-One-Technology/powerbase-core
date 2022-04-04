@@ -98,7 +98,7 @@ class PowerbaseFieldsController < ApplicationController
       db_type: safe_params[:db_type],
       primary_key: safe_params[:is_primary_key],
       options: safe_params[:options],
-    }], @table)
+    }], @table, new_field: true)
 
     if !field_creator.save
       render json: field_creator.field.errors, status: :unprocessable_entity

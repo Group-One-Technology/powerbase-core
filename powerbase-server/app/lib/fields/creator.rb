@@ -2,13 +2,14 @@ class Fields::Creator
   include FieldTypeHelper
   include PusherHelper
 
-  attr_accessor :table, :column, :field, :field_name, :field_options, :table_view, :database, :base_migration
+  attr_accessor :table, :column, :field, :new_field, :field_name, :field_options, :table_view, :database, :base_migration
 
-  def initialize(column, table)
+  def initialize(column, table, new_field: false)
     @column = column
     @table = table
     @field_name = column[0]
     @field_options = column[1]
+    @new_field = new_field
     @database = table.db
     @base_migration = @database.base_migration
 
@@ -121,7 +122,7 @@ class Fields::Creator
   def save
     begin
       if field.save
-        if !field.is_virtual
+        if !field.is_virtual && new_field
           table_schema = Tables::Schema.new table
           table_schema.add_column(field.name, field.db_type)
         end
