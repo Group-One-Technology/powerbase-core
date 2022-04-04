@@ -6,10 +6,12 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 
+const UNSUPPORTED_DATA_TYPES = [FieldType.MULTIPLE_SELECT, FieldType.SINGLE_SELECT, FieldType.PLUGIN, FieldType.OTHERS];
+
 export function CreateFieldType({ fieldType, setFieldType }) {
   const { data: fieldTypes } = useFieldTypes();
 
-  const options = fieldTypes.filter((item) => ![FieldType.PLUGIN, FieldType.OTHERS].includes(item.name));
+  const options = fieldTypes.filter((item) => !UNSUPPORTED_DATA_TYPES.includes(item.name));
 
   const handleSelectOption = (option) => {
     setFieldType(option);
