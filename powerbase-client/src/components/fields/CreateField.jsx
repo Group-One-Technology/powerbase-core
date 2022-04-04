@@ -34,7 +34,8 @@ export function CreateField({
   const isDecimal = options?.type === 'Decimal';
   const disabled = !!(!alias.length || aliasError.error
     || !fieldType
-    || fieldNameError.error);
+    || fieldNameError.error)
+    || dataType.length === 0;
 
   return (
     <form className="p-4 text-sm text-gray-900">

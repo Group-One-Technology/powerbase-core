@@ -56,18 +56,31 @@ export function FieldDataTypeSelect({
               value={dataType}
               onChange={handleDataTypeChange}
               placeholder="e.g. varchar or numeric(5,2)"
-              className="bg-white relative w-full border border-gray-300 rounded-l-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className={cn(
+                'bg-white relative w-full border rounded-l-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                dataType.length === 0 ? 'border-red-300' : 'border-gray-300',
+              )}
             />
             <Listbox.Button
-              className="bg-white relative border border-gray-300 rounded-r-md shadow-sm py-2 px-3 inline-flex items-center justify-center cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className={cn(
+                'bg-white relative border rounded-r-md shadow-sm py-2 px-3 inline-flex items-center justify-center cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                dataType.length === 0 ? 'border-red-300' : 'border-gray-300',
+              )}
             >
               <span className="sr-only">View data type options</span>
               <ChevronDownIcon className="h-4 w-4" />
             </Listbox.Button>
           </div>
-          <p className="m-1 text-xs text-gray-500">
-            This will be the data type of the SQL column.
-          </p>
+          {dataType.length === 0
+            ? (
+              <p className="m-1 text-xs text-red-500">
+                Required.
+              </p>
+            ) : (
+              <p className="m-1 text-xs text-gray-500">
+                This will be the data type of the SQL column.
+              </p>
+            )}
         </div>
         <Listbox.Options className="absolute z-10 mt-1 w-full text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm border-r border-t border-b  border-gray-300 overflow-auto focus:outline-none sm:text-sm">
           {options.map((item) => (
