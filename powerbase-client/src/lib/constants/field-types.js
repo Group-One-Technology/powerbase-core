@@ -16,3 +16,5 @@ export const FieldType = {
 };
 
 Object.freeze(FieldType);
+
+export const NUMBER_TYPES = [FieldType.NUMBER, FieldType.CURRENCY, FieldType.PERCENT];

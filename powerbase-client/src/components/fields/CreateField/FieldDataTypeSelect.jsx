@@ -5,7 +5,7 @@ import { ChevronDownIcon } from '@heroicons/react/outline';
 import { Listbox } from '@headlessui/react';
 
 import { COLUMN_DATA_TYPES } from '@lib/constants/field';
-import { FieldType } from '@lib/constants/field-types';
+import { FieldType, NUMBER_TYPES } from '@lib/constants/field-types';
 
 export function FieldDataTypeSelect({
   fieldType = FieldType.SINGLE_LINE_TEXT,
@@ -15,6 +15,8 @@ export function FieldDataTypeSelect({
 }) {
   const [option, setOption] = useState();
   const [options, setOptions] = useState(COLUMN_DATA_TYPES[fieldType]);
+
+  const hasPrecision = isDecimal || fieldType.name === FieldType.CURRENCY;
 
   const handleDataTypeChange = (evt) => {
     const { value } = evt.target;
@@ -28,10 +30,10 @@ export function FieldDataTypeSelect({
   };
 
   useEffect(() => {
-    if ([FieldType.NUMBER, FieldType.CURRENCY, FieldType.PERCENT].includes(fieldType.name)) {
+    if (NUMBER_TYPES.includes(fieldType.name)) {
       setOptions(COLUMN_DATA_TYPES[fieldType]);
-      setDataType(isDecimal ? 'numeric' : 'integer');
-      setOption(isDecimal ? 'numeric' : 'integer');
+      setDataType(hasPrecision ? 'numeric' : 'integer');
+      setOption(hasPrecision ? 'numeric' : 'integer');
     } else {
       setOptions(COLUMN_DATA_TYPES[fieldType]);
       setDataType(COLUMN_DATA_TYPES[fieldType][0]);
@@ -39,9 +41,11 @@ export function FieldDataTypeSelect({
   }, [fieldType]);
 
   useEffect(() => {
-    setOption(isDecimal ? 'numeric' : 'integer');
-    setDataType(isDecimal ? 'numeric' : 'integer');
-  }, [isDecimal]);
+    if (NUMBER_TYPES.includes(fieldType.name)) {
+      setOption(hasPrecision ? 'numeric' : 'integer');
+      setDataType(hasPrecision ? 'numeric' : 'integer');
+    }
+  }, [hasPrecision]);
 
   return (
     <Listbox value={option} onChange={handleDataTypeOptionChange}>
