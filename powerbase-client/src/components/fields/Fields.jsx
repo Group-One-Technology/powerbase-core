@@ -2,74 +2,35 @@ import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
-import { captureError } from '@lib/helpers/captureError';
-import { AdjustmentsIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { AdjustmentsIcon, PlusIcon } from '@heroicons/react/outline';
 
-import { useSaveStatus } from '@models/SaveStatus';
-import { useViewFields } from '@models/ViewFields';
-import { useTableView } from '@models/TableView';
-import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useBaseUser } from '@models/BaseUser';
-import { hideAllViewFields } from '@lib/api/view-fields';
-import { useReorderFields } from '@lib/hooks/fields/useReorderFields';
+import { useViewFields } from '@models/ViewFields';
+import { FIELDS_SCREEN } from '@lib/constants/field';
 import { PERMISSIONS } from '@lib/constants/permissions';
-
-import { FieldItem } from './FieldItem';
-import NewField from './NewField';
+import { FieldList } from './Fields/FieldList';
+import { CreateField } from './CreateField';
 
 export function Fields({ table }) {
   const { baseUser } = useBaseUser();
-  const { data: view } = useTableView();
-  const { saving, saved, catchError } = useSaveStatus();
-  const { setFields: setRecordFields, setHasAddedNewField } = useViewFieldState();
-  const { data: initialFields, mutate: mutateViewFields } = useViewFields();
-
+  const { data: initialFields } = useViewFields();
   const [fields, setFields] = useState(initialFields);
-  const { sensors, handleReorderFields } = useReorderFields({ fields, setFields });
-  const [loading, setLoading] = useState(false);
-  const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
+
+  const [screen, setScreen] = useState(FIELDS_SCREEN.Fields);
   const canAddFields = baseUser?.can(PERMISSIONS.AddFields, table);
-  const hasPrimaryKey = table?.hasPrimaryKey;
-  const [isCreatingField, setIsCreatingField] = useState(false);
+
+  const handleAddField = () => {
+    if (!canAddFields) return;
+    setScreen(FIELDS_SCREEN.AddField);
+  };
+
+  const handleCloseAddField = () => {
+    setScreen(FIELDS_SCREEN.Fields);
+  };
 
   useEffect(() => {
     setFields(initialFields);
   }, [initialFields]);
-
-  const handleAddNewField = () => {
-    if (!hasPrimaryKey) return;
-    setIsCreatingField(!isCreatingField);
-  };
-
-  const handleHideAll = async () => {
-    if (canManageView) {
-      saving();
-      setLoading(true);
-
-      const updatedFields = fields.map((item) => ({
-        ...item,
-        isHidden: true,
-      }));
-
-      setFields(updatedFields);
-      setRecordFields(updatedFields);
-      setLoading(false);
-
-      try {
-        await hideAllViewFields({ viewId: view.id });
-        await mutateViewFields(updatedFields);
-        saved();
-      } catch (err) {
-        captureError(err);
-        catchError(err);
-      }
-    }
-  };
 
   return (
     <Popover className="relative">
@@ -79,9 +40,7 @@ export function Fields({ table }) {
             type="button"
             className={cn(
               'inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
-              {
-                'ring-2': open,
-              },
+              open && 'ring-2',
             )}
           >
             <AdjustmentsIcon className="block h-4 w-4 mr-1" />
@@ -96,72 +55,32 @@ export function Fields({ table }) {
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel
-              className={cn(
-                'absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md',
-              )}
-            >
+            <Popover.Panel className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-md">
               {({ close }) => (
                 <div className="rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                  {!isCreatingField && (
-                    <>
-                      <div className="py-2">
-                        <div className="text-sm text-gray-900">
-                          <h4 className="flex mx-3 mt-2 items-center">
-                            Fields for&nbsp;
-                            <strong>
-                              <TableIcon className="inline mr-1 h-5 w-5" />
-                              {view.name}
-                            </strong>
-                          </h4>
-                          {canManageView && fields.length > 0 && (
-                          <div className="mx-2 flex justify-end">
-                            <button
-                              type="button"
-                              className="p-1 text-indigo-500"
-                              onClick={handleHideAll}
-                              disabled={loading}
-                            >
-                              Hide all
-                            </button>
-                          </div>
-                          )}
-                        </div>
-                        {fields.length > 0
-                          ? (
-                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
-                              <SortableContext items={fields} strategy={verticalListSortingStrategy}>
-                                <ul className="m-3 list-none flex flex-col">
-                                  {fields.map((field) => <FieldItem key={field.id} view={view} field={field} setFields={setFields} />)}
-                                </ul>
-                              </SortableContext>
-                            </DndContext>
-                          ) : (
-                            <p className="m-3 text-sm font-medium text-center">No fields.</p>
-                          )}
-                      </div>
-                      {(canAddFields && hasPrimaryKey) && (
+                  {screen === FIELDS_SCREEN.Fields && (
+                    <FieldList fields={fields} setFields={setFields}>
+                      {canAddFields && (
                         <button
                           type="button"
                           className="px-3 py-2 w-full text-left text-sm bg-gray-50  flex items-center transition duration-150 ease-in-out text-blue-600  hover:bg-gray-100 focus:bg-gray-100"
-                          onClick={handleAddNewField}
+                          onClick={handleAddField}
                         >
                           <PlusIcon className="mr-1 h-4 w-4" />
-                          Add a magic field
+                          Add a field
                         </button>
                       )}
-                    </>
+                    </FieldList>
                   )}
-                  {isCreatingField && (
-                    <div className="py-2 text-sm text-gray-900">
-                      <NewField
-                        tableId={table.id}
-                        fields={fields}
-                        setIsCreatingField={setIsCreatingField}
-                        close={close}
-                        setHasAddedNewField={setHasAddedNewField}
-                      />
-                    </div>
+                  {screen === FIELDS_SCREEN.AddField && (
+                    <CreateField
+                      table={table}
+                      close={() => {
+                        handleCloseAddField();
+                        close();
+                      }}
+                      cancel={handleCloseAddField}
+                    />
                   )}
                 </div>
               )}

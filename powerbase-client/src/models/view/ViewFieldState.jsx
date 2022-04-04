@@ -11,7 +11,6 @@ function useViewFieldStateModel() {
   const [fields, setFields] = useState(
     initializeFields(initialFields, connections),
   );
-  const [hasAddedNewField, setHasAddedNewField] = useState(false);
 
   useEffect(() => {
     setFields(initializeFields(initialFields, connections));
@@ -26,8 +25,6 @@ function useViewFieldStateModel() {
     fields,
     setFields: updateFields,
     mutateViewFields,
-    hasAddedNewField,
-    setHasAddedNewField,
   };
 }
 

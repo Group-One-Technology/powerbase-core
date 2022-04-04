@@ -76,17 +76,35 @@ class Fields::Creator
   def field_params
     {
       name: field_name,
-      alias: field_name.to_s.titlecase,
+      alias: field_options[:alias] || field_name.to_s.titlecase,
       oid: field_options[:oid],
       db_type: field_options[:db_type],
       default_value: field_options[:default] || nil,
-      is_primary_key: field_options[:primary_key],
-      is_nullable: field_options[:allow_null],
-      is_auto_increment: field_options[:auto_increment] || false,
-      powerbase_field_type_id: field_type,
+      is_nullable: field_options[:allow_null] || true,
+      powerbase_field_type_id: if field_options[:is_virtual]
+          field_options[:field_type_id]
+        else
+          field_type
+        end,
       powerbase_table_id: table.id,
-      is_pii: field_options[:primary_key] ? false : Pii.is_pii?(field_name),
-      has_validation: true,
+      has_validation: field_options[:has_validation] || true,
+      is_virtual: field_options[:is_virtual] || false,
+      is_primary_key: if field_options[:is_virtual]
+          false
+        else
+          field_options[:primary_key] || false
+        end,
+      is_auto_increment: if field_options[:is_virtual]
+          false
+        else
+          field_options[:auto_increment] || false
+        end,
+      is_pii: if table.has_primary_key?
+          field_options[:is_pii] || (field_options[:primary_key] ? false : Pii.is_pii?(field_name))
+        else
+          false
+        end,
+      options: field_options[:options] || nil,
     }
   end
 
@@ -101,22 +119,37 @@ class Fields::Creator
   end
 
   def save
-    if field.save
-      add_field_select_options if field.powerbase_field_type.data_type == "enums"
-      add_to_viewfield
+    begin
+      if field.save
+        if !field.is_virtual
+          table_schema = Tables::Schema.new table
+          table_schema.add_column(field.name, field.db_type)
+        end
 
-      unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
-        .select {|field_name| field_name != field.name.to_s}
-      table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
+        if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
+          add_field_select_options
+        end
 
-      pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
-    else
-      base_migration.logs["errors"].push({
-        type: "Active Record",
-        error: "Failed to save '#{field_name}' field",
-        messages: field.errors.messages,
-      })
-      base_migration.save
+        add_to_viewfield
+
+        unmigrated_columns = Array(table.logs["migration"]["unmigrated_columns"])
+          .select {|field_name| field_name != field.name.to_s}
+        table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
+
+        pusher_trigger!("table.#{table.id}", "field-migration-listener", { id: field.id })
+        true
+      else
+        base_migration.logs["errors"].push({
+          type: "Active Record",
+          error: "Failed to save '#{field_name}' field",
+          messages: field.errors.messages,
+        })
+        base_migration.save
+        false
+      end
+    rescue Sequel::DatabaseError => ex
+      field.destroy
+      raise ex
     end
   end
 

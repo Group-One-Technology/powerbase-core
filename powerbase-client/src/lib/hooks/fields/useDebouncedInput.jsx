@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { searchFieldByName } from '@lib/api/fields';
+import { getFieldByName } from '@lib/api/fields';
 import debounce from 'lodash.debounce';
 import { useAsync } from 'react-async-hook';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
@@ -11,7 +11,7 @@ export const useDebouncedInput = (setNameExists, id) => {
   const [fieldName, setFieldName] = useState('');
   const searchPowerbase = async (name) => {
     try {
-      const { data } = await searchFieldByName({ id, name });
+      const { data } = await getFieldByName({ tableId: id, name });
       setNameExists(!!data?.id);
     } catch (error) {
       setNameExists(false);

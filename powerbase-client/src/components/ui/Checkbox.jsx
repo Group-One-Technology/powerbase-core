@@ -11,7 +11,7 @@ export function Checkbox({
   return (
     <label
       htmlFor={id}
-      className="my-2 block"
+      className="my-2 block cursor-pointer"
     >
       <input
         id={id}
