@@ -10,6 +10,7 @@ import { FieldType } from '@lib/constants/field-types';
 
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
+import { Checkbox } from '@components/ui/Checkbox';
 import { CreateFieldAlias } from './CreateField/CreateFieldAlias';
 import { CreateFieldType } from './CreateField/CreateFieldType';
 import { CreateFieldName } from './CreateField/CreateFieldName';
@@ -30,6 +31,9 @@ export function CreateField({
   const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
   const [dataType, setDataType] = useState('');
   const [options, setOptions] = useState({});
+  const [hasValidation, setHasValidation] = useState(false);
+  const [isNullable, setIsNullable] = useState(false);
+  const [isPii, setIsPii] = useState(false);
 
   const isDecimal = options?.type === 'Decimal';
   const disabled = !!(!alias.length || aliasError.error
@@ -93,6 +97,27 @@ export function CreateField({
               />
             </>
           )}
+
+          <div className="my-4">
+            <Checkbox
+              id="create-field-has-validation"
+              label="Enable Cell Validation"
+              value={hasValidation}
+              setValue={setHasValidation}
+            />
+            <Checkbox
+              id="create-field-is-nullable"
+              label="Set as Nullable"
+              value={isNullable}
+              setValue={setIsNullable}
+            />
+            <Checkbox
+              id="create-field-is-pii"
+              label="Set as PII"
+              value={isPii}
+              setValue={setIsPii}
+            />
+          </div>
         </div>
       )}
 
