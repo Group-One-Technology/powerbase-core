@@ -13,4 +13,10 @@ class Tables::Schema
       db.alter_table(table.name.to_sym) { add_column(field_name.to_sym, data_type) }
     end
   end
+
+  def drop_column(field_name)
+    sequel_connect(database) do |db|
+      db.alter_table(table.name.to_sym) { drop_column(field_name.to_sym) }
+    end
+  end
 end

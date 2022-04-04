@@ -61,6 +61,10 @@ class PowerbaseFieldsController < ApplicationController
     optional(:options)
   end
 
+  schema(:destroy) do
+    required(:id).value(:integer)
+  end
+
   # GET /tables/:table_id/fields
   def index
     @table = PowerbaseTable.find(safe_params[:table_id])
@@ -238,6 +242,15 @@ class PowerbaseFieldsController < ApplicationController
     field_updater = Fields::Updater.new(@field)
     field_updater.update_access!(safe_params[:permission], safe_params[:access])
 
+    render status: :no_content
+  end
+
+  # DELETE /fields/:id
+  def destroy
+    @field = PowerbaseField.find(safe_params[:id])
+    raise NotFound.new("Could not find field with id of #{safe_params[:id]}") if !@field
+    current_user.can?(:delete_fields, @field.table)
+    @field.drop
     render status: :no_content
   end
 

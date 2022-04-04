@@ -1,6 +1,8 @@
+include PermissionsHelper
+include FieldPermissionsHelper
+include ElasticsearchHelper
+
 class PowerbaseField < ApplicationRecord
-  include PermissionsHelper
-  include FieldPermissionsHelper
 
   validates :name, presence: true
   serialize :options, JSON
@@ -22,6 +24,22 @@ class PowerbaseField < ApplicationRecord
     else
       self.options != nil && self.options.precision != nil && self.options.precision > 0
     end
+  end
+
+  def drop(sync_db = true)
+    field_name = self.name
+    table = self.table
+
+    # Drop column in Sequel
+    if !self.is_virtual && sync_db
+      schema = Tables::Schema.new table
+      schema.drop_column(field_name)
+    end
+
+    # Remove column for every doc under index_name
+    remove_column(table.index_name, field_name)
+
+    self.destroy
   end
 
   def update_guests_access(options)
