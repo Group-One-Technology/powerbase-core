@@ -20,12 +20,13 @@ export const COLUMN_TYPE = [
   },
 ];
 
-const TEXT_DATA_TYPES = ['string', 'char'];
-const NUMBER_DATA_TYPES = ['numeric', 'integer', 'float', 'big decimal', 'big num'];
+const TEXT_DATA_TYPES = ['varchar', 'char'];
+const DATE_DATA_TYPES = ['date', 'timestamp'];
+const NUMBER_DATA_TYPES = ['numeric', 'integer', 'float', 'int2', 'int4', 'int8', 'float4', 'float8'];
 
 export const COLUMN_DATA_TYPES = {
   [FieldType.CHECKBOX]: ['bool'],
-  [FieldType.DATE]: ['date', 'datetime'],
+  [FieldType.DATE]: DATE_DATA_TYPES,
   [FieldType.NUMBER]: NUMBER_DATA_TYPES,
   [FieldType.CURRENCY]: NUMBER_DATA_TYPES,
   [FieldType.PERCENT]: NUMBER_DATA_TYPES,
@@ -36,6 +37,6 @@ export const COLUMN_DATA_TYPES = {
   [FieldType.LONG_TEXT]: TEXT_DATA_TYPES,
   [FieldType.SINGLE_SELECT]: TEXT_DATA_TYPES,
   [FieldType.MULTIPLE_SELECT]: TEXT_DATA_TYPES,
-  [FieldType.PLUGIN]: ['bool', 'date', 'datetime', ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
-  [FieldType.OTHERS]: ['bool', 'date', 'datetime', ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
+  [FieldType.PLUGIN]: ['bool', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
+  [FieldType.OTHERS]: ['bool', ...DATE_DATA_TYPES, ...TEXT_DATA_TYPES, ...NUMBER_DATA_TYPES],
 };
