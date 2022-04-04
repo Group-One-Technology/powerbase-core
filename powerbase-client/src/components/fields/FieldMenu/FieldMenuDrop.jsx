@@ -6,10 +6,8 @@ import { TrashIcon } from '@heroicons/react/outline';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
 import { dropField } from '@lib/api/fields';
-import { useMounted } from '@lib/hooks/useMounted';
 
 export function FieldMenuDrop({ field, setConfirmModal }) {
-  const { mounted } = useMounted();
   const { saving, catchError, saved } = useSaveStatus();
   const { fields, setFields, mutateViewFields } = useViewFieldState();
 
@@ -22,11 +20,12 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
 
     try {
       await dropField({ fieldId: field.fieldId });
-      mounted(() => {
-        mutateViewFields(updatedFields);
-        saved();
-      });
+      setConfirmModal({ open: false });
+      mutateViewFields(updatedFields);
+      saved();
     } catch (err) {
+      setConfirmModal({ open: false });
+      setFields(fields);
       catchError(err);
     }
   };
@@ -35,7 +34,7 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
     setConfirmModal({
       open: true,
       title: 'Drop Field',
-      description: 'Are you sure you want to drop this field? This action cannot be undone.',
+      description: `Are you sure you want to drop "${field.alias}" field? This action cannot be undone.`,
       onConfirm: handleConfirmDropField,
     });
   };
