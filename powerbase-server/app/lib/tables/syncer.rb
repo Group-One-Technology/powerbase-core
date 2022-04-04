@@ -95,6 +95,8 @@ class Tables::Syncer
       index_name = table.index_name
       powerbase_fields = fields.select{|field| dropped_columns.include?(field.name.to_sym)}
       powerbase_fields.each {|field| field.drop(false)}
+
+      pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
     end
 
     if !new_connection
