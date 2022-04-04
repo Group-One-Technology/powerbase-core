@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
+import { useViewFields } from '@models/ViewFields';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { COLUMN_TYPE } from '@lib/constants/field';
 import { FieldType } from '@lib/constants/field-types';
+import { useMounted } from '@lib/hooks/useMounted';
+import { addField } from '@lib/api/fields';
 
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
@@ -15,7 +18,7 @@ import { CreateFieldAlias } from './CreateField/CreateFieldAlias';
 import { CreateFieldType } from './CreateField/CreateFieldType';
 import { CreateFieldName } from './CreateField/CreateFieldName';
 import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
-import NumberFieldSelectOptions from './CreateField/NumberFieldSelectOptions';
+import { NumberFieldSelectOptions } from './CreateField/NumberFieldSelectOptions';
 
 export function CreateField({
   table,
@@ -23,6 +26,8 @@ export function CreateField({
   close,
   cancel,
 }) {
+  const { mounted } = useMounted();
+  const { mutate: mutateViewFields } = useViewFields();
   const hasPrimaryKey = table?.hasPrimaryKey;
 
   const [fieldName, setFieldName, fieldNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
@@ -41,8 +46,40 @@ export function CreateField({
     || fieldNameError.error)
     || dataType.length === 0;
 
+  const handleSubmit = async (evt) => {
+    evt.preventDefault();
+    if (disabled) return;
+
+    try {
+      await addField({
+        tableId: table.id,
+        name: fieldName,
+        alias,
+        fieldTypeId: fieldType.id,
+        isVirtual: columnType.nameId === 'magic_field',
+        dbType: dataType,
+        isNullable,
+        isPii,
+        hasValidation,
+        options: options?.currency && fieldType.name === FieldType.CURRENCY
+          ? { style: 'currency', currency: options.currency }
+          : options && options.precision && options.type === 'Decimal'
+            && [FieldType.NUMBER, FieldType.PERCENT].includes(fieldType.name)
+            ? { style: 'precision', precision: options.precision }
+            : null,
+      });
+
+      mounted(() => {
+        mutateViewFields();
+        close();
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
-    <form className="p-4 text-sm text-gray-900">
+    <form onSubmit={handleSubmit} className="p-4 text-sm text-gray-900">
       <CreateFieldAlias
         tableId={table.id}
         alias={alias}
@@ -72,7 +109,7 @@ export function CreateField({
           {[FieldType.NUMBER, FieldType.CURRENCY, FieldType.PERCENT].includes(fieldType.name) && (
             <>
               <NumberFieldSelectOptions fieldType={fieldType} setOptions={setOptions} />
-              {isDecimal && (
+              {(isDecimal && fieldType.name !== FieldType.CURRENCY) && (
                 <NumberFieldSelectOptions
                   fieldType={fieldType}
                   setOptions={setOptions}

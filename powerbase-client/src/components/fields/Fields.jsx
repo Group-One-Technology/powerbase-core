@@ -9,7 +9,7 @@ import { useViewFields } from '@models/ViewFields';
 import { FIELDS_SCREEN } from '@lib/constants/field';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { FieldList } from './Fields/FieldList';
-// import { CreateField } from './CreateField';
+import { CreateField } from './CreateField';
 
 export function Fields({ table }) {
   const { baseUser } = useBaseUser();
@@ -22,6 +22,10 @@ export function Fields({ table }) {
   const handleAddField = () => {
     if (!canAddFields) return;
     setScreen(FIELDS_SCREEN.AddField);
+  };
+
+  const handleCloseAddField = () => {
+    setScreen(FIELDS_SCREEN.Fields);
   };
 
   useEffect(() => {
@@ -68,13 +72,17 @@ export function Fields({ table }) {
                       )}
                     </FieldList>
                   )}
-                  {/* {screen === FIELDS_SCREEN.AddField && (
+                  {screen === FIELDS_SCREEN.AddField && (
                     <CreateField
                       table={table}
                       fields={fields}
-                      close={close}
+                      close={() => {
+                        handleCloseAddField();
+                        close();
+                      }}
+                      cancel={handleCloseAddField}
                     />
-                  )} */}
+                  )}
                 </div>
               )}
             </Popover.Panel>

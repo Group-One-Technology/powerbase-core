@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { FieldType } from '@lib/constants/field-types';
 
-export default function NumberFieldSelectOptions({
+export function NumberFieldSelectOptions({
   fieldType,
   isPrecision,
   setOptions,
@@ -26,8 +26,8 @@ export default function NumberFieldSelectOptions({
     setOptions((val) => ({ ...val, currency }));
   };
 
-  const setNumberPrecision = (precision) => {
-    setOptions((val) => ({ ...val, precision }));
+  const setNumberPrecision = (precisionType) => {
+    setOptions((val) => ({ ...val, precision: precisionType.precision }));
   };
 
   const computeInitialSelected = () => {
