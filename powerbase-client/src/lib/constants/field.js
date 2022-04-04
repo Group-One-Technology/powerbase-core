@@ -21,7 +21,7 @@ export const COLUMN_TYPE = [
 ];
 
 const TEXT_DATA_TYPES = ['string', 'char'];
-const NUMBER_DATA_TYPES = ['integer', 'float', 'numeric', 'big decimal', 'big num'];
+const NUMBER_DATA_TYPES = ['numeric', 'integer', 'float', 'big decimal', 'big num'];
 
 export const COLUMN_DATA_TYPES = {
   [FieldType.CHECKBOX]: ['bool'],

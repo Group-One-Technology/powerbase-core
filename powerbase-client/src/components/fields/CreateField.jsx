@@ -6,12 +6,15 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { COLUMN_TYPE } from '@lib/constants/field';
+import { FieldType } from '@lib/constants/field-types';
 
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { CreateFieldAlias } from './CreateField/CreateFieldAlias';
 import { CreateFieldType } from './CreateField/CreateFieldType';
 import { CreateFieldName } from './CreateField/CreateFieldName';
+import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
+import NumberFieldSelectOptions from './CreateField/NumberFieldSelectOptions';
 
 export function CreateField({
   table,
@@ -25,7 +28,10 @@ export function CreateField({
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [fieldType, setFieldType] = useState();
   const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
+  const [dataType, setDataType] = useState('');
+  const [options, setOptions] = useState({});
 
+  const isDecimal = options?.type === 'Decimal';
   const disabled = !!(!alias.length || aliasError.error
     || !fieldType
     || fieldNameError.error);
@@ -57,12 +63,35 @@ export function CreateField({
             ))}
             className="my-6"
           />
-          <CreateFieldName
-            tableId={table.id}
-            fieldName={fieldName}
-            setFieldName={setFieldName}
-            fieldNameError={fieldNameError}
-          />
+
+          {[FieldType.NUMBER, FieldType.CURRENCY, FieldType.PERCENT].includes(fieldType.name) && (
+            <>
+              <NumberFieldSelectOptions fieldType={fieldType} setOptions={setOptions} />
+              {isDecimal && (
+                <NumberFieldSelectOptions
+                  fieldType={fieldType}
+                  setOptions={setOptions}
+                  isPrecision
+                />
+              )}
+            </>
+          )}
+          {columnType.nameId !== 'magic_field' && (
+            <>
+              <CreateFieldName
+                tableId={table.id}
+                fieldName={fieldName}
+                setFieldName={setFieldName}
+                fieldNameError={fieldNameError}
+              />
+              <FieldDataTypeSelect
+                fieldType={fieldType.name}
+                dataType={dataType}
+                setDataType={setDataType}
+                isDecimal={isDecimal}
+              />
+            </>
+          )}
         </div>
       )}
 
