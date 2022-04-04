@@ -75,6 +75,20 @@ export function FieldDataTypeSelect({
               <ChevronDownIcon className="h-4 w-4" />
             </Listbox.Button>
           </div>
+          <Listbox.Options className="absolute z-10 mt-1 w-full text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm border-r border-t border-b  border-gray-300 overflow-auto focus:outline-none sm:text-sm">
+            {options.map((item) => (
+              <Listbox.Option
+                key={item}
+                value={item}
+                className={({ active, selected }) => cn(
+                  'cursor-default select-none relative py-1.5 pl-2 pr-6 text-gray-900',
+                  (active || selected) ? 'bg-gray-100' : 'bg-white',
+                )}
+              >
+                {item}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
           {dataType.length === 0
             ? (
               <p className="m-1 text-xs text-red-500">
@@ -86,20 +100,6 @@ export function FieldDataTypeSelect({
               </p>
             )}
         </div>
-        <Listbox.Options className="absolute z-10 mt-1 w-full text-left bg-white shadow-lg max-h-60 rounded-md py-1 text-sm border-r border-t border-b  border-gray-300 overflow-auto focus:outline-none sm:text-sm">
-          {options.map((item) => (
-            <Listbox.Option
-              key={item}
-              value={item}
-              className={({ active, selected }) => cn(
-                'cursor-default select-none relative py-1.5 pl-2 pr-6 text-gray-900',
-                (active || selected) ? 'bg-gray-100' : 'bg-white',
-              )}
-            >
-              {item}
-            </Listbox.Option>
-          ))}
-        </Listbox.Options>
       </div>
     </Listbox>
   );
