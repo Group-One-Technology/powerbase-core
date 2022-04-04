@@ -94,13 +94,9 @@ class Tables::Syncer
       puts "#{Time.now} -- Migrating #{dropped_columns.count} dropped columns"
       index_name = table.index_name
       powerbase_fields = fields.select{|field| dropped_columns.include?(field.name.to_sym)}
-      powerbase_fields.each do |field|
-        field_name = field.name
-        field.destroy
+      powerbase_fields.each {|field| field.drop(false)}
 
-        # Remove field for every doc under index_name in elasticsearch
-        remove_column(index_name, field_name)
-      end
+      pusher_trigger!("table.#{table.id}", "powerbase-data-listener", { id: table.id })
     end
 
     if !new_connection

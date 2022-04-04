@@ -106,3 +106,9 @@ export async function addField({
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
+
+export async function dropField({ fieldId }) {
+  const response = await securedApi.delete(`/fields/${fieldId}`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}

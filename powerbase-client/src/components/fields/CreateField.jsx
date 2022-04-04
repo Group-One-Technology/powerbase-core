@@ -35,7 +35,7 @@ export function CreateField({ table, close, cancel }) {
   const [dataType, setDataType] = useState('');
   const [options, setOptions] = useState({});
   const [hasValidation, setHasValidation] = useState(false);
-  const [isNullable, setIsNullable] = useState(false);
+  const [isNullable, setIsNullable] = useState(true);
   const [isPii, setIsPii] = useState(false);
 
   const isVirtual = columnType.nameId === 'magic_field';
