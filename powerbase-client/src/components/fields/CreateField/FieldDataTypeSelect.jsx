@@ -49,8 +49,8 @@ export function FieldDataTypeSelect({
 
   return (
     <Listbox value={option} onChange={handleDataTypeOptionChange}>
-      <div className="my-2 relative w-auto">
-        <label htmlFor="create-field-data-type" className="my-2 text-gray-900 text-sm">Data Type</label>
+      <div className="my-4 relative w-auto">
+        <label htmlFor="create-field-data-type" className="block text-sm font-medium text-gray-700 mb-2">Data Type</label>
         <div className="my-2">
           <div className="flex">
             <input

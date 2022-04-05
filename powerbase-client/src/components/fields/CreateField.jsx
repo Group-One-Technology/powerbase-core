@@ -21,6 +21,7 @@ import { CreateFieldType } from './CreateField/CreateFieldType';
 import { CreateFieldName } from './CreateField/CreateFieldName';
 import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
 import { NumberFieldSelectOptions } from './CreateField/NumberFieldSelectOptions';
+import { CreateFieldSelectOptions } from './CreateField/CreateFieldSelectOptions';
 
 export function CreateField({ table, close, cancel }) {
   const { mounted } = useMounted();
@@ -37,6 +38,7 @@ export function CreateField({ table, close, cancel }) {
   const [hasValidation, setHasValidation] = useState(false);
   const [isNullable, setIsNullable] = useState(true);
   const [isPii, setIsPii] = useState(false);
+  const [selectOptions, setSelectOptions] = useState([{ id: 0, value: '' }]);
 
   const isVirtual = columnType.nameId === 'magic_field';
 
@@ -145,6 +147,13 @@ export function CreateField({ table, close, cancel }) {
                 isDecimal={isDecimal}
               />
             </>
+          )}
+
+          {fieldType.name === FieldType.SINGLE_SELECT && (
+            <CreateFieldSelectOptions
+              options={selectOptions}
+              setOptions={setSelectOptions}
+            />
           )}
 
           <div className="my-4">

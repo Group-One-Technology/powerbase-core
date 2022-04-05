@@ -53,7 +53,7 @@ export function CreateFieldName({
       placeholder="e.g. first_name or firstName"
       value={fieldName}
       onChange={handleNameChange}
-      className="w-full"
+      className="my-4 w-full"
       showError={!fieldNameError.error?.message.includes('Still checking for existing field')}
       error={fieldNameError.error}
       caption={search.status === 'loading' && (
