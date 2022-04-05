@@ -27,7 +27,7 @@ export function SearchWeb({ value, onChange }) {
           onClick={handleClick}
         >
           <span className="sr-only">Search</span>
-          <SearchIcon className="block h-4 w-4" />
+          <SearchIcon className="block h-5 w-5" />
         </button>
       </Transition>
 

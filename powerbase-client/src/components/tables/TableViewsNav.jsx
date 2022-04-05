@@ -51,7 +51,7 @@ export function TableViewsNav() {
             </Popover.Root>
           )}
           {!!(records && totalRecords) && (
-            <p className="text-xs hidden lg:inline">
+            <p className="text-sm hidden lg:inline">
               {records.length} loaded out of {totalRecords}
             </p>
           )}

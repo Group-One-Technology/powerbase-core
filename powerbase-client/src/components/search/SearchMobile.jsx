@@ -18,7 +18,7 @@ export function SearchMobile({ value, onChange }) {
             )}
           >
             <span className="sr-only">Search</span>
-            <SearchIcon className="block h-4 w-4" />
+            <SearchIcon className="block h-5 w-5" />
           </Popover.Button>
           <Transition
             as={Fragment}

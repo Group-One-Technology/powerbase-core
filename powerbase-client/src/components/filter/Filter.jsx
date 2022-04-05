@@ -88,7 +88,7 @@ export function Filter() {
           <Popover.Button
             type="button"
             className={cn(
-              'inline-flex items-center px-1.5 py-1 border border-transparent text-xs font-medium rounded hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
+              'inline-flex items-center px-1.5 py-1 border border-transparent text-sm rounded hover:bg-gray-100 focus:outline-none focus:ring-2 ring-gray-500',
               open && 'ring-2',
               initialFilters?.filters?.length ? 'text-indigo-700' : 'text-gray-700',
             )}
