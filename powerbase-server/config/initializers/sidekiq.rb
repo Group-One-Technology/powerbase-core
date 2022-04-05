@@ -9,8 +9,11 @@ Sidekiq.configure_server do |config|
 
   config.death_handlers << ->(job, ex) do
     puts "Uh oh, #{job["class"]} #{job["jid"]} just died with error #{ex.message}."
-    Sentry.set_context("job_info", job)
-    Sentry.capture_exception(ex)
+
+    if ex.message != "Job killed by API"
+      Sentry.set_context("job_info", job)
+      Sentry.capture_exception(ex)
+    end
   end
 
   SidekiqUniqueJobs::Server.configure(config)
