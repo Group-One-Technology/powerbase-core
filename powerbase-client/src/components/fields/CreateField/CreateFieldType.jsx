@@ -28,7 +28,7 @@ export function CreateFieldType({ fieldType, setFieldType }) {
           type="button"
           key={option.id}
           onClick={() => handleSelectOption(option)}
-          className="w-full rounded-lg p-2 cursor-pointer flex items-center justify-between text-gray-900 bg-white ring-offset-2 ring-offset-indigo-300 ring-indigo-600 focus:outline-none focus:ring-2 hover:bg-indigo-500 hover:text-white"
+          className="w-full rounded-lg p-2 cursor-pointer flex items-center justify-between text-gray-900 bg-white ring-indigo-600 focus:outline-none focus:ring-2 hover:bg-indigo-500 hover:text-white"
         >
           <div className="flex items-center">
             <FieldTypeIcon
