@@ -1,5 +1,6 @@
-import { syncTableRecord } from '@lib/api/records';
 import { useEffect, useState } from 'react';
+import { syncTableRecord } from '@lib/api/records';
+import { useTableRecords } from '@models/TableRecords';
 
 export function useSyncRecord({
   tableId,
@@ -9,6 +10,7 @@ export function useSyncRecord({
   setRecords,
   includePii,
 }) {
+  const { mutate: mutateTableRecords } = useTableRecords();
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
@@ -32,6 +34,11 @@ export function useSyncRecord({
           const { has_synced, ...updatedData } = response;
 
           if (has_synced) {
+            const updatedRecords = records.map((curRecord) => (curRecord.doc_id === updatedData.doc_id
+              ? { ...curRecord, ...updatedData }
+              : curRecord
+            ));
+
             setRecord(record.map((item) => {
               const updatedItem = {
                 ...item,
@@ -41,10 +48,8 @@ export function useSyncRecord({
               return updatedItem;
             }));
 
-            setRecords(records.map((curRecord) => (curRecord.doc_id === updatedData.doc_id
-              ? { ...curRecord, ...updatedData }
-              : curRecord
-            )));
+            setRecords(updatedRecords);
+            mutateTableRecords(updatedRecords, false);
           }
 
           setIsSyncing(false);
