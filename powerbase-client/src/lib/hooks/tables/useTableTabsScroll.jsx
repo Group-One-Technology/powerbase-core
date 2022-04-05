@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 const SCROLL_OFFSET = 100;
 
@@ -6,7 +6,7 @@ export function useTableTabsScroll() {
   const tabsContainerEl = useRef();
   const activeTabEl = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     activeTabEl.current?.scrollIntoView({ behavior: 'smooth' });
 
     if (tabsContainerEl.current) {
