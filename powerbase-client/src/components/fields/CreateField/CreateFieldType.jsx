@@ -22,7 +22,7 @@ export function CreateFieldType({ fieldType, setFieldType }) {
   };
 
   return (
-    <div className="my-4 flex flex-col gap-2">
+    <div className="my-4 flex flex-col gap-0.5">
       {!fieldType && options.map((option) => (
         <button
           type="button"

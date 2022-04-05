@@ -75,6 +75,7 @@ export function CreateFieldAlias({
         </span>
       )}
       autoFocus
+      required
     />
   );
 }

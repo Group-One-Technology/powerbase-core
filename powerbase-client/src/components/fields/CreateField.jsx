@@ -41,14 +41,22 @@ export function CreateField({ table, close, cancel }) {
   const isVirtual = columnType.nameId === 'magic_field';
 
   const isDecimal = options?.type === 'Decimal';
-  const disabled = !!(!alias.length || aliasError.error
-    || !fieldType
-    || fieldNameError.error)
-    || dataType.length === 0;
+  const disabled = !!(aliasError.error || fieldNameError.error);
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     if (disabled || status === 'pending') return;
+
+    if (!fieldType) {
+      dispatch.rejected('Please select a field type below (e.g. Single Line Text, Long Text or etc.).');
+      return;
+    }
+
+    if (dataType.length === 0) {
+      dispatch.rejected('Data type is required for persistent fields (e.g. bool, text, numeric(5,2), etc.).');
+      return;
+    }
+
     dispatch.pending();
 
     try {
@@ -186,7 +194,6 @@ export function CreateField({ table, close, cancel }) {
               : 'cursor-pointer bg-indigo-600 hover:bg-indigo-500',
           )}
           loading={status === 'pending'}
-          disabled={disabled}
         >
           Add Field
         </Button>
