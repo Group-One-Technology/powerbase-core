@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PlusIcon } from '@heroicons/react/outline';
+import { PlusIcon, XIcon } from '@heroicons/react/outline';
+import { closestCenter, DndContext } from '@dnd-kit/core';
+import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { closestCenter, DndContext } from '@dnd-kit/core';
-import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
-function FieldItem({ field, fieldTypes }) {
+function FieldItem({ field, fieldTypes, remove }) {
   return (
     <SortableItem
       id={field.id}
@@ -34,6 +34,14 @@ function FieldItem({ field, fieldTypes }) {
         </div>
         <span className="pl-6 text-sm">{field.alias || field.name}</span>
       </div>
+      <button
+        type="button"
+        className="ml-2 mt-1 p-2 inline-block rounded text-gray-500 text-sm capitalize hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+        onClick={remove}
+      >
+        <XIcon className="h-4 w-4" />
+        <span className="sr-only">Remove Field</span>
+      </button>
     </SortableItem>
   );
 }
@@ -41,6 +49,7 @@ function FieldItem({ field, fieldTypes }) {
 FieldItem.propTypes = {
   field: PropTypes.object.isRequired,
   fieldTypes: PropTypes.array.isRequired,
+  remove: PropTypes.func.isRequired,
 };
 
 export function CreateTableFields({ fields, setFields }) {
@@ -59,6 +68,10 @@ export function CreateTableFields({ fields, setFields }) {
     }
   };
 
+  const handleRemoveField = (id) => {
+    setFields(fields.filter((item) => item.id !== id));
+  };
+
   return (
     <div className="my-4 mx-2">
       <h3 className="block text-sm font-medium text-gray-700 mb-2">Fields</h3>
@@ -70,6 +83,7 @@ export function CreateTableFields({ fields, setFields }) {
                 <FieldItem
                   key={field.id}
                   field={field}
+                  remove={() => handleRemoveField(field.id)}
                 />
               ))}
             </ul>
