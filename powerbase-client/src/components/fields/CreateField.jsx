@@ -109,6 +109,7 @@ export function CreateField({ table, close, cancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="p-4 text-sm text-gray-900" aria-busy={status === 'pending'}>
+      <h2 className="sr-only">Create Field</h2>
       {error && <ErrorAlert errors={error} />}
 
       <CreateFieldAlias
