@@ -150,14 +150,13 @@ export function CreateField({ table, close, cancel }) {
             </>
           )}
 
-          {!isVirtual && (
-            <CreateFieldName
-              tableId={table.id}
-              fieldName={fieldName}
-              setFieldName={setFieldName}
-              fieldNameError={fieldNameError}
-            />
-          )}
+          <CreateFieldName
+            tableId={table.id}
+            fieldName={fieldName}
+            setFieldName={setFieldName}
+            fieldNameError={fieldNameError}
+            isVirtual={isVirtual}
+          />
           <FieldDataTypeSelect
             tableName={table.name}
             fieldName={fieldName}
