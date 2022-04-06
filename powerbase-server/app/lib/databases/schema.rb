@@ -28,9 +28,3 @@ class Databases::Schema
     end
   end
 end
-
-
-fields = [
-  { name: "id", data_type: "integer", is_primary_key: true },
-  { name: "description", data_type: "text" }
-]
