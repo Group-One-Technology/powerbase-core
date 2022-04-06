@@ -57,7 +57,6 @@ export function CreateTableModal({ open, setOpen }) {
         </div>
         <form className="mt-4 flex-1 py-4 px-6 flex flex-col" onSubmit={submit}>
           <Dialog.Title className="sr-only">Create Table</Dialog.Title>
-
           <CreateTableAlias
             baseId={base.id}
             alias={alias}
@@ -72,16 +71,13 @@ export function CreateTableModal({ open, setOpen }) {
             options={TABLE_TYPE}
             className="mt-4"
           />
-
-          {!isVirtual && (
-            <CreateTableName
-              baseId={base.id}
-              tableName={tableName}
-              setTableName={setTableName}
-              tableNameError={tableNameError}
-            />
-          )}
-
+          <CreateTableName
+            baseId={base.id}
+            tableName={tableName}
+            setTableName={setTableName}
+            tableNameError={tableNameError}
+            isVirtual={isVirtual}
+          />
           <CreateTableFields
             fields={fields}
             setFields={setFields}

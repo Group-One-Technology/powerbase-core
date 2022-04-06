@@ -16,6 +16,7 @@ export function CreateTableName({
   tableName,
   setTableName,
   tableNameError,
+  isVirtual,
 }) {
   const debouncedGetTableByName = useConstant(() => AwesomeDebouncePromise(getTableByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
@@ -43,6 +44,8 @@ export function CreateTableName({
   }, [search.status]);
 
   const handleNameChange = (evt) => setTableName(evt.target.value);
+
+  if (isVirtual) return null;
 
   return (
     <Input
@@ -78,4 +81,5 @@ CreateTableName.propTypes = {
   tableName: PropTypes.string,
   setTableName: PropTypes.func.isRequired,
   tableNameError: PropTypes.any,
+  isVirtual: PropTypes.bool,
 };
