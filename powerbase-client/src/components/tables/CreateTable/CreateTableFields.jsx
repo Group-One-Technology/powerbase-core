@@ -20,7 +20,7 @@ function FieldItem({ field, fieldTypes }) {
         component: (
           <button
             type="button"
-            className="inline-flex items-center px-1 py-2 border border-transparent text-xs font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 cursor-grabbing"
+            className="inline-flex items-center px-1 py-2 border border-transparent text-xs font-medium rounded cursor-grabbing text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <span className="sr-only">Reorder</span>
             <GripVerticalIcon className="h-3 w-3 text-gray-500" />
