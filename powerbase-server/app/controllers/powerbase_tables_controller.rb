@@ -5,6 +5,8 @@ class PowerbaseTablesController < ApplicationController
 
   schema(:index) do
     required(:database_id).value(:integer)
+    optional(:name).value(:string)
+    optional(:alias).value(:string)
   end
 
   schema(:show, :alias, :hide, :drop, :clear_error_logs, :logs, :update) do
@@ -54,6 +56,17 @@ class PowerbaseTablesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:database_id])
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:view_base, @database)
+
+    if safe_params[:name] != nil || safe_params[:alias] != nil
+      @table = PowerbaseTable.find_by(
+        "(alias = ? OR name = ?) and powerbase_database_id = ?",
+        safe_params[:alias],
+        (safe_params[:name] || safe_params[:alias].snakecase),
+        @database.id
+      )
+      render json: format_json(@table)
+      return
+    end
 
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 

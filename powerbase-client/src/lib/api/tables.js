@@ -1,3 +1,4 @@
+import queryString from 'query-string';
 import { securedApi, isResponseSuccess } from './index';
 
 export async function getTable({ id }) {
@@ -40,6 +41,13 @@ export async function dropTable({ tableId }) {
 
 export async function getTables({ databaseId }) {
   const response = await securedApi.get(`/databases/${databaseId}/tables`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function getTableByName({ databaseId, alias, name }) {
+  const params = queryString.stringify({ alias, name });
+  const response = await securedApi.get(`databases/${databaseId}/tables?${params}`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
