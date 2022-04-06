@@ -124,6 +124,11 @@ class Fields::Creator
       if field.save
         if !field.is_virtual && new_field
           table_schema = Tables::Schema.new table
+
+          if database.postgresql? && field.powerbase_field_type.data_type == "enums"
+            table_schema.create_enum(field.db_type, field_options[:enum_values])
+          end
+
           table_schema.add_column(field.name, field.db_type)
         end
 
