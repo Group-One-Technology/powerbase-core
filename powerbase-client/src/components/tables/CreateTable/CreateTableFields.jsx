@@ -2,14 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { PlusIcon, XIcon } from '@heroicons/react/outline';
 import { closestCenter, DndContext } from '@dnd-kit/core';
-import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 
+import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';
 
 function FieldItem({ field, fieldTypes, remove }) {
+  const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
+
   return (
     <SortableItem
       id={field.id}
@@ -30,9 +33,12 @@ function FieldItem({ field, fieldTypes, remove }) {
     >
       <div className="relative py-1 flex-1 flex items-center">
         <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
-          <FieldTypeIcon isPrimaryKey={field.isPrimaryKey} typeId={field.fieldTypeId} fieldTypes={fieldTypes} />
+          <FieldTypeIcon isPrimaryKey={field.isPrimaryKey} fieldType={fieldType} />
         </div>
         <span className="pl-6 text-sm">{field.alias || field.name}</span>
+      </div>
+      <div className="flex-1 text-sm text-gray-700">
+        {fieldType.name}
       </div>
       <button
         type="button"
@@ -53,6 +59,7 @@ FieldItem.propTypes = {
 };
 
 export function CreateTableFields({ fields, setFields }) {
+  const { data: fieldTypes } = useFieldTypes();
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
@@ -73,7 +80,7 @@ export function CreateTableFields({ fields, setFields }) {
   };
 
   return (
-    <div className="my-4 mx-2">
+    <div className="my-4">
       <h3 className="block text-sm font-medium text-gray-700 mb-2">Fields</h3>
       <div className="flex flex-col gap-1">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
@@ -83,6 +90,7 @@ export function CreateTableFields({ fields, setFields }) {
                 <FieldItem
                   key={field.id}
                   field={field}
+                  fieldTypes={fieldTypes}
                   remove={() => handleRemoveField(field.id)}
                 />
               ))}
