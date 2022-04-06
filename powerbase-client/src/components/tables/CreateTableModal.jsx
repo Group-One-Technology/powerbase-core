@@ -14,6 +14,7 @@ import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { CreateTableAlias } from './CreateTable/CreateTableAlias';
+import { CreateTableName } from './CreateTable/CreateTableName';
 
 export function CreateTableModal({ open, setOpen }) {
   const { data: base } = useBase();
@@ -22,7 +23,9 @@ export function CreateTableModal({ open, setOpen }) {
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [tableType, setTableType] = useState(TABLE_TYPE[0]);
+
   const disabled = false;
+  const isVirtual = tableType.nameId === 'magic_table';
 
   if (!base || !fieldTypes) return null;
 
@@ -58,6 +61,15 @@ export function CreateTableModal({ open, setOpen }) {
             options={TABLE_TYPE}
             className="my-6"
           />
+
+          {!isVirtual && (
+            <CreateTableName
+              baseId={base.id}
+              tableName={tableName}
+              setTableName={setTableName}
+              tableNameError={tableNameError}
+            />
+          )}
 
           <div className="mt-auto mx-3">
             <Button
