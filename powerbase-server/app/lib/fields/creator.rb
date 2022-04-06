@@ -132,7 +132,9 @@ class Fields::Creator
           table_schema.add_column(field.name, field.db_type)
         end
 
-        if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
+        if field.powerbase_field_type.data_type == "enums" &&
+          ((database.postgresql? && field_options[:enum_values] != nil) ||
+            (database.mysql2? && field_options[:db_type] != nil))
           add_field_select_options
         end
 

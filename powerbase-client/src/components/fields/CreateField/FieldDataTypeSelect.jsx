@@ -15,6 +15,7 @@ export function FieldDataTypeSelect({
   dataType,
   setDataType,
   isDecimal,
+  isVirtual,
 }) {
   const [option, setOption] = useState();
   const [options, setOptions] = useState(COLUMN_DATA_TYPES[fieldTypeName]);
@@ -62,6 +63,8 @@ export function FieldDataTypeSelect({
       setDataType(hasPrecision ? 'numeric' : 'integer');
     }
   }, [hasPrecision]);
+
+  if (isVirtual) return null;
 
   return (
     <Listbox value={option} onChange={handleDataTypeOptionChange}>
@@ -128,4 +131,5 @@ FieldDataTypeSelect.propTypes = {
   dataType: PropTypes.string,
   setDataType: PropTypes.func.isRequired,
   isDecimal: PropTypes.bool,
+  isVirtual: PropTypes.bool,
 };

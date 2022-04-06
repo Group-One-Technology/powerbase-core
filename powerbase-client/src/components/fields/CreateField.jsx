@@ -61,9 +61,18 @@ export function CreateField({ table, close, cancel }) {
 
     const selectOptionValues = selectOptions.map((item) => item.value).filter((item) => item);
 
-    if (fieldType.name === FieldType.SINGLE_SELECT && selectOptionValues.length === 0) {
-      dispatch.rejected('There must be at least 1 select option.');
-      return;
+    if (fieldType.name === FieldType.SINGLE_SELECT) {
+      if (selectOptionValues.length === 0) {
+        dispatch.rejected('There must be at least 1 select option.');
+        return;
+      }
+
+      const duplicateOptionValues = selectOptionValues.filter((item, index) => selectOptionValues.indexOf(item) !== index);
+
+      if (duplicateOptionValues.length) {
+        dispatch.rejected(`Found duplicate select option values: ${duplicateOptionValues.join(', ')}`);
+        return;
+      }
     }
 
     dispatch.pending();
@@ -140,24 +149,24 @@ export function CreateField({ table, close, cancel }) {
               )}
             </>
           )}
+
           {!isVirtual && (
-            <>
-              <CreateFieldName
-                tableId={table.id}
-                fieldName={fieldName}
-                setFieldName={setFieldName}
-                fieldNameError={fieldNameError}
-              />
-              <FieldDataTypeSelect
-                tableName={table.name}
-                fieldName={fieldName}
-                fieldTypeName={fieldType.name}
-                dataType={dataType}
-                setDataType={setDataType}
-                isDecimal={isDecimal}
-              />
-            </>
+            <CreateFieldName
+              tableId={table.id}
+              fieldName={fieldName}
+              setFieldName={setFieldName}
+              fieldNameError={fieldNameError}
+            />
           )}
+          <FieldDataTypeSelect
+            tableName={table.name}
+            fieldName={fieldName}
+            fieldTypeName={fieldType.name}
+            dataType={dataType}
+            setDataType={setDataType}
+            isDecimal={isDecimal}
+            isVirtual={isVirtual}
+          />
 
           {fieldType.name === FieldType.SINGLE_SELECT && (
             <CreateFieldSelectOptions
@@ -207,7 +216,7 @@ export function CreateField({ table, close, cancel }) {
         <Button
           type="submit"
           className={cn(
-            'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+            'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             disabled
               ? 'cursor-not-allowed bg-gray-300 hover:bg-gray-400'
               : 'cursor-pointer bg-indigo-600 hover:bg-indigo-500',

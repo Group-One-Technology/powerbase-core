@@ -102,6 +102,7 @@ class PowerbaseFieldsController < ApplicationController
       is_virtual: safe_params[:is_virtual],
       db_type: safe_params[:db_type],
       primary_key: safe_params[:is_primary_key],
+      # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
       enum_values: safe_params[:select_options],
       options: safe_params[:options],
     }], @table, new_field: true)
