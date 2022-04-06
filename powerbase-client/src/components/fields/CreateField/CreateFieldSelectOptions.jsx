@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@components/ui/Button';
 import { PlusIcon, XIcon } from '@heroicons/react/outline';
+import { camelToSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 
 function OptionInput({ option, remove, update }) {
   const handleUpdateInput = (evt) => {
-    update(evt.target.value);
+    update(camelToSnakeCase(evt.target.value));
   };
 
   return (
@@ -16,7 +17,7 @@ function OptionInput({ option, remove, update }) {
         type="text"
         value={option.value}
         aria-label={`Select option #${option.id + 1} name`}
-        placeholder="e.g. In Progress, Finished, Paid, etc."
+        placeholder="e.g. in_progress, finished, paid, etc."
         onChange={handleUpdateInput}
         className="px-3 py-2 block w-full rounded-md shadow-sm text-sm placeholder-gray-400 border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
       />

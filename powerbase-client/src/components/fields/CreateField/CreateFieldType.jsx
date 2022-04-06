@@ -2,16 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { XCircleIcon } from '@heroicons/react/solid';
 
+import { useBase } from '@models/Base';
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldType } from '@lib/constants/field-types';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
+import { DatabaseType } from '@lib/constants/bases';
 
 const UNSUPPORTED_DATA_TYPES = [FieldType.MULTIPLE_SELECT, FieldType.PLUGIN, FieldType.OTHERS];
 
 export function CreateFieldType({ fieldType, setFieldType }) {
+  const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
 
-  const options = fieldTypes.filter((item) => !UNSUPPORTED_DATA_TYPES.includes(item.name));
+  let options = fieldTypes.filter((item) => !UNSUPPORTED_DATA_TYPES.includes(item.name));
+
+  if (base?.adapter !== DatabaseType.POSTGRESQL) {
+    options = options.filter((item) => item.name === FieldType.SINGLE_SELECT);
+  }
 
   const handleSelectOption = (option) => {
     setFieldType(option);

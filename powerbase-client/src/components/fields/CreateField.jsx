@@ -59,6 +59,13 @@ export function CreateField({ table, close, cancel }) {
       return;
     }
 
+    const selectOptionValues = selectOptions.map((item) => item.value).filter((item) => item);
+
+    if (fieldType.name === FieldType.SINGLE_SELECT && selectOptionValues.length === 0) {
+      dispatch.rejected('There must be at least 1 select option.');
+      return;
+    }
+
     dispatch.pending();
 
     try {
@@ -72,6 +79,7 @@ export function CreateField({ table, close, cancel }) {
         isNullable,
         isPii,
         hasValidation,
+        selectOptions: selectOptionValues,
         options: options?.currency && fieldType.name === FieldType.CURRENCY
           ? { style: 'currency', currency: options.currency }
           : options && options.precision && options.type === 'Decimal'
@@ -141,7 +149,9 @@ export function CreateField({ table, close, cancel }) {
                 fieldNameError={fieldNameError}
               />
               <FieldDataTypeSelect
-                fieldType={fieldType.name}
+                tableName={table.name}
+                fieldName={fieldName}
+                fieldTypeName={fieldType.name}
                 dataType={dataType}
                 setDataType={setDataType}
                 isDecimal={isDecimal}
