@@ -73,8 +73,13 @@ class PowerbaseFieldsController < ApplicationController
     current_user.can?(:view_table, @table)
 
     if safe_params[:name] != nil || safe_params[:alias] != nil
-      @field = PowerbaseField.find_by("(alias = ? OR name = ?) and powerbase_table_id = ?", safe_params[:alias], (safe_params[:name] || safe_params[:alias].snakecase), @table.id)
-      render json: @field
+      @field = PowerbaseField.find_by(
+        "(alias = ? OR name = ?) and powerbase_table_id = ?",
+        safe_params[:alias],
+        (safe_params[:name] || safe_params[:alias].snakecase),
+        @table.id
+      )
+      render json: format_json(@field)
       return
     end
 
