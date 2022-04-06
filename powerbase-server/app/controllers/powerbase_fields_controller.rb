@@ -79,7 +79,7 @@ class PowerbaseFieldsController < ApplicationController
         (safe_params[:name] || safe_params[:alias].snakecase),
         @table.id
       )
-      render json: format_json(@field)
+      render json: { id: @field&.id }
       return
     end
 
