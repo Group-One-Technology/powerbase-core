@@ -16,6 +16,7 @@ export function CreateFieldName({
   fieldName,
   setFieldName,
   fieldNameError,
+  isVirtual,
 }) {
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
@@ -43,6 +44,8 @@ export function CreateFieldName({
   }, [search.status]);
 
   const handleNameChange = (evt) => setFieldName(evt.target.value);
+
+  if (isVirtual) return null;
 
   return (
     <Input
@@ -78,4 +81,5 @@ CreateFieldName.propTypes = {
   fieldName: PropTypes.string,
   setFieldName: PropTypes.func.isRequired,
   fieldNameError: PropTypes.any,
+  isVirtual: PropTypes.bool,
 };
