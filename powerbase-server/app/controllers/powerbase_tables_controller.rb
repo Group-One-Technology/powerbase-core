@@ -64,7 +64,7 @@ class PowerbaseTablesController < ApplicationController
         (safe_params[:name] || safe_params[:alias].snakecase),
         @database.id
       )
-      render json: { id: @table&.id }
+      render json: @table ? { id: @table.id } : nil
       return
     end
 
