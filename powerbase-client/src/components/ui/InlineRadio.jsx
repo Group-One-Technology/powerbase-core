@@ -43,7 +43,7 @@ export function InlineRadio({
       >
         {options.map((option) => {
           let component = (
-            <div className="flex flex-col justify-center text-left">
+            <div className="flex flex-col text-left">
               <RadioGroup.Label as="p" className={cn('text-sm font-medium text-gray-900', option.classNames?.label)}>
                 {option.name}
               </RadioGroup.Label>

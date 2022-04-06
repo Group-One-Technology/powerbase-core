@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
 
 import { useBase } from '@models/Base';
 import { useFieldTypes } from '@models/FieldTypes';
-
 import { useValidState } from '@lib/hooks/useValidState';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { TABLE_TYPE } from '@lib/constants/table';
+
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
+import { InlineRadio } from '@components/ui/InlineRadio';
 import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 
 export function CreateTableModal({ open, setOpen }) {
   const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
+
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
+  const [tableType, setTableType] = useState(TABLE_TYPE[0]);
   const disabled = false;
 
   if (!base || !fieldTypes) return null;
@@ -47,6 +51,14 @@ export function CreateTableModal({ open, setOpen }) {
             aliasError={aliasError}
             setTableName={setTableName}
           />
+          <InlineRadio
+            aria-label="Table Type"
+            value={tableType}
+            setValue={setTableType}
+            options={TABLE_TYPE}
+            className="my-6"
+          />
+
           <div className="mt-auto mx-3">
             <Button
               type="submit"
