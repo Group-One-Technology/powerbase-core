@@ -4,6 +4,7 @@ export const TABLE_TYPE = [
     descriptionId: 'magic_table_description',
     name: 'Magic Table',
     description: 'Accessible thru powerbase but will not affect your current database.',
+    disabled: true,
   },
   {
     nameId: 'persistent_table',
