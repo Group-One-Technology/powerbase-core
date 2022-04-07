@@ -57,7 +57,7 @@ export function CreateTableName({
       value={tableName}
       onChange={handleNameChange}
       className="my-4 w-full"
-      showError={!tableNameError.error?.message.includes('Still checking for existing field')}
+      showError={!tableNameError.error?.message.includes('Still checking for existing table')}
       error={tableNameError.error}
       caption={search.status === 'loading' && (
         <span className="flex">
@@ -65,7 +65,7 @@ export function CreateTableName({
           Checking if SQL table name already exists...
         </span>
       )}
-      success={tableNameError.length > 0 && search.result == null && search.status === 'success' && (
+      success={tableName.length > 0 && search.result == null && search.status === 'success' && (
         <span className="flex">
           <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />
           SQL table name is available.
