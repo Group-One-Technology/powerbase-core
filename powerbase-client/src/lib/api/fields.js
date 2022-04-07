@@ -93,7 +93,7 @@ export async function addField({
   selectOptions,
   options,
 }) {
-  const response = await securedApi.post(`/tables/${tableId}/field`, {
+  const response = await securedApi.post(`/tables/${tableId}/fields`, {
     name,
     alias,
     isNullable,

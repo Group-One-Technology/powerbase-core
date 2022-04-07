@@ -91,7 +91,7 @@ class PowerbaseFieldsController < ApplicationController
       .map {|item| format_json(item)}
   end
 
-  # POST /tables/:id/field
+  # POST /tables/:id/fields
   def create
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
