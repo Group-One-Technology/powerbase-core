@@ -41,7 +41,7 @@ class Databases::Syncer
 
       unmigrated_tables.each_with_index do |table_name, index|
         # Create powerbase table
-        table_creator = Tables::Creator.new table_name, index + 1, powerbase_db
+        table_creator = Tables::Creator.new table_name, powerbase_db, order: index + 1
         table_creator.save
         powerbase_table = table_creator.object
 

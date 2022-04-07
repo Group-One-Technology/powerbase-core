@@ -78,7 +78,7 @@ module Powerbase
       when "CREATE TABLE"
         puts "#{Time.now} -- New table named #{table_name} detected."
         # Create powerbase table
-        table_creator = Tables::Creator.new table_name, powerbase_db.tables.length + 1, powerbase_db
+        table_creator = Tables::Creator.new table_name, powerbase_db, order: powerbase_db.tables.length + 1
         table_creator.save
         powerbase_table = table_creator.object
 

@@ -2,10 +2,11 @@ include SequelHelper
 include PusherHelper
 
 class Tables::Creator
-  attr_accessor :table_name, :order, :database, :table, :base_migration
+  attr_accessor :table_name, :table_alias, :order, :database, :table, :base_migration
 
-  def initialize(table_name, order, database)
+  def initialize(table_name, database, order: nil, table_alias: nil)
     @table_name = table_name
+    @table_alias = table_alias || table_name.to_s.titlecase
     @order = order
     @database = database
     @base_migration = database.base_migration
@@ -18,7 +19,7 @@ class Tables::Creator
       powerbase_database_id: @database.id,
     ) || PowerbaseTable.new
     table.name = table_name
-    table.alias = table_name.to_s.titlecase
+    table.alias = table_alias
     table.powerbase_database_id = database.id
     table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
     table.order = table.order || order
