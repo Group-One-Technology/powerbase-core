@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { PencilAltIcon, PlusIcon, XIcon } from '@heroicons/react/outline';
+import {
+  PencilAltIcon,
+  PlusIcon,
+  SparklesIcon,
+  XIcon,
+} from '@heroicons/react/outline';
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
@@ -44,10 +49,15 @@ function FieldItem({
           <FieldTypeIcon isPrimaryKey={field.isPrimaryKey} fieldType={fieldType} />
         </div>
         <span className="pl-6 text-sm">{field.alias || field.name}</span>
+        <span className="pl-6 text-xs">
+          ({fieldType.name})
+        </span>
       </div>
-      <div className="flex-1 text-sm text-gray-700">
-        {fieldType.name}
-      </div>
+      {field.isVirtual && (
+        <SparklesIcon
+          className="h-5 w-5 ml-auto cursor-auto select-none text-indigo-500"
+        />
+      )}
       <div className="ml-auto flex gap-0.5">
         {((unsetAsPrimaryKey || setAsPrimaryKey) && !field.isVirtual) && (
           <button

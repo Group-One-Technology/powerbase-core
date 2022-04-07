@@ -6,28 +6,34 @@ import { Dialog } from '@headlessui/react';
 
 import { useBase } from '@models/Base';
 import { useFieldTypes } from '@models/FieldTypes';
+import { useCurrentView } from '@models/views/CurrentTableView';
 import { useValidState } from '@lib/hooks/useValidState';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { TABLE_TYPE } from '@lib/constants/table';
 import { useData } from '@lib/hooks/useData';
 import { FieldType } from '@lib/constants/field-types';
+import { createTable } from '@lib/api/tables';
+import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
+import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 import { CreateTableName } from './CreateTable/CreateTableName';
 import { CreateTableFields } from './CreateTable/CreateTableFields';
 
 export function CreateTableModal({ open, setOpen }) {
+  const { mounted } = useMounted();
   const { data: base } = useBase();
-  const { status } = useData();
+  const { status, error, dispatch } = useData();
   const { data: fieldTypes } = useFieldTypes();
+  const { mutateTables } = useCurrentView();
 
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
-  const [tableType, setTableType] = useState(TABLE_TYPE[0]);
+  const [tableType, setTableType] = useState(TABLE_TYPE[1]);
   const [fields, setFields] = useState([{
     id: 0,
     name: 'id',
@@ -42,15 +48,49 @@ export function CreateTableModal({ open, setOpen }) {
     options: null,
   }]);
 
-  const disabled = false;
+  const disabled = !!(aliasError.error || tableNameError.error);
   const isVirtual = tableType.nameId === 'magic_table';
 
   if (!base || !fieldTypes) return null;
 
   const cancel = () => setOpen(false);
 
+  console.log({ fields });
+
   const submit = async (evt) => {
     evt.preventDefault();
+    if (disabled || status === 'pending') return;
+
+    if (fields.length === 0) {
+      dispatch.rejected('There must be at least one field.');
+      return;
+    }
+
+    const primaryKeys = fields.filter((item) => item.isPrimaryKey);
+
+    if (primaryKeys.length === 0) {
+      dispatch.rejected('There must be at least one primary key field.');
+      return;
+    }
+
+    dispatch.pending();
+
+    try {
+      const data = await createTable({
+        databaseId: base.id,
+        name: tableName,
+        alias,
+        isVirtual,
+        fields,
+      });
+      mutateTables();
+      mounted(() => {
+        dispatch.resolved(data);
+        setOpen(false);
+      });
+    } catch (err) {
+      dispatch.rejected(err.response.data.exception || err.response.data.error);
+    }
   };
 
   return (
@@ -68,6 +108,8 @@ export function CreateTableModal({ open, setOpen }) {
         </div>
         <form className="mt-4 flex-1 py-4 px-6 flex flex-col" onSubmit={submit}>
           <Dialog.Title className="sr-only">Create Table</Dialog.Title>
+          {error && <ErrorAlert errors={error} />}
+
           <CreateTableAlias
             baseId={base.id}
             alias={alias}
@@ -112,10 +154,12 @@ export function CreateTableModal({ open, setOpen }) {
               type="submit"
               className={cn(
                 'inline-flex items-center justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm',
-                disabled
+                !disabled
                   ? 'bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 focus:ring-indigo-500'
                   : 'bg-gray-200 text-gray-900 cursor-not-allowed hover:bg-gray-100 focus:bg-gray-100',
               )}
+              loading={status === 'pending'}
+              disabled={disabled}
             >
               Create Table
             </Button>

@@ -37,6 +37,7 @@ export function CreateTableAddField({
             cancel={cancel}
             update={fieldId != null ? update : null}
             submit={fieldId != null ? null : submit}
+            form={false}
           />
         </div>
       </div>
