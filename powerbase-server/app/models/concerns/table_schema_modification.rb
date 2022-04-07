@@ -4,7 +4,17 @@ module TableSchemaModification
 
   def drop
     begin
+      field_ids = self.actual_fields.map(&:id)
+      select_options = FieldSelectOption.where(powerbase_field_id: field_ids).map {|item| item.name.to_sym}
+
       _sequel.drop_table(self.name.to_sym)
+
+      if select_options.length > 0
+        select_options.map do |enum|
+          _sequel.drop_enum(enum)
+        end
+      end
+
       self.remove
     rescue Sequel::DatabaseError => ex
       if ex.message.include?("PG::UndefinedTable")
