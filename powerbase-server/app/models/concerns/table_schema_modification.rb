@@ -3,8 +3,16 @@ module TableSchemaModification
   extend ActiveSupport::Concern
 
   def drop
-    _sequel.drop_table(self.name.to_sym)
-    self.remove
+    begin
+      _sequel.drop_table(self.name.to_sym)
+      self.remove
+    rescue Sequel::DatabaseError => ex
+      if ex.message.include?("PG::UndefinedTable")
+        self.remove
+      else
+        raise ex
+      end
+    end
   end
 
   def update_primary_keys(primary_keys = [])
