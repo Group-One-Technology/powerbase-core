@@ -13,6 +13,7 @@ import { useMounted } from '@lib/hooks/useMounted';
 import { addField } from '@lib/api/fields';
 import { useData } from '@lib/hooks/useData';
 
+import { Form } from '@components/ui/Form';
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { Checkbox } from '@components/ui/Checkbox';
@@ -32,6 +33,7 @@ export function CreateField({
   submit,
   close,
   cancel,
+  form = true,
 }) {
   const { mounted } = useMounted();
   const { status, error, dispatch } = useData();
@@ -140,9 +142,9 @@ export function CreateField({
 
     try {
       const data = await addField(payload);
+      mutateViewFields();
       mounted(() => {
         dispatch.resolved(data);
-        mutateViewFields();
         if (close) close();
       });
     } catch (err) {
@@ -151,7 +153,12 @@ export function CreateField({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 text-sm text-gray-900" aria-busy={status === 'pending'}>
+    <Form
+      form={form}
+      onSubmit={form ? handleSubmit : undefined}
+      className="p-4 text-sm text-gray-900"
+      aria-busy={status === 'pending'}
+    >
       <h2 className="sr-only">Create Field</h2>
       {error && <ErrorAlert errors={error} />}
 
@@ -261,7 +268,7 @@ export function CreateField({
           Cancel
         </button>
         <Button
-          type="submit"
+          type={form ? 'submit' : 'button'}
           className={cn(
             'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             disabled
@@ -269,11 +276,12 @@ export function CreateField({
               : 'cursor-pointer bg-indigo-600 hover:bg-indigo-500',
           )}
           loading={status === 'pending'}
+          onClick={!form ? handleSubmit : undefined}
         >
           {update ? 'Update Field' : 'Add Field'}
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 
@@ -285,4 +293,5 @@ CreateField.propTypes = {
   update: PropTypes.func,
   close: PropTypes.func,
   cancel: PropTypes.func.isRequired,
+  form: PropTypes.bool,
 };
