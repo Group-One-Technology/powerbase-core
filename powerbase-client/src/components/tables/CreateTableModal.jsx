@@ -55,8 +55,6 @@ export function CreateTableModal({ open, setOpen }) {
 
   const cancel = () => setOpen(false);
 
-  console.log({ fields });
-
   const submit = async (evt) => {
     evt.preventDefault();
     if (disabled || status === 'pending') return;
