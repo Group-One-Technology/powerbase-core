@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { PlusIcon, XIcon } from '@heroicons/react/outline';
+import { PencilAltIcon, PlusIcon, XIcon } from '@heroicons/react/outline';
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
@@ -11,7 +11,12 @@ import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';
 import { CreateTableAddField } from './CreateTableAddField';
 
-function FieldItem({ field, fieldTypes, remove }) {
+function FieldItem({
+  field,
+  fieldTypes,
+  update,
+  remove,
+}) {
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
   return (
@@ -41,14 +46,24 @@ function FieldItem({ field, fieldTypes, remove }) {
       <div className="flex-1 text-sm text-gray-700">
         {fieldType.name}
       </div>
-      <button
-        type="button"
-        className="ml-2 mt-1 p-2 inline-block rounded text-gray-500 text-sm capitalize hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
-        onClick={remove}
-      >
-        <XIcon className="h-4 w-4" />
-        <span className="sr-only">Remove Field</span>
-      </button>
+      <div className="ml-auto gap-0.5">
+        <button
+          type="button"
+          className="p-2 inline-block rounded text-gray-500 text-sm capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+          onClick={update}
+        >
+          <PencilAltIcon className="h-4 w-4" />
+          <span className="sr-only">Edit Field</span>
+        </button>
+        <button
+          type="button"
+          className="p-2 inline-block rounded text-gray-500 text-sm capitalize hover:text-red-600 hover:bg-red-200 focus:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+          onClick={remove}
+        >
+          <XIcon className="h-4 w-4" />
+          <span className="sr-only">Remove Field</span>
+        </button>
+      </div>
     </SortableItem>
   );
 }
@@ -57,6 +72,7 @@ FieldItem.propTypes = {
   field: PropTypes.object.isRequired,
   fieldTypes: PropTypes.array.isRequired,
   remove: PropTypes.func.isRequired,
+  update: PropTypes.func.isRequired,
 };
 
 export function CreateTableFields({
@@ -69,6 +85,7 @@ export function CreateTableFields({
 
   const [count, setCount] = useState(1);
   const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
+  const [selectedFieldId, setSelectedFieldId] = useState(null);
 
   const sensors = useSensors();
 
@@ -89,10 +106,25 @@ export function CreateTableFields({
     setFields(fields.filter((item) => item.id !== id));
   };
 
-  const handleAddField = () => setAddFieldModalOpen(true);
+  const handleUpdateField = (id) => {
+    setSelectedFieldId(id);
+    setAddFieldModalOpen(true);
+  };
 
-  const handleSubmitAddField = (payload) => {
-    setFields((items) => [...items, { ...payload, id: count }]);
+  const handleAddField = () => {
+    setSelectedFieldId(null);
+    setAddFieldModalOpen(true);
+  };
+
+  const handleSubmitUpdateField = (payload) => {
+    setFields(fields.map((item) => (item.id === payload.id
+      ? payload
+      : item)));
+    setAddFieldModalOpen(false);
+  };
+
+  const handleSubmitField = (payload) => {
+    setFields([...fields, { id: count, ...payload }]);
     setCount((val) => val + 1);
     setAddFieldModalOpen(false);
   };
@@ -109,6 +141,7 @@ export function CreateTableFields({
                   key={field.id}
                   field={field}
                   fieldTypes={fieldTypes}
+                  update={() => handleUpdateField(field.id)}
                   remove={() => handleRemoveField(field.id)}
                 />
               ))}
@@ -127,11 +160,13 @@ export function CreateTableFields({
 
       <CreateTableAddField
         tableName={tableName}
+        fieldId={selectedFieldId}
         hasPrimaryKey={primaryKeys?.length > 0}
         fields={fields}
         open={addFieldModalOpen}
         setOpen={setAddFieldModalOpen}
-        submit={handleSubmitAddField}
+        update={handleSubmitUpdateField}
+        submit={handleSubmitField}
       />
     </div>
   );

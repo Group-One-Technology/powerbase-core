@@ -13,6 +13,7 @@ const DEBOUNCED_TIMEOUT = 300; // 300ms
 
 export function CreateFieldName({
   tableId,
+  fieldId,
   fields,
   fieldName,
   setFieldName,
@@ -22,14 +23,14 @@ export function CreateFieldName({
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
     async (abortSignal, id, text) => {
-      if (!id || text.length === 0) return null;
+      if (id == null || text.length === 0) return null;
       return debouncedGetFieldByName({ tableId: id, name: fieldName }, abortSignal);
     },
     [tableId, fieldName],
   );
 
   useEffect(() => {
-    if (!tableId) return;
+    if (tableId == null) return;
 
     if (search.status === 'success' && search.result?.id != null) {
       if (!fieldNameError.error) {
@@ -48,7 +49,7 @@ export function CreateFieldName({
 
   useEffect(() => {
     if (tableId) return;
-    const existingField = fields?.find((item) => item.name === fieldName);
+    const existingField = fields?.find((item) => item.id !== fieldId && item.name === fieldName);
 
     if (existingField) {
       fieldNameError.setError(new Error(`Search Error: Field with column name of "${fieldName}" already exists`));
@@ -92,6 +93,7 @@ export function CreateFieldName({
 
 CreateFieldName.propTypes = {
   tableId: PropTypes.number,
+  fieldId: PropTypes.number,
   fields: PropTypes.array,
   fieldName: PropTypes.string,
   setFieldName: PropTypes.func.isRequired,

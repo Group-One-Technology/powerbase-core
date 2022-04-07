@@ -14,6 +14,7 @@ const DEBOUNCED_TIMEOUT = 300; // 300ms
 
 export function CreateFieldAlias({
   tableId,
+  fieldId,
   fields,
   alias,
   setAlias,
@@ -23,14 +24,14 @@ export function CreateFieldAlias({
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
     async (abortSignal, id, text) => {
-      if (!id || text.length === 0) return null;
+      if (id == null || text.length === 0) return null;
       return debouncedGetFieldByName({ tableId: id, alias: text }, abortSignal);
     },
     [tableId, alias],
   );
 
   useEffect(() => {
-    if (!tableId) return;
+    if (tableId == null) return;
 
     if (search.status === 'success' && search.result?.id != null) {
       if (!aliasError.error) {
@@ -49,7 +50,7 @@ export function CreateFieldAlias({
 
   useEffect(() => {
     if (tableId) return;
-    const existingField = fields?.find((item) => item.name === toSnakeCase(alias) || item.alias === alias);
+    const existingField = fields?.find((item) => item.id !== fieldId && (item.name === toSnakeCase(alias) || item.alias === alias));
 
     if (existingField) {
       aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
@@ -96,6 +97,7 @@ export function CreateFieldAlias({
 
 CreateFieldAlias.propTypes = {
   tableId: PropTypes.number,
+  fieldId: PropTypes.number,
   fields: PropTypes.array,
   alias: PropTypes.string,
   setAlias: PropTypes.func.isRequired,

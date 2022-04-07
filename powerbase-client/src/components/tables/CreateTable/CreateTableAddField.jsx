@@ -6,8 +6,10 @@ import { CreateField } from '@components/fields/CreateField';
 
 export function CreateTableAddField({
   tableName,
+  fieldId,
   hasPrimaryKey,
   fields,
+  update,
   submit,
   open,
   setOpen,
@@ -29,10 +31,12 @@ export function CreateTableAddField({
         </div>
         <div className="mt-4">
           <CreateField
+            fieldId={fieldId}
             table={{ name: tableName, hasPrimaryKey }}
             fields={fields}
             cancel={cancel}
-            submit={submit}
+            update={fieldId != null ? update : null}
+            submit={fieldId != null ? null : submit}
           />
         </div>
       </div>
@@ -42,8 +46,10 @@ export function CreateTableAddField({
 
 CreateTableAddField.propTypes = {
   tableName: PropTypes.string,
+  fieldId: PropTypes.number,
   hasPrimaryKey: PropTypes.bool,
   fields: PropTypes.array.isRequired,
+  update: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
   open: PropTypes.bool,
   setOpen: PropTypes.func.isRequired,
