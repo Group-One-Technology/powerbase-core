@@ -110,7 +110,7 @@ class PowerbaseFieldsController < ApplicationController
       # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
       enum_values: safe_params[:select_options],
       options: safe_params[:options],
-    }], @table, new_field: true)
+    }], @table, sync_db: true)
 
     if !field_creator.save
       render json: field_creator.field.errors, status: :unprocessable_entity

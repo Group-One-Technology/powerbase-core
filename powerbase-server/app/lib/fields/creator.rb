@@ -2,14 +2,14 @@ class Fields::Creator
   include FieldTypeHelper
   include PusherHelper
 
-  attr_accessor :table, :column, :field, :new_field, :field_name, :field_options, :table_view, :database, :base_migration
+  attr_accessor :table, :column, :field, :sync_db, :field_name, :field_options, :table_view, :database, :base_migration
 
-  def initialize(column, table, new_field: false)
+  def initialize(column, table, sync_db: false)
     @column = column
     @table = table
     @field_name = column[0]
     @field_options = column[1]
-    @new_field = new_field
+    @sync_db = sync_db
     @database = table.db
     @base_migration = @database.base_migration
 
@@ -123,7 +123,7 @@ class Fields::Creator
   def save
     begin
       if field.save
-        if !field.is_virtual && new_field
+        if !field.is_virtual && sync_db
           table_schema = Tables::Schema.new table
 
           if database.postgresql? && field.powerbase_field_type.data_type == "enums"
