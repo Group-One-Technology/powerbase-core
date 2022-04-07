@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { PlusIcon, XIcon } from '@heroicons/react/outline';
 import { closestCenter, DndContext } from '@dnd-kit/core';
@@ -9,6 +9,7 @@ import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { SortableItem } from '@components/ui/SortableItem';
+import { CreateTableAddField } from './CreateTableAddField';
 
 function FieldItem({ field, fieldTypes, remove }) {
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
@@ -58,8 +59,17 @@ FieldItem.propTypes = {
   remove: PropTypes.func.isRequired,
 };
 
-export function CreateTableFields({ fields, setFields }) {
+export function CreateTableFields({
+  tableName,
+  fields,
+  setFields,
+  primaryKeys,
+}) {
   const { data: fieldTypes } = useFieldTypes();
+
+  const [count, setCount] = useState(1);
+  const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
+
   const sensors = useSensors();
 
   const handleReorderFields = async ({ active, over }) => {
@@ -77,6 +87,14 @@ export function CreateTableFields({ fields, setFields }) {
 
   const handleRemoveField = (id) => {
     setFields(fields.filter((item) => item.id !== id));
+  };
+
+  const handleAddField = () => setAddFieldModalOpen(true);
+
+  const handleSubmitAddField = (payload) => {
+    setFields((items) => [...items, { ...payload, id: count }]);
+    setCount((val) => val + 1);
+    setAddFieldModalOpen(false);
   };
 
   return (
@@ -100,16 +118,28 @@ export function CreateTableFields({ fields, setFields }) {
         <button
           type="button"
           className="inline-flex items-center p-2 text-xs text-gray-600 rounded-lg hover:bg-gray-200 focus:bg-gray-200"
+          onClick={handleAddField}
         >
           <PlusIcon className="h-4 w-4 mr-1" />
           Add a field
         </button>
       </div>
+
+      <CreateTableAddField
+        tableName={tableName}
+        hasPrimaryKey={primaryKeys?.length > 0}
+        fields={fields}
+        open={addFieldModalOpen}
+        setOpen={setAddFieldModalOpen}
+        submit={handleSubmitAddField}
+      />
     </div>
   );
 }
 
 CreateTableFields.propTypes = {
+  tableName: PropTypes.string,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
+  primaryKeys: PropTypes.array,
 };

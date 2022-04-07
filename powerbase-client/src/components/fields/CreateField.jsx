@@ -23,7 +23,13 @@ import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
 import { NumberFieldSelectOptions } from './CreateField/NumberFieldSelectOptions';
 import { CreateFieldSelectOptions } from './CreateField/CreateFieldSelectOptions';
 
-export function CreateField({ table, close, cancel }) {
+export function CreateField({
+  table,
+  fields,
+  submit,
+  close,
+  cancel,
+}) {
   const { mounted } = useMounted();
   const { status, error, dispatch } = useData();
   const { mutate: mutateViewFields } = useViewFields();
@@ -75,34 +81,40 @@ export function CreateField({ table, close, cancel }) {
       }
     }
 
+    const payload = {
+      tableId: table.id,
+      name: fieldName,
+      alias,
+      fieldTypeId: fieldType.id,
+      isVirtual,
+      dbType: dataType,
+      isNullable,
+      isPii,
+      hasValidation,
+      selectOptions: fieldType.name === FieldType.SINGLE_SELECT
+        ? selectOptionValues
+        : undefined,
+      options: options?.currency && fieldType.name === FieldType.CURRENCY
+        ? { style: 'currency', currency: options.currency }
+        : options && options.precision && options.type === 'Decimal'
+          && [FieldType.NUMBER, FieldType.PERCENT].includes(fieldType.name)
+          ? { style: 'precision', precision: options.precision }
+          : null,
+    };
+
+    if (submit) {
+      submit(payload);
+      return;
+    }
+
     dispatch.pending();
 
     try {
-      const data = await addField({
-        tableId: table.id,
-        name: fieldName,
-        alias,
-        fieldTypeId: fieldType.id,
-        isVirtual,
-        dbType: dataType,
-        isNullable,
-        isPii,
-        hasValidation,
-        selectOptions: fieldType.name === FieldType.SINGLE_SELECT
-          ? selectOptionValues
-          : undefined,
-        options: options?.currency && fieldType.name === FieldType.CURRENCY
-          ? { style: 'currency', currency: options.currency }
-          : options && options.precision && options.type === 'Decimal'
-            && [FieldType.NUMBER, FieldType.PERCENT].includes(fieldType.name)
-            ? { style: 'precision', precision: options.precision }
-            : null,
-      });
-
+      const data = await addField(payload);
       mounted(() => {
         dispatch.resolved(data);
         mutateViewFields();
-        close();
+        if (close) close();
       });
     } catch (err) {
       dispatch.rejected(err.response.data.exception || err.response.data.error);
@@ -116,6 +128,7 @@ export function CreateField({ table, close, cancel }) {
 
       <CreateFieldAlias
         tableId={table.id}
+        fields={fields}
         alias={alias}
         setAlias={setAlias}
         aliasError={aliasError}
@@ -155,6 +168,7 @@ export function CreateField({ table, close, cancel }) {
 
           <CreateFieldName
             tableId={table.id}
+            fields={fields}
             fieldName={fieldName}
             setFieldName={setFieldName}
             fieldNameError={fieldNameError}
@@ -234,6 +248,8 @@ export function CreateField({ table, close, cancel }) {
 
 CreateField.propTypes = {
   table: PropTypes.object.isRequired,
-  close: PropTypes.func.isRequired,
+  fields: PropTypes.array,
+  submit: PropTypes.func,
+  close: PropTypes.func,
   cancel: PropTypes.func.isRequired,
 };

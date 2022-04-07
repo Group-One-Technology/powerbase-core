@@ -14,6 +14,7 @@ const DEBOUNCED_TIMEOUT = 300; // 300ms
 
 export function CreateFieldAlias({
   tableId,
+  fields,
   alias,
   setAlias,
   aliasError,
@@ -29,6 +30,8 @@ export function CreateFieldAlias({
   );
 
   useEffect(() => {
+    if (!tableId) return;
+
     if (search.status === 'success' && search.result?.id != null) {
       if (!aliasError.error) {
         aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
@@ -43,6 +46,17 @@ export function CreateFieldAlias({
       }
     }
   }, [search.status]);
+
+  useEffect(() => {
+    if (tableId) return;
+    const existingField = fields?.find((item) => item.name === toSnakeCase(alias) || item.alias === alias);
+
+    if (existingField) {
+      aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
+    } else if (aliasError.error?.message.includes('Search Error')) {
+      aliasError.setError(null);
+    }
+  }, [tableId, alias]);
 
   const handleAliasChange = (evt) => {
     const { value } = evt.target;
@@ -82,6 +96,7 @@ export function CreateFieldAlias({
 
 CreateFieldAlias.propTypes = {
   tableId: PropTypes.number,
+  fields: PropTypes.array,
   alias: PropTypes.string,
   setAlias: PropTypes.func.isRequired,
   aliasError: PropTypes.any,

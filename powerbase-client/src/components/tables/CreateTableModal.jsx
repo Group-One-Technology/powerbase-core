@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { XIcon } from '@heroicons/react/outline';
@@ -10,10 +10,11 @@ import { useValidState } from '@lib/hooks/useValidState';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { TABLE_TYPE } from '@lib/constants/table';
+import { useData } from '@lib/hooks/useData';
+import { FieldType } from '@lib/constants/field-types';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
-import { useViewFields } from '@models/ViewFields';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 import { CreateTableName } from './CreateTable/CreateTableName';
@@ -21,22 +22,33 @@ import { CreateTableFields } from './CreateTable/CreateTableFields';
 
 export function CreateTableModal({ open, setOpen }) {
   const { data: base } = useBase();
+  const { status } = useData();
   const { data: fieldTypes } = useFieldTypes();
-  const { data: viewFields } = useViewFields();
 
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [tableType, setTableType] = useState(TABLE_TYPE[0]);
-  const [fields, setFields] = useState([]);
+  const [primaryKeys, setPrimaryKeys] = useState([]);
+  const [fields, setFields] = useState([{
+    id: 0,
+    name: 'id',
+    alias: 'Id',
+    dbType: 'integer',
+    fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
+    hasValidation: false,
+    isNullable: false,
+    isPii: false,
+    isVirtual: false,
+    isPrimaryKey: true,
+    options: null,
+  }]);
 
   const disabled = false;
   const isVirtual = tableType.nameId === 'magic_table';
 
-  useEffect(() => {
-    setFields(viewFields || []);
-  }, [viewFields]);
-
   if (!base || !fieldTypes) return null;
+
+  const cancel = () => setOpen(false);
 
   const submit = async (evt) => {
     evt.preventDefault();
@@ -79,15 +91,29 @@ export function CreateTableModal({ open, setOpen }) {
             isVirtual={isVirtual}
           />
           <CreateTableFields
+            tableName={tableName}
             fields={fields}
             setFields={setFields}
+            primaryKeys={primaryKeys}
           />
 
-          <div className="mt-auto mx-3">
+          <div className="ml-auto mt-auto">
+            <button
+              type="button"
+              className={cn(
+                'ml-auto mr-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                status === 'pending'
+                  ? 'cursor-not-allowed bg-gray-300 hover:bg-gray-400'
+                  : 'cursor-pointer bg-white hover:bg-gray-50',
+              )}
+              onClick={cancel}
+            >
+              Cancel
+            </button>
             <Button
               type="submit"
               className={cn(
-                'flex items-center justify-center ml-auto rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm',
+                'inline-flex items-center justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm',
                 disabled
                   ? 'bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 focus:ring-indigo-500'
                   : 'bg-gray-200 text-gray-900 cursor-not-allowed hover:bg-gray-100 focus:bg-gray-100',
