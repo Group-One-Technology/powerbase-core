@@ -16,6 +16,8 @@ function FieldItem({
   fieldTypes,
   update,
   remove,
+  setAsPrimaryKey,
+  unsetAsPrimaryKey,
 }) {
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
@@ -46,23 +48,38 @@ function FieldItem({
       <div className="flex-1 text-sm text-gray-700">
         {fieldType.name}
       </div>
-      <div className="ml-auto gap-0.5">
-        <button
-          type="button"
-          className="p-2 inline-block rounded text-gray-500 text-sm capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
-          onClick={update}
-        >
-          <PencilAltIcon className="h-4 w-4" />
-          <span className="sr-only">Edit Field</span>
-        </button>
-        <button
-          type="button"
-          className="p-2 inline-block rounded text-gray-500 text-sm capitalize hover:text-red-600 hover:bg-red-200 focus:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
-          onClick={remove}
-        >
-          <XIcon className="h-4 w-4" />
-          <span className="sr-only">Remove Field</span>
-        </button>
+      <div className="ml-auto flex gap-0.5">
+        {((unsetAsPrimaryKey || setAsPrimaryKey) && !field.isVirtual) && (
+          <button
+            type="button"
+            className="p-2 inline-block rounded bg-gray-100 text-gray-700 text-sm capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+            onClick={field.isPrimaryKey ? unsetAsPrimaryKey : setAsPrimaryKey}
+          >
+            {field.isPrimaryKey
+              ? 'Unset as Primary Key'
+              : 'Set as Primary Key'}
+          </button>
+        )}
+        {update && (
+          <button
+            type="button"
+            className="p-2 inline-block rounded bg-gray-100 text-gray-700 text-sm capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+            onClick={update}
+          >
+            <PencilAltIcon className="h-4 w-4" />
+            <span className="sr-only">Edit Field</span>
+          </button>
+        )}
+        {remove && (
+          <button
+            type="button"
+            className="p-2 inline-block rounded bg-gray-100 text-gray-700 text-sm capitalize hover:text-red-600 hover:bg-red-200 focus:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+            onClick={remove}
+          >
+            <XIcon className="h-4 w-4" />
+            <span className="sr-only">Remove Field</span>
+          </button>
+        )}
       </div>
     </SortableItem>
   );
@@ -71,17 +88,19 @@ function FieldItem({
 FieldItem.propTypes = {
   field: PropTypes.object.isRequired,
   fieldTypes: PropTypes.array.isRequired,
-  remove: PropTypes.func.isRequired,
-  update: PropTypes.func.isRequired,
+  remove: PropTypes.func,
+  update: PropTypes.func,
+  setAsPrimaryKey: PropTypes.func,
+  unsetAsPrimaryKey: PropTypes.func,
 };
 
 export function CreateTableFields({
   tableName,
   fields,
   setFields,
-  primaryKeys,
 }) {
   const { data: fieldTypes } = useFieldTypes();
+  const primaryKeys = fields.filter((item) => item.isPrimaryKey);
 
   const [count, setCount] = useState(1);
   const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
@@ -102,6 +121,15 @@ export function CreateTableFields({
     }
   };
 
+  const togglePrimaryKey = (id, value) => {
+    setFields(fields.map((item) => ({
+      ...item,
+      isPrimaryKey: item.id === id
+        ? value ?? !item.isPrimaryKey
+        : item.isPrimaryKey,
+    })));
+  };
+
   const handleRemoveField = (id) => {
     setFields(fields.filter((item) => item.id !== id));
   };
@@ -118,7 +146,7 @@ export function CreateTableFields({
 
   const handleSubmitUpdateField = (payload) => {
     setFields(fields.map((item) => (item.id === payload.id
-      ? payload
+      ? { ...item, ...payload }
       : item)));
     setAddFieldModalOpen(false);
   };
@@ -130,45 +158,73 @@ export function CreateTableFields({
   };
 
   return (
-    <div className="my-4">
-      <h3 className="block text-sm font-medium text-gray-700 mb-2">Fields</h3>
-      <div className="flex flex-col gap-1">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
-          <SortableContext items={fields} strategy={verticalListSortingStrategy}>
-            <ul className="list-none flex flex-col">
-              {fields.map((field) => (
-                <FieldItem
-                  key={field.id}
-                  field={field}
-                  fieldTypes={fieldTypes}
-                  update={() => handleUpdateField(field.id)}
-                  remove={() => handleRemoveField(field.id)}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
-        <button
-          type="button"
-          className="inline-flex items-center p-2 text-xs text-gray-600 rounded-lg hover:bg-gray-200 focus:bg-gray-200"
-          onClick={handleAddField}
-        >
-          <PlusIcon className="h-4 w-4 mr-1" />
-          Add a field
-        </button>
+    <>
+      <div className="my-4">
+        <h3 className="block text-sm font-medium text-gray-700 mb-2">
+          Fields
+        </h3>
+        <div className="flex flex-col gap-1">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorderFields}>
+            <SortableContext items={fields} strategy={verticalListSortingStrategy}>
+              <ul className="list-none flex flex-col">
+                {fields.map((field) => (
+                  <FieldItem
+                    key={field.id}
+                    field={field}
+                    fieldTypes={fieldTypes}
+                    update={() => handleUpdateField(field.id)}
+                    remove={() => handleRemoveField(field.id)}
+                    setAsPrimaryKey={field.isPrimaryKey
+                      ? null
+                      : () => togglePrimaryKey(field.id, true)}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+          <button
+            type="button"
+            className="inline-flex items-center p-2 text-xs text-gray-600 rounded-lg hover:bg-gray-200 focus:bg-gray-200"
+            onClick={handleAddField}
+          >
+            <PlusIcon className="h-4 w-4 mr-1" />
+            Add a field
+          </button>
+        </div>
+
+        <CreateTableAddField
+          tableName={tableName}
+          fieldId={selectedFieldId}
+          hasPrimaryKey={primaryKeys?.length > 0}
+          fields={fields}
+          open={addFieldModalOpen}
+          setOpen={setAddFieldModalOpen}
+          update={handleSubmitUpdateField}
+          submit={handleSubmitField}
+        />
       </div>
 
-      <CreateTableAddField
-        tableName={tableName}
-        fieldId={selectedFieldId}
-        hasPrimaryKey={primaryKeys?.length > 0}
-        fields={fields}
-        open={addFieldModalOpen}
-        setOpen={setAddFieldModalOpen}
-        update={handleSubmitUpdateField}
-        submit={handleSubmitField}
-      />
-    </div>
+      <div className="my-4">
+        <h3 className="block text-sm font-medium text-gray-700 mb-2">
+          Primary Keys
+        </h3>
+        <ul className="list-none flex flex-col">
+          {primaryKeys.map((field) => (
+            <FieldItem
+              key={field.id}
+              field={field}
+              fieldTypes={fieldTypes}
+              unsetAsPrimaryKey={() => togglePrimaryKey(field.id, false)}
+            />
+          ))}
+          {primaryKeys.length === 0 && (
+            <p className="text-xs text-center text-gray-700">
+              There must be at least one primary key in a table.
+            </p>
+          )}
+        </ul>
+      </div>
+    </>
   );
 }
 
@@ -176,5 +232,4 @@ CreateTableFields.propTypes = {
   tableName: PropTypes.string,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
-  primaryKeys: PropTypes.array,
 };

@@ -28,7 +28,6 @@ export function CreateTableModal({ open, setOpen }) {
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [tableType, setTableType] = useState(TABLE_TYPE[0]);
-  const [primaryKeys, setPrimaryKeys] = useState([]);
   const [fields, setFields] = useState([{
     id: 0,
     name: 'id',
@@ -94,10 +93,9 @@ export function CreateTableModal({ open, setOpen }) {
             tableName={tableName}
             fields={fields}
             setFields={setFields}
-            primaryKeys={primaryKeys}
           />
 
-          <div className="ml-auto mt-auto">
+          <div className="ml-auto mt-4">
             <button
               type="button"
               className={cn(
