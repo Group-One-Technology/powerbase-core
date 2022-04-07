@@ -38,6 +38,7 @@ export function RecordItemSelect({
         )}
         disabled={disabled}
       >
+        <option value="">&nbsp;</option>
         {options?.values.map((option) => (
           <option key={option} value={option}>
             {option}
