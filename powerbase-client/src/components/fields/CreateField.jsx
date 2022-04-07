@@ -88,7 +88,9 @@ export function CreateField({ table, close, cancel }) {
         isNullable,
         isPii,
         hasValidation,
-        selectOptions: selectOptionValues,
+        selectOptions: fieldType.name === FieldType.SINGLE_SELECT
+          ? selectOptionValues
+          : undefined,
         options: options?.currency && fieldType.name === FieldType.CURRENCY
           ? { style: 'currency', currency: options.currency }
           : options && options.precision && options.type === 'Decimal'
