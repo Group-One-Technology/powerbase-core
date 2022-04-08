@@ -8,7 +8,7 @@ class Databases::Schema
   end
 
   def create_table(table_name, fields)
-    primary_keys = fields.select {|field| field[:is_primary_key]}
+    primary_keys = fields.select {|field| field[:primary_key]}
       .map {|field| field[:name].to_sym}
 
     sequel_connect(database) do |db|
@@ -18,7 +18,7 @@ class Databases::Schema
             db.create_enum(field[:data_type].to_sym, field[:enum_values].uniq)
           end
 
-          column(field[:name].to_sym, field[:data_type])
+          column(field[:name].to_sym, field[:data_type], null: field[:null])
         end
 
         if primary_keys.length > 0

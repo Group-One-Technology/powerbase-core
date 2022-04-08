@@ -144,7 +144,8 @@ class PowerbaseTablesController < ApplicationController
             name: field[:name],
             data_type: field[:db_type],
             enum_values: field[:select_options],
-            is_primary_key: field[:is_primary_key],
+            primary_key: field[:is_primary_key],
+            null: field[:is_nullable],
           }
         end
       schema = Databases::Schema.new @database
