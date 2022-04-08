@@ -79,7 +79,9 @@ export function CreateTableModal({ open, setOpen }) {
         name: tableName,
         alias,
         isVirtual,
-        fields,
+        fields: isVirtual
+          ? fields.map((item) => ({ ...item, isVirtual: true }))
+          : fields,
       });
       mutateTables();
       mounted(() => {
