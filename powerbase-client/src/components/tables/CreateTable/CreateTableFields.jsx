@@ -106,6 +106,7 @@ FieldItem.propTypes = {
 
 export function CreateTableFields({
   tableName,
+  isVirtual,
   fields,
   setFields,
 }) {
@@ -203,9 +204,12 @@ export function CreateTableFields({
         </div>
 
         <CreateTableAddField
-          tableName={tableName}
+          table={{
+            name: tableName,
+            hasPrimaryKey: primaryKeys?.length > 0,
+            isVirtual,
+          }}
           fieldId={selectedFieldId}
-          hasPrimaryKey={primaryKeys?.length > 0}
           fields={fields}
           open={addFieldModalOpen}
           setOpen={setAddFieldModalOpen}
@@ -240,6 +244,7 @@ export function CreateTableFields({
 
 CreateTableFields.propTypes = {
   tableName: PropTypes.string,
+  isVirtual: PropTypes.bool,
   fields: PropTypes.array.isRequired,
   setFields: PropTypes.func.isRequired,
 };

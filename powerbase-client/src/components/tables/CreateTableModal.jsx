@@ -131,6 +131,7 @@ export function CreateTableModal({ open, setOpen }) {
           />
           <CreateTableFields
             tableName={tableName}
+            isVirtual={isVirtual}
             fields={fields}
             setFields={setFields}
           />

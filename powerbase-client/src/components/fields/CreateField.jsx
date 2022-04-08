@@ -43,7 +43,9 @@ export function CreateField({
   const [fieldName, setFieldName, fieldNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [fieldType, setFieldType] = useState();
-  const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
+  const [columnType, setColumnType] = useState(table.isVirtual
+    ? COLUMN_TYPE.find((item) => item.nameId === 'magic_field')
+    : COLUMN_TYPE[0]);
   const [dataType, setDataType] = useState('');
   const [hasValidation, setHasValidation] = useState(false);
   const [isNullable, setIsNullable] = useState(true);
@@ -56,6 +58,7 @@ export function CreateField({
   const isDecimal = options?.type === 'Decimal';
   const disabled = !!(aliasError.error || fieldNameError.error);
 
+  // Update initial values for selected field to update.
   useEffect(() => {
     if (fieldId == null || !fieldTypes) return;
 
@@ -68,7 +71,9 @@ export function CreateField({
     setFieldName(field.name);
     setAlias(field.alias);
     setFieldType(curFieldType);
-    setColumnType(COLUMN_TYPE.find((item) => item.nameId === curColumnType));
+    setColumnType(table.isVirtual
+      ? COLUMN_TYPE.find((item) => item.nameId === 'magic_field')
+      : COLUMN_TYPE.find((item) => item.nameId === curColumnType));
     setDataType(field.dbType);
     setIsNullable(field.isNullable);
     setIsPii(field.isPii);
@@ -178,17 +183,19 @@ export function CreateField({
           <p className="text-sm text-gray-700">
             {fieldType.description}
           </p>
-          <InlineRadio
-            aria-label="Field Type"
-            value={columnType}
-            setValue={setColumnType}
-            options={COLUMN_TYPE.map((item) => (
-              item.nameId === 'magic_field' && !hasPrimaryKey
-                ? { ...item, disabled: 'There must be at least one primary key to create a magic field.' }
-                : item
-            ))}
-            className="my-6"
-          />
+          {!table.isVirtual && (
+            <InlineRadio
+              aria-label="Field Type"
+              value={columnType}
+              setValue={setColumnType}
+              options={COLUMN_TYPE.map((item) => (
+                item.nameId === 'magic_field' && !hasPrimaryKey
+                  ? { ...item, disabled: 'There must be at least one primary key to create a magic field.' }
+                  : item
+              ))}
+              className="my-6"
+            />
+          )}
 
           {NUMBER_TYPES.includes(fieldType.name) && (
             <>
