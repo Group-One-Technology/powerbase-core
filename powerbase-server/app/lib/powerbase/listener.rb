@@ -77,6 +77,10 @@ module Powerbase
       case command_tag
       when "CREATE TABLE"
         puts "#{Time.now} -- New table named #{table_name} detected."
+        # Check if table is already saved in powerbase
+        powerbase_table = PowerbaseTable.find_by(name: table_name, powerbase_database_id: powerbase_db.id)
+        return if powerbase_table != nil
+
         # Create powerbase table
         table_creator = Tables::Creator.new table_name, powerbase_db, order: powerbase_db.tables.length + 1
         table_creator.save
