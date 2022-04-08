@@ -81,7 +81,11 @@ class Tables::Syncer
 
     if unmigrated_columns.count > 0
       puts "#{Time.now} -- Migrating #{unmigrated_columns.count} unmigrated columns"
-      table.write_migration_logs!(status: "migrating_metadata", unmigrated_columns: unmigrated_columns)
+      if new_connection
+        table.write_migration_logs!(status: "migrating_metadata", unmigrated_columns: unmigrated_columns)
+      else
+        table.write_migration_logs!(unmigrated_columns: unmigrated_columns)
+      end
 
       columns = schema.select{|col| unmigrated_columns.include? col.first}
       columns.each do |column|

@@ -4,7 +4,7 @@
 # * Seed PowerbaseFieldTypes...
 single_line_text = PowerbaseFieldType.find_or_create_by(name: "Single Line Text", description: "A short string.", data_type: "string")
 long_text = PowerbaseFieldType.find_or_create_by(name: "Long Text", description: "A long string.", data_type: "string")
-json_text = PowerbaseFieldType.find_or_create_by(name: "JSON Text", description: "A JSON in a form of a string.", data_type: "text")
+json_text = PowerbaseFieldType.find_or_create_by(name: "JSON Text", description: "A JSON in a form of a string.", data_type: "string")
 checkbox = PowerbaseFieldType.find_or_create_by(name: "Checkbox", description: "A binary choice.", data_type: "boolean")
 number = PowerbaseFieldType.find_or_create_by(name: "Number", description: "Can either be an integer or decimal. Depends on the user.", data_type: "number")
 single_select = PowerbaseFieldType.find_or_create_by(name: "Single Select", description: "Shows a list of options in which a user only selects a single one.", data_type: "enums")
@@ -22,7 +22,7 @@ FieldDbTypeMapping.find_or_create_by(db_type: "char", adapter: "sequel", powerba
 FieldDbTypeMapping.find_or_create_by(db_type: "varchar", adapter: "sequel", powerbase_field_type_id: single_line_text.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "uuid", adapter: "sequel", powerbase_field_type_id: single_line_text.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "text", adapter: "sequel", powerbase_field_type_id: long_text.id)
-FieldDbTypeMapping.find_or_create_by(db_type: "boolean", adapter: "sequel", powerbase_field_type_id: checkbox.id)
+FieldDbTypeMapping.find_or_create_by(db_type: "bool", adapter: "sequel", powerbase_field_type_id: checkbox.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "float", adapter: "sequel", powerbase_field_type_id: number.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "bigint", adapter: "sequel", powerbase_field_type_id: number.id)
 FieldDbTypeMapping.find_or_create_by(db_type: "int", adapter: "sequel", powerbase_field_type_id: number.id)

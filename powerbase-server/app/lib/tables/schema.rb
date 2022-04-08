@@ -27,7 +27,7 @@ class Tables::Schema
   # Only available for PostgreSQL databases.
   def create_enum(data_type, enum_values)
     sequel_connect(database) do |db|
-      db.create_enum(data_type.to_sym, enum_values)
+      db.create_enum(data_type.to_sym, enum_values.uniq)
     end
   end
 end

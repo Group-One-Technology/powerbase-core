@@ -33,7 +33,7 @@ export const COLUMN_DATA_TYPES = {
   [FieldType.SINGLE_LINE_TEXT]: TEXT_DATA_TYPES,
   [FieldType.EMAIL]: TEXT_DATA_TYPES,
   [FieldType.URL]: TEXT_DATA_TYPES,
-  [FieldType.JSON_TEXT]: TEXT_DATA_TYPES,
+  [FieldType.JSON_TEXT]: ['text', ...TEXT_DATA_TYPES],
   [FieldType.LONG_TEXT]: ['text', ...TEXT_DATA_TYPES],
   [FieldType.SINGLE_SELECT]: ['enum'],
   [FieldType.MULTIPLE_SELECT]: TEXT_DATA_TYPES,

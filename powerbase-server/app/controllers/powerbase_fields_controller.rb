@@ -73,8 +73,13 @@ class PowerbaseFieldsController < ApplicationController
     current_user.can?(:view_table, @table)
 
     if safe_params[:name] != nil || safe_params[:alias] != nil
-      @field = PowerbaseField.find_by("(alias = ? OR name = ?) and powerbase_table_id = ?", safe_params[:alias], (safe_params[:name] || safe_params[:alias].snakecase), @table.id)
-      render json: @field
+      @field = PowerbaseField.find_by(
+        "(alias = ? OR name = ?) and powerbase_table_id = ?",
+        safe_params[:alias],
+        (safe_params[:name] || safe_params[:alias].snakecase),
+        @table.id
+      )
+      render json: @field ? { id: @field.id } : nil
       return
     end
 
@@ -86,7 +91,7 @@ class PowerbaseFieldsController < ApplicationController
       .map {|item| format_json(item)}
   end
 
-  # POST /tables/:id/field
+  # POST /tables/:id/fields
   def create
     @table = PowerbaseTable.find(safe_params[:table_id])
     raise NotFound.new("Could not find table with id of #{safe_params[:table_id]}") if !@table
@@ -105,7 +110,7 @@ class PowerbaseFieldsController < ApplicationController
       # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
       enum_values: safe_params[:select_options],
       options: safe_params[:options],
-    }], @table, new_field: true)
+    }], @table, sync_db: true)
 
     if !field_creator.save
       render json: field_creator.field.errors, status: :unprocessable_entity

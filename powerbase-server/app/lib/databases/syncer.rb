@@ -33,6 +33,7 @@ class Databases::Syncer
   def sync!
     if unmigrated_tables.empty? && dropped_tables.empty?
       puts "#{Time.now} -- Database##{powerbase_db.id} is already in synced."
+      powerbase_db.update_status!("migrated")
       return
     end
 
@@ -41,7 +42,7 @@ class Databases::Syncer
 
       unmigrated_tables.each_with_index do |table_name, index|
         # Create powerbase table
-        table_creator = Tables::Creator.new table_name, index + 1, powerbase_db
+        table_creator = Tables::Creator.new table_name, powerbase_db, order: index + 1
         table_creator.save
         powerbase_table = table_creator.object
 

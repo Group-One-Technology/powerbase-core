@@ -13,6 +13,8 @@ const DEBOUNCED_TIMEOUT = 300; // 300ms
 
 export function CreateFieldName({
   tableId,
+  fieldId,
+  fields,
   fieldName,
   setFieldName,
   fieldNameError,
@@ -21,13 +23,15 @@ export function CreateFieldName({
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
     async (abortSignal, id, text) => {
-      if (!id || text.length === 0) return null;
+      if (id == null || text.length === 0) return null;
       return debouncedGetFieldByName({ tableId: id, name: fieldName }, abortSignal);
     },
     [tableId, fieldName],
   );
 
   useEffect(() => {
+    if (tableId == null) return;
+
     if (search.status === 'success' && search.result?.id != null) {
       if (!fieldNameError.error) {
         fieldNameError.setError(new Error(`Search Error: Field with column name of "${fieldName}" already exists`));
@@ -41,7 +45,18 @@ export function CreateFieldName({
         fieldNameError.setError(null);
       }
     }
-  }, [search.status]);
+  }, [tableId, search.status]);
+
+  useEffect(() => {
+    if (tableId) return;
+    const existingField = fields?.find((item) => item.id !== fieldId && item.name === fieldName);
+
+    if (existingField) {
+      fieldNameError.setError(new Error(`Search Error: Field with column name of "${fieldName}" already exists`));
+    } else if (fieldNameError.error?.message.includes('Search Error')) {
+      fieldNameError.setError(null);
+    }
+  }, [tableId, fieldName]);
 
   const handleNameChange = (evt) => setFieldName(evt.target.value);
 
@@ -78,6 +93,8 @@ export function CreateFieldName({
 
 CreateFieldName.propTypes = {
   tableId: PropTypes.number,
+  fieldId: PropTypes.number,
+  fields: PropTypes.array,
   fieldName: PropTypes.string,
   setFieldName: PropTypes.func.isRequired,
   fieldNameError: PropTypes.any,

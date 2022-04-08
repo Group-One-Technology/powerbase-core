@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { captureError } from '@lib/helpers/captureError';
-import { PlusIcon, TableIcon } from '@heroicons/react/outline';
+import { TableIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,

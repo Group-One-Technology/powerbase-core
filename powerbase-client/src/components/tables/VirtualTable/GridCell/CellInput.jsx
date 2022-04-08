@@ -93,7 +93,7 @@ export function CellInput({
       return (
         <div
           className={cn(
-            'h-full w-full text-sm items-center py-1 px-2 text-indigo-600 border-none rounded',
+            'h-full w-full text-sm items-center px-2 text-indigo-600 border-none rounded',
             isAddRecord && 'bg-green-50',
             className,
           )}
@@ -102,7 +102,7 @@ export function CellInput({
             ref={inputRef}
             type="checkbox"
             name={field.name}
-            className="py-1 px-2 h-4 w-4 focus:ring-indigo-500 border-gray-300 rounded"
+            className="mt-1 px-2 h-4 w-4 focus:ring-indigo-500 border-gray-300 rounded"
             checked={value?.toString() === 'true'}
             onChange={(evt) => updateValue(evt.target.checked)}
           />
@@ -118,7 +118,7 @@ export function CellInput({
             value={value}
             onFocus={() => setFocus(true)}
             className={cn(
-              'absolute text-sm items-center py-1 px-2 border-none',
+              'absolute w-full text-sm items-center py-1 px-2 border-none',
               isAddRecord && 'bg-green-50',
               className,
             )}

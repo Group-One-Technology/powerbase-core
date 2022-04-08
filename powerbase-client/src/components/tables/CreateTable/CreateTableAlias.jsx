@@ -5,41 +5,37 @@ import AwesomeDebouncePromise from 'awesome-debounce-promise';
 import useConstant from 'use-constant';
 import { CheckIcon } from '@heroicons/react/solid';
 
-import { Input } from '@components/ui/Input';
 import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
-import { getFieldByName } from '@lib/api/fields';
+import { getTableByName } from '@lib/api/tables';
+import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
 
 const DEBOUNCED_TIMEOUT = 300; // 300ms
 
-export function CreateFieldAlias({
-  tableId,
-  fieldId,
-  fields,
+export function CreateTableAlias({
+  baseId,
   alias,
   setAlias,
   aliasError,
-  setFieldName,
+  setTableName,
 }) {
-  const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
+  const debouncedGetTableByName = useConstant(() => AwesomeDebouncePromise(getTableByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
     async (abortSignal, id, text) => {
-      if (id == null || text.length === 0) return null;
-      return debouncedGetFieldByName({ tableId: id, alias: text }, abortSignal);
+      if (!id || text.length === 0) return null;
+      return debouncedGetTableByName({ databaseId: baseId, alias: text }, abortSignal);
     },
-    [tableId, alias],
+    [baseId, alias],
   );
 
   useEffect(() => {
-    if (tableId == null) return;
-
     if (search.status === 'success' && search.result?.id != null) {
       if (!aliasError.error) {
-        aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
+        aliasError.setError(new Error(`Search Error: Table with name of "${alias}" already exists`));
       }
     } else if (search.status === 'loading' && alias.length) {
       if (!aliasError.error) {
-        aliasError.setError(new Error('Search Error: Still checking for existing field'));
+        aliasError.setError(new Error('Search Error: Still checking for existing table'));
       }
     } else if (search.status === 'success' && search.result == null) {
       if (aliasError.error?.message.includes('Search Error')) {
@@ -48,45 +44,34 @@ export function CreateFieldAlias({
     }
   }, [search.status]);
 
-  useEffect(() => {
-    if (tableId) return;
-    const existingField = fields?.find((item) => item.id !== fieldId && (item.name === toSnakeCase(alias) || item.alias === alias));
-
-    if (existingField) {
-      aliasError.setError(new Error(`Search Error: Field with name of "${alias}" already exists`));
-    } else if (aliasError.error?.message.includes('Search Error')) {
-      aliasError.setError(null);
-    }
-  }, [tableId, alias]);
-
   const handleAliasChange = (evt) => {
     const { value } = evt.target;
     setAlias(value);
-    setFieldName(toSnakeCase(value));
+    setTableName(toSnakeCase(value));
   };
 
   return (
     <Input
       type="text"
-      id="create-field-alias"
-      name="create-field-alias"
-      aria-label="Field Name"
+      id="create-table-alias"
+      name="create-table-alias"
+      aria-label="Table Name"
       value={alias}
-      placeholder="Enter Field Name (e.g. First Name)"
+      placeholder="Enter Table Name (e.g. Users, Projects)"
       onChange={handleAliasChange}
       className="w-full"
-      showError={!aliasError.error?.message.includes('Still checking for existing field')}
+      showError={!aliasError.error?.message.includes('Still checking for existing table')}
       error={aliasError.error}
       caption={search.status === 'loading' && (
         <span className="flex">
           <Loader className="h-4 w-4 mr-1" aria-hidden="true" />
-          Checking if field name already exists...
+          Checking if table name already exists...
         </span>
       )}
       success={alias.length > 0 && search.result == null && search.status === 'success' && (
         <span className="flex">
           <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />
-          Field name is available.
+          Table name is available.
         </span>
       )}
       autoFocus
@@ -95,12 +80,10 @@ export function CreateFieldAlias({
   );
 }
 
-CreateFieldAlias.propTypes = {
-  tableId: PropTypes.number,
-  fieldId: PropTypes.number,
-  fields: PropTypes.array,
+CreateTableAlias.propTypes = {
+  baseId: PropTypes.number,
   alias: PropTypes.string,
   setAlias: PropTypes.func.isRequired,
   aliasError: PropTypes.any,
-  setFieldName: PropTypes.func.isRequired,
+  setTableName: PropTypes.func.isRequired,
 };

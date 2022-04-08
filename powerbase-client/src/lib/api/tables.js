@@ -1,3 +1,4 @@
+import queryString from 'query-string';
 import { securedApi, isResponseSuccess } from './index';
 
 export async function getTable({ id }) {
@@ -14,6 +15,36 @@ export async function getTableLogs({ id }) {
 
 export async function clearTableErrorLogs({ tableId }) {
   const response = await securedApi.put(`/tables/${tableId}/clear_error_logs`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function createTable({
+  databaseId,
+  name,
+  alias,
+  isVirtual,
+  fields,
+}) {
+  const response = await securedApi.post(`/databases/${databaseId}/tables`, {
+    databaseId,
+    name,
+    alias,
+    isVirtual,
+    fields: fields.map((item) => ({
+      name: item.name,
+      alias: item.alias,
+      isNullable: item.isNullable,
+      isPii: item.isPii,
+      hasValidation: item.hasValidation,
+      fieldTypeId: item.fieldTypeId,
+      isVirtual: item.isVirtual,
+      isPrimaryKey: item.isPrimaryKey,
+      dbType: item.dbType,
+      selectOptions: item.selectOptions,
+      options: item.options,
+    })),
+  });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }
@@ -40,6 +71,13 @@ export async function dropTable({ tableId }) {
 
 export async function getTables({ databaseId }) {
   const response = await securedApi.get(`/databases/${databaseId}/tables`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
+export async function getTableByName({ databaseId, alias, name }) {
+  const params = queryString.stringify({ alias, name });
+  const response = await securedApi.get(`databases/${databaseId}/tables?${params}`);
   if (isResponseSuccess(response)) return response.data;
   return undefined;
 }

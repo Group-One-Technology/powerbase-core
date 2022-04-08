@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
 import { useViewFields } from '@models/ViewFields';
+import { useFieldTypes } from '@models/FieldTypes';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
@@ -12,6 +13,7 @@ import { useMounted } from '@lib/hooks/useMounted';
 import { addField } from '@lib/api/fields';
 import { useData } from '@lib/hooks/useData';
 
+import { Form } from '@components/ui/Form';
 import { Button } from '@components/ui/Button';
 import { InlineRadio } from '@components/ui/InlineRadio';
 import { Checkbox } from '@components/ui/Checkbox';
@@ -23,27 +25,57 @@ import { FieldDataTypeSelect } from './CreateField/FieldDataTypeSelect';
 import { NumberFieldSelectOptions } from './CreateField/NumberFieldSelectOptions';
 import { CreateFieldSelectOptions } from './CreateField/CreateFieldSelectOptions';
 
-export function CreateField({ table, close, cancel }) {
+export function CreateField({
+  fieldId,
+  table,
+  fields,
+  update,
+  submit,
+  close,
+  cancel,
+  form = true,
+}) {
   const { mounted } = useMounted();
   const { status, error, dispatch } = useData();
+  const { data: fieldTypes } = useFieldTypes();
   const { mutate: mutateViewFields } = useViewFields();
-  const hasPrimaryKey = table?.hasPrimaryKey;
 
   const [fieldName, setFieldName, fieldNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [fieldType, setFieldType] = useState();
   const [columnType, setColumnType] = useState(COLUMN_TYPE[0]);
   const [dataType, setDataType] = useState('');
-  const [options, setOptions] = useState({});
   const [hasValidation, setHasValidation] = useState(false);
   const [isNullable, setIsNullable] = useState(true);
   const [isPii, setIsPii] = useState(false);
   const [selectOptions, setSelectOptions] = useState([{ id: 0, value: '' }]);
+  const [options, setOptions] = useState({});
 
+  const hasPrimaryKey = table?.hasPrimaryKey;
   const isVirtual = columnType.nameId === 'magic_field';
-
   const isDecimal = options?.type === 'Decimal';
   const disabled = !!(aliasError.error || fieldNameError.error);
+
+  useEffect(() => {
+    if (fieldId == null || !fieldTypes) return;
+
+    const field = fields?.find((item) => item.id === fieldId);
+    if (!field) return;
+
+    const curFieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
+    const curColumnType = field.isVirtual ? 'magic_field' : 'persistent_field';
+
+    setFieldName(field.name);
+    setAlias(field.alias);
+    setFieldType(curFieldType);
+    setColumnType(COLUMN_TYPE.find((item) => item.nameId === curColumnType));
+    setDataType(field.dbType);
+    setIsNullable(field.isNullable);
+    setIsPii(field.isPii);
+    setHasValidation(field.hasValidation);
+    setSelectOptions(field.selectOptions?.map((item, index) => ({ id: index, value: item })) ?? []);
+    setOptions(field.options);
+  }, [fieldId, fieldTypes]);
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
@@ -59,7 +91,7 @@ export function CreateField({ table, close, cancel }) {
       return;
     }
 
-    const selectOptionValues = selectOptions.map((item) => item.value).filter((item) => item);
+    const selectOptionValues = selectOptions?.map((item) => item.value).filter((item) => item);
 
     if (fieldType.name === FieldType.SINGLE_SELECT) {
       if (selectOptionValues.length === 0) {
@@ -75,32 +107,45 @@ export function CreateField({ table, close, cancel }) {
       }
     }
 
+    const payload = {
+      tableId: table.id,
+      name: fieldName,
+      alias,
+      fieldTypeId: fieldType.id,
+      isVirtual,
+      dbType: dataType,
+      isNullable,
+      isPii,
+      hasValidation,
+      selectOptions: fieldType.name === FieldType.SINGLE_SELECT
+        ? selectOptionValues
+        : undefined,
+      options: options?.currency && fieldType.name === FieldType.CURRENCY
+        ? { style: 'currency', currency: options.currency }
+        : options && options.precision && options.type === 'Decimal'
+          && [FieldType.NUMBER, FieldType.PERCENT].includes(fieldType.name)
+          ? { style: 'precision', precision: options.precision }
+          : null,
+    };
+
+    if (submit) {
+      submit(payload);
+      return;
+    }
+
+    if (update) {
+      update({ id: fieldId, ...payload });
+      return;
+    }
+
     dispatch.pending();
 
     try {
-      const data = await addField({
-        tableId: table.id,
-        name: fieldName,
-        alias,
-        fieldTypeId: fieldType.id,
-        isVirtual,
-        dbType: dataType,
-        isNullable,
-        isPii,
-        hasValidation,
-        selectOptions: selectOptionValues,
-        options: options?.currency && fieldType.name === FieldType.CURRENCY
-          ? { style: 'currency', currency: options.currency }
-          : options && options.precision && options.type === 'Decimal'
-            && [FieldType.NUMBER, FieldType.PERCENT].includes(fieldType.name)
-            ? { style: 'precision', precision: options.precision }
-            : null,
-      });
-
+      const data = await addField(payload);
+      mutateViewFields();
       mounted(() => {
         dispatch.resolved(data);
-        mutateViewFields();
-        close();
+        if (close) close();
       });
     } catch (err) {
       dispatch.rejected(err.response.data.exception || err.response.data.error);
@@ -108,11 +153,19 @@ export function CreateField({ table, close, cancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 text-sm text-gray-900" aria-busy={status === 'pending'}>
+    <Form
+      form={form}
+      onSubmit={form ? handleSubmit : undefined}
+      className="p-4 text-sm text-gray-900"
+      aria-busy={status === 'pending'}
+    >
+      <h2 className="sr-only">Create Field</h2>
       {error && <ErrorAlert errors={error} />}
 
       <CreateFieldAlias
         tableId={table.id}
+        fieldId={fieldId}
+        fields={fields}
         alias={alias}
         setAlias={setAlias}
         aliasError={aliasError}
@@ -152,6 +205,8 @@ export function CreateField({ table, close, cancel }) {
 
           <CreateFieldName
             tableId={table.id}
+            fieldId={fieldId}
+            fields={fields}
             fieldName={fieldName}
             setFieldName={setFieldName}
             fieldNameError={fieldNameError}
@@ -213,7 +268,7 @@ export function CreateField({ table, close, cancel }) {
           Cancel
         </button>
         <Button
-          type="submit"
+          type={form ? 'submit' : 'button'}
           className={cn(
             'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
             disabled
@@ -221,16 +276,22 @@ export function CreateField({ table, close, cancel }) {
               : 'cursor-pointer bg-indigo-600 hover:bg-indigo-500',
           )}
           loading={status === 'pending'}
+          onClick={!form ? handleSubmit : undefined}
         >
-          Add Field
+          {update ? 'Update Field' : 'Add Field'}
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 
 CreateField.propTypes = {
+  fieldId: PropTypes.number,
   table: PropTypes.object.isRequired,
-  close: PropTypes.func.isRequired,
+  fields: PropTypes.array,
+  submit: PropTypes.func,
+  update: PropTypes.func,
+  close: PropTypes.func,
   cancel: PropTypes.func.isRequired,
+  form: PropTypes.bool,
 };

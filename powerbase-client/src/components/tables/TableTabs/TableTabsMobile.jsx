@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useCurrentView } from '@models/views/CurrentTableView';
 
-export function TableTabsMobile({ addTable }) {
+export function TableTabsMobile({ addTable, canAddTables }) {
   const { table, tables, handleTableChange } = useCurrentView();
 
   return (
@@ -33,9 +33,11 @@ export function TableTabsMobile({ addTable }) {
             {!item.isMigrated && ' (Migrating)'}
           </option>
         ))}
-        <option onClick={addTable} className="text-sm text-white bg-gray-900 bg-opacity-80">
-          + Add Table
-        </option>
+        {tables && canAddTables && (
+          <option onClick={addTable} className="text-sm text-white bg-gray-900 bg-opacity-80">
+            + Add Table
+          </option>
+        )}
       </select>
     </div>
   );
@@ -43,4 +45,5 @@ export function TableTabsMobile({ addTable }) {
 
 TableTabsMobile.propTypes = {
   addTable: PropTypes.func.isRequired,
+  canAddTables: PropTypes.bool,
 };

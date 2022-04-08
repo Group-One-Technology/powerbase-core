@@ -5,11 +5,33 @@ class PowerbaseTablesController < ApplicationController
 
   schema(:index) do
     required(:database_id).value(:integer)
+    optional(:name).value(:string)
+    optional(:alias).value(:string)
   end
 
   schema(:show, :alias, :hide, :drop, :clear_error_logs, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
+  end
+
+  schema(:create) do
+    required(:database_id).value(:integer)
+    required(:name).value(:string)
+    required(:alias).value(:string)
+    required(:is_virtual).value(:bool)
+    required(:fields).array(:hash) do
+      required(:name).value(:string)
+      required(:alias).value(:string)
+      optional(:db_type).value(:string)
+      optional(:is_nullable).value(:bool)
+      optional(:is_pii).value(:bool)
+      optional(:has_validation).value(:bool)
+      required(:field_type_id).value(:integer)
+      required(:is_virtual).value(:bool)
+      required(:is_primary_key).value(:bool)
+      required(:select_options).value(:array)
+      optional(:options)
+    end
   end
 
   schema(:update_tables) do
@@ -39,12 +61,6 @@ class PowerbaseTablesController < ApplicationController
     required(:roles)
   end
 
-  schema(:create) do
-    required(:id).value(:integer)
-    required(:table)
-    required(:fields)
-  end
-
   schema(:reindex_records) do
     required(:id).value(:integer)
   end
@@ -54,6 +70,17 @@ class PowerbaseTablesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:database_id])
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:view_base, @database)
+
+    if safe_params[:name] != nil || safe_params[:alias] != nil
+      @table = PowerbaseTable.find_by(
+        "(alias = ? OR name = ?) and powerbase_database_id = ?",
+        safe_params[:alias],
+        (safe_params[:name] || safe_params[:alias].snakecase),
+        @database.id
+      )
+      render json: @table ? { id: @table.id } : nil
+      return
+    end
 
     @guest = Guest.find_by(user_id: current_user.id, powerbase_database_id: @database.id)
 
@@ -78,6 +105,56 @@ class PowerbaseTablesController < ApplicationController
       render json: format_json(@table)
     else
       render json: @table.errors, status: :unprocessable_entity
+    end
+  end
+
+  # POST /databases/:database_id/tables
+  def create
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    current_user.can?(:add_tables, @database)
+
+    begin
+      table_creator = Tables::Creator.new safe_params[:name], @database, order: @database.tables.length + 1, table_alias: safe_params[:alias]
+      table_creator.save
+      @table = table_creator.object
+
+      safe_params[:fields].each_with_index do |field, index|
+        field_name = field[:is_virtual] ? field[:name].snakecase : field[:name]
+        field_creator = Fields::Creator.new([field_name, {
+          alias: field[:alias],
+          allow_null: field[:is_nullable],
+          is_pii: field[:is_pii],
+          has_validation: field[:has_validation],
+          field_type_id: field[:field_type_id],
+          is_virtual: field[:is_virtual],
+          db_type: field[:db_type],
+          primary_key: field[:is_primary_key],
+          # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
+          enum_values: field[:select_options],
+          options: field[:options],
+        }], @table)
+        field_creator.save
+      end
+
+      columns = safe_params[:fields]
+        .select {|field| !field[:is_virtual]}
+        .map do |field|
+          {
+            name: field[:name],
+            data_type: field[:db_type],
+            enum_values: field[:select_options],
+            primary_key: field[:is_primary_key],
+            null: field[:is_nullable],
+          }
+        end
+      schema = Databases::Schema.new @database
+      schema.create_table(@table.name, columns)
+
+      @table.write_migration_logs!(status: "migrated")
+    rescue Sequel::DatabaseError => ex
+      table.remove
+      raise ex
     end
   end
 
@@ -182,49 +259,6 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  # This is a functional test endpoint for now alongside its corresponding helpers
-  # TODO - add to validation schema on revisiting the feature
-  def create
-    table_params = safe_params[:table]
-    fields_params = safe_params[:fields]
-    standardized_table_params = standardize_table_params(table_params)
-    res_fields = {}
-    @table = PowerbaseTable.create(standardized_table_params)
-    if !@table
-      render json: { error: "Could not create the new virtual table'" }, status: :unprocessable_entity
-      return
-    end
-    @view = TableView.create(
-      name: "Default",
-      view_type: "grid",
-      order: @table.table_views.count,
-      powerbase_table_id: @table.id,
-    )
-    if !@view
-      render json: { error: "Could not create a view for the new virtual table'" }, status: :unprocessable_entity
-      return
-    end
-    @table.default_view_id = @view.id
-    @table.save!
-    fields_params.each_with_index do |field_param, index|
-      standardized_field_params = standardize_field_params(field_param, @table)
-      cur_field = PowerbaseField.create(standardized_field_params)
-      res_fields[cur_field.name] = cur_field.id
-      view_field = ViewFieldOption.new
-      view_field.width = case cur_field.powerbase_field_type_id
-        when 3
-          cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
-        else
-          300
-      end
-      view_field.order = index + 1
-      view_field.table_view_id = @view.id
-      view_field.powerbase_field_id = cur_field.id
-      view_field.save!
-    end
-    render json: {table: format_json(table), fields: res_fields}
-  end
-
   # PUT /tables/:id/update_primary_keys
   def update_primary_keys
     @table.update_primary_keys(safe_params[:primary_keys])
@@ -310,34 +344,6 @@ class PowerbaseTablesController < ApplicationController
         id: field.id,
         name: field.name,
         alias: field.alias,
-      }
-    end
-
-    def standardize_table_params(params)
-      {
-        powerbase_database_id: params[:powerbase_database_id],
-        is_migrated: params[:is_migrated],
-        is_virtual: params[:is_virtual],
-        alias: params[:alias],
-        name: params[:name],
-        page_size: params[:page_size]
-      }
-    end
-
-    def standardize_field_params(params, table)
-     {
-        name: params[:name],
-        description: params[:description],
-        oid: params[:oid],
-        db_type: params[:db_type],
-        default_value: params[:default_value],
-        is_primary_key: params[:is_primary_key],
-        is_nullable: params[:is_nullable],
-        powerbase_table_id: table.id,
-        powerbase_field_type_id: params[:powerbase_field_type_id],
-        is_pii: params[:is_pii],
-        alias: params[:alias],
-        is_virtual: params[:is_virtual],
       }
     end
 end
