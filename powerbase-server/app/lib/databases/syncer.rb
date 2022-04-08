@@ -33,6 +33,7 @@ class Databases::Syncer
   def sync!
     if unmigrated_tables.empty? && dropped_tables.empty?
       puts "#{Time.now} -- Database##{powerbase_db.id} is already in synced."
+      powerbase_db.update_status!("migrated")
       return
     end
 
