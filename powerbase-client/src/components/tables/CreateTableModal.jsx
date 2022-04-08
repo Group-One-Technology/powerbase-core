@@ -24,6 +24,19 @@ import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 import { CreateTableName } from './CreateTable/CreateTableName';
 import { CreateTableFields } from './CreateTable/CreateTableFields';
 
+const INITIAL_FIELD = {
+  id: 0,
+  name: 'id',
+  alias: 'Id',
+  dbType: 'integer',
+  hasValidation: false,
+  isNullable: false,
+  isPii: false,
+  isVirtual: false,
+  isPrimaryKey: true,
+  options: null,
+};
+
 export function CreateTableModal({ open, setOpen }) {
   const { mounted } = useMounted();
   const { data: base } = useBase();
@@ -35,17 +48,8 @@ export function CreateTableModal({ open, setOpen }) {
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [tableType, setTableType] = useState(TABLE_TYPE[1]);
   const [fields, setFields] = useState([{
-    id: 0,
-    name: 'id',
-    alias: 'Id',
-    dbType: 'integer',
+    ...INITIAL_FIELD,
     fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
-    hasValidation: false,
-    isNullable: false,
-    isPii: false,
-    isVirtual: false,
-    isPrimaryKey: true,
-    options: null,
   }]);
 
   const disabled = !!(aliasError.error || tableNameError.error);
@@ -54,6 +58,16 @@ export function CreateTableModal({ open, setOpen }) {
   if (!base || !fieldTypes) return null;
 
   const cancel = () => setOpen(false);
+
+  const resetInputs = () => {
+    setTableName('', false);
+    setAlias('', false);
+    setTableType(TABLE_TYPE[1]);
+    setFields([{
+      ...INITIAL_FIELD,
+      fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
+    }]);
+  };
 
   const submit = async (evt) => {
     evt.preventDefault();
@@ -84,6 +98,7 @@ export function CreateTableModal({ open, setOpen }) {
       mutateTables();
       mounted(() => {
         dispatch.resolved(data);
+        resetInputs();
         setOpen(false);
       });
     } catch (err) {
