@@ -6,17 +6,21 @@ import { Listbox } from '@headlessui/react';
 
 import { COLUMN_DATA_TYPES } from '@lib/constants/field';
 import { FieldType, NUMBER_TYPES } from '@lib/constants/field-types';
+import { toSnakeCase } from '@lib/helpers/text/textTypeFormatters';
 
 export function FieldDataTypeSelect({
-  fieldType = FieldType.SINGLE_LINE_TEXT,
+  tableName,
+  fieldName,
+  fieldTypeName = FieldType.SINGLE_LINE_TEXT,
   dataType,
   setDataType,
   isDecimal,
+  isVirtual,
 }) {
   const [option, setOption] = useState();
-  const [options, setOptions] = useState(COLUMN_DATA_TYPES[fieldType]);
+  const [options, setOptions] = useState(COLUMN_DATA_TYPES[fieldTypeName]);
 
-  const hasPrecision = isDecimal || fieldType.name === FieldType.CURRENCY;
+  const hasPrecision = isDecimal || fieldTypeName === FieldType.CURRENCY;
 
   const handleDataTypeChange = (evt) => {
     const { value } = evt.target;
@@ -30,27 +34,42 @@ export function FieldDataTypeSelect({
   };
 
   useEffect(() => {
-    if (NUMBER_TYPES.includes(fieldType.name)) {
-      setOptions(COLUMN_DATA_TYPES[fieldType]);
+    if (NUMBER_TYPES.includes(fieldTypeName)) {
+      setOptions(COLUMN_DATA_TYPES[fieldTypeName]);
       setDataType(hasPrecision ? 'numeric' : 'integer');
       setOption(hasPrecision ? 'numeric' : 'integer');
     } else {
-      setOptions(COLUMN_DATA_TYPES[fieldType]);
-      setDataType(COLUMN_DATA_TYPES[fieldType][0]);
+      setOptions(COLUMN_DATA_TYPES[fieldTypeName]);
+
+      if (fieldTypeName === FieldType.SINGLE_SELECT) {
+        setDataType(`${toSnakeCase(tableName)}_${fieldName}_enum`);
+        setOption(null);
+      } else {
+        setDataType(COLUMN_DATA_TYPES[fieldTypeName][0]);
+      }
     }
-  }, [fieldType]);
+  }, [fieldTypeName]);
 
   useEffect(() => {
-    if (NUMBER_TYPES.includes(fieldType.name)) {
+    if (fieldTypeName === FieldType.SINGLE_SELECT) {
+      setDataType(`${toSnakeCase(tableName)}_${fieldName}_enum`);
+      setOption(null);
+    }
+  }, [tableName, fieldName]);
+
+  useEffect(() => {
+    if (NUMBER_TYPES.includes(fieldTypeName)) {
       setOption(hasPrecision ? 'numeric' : 'integer');
       setDataType(hasPrecision ? 'numeric' : 'integer');
     }
   }, [hasPrecision]);
 
+  if (isVirtual) return null;
+
   return (
     <Listbox value={option} onChange={handleDataTypeOptionChange}>
-      <div className="my-2 relative w-auto">
-        <label htmlFor="create-field-data-type" className="my-2 text-gray-900 text-sm">Data Type</label>
+      <div className="my-4 relative w-auto">
+        <label htmlFor="create-field-data-type" className="block text-sm font-medium text-gray-700 mb-2">Data Type</label>
         <div className="my-2">
           <div className="flex">
             <input
@@ -106,8 +125,11 @@ export function FieldDataTypeSelect({
 }
 
 FieldDataTypeSelect.propTypes = {
-  fieldType: PropTypes.oneOf(FieldType),
+  tableName: PropTypes.string.isRequired,
+  fieldName: PropTypes.string,
+  fieldTypeName: PropTypes.oneOf(FieldType),
   dataType: PropTypes.string,
   setDataType: PropTypes.func.isRequired,
   isDecimal: PropTypes.bool,
+  isVirtual: PropTypes.bool,
 };

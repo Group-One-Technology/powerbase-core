@@ -14,9 +14,20 @@ class Tables::Schema
     end
   end
 
-  def drop_column(field_name)
+  def drop_column(field)
     sequel_connect(database) do |db|
-      db.alter_table(table.name.to_sym) { drop_column(field_name.to_sym) }
+      db.alter_table(table.name.to_sym) { drop_column(field.name.to_sym) }
+
+      if field.powerbase_field_type.data_type == "enums"
+        db.drop_enum(field.db_type.to_sym)
+      end
+    end
+  end
+
+  # Only available for PostgreSQL databases.
+  def create_enum(data_type, enum_values)
+    sequel_connect(database) do |db|
+      db.create_enum(data_type.to_sym, enum_values)
     end
   end
 end

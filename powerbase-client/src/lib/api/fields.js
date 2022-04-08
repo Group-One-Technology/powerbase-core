@@ -90,6 +90,7 @@ export async function addField({
   fieldTypeId,
   isVirtual,
   dbType,
+  selectOptions,
   options,
 }) {
   const response = await securedApi.post(`/tables/${tableId}/field`, {
@@ -101,6 +102,7 @@ export async function addField({
     fieldTypeId,
     isVirtual,
     dbType,
+    selectOptions,
     options,
   });
   if (isResponseSuccess(response)) return response.data;

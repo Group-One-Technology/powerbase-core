@@ -16,6 +16,7 @@ export function CreateFieldName({
   fieldName,
   setFieldName,
   fieldNameError,
+  isVirtual,
 }) {
   const debouncedGetFieldByName = useConstant(() => AwesomeDebouncePromise(getFieldByName, DEBOUNCED_TIMEOUT));
   const search = useAsyncAbortable(
@@ -44,6 +45,8 @@ export function CreateFieldName({
 
   const handleNameChange = (evt) => setFieldName(evt.target.value);
 
+  if (isVirtual) return null;
+
   return (
     <Input
       type="text"
@@ -53,7 +56,7 @@ export function CreateFieldName({
       placeholder="e.g. first_name or firstName"
       value={fieldName}
       onChange={handleNameChange}
-      className="w-full"
+      className="my-4 w-full"
       showError={!fieldNameError.error?.message.includes('Still checking for existing field')}
       error={fieldNameError.error}
       caption={search.status === 'loading' && (
@@ -78,4 +81,5 @@ CreateFieldName.propTypes = {
   fieldName: PropTypes.string,
   setFieldName: PropTypes.func.isRequired,
   fieldNameError: PropTypes.any,
+  isVirtual: PropTypes.bool,
 };

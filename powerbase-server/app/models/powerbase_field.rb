@@ -27,17 +27,16 @@ class PowerbaseField < ApplicationRecord
   end
 
   def drop(sync_db = true)
-    field_name = self.name
     table = self.table
 
     # Drop column in Sequel
     if !self.is_virtual && sync_db
       schema = Tables::Schema.new table
-      schema.drop_column(field_name)
+      schema.drop_column(self)
     end
 
     # Remove column for every doc under index_name
-    remove_column(table.index_name, field_name)
+    remove_column(table.index_name, self.name)
 
     self.destroy
   end

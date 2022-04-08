@@ -55,11 +55,12 @@ class Fields::Creator
     field_select_options.name = field_options[:db_type]
 
     if database.postgresql?
-      field_select_options.values = field_options[:enum_values]
+      field_select_options.values = field_options[:enum_values].uniq
     elsif database.mysql2?
       field_select_options.values = field_options[:db_type].slice(5..-2)
         .tr("''", "")
         .split(",")
+        .uniq
     end
 
     field_select_options.powerbase_field_id = field.id
@@ -124,10 +125,17 @@ class Fields::Creator
       if field.save
         if !field.is_virtual && new_field
           table_schema = Tables::Schema.new table
+
+          if database.postgresql? && field.powerbase_field_type.data_type == "enums"
+            table_schema.create_enum(field.db_type, field_options[:enum_values].uniq)
+          end
+
           table_schema.add_column(field.name, field.db_type)
         end
 
-        if field.powerbase_field_type.data_type == "enums" && !field.is_virtual
+        if field.powerbase_field_type.data_type == "enums" &&
+          ((database.postgresql? && field_options[:enum_values] != nil) ||
+            (database.mysql2? && field_options[:db_type] != nil))
           add_field_select_options
         end
 
