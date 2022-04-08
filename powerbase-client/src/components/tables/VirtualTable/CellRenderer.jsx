@@ -119,6 +119,7 @@ export function CellRenderer({
           onSubmit={(initialValue, updatedValue) => {
             setIsEditing(false);
             setCellToEdit({});
+
             if (initialValue !== updatedValue) {
               onExitEditing(updatedValue);
             }

@@ -34,7 +34,7 @@ export function useEditingCell({ records, setRecords }) {
   }) => {
     const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
 
-    if (!(canEditFieldData && fields.length) || [FieldType.CHECKBOX].includes(fieldType.name)) {
+    if (!canEditFieldData && fields.length) {
       exitEditing();
       return;
     }

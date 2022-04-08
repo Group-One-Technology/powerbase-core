@@ -110,7 +110,7 @@ export function CellValue({
         type="checkbox"
         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         checked={value?.toString() === 'true'}
-        onChange={() => handleChange(!(value?.toString() === 'true'))}
+        onChange={(evt) => handleChange(evt.target.checked)}
       />
     );
   }
