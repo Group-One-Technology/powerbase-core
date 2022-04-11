@@ -91,7 +91,7 @@ class Fields::Creator
       powerbase_table_id: table.id,
       has_validation: field_options[:has_validation] || true,
       is_virtual: field_options[:is_virtual] || false,
-      is_primary_key: if field_options[:is_virtual]
+      is_primary_key: if field_options[:is_virtual] && !table.is_virtual
           false
         else
           field_options[:primary_key] || false

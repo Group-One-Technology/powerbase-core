@@ -114,7 +114,10 @@ class PowerbaseTablesController < ApplicationController
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:add_tables, @database)
 
-    table_creator = Tables::Creator.new safe_params[:name], @database, order: @database.tables.length + 1, table_alias: safe_params[:alias]
+    table_creator = Tables::Creator.new safe_params[:name], @database,
+      order: @database.tables.length + 1,
+      table_alias: safe_params[:alias],
+      is_virtual: safe_params[:is_virtual]
     table_creator.save
     @table = table_creator.object
 
@@ -315,6 +318,7 @@ class PowerbaseTablesController < ApplicationController
         order: table.order,
         is_hidden: table.is_hidden,
         is_migrated: table.is_migrated,
+        is_virtual: table.is_virtual,
         has_primary_key: table.has_primary_key?,
         status: table.status,
         is_reindexing: table.status == "indexing_records" || Array(table.logs["migration"]["old_primary_keys"]).length > 0,
@@ -339,6 +343,7 @@ class PowerbaseTablesController < ApplicationController
         migrated_fields: table.fields.map {|item| field_format_json(item)},
         logs: table.logs,
         is_migrated: table.is_migrated,
+        is_virtual: table.is_virtual,
         created_at: table.created_at,
         updated_at: table.updated_at,
       }
