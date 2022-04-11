@@ -4,6 +4,7 @@ import { useTableRecords } from '@models/TableRecords';
 
 export function useSyncRecord({
   tableId,
+  isVirtual,
   record,
   records,
   setRecord,
@@ -14,7 +15,7 @@ export function useSyncRecord({
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    if (!isSyncing && record?.length) {
+    if (!isSyncing && !isVirtual && record?.length) {
       setIsSyncing(true);
 
       const primaryKeys = record
