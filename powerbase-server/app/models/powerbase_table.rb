@@ -102,7 +102,10 @@ class PowerbaseTable < ApplicationRecord
     self.save
     BaseConnection.where(powerbase_table_id: self.id).destroy_all
     BaseConnection.where(referenced_table_id: self.id).destroy_all
-    delete_index(self.index_name) if index_exists?(self.index_name)
+    begin
+      delete_index(self.index_name) if index_exists?(self.index_name)
+    rescue Elasticsearch::Transport::Transport::Errors::NotFound => ex
+    end
     self.destroy
   end
 
