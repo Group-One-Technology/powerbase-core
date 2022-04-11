@@ -31,7 +31,7 @@ module Powerbase
       @table_id = @table.id
       @database = @table.db
       @adapter = @database.adapter || "postgresql"
-      @turbo = @database.is_turbo || false
+      @turbo = @database.is_turbo || @table.is_virtual || false
 
       @query = options[:query] ? sanitize(options[:query]) : nil
       @filter = options[:filter] || nil

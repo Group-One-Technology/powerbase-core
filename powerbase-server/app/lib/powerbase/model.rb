@@ -13,7 +13,7 @@ module Powerbase
       @table_name = @table.name
       @fields = @table.fields
       @database = @table.db
-      @is_turbo = @database.is_turbo
+      @is_turbo = @database.is_turbo || @table.is_virtual
     end
 
     # Add record for both turbo/non turbo bases.
@@ -228,7 +228,7 @@ module Powerbase
     # :primary_keys :: an object of the table's primary keys.
     #    Ex: { pathId: 123, userId: 1245 }
     def sync_record(options)
-      return if !@is_turbo
+      return if !@is_turbo || @table.is_virtual
       indexed_record = get(options)
       remote_record = get({ **options, is_remote_record: true })
       has_synced = false
