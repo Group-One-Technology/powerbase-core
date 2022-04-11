@@ -16,6 +16,12 @@ class Tables::Syncer
   # - new_table :: boolean - if the table is newly createdl.
   def initialize(table, schema: nil, foreign_keys: nil, new_connection: false, reindex: true, new_table: false)
     @table = table
+
+    if table.is_virtual
+      puts "Table##{table.id} is a virtual table, it doesn't need to sync."
+      return
+    end
+
     @database = table.db
     @new_connection = new_connection
     @reindex = reindex
@@ -67,10 +73,10 @@ class Tables::Syncer
 
   def in_synced?
     set_table_as_migrated(true)
-    !new_connection && unmigrated_columns.empty? && dropped_columns.empty? && updated_columns.empty? &&
+    table.is_virtual || (!new_connection && unmigrated_columns.empty? && dropped_columns.empty? && updated_columns.empty? &&
       is_records_synced &&
       !has_primary_key_changed? &&
-      !has_foreign_key_changed?
+      !has_foreign_key_changed?)
   end
 
   def sync!

@@ -75,7 +75,7 @@ class SyncDatabaseWorker < ApplicationWorker
         # Re-checking tables if in-synced
         unsynced_table_schemas = {}
         unsynced_table_keys = {}
-        tables = database.tables
+        tables = database.actual_tables
         tables.each do |table|
           puts "#{Time.now} -- Checking if table##{table.id} is in synced for db##{database.id}"
           table_name = table.name.to_sym
