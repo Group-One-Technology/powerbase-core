@@ -93,7 +93,7 @@ function CellRenderer({
           className="mr-1"
         />
         <span id={`field-${field.id}-name`}>{field.alias || field.name}</span>
-        {field.isVirtual && (
+        {(field.isVirtual && !table.isVirtual) && (
           <SparklesIcon
             className={cn('h-5 w-5 ml-auto cursor-auto select-none', OUTLINE_COLORS[base.color])}
           />

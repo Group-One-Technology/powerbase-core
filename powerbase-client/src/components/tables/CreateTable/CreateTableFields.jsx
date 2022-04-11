@@ -23,6 +23,7 @@ function FieldItem({
   remove,
   setAsPrimaryKey,
   unsetAsPrimaryKey,
+  isVirtual,
 }) {
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
@@ -53,7 +54,7 @@ function FieldItem({
           ({fieldType.name})
         </span>
       </div>
-      {field.isVirtual && (
+      {(field.isVirtual && !isVirtual) && (
         <SparklesIcon
           className="h-5 w-5 ml-auto cursor-auto select-none text-indigo-500"
         />
@@ -102,6 +103,7 @@ FieldItem.propTypes = {
   update: PropTypes.func,
   setAsPrimaryKey: PropTypes.func,
   unsetAsPrimaryKey: PropTypes.func,
+  isVirtual: PropTypes.bool,
 };
 
 export function CreateTableFields({
@@ -188,6 +190,7 @@ export function CreateTableFields({
                     setAsPrimaryKey={field.isPrimaryKey
                       ? null
                       : () => togglePrimaryKey(field.id, true)}
+                    isVirtual={isVirtual}
                   />
                 ))}
               </ul>
