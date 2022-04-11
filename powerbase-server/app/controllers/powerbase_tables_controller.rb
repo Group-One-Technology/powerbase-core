@@ -114,46 +114,51 @@ class PowerbaseTablesController < ApplicationController
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:add_tables, @database)
 
-    begin
-      table_creator = Tables::Creator.new safe_params[:name], @database, order: @database.tables.length + 1, table_alias: safe_params[:alias]
-      table_creator.save
-      @table = table_creator.object
+    table_creator = Tables::Creator.new safe_params[:name], @database, order: @database.tables.length + 1, table_alias: safe_params[:alias]
+    table_creator.save
+    @table = table_creator.object
 
-      safe_params[:fields].each_with_index do |field, index|
-        field_name = field[:is_virtual] ? field[:name].snakecase : field[:name]
-        field_creator = Fields::Creator.new([field_name, {
-          alias: field[:alias],
-          allow_null: field[:is_nullable],
-          is_pii: field[:is_pii],
-          has_validation: field[:has_validation],
-          field_type_id: field[:field_type_id],
-          is_virtual: field[:is_virtual],
-          db_type: field[:db_type],
-          primary_key: field[:is_primary_key],
-          # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
+    safe_params[:fields].each_with_index do |field, index|
+      is_virtual = @table.is_virtual || field[:is_virtual]
+      field_name = is_virtual ? field[:name].snakecase : field[:name]
+
+      field_creator = Fields::Creator.new([field_name, {
+        alias: field[:alias],
+        allow_null: field[:is_nullable],
+        is_pii: field[:is_pii],
+        has_validation: field[:has_validation],
+        field_type_id: field[:field_type_id],
+        is_virtual: is_virtual,
+        db_type: field[:db_type],
+        primary_key: field[:is_primary_key],
+        # * Select field types currently only supports postgresql hence the enum_values, mysql uses db_type for its option values.
+        enum_values: field[:select_options],
+        options: field[:options],
+      }], @table)
+      field_creator.save
+    end
+
+    columns = safe_params[:fields]
+      .select {|field| !field[:is_virtual]}
+      .map do |field|
+        {
+          name: field[:name],
+          data_type: field[:db_type],
           enum_values: field[:select_options],
-          options: field[:options],
-        }], @table)
-        field_creator.save
+          primary_key: field[:is_primary_key],
+          null: field[:is_nullable],
+        }
       end
 
-      columns = safe_params[:fields]
-        .select {|field| !field[:is_virtual]}
-        .map do |field|
-          {
-            name: field[:name],
-            data_type: field[:db_type],
-            enum_values: field[:select_options],
-            primary_key: field[:is_primary_key],
-            null: field[:is_nullable],
-          }
-        end
-      schema = Databases::Schema.new @database
-      schema.create_table(@table.name, columns)
+    begin
+      if !@table.is_virtual
+        schema = Databases::Schema.new @database
+        schema.create_table(@table.name, columns)
+      end
 
       @table.write_migration_logs!(status: "migrated")
     rescue Sequel::DatabaseError => ex
-      table.remove
+      @table.remove
       raise ex
     end
   end
