@@ -91,7 +91,9 @@ module Powerbase
         end
       end
 
-      update_remote_record(primary_keys: primary_keys, data: remote_data) if remote_data.length > 0
+      if !@table.is_virtual && remote_data.length > 0
+        update_remote_record(primary_keys: primary_keys, data: remote_data)
+      end
       update_doc_record(primary_keys: primary_keys, data: virtual_data) if virtual_data.length > 0
 
       true
@@ -165,13 +167,15 @@ module Powerbase
         end
       end
 
-      query = Powerbase::QueryCompiler.new(@table)
-      sequel_query = query.find_by(primary_keys).to_sequel
-      sequel_connect(@database) {|db|
-        db.from(@table_name.to_sym)
-          .yield_self(&sequel_query)
-          .delete()
-      }
+      if !@table.is_virtual
+        query = Powerbase::QueryCompiler.new(@table)
+        sequel_query = query.find_by(primary_keys).to_sequel
+        sequel_connect(@database) {|db|
+          db.from(@table_name.to_sym)
+            .yield_self(&sequel_query)
+            .delete()
+        }
+      end
     end
 
     # * Get a document/table record.

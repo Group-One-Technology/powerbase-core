@@ -9,7 +9,7 @@ class Databases::Syncer
   def initialize(powerbase_db, new_connection: false, tables: nil)
     @powerbase_db = powerbase_db
     @new_connection = new_connection
-    @powerbase_tables = @powerbase_db.tables
+    @powerbase_tables = @powerbase_db.actual_tables
 
     begin
       @tables = tables || sequel_connect(@powerbase_db) {|db| db.tables}

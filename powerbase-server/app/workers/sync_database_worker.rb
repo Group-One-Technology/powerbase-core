@@ -37,7 +37,7 @@ class SyncDatabaseWorker < ApplicationWorker
       return index_records
     end
 
-    database.tables.each do |table|
+    database.actual_tables.each do |table|
       table.write_migration_logs!(status: "migrated")
     end
 
@@ -166,7 +166,7 @@ class SyncDatabaseWorker < ApplicationWorker
         :new_connection => new_connection,
       )
       batch.jobs do
-        database.tables.each {|table| table.migrator.create_listener_later!}
+        database.actual_tables.each {|table| table.migrator.create_listener_later!}
       end
 
       puts "#{Time.now} -- Started Batch #{batch.bid} -- Creating listeners for database##{database.id}"
@@ -182,7 +182,7 @@ class SyncDatabaseWorker < ApplicationWorker
         :new_connection => new_connection,
       )
       batch.jobs do
-        database.tables.each(&:reindex_later!)
+        database.actual_tables.each(&:reindex_later!)
       end
 
       puts "#{Time.now} -- Started Batch #{batch.bid} -- Indexing records for database##{database.id}"
