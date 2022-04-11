@@ -143,6 +143,7 @@ export function CellRenderer({
       onEditCell={handleEditCell}
       className={className}
       style={style}
+      isLastRow={isLastRow}
     >
       <CellValue
         value={value}

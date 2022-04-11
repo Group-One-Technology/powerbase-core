@@ -20,6 +20,7 @@ export function CellMenu({
   setHoveredCell,
   children,
   onEditCell,
+  isLastRow,
   ...props
 }) {
   const { mounted } = useMounted();
@@ -84,6 +85,10 @@ export function CellMenu({
     }
   };
 
+  if (isLastRow) {
+    return <div {...props}>{children}</div>;
+  }
+
   return (
     <>
       <ContextMenu.Root open={open} onOpenChange={handleOpenChange}>
@@ -135,4 +140,5 @@ CellMenu.propTypes = {
   setRecords: PropTypes.func.isRequired,
   setHoveredCell: PropTypes.func.isRequired,
   onEditCell: PropTypes.func.isRequired,
+  isLastRow: PropTypes.bool,
 };
