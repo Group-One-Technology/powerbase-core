@@ -41,7 +41,7 @@ module Powerbase
       @is_magic_sort = false
       @is_magic_filter = false
 
-      @fields = @table.fields
+      @fields = @table.fields.order(name: :asc).reload
       @actual_fields = @fields.select {|item| !item.is_virtual}
       @magic_fields = @fields.select {|item| item.is_virtual}
       @field_types = PowerbaseFieldType.all
@@ -673,13 +673,13 @@ module Powerbase
             { field: sort_item[:field], operator: operator }
           end
         elsif @sort.kind_of?(Array)
-          primary_keys = @fields.order(name: :asc).select {|field| field.is_primary_key }
+          primary_keys = @fields.select {|field| field.is_primary_key }
           order_field = if primary_keys.length > 0
               primary_keys.first
             elsif !@turbo
-              @actual_fields.order(name: :asc).first
+              @actual_fields.first
             elsif is_magic_values
-              @magic_fields.order(name: :asc).first
+              @magic_fields.first
             end
 
           order_field != nil ? [{ field: order_field.name, operator: "asc" }] : []
