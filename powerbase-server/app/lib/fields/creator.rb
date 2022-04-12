@@ -102,7 +102,13 @@ class Fields::Creator
           field_options[:auto_increment] || false
         end,
       is_pii: if table.has_primary_key?
-          field_options[:is_pii] || (field_options[:primary_key] ? false : Pii.is_pii?(field_name))
+          if field_options[:is_pii] != nil
+            field_options[:is_pii]
+          elsif field_options[:primary_key]
+            false
+          else
+            Pii.is_pii?(field_name)
+          end
         else
           false
         end,
