@@ -86,7 +86,7 @@ class Tables::Migrator
       fetch_table_records!
 
       records.each do |record|
-        doc = format_record(record, fields)
+        doc = format_record(record.symbolize_keys, fields)
         doc_id = get_doc_id(primary_keys, doc, actual_fields)
         puts "#{Time.now} -- Record to index at #{index_name} DOC_ID: #{doc_id}"
 
@@ -136,11 +136,11 @@ class Tables::Migrator
               begin
                 found_doc = get_record(index_name, search_doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-                puts "#{Time.now} -- No old document found for doc_id of #{doc_id}"
+                puts "#{Time.now} -- No old document found for doc_id of #{search_doc_id}"
               end
 
               if found_doc != nil && found_doc.key?("_source")
-                old_doc = found_doc["_source"]
+                old_doc = found_doc["_source"].symbolize_keys
                 old_doc_id = search_doc_id
 
                 # Remove the old existing doc
@@ -169,6 +169,7 @@ class Tables::Migrator
               begin
                 found_doc = get_record(index_name, doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                found_doc = nil
                 puts "#{Time.now} -- No existing document found for doc_id of #{doc_id}"
               end
 
@@ -178,6 +179,8 @@ class Tables::Migrator
                 else
                   existing_doc = found_doc["_source"]
                 end
+
+                existing_doc = existing_doc.symbolize_keys
               end
 
               existing_doc&.each do |key, value|
@@ -249,7 +252,7 @@ class Tables::Migrator
     begin
       # Remove _in_synced column for every doc under index_name
       remove_column(index_name, "_in_synced")
-    rescue ex
+    rescue => ex
       puts ex
     end
 

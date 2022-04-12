@@ -62,7 +62,10 @@ class Tables::Syncer
   end
 
   def has_primary_key_changed?
-    @has_primary_key_changed ||= @primary_keys != @primary_keys_fields
+    # Record old primary keys for reindexing to know the old doc_id
+    has_old_primary_keys = Array(table.logs["migration"]["old_primary_keys"]).length > 0
+
+    @has_primary_key_changed ||= @primary_keys != @primary_keys_fields && !has_old_primary_keys
   end
 
   def has_foreign_key_changed?
@@ -112,7 +115,6 @@ class Tables::Syncer
     if !new_connection
       if has_primary_key_changed
         puts "#{Time.now} -- Migrating changed primary key(s)"
-        # Record old primary keys for reindexing to know the old doc_id
         table.write_migration_logs!(old_primary_keys: primary_keys_fields)
 
         # Update primary key fields
