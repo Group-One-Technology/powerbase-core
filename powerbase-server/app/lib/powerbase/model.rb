@@ -285,12 +285,15 @@ module Powerbase
     # Accepts the following options:
     # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
-    # :sort :: a JSON that contains the sort for the records.
+    # :sort :: a JSON array that contains the sort for the records.
     # :page :: the page number.
+    # :offset :: get records on offset value instead of page number.
     # :limit :: the page count. No. of records to get per page.
     def search(options)
       page = options[:page] || 1
       limit = options[:limit] || @table.page_size
+      offset = options[:offset] != nil ? options[:offset] : (page - 1) * limit
+
       query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         filter: options[:filters],
@@ -301,7 +304,7 @@ module Powerbase
       if @is_turbo
         create_index!(@index)
         search_params = query.to_elasticsearch
-        search_params[:from] = (page - 1) * limit
+        search_params[:from] = offset
         search_params[:size] = limit
         result = search_records(@index, search_params)
         result = format_es_result(result)
@@ -311,7 +314,7 @@ module Powerbase
 
         if magic_search_params != nil
           create_index!(@index)
-          magic_search_params[:from] = (page - 1) * limit
+          magic_search_params[:from] = offset
           magic_search_params[:size] = limit + 100
           magic_result = search_records(@index, magic_search_params)
           magic_records = format_es_result(magic_result)
