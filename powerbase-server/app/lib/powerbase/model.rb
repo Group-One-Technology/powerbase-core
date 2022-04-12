@@ -13,7 +13,7 @@ module Powerbase
       @table_name = @table.name
       @fields = @table.fields
       @database = @table.db
-      @is_turbo = @database.is_turbo
+      @is_turbo = @database.is_turbo || @table.is_virtual
     end
 
     # Add record for both turbo/non turbo bases.
@@ -36,7 +36,7 @@ module Powerbase
         end
       end
 
-      if remote_data.length > 0
+      if !@table.is_virtual && remote_data.length > 0
         default_value_fields = @fields.find {|field| field.default_value != nil && field.default_value.length > 0}
         incremented_field = @fields.find {|field| field.is_primary_key && field.is_auto_increment}
 
@@ -56,13 +56,16 @@ module Powerbase
           table_query.yield_self(&sequel_query).first
         end
 
-        record = inserted_record if inserted_record != nil
+        record = { **record, **inserted_record } if inserted_record != nil
       end
 
       if @is_turbo || (virtual_data.length > 0 && primary_keys.length > 0)
         create_index!(@index)
         virtual_data = @is_turbo ? { **record, **virtual_data } : { **virtual_data, **primary_keys }
-        magic_result = create_new_record(@index, virtual_data, primary_keys)
+
+        fields = @fields.select {|item| primary_keys.keys.include?(item.name.to_sym) }
+        doc_id = get_doc_id(fields, virtual_data, @fields)
+        magic_result = update_record(@index, doc_id, virtual_data)
 
         if magic_result["result"] == "created"
           record = { **virtual_data, doc_id: magic_result["_id"] }
@@ -91,7 +94,9 @@ module Powerbase
         end
       end
 
-      update_remote_record(primary_keys: primary_keys, data: remote_data) if remote_data.length > 0
+      if !@table.is_virtual && remote_data.length > 0
+        update_remote_record(primary_keys: primary_keys, data: remote_data)
+      end
       update_doc_record(primary_keys: primary_keys, data: virtual_data) if virtual_data.length > 0
 
       true
@@ -154,24 +159,31 @@ module Powerbase
         return nil
       end
 
+      result = nil
       magic_fields = @fields.select {|field| field.is_virtual}
       doc_id = format_doc_id(primary_keys)
 
       if (@is_turbo || magic_fields.length > 0) && doc_id.present?
         begin
           delete_record(@index, doc_id)
+          result = true
         rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
           puts "#{Time.now} -- Not found doc_id: #{doc_id}"
         end
       end
 
-      query = Powerbase::QueryCompiler.new(@table)
-      sequel_query = query.find_by(primary_keys).to_sequel
-      sequel_connect(@database) {|db|
-        db.from(@table_name.to_sym)
-          .yield_self(&sequel_query)
-          .delete()
-      }
+      if !@table.is_virtual
+        result = nil
+        query = Powerbase::QueryCompiler.new(@table)
+        sequel_query = query.find_by(primary_keys).to_sequel
+        result = sequel_connect(@database) {|db|
+          db.from(@table_name.to_sym)
+            .yield_self(&sequel_query)
+            .delete()
+        }
+      end
+
+      result
     end
 
     # * Get a document/table record.
@@ -228,7 +240,7 @@ module Powerbase
     # :primary_keys :: an object of the table's primary keys.
     #    Ex: { pathId: 123, userId: 1245 }
     def sync_record(options)
-      return if !@is_turbo
+      return if !@is_turbo || @table.is_virtual
       indexed_record = get(options)
       remote_record = get({ **options, is_remote_record: true })
       has_synced = false
@@ -281,12 +293,15 @@ module Powerbase
     # Accepts the following options:
     # :query :: a string that contains the search query for the records.
     # :filter :: a JSON that contains the filter for the records.
-    # :sort :: a JSON that contains the sort for the records.
+    # :sort :: a JSON array that contains the sort for the records.
     # :page :: the page number.
+    # :offset :: get records on offset value instead of page number.
     # :limit :: the page count. No. of records to get per page.
     def search(options)
       page = options[:page] || 1
       limit = options[:limit] || @table.page_size
+      offset = options[:offset] != nil ? options[:offset] : (page - 1) * limit
+
       query = Powerbase::QueryCompiler.new(@table, {
         query: options[:query],
         filter: options[:filters],
@@ -297,7 +312,7 @@ module Powerbase
       if @is_turbo
         create_index!(@index)
         search_params = query.to_elasticsearch
-        search_params[:from] = (page - 1) * limit
+        search_params[:from] = offset
         search_params[:size] = limit
         result = search_records(@index, search_params)
         result = format_es_result(result)
@@ -307,7 +322,7 @@ module Powerbase
 
         if magic_search_params != nil
           create_index!(@index)
-          magic_search_params[:from] = (page - 1) * limit
+          magic_search_params[:from] = offset
           magic_search_params[:size] = limit + 100
           magic_result = search_records(@index, magic_search_params)
           magic_records = format_es_result(magic_result)

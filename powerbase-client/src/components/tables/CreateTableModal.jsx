@@ -46,7 +46,7 @@ export function CreateTableModal({ open, setOpen }) {
 
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
-  const [tableType, setTableType] = useState(TABLE_TYPE[1]);
+  const [tableType, setTableType] = useState(TABLE_TYPE[0]);
   const [fields, setFields] = useState([{
     ...INITIAL_FIELD,
     fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
@@ -62,7 +62,7 @@ export function CreateTableModal({ open, setOpen }) {
   const resetInputs = () => {
     setTableName('', false);
     setAlias('', false);
-    setTableType(TABLE_TYPE[1]);
+    setTableType(TABLE_TYPE[0]);
     setFields([{
       ...INITIAL_FIELD,
       fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
@@ -93,7 +93,9 @@ export function CreateTableModal({ open, setOpen }) {
         name: tableName,
         alias,
         isVirtual,
-        fields,
+        fields: isVirtual
+          ? fields.map((item) => ({ ...item, isVirtual: true }))
+          : fields,
       });
       mutateTables();
       mounted(() => {
@@ -146,6 +148,7 @@ export function CreateTableModal({ open, setOpen }) {
           />
           <CreateTableFields
             tableName={tableName}
+            isVirtual={isVirtual}
             fields={fields}
             setFields={setFields}
           />

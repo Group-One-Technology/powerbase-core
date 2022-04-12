@@ -21,7 +21,7 @@ class NonTurboDbRecordsSyncerCronWorker < ApplicationWorker
   def initialize_sync_tables!
     puts "#{Time.now} Autosync Table Records..."
     dbs.each do |db|
-      db.tables.each do |table|
+      db.actual_tables.each do |table|
         table_syncer = Tables::Syncer.new table
         table_syncer.sync!
       end

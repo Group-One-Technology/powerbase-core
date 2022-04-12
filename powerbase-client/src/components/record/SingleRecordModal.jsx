@@ -64,6 +64,7 @@ export function BaseSingleRecordModal({
 
   const { isSyncing } = useSyncRecord({
     tableId: table.id,
+    isVirtual: table.isVirtual,
     record: initialRecord,
     records,
     setRecord,
@@ -214,7 +215,7 @@ export function BaseSingleRecordModal({
               <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
                 {table.name.toUpperCase()}
               </Dialog.Title>
-              {base.isTurbo && (
+              {(base.isTurbo && !table.isVirtual) && (
                 <Tooltip.Root delayDuration={0}>
                   <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
                     <span className="sr-only">{isSyncing ? 'Syncing record' : 'Record synced'}</span>

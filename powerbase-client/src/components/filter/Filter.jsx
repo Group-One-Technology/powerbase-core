@@ -1,6 +1,7 @@
 import React, {
   Fragment, useRef, useCallback, useState, useEffect,
 } from 'react';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Popover, Transition } from '@headlessui/react';
 import { FilterIcon, TableIcon } from '@heroicons/react/outline';
@@ -21,7 +22,7 @@ import { buildFilterTree } from '@lib/helpers/filter/buildFilterTree';
 import { getFilterFieldNames } from '@lib/helpers/filter/getFilterFieldNames';
 import { FilterGroup } from './FilterGroup';
 
-export function Filter() {
+export function Filter({ table }) {
   const filterRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: base } = useBase();
@@ -30,7 +31,7 @@ export function Filter() {
   const { data: fields } = useViewFields();
   const { filters: { value: initialFilters }, setFilters } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const [isMagicFilter, setIsMagicFilter] = useState(false);
+  const [isMagicFilter, setIsMagicFilter] = useState(table.isVirtual);
   const [isSingleFilter, setIsSingleFilter] = useState(false);
 
   const canManageViews = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
@@ -41,10 +42,12 @@ export function Filter() {
       const uniqueFieldNames = filterFieldNames.filter((item, index) => filterFieldNames.indexOf(item) === index);
 
       setIsSingleFilter(filterFieldNames.length === 1);
-      setIsMagicFilter(uniqueFieldNames.some((filterField) => {
-        const field = fields.find((item) => item.name === filterField);
-        return field.isVirtual;
-      }));
+      if (!table.isVirtual) {
+        setIsMagicFilter(uniqueFieldNames.some((filterField) => {
+          const field = fields.find((item) => item.name === filterField);
+          return field.isVirtual;
+        }));
+      }
     }
   }, [fields, initialFilters]);
 
@@ -143,3 +146,7 @@ export function Filter() {
     </Popover>
   );
 }
+
+Filter.propTypes = {
+  table: PropTypes.object.isRequired,
+};

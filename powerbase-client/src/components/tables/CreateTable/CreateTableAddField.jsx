@@ -5,9 +5,8 @@ import { XIcon } from '@heroicons/react/outline';
 import { CreateField } from '@components/fields/CreateField';
 
 export function CreateTableAddField({
-  tableName,
+  table,
   fieldId,
-  hasPrimaryKey,
   fields,
   update,
   submit,
@@ -32,7 +31,7 @@ export function CreateTableAddField({
         <div className="mt-4">
           <CreateField
             fieldId={fieldId}
-            table={{ name: tableName, hasPrimaryKey }}
+            table={table}
             fields={fields}
             cancel={cancel}
             update={fieldId != null ? update : null}
@@ -46,9 +45,8 @@ export function CreateTableAddField({
 }
 
 CreateTableAddField.propTypes = {
-  tableName: PropTypes.string,
+  table: PropTypes.object,
   fieldId: PropTypes.number,
-  hasPrimaryKey: PropTypes.bool,
   fields: PropTypes.array.isRequired,
   update: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,

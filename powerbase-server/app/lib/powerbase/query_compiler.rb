@@ -31,7 +31,7 @@ module Powerbase
       @table_id = @table.id
       @database = @table.db
       @adapter = @database.adapter || "postgresql"
-      @turbo = @database.is_turbo || false
+      @turbo = @database.is_turbo || @table.is_virtual || false
 
       @query = options[:query] ? sanitize(options[:query]) : nil
       @filter = options[:filter] || nil
@@ -41,8 +41,9 @@ module Powerbase
       @is_magic_sort = false
       @is_magic_filter = false
 
-      @fields = PowerbaseField.where(powerbase_table_id: @table_id, is_virtual: false)
-      @magic_fields = @table.magic_fields
+      @fields = @table.fields.order(name: :asc).reload
+      @actual_fields = @fields.select {|item| !item.is_virtual}
+      @magic_fields = @fields.select {|item| item.is_virtual}
       @field_types = PowerbaseFieldType.all
       @field_type = {}
       @field_types.each {|field_type| @field_type[field_type.id] = field_type.name }
@@ -94,7 +95,7 @@ module Powerbase
 
         # For full text search
         if @query != nil && @query.length > 0
-          filters = @fields.map do |field|
+          filters = @actual_fields.map do |field|
             field_type = @field_type[field.powerbase_field_type_id]
             column = {}
             column[field.name.to_sym] = @query
@@ -433,7 +434,7 @@ module Powerbase
             next transform_sequel_filter(filter)
           end
 
-          field = @fields.find {|item| item.name.to_s == filter[:field].to_s}
+          field = @actual_fields.find {|item| item.name.to_s == filter[:field].to_s}
           next if !field
 
           field_type = @field_type[field.powerbase_field_type_id]
@@ -563,9 +564,9 @@ module Powerbase
           when "is not"
             "(NOT #{field}:\"#{value}\")"
           when "contains"
-            "#{field}:#{value}"
+            "#{field}:*#{value}*"
           when "does not contain"
-            "(NOT #{field}:#{value})"
+            "(NOT #{field}:*#{value}*)"
           when "="
             "#{field}:#{value}"
           when "!="
@@ -644,12 +645,12 @@ module Powerbase
 
       def filtered_fields(is_magic_records = false, is_elasticsearch = false)
         included_fields =  if !is_elasticsearch
-            @fields
+            @actual_fields
           elsif is_magic_records
-            primary_key_fields = @fields.select {|field| field.is_primary_key}
+            primary_key_fields = @actual_fields.select {|field| field.is_primary_key}
             [*@magic_fields, *primary_key_fields]
           else
-            [*@fields, *@magic_fields]
+            @fields
           end
 
         if !@include_pii
@@ -672,13 +673,13 @@ module Powerbase
             { field: sort_item[:field], operator: operator }
           end
         elsif @sort.kind_of?(Array)
-          primary_keys = @fields.order(name: :asc).select {|field| field.is_primary_key }
+          primary_keys = @fields.select {|field| field.is_primary_key }
           order_field = if primary_keys.length > 0
               primary_keys.first
             elsif !@turbo
-              @fields.order(name: :asc).first
+              @actual_fields.first
             elsif is_magic_values
-              @magic_fields..order(name: :asc).first
+              @magic_fields.first
             end
 
           order_field != nil ? [{ field: order_field.name, operator: "asc" }] : []
@@ -694,7 +695,7 @@ module Powerbase
           formatted_sort
         else
           formatted_sort.select do |sort_item|
-            !!@fields.find{|item| item.name == sort_item[:field].to_s}
+            !!@actual_fields.find{|item| item.name == sort_item[:field].to_s}
           end
         end
       end

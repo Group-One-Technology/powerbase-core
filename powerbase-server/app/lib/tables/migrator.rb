@@ -6,28 +6,33 @@ class Tables::Migrator
 
   attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
-                :indexed_records, :total_records, :records,
+                :indexed_records, :total_records, :total_indexed_records, :records,
                 :database, :in_synced
 
   def initialize(table)
     @table = table
     @index_name = table.index_name
     @fields = table.fields.reload
-    @primary_keys = table.primary_keys
-    @order_field = primary_keys.first || fields.first
+    @primary_keys = table.primary_keys.reload
+    @order_field = primary_keys.first || (table.is_virtual ? fields.first : table.actual_fields.first)
     @adapter = table.db.adapter
     @database = table.db
     @offset = table.logs["migration"]["offset"] || 0
     @indexed_records = table.logs["migration"]["indexed_records"] || 0
-    @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
+
+    if !table.is_virtual
+      @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
+    end
   end
 
   def total_indexed_records
-    Powerbase::Model.new(@table).get_count
+    @total_indexed_records ||= Powerbase::Model.new(@table).get_count
   end
 
   def in_synced?
-    if @database.is_turbo
+    if @table.is_virtual
+      true
+    elsif @database.is_turbo
       @in_synced ||= @total_records == total_indexed_records
     else
       has_virtual_fields = fields.any?{|field| field.is_virtual}
@@ -41,8 +46,13 @@ class Tables::Migrator
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
+    if table.is_virtual && old_primary_keys.length === 0
+      set_table_as_migrated
+      return
+    end
+
     # Reset all migration counter logs when first time indexing or when re-indexing.
-    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records")
+    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records") || table.is_virtual || old_primary_keys.length > 0
       @offset = 0
       @indexed_records = 0
       table.write_migration_logs!(
@@ -64,7 +74,7 @@ class Tables::Migrator
 
     table.write_migration_logs!(status: "indexing_records")
 
-    if total_records.zero?
+    if (!table.is_virtual && total_records.zero?) || (table.is_virtual && total_indexed_records.zero?)
       puts "#{Time.now} -- Indexing done. No record found for table##{table.id}"
       set_table_as_migrated
       return
@@ -72,17 +82,18 @@ class Tables::Migrator
 
     puts "#{Time.now} -- Saving #{total_records} documents at index #{index_name} table##{table.id}..."
 
-    while offset < total_records
+    while (!table.is_virtual && offset < total_records) || (table.is_virtual && offset < total_indexed_records)
       fetch_table_records!
 
       records.each do |record|
-        doc = format_record(record, fields)
-        doc_id = get_doc_id(primary_keys, doc, actual_fields)
+        doc = format_record(record.symbolize_keys, fields)
+        doc_id = get_doc_id(primary_keys, doc, table.is_virtual ? fields : actual_fields)
         puts "#{Time.now} -- Record to index at #{index_name} DOC_ID: #{doc_id}"
 
         begin
           doc_size = get_doc_size(doc)
-          if !is_indexable?(doc_size)
+
+          if !table.is_virtual && !is_indexable?(doc_size)
             error_message = "Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 80MB"
             puts error_message
             Sentry.set_context('record', {
@@ -125,11 +136,11 @@ class Tables::Migrator
               begin
                 found_doc = get_record(index_name, search_doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
-                puts "#{Time.now} -- No old document found for doc_id of #{doc_id}"
+                puts "#{Time.now} -- No old document found for doc_id of #{search_doc_id}"
               end
 
               if found_doc != nil && found_doc.key?("_source")
-                old_doc = found_doc["_source"]
+                old_doc = found_doc["_source"].symbolize_keys
                 old_doc_id = search_doc_id
 
                 # Remove the old existing doc
@@ -142,15 +153,16 @@ class Tables::Migrator
               end
             end
 
-            if database.is_turbo
+            if database.is_turbo || table.is_virtual
               # Merge old document's data with updated doc - Actual and Magic Values (if any)
               if old_doc != nil && old_doc.length > 0
                 doc = { **old_doc, **doc }
               end
+            # Reindexing for non-turbo bases with virtual fields.
             else
               # Pick virtual and primary key data for doc.
               updated_doc = {}
-              existing_doc = {}
+              existing_doc = old_doc.nil? ? {} : old_doc.symbolize_keys
 
               virtual_fields = fields.select {|field| field.is_virtual}
 
@@ -158,15 +170,12 @@ class Tables::Migrator
               begin
                 found_doc = get_record(index_name, doc_id)
               rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
+                found_doc = nil
                 puts "#{Time.now} -- No existing document found for doc_id of #{doc_id}"
               end
 
               if found_doc != nil && found_doc.key?("_source")
-                if old_doc != nil
-                  existing_doc = { **old_doc, **found_doc["_source"] }
-                else
-                  existing_doc = found_doc["_source"]
-                end
+                existing_doc = { **existing_doc, **found_doc["_source"] }.symbolize_keys
               end
 
               existing_doc&.each do |key, value|
@@ -235,9 +244,14 @@ class Tables::Migrator
       end
     end
 
-    # Remove _in_synced column for every doc under index_name
-    remove_column(index_name, "_in_synced")
+    begin
+      # Remove _in_synced column for every doc under index_name
+      remove_column(index_name, "_in_synced")
+    rescue => ex
+      puts ex
+    end
 
+    table.write_migration_logs!(old_primary_keys: [])
     set_table_as_migrated
   end
 
@@ -245,22 +259,24 @@ class Tables::Migrator
     puts "#{Time.now} -- Adding and auto linking connections of table##{table.id}"
     table.write_migration_logs!(status: "adding_connections")
 
-    table_foreign_keys = foreign_keys || sequel_connect(database) {|db| db.foreign_key_list(table.name) }
-    table_foreign_keys.each do |foreign_key|
-      referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
+    if !table.is_virtual
+      table_foreign_keys = foreign_keys || sequel_connect(database) {|db| db.foreign_key_list(table.name) }
+      table_foreign_keys.each do |foreign_key|
+        referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
-      if referenced_table
-        conn_creator = BaseConnection::Creator.new table, {
-          name: foreign_key[:name],
-          columns: foreign_key[:columns],
-          powerbase_table_id: table.id,
-          powerbase_database_id: table.powerbase_database_id,
-          referenced_columns: foreign_key[:key],
-          referenced_table_id:  referenced_table.id,
-          referenced_database_id:  referenced_table.powerbase_database_id,
-          is_constraint: true,
-        }
-        conn_creator.save
+        if referenced_table
+          conn_creator = BaseConnection::Creator.new table, {
+            name: foreign_key[:name],
+            columns: foreign_key[:columns],
+            powerbase_table_id: table.id,
+            powerbase_database_id: table.powerbase_database_id,
+            referenced_columns: foreign_key[:key],
+            referenced_table_id:  referenced_table.id,
+            referenced_database_id:  referenced_table.powerbase_database_id,
+            is_constraint: true,
+          }
+          conn_creator.save
+        end
       end
     end
 
@@ -386,14 +402,27 @@ class Tables::Migrator
 
   private
   def fetch_table_records!
-    sequel_connect(database) do |db|
-      table_query = db.from(table.name)
-      @total_records = table_query.count
-      @records = table_query
-        .order(order_field.name.to_sym)
-        .limit(DEFAULT_PAGE_SIZE)
-        .offset(offset)
-        .all
+    if table.is_virtual
+      model = Powerbase::Model.new(table)
+      @records = model.search({
+        offset: offset,
+        limit: DEFAULT_PAGE_SIZE,
+        sort: [{
+          id: "#{order_field.name}-ascending-0",
+          field: order_field.name,
+          operator: "ascending",
+        }],
+      })
+    else
+      sequel_connect(database) do |db|
+        table_query = db.from(table.name)
+        @total_records = table_query.count
+        @records = table_query
+          .order(order_field.name.to_sym)
+          .limit(DEFAULT_PAGE_SIZE)
+          .offset(offset)
+          .all
+      end
     end
   end
 

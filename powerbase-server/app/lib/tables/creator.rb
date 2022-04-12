@@ -2,12 +2,13 @@ include SequelHelper
 include PusherHelper
 
 class Tables::Creator
-  attr_accessor :table_name, :table_alias, :order, :database, :table, :base_migration
+  attr_accessor :table_name, :table_alias, :order, :is_virtual, :database, :table, :base_migration
 
-  def initialize(table_name, database, order: nil, table_alias: nil)
+  def initialize(table_name, database, order: nil, table_alias: nil, is_virtual: false)
     @table_name = table_name
     @table_alias = table_alias || table_name.to_s.titlecase
     @order = order
+    @is_virtual = is_virtual
     @database = database
     @base_migration = database.base_migration
     initialize_new_table!
@@ -20,8 +21,9 @@ class Tables::Creator
     ) || PowerbaseTable.new
     table.name = table_name
     table.alias = table_alias
+    table.is_virtual = is_virtual
     table.powerbase_database_id = database.id
-    table.page_size = database.is_turbo ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
+    table.page_size = database.is_turbo || is_virtual ? DEFAULT_PAGE_SIZE_TURBO : DEFAULT_PAGE_SIZE
     table.order = table.order || order
     table.logs = { migration: { total_records: nil } }
   end

@@ -61,10 +61,11 @@ export function RecordItemValue({
   const [value, setValue, { error: valueError }] = useValidState(
     item.value ?? '',
     (curVal) => CELL_VALUE_VALIDATOR({
+      name: item.alias,
       value: curVal,
       type: fieldType.name,
-      required: !item.isNullable,
-      strict: item.hasValidation,
+      required: !item.isNullable && !item.isAutoIncrement,
+      strict: item.hasValidation || item.isPrimaryKey,
     }),
   );
   const error = hasFocused ? valueError : undefined;
@@ -368,7 +369,7 @@ export function RecordItemValue({
           id={item.name}
           label={labelContent}
           name={item.name}
-          value={value}
+          value={value?.toString()}
           onChange={(evt) => updateValue(evt.target.value)}
           className="w-full flex items-center text-gray-800"
           rootClassName="mb-8"

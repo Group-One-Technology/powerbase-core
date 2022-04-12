@@ -2,6 +2,7 @@ import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { SparklesIcon } from '@heroicons/react/outline';
 
 import { useCurrentView } from '@models/views/CurrentTableView';
 import { Dot } from '@components/ui/Dot';
@@ -26,6 +27,9 @@ export const TableTabItem = React.forwardRef(({ table }, activeTabRef) => {
     >
       {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
       {table.alias || table.name}
+      {table.isVirtual && (
+        <SparklesIcon className="inline h-4 w-4 ml-2 cursor-auto select-none" />
+      )}
     </button>
   );
 

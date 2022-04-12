@@ -36,6 +36,7 @@ class PowerbaseDatabase < ApplicationRecord
   has_many :guests, dependent: :destroy
   has_one :base_migration, dependent: :destroy
   has_many :powerbase_tables
+  has_many :actual_tables, -> { where is_virtual: false }, class_name: "PowerbaseTable"
   has_many :powerbase_fields, through: :powerbase_tables
   has_many :connections, class_name: "BaseConnection", foreign_key: :powerbase_database_id
   has_many :referenced_connections, class_name: "BaseConnection", foreign_key: :referenced_database_id

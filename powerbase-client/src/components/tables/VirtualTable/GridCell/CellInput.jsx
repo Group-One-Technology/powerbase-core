@@ -24,10 +24,11 @@ export function CellInput({
   const [value, setValue, { error }] = useValidState(
     initialValue,
     (curVal) => CELL_VALUE_VALIDATOR({
+      name: field.alias,
       value: curVal,
       type: fieldType.name,
-      required: !field.isNullable,
-      strict: validate,
+      required: !field.isNullable && !field.isAutoIncrement,
+      strict: validate || field.isPrimaryKey,
     }),
   );
   const [focus, setFocus] = useState(!isAddRecord);

@@ -24,7 +24,7 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { ExclamationIcon } from '@heroicons/react/solid';
 import { OUTLINE_COLORS } from '@lib/constants';
 
-function FieldItem({ field, action }) {
+function FieldItem({ isVirtual, field, action }) {
   const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
 
@@ -38,7 +38,7 @@ function FieldItem({ field, action }) {
         </div>
         <span className="pl-6 text-sm">
           {field.alias} ({field.name})
-          {field.isVirtual && (
+          {!isVirtual && field.isVirtual && (
             <SparklesIcon className={cn('inline h-4 w-4 ml-2 cursor-auto select-none', OUTLINE_COLORS[base.color])} />
           )}
         </span>
@@ -49,6 +49,7 @@ function FieldItem({ field, action }) {
 }
 
 FieldItem.propTypes = {
+  isVirtual: PropTypes.bool,
   field: PropTypes.object.isRequired,
   action: PropTypes.any,
 };
@@ -83,7 +84,7 @@ export function TableKeysModal() {
   const canUpdatePrimaryKey = canManageTable && !hasReferencedConstraints && table.status === 'migrated';
 
   const handleSetAsPrimary = (selectedField, value) => {
-    if (selectedField.isVirtual) return;
+    if (selectedField.isVirtual && !table.isVirtual) return;
     setViewFields(viewFields.map((field) => ({
       ...field,
       isPrimaryKey: field.id === selectedField.id
@@ -165,6 +166,7 @@ export function TableKeysModal() {
                   {primaryKeys.map((field) => (
                     <FieldItem
                       key={field.id}
+                      isVirtual={table.isVirtual}
                       field={field}
                       fieldTypes={fieldTypes}
                       action={canUpdatePrimaryKey && (
@@ -193,7 +195,7 @@ export function TableKeysModal() {
                 {foreignKeys.length > 0 && (
                   <ul className="mb-4 list-none flex flex-col gap-1">
                     {foreignKeys.map((field) => (
-                      <FieldItem key={field.id} field={field} fieldTypes={fieldTypes} />
+                      <FieldItem key={field.id} field={field} fieldTypes={fieldTypes} isVirtual={table.isVirtual} />
                     ))}
                   </ul>
                 )}
@@ -212,9 +214,10 @@ export function TableKeysModal() {
                     key={field.id}
                     field={field}
                     fieldTypes={fieldTypes}
+                    isVirtual={table.isVirtual}
                     action={(canUpdatePrimaryKey && !field.isPrimaryKey) && (
                       <>
-                        {field.isPii || field.isVirtual || fieldType?.name === 'Date'
+                        {field.isPii || (field.isVirtual && !table.isVirtual) || fieldType?.name === 'Date'
                           ? (
                             <Tooltip.Root delayDuration={0}>
                               <Tooltip.Trigger className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 text-sm font-medium cursor-not-allowed text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto">

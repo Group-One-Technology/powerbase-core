@@ -182,7 +182,7 @@ export function FieldMenu({
                 {field.name}
               </dd>
 
-              {field.dbType && (
+              {(field.dbType && !field.isVirtual) && (
                 <>
                   <dt className="mt-2 mb-1 px-4 text-xs uppercase text-gray-500">
                     DB Type

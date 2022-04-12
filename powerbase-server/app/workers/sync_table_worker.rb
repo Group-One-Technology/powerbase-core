@@ -12,6 +12,11 @@ class SyncTableWorker < ApplicationWorker
       return
     end
 
+    if table.is_virtual
+      puts "Table##{table_id} is a virtual table, it doesn't need to sync."
+      return
+    end
+
     table_syncer = Tables::Syncer.new table, new_connection: new_connection, reindex: reindex
     if !table_syncer.in_synced?
       table_syncer.sync!

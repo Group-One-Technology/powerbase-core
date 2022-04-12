@@ -102,7 +102,7 @@ class PowerbaseTable < ApplicationRecord
     self.save
     BaseConnection.where(powerbase_table_id: self.id).destroy_all
     BaseConnection.where(referenced_table_id: self.id).destroy_all
-    delete_index(self.index_name) if index_exists?(self.index_name)
+    delete_index(self.index_name)
     self.destroy
   end
 
