@@ -1,5 +1,3 @@
-include SequelHelper
-
 class PowerbaseTablesController < ApplicationController
   before_action :authorize_access_request!
   before_action :check_table_access, only: [:alias, :clear_error_logs, :update, :update_default_view, :update_primary_keys]
