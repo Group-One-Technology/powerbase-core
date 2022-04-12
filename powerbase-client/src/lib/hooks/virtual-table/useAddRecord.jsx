@@ -5,9 +5,11 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { useBaseUser } from '@models/BaseUser';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useFieldTypes } from '@models/FieldTypes';
 import { useViewOptions } from '@models/views/ViewOptions';
 import { useAddRecordModal } from '@models/modals/AddRecordModal';
 import { PERMISSIONS } from '@lib/constants/permissions';
+import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
 import { addRecord } from '@lib/api/records';
 import { useDidMountEffect } from '../useDidMountEffect';
 import { useMounted } from '../useMounted';
@@ -21,6 +23,7 @@ export function useAddRecord({
   const { mounted } = useMounted();
   const { baseUser } = useBaseUser();
   const { saved, saving, catchError } = useSaveStatus();
+  const { data: fieldTypes } = useFieldTypes();
   const { filters: { value: initialFilters } } = useViewOptions();
   const { data: viewFields } = useViewFields();
   const { mutate: mutateTableRecords } = useTableRecords();
@@ -81,6 +84,22 @@ export function useAddRecord({
       } else if (primaryKeys.length === 1) {
         const primaryKey = primaryKeys[0];
         hasInvalidKeys = primaryKey.value == null && !primaryKey.isAutoIncrement && primaryKey.defaultValue == null;
+      }
+
+      try {
+        primaryKeys.forEach((item) => {
+          const fieldType = fieldTypes.find((fType) => fType.id === item.fieldTypeId);
+          CELL_VALUE_VALIDATOR({
+            name: item.alias,
+            value: item.value,
+            type: fieldType.name,
+            required: !item.isNullable,
+            strict: item.hasValidation || item.isPrimaryKey,
+          });
+        });
+      } catch (err) {
+        catchError(err.message);
+        return exit();
       }
     }
 

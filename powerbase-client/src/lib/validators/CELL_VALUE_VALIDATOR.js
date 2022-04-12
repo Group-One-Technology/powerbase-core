@@ -11,6 +11,7 @@ import { isValidNumber } from '@lib/helpers/isValidNumber';
  * @returns boolean - check whether the input is valid or not.
  */
 export function CELL_VALUE_VALIDATOR({
+  name,
   value,
   type = FieldType.SINGLE_LINE_TEXT,
   required = false,
@@ -19,21 +20,21 @@ export function CELL_VALUE_VALIDATOR({
   const isEmpty = (value == null || (typeof value === 'string' && value.length === 0));
 
   if (required && isEmpty) {
-    throw new Error('Required');
+    throw new Error(`${name} is Required`);
   } else if (isEmpty) return true;
 
   if (strict) {
     switch (type) {
       case FieldType.EMAIL: {
-        if (!isValidEmail(value)) throw new Error('Must be a valid email.');
+        if (!isValidEmail(value)) throw new Error(`${name} must be a valid email.`);
         break;
       }
       case FieldType.URL: {
-        if (!isValidHttpUrl(value)) throw new Error('Must be a valid url.');
+        if (!isValidHttpUrl(value)) throw new Error(`${name} must be a valid url.`);
         break;
       }
       case FieldType.JSON_TEXT: {
-        if (!isValidJSONString(value)) throw new Error('Must be a valid JSON text.');
+        if (!isValidJSONString(value)) throw new Error(`${name} must be a JSON text.`);
         break;
       }
     }
@@ -41,13 +42,13 @@ export function CELL_VALUE_VALIDATOR({
 
   switch (type) {
     case FieldType.DATE: {
-      if (!isValidDate(new Date(value))) throw new Error('Must be a valid date.');
+      if (!isValidDate(new Date(value))) throw new Error(`${name} must be a valid date.`);
       break;
     }
     case FieldType.CURRENCY:
     case FieldType.PERCENT:
     case FieldType.NUMBER: {
-      if (!isValidNumber(value)) throw new Error('Must be a valid number.');
+      if (!isValidNumber(value)) throw new Error(`${name} must be a valid number.`);
       break;
     }
   }

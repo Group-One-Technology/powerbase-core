@@ -54,10 +54,11 @@ export function useEditingCell({ records, setRecords }) {
 
     try {
       CELL_VALUE_VALIDATOR({
+        name: field.alias,
         value: updatedValue,
         type: fieldType.name,
         required: !field.isNullable,
-        strict: field.hasValidation,
+        strict: field.hasValidation || field.isPrimaryKey,
       });
     } catch (err) {
       catchError(err.message);

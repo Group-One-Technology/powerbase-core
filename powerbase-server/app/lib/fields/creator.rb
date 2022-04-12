@@ -81,16 +81,16 @@ class Fields::Creator
       alias: field_options[:alias] || field_name.to_s.titlecase,
       oid: field_options[:oid],
       db_type: field_options[:db_type],
-      default_value: defined?(field_options[:default]) ? field_options[:default] : nil,
-      is_nullable: defined?(field_options[:allow_null]) ? field_options[:allow_null] : true,
+      default_value: !field_options[:default].nil? ? field_options[:default] : nil,
+      is_nullable: !field_options[:allow_null].nil? ? field_options[:allow_null] : true,
       powerbase_field_type_id: if field_options[:is_virtual]
           field_options[:field_type_id]
         else
           field_type
         end,
       powerbase_table_id: table.id,
-      has_validation: defined?(field_options[:has_validation]) ? field_options[:has_validation] : true,
-      is_virtual: defined?(field_options[:is_virtual]) ? field_options[:is_virtual] : false,
+      has_validation: !field_options[:has_validation].nil? ? field_options[:has_validation] : true,
+      is_virtual: !field_options[:is_virtual].nil? ? field_options[:is_virtual] : false,
       is_primary_key: if field_options[:is_virtual] && !table.is_virtual
           false
         else
@@ -102,7 +102,7 @@ class Fields::Creator
           field_options[:auto_increment] || false
         end,
       is_pii: if table.has_primary_key?
-          if defined?(field_options[:is_pii])
+          if !field_options[:is_pii].nil?
             field_options[:is_pii]
           elsif field_options[:primary_key]
             false
