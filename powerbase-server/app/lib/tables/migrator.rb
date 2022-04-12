@@ -87,7 +87,7 @@ class Tables::Migrator
 
       records.each do |record|
         doc = format_record(record.symbolize_keys, fields)
-        doc_id = get_doc_id(primary_keys, doc, actual_fields)
+        doc_id = get_doc_id(primary_keys, doc, table.is_virtual ? fields : actual_fields)
         puts "#{Time.now} -- Record to index at #{index_name} DOC_ID: #{doc_id}"
 
         begin

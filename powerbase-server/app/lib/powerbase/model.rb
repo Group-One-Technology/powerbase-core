@@ -36,7 +36,7 @@ module Powerbase
         end
       end
 
-      if remote_data.length > 0
+      if !@table.is_virtual && remote_data.length > 0
         default_value_fields = @fields.find {|field| field.default_value != nil && field.default_value.length > 0}
         incremented_field = @fields.find {|field| field.is_primary_key && field.is_auto_increment}
 
@@ -62,7 +62,8 @@ module Powerbase
       if @is_turbo || (virtual_data.length > 0 && primary_keys.length > 0)
         create_index!(@index)
         virtual_data = @is_turbo ? { **record, **virtual_data } : { **virtual_data, **primary_keys }
-        magic_result = create_new_record(@index, virtual_data, primary_keys)
+        doc_id = get_doc_id(primary_keys, virtual_data, @fields)
+        magic_result = create_new_record(@index, virtual_data, doc_id)
 
         if magic_result["result"] == "created"
           record = { **virtual_data, doc_id: magic_result["_id"] }
