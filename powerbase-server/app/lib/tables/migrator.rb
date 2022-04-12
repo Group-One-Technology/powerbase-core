@@ -253,22 +253,24 @@ class Tables::Migrator
     puts "#{Time.now} -- Adding and auto linking connections of table##{table.id}"
     table.write_migration_logs!(status: "adding_connections")
 
-    table_foreign_keys = foreign_keys || sequel_connect(database) {|db| db.foreign_key_list(table.name) }
-    table_foreign_keys.each do |foreign_key|
-      referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
+    if !table.is_virtual
+      table_foreign_keys = foreign_keys || sequel_connect(database) {|db| db.foreign_key_list(table.name) }
+      table_foreign_keys.each do |foreign_key|
+        referenced_table = database.tables.find_by(name: foreign_key[:table].to_s)
 
-      if referenced_table
-        conn_creator = BaseConnection::Creator.new table, {
-          name: foreign_key[:name],
-          columns: foreign_key[:columns],
-          powerbase_table_id: table.id,
-          powerbase_database_id: table.powerbase_database_id,
-          referenced_columns: foreign_key[:key],
-          referenced_table_id:  referenced_table.id,
-          referenced_database_id:  referenced_table.powerbase_database_id,
-          is_constraint: true,
-        }
-        conn_creator.save
+        if referenced_table
+          conn_creator = BaseConnection::Creator.new table, {
+            name: foreign_key[:name],
+            columns: foreign_key[:columns],
+            powerbase_table_id: table.id,
+            powerbase_database_id: table.powerbase_database_id,
+            referenced_columns: foreign_key[:key],
+            referenced_table_id:  referenced_table.id,
+            referenced_database_id:  referenced_table.powerbase_database_id,
+            is_constraint: true,
+          }
+          conn_creator.save
+        end
       end
     end
 
