@@ -2,6 +2,7 @@ import React, {
   Fragment, useEffect, useRef, useState,
 } from 'react';
 import cn from 'classnames';
+import PropTypes from 'prop-types';
 import { Popover, Transition } from '@headlessui/react';
 import { SwitchVerticalIcon, TableIcon, PlusIcon } from '@heroicons/react/outline';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -22,7 +23,7 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { captureError } from '@lib/helpers/captureError';
 import { SortItem } from './SortItem';
 
-export function Sort() {
+export function Sort({ table }) {
   const sortRef = useRef();
   const { saving, saved, catchError } = useSaveStatus();
   const { data: base } = useBase();
@@ -31,7 +32,7 @@ export function Sort() {
   const { data: fields } = useViewFields();
   const { sort: { value: sort }, setSort } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
-  const [isMagicSort, setIsMagicSort] = useState(false);
+  const [isMagicSort, setIsMagicSort] = useState(table.isVirtual);
   const isSingleSort = sort?.length === 1;
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
@@ -193,3 +194,7 @@ export function Sort() {
     </Popover>
   );
 }
+
+Sort.propTypes = {
+  table: PropTypes.object.isRequired,
+};

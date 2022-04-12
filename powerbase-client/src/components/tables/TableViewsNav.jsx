@@ -63,10 +63,8 @@ export function TableViewsNav() {
         </div>
         <div className="flex-1 flex items-center justify-center gap-x-1">
           <Fields table={table} />
-          <Filter />
-          <Sort />
-          {/* TODO - Reimplement this for future field writes to remote db feature */}
-          {/* <Sync fields={fields} table={table} /> */}
+          <Filter table={table} />
+          <Sort table={table} />
         </div>
         <div className="flex-1 flex items-center justify-end">
           <Search />
