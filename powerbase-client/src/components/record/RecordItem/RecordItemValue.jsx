@@ -64,7 +64,7 @@ export function RecordItemValue({
       name: item.alias,
       value: curVal,
       type: fieldType.name,
-      required: !item.isNullable,
+      required: !item.isNullable && !item.isAutoIncrement,
       strict: item.hasValidation || item.isPrimaryKey,
     }),
   );

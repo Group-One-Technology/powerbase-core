@@ -93,7 +93,7 @@ export function useAddRecord({
             name: item.alias,
             value: item.value,
             type: fieldType.name,
-            required: !item.isNullable,
+            required: !item.isNullable && !item.isAutoIncrement,
             strict: item.hasValidation || item.isPrimaryKey,
           });
         });

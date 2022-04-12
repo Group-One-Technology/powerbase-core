@@ -56,14 +56,16 @@ module Powerbase
           table_query.yield_self(&sequel_query).first
         end
 
-        record = inserted_record if inserted_record != nil
+        record = { **record, **inserted_record } if inserted_record != nil
       end
 
       if @is_turbo || (virtual_data.length > 0 && primary_keys.length > 0)
         create_index!(@index)
         virtual_data = @is_turbo ? { **record, **virtual_data } : { **virtual_data, **primary_keys }
-        doc_id = get_doc_id(primary_keys, virtual_data, @fields)
-        magic_result = create_new_record(@index, virtual_data, doc_id)
+
+        fields = @fields.select {|item| primary_keys.keys.include?(item.name.to_sym) }
+        doc_id = get_doc_id(fields, virtual_data, @fields)
+        magic_result = update_record(@index, doc_id, virtual_data)
 
         if magic_result["result"] == "created"
           record = { **virtual_data, doc_id: magic_result["_id"] }

@@ -57,7 +57,7 @@ export function useEditingCell({ records, setRecords }) {
         name: field.alias,
         value: updatedValue,
         type: fieldType.name,
-        required: !field.isNullable,
+        required: !field.isNullable && !field.isAutoIncrement,
         strict: field.hasValidation || field.isPrimaryKey,
       });
     } catch (err) {

@@ -27,7 +27,7 @@ export function CellInput({
       name: field.alias,
       value: curVal,
       type: fieldType.name,
-      required: !field.isNullable,
+      required: !field.isNullable && !field.isAutoIncrement,
       strict: validate || field.isPrimaryKey,
     }),
   );
