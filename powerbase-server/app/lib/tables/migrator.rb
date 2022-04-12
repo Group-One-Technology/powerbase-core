@@ -6,7 +6,7 @@ class Tables::Migrator
 
   attr_accessor :table, :index_name, :primary_keys,
                 :order_field, :adapter, :fields, :offset,
-                :indexed_records, :total_records, :records,
+                :indexed_records, :total_records, :total_indexed_records, :records,
                 :database, :in_synced
 
   def initialize(table)
@@ -19,15 +19,20 @@ class Tables::Migrator
     @database = table.db
     @offset = table.logs["migration"]["offset"] || 0
     @indexed_records = table.logs["migration"]["indexed_records"] || 0
-    @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
+
+    if !table.is_virtual
+      @total_records = sequel_connect(@database) {|db| db.from(table.name).count}
+    end
   end
 
   def total_indexed_records
-    Powerbase::Model.new(@table).get_count
+    @total_indexed_records ||= Powerbase::Model.new(@table).get_count
   end
 
   def in_synced?
-    if @database.is_turbo
+    if @table.is_virtual
+      true
+    elsif @database.is_turbo
       @in_synced ||= @total_records == total_indexed_records
     else
       has_virtual_fields = fields.any?{|field| field.is_virtual}
@@ -41,8 +46,10 @@ class Tables::Migrator
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
+    return if table.is_virtual && old_primary_keys.length === 0
+
     # Reset all migration counter logs when first time indexing or when re-indexing.
-    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records")
+    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records") || table.is_virtual
       @offset = 0
       @indexed_records = 0
       table.write_migration_logs!(
@@ -64,7 +71,7 @@ class Tables::Migrator
 
     table.write_migration_logs!(status: "indexing_records")
 
-    if total_records.zero?
+    if (!table.is_virtual && total_records.zero?) || (table.is_virtual && total_indexed_records.zero?)
       puts "#{Time.now} -- Indexing done. No record found for table##{table.id}"
       set_table_as_migrated
       return
@@ -72,7 +79,7 @@ class Tables::Migrator
 
     puts "#{Time.now} -- Saving #{total_records} documents at index #{index_name} table##{table.id}..."
 
-    while offset < total_records
+    while (!table.is_virtual && offset < total_records) || (table.is_virtual && offset < total_indexed_records)
       fetch_table_records!
 
       records.each do |record|
@@ -82,7 +89,8 @@ class Tables::Migrator
 
         begin
           doc_size = get_doc_size(doc)
-          if !is_indexable?(doc_size)
+
+          if !table.is_virtual && !is_indexable?(doc_size)
             error_message = "Failed to index doc_id#{doc_id} with size of #{doc_size} bytes in table##{table.id}. The document size limit is 80MB"
             puts error_message
             Sentry.set_context('record', {
@@ -386,14 +394,27 @@ class Tables::Migrator
 
   private
   def fetch_table_records!
-    sequel_connect(database) do |db|
-      table_query = db.from(table.name)
-      @total_records = table_query.count
-      @records = table_query
-        .order(order_field.name.to_sym)
-        .limit(DEFAULT_PAGE_SIZE)
-        .offset(offset)
-        .all
+    if table.is_virtual
+      model = Powerbase::Model.new(table)
+      @records = model.search({
+        offset: offset,
+        limit: DEFAULT_PAGE_SIZE,
+        sort: [{
+          id: "#{order_field.name}-ascending-0",
+          field: order_field.name,
+          operator: "ascending",
+        }],
+      })
+    else
+      sequel_connect(database) do |db|
+        table_query = db.from(table.name)
+        @total_records = table_query.count
+        @records = table_query
+          .order(order_field.name.to_sym)
+          .limit(DEFAULT_PAGE_SIZE)
+          .offset(offset)
+          .all
+      end
     end
   end
 
