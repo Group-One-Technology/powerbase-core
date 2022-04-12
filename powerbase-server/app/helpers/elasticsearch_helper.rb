@@ -164,17 +164,23 @@ module ElasticsearchHelper
 
       formatted_record[record_key] = case field.powerbase_field_type_id
         when number_field_type.id
-          if record_value.is_a?(String) &&Float(record_value, exception: false) != nil
+          if record_value.is_a?(String) && record_value.empty?
+            nil
+          elsif record_value.is_a?(String) && Float(record_value, exception: false) != nil
             record_value.include?(".") ? record_value.to_f : record_value.to_i
           else
             record_value
           end
         when date_field_type.id
-          date = DateTime.parse(record_value) rescue nil
-          if date != nil
-            date.utc.strftime("%FT%T.%L%z")
+          if record_value.is_a?(String) && record_value.empty?
+            nil
           else
-            record_value
+            date = DateTime.parse(record_value) rescue nil
+            if date != nil
+              date.utc.strftime("%FT%T.%L%z")
+            else
+              record_value
+            end
           end
         else
           %Q(#{record_value})
