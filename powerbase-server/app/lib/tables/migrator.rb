@@ -46,7 +46,10 @@ class Tables::Migrator
     actual_fields = fields.select {|field| !field.is_virtual}
     old_primary_keys = Array(table.logs["migration"]["old_primary_keys"])
 
-    return if table.is_virtual && old_primary_keys.length === 0
+    if table.is_virtual && old_primary_keys.length === 0
+      set_table_as_migrated
+      return
+    end
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
     if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records") || table.is_virtual
@@ -150,7 +153,7 @@ class Tables::Migrator
               end
             end
 
-            if database.is_turbo
+            if database.is_turbo || table.is_virtual
               # Merge old document's data with updated doc - Actual and Magic Values (if any)
               if old_doc != nil && old_doc.length > 0
                 doc = { **old_doc, **doc }
@@ -243,8 +246,12 @@ class Tables::Migrator
       end
     end
 
-    # Remove _in_synced column for every doc under index_name
-    remove_column(index_name, "_in_synced")
+    begin
+      # Remove _in_synced column for every doc under index_name
+      remove_column(index_name, "_in_synced")
+    rescue ex
+      puts ex
+    end
 
     set_table_as_migrated
   end
