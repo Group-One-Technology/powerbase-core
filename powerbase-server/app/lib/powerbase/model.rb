@@ -156,26 +156,31 @@ module Powerbase
         return nil
       end
 
+      result = nil
       magic_fields = @fields.select {|field| field.is_virtual}
       doc_id = format_doc_id(primary_keys)
 
       if (@is_turbo || magic_fields.length > 0) && doc_id.present?
         begin
           delete_record(@index, doc_id)
+          result = true
         rescue Elasticsearch::Transport::Transport::Errors::NotFound => exception
           puts "#{Time.now} -- Not found doc_id: #{doc_id}"
         end
       end
 
       if !@table.is_virtual
+        result = nil
         query = Powerbase::QueryCompiler.new(@table)
         sequel_query = query.find_by(primary_keys).to_sequel
-        sequel_connect(@database) {|db|
+        result = sequel_connect(@database) {|db|
           db.from(@table_name.to_sym)
             .yield_self(&sequel_query)
             .delete()
         }
       end
+
+      result
     end
 
     # * Get a document/table record.
