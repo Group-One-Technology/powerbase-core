@@ -13,8 +13,8 @@ class Tables::Migrator
     @table = table
     @index_name = table.index_name
     @fields = table.fields.reload
-    @primary_keys = table.primary_keys
-    @order_field = primary_keys.first || fields.first
+    @primary_keys = table.primary_keys.reload
+    @order_field = primary_keys.first || (table.is_virtual ? fields.first : table.actual_fields.first)
     @adapter = table.db.adapter
     @database = table.db
     @offset = table.logs["migration"]["offset"] || 0
@@ -52,7 +52,7 @@ class Tables::Migrator
     end
 
     # Reset all migration counter logs when first time indexing or when re-indexing.
-    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records") || table.is_virtual
+    if table.logs["migration"]["start_time"] == nil || (!in_synced && table.status != "indexing_records") || table.is_virtual || old_primary_keys.length > 0
       @offset = 0
       @indexed_records = 0
       table.write_migration_logs!(
@@ -158,10 +158,11 @@ class Tables::Migrator
               if old_doc != nil && old_doc.length > 0
                 doc = { **old_doc, **doc }
               end
+            # Reindexing for non-turbo bases with virtual fields.
             else
               # Pick virtual and primary key data for doc.
               updated_doc = {}
-              existing_doc = {}
+              existing_doc = old_doc.nil? ? {} : old_doc.symbolize_keys
 
               virtual_fields = fields.select {|field| field.is_virtual}
 
@@ -174,13 +175,7 @@ class Tables::Migrator
               end
 
               if found_doc != nil && found_doc.key?("_source")
-                if old_doc != nil
-                  existing_doc = { **old_doc, **found_doc["_source"] }
-                else
-                  existing_doc = found_doc["_source"]
-                end
-
-                existing_doc = existing_doc.symbolize_keys
+                existing_doc = { **existing_doc, **found_doc["_source"] }.symbolize_keys
               end
 
               existing_doc&.each do |key, value|
@@ -256,6 +251,7 @@ class Tables::Migrator
       puts ex
     end
 
+    table.write_migration_logs!(old_primary_keys: [])
     set_table_as_migrated
   end
 
