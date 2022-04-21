@@ -24,6 +24,25 @@ class Powerbase::Schema
     @password = SecureRandom.send(:choose, [*'a'..'z', *'A'..'Z'], 5) + SecureRandom.alphanumeric(5)
   end
 
+  def create_role(role_name, superuser: false, create_db: false, create_role: false, inherit: false)
+    options = "#{superuser ? "SUPERUSER" : "NOSUPERUSER"}"
+    options += " #{create_db ? "CREATEDB" : "NOCREATEDB"}"
+    options += " #{create_role ? "CREATEROLE" : "NOCREATEROLE"}"
+    options += " #{inherit ? "INHERIT" : "NOINHERIT"}"
+
+    puts options
+
+    Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) {|db|
+      db.run("CREATE ROLE #{role_name} WITH #{options}")
+    }
+  end
+
+  def drop_role(role_name)
+    Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) {|db|
+      db.run("DROP ROLE #{role_name}")
+    }
+  end
+
   def create_database
     create_unique_identifier
 
