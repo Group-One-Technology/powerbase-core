@@ -4,11 +4,11 @@ class Powerbase::Schema
   attr_accessor :database_name, :username, :password, :connection_string
 
   def connection_string
-    return nil if @user.nil? || @password.nil? || @database_name.nil?
+    return nil if @username.nil? || @password.nil? || @database_name.nil?
 
     @connection_string ||= ("%{adapter}://%{user}:%{password}@%{host}/%{database}" % {
       adapter: "postgres",
-      user: @user,
+      user: @username,
       password: @password,
       host: ENV["AWS_DATABASE_HOST"],
       database: @database_name,
@@ -16,21 +16,21 @@ class Powerbase::Schema
   end
 
   def create_unique_identifier
+    total = PowerbaseDatabase.count + 1
+
     begin
-      @database_name = SecureRandom.send(:choose, [*'a'..'z', *'A'..'Z'], 5) + SecureRandom.alphanumeric(10)
+      @database_name = "d#{total}" + SecureRandom.alphanumeric(10).downcase
     end while PowerbaseDatabase.exists?(database_name: @database_name)
 
-    @username = SecureRandom.send(:choose, [*'a'..'z', *'A'..'Z'], 5) + SecureRandom.alphanumeric(5)
-    @password = SecureRandom.send(:choose, [*'a'..'z', *'A'..'Z'], 5) + SecureRandom.alphanumeric(5)
+    @username = SecureRandom.send(:choose, [*'a'..'z'], 5) + SecureRandom.alphanumeric(5).downcase
+    @password = SecureRandom.send(:choose, [*'a'..'z'], 5) + SecureRandom.alphanumeric(5).downcase
   end
 
-  def create_role(role_name, superuser: false, create_db: false, create_role: false, inherit: false)
-    options = "#{superuser ? "SUPERUSER" : "NOSUPERUSER"}"
+  def create_role(role_name, create_db: false, create_role: false, inherit: false)
+    options = "NOSUPERUSER"
     options += " #{create_db ? "CREATEDB" : "NOCREATEDB"}"
     options += " #{create_role ? "CREATEROLE" : "NOCREATEROLE"}"
     options += " #{inherit ? "INHERIT" : "NOINHERIT"}"
-
-    puts options
 
     Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) {|db|
       db.run("CREATE ROLE #{role_name} WITH #{options}")
@@ -44,15 +44,28 @@ class Powerbase::Schema
   end
 
   def create_database
+    # Generate random alphanumeric string for database name, username and password.
     create_unique_identifier
 
+    # Create new user and database in SQL.
     Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) do |db|
       db.run("CREATE DATABASE #{@database_name}")
       db.run("REVOKE CONNECT ON DATABASE #{@database_name} FROM PUBLIC")
       db.run("CREATE USER #{@username} LOGIN ENCRYPTED PASSWORD '#{@password}' ROLE powerbase_user")
-      db.run("ALTER DATABASE #{@database_name} OWNER TO #{@username}")
+      # Didn't use alter database owner since the roles we receive from AWS RDS isn't a superuser but a rds_superuser
+      db.run("GRANT CONNECT ON DATABASE #{@database_name} TO #{@username}")
+      db.run("GRANT ALL PRIVILEGES ON DATABASE #{@database_name} TO #{@username}")
     end
 
-    @connection_string
+    Sequel.connect(connection_string) do |db|
+      db.create_table :users do
+        primary_key :id
+        column :first_name, :text
+        column :last_name, :text
+        column :created_at, :timestamp, default: Sequel.lit("NOW()")
+      end
+    end
+
+    [@database_name, @connection_string]
   end
 end
