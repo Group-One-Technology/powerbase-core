@@ -28,6 +28,13 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:database).value(:string)
   end
 
+  schema(:create) do
+    required(:name).value(:string)
+    required(:adapter).value(:string)
+    required(:is_turbo).value(:bool)
+    required(:color).value(:string)
+  end
+
   schema(:connect) do
     optional(:name).value(:string)
     optional(:host).value(:string)
@@ -152,6 +159,36 @@ class PowerbaseDatabasesController < ApplicationController
     end
   end
 
+  # POST /databases/
+  def create
+    existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
+
+    if existing_database
+      raise StandardError.new "Database with name of \"#{safe_params[:name]}\" already exists in this account."
+    end
+
+    powerbase = Powerbase::Schema.new
+    database_name, connection_string = powerbase.create_database
+
+    database_creator = Databases::Creator.new({
+      name: safe_params[:name],
+      database_name: database_name,
+      connection_string: connection_string,
+      adapter: "postgresql",
+      color: safe_params[:color],
+      is_turbo: safe_params[:is_turbo],
+      is_superuser: false,
+      is_created: true,
+      user_id: current_user.id,
+    })
+
+    if database_creator.save
+      render json: { database: format_json(database_creator.database) }
+    else
+      render json: database_creator.errors, status: :unprocessable_entity
+    end
+  end
+
   # POST /databases/connect
   def connect
     existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
@@ -189,6 +226,7 @@ class PowerbaseDatabasesController < ApplicationController
       adapter: validator.adapter,
       color: safe_params[:color],
       is_turbo: safe_params[:is_turbo],
+      is_created: false,
       is_superuser: validator.is_superuser,
       user_id: current_user.id,
     })
