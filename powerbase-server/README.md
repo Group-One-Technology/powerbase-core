@@ -59,7 +59,15 @@ Copy and rename `config/application.example.yml` to `config/application.example.
         docker.elastic.co/kibana/kibana-oss:7.10.2
     ```
 
-5. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
+5. In the `AWS_DATABASE_HOST` in `config/application.yml` (should be localhost for your local environment and AWS for production), create the `powerbase_app` role if there isn't any yet:
+
+NOTE: Update the password bellow:
+
+```
+CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD 'enter your desired password here'
+```
+
+6. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
 
 ```bash
 # Will migrate the schema to PostgreSQL and import the indices for Elastic Search
@@ -69,7 +77,7 @@ rails db:migrate
 rails db:seed
 ```
 
-6. Run the app and you're all set!
+7. Run the app and you're all set!
 
 ```bash
 # Run Rails server
