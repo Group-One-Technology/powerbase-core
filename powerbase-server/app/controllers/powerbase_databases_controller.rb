@@ -270,7 +270,12 @@ class PowerbaseDatabasesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:id])
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
     raise AccessDenied if !Guest.owner?(current_user.id, @database)
-    @database.remove
+
+    if @database.is_created
+      @database.drop
+    else
+      @database.remove
+    end
     render status: :no_content
   end
 
@@ -340,6 +345,7 @@ class PowerbaseDatabasesController < ApplicationController
         status: database.status,
         is_migrated: database.migrated?,
         is_turbo: database.is_turbo,
+        is_created: database.is_created,
         is_superuser: database.is_superuser,
         default_table: if default_table
             {

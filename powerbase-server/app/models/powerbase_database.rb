@@ -133,6 +133,15 @@ class PowerbaseDatabase < ApplicationRecord
     self.destroy
   end
 
+  def drop
+    if self.is_created
+      username = self.connection_string.split("@")[0].split("://")[1].split(":")[0]
+      DropDatabaseWorker.perform_async(self.database_name, username)
+    end
+
+    self.remove
+  end
+
   def update_guests_access(options)
     guest = options[:guest]
     is_allowed = options[:is_allowed]

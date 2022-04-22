@@ -68,4 +68,13 @@ class Powerbase::Schema
 
     [@database_name, @connection_string]
   end
+
+  def drop_database(database_name, username = nil)
+    Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) do |db|
+      db.run("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '#{database_name}' AND pid <> pg_backend_pid() AND state in ('idle', 'idle in transaction', 'idle in transaction (aborted)', 'disabled') AND state_change < current_timestamp - INTERVAL '15' MINUTE;
+      ")
+      db.run("DROP DATABASE #{database_name} WITH (FORCE)")
+      db.run("DROP USER #{username}") if !username.nil?
+    end
+  end
 end

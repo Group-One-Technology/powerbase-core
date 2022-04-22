@@ -21,8 +21,8 @@ export function DisconnectBase() {
 
   const [confirmModal, setConfirmModal] = useState({
     open: false,
-    title: 'Disconnect Base',
-    description: 'Are you sure you want to disconnect to this base? This action cannot be undone.',
+    title: base?.isCreated ? 'Drop Base' : 'Disconnect Base',
+    description: `Are you sure you want to ${base?.isCreated ? 'drop' : 'disconnect'} to this base? This action cannot be undone.`,
   });
 
   const handleConfirmDisconnect = () => {
@@ -37,7 +37,7 @@ export function DisconnectBase() {
       try {
         await disconnectDatabase({ id });
         history.push('/');
-        saved(`Successfully disconnect the "${name}" base.`);
+        saved(`Successfully ${base?.isCreated ? 'dropped' : 'disconnected'} the "${name}" base.`);
       } catch (err) {
         captureError(err);
         catchError(err);
@@ -70,7 +70,7 @@ export function DisconnectBase() {
         onClick={handleConfirmDisconnect}
         disabled={!base || !isOwner}
       >
-        Disconnect Database
+        {base?.isCreated ? 'Drop Database' : 'Disconnect Database'}
       </Button>
 
       <ConfirmationModal

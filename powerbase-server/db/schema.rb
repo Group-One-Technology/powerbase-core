@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_21_232335) do
+ActiveRecord::Schema.define(version: 2022_04_22_012451) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -129,6 +129,7 @@ ActiveRecord::Schema.define(version: 2022_04_21_232335) do
     t.string "status", default: "analyzing_base"
     t.boolean "is_superuser", default: false, null: false
     t.integer "max_connections", default: 0, null: false
+    t.boolean "is_created", default: false
     t.index ["user_id"], name: "index_powerbase_databases_on_user_id"
   end
 
