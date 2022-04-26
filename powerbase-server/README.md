@@ -64,7 +64,11 @@ Copy and rename `config/application.example.yml` to `config/application.example.
 NOTE: Update the password bellow:
 
 ```
+-- Role of our powerbase server which creates databases and users.
 CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD 'enter your desired password here'
+
+-- Enables powerbase_app to kill active connections and drop the database
+GRANT pg_signal_backend TO powerbase_app;
 ```
 
 6. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
