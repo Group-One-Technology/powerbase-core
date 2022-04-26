@@ -371,7 +371,7 @@ class Tables::Migrator
       end
     end
 
-    table.write_migration_logs!(status: "migrated_connections")
+    table.write_migration_logs!(status: table.is_virtual ? "migrated" : "migrated_connections")
     pusher_trigger!("table.#{table.id}", "connection-migration-listener", { id: table.id })
     pusher_trigger!("table.#{table.id}", "table-migration-listener", { id: table.id })
   end
