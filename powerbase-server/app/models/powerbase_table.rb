@@ -202,7 +202,11 @@ class PowerbaseTable < ApplicationRecord
     self.save
 
     if status.present?
-      pusher_trigger!("table.#{self.id}", "notifier-migration-listener", { id: self.id })
+      begin
+        pusher_trigger!("table.#{self.id}", "notifier-migration-listener", { id: self.id })
+      rescue Pusher::HTTPError => ex
+        puts ex
+      end
     end
   end
 end
