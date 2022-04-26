@@ -52,7 +52,7 @@ function BaseTablePermissionsModal() {
       if (table.permissions[permission.key].access !== access) {
         try {
           await updateTablePermission({ id: table.id, permission: permission.key, access });
-          await tablesResponse.mutate();
+          await tablesResponse?.mutate();
           saved(`Successfully updated table "${table.alias}"'s ${permission.name} permission to "${access}" access`);
         } catch (err) {
           catchError(err);
@@ -97,7 +97,7 @@ function BaseTablePermissionsModal() {
             ? updatedGuestPermission
             : item.permissions,
         })));
-        tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+        tablesResponse?.mutate(tablesResponse?.data.map((item) => (item.id === table.id
           ? updatedTable
           : item)));
         saved(`Successfully removed "${guest.firstName}" from ${list} guests.`);
@@ -120,7 +120,7 @@ function BaseTablePermissionsModal() {
         roles: allowedRoles,
         permission,
       });
-      tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+      tablesResponse?.mutate(tablesResponse?.data.map((item) => (item.id === table.id
         ? updatedTable
         : item)));
       saved(`Successfully removed "${role}" from allowed roles.`);
@@ -151,7 +151,7 @@ function BaseTablePermissionsModal() {
               roles: allowedRoles,
               permission: permissionKey,
             });
-            tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+            tablesResponse?.mutate(tablesResponse?.data.map((item) => (item.id === table.id
               ? updatedTable
               : item)));
             saved(`Successfully added "${role}" from allowed roles.`);
@@ -206,7 +206,7 @@ function BaseTablePermissionsModal() {
               ? updatedGuestPermission
               : item.permissions,
           })));
-          tablesResponse.mutate(tablesResponse.data.map((item) => (item.id === table.id
+          tablesResponse?.mutate(tablesResponse?.data.map((item) => (item.id === table.id
             ? updatedTable
             : item)));
           saved(`Successfully added "${guest.firstName}" from ${list} guests.`);

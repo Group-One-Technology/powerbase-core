@@ -59,16 +59,7 @@ class Powerbase::Schema
       db.run("GRANT ALL PRIVILEGES ON DATABASE #{@database_name} TO #{@username}")
     end
 
-    Sequel.connect(connection_string) do |db|
-      db.create_table :users do
-        primary_key :id
-        column :first_name, :text
-        column :last_name, :text
-        column :created_at, :timestamp, default: Sequel.lit("NOW()")
-      end
-    end
-
-    [@database_name, @connection_string]
+    [@database_name, connection_string]
   end
 
   def drop_database(database_name, username = nil)

@@ -20,7 +20,7 @@ export function Table() {
   } = useCurrentView();
 
   useEffect(() => {
-    if (tables && tableError?.response.data.status === HttpStatus.NOT_AUTHORIZED) {
+    if (tables?.length && tableError?.response.data.status === HttpStatus.NOT_AUTHORIZED) {
       const defaultTable = tables.find((item) => item.id === base.defaultTable.id);
       handleTableChange({ table: defaultTable });
     }

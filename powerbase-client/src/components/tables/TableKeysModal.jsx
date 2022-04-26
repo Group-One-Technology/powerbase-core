@@ -112,7 +112,7 @@ export function TableKeysModal() {
         primaryKeys: primaryKeysArray,
       });
 
-      if (currentTable.id === table.id) tablesResponse.mutate();
+      if (currentTable.id === table.id) tablesResponse?.mutate();
       await mutateViewFields(viewFields);
       saved(`Successfully updated primary keys for table ${table.alias}`);
     } catch (err) {
