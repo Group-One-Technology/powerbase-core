@@ -6,6 +6,7 @@ import { captureError } from '@lib/helpers/captureError';
 import { useBase } from '@models/Base';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useAuthUser } from '@models/AuthUser';
+import { useBases } from '@models/Bases';
 import { disconnectDatabase } from '@lib/api/databases';
 import { Button } from '@components/ui/Button';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
@@ -14,6 +15,7 @@ export function DisconnectBase() {
   const history = useHistory();
   const { authUser } = useAuthUser();
   const { data: base } = useBase();
+  const { mutate: mutateBases } = useBases();
   const {
     saved, saving, catchError, loading,
   } = useSaveStatus();
@@ -36,6 +38,7 @@ export function DisconnectBase() {
 
       try {
         await disconnectDatabase({ id });
+        await mutateBases();
         history.push('/');
         saved(`Successfully ${base?.isCreated ? 'dropped' : 'disconnected'} the "${name}" base.`);
       } catch (err) {
