@@ -16,10 +16,10 @@ class Powerbase::Schema
   end
 
   def create_unique_identifier
-    total = PowerbaseDatabase.count + 1
+    next_id = PowerbaseDatabase.maximum(:id)
 
     begin
-      @database_name = "d#{total}" + SecureRandom.alphanumeric(10).downcase
+      @database_name = "d#{next_id}" + SecureRandom.alphanumeric(10).downcase
     end while PowerbaseDatabase.exists?(database_name: @database_name)
 
     @username = SecureRandom.send(:choose, [*'a'..'z'], 5) + SecureRandom.alphanumeric(5).downcase
@@ -50,8 +50,10 @@ class Powerbase::Schema
     # Create new user and database in SQL.
     Sequel.connect(ENV["AWS_DATABASE_CONNECTION"]) do |db|
       db.run("CREATE DATABASE #{@database_name}")
+
       db.run("REVOKE CONNECT ON DATABASE #{@database_name} FROM PUBLIC")
       db.run("CREATE USER #{@username} LOGIN ENCRYPTED PASSWORD '#{@password}' ROLE powerbase_user")
+
       # Didn't use alter database owner since the roles we receive from AWS RDS isn't a superuser but a rds_superuser
       db.run("GRANT CONNECT ON DATABASE #{@database_name} TO #{@username}")
       db.run("GRANT ALL PRIVILEGES ON DATABASE #{@database_name} TO #{@username}")
