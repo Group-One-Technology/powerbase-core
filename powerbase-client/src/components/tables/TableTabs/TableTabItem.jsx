@@ -48,6 +48,9 @@ export const TableTabItem = React.forwardRef(({ table }, activeTabRef) => {
         >
           {!table.isMigrated && <Dot color="yellow" className="mr-1.5" />}
           {table.alias || table.name}
+          {table.isVirtual && (
+            <SparklesIcon className="inline h-4 w-4 ml-2 cursor-auto select-none" />
+          )}
         </Tooltip.Trigger>
         <Tooltip.Content className="bg-gray-900 text-white text-xs py-1 px-2 rounded">
           <Tooltip.Arrow className="gray-900" />
