@@ -4,7 +4,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { Chunk } from 'editmode-react';
 
 import { OnboardingTabs } from '@lib/constants/onboarding';
-import { connectDatabase } from '@lib/api/databases';
+import { connectDatabase, createDatabase } from '@lib/api/databases';
 import { MAX_SMALL_DATABASE_SIZE } from '@lib/constants/bases';
 import { formatBytes } from '@lib/helpers/formatBytes';
 import { setAuthUserAsOnboarded } from '@lib/api/auth';
@@ -17,6 +17,7 @@ export function OnboardingConnectDatabase({
   powerbaseType,
   base,
   setBase,
+  isNewBase,
 }) {
   const [modal, setModal] = useState({
     open: false,
@@ -35,11 +36,14 @@ export function OnboardingConnectDatabase({
     setModal({ open: false });
 
     try {
-      const response = await connectDatabase(payload);
+      const response = isNewBase
+        ? await createDatabase(payload)
+        : await connectDatabase(payload);
+
       await setAuthUserAsOnboarded();
       setBase(response.database);
 
-      if (response.database.isTurbo && response.dbSize) {
+      if (!isNewBase && response.database.isTurbo && response.dbSize) {
         if (response.dbSize > MAX_SMALL_DATABASE_SIZE) {
           const bytes = response.dbSize * 1024;
           setModal((val) => ({
@@ -80,6 +84,7 @@ export function OnboardingConnectDatabase({
         powerbaseType={powerbaseType}
         loading={loading}
         setLoading={setLoading}
+        isNewBase={isNewBase}
       />
       <ConnectBaseModal
         open={modal.open}
@@ -99,4 +104,5 @@ OnboardingConnectDatabase.propTypes = {
   setCurrentTab: PropTypes.func.isRequired,
   base: PropTypes.object,
   setBase: PropTypes.func.isRequired,
+  isNewBase: PropTypes.bool,
 };

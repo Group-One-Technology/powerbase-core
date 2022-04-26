@@ -6,7 +6,6 @@ export const BASE_SOURCES = [
     description: 'Build out your table and data from scratch',
     footnote: 'Options: Postgres, MySQL',
     value: 'create',
-    disabled: true,
   },
   {
     pretext: 'Connect Existing',
