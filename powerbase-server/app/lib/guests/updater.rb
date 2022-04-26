@@ -20,6 +20,9 @@ class Guests::Updater
         message: "has accepted the invite to",
         object_type: 'database',
       }, @guest.powerbase_database)
+
+      user = @guest.user
+      user.update(is_onboarded: true) if !user.is_onboarded
       return true
     else
       @errors = @guest.errors

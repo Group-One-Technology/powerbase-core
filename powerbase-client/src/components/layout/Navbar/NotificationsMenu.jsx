@@ -22,7 +22,7 @@ import { readNotifications } from '@lib/api/notifications';
 
 function BaseNotificationsMenu({ colored }) {
   const { mounted } = useMounted();
-  const { authUser } = useAuthUser();
+  const { authUser, mutate: mutateAuthUser } = useAuthUser();
   const { listener } = useNotificationsListener();
   const { mutate: mutateSharedBases } = useSharedBases();
   const { data: notifications, mutate: mutateNotifications } = useNotifications();
@@ -80,6 +80,7 @@ function BaseNotificationsMenu({ colored }) {
 
       try {
         await acceptGuestInvitation({ id: guest.id });
+        if (!authUser?.isOnboarded) mutateAuthUser({ ...authUser, isOnboarded: true });
         await mutateSharedBases();
         mutateGuestInvitations(updatedGuestInvitations);
         saved(`Successfully accepted invite to ${guest.databaseName} base.`);
