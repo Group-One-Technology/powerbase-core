@@ -59,9 +59,13 @@ Copy and rename `config/application.example.yml` to `config/application.example.
         docker.elastic.co/kibana/kibana-oss:7.10.2
     ```
 
-5. In the `AWS_DATABASE_HOST` in `config/application.yml` (should be localhost for your local environment and AWS for production), create the `powerbase_app` role if there isn't any yet:
-
-NOTE: Update the password bellow:
+5. Setting up host for creating databases
+- Add `AWS_DATABASE_HOST` and `AWS_DATABASE_CONNECTION` to your `config/application.yml`  (should be localhost for your local environment and AWS for production)
+  wherein
+  - `AWS_DATABASE_HOST` is the host w/ port where the databases will be created, can either be AWS RDS DB Instance host or your PostgreSQL localhost.
+  - `AWS_DATABASE_CONNECTION` is the connection string that uses the `powerbase_app` role for the powerbase server to use.
+- In your database host, create the `powerbase_app` role if there isn't any yet:
+   NOTE: Update the password bellow:
 
 ```
 -- Role of our powerbase server which creates databases and users.
@@ -69,7 +73,7 @@ CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED P
 
 -- Enables powerbase_app to kill active connections and drop the database
 GRANT pg_signal_backend TO powerbase_app;
-```
+
 
 6. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
 
