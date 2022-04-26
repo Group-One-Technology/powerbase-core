@@ -124,7 +124,11 @@ class PowerbaseDatabase < ApplicationRecord
       self.base_migration.save
     end
 
-    pusher_trigger!("database.#{self.id}", "migration-listener", { id: self.id })
+    begin
+      pusher_trigger!("database.#{self.id}", "migration-listener", { id: self.id })
+    rescue ex
+      puts ex
+    end
   end
 
   def remove
