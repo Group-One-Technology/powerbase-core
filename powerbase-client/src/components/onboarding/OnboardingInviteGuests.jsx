@@ -77,7 +77,11 @@ export function OnboardingInviteGuests({ base }) {
     setSkipLoading(true);
     await setAuthUserAsOnboarded();
     mutateAuthUser({ ...authUser, isOnboarded: true });
-    history.push(`/base/${base.id}/progress?onboarding=true`);
+    if (base.isCreated) {
+      history.push(`/base/${base.id}`);
+    } else {
+      history.push(`/base/${base.id}/progress?onboarding=true`);
+    }
   };
 
   const handleInviteGuests = async (evt) => {
