@@ -71,6 +71,9 @@ Copy and rename `config/application.example.yml` to `config/application.example.
 -- Role of our powerbase server which creates databases and users.
 CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD 'enter your desired password here'
 
+-- Then don't forget to give connect privilege to the main db (e.g. powerbase) to powerbase_app
+GRANT CONNECT ON DATABASE powerbase TO powerbase_app
+
 -- Enables powerbase_app to kill active connections and drop the database
 GRANT pg_signal_backend TO powerbase_app;
 
