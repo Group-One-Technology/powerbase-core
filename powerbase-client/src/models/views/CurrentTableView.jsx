@@ -16,20 +16,22 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
 
   const tablesResponse = useSWR(
     (baseId && authUser) ? `${authUser.id}/databases/${baseId}/tables` : null,
-    () => getTables({ databaseId: baseId }),
+    () => (baseId ? getTables({ databaseId: baseId }) : undefined),
     { revalidateOnFocus: true },
   );
 
   const viewsResponse = useSWR(
     (tableId && authUser) ? `${authUser.id}/tables/${tableId}/views` : null,
-    () => getTableViews({ tableId }),
+    () => (tableId ? getTableViews({ tableId }) : undefined),
     { revalidateOnFocus: true },
   );
 
-  useTableMigrationListener({ tables: tablesResponse.data, mutate: tablesResponse.mutate });
-  const { migrationListener } = useMigrationListener({ mutate: tablesResponse.mutate });
+  useTableMigrationListener({ tables: tablesResponse?.data, mutate: tablesResponse?.mutate });
+  const { migrationListener } = useMigrationListener({ mutate: tablesResponse?.mutate });
 
-  const currentTable = tablesResponse.data?.find((table) => table.id.toString() === tableId.toString());
+  const currentTable = tableId
+    ? tablesResponse?.data?.find((table) => table.id.toString() === tableId.toString())
+    : undefined;
   const currentView = viewsResponse.data?.find((view) => view.id.toString() === viewId?.toString());
 
   const handleTableChange = ({ table }) => {
@@ -57,7 +59,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
 
     try {
       await updateTableDefaultView({ tableId: view.tableId, viewId: view.id });
-      await tablesResponse.mutate();
+      await tablesResponse?.mutate();
     } catch (err) {
       console.log(err);
     }
@@ -68,12 +70,12 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
   }, [baseId]);
 
   useEffect(() => {
-    setTables(tablesResponse.data?.filter((item) => !item.isHidden));
-    if (tablesResponse.data && currentTable == null) {
-      const firstTable = tablesResponse.data[0];
+    setTables(tablesResponse?.data?.filter((item) => !item.isHidden));
+    if (tablesResponse?.data?.length && currentTable == null) {
+      const firstTable = tablesResponse?.data[0];
       handleTableChange({ table: firstTable });
     }
-  }, [tablesResponse.data]);
+  }, [tablesResponse?.data]);
 
   return {
     table: currentTable,
@@ -87,7 +89,7 @@ function useCurrentViewModel({ baseId, initialTableId, initialViewId }) {
     setTableId,
     handleTableChange,
     handleViewChange,
-    mutateTables: tablesResponse.mutate,
+    mutateTables: tablesResponse?.mutate,
   };
 }
 

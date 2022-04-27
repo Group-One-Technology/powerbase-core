@@ -59,7 +59,31 @@ Copy and rename `config/application.example.yml` to `config/application.example.
         docker.elastic.co/kibana/kibana-oss:7.10.2
     ```
 
-5. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
+5. Setting up host for creating databases
+- Add `AWS_DATABASE_HOST` and `AWS_DATABASE_CONNECTION` to your `config/application.yml`  (should be localhost for your local environment and AWS for production)
+  wherein
+  - `AWS_DATABASE_HOST` is the host w/ port where the databases will be created, can either be AWS RDS DB Instance host or your PostgreSQL localhost.
+  - `AWS_DATABASE_CONNECTION` is the connection string that uses the `powerbase_app` role for the powerbase server to use.
+- In your database host, create the `powerbase_app` role if there isn't any yet:
+   NOTE: Update the password bellow:
+
+```
+-- Role of our powerbase server which creates databases and users.
+CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD 'enter your desired password here'
+
+-- Then don't forget to give connect privilege to the main db (e.g. powerbase) to powerbase_app
+GRANT CONNECT ON DATABASE powerbase TO powerbase_app
+
+-- Enables powerbase_app to kill active connections and drop the database
+GRANT pg_signal_backend TO powerbase_app;
+
+-- After creating a powerbase_app user, don't forget to revoke connect privileges of existing databases from PUBLIC. This is so that newly created roles will have no access to the existing databases by default.
+-- You can list all databases by:
+SELECT * FROM pg_database
+-- Then you can revoke connect privileges by:
+REVOKE CONNECT ON DATABASE database_name FROM PUBLIC
+
+6. Migrate and Seed the database. Make sure you have a PostgreSQL database named `powerbase` and Elastic Search installed and running.
 
 ```bash
 # Will migrate the schema to PostgreSQL and import the indices for Elastic Search
@@ -69,7 +93,7 @@ rails db:migrate
 rails db:seed
 ```
 
-6. Run the app and you're all set!
+7. Run the app and you're all set!
 
 ```bash
 # Run Rails server

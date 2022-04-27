@@ -3,7 +3,6 @@ import { RadioGroup } from '@headlessui/react';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants/bases';
 
 import { Page } from '@components/layout/Page';
@@ -15,38 +14,55 @@ import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
 import { Button } from '@components/ui/Button';
 import { Tabs } from '@components/ui/Tabs';
+import { createDatabase } from '@lib/api/databases';
+import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
 
 export function CreateBasePage() {
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
-  const [databaseName, setDatabaseName, databaseNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
   const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
 
-  const handleSubmit = (evt) => {
+  const [modal, setModal] = useState({
+    open: false,
+    content: '',
+    error: undefined,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    setLoading(true);
+    setModal({ open: false });
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
+      setLoading(false);
       return;
     }
 
-    const hasErrors = !!(!databaseName.length && databaseNameError)
-      || !databaseType
-      || !databasePlatform;
+    const hasErrors = !databaseType || !databasePlatform;
 
     if (!hasErrors) {
-      console.log({
-        success: true,
-        name,
-        database: databaseName,
-        adapter: databaseType,
-        platform: databasePlatform,
-        isTurbo: powerbaseType.name === 'Powerbase Turbo',
-        color,
-      });
+      try {
+        const response = await createDatabase({
+          name,
+          isTurbo: powerbaseType.name === 'Powerbase Turbo',
+          color,
+        });
+
+        setModal((val) => ({ ...val, base: response.database }));
+      } catch (err) {
+        setModal((val) => ({
+          ...val,
+          error: err.response.data.exception || err.response.data.error,
+        }));
+      }
     }
+
+    setModal((val) => ({ ...val, open: true }));
+    setLoading(false);
   };
 
   return (
@@ -73,17 +89,6 @@ export function CreateBasePage() {
                 value={name}
                 onChange={(evt) => setName(evt.target.value)}
                 error={nameError.error}
-                className="my-6"
-                required
-              />
-              <InlineInput
-                type="text"
-                label="Database Name"
-                name="database-name"
-                placeholder="e.g. powerbase or field_projects"
-                value={databaseName}
-                onChange={(evt) => setDatabaseName(evt.target.value)}
-                error={databaseNameError.error}
                 className="my-6"
                 required
               />
@@ -127,6 +132,7 @@ export function CreateBasePage() {
                   <Button
                     type="submit"
                     className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    loading={loading}
                   >
                     Save
                   </Button>
@@ -136,6 +142,14 @@ export function CreateBasePage() {
           </div>
         </PageContent>
       </div>
+
+      <ConnectBaseModal
+        open={modal.open}
+        setOpen={(val) => setModal((prevVal) => ({ ...prevVal, open: val }))}
+        content={modal.content}
+        error={modal.error}
+        base={modal.base}
+      />
     </Page>
   );
 }

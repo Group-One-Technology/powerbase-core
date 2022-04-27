@@ -1,5 +1,19 @@
 import { isResponseSuccess, securedApi } from './index';
 
+export async function createDatabase({
+  name,
+  isTurbo,
+  color,
+}) {
+  const response = await securedApi.post('/databases', {
+    name,
+    isTurbo,
+    color,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function connectDatabase({
   name,
   adapter,

@@ -124,13 +124,26 @@ class PowerbaseDatabase < ApplicationRecord
       self.base_migration.save
     end
 
-    pusher_trigger!("database.#{self.id}", "migration-listener", { id: self.id })
+    begin
+      pusher_trigger!("database.#{self.id}", "migration-listener", { id: self.id })
+    rescue ex
+      puts ex
+    end
   end
 
   def remove
     tables.each(&:remove)
     base_migration.destroy
     self.destroy
+  end
+
+  def drop
+    if self.is_created
+      username = self.connection_string.split("@")[0].split("://")[1].split(":")[0]
+      DropDatabaseWorker.perform_async(self.database_name, username)
+    end
+
+    self.remove
   end
 
   def update_guests_access(options)

@@ -11,12 +11,16 @@ class UserMailer < ApplicationMailer
     @action_url = "#{ENV["CLIENT"]}/user/confirm-email?token=#{@user.confirmation_token}"
     @confirm_within = ActiveSupport::Duration.build(@user.confirm_within).inspect
 
-    mail(
-      subject: 'Confirm Your Email',
-      to: @user.unconfirmed_email,
-      track_opens: 'true',
-      message_stream: 'outbound',
-    )
+    if Rails.env.production?
+      mail(
+        subject: 'Confirm Your Email',
+        to: @user.unconfirmed_email,
+        track_opens: 'true',
+        message_stream: 'outbound',
+      )
+    else
+      puts "#{Time.now} -- Confirm Your Email, #{@user.unconfirmed_email} - #{@action_url}"
+    end
   end
 
   def reset_password(user_id: nil, token: nil)

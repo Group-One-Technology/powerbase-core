@@ -12,7 +12,13 @@ class SyncDatabaseWorker < ApplicationWorker
 
     @new_connection = new_connection
     set_database(database_id)
-    initialize_sync_database
+
+    if database.is_created && new_connection
+      create_listeners
+      set_database_as_migrated
+    else
+      initialize_sync_database
+    end
   end
 
   def on_complete(status, params)
@@ -41,14 +47,7 @@ class SyncDatabaseWorker < ApplicationWorker
       table.write_migration_logs!(status: "migrated")
     end
 
-    database.update_status!("migrated")
-    database.base_migration.end_time = Time.now
-    database.base_migration.save
-
-    puts "#{Time.now} -- Database##{database.id} has been migrated"
-    pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
-
-    listen!
+    set_database_as_migrated
   end
 
   private
@@ -64,6 +63,17 @@ class SyncDatabaseWorker < ApplicationWorker
         puts "Could not find database with id of '#{database_id}'"
         return
       end
+    end
+
+    def set_database_as_migrated
+      database.update_status!("migrated")
+      database.base_migration.end_time = Time.now
+      database.base_migration.save
+
+      puts "#{Time.now} -- Database##{database.id} has been migrated"
+      pusher_trigger!("database.#{database.id}", "migration-listener", { id: database.id })
+
+      listen!
     end
 
     def initialize_sync_database
@@ -157,7 +167,11 @@ class SyncDatabaseWorker < ApplicationWorker
 
     def create_listeners
       database.update_status!("creating_listeners")
-      database.create_notifier_function! if new_connection
+
+      if new_connection
+        database.create_notifier_function!
+        return if database.is_created
+      end
 
       batch = Sidekiq::Batch.new
       batch.description = "Creating listeners for database##{database.id}"

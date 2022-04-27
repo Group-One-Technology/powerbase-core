@@ -17,6 +17,7 @@ export function OnboardingPage() {
   const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1]);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [base, setBase] = useState();
+  const isNewBase = databaseType.value === 'create';
 
   const handleTabsChange = (value) => setCurrentTab(value);
 
@@ -63,6 +64,7 @@ export function OnboardingPage() {
               powerbaseType={powerbaseType}
               base={base}
               setBase={setBase}
+              isNewBase={isNewBase}
             />
             <OnboardingInviteGuests base={base} />
           </Tabs.Root>

@@ -28,7 +28,7 @@ function BaseShareBaseModal() {
   const { open, setOpen, base } = useShareBaseModal();
   const { modal, guest } = usePermissionsStateModal();
   const { saving, saved, catchError } = useSaveStatus();
-  const { tablesResponse: { mutate: mutateTables } } = useCurrentView();
+  const { tablesResponse } = useCurrentView();
   const { mutate: mutateViewFields } = useViewFields();
   const { data: initialGuests, mutate: mutateGuests } = useBaseGuests();
   const { baseUser } = useBaseUser();
@@ -73,7 +73,7 @@ function BaseShareBaseModal() {
             : undefined,
         });
         mutateBase();
-        mutateTables();
+        tablesResponse?.mutate();
         mutateViewFields();
         await mutateGuests();
         saved(`Successfully invited guest with email of ${email}.`);

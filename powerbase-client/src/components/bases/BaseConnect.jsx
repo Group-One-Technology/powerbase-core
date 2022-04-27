@@ -5,7 +5,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { DATABASE_TYPES, POWERBASE_TYPE } from '@lib/constants/bases';
+import { DATABASE_TYPES, DB_PLATFORMS, POWERBASE_TYPE } from '@lib/constants/bases';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 
 import { InlineColorRadio } from '@components/ui/InlineColorRadio';
@@ -14,8 +14,9 @@ import { InlineInput } from '@components/ui/InlineInput';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { Button } from '@components/ui/Button';
 import { ArrowLeftIcon } from '@heroicons/react/outline';
+import { RadioGroup } from '@headlessui/react';
 
-const CONNECTION_TABS = ['Link Existing', 'Link from URL'];
+const CONNECTION_TABS = ['New', 'Link Existing', 'Link from URL'];
 
 export function BaseConnect({
   submit,
@@ -23,13 +24,15 @@ export function BaseConnect({
   loading,
   setLoading,
   cancel,
+  isNewBase,
 }) {
-  const [currentTab, setCurrentTab] = useState(CONNECTION_TABS[1]);
+  const [currentTab, setCurrentTab] = useState(isNewBase ? CONNECTION_TABS[0] : CONNECTION_TABS[1]);
 
   const [name, setName, nameError] = useValidState('', REQUIRED_VALIDATOR);
   const [connectionString, setConnectionString, connectionStringError] = useValidState('', REQUIRED_VALIDATOR);
   const [databaseName, setDatabaseName, databaseNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES[0]);
+  const [databasePlatform, setDatabasePlatform] = useState(DB_PLATFORMS[0]);
   const [host, setHost, hostError] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, portError] = useValidState(databaseType.port, REQUIRED_VALIDATOR);
   const [user, setUser] = useState('');
@@ -50,35 +53,45 @@ export function BaseConnect({
       return;
     }
 
+    const isTurbo = powerbaseType.name === 'Powerbase Turbo';
+
     if (currentTab === 'Link from URL') {
       const hasErrors = !connectionString.length
         || !!connectionStringError.error;
       if (hasErrors) return;
-    } else {
+
+      await submit({
+        connectionString,
+        name,
+        isTurbo,
+        color,
+      });
+    } else if (currentTab === 'Link Existing') {
       const hasErrors = !!(!databaseName.length && databaseNameError.error)
         || !!(!host.length && hostError.error)
         || !!portError.error
         || !databaseType;
       if (hasErrors) return;
-    }
 
-    const payload = currentTab === 'Link from URL'
-      ? { connectionString }
-      : {
+      await submit({
+        name,
+        isTurbo,
+        color,
         database: databaseName,
         adapter: databaseType.value,
         host,
         port,
         user,
         password,
-      };
-
-    await submit({
-      ...payload,
-      name,
-      isTurbo: powerbaseType.name === 'Powerbase Turbo',
-      color,
-    });
+      });
+    } else if (currentTab === 'New') {
+      await submit({
+        name,
+        isTurbo,
+        color,
+        adapter: databaseType.value,
+      });
+    }
   };
 
   return (
@@ -102,6 +115,77 @@ export function BaseConnect({
           </Tabs.Trigger>
         ))}
       </Tabs.List>
+      <Tabs.Content value="New">
+        <form onSubmit={handleSubmit}>
+          <InlineInput
+            type="text"
+            label="Name"
+            name="name"
+            placeholder="e.g. Powerbase or Field Projects"
+            value={name}
+            onChange={(evt) => setName(evt.target.value)}
+            error={nameError.error}
+            className="my-6"
+            required
+          />
+          <InlineSelect
+            label="Type"
+            value={databaseType}
+            setValue={setDatabaseType}
+            options={DATABASE_TYPES}
+            className="my-6"
+          />
+          <InlineRadio
+            label="Where"
+            aria-label="Cloud Platform"
+            value={databasePlatform}
+            setValue={setDatabasePlatform}
+            options={DB_PLATFORMS}
+            enhancer={(option) => !!option.price && (
+              <RadioGroup.Description as="div" className="mt-2 flex text-sm sm:mt-0 sm:block sm:ml-4 sm:text-right">
+                <div className="font-medium text-gray-900">{option.price}</div>
+                <div className="ml-1 text-gray-500 sm:ml-0">/mo</div>
+              </RadioGroup.Description>
+            )}
+            className="my-6"
+          />
+          <InlineRadio
+            label="Powerbase Type"
+            value={powerbaseType}
+            setValue={setPowerbaseType}
+            options={POWERBASE_TYPE}
+            className="my-6"
+          />
+          <InlineColorRadio
+            value={color}
+            setValue={setColor}
+            error={colorError.error}
+            setError={colorError.setError}
+            className="my-6"
+          />
+          <div className="grid grid-cols-12 my-6">
+            <div className="col-start-4 col-span-9 flex flex-col gap-y-4">
+              <Button
+                type="submit"
+                className="w-full flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                loading={loading}
+              >
+                Connect and Save
+              </Button>
+              {cancel && (
+                <Button
+                  type="button"
+                  className="w-min inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-200 focus:bg-gray-200"
+                  onClick={cancel}
+                >
+                  <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                  Return
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </Tabs.Content>
       <Tabs.Content value="Link Existing">
         <form onSubmit={handleSubmit}>
           <InlineInput
@@ -281,4 +365,5 @@ BaseConnect.propTypes = {
   loading: PropTypes.bool,
   setLoading: PropTypes.func.isRequired,
   cancel: PropTypes.func,
+  isNewBase: PropTypes.bool,
 };

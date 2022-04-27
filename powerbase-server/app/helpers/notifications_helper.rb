@@ -10,10 +10,18 @@ module NotificationsHelper
       user_id: data[:user_id]
     })
 
-    notif_pusher_trigger!(notification.user_id, notification.data_type)
+    begin
+      notif_pusher_trigger!(notification.user_id, notification.data_type)
+    rescue ex
+      puts ex
+    end
   end
 
   def notif_pusher_trigger!(user_id, type)
-    pusher_trigger!("notifications.#{user_id}", "notifications-listener", { type: type })
+    begin
+      pusher_trigger!("notifications.#{user_id}", "notifications-listener", { type: type })
+    rescue ex
+      puts ex
+    end
   end
 end

@@ -77,7 +77,11 @@ export function OnboardingInviteGuests({ base }) {
     setSkipLoading(true);
     await setAuthUserAsOnboarded();
     mutateAuthUser({ ...authUser, isOnboarded: true });
-    history.push(`/base/${base.id}/progress?onboarding=true`);
+    if (base.isCreated) {
+      history.push(`/base/${base.id}`);
+    } else {
+      history.push(`/base/${base.id}/progress?onboarding=true`);
+    }
   };
 
   const handleInviteGuests = async (evt) => {
@@ -98,7 +102,11 @@ export function OnboardingInviteGuests({ base }) {
         await inviteMultipleGuests({ databaseId: base.id, users });
         await setAuthUserAsOnboarded();
         mutateAuthUser({ ...authUser, isOnboarded: true });
-        history.push(`/base/${base.id}/progress?onboarding=true`);
+        if (base.isCreated) {
+          history.push(`/base/${base.id}`);
+        } else {
+          history.push(`/base/${base.id}/progress?onboarding=true`);
+        }
         saved(`Successfully invited ${users.length} user(s) to "${base.name}" base.`);
       } catch (err) {
         captureError(err);
