@@ -14,6 +14,7 @@ class SyncDatabaseWorker < ApplicationWorker
     set_database(database_id)
 
     if database.is_created && new_connection
+      create_listeners
       set_database_as_migrated
     else
       initialize_sync_database
@@ -166,7 +167,11 @@ class SyncDatabaseWorker < ApplicationWorker
 
     def create_listeners
       database.update_status!("creating_listeners")
-      database.create_notifier_function! if new_connection
+
+      if new_connection
+        database.create_notifier_function!
+        return if database.is_created
+      end
 
       batch = Sidekiq::Batch.new
       batch.description = "Creating listeners for database##{database.id}"
