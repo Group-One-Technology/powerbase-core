@@ -79,7 +79,7 @@ GRANT pg_signal_backend TO powerbase_app;
 
 -- After creating a powerbase_app user, don't forget to revoke connect privileges of existing databases from PUBLIC. This is so that newly created roles will have no access to the existing databases by default.
 -- You can list all databases by:
-SELECT * FROM pg_databases
+SELECT * FROM pg_database
 -- Then you can revoke connect privileges by:
 REVOKE CONNECT ON DATABASE database_name FROM PUBLIC
 
