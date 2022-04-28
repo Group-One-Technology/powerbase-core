@@ -36,6 +36,8 @@ class Databases::Schema
     end
 
     if !table.is_virtual
+      notifier = Powerbase::Notifier.new database
+      table_name = table.name
       actual_columns = fields.select {|field| !field[:is_virtual]}
         .map do |field|
           {
@@ -52,7 +54,7 @@ class Databases::Schema
 
       begin
         sequel_connect(database) do |db|
-          db.create_table(table.name.to_sym) do
+          db.create_table(table_name.to_sym) do
             actual_columns.each do |field|
               if field[:data_type].end_with?("enum") || (field[:enum_values] && field[:enum_values].length > 0)
                 db.create_enum(field[:data_type].to_sym, field[:enum_values].uniq)
@@ -64,6 +66,13 @@ class Databases::Schema
             if primary_keys.length > 0
               primary_key(primary_keys)
             end
+          end
+
+          db.run(notifier.trigger_sql(table_name))
+
+          if database.is_superuser
+            db.run(notifier.event_trigger_sql(table_name))
+            db.run(notifier.drop_event_trigger_sql(table_name))
           end
         end
       rescue Sequel::DatabaseError => ex
