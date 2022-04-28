@@ -2,7 +2,7 @@ namespace :database do
   task auto_sync: :environment do
     puts "#{Time.now} -- Enabling auto sync..."
 
-    PowerbaseDatabase.turbo.each do |db|
+    PowerbaseDatabase.each do |db|
       if db.postgresql?
         puts "#{Time.now} -- Enabling auto sync for Database - #{db.name}##{db.id}"
 
