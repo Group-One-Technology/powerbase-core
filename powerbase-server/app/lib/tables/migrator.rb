@@ -223,11 +223,15 @@ class Tables::Migrator
       @offset += DEFAULT_PAGE_SIZE
 
       table.write_migration_logs!(offset: offset, indexed_records: indexed_records)
-      pusher_trigger!("table.#{table.id}", "notifier-migration-listener", {
-        id: table.id,
-        offset: offset,
-        indexed_records: indexed_records,
-      })
+      begin
+        pusher_trigger!("table.#{table.id}", "notifier-migration-listener", {
+          id: table.id,
+          offset: offset,
+          indexed_records: indexed_records,
+        })
+      rescue => ex
+        puts ex
+      end
     end
 
     # Remove deleted indexed records based on _in_synced

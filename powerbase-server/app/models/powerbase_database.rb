@@ -126,7 +126,7 @@ class PowerbaseDatabase < ApplicationRecord
 
     begin
       pusher_trigger!("database.#{self.id}", "migration-listener", { id: self.id })
-    rescue ex
+    rescue => ex
       puts ex
     end
   end
