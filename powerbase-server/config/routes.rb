@@ -31,6 +31,7 @@ Rails.application.routes.draw do
 
     member do
       get 'connection_stats'
+      get 'credentials'
       put 'general_info', as: 'update_database_general_info', to: 'powerbase_databases#update_general_info'
       put 'credentials', as: 'update_database_credentials', to: 'powerbase_databases#update_credentials'
       put 'clear_logs'
