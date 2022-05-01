@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 
+import { useBase } from '@models/Base';
+import { getDatabaseCredentials } from '@lib/api/databases';
+import { useData } from '@lib/hooks/useData';
+import { decrypt } from '@lib/helpers/crypto';
+
+import { Button } from '@components/ui/Button';
 import { StatusModal } from '@components/ui/StatusModal';
 import { BaseGeneralInfoForm } from './core-settings/BaseGeneralInfoForm';
 import { BaseConnectionInfoForm } from './core-settings/BaseConnectionInfoForm';
@@ -24,10 +30,25 @@ const ERROR_ICON = (
 );
 
 export function BaseCoreSettings() {
+  const { data: base } = useBase();
   const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
+  const {
+    data, status, error, dispatch,
+  } = useData();
 
   const handleInit = () => setModal(INITIAL_MODAL_VALUE);
   const handleSuccess = () => setModal((curVal) => ({ ...curVal, open: true }));
+
+  const handleViewCredentials = async () => {
+    dispatch.pending();
+
+    try {
+      const response = await getDatabaseCredentials({ id: base.id });
+      dispatch.resolved(response.connectionString);
+    } catch (err) {
+      dispatch.rejected(err.response.data.exception || err.response.data.error);
+    }
+  };
 
   const handleError = (err) => {
     setModal({
@@ -54,6 +75,22 @@ export function BaseCoreSettings() {
         handleError={handleError}
       />
       <BaseConnectionStats />
+
+      <div>
+        <h3>Connection String</h3>
+        <Button
+          type="button"
+          onClick={handleViewCredentials}
+          loading={status === 'pending'}
+        >
+          View Credentials
+        </Button>
+        {data?.length > 0 && (
+          <p>
+            {decrypt(data, base.id)}
+          </p>
+        )}
+      </div>
 
       <StatusModal
         open={modal.open}
