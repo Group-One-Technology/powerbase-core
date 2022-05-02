@@ -57,7 +57,7 @@ export function BaseConnectionInfoForm({ handleInit, handleSuccess, handleError 
   return (
     <form onSubmit={handleSubmit}>
       <h3 className="mt-4 text-lg font-medium text-gray-900">
-        Connection String
+        Database Credentials
       </h3>
       <p className="text-sm text-gray-500 my-1">
         You may leave this section blank if you do not wish to update the
