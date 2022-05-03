@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+CONTAINER_FIRST_STARTUP="CONTAINER_FIRST_STARTUP"
+
+if [ ! -e /$CONTAINER_FIRST_STARTUP ]; then
+  touch /$CONTAINER_FIRST_STARTUP
+
+  bundle exec rake db:create
+
+  export PGPASSWORD=$POSTGRES_PASSWORD
+
+psql -U $POSTGRES_USER -h host.docker.internal -p 5432 << EOF
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'powerbase_app') THEN
+        CREATE USER powerbase_app WITH NOSUPERUSER CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD $POSTGRES_APP_PASSWORD;
+
+        GRANT CONNECT ON DATABASE powerbase TO powerbase_app;
+        GRANT pg_signal_backend TO powerbase_app;
+
+        REVOKE CONNECT ON DATABASE postgres FROM PUBLIC;
+        REVOKE CONNECT ON DATABASE powerbase FROM PUBLIC;
+    END IF;
+  END\$\$;
+EOF
+
+  bundle exec rake db:migrate
+
+  if [[ $? != 0 ]]; then
+    echo "-- Failed to migrate. Running setup first."
+    bundle exec rake db:setup
+  fi
+
+  bundle exec rake db:seed
+else
+  bundle exec rake db:migrate
+fi
+
+
+exec "$@"

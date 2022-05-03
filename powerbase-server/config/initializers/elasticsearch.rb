@@ -1,6 +1,6 @@
 require 'elasticsearch/model'
 
-elasticsearch_url = ENV["elasticsearch_url"]
+elasticsearch_url = ENV.fetch("ELASTICSEARCH_URL") { "http://localhost:9200" }
 connection_hash = {
   url: elasticsearch_url,
   reload_connections: true,

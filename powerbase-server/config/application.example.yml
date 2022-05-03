@@ -1,11 +1,14 @@
 CLIENT: "http://localhost:4000"
 AUTH_TOKEN_ENCRYPTION_KEY: "secret"
+SECRET_KEY_BASE:
 
+DATABASE_URL: ""
 encryption_key: "secret"
 jwt_encryption_key: "secret"
 API_ENCRYPTION_KEY: "some_32_character_secret_1234567"
-redis_url: "redis://localhost:6379/0"
-elasticsearch_url: "http://localhost:9200"
+
+REDIS_URL: "redis://localhost:6379/0"
+ELASTICSEARCH_URL: "http://localhost:9200"
 hubspot_api_key: ""
 
 PUSHER_KEY: ""
