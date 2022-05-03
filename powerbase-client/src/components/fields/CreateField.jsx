@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { InformationCircleIcon } from '@heroicons/react/outline';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
@@ -250,12 +252,26 @@ export function CreateField({
               setValue={setIsNullable}
             />
             {hasPrimaryKey && (
-              <Checkbox
-                id="create-field-is-pii"
-                label="Set as PII"
-                value={isPii}
-                setValue={setIsPii}
-              />
+              <div className="flex items-center">
+                <Checkbox
+                  id="create-field-is-pii"
+                  label="Set as PII"
+                  value={isPii}
+                  setValue={setIsPii}
+                />
+                <Tooltip.Root delayDuration={0}>
+                  <Tooltip.Trigger className="ml-1 py-[1px] px-0.5 rounded text-gray-500">
+                    <span className="sr-only">What is PII?</span>
+                    <InformationCircleIcon className="mt-0.5 h-4 w-4 text-gray-700" aria-hidden="true" />
+                  </Tooltip.Trigger>
+                  <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                    <Tooltip.Arrow className="gray-900" />
+                    Personal Identifiable Information (PII) is information&nbsp;
+                    <br />
+                    that could be used to identify an individual.
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              </div>
             )}
           </div>
         </div>
