@@ -150,8 +150,8 @@ class PowerbaseFieldsController < ApplicationController
       return
     end
 
-    if @field.db_type != nil && (@field.db_type.include?("uuid") || @field.db_type.include?("int"))
-      render json: { error: "Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'" }, status: :unprocessable_entity
+    if @field.db_type != nil && ["uuid", "int", "integer"].include?(@field.db_type)
+      render json: { error: "Could not convert field with db_type of '#{@field.db_type}' to '#{@field_type.name}'. Value must be an decimal/numeric." }, status: :unprocessable_entity
       return
     end
 

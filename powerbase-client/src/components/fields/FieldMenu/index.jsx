@@ -41,7 +41,8 @@ export function FieldMenu({
 
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
   const relatedFieldTypes = fieldTypes.filter((item) => item.dataType === fieldType.dataType);
-  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !(field.dbType && ['uuid', 'int'].includes(field.dbType));
+  const isFieldTypeConvertable = relatedFieldTypes.length > 1 && !(field.dbType && ['uuid', 'int', 'integer'].includes(field.dbType));
+
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canChangeGuestAccess = baseUser?.can(PERMISSIONS.ChangeGuestAccess);
@@ -87,6 +88,7 @@ export function FieldMenu({
     if (canManageField) {
       saving();
 
+      const oldFields = [...fields];
       const updatedFields = fields.map((item) => ({
         ...item,
         fieldTypeId: item.id === field.id
@@ -102,6 +104,7 @@ export function FieldMenu({
         await mutateViewFields(updatedFields);
         saved();
       } catch (err) {
+        setFields(oldFields);
         captureError(err);
         catchError(err);
       }
