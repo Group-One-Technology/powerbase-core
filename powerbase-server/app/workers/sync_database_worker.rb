@@ -205,7 +205,17 @@ class SyncDatabaseWorker < ApplicationWorker
     def listen!
       if new_connection
         poller = Sidekiq::Cron::Job.find("Database Listeners")
-        poller.args << database.id
+
+        if poller
+          poller.args << database.id
+        else
+          poller = Sidekiq::Cron::Job.new(
+            name: "Database Listeners",
+            args: [database.id],
+            cron: '*/5 * * * *', # Run The job every 5 mins
+            class: 'PollWorker'
+          )
+        end
 
         if poller.save
           poller.enque!

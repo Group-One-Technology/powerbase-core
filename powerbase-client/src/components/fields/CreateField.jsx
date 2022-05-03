@@ -252,12 +252,13 @@ export function CreateField({
               setValue={setIsNullable}
             />
             {hasPrimaryKey && (
-              <div className="flex items-center">
+              <div className="my-2 flex items-center">
                 <Checkbox
                   id="create-field-is-pii"
                   label="Set as PII"
                   value={isPii}
                   setValue={setIsPii}
+                  className="!my-0"
                 />
                 <Tooltip.Root delayDuration={0}>
                   <Tooltip.Trigger className="ml-1 py-[1px] px-0.5 rounded text-gray-500">

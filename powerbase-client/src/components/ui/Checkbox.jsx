@@ -1,17 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 
 export function Checkbox({
   id,
   label,
   value,
   setValue,
+  className = '',
 }) {
   const handleToggleChecked = () => setValue(!value);
   return (
     <label
       htmlFor={id}
-      className="my-2 block cursor-pointer"
+      className={cn('my-2 block cursor-pointer', className)}
     >
       <input
         id={id}
@@ -33,4 +35,5 @@ Checkbox.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.bool,
   setValue: PropTypes.func.isRequired,
+  className: PropTypes.string,
 };
