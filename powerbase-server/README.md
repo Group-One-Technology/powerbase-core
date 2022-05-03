@@ -121,6 +121,15 @@ Copy and rename `config/application.docker-example.yml` to `config/application.y
 
 Then copy and rename `.env.docker-example` to `.env` and update the variables.
 
+3. Run docker
+
+Build and run the docker container:
+
+```bash
+docker compose up
+```
+
+
 ## Testing the server
 
 1. Prepare the test database if you don't have on yet.
