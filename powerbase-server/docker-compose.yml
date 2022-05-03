@@ -14,27 +14,6 @@ services:
     ports:
       - '6379:6379'
     command: redis-server --requirepass ${REDIS_PASSWORD}
-  web:
-    entrypoint: [bin/entry]
-    build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 4001 -b '0.0.0.0' -e ${ENVIRONMENT}"
-    volumes:
-      - .:/powerbase-server
-    ports:
-      - "4001:4001"
-    env_file:
-      - '.env'
-    depends_on:
-      - 'postgres'
-      - 'redis'
-  sidekiq:
-    depends_on:
-      - 'postgres'
-      - 'redis'
-    build: .
-    command: bundle exec sidekiq -e ${ENVIRONMENT} -c 3
-    env_file:
-      - '.env'
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     environment:
@@ -48,6 +27,29 @@ services:
         hard: -1
     ports:
       - "9200:9200"
+  web:
+    entrypoint: [bin/entry]
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 4001 -b '0.0.0.0' -e ${ENVIRONMENT}"
+    volumes:
+      - .:/powerbase-server
+    ports:
+      - "4001:4001"
+    env_file:
+      - '.env'
+    depends_on:
+      - 'postgres'
+      - 'redis'
+      - 'elasticsearch'
+  sidekiq:
+    depends_on:
+      - 'postgres'
+      - 'redis'
+      - 'elasticsearch'
+    build: .
+    command: bundle exec sidekiq -e ${ENVIRONMENT} -c 3
+    env_file:
+      - '.env'
 volumes:
   redis:
   postgres:
