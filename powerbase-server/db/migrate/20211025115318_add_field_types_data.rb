@@ -77,7 +77,7 @@ class AddFieldTypesData < ActiveRecord::Migration[6.1]
     field_type = PowerbaseFieldType.find_by(name: "Percent") || PowerbaseFieldType.new
     if field_type
       field_type.name = "Percent"
-      field_type.description = "Number or ratio expressed as a fraction of 100"
+      field_type.description = "Number or ratio expressed as a fraction of 100."
       field_type.data_type = "number"
       field_type.save
     end
