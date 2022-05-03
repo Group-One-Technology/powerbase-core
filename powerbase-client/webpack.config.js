@@ -75,6 +75,7 @@ module.exports = {
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         API: JSON.stringify(process.env.API),
+        API_ENCRYPTION_KEY: JSON.stringify(process.env.API_ENCRYPTION_KEY),
         PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
         SENTRY_DSN: JSON.stringify(process.env.SENTRY_DSN),
         EDITMODE_PROJECT_ID: JSON.stringify(process.env.EDITMODE_PROJECT_ID),

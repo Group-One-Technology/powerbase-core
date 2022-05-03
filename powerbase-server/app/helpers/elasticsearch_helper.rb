@@ -48,7 +48,7 @@ module ElasticsearchHelper
     end
   end
 
-  def remove_column(index, column_name)
+  def remove_es_column(index, column_name)
     client.perform_request("POST", "#{index}/_update_by_query", {}, {
       script: "ctx._source.remove('#{column_name}')",
     })

@@ -4,7 +4,7 @@ class PowerbaseDatabasesController < ApplicationController
   before_action :check_database_access, only: [:update_general_info, :update_credentials, :clear_logs]
   before_action :check_database_permission_access, only: [:update_allowed_roles, :update_database_permission]
 
-  schema(:show, :destroy, :clear_logs) do
+  schema(:show, :credentials, :destroy, :clear_logs) do
     required(:id).value(:integer)
   end
 
@@ -75,6 +75,14 @@ class PowerbaseDatabasesController < ApplicationController
   def index
     @databases = PowerbaseDatabase.where(user_id: current_user.id)
     render json: @databases.map {|item| format_json(item)}
+  end
+
+  # GET /databases/:id/credentials
+  def credentials
+    @database = PowerbaseDatabase.find(safe_params[:id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
+    current_user.can?(:manage_base, @database)
+    render json: { connection_string: Crypto.encrypt(@database.connection_string, @database.id) }
   end
 
   # GET /shared_databases

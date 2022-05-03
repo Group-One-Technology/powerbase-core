@@ -36,7 +36,7 @@ class PowerbaseField < ApplicationRecord
     end
 
     # Remove column for every doc under index_name
-    remove_column(table.index_name, self.name)
+    remove_es_column(table.index_name, self.name)
 
     self.destroy
   end

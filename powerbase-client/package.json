@@ -30,6 +30,7 @@
     "axios": "^0.21.1",
     "classnames": "^2.3.1",
     "constate": "^3.2.0",
+    "crypto-js": "^4.1.1",
     "dotenv": "^9.0.2",
     "editmode-react": "^3.1.36",
     "express": "^4.17.1",

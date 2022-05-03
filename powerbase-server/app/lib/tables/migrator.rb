@@ -250,7 +250,7 @@ class Tables::Migrator
 
     begin
       # Remove _in_synced column for every doc under index_name
-      remove_column(index_name, "_in_synced")
+      remove_es_column(index_name, "_in_synced")
     rescue => ex
       puts ex
     end

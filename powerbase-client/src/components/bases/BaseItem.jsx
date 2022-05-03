@@ -55,7 +55,9 @@ export function BaseItem({
         )}
       </div>
       <Link to={`/base/${base.id}${base.defaultTable ? `/table/${base.defaultTable.id}?view=${base.defaultTable.defaultViewId}` : ''}`}>
-        <h2 className="text-gray-900 text-lg font-bold uppercase break-words" style={{ hyphens: 'auto' }}>{base.name}</h2>
+        <h2 className="text-gray-900 text-lg font-bold uppercase break-words" style={{ hyphens: 'auto' }}>
+          {base.name}
+        </h2>
         {showOwner && (
           <p className="text-xs text-gray-500 truncate">
             Owned by {base.owner.firstName}

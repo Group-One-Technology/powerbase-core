@@ -5,6 +5,7 @@ import { StatusModal } from '@components/ui/StatusModal';
 import { BaseGeneralInfoForm } from './core-settings/BaseGeneralInfoForm';
 import { BaseConnectionInfoForm } from './core-settings/BaseConnectionInfoForm';
 import { BaseConnectionStats } from './core-settings/BaseConnectionStats';
+import { BaseCredentials } from './core-settings/BaseCredentials';
 
 const INITIAL_MODAL_VALUE = {
   open: false,
@@ -48,6 +49,7 @@ export function BaseCoreSettings() {
         handleSuccess={handleSuccess}
         handleError={handleError}
       />
+      <BaseCredentials />
       <BaseConnectionInfoForm
         handleInit={handleInit}
         handleSuccess={handleSuccess}
