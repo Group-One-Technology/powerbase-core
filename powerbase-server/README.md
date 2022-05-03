@@ -25,7 +25,7 @@ bundle install
 
 3. Setup Environment Variables
 
-Copy and rename `config/application.example.yml` to `config/application.example.yml` and update the ff variables.
+Copy and rename `config/application.example.yml` to `config/application.yml` and update the variables.
 
 4. Setup Elastic Search
 
@@ -102,6 +102,24 @@ rails s
 # In another terminal, Run sidekiq
 bundle exec sidekiq start
 ```
+
+## Dockerizing the App
+
+1. Clone Powerbase's core repository
+
+```bash
+git clone https://github.com/Group-One-Technology/powerbase-core.git
+```
+
+2. Go to the server's directory and setup the environment variables
+
+```bash
+cd powerbase-server
+```
+
+Copy and rename `config/application.docker-example.yml` to `config/application.yml` and update the variables.
+
+Then copy and rename `.env.docker-example` to `.env` and update the variables.
 
 ## Testing the server
 
