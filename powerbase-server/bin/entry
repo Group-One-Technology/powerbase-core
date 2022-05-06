@@ -10,7 +10,7 @@ if [ ! -e /$CONTAINER_FIRST_STARTUP ]; then
 
   export PGPASSWORD=$POSTGRES_PASSWORD
 
-psql -U $POSTGRES_USER -h host.docker.internal -p 5432 << EOF
+psql -U $POSTGRES_USER -h host.docker.internal -p 5432 -d powerbase << EOF
   DO \$\$
   BEGIN
     IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'powerbase_app') THEN

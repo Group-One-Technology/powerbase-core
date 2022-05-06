@@ -4,8 +4,10 @@ services:
     image: 'postgres:14.2'
     volumes:
       - postgres:/var/lib/postgresql/data
-    env_file:
-      - '.env'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=powerbase
     ports:
       - '5432:5432'
   redis:
@@ -27,7 +29,16 @@ services:
         hard: -1
     ports:
       - "9200:9200"
-  web:
+  web_socket:
+    image: edgurgel/poxa-automated:latest
+    environment:
+      - PORT=6001
+      - POXA_APP_ID=${PUSHER_APP_ID}
+      - POXA_APP_KEY=${PUSHER_KEY}
+      - POXA_SECRET=${PUSHER_SECRET}
+    ports:
+      - "6001:6001"
+  server:
     entrypoint: [bin/entry]
     build: .
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 4001 -b '0.0.0.0' -e ${ENVIRONMENT}"
@@ -41,11 +52,13 @@ services:
       - 'postgres'
       - 'redis'
       - 'elasticsearch'
+      - 'web_socket'
   sidekiq:
     depends_on:
       - 'postgres'
       - 'redis'
       - 'elasticsearch'
+      - 'web_socket'
     build: .
     command: bundle exec sidekiq -e ${ENVIRONMENT} -c 3
     env_file:
