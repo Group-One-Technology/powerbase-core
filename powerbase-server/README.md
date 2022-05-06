@@ -60,10 +60,10 @@ Copy and rename `config/application.example.yml` to `config/application.yml` and
     ```
 
 5. Setting up host for creating databases
-- Add `AWS_DATABASE_HOST` and `AWS_DATABASE_CONNECTION` to your `config/application.yml`  (should be localhost for your local environment and AWS for production)
+- Add `POWERBASE_CLOUD_HOST` and `POWERBASE_CLOUD_DB_CONNECTION` to your `config/application.yml`  (should be localhost for your local environment and AWS for production)
   wherein
-  - `AWS_DATABASE_HOST` is the host w/ port where the databases will be created, can either be AWS RDS DB Instance host or your PostgreSQL localhost.
-  - `AWS_DATABASE_CONNECTION` is the connection string that uses the `powerbase_app` role for the powerbase server to use.
+  - `POWERBASE_CLOUD_HOST` is the host w/ port where the databases will be created, can either be AWS RDS DB Instance host or your PostgreSQL localhost.
+  - `POWERBASE_CLOUD_DB_CONNECTION` is the connection string that uses the `powerbase_app` role for the powerbase server to use.
 - In your database host, create the `powerbase_app` role if there isn't any yet:
    NOTE: Update the password bellow:
 
@@ -117,9 +117,7 @@ git clone https://github.com/Group-One-Technology/powerbase-core.git
 cd powerbase-server
 ```
 
-Copy and rename `config/application.docker-example.yml` to `config/application.yml` and update the variables.
-
-Then copy and rename `.env.docker-example` to `.env` and update the variables.
+Copy and rename `.env.docker-example` to `.env` and update the variables.
 
 3. Run docker
 
