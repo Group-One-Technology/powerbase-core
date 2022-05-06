@@ -4,7 +4,7 @@ const { PUSHER_KEY, PUSHER_HOST } = process.env;
 let host = '';
 let port = '';
 
-if (PUSHER_HOST.length > 0) {
+if (PUSHER_HOST && PUSHER_HOST.length > 0) {
   [, host] = PUSHER_HOST.split('://');
   [host, port] = host.split(':');
 }
