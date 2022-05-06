@@ -1,8 +1,8 @@
 module PusherHelper
   def pusher
-    scheme = nil
-    host = nil
-    port = nil
+    scheme = ""
+    host = ""
+    port = ""
 
     if !ENV["PUSHER_HOST"].to_s.empty?
       scheme, host = ENV["PUSHER_HOST"].split("://")
