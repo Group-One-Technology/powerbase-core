@@ -1,11 +1,28 @@
 module PusherHelper
   def pusher
+    scheme = ""
+    host = ""
+    port = ""
+
+    if !ENV["PUSHER_HOST"].to_s.empty?
+      scheme, host = ENV["PUSHER_HOST"].split("://")
+      host, port = host.split(":")
+    end
+
+    config = !scheme.empty? && !host.empty? && !port.empty? ? {
+        host: host,
+        port: port,
+        scheme: scheme,
+        use_tls: false,
+        enabled_transports: ["ws", "wss"],
+      } : { cluster: 'ap1', use_tls: true }
+
     @pusher ||= Pusher::Client.new(
       app_id: ENV["PUSHER_APP_ID"],
       key: ENV["PUSHER_KEY"],
       secret: ENV["PUSHER_SECRET"],
-      cluster: 'ap1',
-      use_tls: true
+
+      **config
     )
   end
 

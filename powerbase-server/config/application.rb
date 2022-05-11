@@ -19,6 +19,9 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load environment variables
+Dotenv::Railtie.load
+
 module PowerbaseServer
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

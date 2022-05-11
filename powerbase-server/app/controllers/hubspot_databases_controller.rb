@@ -25,7 +25,7 @@ class HubspotDatabasesController < ApplicationController
 
   private
     def authorize_acesss_hubspot
-      if safe_params[:api_key] != ENV["hubspot_api_key"]
+      if safe_params[:api_key] != ENV["HUBSPOT_API_KEY"]
         raise StandardError.new "Invalid Hubspot API Key. Access denied."
       end
     end
