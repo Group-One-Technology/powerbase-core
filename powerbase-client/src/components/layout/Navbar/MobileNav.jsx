@@ -114,8 +114,13 @@ export function MobileNav({ base, bases, navigation }) {
           <div className="ml-3">
             <div className={cn('text-base font-medium', base ? 'text-white' : 'text-gray-800')}>
               {authUser.firstName} {authUser.lastName}
+              {authUser.isAdmin && (
+                <span className={cn('ml-2 text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>(Admin)</span>
+              )}
             </div>
-            <div className={cn('text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>{authUser.email}</div>
+            <div className={cn('text-sm font-medium', base ? 'text-white' : 'text-gray-500')}>
+              {authUser.email}
+            </div>
           </div>
         </div>
         <div className="mt-3 space-y-1">

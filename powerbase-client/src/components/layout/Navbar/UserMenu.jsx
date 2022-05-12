@@ -98,6 +98,23 @@ export function UserMenu({ list, colored }) {
               static
               className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
+              <div className="px-4 py-2 flex items-center space-x-2 border-b border-gray-200">
+                <div className="flex-shrink-0">
+                  <Gravatar
+                    email={authUser.email}
+                    className="h-10 w-10 rounded-full"
+                    alt={`${authUser.firstName}'s profile picture`}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {authUser.firstName}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {authUser.isAdmin ? 'Admin' : 'User'}
+                  </p>
+                </div>
+              </div>
               {USER_NAVIGATION.map((item) => (
                 <Menu.Item key={item.name}>
                   {({ active }) => (
