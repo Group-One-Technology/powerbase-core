@@ -16,6 +16,7 @@ class Users::AuthController < ApplicationController
         email: user.email,
         is_onboarded: user.is_onboarded,
         is_confirmed: user.confirmed?,
+        is_admin: user.is_admin,
         created_at: user.created_at,
         updated_at: user.updated_at,
       }

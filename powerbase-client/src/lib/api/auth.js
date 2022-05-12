@@ -48,7 +48,13 @@ export async function register({
     password,
     passwordConfirmation,
   });
-  if (isResponseSuccess(response)) return response.data;
+  if (isResponseSuccess(response)) {
+    if (response.data?.isAdmin) {
+      localStorage.csrf = response.data.csrf;
+      localStorage.signedIn = true;
+    }
+    return response.data;
+  }
   return undefined;
 }
 
