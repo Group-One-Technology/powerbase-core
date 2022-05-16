@@ -1,63 +1,56 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
+import PropTypes from 'prop-types';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
+import { DOMAIN_VALIDATOR } from '@lib/validators/DOMAIN_VALIDATOR';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
-import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
 import { GETTING_STARTED_LINK } from '@lib/constants/links';
 import { useData } from '@lib/hooks/useData';
-import { register } from '@lib/api/auth';
-import { useAuthUser } from '@models/AuthUser';
 
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { SetupTabs } from '@lib/constants/setup';
-import { ArrowLeftIcon } from '@heroicons/react/outline';
+import { Checkbox } from '@components/ui/Checkbox';
+import { setupSettings } from '@lib/api/settings';
 
-export function SetupAdminForm({ setCurrentTab }) {
-  const { mutate: mutateAuthUser } = useAuthUser();
-
-  const [firstName, setFirstName, { error: firstNameError }] = useValidState('', REQUIRED_VALIDATOR);
-  const [lastName, setLastName, { error: lastNameError }] = useValidState('', REQUIRED_VALIDATOR);
+export function SetupSMTP({ setCurrentTab }) {
+  const [address, setAddress, { error: addressError }] = useValidState('', REQUIRED_VALIDATOR);
+  const [port, setPort, { error: portError }] = useValidState('', REQUIRED_VALIDATOR);
+  const [domain, setDomain, { error: domainError }] = useValidState('', DOMAIN_VALIDATOR);
   const [email, setEmail, { error: emailError }] = useValidState('', EMAIL_VALIDATOR);
-  const [password, setPassword, { error: passwordError }] = useValidState('', PASSWORD_VALIDATOR);
-  const [confirmPassword, setConfirmPassword, { error: confirmPasswordError }] = useValidState(
-    '', PASSWORD_VALIDATOR,
-  );
+  const [password, setPassword, { error: passwordError }] = useValidState('', REQUIRED_VALIDATOR);
+  const [username, setUsername, { error: usernameError }] = useValidState('', REQUIRED_VALIDATOR);
+  const [useTLS, setUseTLS] = useState(true);
 
   const { status, error, dispatch } = useData();
-
-  const previousStep = () => setCurrentTab(SetupTabs.SETUP_SMTP);
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     dispatch.pending();
 
-    if (password && confirmPassword && (password !== confirmPassword)) {
-      dispatch.rejected('Password doesn\'t match confirm password.');
-      return;
-    }
-
-    const hasErrors = (!firstName.length && firstNameError.error)
-      || (!lastName.length && lastNameError.error)
+    const hasErrors = (!address.length && addressError.error)
+      || (!port.length && portError.error)
+      || (!domain.length && domainError.error)
       || (!email.length && emailError.error)
+      || (!username.length && usernameError.error)
       || (!password.length && passwordError.error);
 
     if (!hasErrors) {
       try {
-        await register({
-          firstName,
-          lastName,
+        await setupSettings({
+          address,
+          port: parseInt(port, 10),
+          domain,
           email,
           password,
-          passwordConfirmation: confirmPassword,
+          username,
+          useTLS,
         });
-
-        await mutateAuthUser();
         dispatch.resolved();
+        setCurrentTab(SetupTabs.ADMIN_REGISTER);
       } catch (err) {
         dispatch.rejected(err.response.data.exception || err.response.data.error);
       }
@@ -65,51 +58,69 @@ export function SetupAdminForm({ setCurrentTab }) {
   };
 
   return (
-    <Tabs.Content value={SetupTabs.ADMIN_REGISTER}>
+    <Tabs.Content value={SetupTabs.SETUP_SMTP}>
       <div className="mx-auto max-w-md min-h-full p-4 flex items-center justify-center">
         <div className="my-4">
           <h2 className="text-xl leading-6 font-bold text-gray-90">
-            Let&apos;s setup your admin account.
+            Let&apos;s setup the SMTP service.
           </h2>
           <p className="my-2 text-gray-700 text-sm">
-            This is the login you will use to update the admin settings of Powerbase (e.g. SMTP, etc).
+            This will be used to send email to powerbase users.
           </p>
           {error && <ErrorAlert errors={error} />}
           <form className="mt-6 space-y-4 w-full" onSubmit={handleSubmit} aria-busy={status === 'pending'}>
             <Input
               type="text"
-              id="firstName"
-              label="First name"
-              name="first-name"
-              autoComplete="first-name"
-              placeholder="e.g. John"
-              value={firstName}
-              onChange={(evt) => setFirstName(evt.target.value)}
-              error={firstNameError}
+              id="address"
+              label="Address"
+              name="address"
+              placeholder="e.g. smtp.yourmailservice.com"
+              value={address}
+              onChange={(evt) => setAddress(evt.target.value)}
+              error={addressError}
               required
             />
             <Input
               type="text"
-              id="lastName"
-              label="Last name"
-              name="last-name"
-              autoComplete="last-name"
-              placeholder="e.g. Doe"
-              value={lastName}
-              onChange={(evt) => setLastName(evt.target.value)}
-              error={lastNameError}
+              id="port"
+              label="Port"
+              name="port"
+              placeholder="e.g. 587"
+              value={port}
+              onChange={(evt) => setPort(evt.target.value)}
+              error={portError}
               required
             />
             <Input
-              id="email"
-              label="Email address"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="e.g. johndoe@example.com"
+              type="text"
+              id="domain"
+              label="Domain"
+              name="domain"
+              placeholder="e.g. yourdomain.com"
+              value={domain}
+              onChange={(evt) => setDomain(evt.target.value)}
+              error={domainError}
+              required
+            />
+            <Input
+              type="text"
+              id="from-email"
+              label="From Email"
+              name="from-email"
+              placeholder="e.g. johndoe@yourdomain.com"
               value={email}
               onChange={(evt) => setEmail(evt.target.value)}
               error={emailError}
+              required
+            />
+            <Input
+              type="text"
+              id="username"
+              label="Username"
+              name="username"
+              value={username}
+              onChange={(evt) => setUsername(evt.target.value)}
+              error={usernameError}
               required
             />
             <Input
@@ -123,16 +134,11 @@ export function SetupAdminForm({ setCurrentTab }) {
               error={passwordError}
               required
             />
-            <Input
-              type="password"
-              id="confirmPassword"
-              label="Confirm Password"
-              name="confirm-password"
-              autoComplete="confirm-password"
-              value={confirmPassword}
-              onChange={(evt) => setConfirmPassword(evt.target.value)}
-              error={confirmPasswordError}
-              required
+            <Checkbox
+              id="use-tls"
+              label="Use TLS"
+              value={useTLS}
+              setValue={setUseTLS}
             />
 
             <Button
@@ -154,14 +160,6 @@ export function SetupAdminForm({ setCurrentTab }) {
               </a>
               &nbsp;guide.
             </p>
-            <button
-              type="button"
-              className="-ml-2 w-min inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-200 focus:bg-gray-200"
-              onClick={previousStep}
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Return
-            </button>
           </form>
         </div>
       </div>
@@ -169,6 +167,6 @@ export function SetupAdminForm({ setCurrentTab }) {
   );
 }
 
-SetupAdminForm.propTypes = {
+SetupSMTP.propTypes = {
   setCurrentTab: PropTypes.func.isRequired,
 };
