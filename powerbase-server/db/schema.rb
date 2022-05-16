@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_12_071923) do
+ActiveRecord::Schema.define(version: 2022_05_16_052758) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -181,6 +181,14 @@ ActiveRecord::Schema.define(version: 2022_05_12_071923) do
     t.boolean "is_hidden", default: false
     t.index ["default_view_id"], name: "index_powerbase_tables_on_default_view_id"
     t.index ["powerbase_database_id"], name: "index_powerbase_tables_on_powerbase_database_id"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string "key", null: false
+    t.text "value", null: false
+    t.string "tag"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "table_views", force: :cascade do |t|
