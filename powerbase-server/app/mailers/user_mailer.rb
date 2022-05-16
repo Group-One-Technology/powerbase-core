@@ -14,6 +14,7 @@ class UserMailer < ApplicationMailer
     if Rails.env.production?
       mail(
         subject: 'Confirm Your Email',
+        from: @sender_email,
         to: @user.unconfirmed_email,
         track_opens: 'true',
         message_stream: 'outbound',
@@ -33,6 +34,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       subject: 'Password Reset',
+      from: @sender_email,
       to: @user.email,
       track_opens: 'true',
       message_stream: 'outbound',
@@ -48,6 +50,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       subject: 'Your password has been changed successfully',
+      from: @sender_email,
       to: @user.email,
       track_opens: 'true',
       message_stream: 'outbound',
