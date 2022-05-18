@@ -31,7 +31,7 @@ function BaseAdminSettingsEmail() {
   const { status, error, dispatch } = useData();
 
   const reset = () => {
-    if (smtpSettings == null) return;
+    if (smtpSettings == null || smtpSettings?.length === 0) return;
 
     setAddress(smtpSettings.address);
     setPort(smtpSettings.port);
