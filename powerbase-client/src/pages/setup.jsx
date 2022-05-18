@@ -4,22 +4,25 @@ import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
 
 import { useAuthUser } from '@models/AuthUser';
+import { HasAdminProvider, useHasAdmin } from '@models/HasAdmin';
 import { SetupTabs } from '@lib/constants/setup';
 import { Page } from '@components/layout/Page';
 import { SetupIntro } from '@components/setup/SetupIntro';
 import { SetupAdminForm } from '@components/setup/SetupAdminForm';
 import { SetupSMTP } from '@components/setup/SetupSMTP';
 
-export function SetupPage() {
+function BaseSetupPage() {
   const history = useHistory();
   const { authUser } = useAuthUser();
+  const { data: hasAdmin } = useHasAdmin();
+
   const [currentTab, setCurrentTab] = useState(SetupTabs.WELCOME);
 
   const handleTabsChange = (value) => setCurrentTab(value);
 
   useEffect(() => {
-    if (localStorage.signedIn) history.push('/');
-  }, [authUser]);
+    if (localStorage.signedIn || hasAdmin) history.push('/');
+  }, [authUser, hasAdmin]);
 
   return (
     <Page title="Setup Powerbase" navbar={false} className="relative h-screen min-h-full overflow-x-hidden py-10">
@@ -54,5 +57,13 @@ export function SetupPage() {
         </div>
       </Tabs.Root>
     </Page>
+  );
+}
+
+export function SetupPage() {
+  return (
+    <HasAdminProvider>
+      <BaseSetupPage />
+    </HasAdminProvider>
   );
 }

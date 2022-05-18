@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 
 import { useAuthUser } from '@models/AuthUser';
+import { HasAdminProvider, useHasAdmin } from '@models/HasAdmin';
 import { useValidState } from '@lib/hooks/useValidState';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { PASSWORD_VALIDATOR } from '@lib/validators/PASSWORD_VALIDATOR';
@@ -16,10 +17,11 @@ import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Logo } from '@components/ui/Logo';
 
-export function RegisterPage() {
+function BaseRegisterPage() {
   const history = useHistory();
   const { mounted } = useMounted();
   const { authUser } = useAuthUser();
+  const { data: hasAdmin } = useHasAdmin();
 
   const [firstName, setFirstName, { error: firstNameError }] = useValidState('', REQUIRED_VALIDATOR);
   const [lastName, setLastName, { error: lastNameError }] = useValidState('', REQUIRED_VALIDATOR);
@@ -68,7 +70,8 @@ export function RegisterPage() {
 
   useEffect(() => {
     if (localStorage.signedIn) history.push('/');
-  }, [authUser]);
+    if (hasAdmin === false) history.push('/setup');
+  }, [authUser, hasAdmin]);
 
   return (
     <Page title="Login" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -154,5 +157,13 @@ export function RegisterPage() {
         </div>
       </div>
     </Page>
+  );
+}
+
+export function RegisterPage() {
+  return (
+    <HasAdminProvider>
+      <BaseRegisterPage />
+    </HasAdminProvider>
   );
 }

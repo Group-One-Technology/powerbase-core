@@ -1,8 +1,14 @@
 class UsersController < ApplicationController
-  before_action :authorize_access_request!
+  before_action :authorize_access_request!, except: [:has_admin]
 
   schema(:guest) do
     required(:database_id)
+  end
+
+  # GET /users/has_admin
+  def has_admin
+    has_admin = !User.find_by(is_admin: true).nil?
+    render json: { has_admin: has_admin }
   end
 
   # GET /auth/databases/:database_id/guest
