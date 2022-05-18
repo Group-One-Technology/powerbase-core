@@ -38,9 +38,11 @@ export function TestEmailButton() {
       >
         Send Test Email
       </button>
-      <p className="my-1 text-sm text-green-500">
-        {data}
-      </p>
+      {status === 'resolved' && (
+        <p className="my-1 text-sm text-green-500">
+          {data}
+        </p>
+      )}
     </div>
   );
 }
