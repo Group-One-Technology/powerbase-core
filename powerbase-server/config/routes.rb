@@ -17,6 +17,14 @@ Rails.application.routes.draw do
   put '/forgot_password/', to: 'users/passwords#forgot'
   put '/reset_password/', to: 'users/passwords#reset'
 
+  resources :settings, only: [] do
+    collection do
+      get 'smtp'
+      post 'smtp', to: 'settings#setup_smtp'
+      post 'send_test_email'
+    end
+  end
+
   resources :notifications, only: [:index], shallow: true do
     collection do
       put 'read'
@@ -129,9 +137,11 @@ Rails.application.routes.draw do
 
   get 'shared_databases', to: 'powerbase_databases#shared_databases'
   get 'base_invitations', to: 'guests#base_invitations'
+
+  get 'users/has_admin', to: 'users#has_admin'
   get 'auth/databases/:database_id/guest', to: 'users#guest'
   put 'auth/onboarded', to: 'users#onboarded'
-  post 'settings/smtp', to: 'settings#setup_smtp'
+
   post '/guests/invite_sample_database', to: 'guests#invite_sample_database'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
   put 'tables/:id/sync_record', to: 'table_records#sync_record', as: 'sync_table_record'

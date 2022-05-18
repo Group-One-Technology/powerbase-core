@@ -34,6 +34,7 @@ import { BaseProgressPage } from '@pages/base/[id]/progress';
 import { TablePage } from '@pages/base/[id]/table/[id]';
 
 import './index.css';
+import { AdminSettingsPage } from '@pages/admin-settings';
 
 export function App() {
   return (
@@ -49,7 +50,7 @@ export function App() {
           <Route exact path="/reconfirm-email" component={ReconfirmEmailPage} />
           <Route exact path="/forgot-password" component={ForgotPasswordPage} />
           <Route exact path="/bases" component={BasesPage} />
-          <Route exact path="/settings" component={SettingsPage} />
+          <Route exact path="/admin_settings" component={AdminSettingsPage} />
           <Route path="/base">
             <BasesRoute />
           </Route>
@@ -99,6 +100,7 @@ function UserRoute() {
     <Switch>
       <Route exact path={`${path}/confirm-email`} component={ConfirmEmailPage} />
       <Route exact path={`${path}/reset-password`} component={ResetPasswordPage} />
+      <Route exact path={`${path}/settings`} component={SettingsPage} />
       <Redirect from="*" to="/404" />
     </Switch>
   );
