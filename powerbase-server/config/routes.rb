@@ -141,6 +141,7 @@ Rails.application.routes.draw do
   get 'users/has_admin', to: 'users#has_admin'
   get 'auth/databases/:database_id/guest', to: 'users#guest'
   put 'auth/onboarded', to: 'users#onboarded'
+  put 'auth/password', to: 'users#update_password'
 
   post '/guests/invite_sample_database', to: 'guests#invite_sample_database'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'
