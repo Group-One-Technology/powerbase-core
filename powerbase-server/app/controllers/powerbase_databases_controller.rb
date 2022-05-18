@@ -155,8 +155,8 @@ class PowerbaseDatabasesController < ApplicationController
     meta_query = Databases::MetaQuery.new @database
     database_size = meta_query.database_size
 
-    if database_size.kilobytes > 2.gigabytes
-      render json: { error: "Connecting to a database with over 2GB of data is currently restricted." }, status: :unprocessable_entity
+    if database_size.kilobytes > 2.gigabytes && @database.is_turbo
+      render json: { error: "Connecting to a database with over 2GB of data is currently restricted for turbo bases." }, status: :unprocessable_entity
       return
     end
 

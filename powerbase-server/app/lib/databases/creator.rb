@@ -41,14 +41,16 @@ class Databases::Creator
 
   def save
     if @database.mysql2?
-      raise StandardError.new "Couldn't connect to \"#{@database.name}\". MySQL databases are currently not supported yet."
+      @errors = { error: "Couldn't connect to \"#{@database.name}\". MySQL databases are currently not supported yet." }
+      return false
     end
 
     query = Databases::MetaQuery.new @database
     @db_size = query.database_size || 0
 
-    if (@db_size * 1024) > 2.gigabytes
-      raise StandardError.new "Connecting to a database with over 2GB of data is currently restricted."
+    if (@db_size * 1024) > 2.gigabytes && @database.is_turbo
+      @errors = { error: "Connecting to a database with over 2GB of data is currently restricted for turbo bases." }
+      return false
     end
 
     if @database.save
