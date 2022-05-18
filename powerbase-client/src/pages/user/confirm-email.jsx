@@ -23,12 +23,12 @@ export function ConfirmEmailPage() {
     : undefined);
 
   useEffect(() => {
-    if (authUser === null && token?.length && !emailSent) {
+    if (token?.length && !emailSent) {
       setLoading(true);
       confirmEmail({ token })
         .then(async () => {
-          mounted(() => setEmailSent(true));
           await mutateAuthUser();
+          mounted(() => setEmailSent(true));
           mounted(() => setLoading(false));
         })
         .catch((err) => {
@@ -42,8 +42,8 @@ export function ConfirmEmailPage() {
   }, [authUser]);
 
   useEffect(() => {
-    if (localStorage.signedIn) history.push('/');
-  }, [authUser]);
+    if (localStorage.signedIn && emailSent) history.push('/');
+  }, [authUser, emailSent]);
 
   return (
     <Page title="Confirm Your Email" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
