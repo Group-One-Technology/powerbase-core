@@ -9,6 +9,7 @@ import {
 import { Toaster } from 'react-hot-toast';
 
 import { GlobalProviders } from '@components/GlobalProviders';
+import { SetupPage } from '@pages/setup';
 import { OnboardingPage } from '@pages/onboarding';
 import { LoginPage } from '@pages/login';
 import { RegisterPage } from '@pages/register';
@@ -40,6 +41,7 @@ export function App() {
       <GlobalProviders>
         <Switch>
           <Route exact path="/" component={BasesPage} />
+          <Route exact path="/setup" component={SetupPage} />
           <Route exact path="/onboarding" component={OnboardingPage} />
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/register" component={RegisterPage} />
