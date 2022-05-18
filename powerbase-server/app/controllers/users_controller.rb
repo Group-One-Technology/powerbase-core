@@ -1,8 +1,33 @@
 class UsersController < ApplicationController
   before_action :authorize_access_request!, except: [:has_admin]
 
+  schema(:update_password) do
+    required(:current_password).value(:string)
+    required(:password).value(:string)
+    required(:password_confirmation).value(:string)
+  end
+
   schema(:guest) do
     required(:database_id)
+  end
+
+  # PUT /auth/password
+  def update_password
+    if current_user&.authenticate(safe_params[:current_password])
+      if safe_params[:current_password] == safe_params[:password]
+        render json: { error: 'New password must not be the same with the current password' }, status: :unprocessable_entity
+        return
+      end
+
+      if current_user.reset_password(safe_params[:password], safe_params[:password_confirmation])
+        current_user.send_success_reset_password_notice
+        render status: :no_content
+      else
+        render json: { error: current_user.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Invalid current password. Could not update password." }, status: :unauthorized
+    end
   end
 
   # GET /users/has_admin

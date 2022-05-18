@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDownIcon, SearchIcon } from '@heroicons/react/outline';
 import { MOCK_PEOPLE } from '@lib/constants/index';
+import * as Tabs from '@radix-ui/react-tabs';
 
 export function GuestsSettings() {
   const [query, setQuery] = useState('');
@@ -10,7 +11,7 @@ export function GuestsSettings() {
   };
 
   return (
-    <div className="py-6 px-4 sm:p-6 lg:pb-8">
+    <Tabs.Content value="Guests" className="py-6 px-4 sm:p-6 lg:pb-8">
       <div className="relative rounded-md shadow-sm w-full max-w-md">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <SearchIcon className="block h-4 w-4 text-gray-400" aria-hidden="true" />
@@ -65,6 +66,6 @@ export function GuestsSettings() {
           ))}
         </tbody>
       </table>
-    </div>
+    </Tabs.Content>
   );
 }

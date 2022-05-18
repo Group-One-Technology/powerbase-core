@@ -58,6 +58,20 @@ export async function register({
   return undefined;
 }
 
+export async function updatePassword({
+  currentPassword,
+  password,
+  passwordConfirmation,
+}) {
+  const response = await securedApi.put('/auth/password', {
+    currentPassword,
+    password,
+    passwordConfirmation,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function confirmEmail({ token }) {
   const response = await securedApi.put('/confirm_email', { token });
   if (isResponseSuccess(response)) {
