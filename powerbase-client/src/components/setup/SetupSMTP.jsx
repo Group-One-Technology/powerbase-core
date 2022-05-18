@@ -80,6 +80,7 @@ export function SetupSMTP({ setCurrentTab }) {
               onChange={(evt) => setAddress(evt.target.value)}
               error={addressError}
               caption="Address of the SMTP server that handles your emails."
+              autoComplete="off"
               required
             />
             <Input
@@ -92,6 +93,7 @@ export function SetupSMTP({ setCurrentTab }) {
               onChange={(evt) => setPort(evt.target.value)}
               error={portError}
               caption="Port of the SMTP server uses for outgoing emails."
+              autoComplete="off"
               required
             />
             <Input
@@ -103,6 +105,7 @@ export function SetupSMTP({ setCurrentTab }) {
               value={domain}
               onChange={(evt) => setDomain(evt.target.value)}
               error={domainError}
+              autoComplete="off"
               required
             />
             <Input
@@ -114,8 +117,9 @@ export function SetupSMTP({ setCurrentTab }) {
               value={email}
               onChange={(evt) => setEmail(evt.target.value)}
               error={emailError}
-              required
               caption="Email address you want to use as the sender of Powerbase emails."
+              autoComplete="off"
+              required
             />
             <Input
               type="text"
@@ -125,6 +129,7 @@ export function SetupSMTP({ setCurrentTab }) {
               value={username}
               onChange={(evt) => setUsername(evt.target.value)}
               error={usernameError}
+              autoComplete="off"
               required
             />
             <Input
@@ -132,10 +137,10 @@ export function SetupSMTP({ setCurrentTab }) {
               id="password"
               label="Password"
               name="password"
-              autoComplete="current-password"
               value={password}
               onChange={(evt) => setPassword(evt.target.value)}
               error={passwordError}
+              autoComplete="off"
               required
             />
             <Checkbox
