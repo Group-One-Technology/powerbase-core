@@ -15,6 +15,7 @@ import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { Checkbox } from '@components/ui/Checkbox';
 import { setupSettings } from '@lib/api/settings';
+import { TestEmailButton } from './email/TestEmailButton';
 
 function BaseAdminSettingsEmail() {
   const { data: smtpSettings } = useSMTPSettings();
@@ -86,8 +87,8 @@ function BaseAdminSettingsEmail() {
 
   return (
     <Tabs.Content value="Email">
-      <div className="py-6 px-12 max-w-lg">
-        <div className="my-4">
+      <div className="py-6 px-12">
+        <div className="my-4 max-w-lg">
           <h2 className="text-xl leading-6 font-bold text-gray-90">
             SMTP Settings
           </h2>
@@ -207,6 +208,15 @@ function BaseAdminSettingsEmail() {
               </button>
             </div>
           </form>
+        </div>
+        <div className="my-16">
+          <h2 className="text-xl leading-6 font-bold text-gray-90">
+            Check SMTP Settings
+          </h2>
+          <p className="my-2 text-gray-700 text-sm">
+            Send a test email to see whether the SMTP has been setup correctly.
+          </p>
+          <TestEmailButton />
         </div>
       </div>
     </Tabs.Content>

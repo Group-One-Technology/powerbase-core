@@ -19,8 +19,9 @@ Rails.application.routes.draw do
 
   resources :settings, only: [] do
     collection do
-      get 'smtp', to: 'settings#smtp'
+      get 'smtp'
       post 'smtp', to: 'settings#setup_smtp'
+      post 'send_test_email'
     end
   end
 

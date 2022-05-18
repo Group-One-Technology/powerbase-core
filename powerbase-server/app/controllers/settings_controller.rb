@@ -42,4 +42,10 @@ class SettingsController < ApplicationController
 
     render status: :ok
   end
+
+  # POST /settings/send_test_email
+  def send_test_email
+    MainMailer.test_email(user_id: current_user.id).deliver_later
+    render status: :no_content
+  end
 end

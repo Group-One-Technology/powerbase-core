@@ -6,6 +6,12 @@ export async function getSMTPSettings() {
   return undefined;
 }
 
+export async function sendTestEmail() {
+  const response = await securedApi.post('/settings/send_test_email');
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function setupSettings({
   address,
   port,
