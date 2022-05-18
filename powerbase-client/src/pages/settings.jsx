@@ -28,6 +28,7 @@ const TABS = [
   {
     name: 'Guests',
     icon: UserGroupIcon,
+    disabled: true,
   },
   {
     name: 'Billings & Plans',
