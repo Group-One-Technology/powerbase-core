@@ -15,6 +15,7 @@ import { login } from '@lib/api/auth';
 import { Button } from '@components/ui/Button';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Logo } from '@components/ui/Logo';
+import { Loader } from '@components/ui/Loader';
 
 function BaseLoginPage() {
   const history = useHistory();
@@ -56,6 +57,8 @@ function BaseLoginPage() {
     if (localStorage.signedIn) history.push('/');
     if (hasAdmin === false) history.push('/setup');
   }, [authUser, hasAdmin]);
+
+  if (hasAdmin == null) return <Loader className="h-screen" />;
 
   return (
     <Page title="Login" navbar={false} className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
