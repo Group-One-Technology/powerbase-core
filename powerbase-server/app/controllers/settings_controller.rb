@@ -1,4 +1,6 @@
 class SettingsController < ApplicationController
+  before_action :authorize_access_request!, except: [:setup_smtp]
+
   schema(:setup_smtp) do
     required(:address).value(:string)
     required(:port).value(:integer)
@@ -9,7 +11,20 @@ class SettingsController < ApplicationController
     required(:use_tls).value(:bool)
   end
 
-  # POST /setup_smtp
+  # GET /settings/smtp
+  def smtp
+    raise AccessDenied if !current_user.is_admin
+
+    settings = Setting.where(tag: "smtp")
+    smtp_settings = {}
+    settings.select {|key, value| key != "email"}.map do |setting|
+      smtp_settings[setting.key.to_sym] = setting.value
+    end
+
+    render json: smtp_settings
+  end
+
+  # POST /settings/smtp
   def setup_smtp
     has_admin = !User.find_by(is_admin: true).nil?
     if has_admin

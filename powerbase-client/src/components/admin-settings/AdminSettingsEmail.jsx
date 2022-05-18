@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
-import PropTypes from 'prop-types';
 
+import { SMTPSettingsProvider, useSMTPSettings } from '@models/SMTPSettings';
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { INTEGER_STRING_VALIDATOR } from '@lib/validators/INTEGER_STRING_VALIDATOR';
 import { DOMAIN_VALIDATOR } from '@lib/validators/DOMAIN_VALIDATOR';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
-import { GETTING_STARTED_LINK } from '@lib/constants/links';
+import { INTEGER_STRING_VALIDATOR } from '@lib/validators/INTEGER_STRING_VALIDATOR';
 import { useData } from '@lib/hooks/useData';
 
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
-import { SetupTabs } from '@lib/constants/setup';
 import { Checkbox } from '@components/ui/Checkbox';
 import { setupSettings } from '@lib/api/settings';
 
-export function SetupSMTP({ setCurrentTab }) {
+function BaseAdminSettingsEmail() {
+  const { data: smtpSettings } = useSMTPSettings();
+
   const [address, setAddress, { error: addressError }] = useValidState('', REQUIRED_VALIDATOR);
   const [port, setPort, { error: portError }] = useValidState('', INTEGER_STRING_VALIDATOR);
   const [domain, setDomain, { error: domainError }] = useValidState('', DOMAIN_VALIDATOR);
@@ -27,6 +28,32 @@ export function SetupSMTP({ setCurrentTab }) {
   const [useTLS, setUseTLS] = useState(true);
 
   const { status, error, dispatch } = useData();
+
+  const reset = () => {
+    if (smtpSettings == null) return;
+
+    setAddress(smtpSettings.address);
+    setPort(smtpSettings.port);
+    setDomain(smtpSettings.domain);
+    setEmail(smtpSettings.email);
+    setUsername(smtpSettings.username);
+    setPassword(smtpSettings.password);
+    setUseTLS(smtpSettings.useTls.toString() === 't');
+  };
+
+  useEffect(() => {
+    reset();
+  }, [smtpSettings]);
+
+  const clear = () => {
+    setAddress('', false);
+    setPort('', false);
+    setEmail('', false);
+    setDomain('', false);
+    setUsername('', false);
+    setPassword('', false);
+    setUseTLS(true);
+  };
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
@@ -50,23 +77,22 @@ export function SetupSMTP({ setCurrentTab }) {
           username,
           useTLS,
         });
-        dispatch.resolved();
-        setCurrentTab(SetupTabs.ADMIN_REGISTER);
+        dispatch.resolved('', 'Successfully updated the SMTP settings.');
       } catch (err) {
-        dispatch.rejected(err.response.data.exception || err.response.data.error);
+        dispatch.rejected(err.response.data.exception || err.response.data.error, true);
       }
     }
   };
 
   return (
-    <Tabs.Content value={SetupTabs.SETUP_SMTP}>
-      <div className="mx-auto max-w-md min-h-full p-4 flex items-center justify-center">
+    <Tabs.Content value="Email">
+      <div className="py-6 px-12 max-w-lg">
         <div className="my-4">
           <h2 className="text-xl leading-6 font-bold text-gray-90">
-            Let&apos;s setup the SMTP service.
+            SMTP Settings
           </h2>
           <p className="my-2 text-gray-700 text-sm">
-            This will be used to send email to powerbase users.
+            Configure the settings used for sending emails.
           </p>
           {error && <ErrorAlert errors={error} />}
           <form className="mt-6 space-y-4 w-full" onSubmit={handleSubmit} aria-busy={status === 'pending'}>
@@ -120,7 +146,7 @@ export function SetupSMTP({ setCurrentTab }) {
             <Input
               type="text"
               id="username"
-              label="Username"
+              label="SMTP Username"
               name="username"
               value={username}
               onChange={(evt) => setUsername(evt.target.value)}
@@ -130,7 +156,7 @@ export function SetupSMTP({ setCurrentTab }) {
             <Input
               type="password"
               id="password"
-              label="Password"
+              label="SMTP Password"
               name="password"
               autoComplete="current-password"
               value={password}
@@ -145,25 +171,41 @@ export function SetupSMTP({ setCurrentTab }) {
               setValue={setUseTLS}
             />
 
-            <Button
-              type="submit"
-              className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              loading={status === 'pending'}
-            >
-              Save and continue
-            </Button>
-            <p className="my-4 text-gray-700 text-xs">
-              If you need any help, you can checkout our&nbsp;
-              <a
-                href={GETTING_STARTED_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-700 hover:text-indigo-600 focus:text-indigo-600"
+            <div className="flex gap-4">
+              <Button
+                type="submit"
+                className="w-full inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-base rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                loading={status === 'pending'}
               >
-                getting started
-              </a>
-              &nbsp;guide.
-            </p>
+                Save changes
+              </Button>
+              <button
+                type="button"
+                className={cn(
+                  'inline-flex items-center justify-center border border-transparent font-medium px-6 py-2 text-base rounded-md shadow-sm',
+                  status === 'pending'
+                    ? 'bg-gray-300 text-gray-900'
+                    : 'text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 border border-gray-300',
+                )}
+                onClick={clear}
+                disabled={status === 'pending'}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  'inline-flex items-center justify-center border border-transparent font-medium px-6 py-2 text-base rounded-md shadow-sm',
+                  status === 'pending'
+                    ? 'bg-gray-300 text-gray-900'
+                    : 'text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 border border-gray-300',
+                )}
+                onClick={reset}
+                disabled={status === 'pending'}
+              >
+                Reset
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -171,6 +213,10 @@ export function SetupSMTP({ setCurrentTab }) {
   );
 }
 
-SetupSMTP.propTypes = {
-  setCurrentTab: PropTypes.func.isRequired,
-};
+export function AdminSettingsEmail() {
+  return (
+    <SMTPSettingsProvider>
+      <BaseAdminSettingsEmail />
+    </SMTPSettingsProvider>
+  );
+}

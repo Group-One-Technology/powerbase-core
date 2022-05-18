@@ -14,7 +14,7 @@ export function AuthOnly({ children }) {
   }, [authUser]);
 
   if (authUser) {
-    if (!authUser.isOnboarded && location.pathname !== '/onboarding') {
+    if (!authUser.isOnboarded && ['/', '/bases'].includes(location.pathname)) {
       history.push('/onboarding');
       return <Loader className="h-screen" />;
     }

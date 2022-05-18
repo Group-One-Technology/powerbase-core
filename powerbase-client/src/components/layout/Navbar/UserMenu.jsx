@@ -12,7 +12,8 @@ import { logout } from '@lib/api/auth';
 
 const USER_NAVIGATION = [
   { name: 'Profile', href: '/profile' },
-  { name: 'Settings', href: '/settings' },
+  { name: 'Account Settings', href: '/user/settings' },
+  { name: 'Admin Settings', href: '/admin_settings' },
 ];
 
 export function UserMenu({ list, colored }) {
