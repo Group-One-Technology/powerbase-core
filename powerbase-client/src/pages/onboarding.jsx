@@ -15,11 +15,27 @@ import { OnboardingInviteGuests } from '@components/onboarding/OnboardingInviteG
 
 export function OnboardingPage() {
   const [currentTab, setCurrentTab] = useState(OnboardingTabs.SETUP_DATABASE);
-  const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1]);
+  const [databaseType, setDatabaseType] = useState(BASE_SOURCES[1].value);
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [base, setBase] = useState();
-  const isNewBase = databaseType.value === 'create';
   const { data: generalSettings } = useGeneralSettings();
+
+  const sampleDatabase = generalSettings?.sampleDatabase;
+  const isNewBase = databaseType === 'create';
+
+  const databaseTypes = sampleDatabase?.id == null
+    ? BASE_SOURCES.map((item) => ({
+      ...item,
+      disabled: item.value === 'sample'
+        ? true
+        : item.disabled,
+    }))
+    : BASE_SOURCES.map((item) => ({
+      ...item,
+      footnote: item.value === 'sample' && sampleDatabase?.name.length
+        ? `Try out Powerbase with our sample ${sampleDatabase.name} database.`
+        : item.footnote,
+    }));
 
   const handleTabsChange = (value) => setCurrentTab(value);
 
@@ -38,7 +54,7 @@ export function OnboardingPage() {
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>
             <Tabs.List
               aria-label="onboarding powerbase tabs"
-              className={cn('my-4 w-72 mx-auto flex flex-row justify-center space-x-4', databaseType.name === 'Sample Database' && 'invisible')}
+              className={cn('my-4 w-72 mx-auto flex flex-row justify-center space-x-4', databaseType === 'sample' && 'invisible')}
             >
               {Object.keys(OnboardingTabs).map((key) => (
                 <Tabs.Trigger
@@ -57,10 +73,11 @@ export function OnboardingPage() {
             <OnboardingSetupDatabase
               databaseType={databaseType}
               setDatabaseType={setDatabaseType}
+              databaseTypes={databaseTypes}
               powerbaseType={powerbaseType}
               setPowerbaseType={setPowerbaseType}
               setCurrentTab={setCurrentTab}
-              sampleDatabase={generalSettings?.sampleDatabase}
+              sampleDatabaseId={sampleDatabase?.id}
             />
             <OnboardingConnectDatabase
               setCurrentTab={setCurrentTab}
