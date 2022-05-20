@@ -142,6 +142,7 @@ Rails.application.routes.draw do
   get 'auth/databases/:database_id/guest', to: 'users#guest'
   put 'auth/onboarded', to: 'users#onboarded'
   put 'auth/password', to: 'users#update_password'
+  put 'auth/account', to: 'users#update_account'
 
   post '/guests/invite_sample_database', to: 'guests#invite_sample_database'
   post 'tables/:table_id/records/:id', to: 'table_records#show', as: 'table_record'

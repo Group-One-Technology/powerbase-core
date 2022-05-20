@@ -1,6 +1,13 @@
 class UsersController < ApplicationController
   before_action :authorize_access_request!, except: [:has_admin]
 
+  schema(:update_account) do
+    required(:first_name).value(:string)
+    required(:last_name).value(:string)
+    required(:email).value(:string)
+    required(:password).value(:string)
+  end
+
   schema(:update_password) do
     required(:current_password).value(:string)
     required(:password).value(:string)
@@ -9,6 +16,39 @@ class UsersController < ApplicationController
 
   schema(:guest) do
     required(:database_id)
+  end
+
+  # PUT /auth/account
+  def update_account
+    if current_user&.authenticate(safe_params[:password])
+      user = User.find(current_user.id)
+      user.first_name = safe_params[:first_name]
+      user.last_name = safe_params[:last_name]
+      user.save
+
+      current_email = user.email
+      if current_email != safe_params[:email]
+        existing_users = User.where(email: safe_params[:email]).where.not(id: current_user.id) ||
+          User.where(unconfirmed_email: safe_params[:email]).where.not(id: current_user.id)
+
+        if existing_users.length > 0
+          render json: { error: "User with email of \"#{safe_params[:email]}\" already exists." }, status: :unprocessable_entity
+          return
+        end
+
+        if user.email_change(safe_params[:email])
+          user.send_confirmation_instructions
+          user.send_change_email_notice(current_email, safe_params[:email])
+          render status: :no_content
+        else
+          render json: { error: user.errors.full_messages }, status: :unprocessable_entity
+        end
+      else
+        render status: :no_content
+      end
+    else
+      render json: { error: "Invalid password. Could not update account." }, status: :unauthorized
+    end
   end
 
   # PUT /auth/password

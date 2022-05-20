@@ -42,7 +42,7 @@ export function PasswordSettings() {
           passwordConfirmation: confirmPassword,
         });
 
-        await mutateAuthUser();
+        mutateAuthUser();
         dispatch.resolved('', 'Successfully updated the password.');
       } catch (err) {
         dispatch.rejected(err.response.data.exception || err.response.data.error);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
 import {
@@ -14,12 +14,13 @@ import { Page } from '@components/layout/Page';
 import { PageContent } from '@components/layout/PageContent';
 import { GuestsSettings } from '@components/settings/GuestsSettings';
 import { PasswordSettings } from '@components/settings/PasswordSettings';
+import { ProfileSettings } from '@components/settings/ProfileSettings';
+import { useQuery } from '@lib/hooks/useQuery';
 
 const TABS = [
   {
     name: 'Profile',
     icon: UserCircleIcon,
-    disabled: true,
   },
   {
     name: 'Password',
@@ -38,8 +39,14 @@ const TABS = [
 ];
 
 function BaseSettingsPage() {
+  const query = useQuery();
   const { authUser } = useAuthUser();
-  const [currentTab, setCurrentTab] = useState('Password');
+  const initialTab = query.get('tab');
+  const [currentTab, setCurrentTab] = useState(TABS.find((item) => item.name === initialTab)?.name || 'Profile');
+
+  useEffect(() => {
+    setCurrentTab(TABS.find((item) => item.name === initialTab)?.name || 'Profile');
+  }, [initialTab]);
 
   return (
     <PageContent className="py-4">
@@ -90,6 +97,7 @@ function BaseSettingsPage() {
               ))}
             </Tabs.List>
             <div className="divide-y divide-gray-200 lg:col-span-9">
+              <ProfileSettings />
               <PasswordSettings />
               <GuestsSettings />
             </div>
