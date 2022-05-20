@@ -14,7 +14,7 @@ export const BASE_SOURCES = [
   {
     pretext: 'Start with',
     name: 'Sample Database',
-    footnote: 'Try out Powerbase with our sample IMDB database.',
+    footnote: 'Try out Powerbase with our sample database.',
     value: 'sample',
   },
 ];
