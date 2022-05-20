@@ -1,5 +1,3 @@
-const { SAMPLE_DATABASE_ID } = process.env;
-
 export const BASE_SOURCES = [
   {
     name: 'Fresh Base',
@@ -18,7 +16,6 @@ export const BASE_SOURCES = [
     name: 'Sample Database',
     footnote: 'Try out Powerbase with our sample IMDB database.',
     value: 'sample',
-    disabled: SAMPLE_DATABASE_ID.length === 0,
   },
 ];
 

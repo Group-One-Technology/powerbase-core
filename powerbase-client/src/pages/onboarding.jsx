@@ -3,6 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
 import { Chunk } from 'editmode-react';
 
+import { useGeneralSettings } from '@models/GeneralSettings';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
 import { POWERBASE_TYPE } from '@lib/constants/bases';
 import { Page } from '@components/layout/Page';
@@ -18,6 +19,7 @@ export function OnboardingPage() {
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[0]);
   const [base, setBase] = useState();
   const isNewBase = databaseType.value === 'create';
+  const { data: generalSettings } = useGeneralSettings();
 
   const handleTabsChange = (value) => setCurrentTab(value);
 
@@ -58,6 +60,7 @@ export function OnboardingPage() {
               powerbaseType={powerbaseType}
               setPowerbaseType={setPowerbaseType}
               setCurrentTab={setCurrentTab}
+              sampleDatabase={generalSettings?.sampleDatabase}
             />
             <OnboardingConnectDatabase
               setCurrentTab={setCurrentTab}

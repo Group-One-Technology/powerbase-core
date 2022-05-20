@@ -7,8 +7,10 @@ import {
   TemplateIcon,
 } from '@heroicons/react/outline';
 
+import { BasesProvider } from '@models/Bases';
 import { Page } from '@components/layout/Page';
 import { PageContent } from '@components/layout/PageContent';
+import { AdminSettingsGeneral } from '@components/admin-settings/AdminSettingsGeneral';
 import { AdminSettingsEmail } from '@components/admin-settings/AdminSettingsEmail';
 
 const TABS = [
@@ -20,7 +22,6 @@ const TABS = [
   {
     name: 'General',
     icon: CogIcon,
-    disabled: true,
   },
   {
     name: 'Email',
@@ -29,7 +30,7 @@ const TABS = [
 ];
 
 export function AdminSettingsPage() {
-  const [currentTab, setCurrentTab] = useState('Email');
+  const [currentTab, setCurrentTab] = useState('General');
 
   return (
     <Page authOnly>
@@ -67,6 +68,9 @@ export function AdminSettingsPage() {
                 ))}
               </Tabs.List>
               <div className="divide-y divide-gray-200 lg:col-span-9">
+                <BasesProvider>
+                  <AdminSettingsGeneral />
+                </BasesProvider>
                 <AdminSettingsEmail />
               </div>
             </Tabs.Root>

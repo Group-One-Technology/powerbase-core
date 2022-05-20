@@ -14,7 +14,7 @@ import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { Checkbox } from '@components/ui/Checkbox';
-import { setupSettings } from '@lib/api/settings';
+import { setupSMTPSettings } from '@lib/api/settings';
 import { TestEmailButton } from './email/TestEmailButton';
 
 function BaseAdminSettingsEmail() {
@@ -68,7 +68,7 @@ function BaseAdminSettingsEmail() {
 
     if (!hasErrors) {
       try {
-        await setupSettings({
+        await setupSMTPSettings({
           address,
           port: parseInt(port, 10),
           domain,

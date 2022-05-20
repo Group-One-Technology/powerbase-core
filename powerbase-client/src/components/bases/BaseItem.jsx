@@ -13,13 +13,12 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { IBase } from '@lib/propTypes/base';
 import { Badge } from '@components/ui/Badge';
 
-const { SAMPLE_DATABASE_ID } = process.env;
-
 export function BaseItem({
   base,
   mutate,
   handleErrorClick,
   showOwner,
+  sampleDatabaseId,
 }) {
   return (
     <div className="relative p-2 h-full flex flex-col justify-center">
@@ -74,7 +73,7 @@ export function BaseItem({
                 View
                 <ChevronRightIcon className="ml-0.5 h-4 w-4" />
               </p>
-              {base.id.toString() === SAMPLE_DATABASE_ID && <div className="my-1"><Badge color="gray">Sample DB</Badge></div>}
+              {base.id.toString() === sampleDatabaseId?.toString() && <div className="my-1"><Badge color="gray">Sample DB</Badge></div>}
             </>
           )
           : <div><Badge color="yellow" className="mt-2">Migrating</Badge></div>}
@@ -98,4 +97,5 @@ BaseItem.propTypes = {
   mutate: PropTypes.func.isRequired,
   handleErrorClick: PropTypes.func.isRequired,
   showOwner: PropTypes.bool,
+  sampleDatabaseId: PropTypes.any,
 };

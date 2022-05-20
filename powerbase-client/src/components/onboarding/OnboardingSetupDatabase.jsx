@@ -15,32 +15,46 @@ import { Button } from '@components/ui/Button';
 import { useAuthUser } from '@models/AuthUser';
 import { useSharedBases } from '@models/SharedBases';
 
-const { SAMPLE_DATABASE_ID } = process.env;
-
 export function OnboardingSetupDatabase({
   databaseType,
   setDatabaseType,
   powerbaseType,
   setPowerbaseType,
   setCurrentTab,
+  sampleDatabase,
 }) {
+  const history = useHistory();
   const { authUser, mutate: mutateAuthUser } = useAuthUser();
   const { mutate: mutateSharedBases } = useSharedBases();
-  const history = useHistory();
   const {
     saving, saved, loading, catchError,
   } = useSaveStatus();
+  const sampleDatabaseId = sampleDatabase?.id;
+
+  const baseSources = sampleDatabaseId == null
+    ? BASE_SOURCES.map((item) => ({
+      ...item,
+      disabled: item.value === 'sample'
+        ? true
+        : item.disabled,
+    }))
+    : BASE_SOURCES.map((item) => ({
+      ...item,
+      footnote: item.value === 'sample' && sampleDatabase?.name.length
+        ? `Try out Powerbase with our sample ${sampleDatabase.name} database.`
+        : item.footnote,
+    }));
 
   const handleNextStep = async () => {
     if (databaseType.name === 'Sample Database') {
-      if (!databaseType.disabled) {
+      if (!databaseType.disabled && sampleDatabaseId != null) {
         try {
           saving();
           await inviteGuestToSampleDatabase();
           await setAuthUserAsOnboarded();
           mutateAuthUser({ ...authUser, isOnboarded: true });
           mutateSharedBases();
-          history.push(`/base/${SAMPLE_DATABASE_ID}`);
+          history.push(`/base/${sampleDatabaseId}`);
           saved('Successfully been invited to the sample database.');
         } catch (err) {
           catchError(err);
@@ -63,7 +77,7 @@ export function OnboardingSetupDatabase({
       <RadioGroup value={databaseType} onChange={setDatabaseType}>
         <RadioGroup.Label className="sr-only">Database Type</RadioGroup.Label>
         <div className="mx-auto flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row sm:h-60 sm:w-[700px]">
-          {BASE_SOURCES.map((option) => (
+          {baseSources.map((option) => (
             <RadioGroup.Option
               key={option.name}
               value={option}
@@ -200,4 +214,5 @@ OnboardingSetupDatabase.propTypes = {
   powerbaseType: PropTypes.object.isRequired,
   setPowerbaseType: PropTypes.func.isRequired,
   setCurrentTab: PropTypes.func.isRequired,
+  sampleDatabase: PropTypes.any,
 };
