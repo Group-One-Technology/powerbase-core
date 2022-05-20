@@ -82,9 +82,9 @@ export function OnboardingSetupDatabase({
               key={option.name}
               value={option}
               className={({ active }) => (cn(
-                'flex-1 bg-white relative block rounded-lg border border-gray-300 shadow-sm py-4 px-2 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
+                'flex-1 bg-white relative block rounded-lg border border-gray-300 shadow-sm py-4 px-2 hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
                 active && 'ring-1 ring-offset-2 ring-indigo-500',
-                option.disabled && 'bg-gray-100 cursor-not-allowed',
+                option.disabled ? 'bg-gray-100 cursor-not-allowed' : 'cursor-pointer',
               ))}
               disabled={option.disabled}
             >
