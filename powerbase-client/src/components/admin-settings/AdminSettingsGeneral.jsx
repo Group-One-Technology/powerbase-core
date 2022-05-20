@@ -15,7 +15,13 @@ export function AdminSettingsGeneral() {
   const { status, error, dispatch } = useData();
   const { data: bases } = useBases();
 
-  const [sampleDatabase, setSampleDatabase] = useState();
+  const [sampleDatabase, setSampleDatabase] = useState(null);
+  const sampleBase = generalSettings?.sampleDatabase?.id && bases?.length
+    ? bases.filter((item) => item.id === generalSettings.sampleDatabase.id)
+    : null;
+  const basesOptions = sampleBase == null && generalSettings?.sampleDatabase != null && bases != null
+    ? [...bases, generalSettings.sampleDatabase]
+    : bases;
 
   useEffect(() => {
     if (generalSettings == null || Object.keys(generalSettings || {}).length === 0) return;
@@ -52,7 +58,7 @@ export function AdminSettingsGeneral() {
             <SampleDBSelect
               value={sampleDatabase}
               setValue={setSampleDatabase}
-              options={bases}
+              options={basesOptions}
             />
 
             <div className="flex gap-4">

@@ -3,8 +3,11 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { Listbox } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
+import { useAuthUser } from '@models/AuthUser';
 
 export function SampleDBSelect({ value, setValue, options }) {
+  const { authUser } = useAuthUser();
+
   return (
     <div className="w-full">
       <label htmlFor="sample-database" className="block text-sm font-medium text-gray-700 mb-2">
@@ -19,11 +22,11 @@ export function SampleDBSelect({ value, setValue, options }) {
           >
             <span className="block truncate">
               {value?.name ?? 'None'}
-              <span className="text-xs text-gray-700">
-                {value?.owner
-                  ? ` (Owned by ${value.owner.name})`
-                  : ''}
-              </span>
+              {value?.owner && (
+                <span className="text-xs text-gray-700">
+                  {` (Owned by ${value.owner.name})`}
+                </span>
+              )}
             </span>
             <SelectorIcon className="ml-auto w-5 h-5 text-gray-400" aria-hidden="true" />
           </Listbox.Button>
@@ -47,6 +50,11 @@ export function SampleDBSelect({ value, setValue, options }) {
                 )}
               >
                 {option.name}
+                {option.owner && authUser && option.owner.userId !== authUser.id && (
+                  <span className="text-xs text-gray-700">
+                    {` (Owned by ${option.owner.name})`}
+                  </span>
+                )}
               </Listbox.Option>
             ))}
           </Listbox.Options>
