@@ -40,7 +40,7 @@ export function AdminSettingsPage() {
               Admin Settings
             </h1>
           </header>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow">
             <Tabs.Root
               value={currentTab}
               onValueChange={setCurrentTab}
