@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+  <div style="width: 100%; height: 100% background-color: white; color: #0F172A; font-family: Arial, Helvetica, sans-serif;">
+    <div style="margin: 8rem auto; width: 80%; max-width: 400px">
+      <h1 style="color: #0F172A;">Hi <%= @user.first_name %>,</h1>
+      <p style="color: #0F172A; font-size: 1rem; line-height: 1.5rem;">
+        Your <strong>email has changed from <%= @old_email %> to <%= @email %></strong> on Powerbase at <%= @date %>.
+      </p>
+      <p style="color: #0F172A; font-size: 1rem; line-height: 1.5rem;">
+        If you didn&apos;t request this, please contact us at <a href="mailto:<%= @support_email %>" style="color: #4338CA"><%= @support_email %></a>.
+      </p>
+      <p style="color: #0F172A; font-size: 1rem; line-height: 1.5rem;">
+        Thank you,
+        <br />
+        Powerbase Team
+      </p>
+    </div>
+  </div>
+</body>
+</html>

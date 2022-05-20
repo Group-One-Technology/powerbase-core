@@ -24,6 +24,25 @@ class User
       super
     end
 
+    # Updates the email by storing it to unconfirmed email. Returns true if
+    # the email is valid and the record was saved, false otherwise.
+    def email_change(new_email)
+      if new_email.present?
+        if self.email != new_email
+          self.email = new_email
+          self.unconfirmed_email = new_email
+          self.confirmed_at = nil
+          save(validate: false)
+        else
+          errors.add(:email, 'must not be the same with the new email')
+          false
+        end
+      else
+        errors.add(:email, :blank)
+        false
+      end
+    end
+
     # Confirm a user by setting it's confirmed_at to actual time. If the user
     # is already confirmed, add an error to email field. If the user is invalid
     # add errors
@@ -79,6 +98,11 @@ class User
     #
     def confirmation_period_expired?
       self.class.confirm_within && self.confirmation_sent_at && (Time.now.utc > self.confirmation_sent_at.utc + self.class.confirm_within)
+    end
+
+    # Send change email notice.
+    def send_change_email_notice(old_email, new_email)
+      UserMailer.changed_email_notice(user_id: id, old_email: old_email, email: new_email).deliver_later
     end
 
     # Send confirmation instructions by email

@@ -58,6 +58,22 @@ export async function register({
   return undefined;
 }
 
+export async function updateUser({
+  firstName,
+  lastName,
+  email,
+  password,
+}) {
+  const response = await securedApi.put('/auth/account', {
+    firstName,
+    lastName,
+    email,
+    password,
+  });
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function updatePassword({
   currentPassword,
   password,

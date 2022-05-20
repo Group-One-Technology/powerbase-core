@@ -11,8 +11,8 @@ import { useSaveStatus } from '@models/SaveStatus';
 import { logout } from '@lib/api/auth';
 
 const USER_NAVIGATION = [
-  { name: 'Profile', href: '/profile' },
-  { name: 'Account Settings', href: '/user/settings' },
+  { name: 'Profile', href: '/user/settings?tab=Profile' },
+  { name: 'Account Settings', href: '/user/settings?tab=Password' },
   { name: 'Admin Settings', href: '/admin_settings' },
 ];
 
