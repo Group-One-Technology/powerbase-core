@@ -7,7 +7,7 @@ import { App } from './App';
 
 const { SENTRY_DSN, ENABLE_SENTRY } = process.env;
 
-if (ENABLE_SENTRY === 'true' || IS_PRODUCTION) {
+if (ENABLE_SENTRY === 'true' && IS_PRODUCTION) {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: process.env.NODE_ENV,
