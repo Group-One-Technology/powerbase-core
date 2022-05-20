@@ -8,6 +8,7 @@ import { SaveStatusProvider } from '@models/SaveStatus';
 import { NotificationsProvider } from '@models/Notifications';
 import { SharedBasesProvider } from '@models/SharedBases';
 import { FieldTypesProvider } from '@models/FieldTypes';
+import { GeneralSettingsProvider } from '@models/GeneralSettings';
 
 const { EDITMODE_PROJECT_ID } = process.env;
 
@@ -21,15 +22,17 @@ export function GlobalProviders({ children }) {
     >
       <Editmode projectId={EDITMODE_PROJECT_ID}>
         <AuthUserProvider>
-          <SaveStatusProvider>
-            <FieldTypesProvider>
-              <NotificationsProvider>
-                <SharedBasesProvider>
-                  {children}
-                </SharedBasesProvider>
-              </NotificationsProvider>
-            </FieldTypesProvider>
-          </SaveStatusProvider>
+          <GeneralSettingsProvider>
+            <SaveStatusProvider>
+              <FieldTypesProvider>
+                <NotificationsProvider>
+                  <SharedBasesProvider>
+                    {children}
+                  </SharedBasesProvider>
+                </NotificationsProvider>
+              </FieldTypesProvider>
+            </SaveStatusProvider>
+          </GeneralSettingsProvider>
         </AuthUserProvider>
       </Editmode>
     </SWRConfig>
