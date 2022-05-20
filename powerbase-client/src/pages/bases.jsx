@@ -5,6 +5,7 @@ import { PlusCircleIcon } from '@heroicons/react/outline';
 
 import { BasesProvider, useBases } from '@models/Bases';
 import { useSharedBases } from '@models/SharedBases';
+import { useGeneralSettings } from '@models/GeneralSettings';
 
 import { Page } from '@components/layout/Page';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -17,6 +18,8 @@ import { Loader } from '@components/ui/Loader';
 function BasesContentPage() {
   const { data: bases, mutate: mutateBases } = useBases();
   const { data: sharedBases, mutate: mutateSharedBases } = useSharedBases();
+  const { data: generalSettings } = useGeneralSettings();
+  const sampleDatabaseId = generalSettings?.sampleDatabase?.id;
 
   const [errorModal, setErrorModal] = useState({
     base: undefined,
@@ -49,7 +52,12 @@ function BasesContentPage() {
                   key={base.id}
                   className="sm:w-40 sm:h-40 text-center bg-white rounded-lg shadow divide-y divide-gray-200"
                 >
-                  <BaseItem base={base} handleErrorClick={handleErrorClick} mutate={mutateBases} />
+                  <BaseItem
+                    base={base}
+                    handleErrorClick={handleErrorClick}
+                    mutate={mutateBases}
+                    sampleDatabaseId={sampleDatabaseId}
+                  />
                 </li>
               ))}
               <li className="sm:w-40 sm:h-40 text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
@@ -86,6 +94,7 @@ function BasesContentPage() {
                         handleErrorClick={handleErrorClick}
                         mutate={mutateSharedBases}
                         showOwner={hasDuplicateName}
+                        sampleDatabaseId={sampleDatabaseId}
                       />
                     </li>
                   );

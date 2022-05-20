@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Dialog, Transition } from '@headlessui/react';
 import { InformationCircleIcon } from '@heroicons/react/solid';
 import { useHistory } from 'react-router-dom';
@@ -9,9 +10,7 @@ import { useQuery } from '@lib/hooks/useQuery';
 import { inviteGuestToSampleDatabase } from '@lib/api/guests';
 import { Button } from '@components/ui/Button';
 
-const { SAMPLE_DATABASE_ID } = process.env;
-
-export function OnboaringPrompt() {
+export function OnboaringPrompt({ sampleDatabaseId }) {
   const query = useQuery();
   const history = useHistory();
   const { mutate: mutateSharedBases } = useSharedBases();
@@ -20,19 +19,21 @@ export function OnboaringPrompt() {
     saving, saved, loading, catchError,
   } = useSaveStatus();
 
-  const [open, setOpen] = useState((onboarding?.toString() === 'true' && SAMPLE_DATABASE_ID?.length > 0) || false);
+  const [open, setOpen] = useState((onboarding?.toString() === 'true' && sampleDatabaseId?.length > 0) || false);
 
   const handleInviteSampleDatabase = async () => {
     try {
       saving();
       await inviteGuestToSampleDatabase();
       mutateSharedBases();
-      history.push(`/base/${SAMPLE_DATABASE_ID}`);
+      history.push(`/base/${sampleDatabaseId}`);
       saved('Successfully been invited to the sample database.');
     } catch (err) {
       catchError(err);
     }
   };
+
+  if (sampleDatabaseId == null) return null;
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -110,3 +111,7 @@ export function OnboaringPrompt() {
     </Transition.Root>
   );
 }
+
+OnboaringPrompt.propTypes = {
+  sampleDatabaseId: PropTypes.any,
+};

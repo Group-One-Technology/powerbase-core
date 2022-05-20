@@ -9,13 +9,13 @@ import { DOMAIN_VALIDATOR } from '@lib/validators/DOMAIN_VALIDATOR';
 import { EMAIL_VALIDATOR } from '@lib/validators/EMAIL_VALIDATOR';
 import { GETTING_STARTED_LINK } from '@lib/constants/links';
 import { useData } from '@lib/hooks/useData';
+import { setupSMTPSettings } from '@lib/api/settings';
+import { SetupTabs } from '@lib/constants/setup';
 
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
-import { SetupTabs } from '@lib/constants/setup';
 import { Checkbox } from '@components/ui/Checkbox';
-import { setupSettings } from '@lib/api/settings';
 
 export function SetupSMTP({ setCurrentTab }) {
   const [address, setAddress, { error: addressError }] = useValidState('', REQUIRED_VALIDATOR);
@@ -41,7 +41,7 @@ export function SetupSMTP({ setCurrentTab }) {
 
     if (!hasErrors) {
       try {
-        await setupSettings({
+        await setupSMTPSettings({
           address,
           port: parseInt(port, 10),
           domain,

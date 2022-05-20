@@ -179,8 +179,11 @@ class GuestsController < ApplicationController
 
   # POST /guests/invite_sample_database
   def invite_sample_database
-    @database = PowerbaseDatabase.find ENV["SAMPLE_DATABASE_ID"]
-    raise NotFound.new("Could not find database with id of #{ENV["SAMPLE_DATABASE_ID"]}") if !@database
+    sample_database_id = Setting.find_by(key: "sample_database_id")&.value
+    raise NotFound.new("There is no sample database") if sample_database_id.nil?
+
+    @database = PowerbaseDatabase.find sample_database_id
+    raise NotFound.new("Could not find database with id of #{sample_database_id}") if !@database
 
     if current_user.id == @database.user_id
       render json: { error: "You already have access to the #{@database.name} sample database." }, status: :unprocessable_entity

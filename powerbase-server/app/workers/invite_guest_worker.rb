@@ -59,6 +59,7 @@ class InviteGuestWorker
     guest.save
 
     # Notify changes to client
-    notif_pusher_trigger!(guest.user_id, "base_invite") if guest.powerbase_database_id.to_s != ENV["SAMPLE_DATABASE_ID"]
+    sample_database_id = Setting.find_by(key: "sample_database_id")&.value
+    notif_pusher_trigger!(guest.user_id, "base_invite") if guest.powerbase_database_id.to_s != sample_database_id.to_s
   end
 end

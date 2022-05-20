@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_18_050413) do
+ActiveRecord::Schema.define(version: 2022_05_20_063822) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -188,7 +188,7 @@ ActiveRecord::Schema.define(version: 2022_05_18_050413) do
     t.string "tag"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.text "encrypted_value", null: false
+    t.text "encrypted_value"
   end
 
   create_table "table_views", force: :cascade do |t|

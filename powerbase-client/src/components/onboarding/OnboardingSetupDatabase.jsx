@@ -6,7 +6,7 @@ import { useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
 
-import { BASE_SOURCES, OnboardingTabs } from '@lib/constants/onboarding';
+import { OnboardingTabs } from '@lib/constants/onboarding';
 import { POWERBASE_TYPE } from '@lib/constants/bases';
 import { inviteGuestToSampleDatabase } from '@lib/api/guests';
 import { setAuthUserAsOnboarded } from '@lib/api/auth';
@@ -15,32 +15,33 @@ import { Button } from '@components/ui/Button';
 import { useAuthUser } from '@models/AuthUser';
 import { useSharedBases } from '@models/SharedBases';
 
-const { SAMPLE_DATABASE_ID } = process.env;
-
 export function OnboardingSetupDatabase({
   databaseType,
   setDatabaseType,
+  databaseTypes,
   powerbaseType,
   setPowerbaseType,
   setCurrentTab,
+  sampleDatabaseId,
 }) {
+  const history = useHistory();
   const { authUser, mutate: mutateAuthUser } = useAuthUser();
   const { mutate: mutateSharedBases } = useSharedBases();
-  const history = useHistory();
   const {
     saving, saved, loading, catchError,
   } = useSaveStatus();
 
   const handleNextStep = async () => {
-    if (databaseType.name === 'Sample Database') {
-      if (!databaseType.disabled) {
+    if (databaseType === 'sample') {
+      const selectedBaseSource = databaseTypes.find((item) => item.value === databaseType);
+      if (!selectedBaseSource.disabled && sampleDatabaseId != null) {
         try {
           saving();
           await inviteGuestToSampleDatabase();
           await setAuthUserAsOnboarded();
           mutateAuthUser({ ...authUser, isOnboarded: true });
           mutateSharedBases();
-          history.push(`/base/${SAMPLE_DATABASE_ID}`);
+          history.push(`/base/${sampleDatabaseId}`);
           saved('Successfully been invited to the sample database.');
         } catch (err) {
           catchError(err);
@@ -63,14 +64,14 @@ export function OnboardingSetupDatabase({
       <RadioGroup value={databaseType} onChange={setDatabaseType}>
         <RadioGroup.Label className="sr-only">Database Type</RadioGroup.Label>
         <div className="mx-auto flex justify-center space-y-2 sm:space-x-2 sm:space-y-0 flex-col sm:flex-row sm:h-60 sm:w-[700px]">
-          {BASE_SOURCES.map((option) => (
+          {databaseTypes.map((option) => (
             <RadioGroup.Option
               key={option.name}
-              value={option}
+              value={option.value}
               className={({ active }) => (cn(
-                'flex-1 bg-white relative block rounded-lg border border-gray-300 shadow-sm py-4 px-2 cursor-pointer hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
+                'flex-1 bg-white relative block rounded-lg border border-gray-300 shadow-sm py-4 px-2 hover:border-gray-400 sm:flex sm:justify-between focus:outline-none',
                 active && 'ring-1 ring-offset-2 ring-indigo-500',
-                option.disabled && 'bg-gray-100 cursor-not-allowed',
+                option.disabled ? 'bg-gray-100 cursor-not-allowed' : 'cursor-pointer',
               ))}
               disabled={option.disabled}
             >
@@ -106,7 +107,7 @@ export function OnboardingSetupDatabase({
         </div>
       </RadioGroup>
 
-      {databaseType.name !== 'Sample Database' && (
+      {databaseType !== 'sample' && (
         <>
           <p className="mt-8 mb-6 text-center text-base text-gray-600">
             <Chunk identifier="onboarding_powerbase_type_description">
@@ -178,7 +179,7 @@ export function OnboardingSetupDatabase({
           onClick={handleNextStep}
           loading={loading}
         >
-          {databaseType.name !== 'Sample Database'
+          {databaseType !== 'sample'
             ? (
               <Chunk identifier="onboarding_setup_button">
                 Setup Database
@@ -197,7 +198,9 @@ export function OnboardingSetupDatabase({
 OnboardingSetupDatabase.propTypes = {
   databaseType: PropTypes.object.isRequired,
   setDatabaseType: PropTypes.func.isRequired,
+  databaseTypes: PropTypes.array,
   powerbaseType: PropTypes.object.isRequired,
   setPowerbaseType: PropTypes.func.isRequired,
   setCurrentTab: PropTypes.func.isRequired,
+  sampleDatabaseId: PropTypes.any,
 };

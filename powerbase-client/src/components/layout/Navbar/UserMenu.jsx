@@ -13,13 +13,16 @@ import { logout } from '@lib/api/auth';
 const USER_NAVIGATION = [
   { name: 'Profile', href: '/user/settings?tab=Profile' },
   { name: 'Account Settings', href: '/user/settings?tab=Password' },
-  { name: 'Admin Settings', href: '/admin_settings' },
 ];
 
 export function UserMenu({ list, colored }) {
   const history = useHistory();
   const { authUser, mutate } = useAuthUser();
   const { catchError } = useSaveStatus();
+
+  const userNavigation = authUser.isAdmin
+    ? [...USER_NAVIGATION, { name: 'Admin Settings', href: '/admin_settings' }]
+    : USER_NAVIGATION;
 
   const handleLogout = async () => {
     try {
@@ -34,7 +37,7 @@ export function UserMenu({ list, colored }) {
   if (list) {
     return (
       <>
-        {USER_NAVIGATION?.map((item) => (
+        {userNavigation?.map((item) => (
           <Link
             key={item.name}
             to={item.href}
@@ -116,7 +119,7 @@ export function UserMenu({ list, colored }) {
                   </p>
                 </div>
               </div>
-              {USER_NAVIGATION.map((item) => (
+              {userNavigation.map((item) => (
                 <Menu.Item key={item.name}>
                   {({ active }) => (
                     <Link

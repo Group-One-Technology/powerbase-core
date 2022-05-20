@@ -22,6 +22,8 @@ Rails.application.routes.draw do
       get 'smtp'
       post 'smtp', to: 'settings#setup_smtp'
       post 'send_test_email'
+      get 'general'
+      post 'general', to: 'settings#setup_general'
     end
   end
 
