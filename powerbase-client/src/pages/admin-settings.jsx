@@ -12,6 +12,8 @@ import { Page } from '@components/layout/Page';
 import { PageContent } from '@components/layout/PageContent';
 import { AdminSettingsGeneral } from '@components/admin-settings/AdminSettingsGeneral';
 import { AdminSettingsEmail } from '@components/admin-settings/AdminSettingsEmail';
+import { useAuthUser } from '@models/AuthUser';
+import { Error404Page } from './404';
 
 const TABS = [
   {
@@ -30,7 +32,12 @@ const TABS = [
 ];
 
 export function AdminSettingsPage() {
+  const { authUser } = useAuthUser();
   const [currentTab, setCurrentTab] = useState('General');
+
+  if (!authUser?.isAdmin) {
+    return <Error404Page />;
+  }
 
   return (
     <Page authOnly>
