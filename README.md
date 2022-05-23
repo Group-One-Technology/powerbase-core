@@ -11,7 +11,7 @@ Powerbase is the missing bridge to the worlds most trusted relational database.
   - The same reason with above since this triggers the deployment also.
 
 ### Environment Variables
-- When adding new environment variable either on the client (`.env`) or on the server (`application.yml`), make sure to do the ff:
+- When adding new environment variable either on the client or on the server make sure to do the ff:
   - Add it to its corresponding the `.example` file.
   - Notify the team of the change.
 
@@ -36,10 +36,10 @@ Powerbase is the missing bridge to the worlds most trusted relational database.
 | :------------------------- | :---: |:----------------: |
 | React-NodeJS Client        | 4000  | The frontend of Powerbase |
 | Rails API Server           | 4001  | The API Server that communicates to the frontend |
-| Elastic Search             | 9200  |  For fast searching for Powerbase Turbo |
-| Kibana                     | 5601  | UI for Elastic Search (optional) |
 | Sidekiq                    |  -    | For handling background jobs |
-
+| [Elasticsearch](https://www.elastic.co/) | 9200  | For fast searching for turbo bases and storing magic values for non-turbo bases |
+| [Poxa](https://github.com/edgurgel/poxa) | 6001  | For real-time updates |
+| Kibana                     | 5601  | UI for Elastic Search (optional) |
 
 ## Installation
 

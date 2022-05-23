@@ -11,6 +11,7 @@ class Databases::Creator
       adapter: database[:adapter],
       color: database[:color],
       is_turbo: database[:is_turbo],
+      enable_magic_data: !!database[:enable_magic_data],
       is_created: database[:is_created],
       is_superuser: database[:is_superuser],
       user_id: database[:user_id],

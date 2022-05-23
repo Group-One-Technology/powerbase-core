@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { InformationCircleIcon } from '@heroicons/react/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
+import { useBase } from '@models/Base';
 import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useValidState } from '@lib/hooks/useValidState';
@@ -38,6 +39,7 @@ export function CreateField({
   form = true,
 }) {
   const { mounted } = useMounted();
+  const { data: base } = useBase();
   const { status, error, dispatch } = useData();
   const { data: fieldTypes } = useFieldTypes();
   const { mutate: mutateViewFields } = useViewFields();
@@ -83,6 +85,19 @@ export function CreateField({
     setSelectOptions(field.selectOptions?.map((item, index) => ({ id: index, value: item })) ?? []);
     setOptions(field.options);
   }, [fieldId, fieldTypes]);
+
+  const reset = () => {
+    setFieldName('', false);
+    setAlias('', false);
+    setFieldType(null);
+    setColumnType(COLUMN_TYPE[0]);
+    setDataType('');
+    setHasValidation(false);
+    setIsNullable(true);
+    setIsPii(false);
+    setSelectOptions([{ id: 0, value: '' }]);
+    setOptions({});
+  };
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
@@ -153,6 +168,7 @@ export function CreateField({
       mounted(() => {
         dispatch.resolved(data);
         if (close) close();
+        reset();
       });
     } catch (err) {
       dispatch.rejected(err.response.data.exception || err.response.data.error);
@@ -185,20 +201,6 @@ export function CreateField({
           <p className="text-sm text-gray-700">
             {fieldType.description}
           </p>
-          {!table.isVirtual && (
-            <InlineRadio
-              aria-label="Field Type"
-              value={columnType}
-              setValue={setColumnType}
-              options={COLUMN_TYPE.map((item) => (
-                item.nameId === 'magic_field' && !hasPrimaryKey
-                  ? { ...item, disabled: 'There must be at least one primary key to create a magic field.' }
-                  : item
-              ))}
-              className="my-6"
-            />
-          )}
-
           {NUMBER_TYPES.includes(fieldType.name) && (
             <>
               <NumberFieldSelectOptions fieldType={fieldType} setOptions={setOptions} />
@@ -211,43 +213,31 @@ export function CreateField({
               )}
             </>
           )}
-
-          <CreateFieldName
-            tableId={table.id}
-            fieldId={fieldId}
-            fields={fields}
-            fieldName={fieldName}
-            setFieldName={setFieldName}
-            fieldNameError={fieldNameError}
-            isVirtual={isVirtual}
-          />
-          <FieldDataTypeSelect
-            tableName={table.name}
-            fieldName={fieldName}
-            fieldTypeName={fieldType.name}
-            dataType={dataType}
-            setDataType={setDataType}
-            isDecimal={isDecimal}
-            isVirtual={isVirtual}
-          />
-
-          {fieldType.name === FieldType.SINGLE_SELECT && (
-            <CreateFieldSelectOptions
-              options={selectOptions}
-              setOptions={setSelectOptions}
-            />
-          )}
-
           <div className="my-4">
-            <Checkbox
-              id="create-field-has-validation"
-              label="Enable Cell Validation"
-              value={hasValidation}
-              setValue={setHasValidation}
-            />
+            <div className="flex items-center">
+              <Checkbox
+                id="create-field-has-validation"
+                label="Enable Cell Validation"
+                value={hasValidation}
+                setValue={setHasValidation}
+                className="!my-0"
+              />
+              <Tooltip.Root delayDuration={0}>
+                <Tooltip.Trigger className="ml-1 py-[1px] px-0.5 rounded text-gray-500">
+                  <span className="sr-only">What is Cell Validation?</span>
+                  <InformationCircleIcon className="mt-0.5 h-4 w-4 text-gray-700" aria-hidden="true" />
+                </Tooltip.Trigger>
+                <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                  <Tooltip.Arrow className="gray-900" />
+                  Enabling this will run the validation in the UI-level when editing a cell value&nbsp;
+                  <br />
+                  (e.g. saving test@mail to an email field will fail since it is not a valid email).
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </div>
             <Checkbox
               id="create-field-is-nullable"
-              label="Set as Nullable"
+              label="Allow Empty / Null"
               value={isNullable}
               setValue={setIsNullable}
             />
@@ -275,6 +265,46 @@ export function CreateField({
               </div>
             )}
           </div>
+
+          {(!table.isVirtual && base.enableMagicData) && (
+            <InlineRadio
+              aria-label="Field Type"
+              value={columnType}
+              setValue={setColumnType}
+              options={COLUMN_TYPE.map((item) => (
+                item.nameId === 'magic_field' && !hasPrimaryKey
+                  ? { ...item, disabled: 'There must be at least one primary key to create a magic field.' }
+                  : item
+              ))}
+              className="my-6"
+            />
+          )}
+
+          <CreateFieldName
+            tableId={table.id}
+            fieldId={fieldId}
+            fields={fields}
+            fieldName={fieldName}
+            setFieldName={setFieldName}
+            fieldNameError={fieldNameError}
+            isVirtual={isVirtual}
+          />
+          <FieldDataTypeSelect
+            tableName={table.name}
+            fieldName={fieldName}
+            fieldTypeName={fieldType.name}
+            dataType={dataType}
+            setDataType={setDataType}
+            isDecimal={isDecimal}
+            isVirtual={isVirtual}
+          />
+
+          {fieldType.name === FieldType.SINGLE_SELECT && (
+            <CreateFieldSelectOptions
+              options={selectOptions}
+              setOptions={setSelectOptions}
+            />
+          )}
         </div>
       )}
 

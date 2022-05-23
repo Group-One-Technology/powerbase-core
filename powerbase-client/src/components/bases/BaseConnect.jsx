@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 import * as Tabs from '@radix-ui/react-tabs';
+import { Switch, RadioGroup } from '@headlessui/react';
+import { ArrowLeftIcon } from '@heroicons/react/outline';
 
 import { useValidState } from '@lib/hooks/useValidState';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
@@ -13,8 +15,6 @@ import { InlineRadio } from '@components/ui/InlineRadio';
 import { InlineInput } from '@components/ui/InlineInput';
 import { InlineSelect } from '@components/ui/InlineSelect';
 import { Button } from '@components/ui/Button';
-import { ArrowLeftIcon } from '@heroicons/react/outline';
-import { RadioGroup } from '@headlessui/react';
 
 const CONNECTION_TABS = ['New', 'Link Existing', 'Link from URL'];
 
@@ -22,7 +22,6 @@ export function BaseConnect({
   submit,
   powerbaseType: initialPowerbaseType,
   loading,
-  setLoading,
   cancel,
   isNewBase,
 }) {
@@ -39,6 +38,7 @@ export function BaseConnect({
   const [password, setPassword] = useState('');
   const [powerbaseType, setPowerbaseType] = useState(initialPowerbaseType || POWERBASE_TYPE[0]);
   const [color, setColor, colorError] = useValidState('');
+  const [enableMagicData, setEnableMagicData] = useState(false);
 
   useEffect(() => {
     setPort(databaseType.port);
@@ -49,7 +49,6 @@ export function BaseConnect({
 
     if (!color.length) {
       colorError.setError(new Error('Required'));
-      setLoading(false);
       return;
     }
 
@@ -65,6 +64,8 @@ export function BaseConnect({
         name,
         isTurbo,
         color,
+        enableMagicData,
+        isNew: false,
       });
     } else if (currentTab === 'Link Existing') {
       const hasErrors = !!(!databaseName.length && databaseNameError.error)
@@ -83,6 +84,8 @@ export function BaseConnect({
         port,
         user,
         password,
+        enableMagicData,
+        isNew: false,
       });
     } else if (currentTab === 'New') {
       await submit({
@@ -90,6 +93,8 @@ export function BaseConnect({
         isTurbo,
         color,
         adapter: databaseType.value,
+        enableMagicData,
+        isNew: true,
       });
     }
   };
@@ -163,6 +168,36 @@ export function BaseConnect({
             setError={colorError.setError}
             className="my-6"
           />
+          <div className="grid grid-cols-12 gap-x-2 items-center">
+            <Switch.Group as="div" className="col-start-4 col-end-13 flex justify-between gap-20">
+              <span className="flex-grow flex flex-col">
+                <Switch.Label as="span" className="text-base font-medium text-gray-700" passive>
+                  Enable Magic Tables and Fields
+                </Switch.Label>
+                <Switch.Description as="span" className="text-sm text-gray-500">
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  <br />
+                  <span className="text-xs">Note: You can change this later.</span>
+                </Switch.Description>
+              </span>
+              <Switch
+                checked={enableMagicData}
+                onChange={setEnableMagicData}
+                className={cn(
+                  'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                  enableMagicData ? 'bg-indigo-600' : 'bg-gray-200',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+                    enableMagicData ? 'translate-x-5' : 'translate-x-0',
+                  )}
+                />
+              </Switch>
+            </Switch.Group>
+          </div>
           <div className="grid grid-cols-12 my-6">
             <div className="col-start-4 col-span-9 flex flex-col gap-y-4">
               <Button
@@ -271,6 +306,36 @@ export function BaseConnect({
             setError={colorError.setError}
             className="my-6"
           />
+          <div className="grid grid-cols-12 gap-x-2 items-center">
+            <Switch.Group as="div" className="col-start-4 col-end-13 flex justify-between gap-20">
+              <span className="flex-grow flex flex-col">
+                <Switch.Label as="span" className="text-base font-medium text-gray-700" passive>
+                  Enable Magic Tables and Fields
+                </Switch.Label>
+                <Switch.Description as="span" className="text-sm text-gray-500">
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  <br />
+                  <span className="text-xs">Note: You can change this later.</span>
+                </Switch.Description>
+              </span>
+              <Switch
+                checked={enableMagicData}
+                onChange={setEnableMagicData}
+                className={cn(
+                  'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                  enableMagicData ? 'bg-indigo-600' : 'bg-gray-200',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+                    enableMagicData ? 'translate-x-5' : 'translate-x-0',
+                  )}
+                />
+              </Switch>
+            </Switch.Group>
+          </div>
           <div className="grid grid-cols-12 my-6">
             <div className="col-start-4 col-span-9 flex flex-col gap-y-4">
               <Button
@@ -332,6 +397,36 @@ export function BaseConnect({
             setError={colorError.setError}
             className="my-6"
           />
+          <div className="grid grid-cols-12 gap-x-2 items-center">
+            <Switch.Group as="div" className="col-start-4 col-end-13 flex justify-between gap-20">
+              <span className="flex-grow flex flex-col">
+                <Switch.Label as="span" className="text-base font-medium text-gray-700" passive>
+                  Enable Magic Tables and Fields
+                </Switch.Label>
+                <Switch.Description as="span" className="text-sm text-gray-500">
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  <br />
+                  <span className="text-xs">Note: You can change this later.</span>
+                </Switch.Description>
+              </span>
+              <Switch
+                checked={enableMagicData}
+                onChange={setEnableMagicData}
+                className={cn(
+                  'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                  enableMagicData ? 'bg-indigo-600' : 'bg-gray-200',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+                    enableMagicData ? 'translate-x-5' : 'translate-x-0',
+                  )}
+                />
+              </Switch>
+            </Switch.Group>
+          </div>
           <div className="grid grid-cols-12 my-6">
             <div className="col-start-4 col-span-9 flex flex-col gap-y-4">
               <Button
@@ -363,7 +458,6 @@ BaseConnect.propTypes = {
   submit: PropTypes.func.isRequired,
   powerbaseType: PropTypes.object,
   loading: PropTypes.bool,
-  setLoading: PropTypes.func.isRequired,
   cancel: PropTypes.func,
   isNewBase: PropTypes.bool,
 };

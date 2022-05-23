@@ -55,9 +55,9 @@ export function CreateTableAlias({
       type="text"
       id="create-table-alias"
       name="create-table-alias"
-      aria-label="Table Name"
+      label="Table Name"
       value={alias}
-      placeholder="Enter Table Name (e.g. Users, Projects)"
+      placeholder="e.g. Users, Projects"
       onChange={handleAliasChange}
       className="w-full"
       showError={!aliasError.error?.message.includes('Still checking for existing table')}

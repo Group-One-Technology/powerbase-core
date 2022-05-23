@@ -13,7 +13,7 @@ export function Checkbox({
   return (
     <label
       htmlFor={id}
-      className={cn('my-2 block cursor-pointer', className)}
+      className={cn('my-2 flex items-center cursor-pointer', className)}
     >
       <input
         id={id}

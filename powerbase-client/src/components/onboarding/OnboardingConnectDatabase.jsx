@@ -11,6 +11,7 @@ import { setAuthUserAsOnboarded } from '@lib/api/auth';
 
 import { BaseConnect } from '@components/bases/BaseConnect';
 import { ConnectBaseModal } from '@components/bases/ConnectBaseModal';
+import { useData } from '@lib/hooks/useData';
 
 export function OnboardingConnectDatabase({
   setCurrentTab,
@@ -19,56 +20,46 @@ export function OnboardingConnectDatabase({
   setBase,
   isNewBase,
 }) {
-  const [modal, setModal] = useState({
-    open: false,
-    content: '',
-    error: undefined,
-  });
-
-  const [loading, setLoading] = useState(false);
-
   const handleCancel = () => {
     setCurrentTab(OnboardingTabs.SETUP_DATABASE);
   };
 
-  const handleSubmit = async (payload) => {
-    setLoading(true);
-    setModal({ open: false });
+  const {
+    data, status, dispatch, error,
+  } = useData();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleSubmit = async ({ isNew, ...payload }) => {
+    setModalOpen(false);
+    dispatch.pending();
 
     try {
-      const response = isNewBase
+      const response = isNew
         ? await createDatabase(payload)
         : await connectDatabase(payload);
+      let content = '';
 
       await setAuthUserAsOnboarded();
       setBase(response.database);
 
-      if (!isNewBase && response.database.isTurbo && response.dbSize) {
+      if (!isNew && response.database.isTurbo && response.dbSize) {
         if (response.dbSize > MAX_SMALL_DATABASE_SIZE) {
           const bytes = response.dbSize * 1024;
-          setModal((val) => ({
-            ...val,
-            content: `It might take hours/days to import the database with the size of ${formatBytes(bytes)}`,
-          }));
+          content = `It might take hours/days to import the database with the size of ${formatBytes(bytes)}`;
         }
       }
+
+      dispatch.resolved(content);
     } catch (err) {
-      setModal((val) => ({
-        ...val,
-        error: err.response.data.exception || err.response.data.error,
-      }));
+      dispatch.rejected(err.response.data.exception || err.response.data.error);
     }
 
-    setModal((prevVal) => ({ ...prevVal, open: true }));
-    setLoading(false);
+    setModalOpen(true);
   };
 
   const handleAlertSubmit = () => {
-    setModal((prevVal) => ({ ...prevVal, open: false }));
-
-    if (!modal.error) {
-      setCurrentTab(OnboardingTabs.INVITE_GUESTS);
-    }
+    setModalOpen(false);
+    if (!error) setCurrentTab(OnboardingTabs.INVITE_GUESTS);
   };
 
   return (
@@ -82,16 +73,15 @@ export function OnboardingConnectDatabase({
         submit={handleSubmit}
         cancel={handleCancel}
         powerbaseType={powerbaseType}
-        loading={loading}
-        setLoading={setLoading}
+        loading={status === 'pending'}
         isNewBase={isNewBase}
       />
       <ConnectBaseModal
-        open={modal.open}
-        setOpen={(val) => setModal((prevVal) => ({ ...prevVal, open: val }))}
+        open={modalOpen}
+        setOpen={setModalOpen}
         base={base}
-        content={modal.content}
-        error={modal.error}
+        content={data}
+        error={error}
         buttonText="Confirm"
         submit={handleAlertSubmit}
       />

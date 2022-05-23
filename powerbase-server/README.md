@@ -27,7 +27,7 @@ bundle install
 
 Copy and rename `config/application.example.yml` to `config/application.yml` and update the variables.
 
-4. Setup Elastic Search
+4. Setup Elastic Search and Poxa
 
     4.1. Create a network called `powerbase`:
 
@@ -36,6 +36,7 @@ Copy and rename `config/application.example.yml` to `config/application.yml` and
     ```
 
     4.2. Setup Elastic Search
+    - Elasticsearch is used for indexing records for turbo bases, and magic values for non-turbo bases.
 
     ```bash
     docker run \
@@ -48,7 +49,7 @@ Copy and rename `config/application.example.yml` to `config/application.yml` and
         docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
     ```
 
-    4.3. Setup Kibana
+    4.3. Setup Kibana (optional)
 
     ```bash
     docker run \
@@ -57,6 +58,20 @@ Copy and rename `config/application.example.yml` to `config/application.yml` and
         --publish 5601:5601 \
         --env "ELASTICSEARCH_HOSTS=http://powerbase-elasticsearch:9200" \
         docker.elastic.co/kibana/kibana-oss:7.10.2
+    ```
+
+    4.4. Setup Poxa
+    - Poxa is used for real-time updates. Update the environment variables here and in `.env` as you wish.
+
+    ```bash
+    docker run \
+        --name powerbase-poxa \
+        --publish 6001:6001 \
+        --env "PORT=6001" \
+        --env "POXA_APP_ID=app-id" \
+        --env "POXA_APP_KEY=app-key" \
+        --env "POXA_SECRET=app-secret" \
+        edgurgel/poxa-automated:latest
     ```
 
 5. Setting up host for creating databases

@@ -61,7 +61,7 @@ function BasesContentPage() {
                 </li>
               ))}
               <li className="sm:w-40 sm:h-40 text-center bg-gray-200 rounded-lg shadow divide-y divide-gray-200">
-                <Link to="/base/create" className="h-full">
+                <Link to="/base/connect" className="h-full">
                   <div className="h-full flex flex-col p-2 items-center justify-center">
                     <PlusCircleIcon className="mt-3 h-12 w-12 text-gray-500" />
                     <p className="mt-2 text-sm text-gray-500">

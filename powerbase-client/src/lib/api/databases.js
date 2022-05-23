@@ -4,11 +4,13 @@ export async function createDatabase({
   name,
   isTurbo,
   color,
+  enableMagicData,
 }) {
   const response = await securedApi.post('/databases', {
     name,
     isTurbo,
     color,
+    enableMagicData,
   });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
@@ -25,6 +27,7 @@ export async function connectDatabase({
   connectionString,
   isTurbo,
   color,
+  enableMagicData,
 }) {
   const response = await securedApi.post('/databases/connect', {
     name,
@@ -37,6 +40,7 @@ export async function connectDatabase({
     connectionString,
     isTurbo,
     color,
+    enableMagicData,
   });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
@@ -76,10 +80,16 @@ export async function getDatabaseConnectionStats({ id, params }) {
   return undefined;
 }
 
-export async function updateDatabaseGeneralInfo({ id, name, color }) {
+export async function updateDatabaseGeneralInfo({
+  id,
+  name,
+  color,
+  enableMagicData,
+}) {
   const response = await securedApi.put(`/databases/${id}/general_info`, {
     name,
     color,
+    enableMagicData,
   });
   if (isResponseSuccess(response)) return response.data;
   return undefined;
