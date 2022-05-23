@@ -103,7 +103,7 @@ export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) 
         className="my-6"
       />
 
-      <Switch.Group as="div" className="flex items-center justify-between gap-20">
+      <Switch.Group as="div" className="flex justify-between gap-20">
         <span className="flex-grow flex flex-col">
           <Switch.Label as="span" className="text-base font-medium text-gray-700" passive>
             Enable Magic Tables and Fields

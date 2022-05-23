@@ -34,6 +34,7 @@ class PowerbaseDatabasesController < ApplicationController
     required(:adapter).value(:string)
     required(:is_turbo).value(:bool)
     required(:color).value(:string)
+    required(:enable_magic_data).value(:bool)
   end
 
   schema(:connect) do
@@ -47,6 +48,7 @@ class PowerbaseDatabasesController < ApplicationController
     optional(:color).value(:string)
     optional(:is_turbo).value(:bool)
     optional(:connection_string).value(:string)
+    optional(:enable_magic_data).value(:bool)
   end
 
   schema(:connect_hubspot) do
@@ -174,7 +176,8 @@ class PowerbaseDatabasesController < ApplicationController
     existing_database = PowerbaseDatabase.find_by(name: safe_params[:name], user_id: current_user.id)
 
     if existing_database
-      raise StandardError.new "Database with name of \"#{safe_params[:name]}\" already exists in this account."
+      render json: { error: "Database with name of \"#{safe_params[:name]}\" already exists in this account." }, status: :unprocessable_entity
+      return
     end
 
     powerbase = Powerbase::Schema.new
@@ -187,6 +190,7 @@ class PowerbaseDatabasesController < ApplicationController
       adapter: "postgresql",
       color: safe_params[:color],
       is_turbo: safe_params[:is_turbo],
+      enable_magic_data: safe_params[:enable_magic_data],
       is_superuser: false,
       is_created: true,
       user_id: current_user.id,
@@ -210,7 +214,7 @@ class PowerbaseDatabasesController < ApplicationController
     validator = Databases::ConnectionValidator.new(
       adapter: safe_params[:adapter]&.strip,
       host: safe_params[:host]&.strip,
-      port: safe_params[:port]&.strip,
+      port: safe_params[:port].to_i,
       user: safe_params[:user]&.strip,
       password: safe_params[:password],
       database: safe_params[:database]&.strip,
@@ -236,6 +240,7 @@ class PowerbaseDatabasesController < ApplicationController
       adapter: validator.adapter,
       color: safe_params[:color],
       is_turbo: safe_params[:is_turbo],
+      enable_magic_data: safe_params[:enable_magic_data],
       is_created: false,
       is_superuser: validator.is_superuser,
       user_id: current_user.id,

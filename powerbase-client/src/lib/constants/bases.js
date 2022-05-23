@@ -7,7 +7,7 @@ export const BASE_SOURCES = [
     name: 'Fresh Base',
     description: 'Build out your table and data from scratch',
     footnote: 'Options: Postgres, MySQL',
-    href: '/base/create',
+    href: '/base/connect?type=new_base',
   },
   {
     pretext: 'Connect Existing',
@@ -25,7 +25,7 @@ export const BASE_SOURCES = [
     pretext: 'Import Existing',
     name: 'SQL Database from URL',
     footnote: 'Connect your existing mysql or postgres database',
-    href: '/base/connect-url',
+    href: '/base/connect?type=import_url',
   },
   {
     name: 'Hubspot',
