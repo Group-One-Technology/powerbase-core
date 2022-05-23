@@ -17,6 +17,7 @@ class PowerbaseDatabasesController < ApplicationController
     required(:id).value(:integer)
     required(:name).value(:string)
     required(:color).value(:string)
+    required(:enable_magic_data).value(:bool)
   end
 
   schema(:update_credentials) do
@@ -120,6 +121,7 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     @database.color = safe_params[:color]
+    @database.enable_magic_data = !!safe_params[:enable_magic_data]
     if @database.save
       render json: format_json(@database)
     else
@@ -350,6 +352,7 @@ class PowerbaseDatabasesController < ApplicationController
           email: owner.email,
         },
         color: database.color,
+        enable_magic_data: database.enable_magic_data,
         status: database.status,
         is_migrated: database.migrated?,
         is_turbo: database.is_turbo,

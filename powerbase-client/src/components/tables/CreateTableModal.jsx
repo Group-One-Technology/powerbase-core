@@ -132,13 +132,15 @@ export function CreateTableModal({ open, setOpen }) {
             aliasError={aliasError}
             setTableName={setTableName}
           />
-          <InlineRadio
-            aria-label="Table Type"
-            value={tableType}
-            setValue={setTableType}
-            options={TABLE_TYPE}
-            className="mt-4"
-          />
+          {base.enableMagicData && (
+            <InlineRadio
+              aria-label="Table Type"
+              value={tableType}
+              setValue={setTableType}
+              options={TABLE_TYPE}
+              className="mt-4"
+            />
+          )}
           <CreateTableName
             baseId={base.id}
             tableName={tableName}

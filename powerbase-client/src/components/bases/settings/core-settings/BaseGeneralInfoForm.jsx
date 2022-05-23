@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
+import { Switch } from '@headlessui/react';
 
 import { useBase } from '@models/Base';
 import { useBases } from '@models/Bases';
@@ -27,6 +29,7 @@ export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) 
   const [databaseType, setDatabaseType] = useState(DATABASE_TYPES.find((item) => item.value === base.adapter));
   const [powerbaseType, setPowerbaseType] = useState(POWERBASE_TYPE[base.isTurbo ? 0 : 1]);
   const [color, setColor, colorError] = useValidState(base.color);
+  const [enableMagicData, setEnableMagicData] = useState(base.enableMagicData);
 
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +51,7 @@ export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) 
         id: base.id,
         name,
         color,
+        enableMagicData,
       });
 
       mounted(() => setLoading(false));
@@ -98,6 +102,34 @@ export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) 
         setError={colorError.setError}
         className="my-6"
       />
+
+      <Switch.Group as="div" className="flex items-center justify-between gap-20">
+        <span className="flex-grow flex flex-col">
+          <Switch.Label as="span" className="text-base font-medium text-gray-700" passive>
+            Enable Magic Tables and Fields
+          </Switch.Label>
+          <Switch.Description as="span" className="text-sm text-gray-500">
+            Magic tables and fields are accessible thru Powerbase but does not affect your current database. This is useful for storing data which you don&apos;t want to persist to your SQL database (e.g. comments magic field in a projects SQL table).
+          </Switch.Description>
+        </span>
+        <Switch
+          checked={enableMagicData}
+          onChange={setEnableMagicData}
+          className={cn(
+            'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+            enableMagicData ? 'bg-indigo-600' : 'bg-gray-200',
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200',
+              enableMagicData ? 'translate-x-5' : 'translate-x-0',
+            )}
+          />
+        </Switch>
+      </Switch.Group>
+
       <div className="mt-4 py-4 border-t border-solid flex justify-between">
         <DisconnectBase />
         <Button

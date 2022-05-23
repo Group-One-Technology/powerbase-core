@@ -70,9 +70,9 @@ export function CreateFieldAlias({
       type="text"
       id="create-field-alias"
       name="create-field-alias"
-      aria-label="Field Name"
+      label="Field Name"
       value={alias}
-      placeholder="Enter Field Name (e.g. First Name)"
+      placeholder="e.g. First Name"
       onChange={handleAliasChange}
       className="w-full"
       showError={!aliasError.error?.message.includes('Still checking for existing field')}

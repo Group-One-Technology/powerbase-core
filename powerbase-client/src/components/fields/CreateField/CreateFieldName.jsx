@@ -67,7 +67,7 @@ export function CreateFieldName({
       type="text"
       id="create-field-column-name"
       name="create-field-column-name"
-      label="Column Name"
+      label="SQL Column Name"
       placeholder="e.g. first_name or firstName"
       value={fieldName}
       onChange={handleNameChange}
