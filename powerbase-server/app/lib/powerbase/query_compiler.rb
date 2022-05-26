@@ -26,6 +26,7 @@ module Powerbase
     # :sort :: a sort hash.
     # :include_pii :: a boolean for whether to query pii fields or not.
     # :include_json :: a boolean for whether to substring the queried json fields or not.
+    # :include_large_text :: a boolean for whether to substring the queried text fields or not.
     def initialize(table, options = {})
       @table = table.is_a?(ActiveRecord::Base) ? table : PowerbaseTable.find(table)
       @table_id = @table.id
@@ -38,6 +39,7 @@ module Powerbase
       @sort = options[:sort] == nil ? [] : options[:sort]
       @include_pii = options[:include_pii] || false
       @include_json = options[:include_json] || false
+      @include_large_text = options[:include_large_text] || false
       @is_magic_sort = false
       @is_magic_filter = false
 
@@ -78,10 +80,43 @@ module Powerbase
         included_fields = included_fields.select {|field| @field_type[field.powerbase_field_type_id] != "JSON Text"}
       end
 
-      included_fields = included_fields.map {|field| field.name.to_sym}
+      text_field_names = included_fields
+        .select {|field| ["Single Line Text", "Long Text"].include?(@field_type[field.powerbase_field_type_id])}
+        .map {|field| field.name}
+      included_fields = included_fields
+        .select {|field| !text_field_names.include?(field.name)}
+        .map {|field| field.name.to_sym}
 
       -> (db) {
         db = db.select(*included_fields)
+
+        # Max character size is 10,000,000 cause at 1M the browser freezes.
+        text_size = !@include_large_text ? "1000" : "10000000"
+        text_field_names.each do |field_name|
+          if @adapter == "mysql2"
+            db = db.select_append(Sequel.lit(%Q[
+              (
+                CASE
+                  WHEN LENGTH('#{field_name}') > #{text_size}
+                  THEN SUBSTRING('#{field_name}', 1, #{text_size}) || '...'
+                  ELSE '#{field_name}'
+                END
+              ) AS '#{field_name}'
+            ]))
+            db = db.select_append(Sequel.lit(%Q[LENGTH('#{field_name}') AS #{field_name}_count]))
+          else # postgresql
+            db = db.select_append(Sequel.lit(%Q[
+              (
+                CASE
+                  WHEN LENGTH("#{field_name}") > #{text_size}
+                  THEN SUBSTRING("#{field_name}", 1, #{text_size}) || '...'
+                  ELSE "#{field_name}"
+                END
+              ) AS "#{field_name}"
+            ]))
+            db = db.select_append(Sequel.lit(%Q[LENGTH("#{field_name}") AS #{field_name}_count]))
+          end
+        end
 
         if !@include_json
           json_fields.each do |field|
