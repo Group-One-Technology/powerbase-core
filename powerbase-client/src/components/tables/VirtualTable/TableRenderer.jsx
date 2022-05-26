@@ -128,7 +128,9 @@ export function TableRenderer({
           ...item,
           value: curValue,
           count: curCount,
-          readOnly: curValue?.length < curCount,
+          readOnly: curCount != null && curValue != null
+            ? curValue.length < curCount
+            : undefined,
         });
       })
       .sort((x, y) => x.order > y.order);

@@ -52,7 +52,7 @@ export function BaseSingleRecordModal({
   const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
-  const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
+  const { data: remoteRecord, isValidating: isRemoteRecordValidating, mutate: mutateTableRecord } = useTableRecord();
   const { setTotalRecords, mutate: mutateTableRecordsCount } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
@@ -81,6 +81,7 @@ export function BaseSingleRecordModal({
 
   useEffect(() => {
     setRecord(initialRecord);
+    mutateTableRecord();
   }, [table, initialRecord]);
 
   useEffect(() => {
@@ -91,7 +92,9 @@ export function BaseSingleRecordModal({
           value: remoteRecord[item.name] ?? item.value,
           count: remoteRecord[`${item.name}_count`] ?? item[`${item.name}_count`],
         };
-        updatedItem.readOnly = updatedItem.value?.length < updatedItem.count;
+        updatedItem.readOnly = updatedItem.count != null && updatedItem.value != null
+          ? updatedItem.value.length < updatedItem.count
+          : undefined;
         if (updatedItem.isPii) return { ...updatedItem, includePii };
         return updatedItem;
       }));
@@ -223,15 +226,15 @@ export function BaseSingleRecordModal({
                 <Tooltip.Root delayDuration={0}>
                   <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
                     <span className="sr-only">
-                      {(!isSyncing || (remoteRecord && !base.isTurbo)) ? 'Record synced' : 'Syncing record'}
+                      {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo)) ? 'Record synced' : 'Syncing record'}
                     </span>
-                    {(!isSyncing || (remoteRecord && !base.isTurbo))
+                    {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo))
                       ? <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />
                       : <Loader className="h-5 w-5" />}
                   </Tooltip.Trigger>
                   <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
                     <Tooltip.Arrow className="gray-900" />
-                    {(!isSyncing || (remoteRecord && !base.isTurbo))
+                    {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo))
                       ? 'Record is in-synced.'
                       : 'Checking if the record is in synced.'}
                   </Tooltip.Content>

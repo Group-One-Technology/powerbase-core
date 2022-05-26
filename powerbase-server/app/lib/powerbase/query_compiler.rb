@@ -90,8 +90,8 @@ module Powerbase
       -> (db) {
         db = db.select(*included_fields)
 
-        # Max character size is 10,000,000 cause at 1M the browser freezes.
-        text_size = !@include_large_text ? "1000" : "10000000"
+        # Max character size is 1,000,000 cause at around 100,000,000 the browser freezes.
+        text_size = !@include_large_text ? "1000" : "1000000"
         text_field_names.each do |field_name|
           if @adapter == "mysql2"
             db = db.select_append(Sequel.lit(%Q[
