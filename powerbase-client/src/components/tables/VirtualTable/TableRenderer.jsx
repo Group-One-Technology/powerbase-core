@@ -123,6 +123,7 @@ export function TableRenderer({
       .map((item) => ({
         ...item,
         value: records[rowNo - 1][item.name],
+        count: records[rowNo - 1][`${item.name}_count`],
       }))
       .sort((x, y) => x.order > y.order);
 

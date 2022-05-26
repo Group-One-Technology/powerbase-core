@@ -87,6 +87,7 @@ export function BaseSingleRecordModal({
         const updatedItem = {
           ...item,
           value: remoteRecord[item.name] ?? item.value,
+          count: remoteRecord[`${item.name}_count`],
         };
         if (updatedItem.isPii) return { ...updatedItem, includePii };
         return updatedItem;
@@ -215,19 +216,21 @@ export function BaseSingleRecordModal({
               <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
                 {table.name.toUpperCase()}
               </Dialog.Title>
-              {(base.isTurbo && !table.isVirtual) && (
+              {(!table.isVirtual || (remoteRecord == null && !base.isTurbo)) && (
                 <Tooltip.Root delayDuration={0}>
                   <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
-                    <span className="sr-only">{isSyncing ? 'Syncing record' : 'Record synced'}</span>
-                    {isSyncing
-                      ? <Loader className="h-5 w-5" />
-                      : <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />}
+                    <span className="sr-only">
+                      {(!isSyncing || (remoteRecord && !base.isTurbo)) ? 'Record synced' : 'Syncing record'}
+                    </span>
+                    {(!isSyncing || (remoteRecord && !base.isTurbo))
+                      ? <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />
+                      : <Loader className="h-5 w-5" />}
                   </Tooltip.Trigger>
                   <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
                     <Tooltip.Arrow className="gray-900" />
-                    {isSyncing
-                      ? 'Checking if the record is in synced.'
-                      : 'Record is in-synced.'}
+                    {(!isSyncing || (remoteRecord && !base.isTurbo))
+                      ? 'Record is in-synced.'
+                      : 'Checking if the record is in synced.'}
                   </Tooltip.Content>
                 </Tooltip.Root>
               )}

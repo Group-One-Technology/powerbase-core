@@ -69,6 +69,7 @@ export function RecordItemValue({
     }),
   );
   const error = hasFocused ? valueError : undefined;
+  const isReadOnly = item.value?.length < item.count;
 
   useEffect(() => {
     if (item.value !== value) {
@@ -120,6 +121,18 @@ export function RecordItemValue({
               </Tooltip.Content>
             </Tooltip.Root>
           )}
+          {isReadOnly && (
+            <Tooltip.Root delayDuration={0}>
+              <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
+                <LockClosedIcon className="mr-1 h-4 w-4" />
+                Read Only
+              </Tooltip.Trigger>
+              <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
+                <Tooltip.Arrow className="gray-900" />
+                Data is too large to be edited in Powerbase.
+              </Tooltip.Content>
+            </Tooltip.Root>
+          )}
         </span>
       </div>
       {inputTypes.length > 1 && (
@@ -152,7 +165,7 @@ export function RecordItemValue({
     </div>
   );
 
-  const endEnhancer = newChange != null
+  let endEnhancer = newChange != null
     ? (
       <div>
         <p className="mt-2 text-xs text-gray-500 my-2">
@@ -177,6 +190,17 @@ export function RecordItemValue({
       </div>
     )
     : null;
+
+  if (item.count > item.value?.length) {
+    endEnhancer = (
+      <>
+        {endEnhancer}
+        <p className="mt-2 text-xs text-gray-700 my-2">
+          Displaying {item.value.length.toLocaleString()} characters out of {item.count.toLocaleString()}.
+        </p>
+      </>
+    );
+  }
 
   useEffect(() => {
     const curItemValue = inputType === 'Null' ? null : value;
@@ -294,8 +318,9 @@ export function RecordItemValue({
               onAdd={({ updated_src }) => updateValue(JSON.stringify(updated_src))}
               displayDataTypes={false}
               enableClipboard={false}
-              collapsed
               disabled={disabled}
+              readOnly={isReadOnly}
+              collapsed
             />
             {endEnhancer}
           </div>
@@ -311,7 +336,7 @@ export function RecordItemValue({
           <textarea
             id={item.name}
             name={item.name}
-            rows={3}
+            rows={item.count / 100 > 10 ? 10 : item.count / 100}
             className={cn(
               'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
               disabled && 'bg-gray-100 cursor-not-allowed',
@@ -319,6 +344,7 @@ export function RecordItemValue({
             onChange={(evt) => updateValue(evt.target.value)}
             value={value.toString()}
             disabled={disabled}
+            readOnly={isReadOnly}
           />
           {error && (
             <p className="mt-2 text-xs text-red-600 my-2">
@@ -337,7 +363,7 @@ export function RecordItemValue({
           <textarea
             id={item.name}
             name={item.name}
-            rows={3}
+            rows={item.count / 100 > 10 ? 10 : item.count / 100}
             className={cn(
               'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
               disabled && 'bg-gray-100 cursor-not-allowed',
@@ -345,6 +371,7 @@ export function RecordItemValue({
             onChange={(evt) => updateValue(evt.target.value)}
             value={value}
             disabled={disabled}
+            readOnly={isReadOnly}
           />
           {error && (
             <p className="mt-2 text-xs text-red-600 my-2">
@@ -376,6 +403,7 @@ export function RecordItemValue({
           error={error}
           disabled={disabled}
           caption={endEnhancer}
+          readOnly={isReadOnly}
           showError
         />
       );

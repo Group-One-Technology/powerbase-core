@@ -44,6 +44,7 @@ export function useSyncRecord({
               const updatedItem = {
                 ...item,
                 value: updatedData[item.name] ?? item.value,
+                count: updatedData[`${item.name}_count`],
               };
               if (updatedItem.isPii) return { ...updatedItem, includePii };
               return updatedItem;
