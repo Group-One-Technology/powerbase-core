@@ -69,7 +69,6 @@ export function RecordItemValue({
     }),
   );
   const error = hasFocused ? valueError : undefined;
-  const isReadOnly = item.value?.length < item.count;
 
   useEffect(() => {
     if (item.value !== value) {
@@ -121,7 +120,7 @@ export function RecordItemValue({
               </Tooltip.Content>
             </Tooltip.Root>
           )}
-          {isReadOnly && (
+          {item.readOnly && (
             <Tooltip.Root delayDuration={0}>
               <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
                 <LockClosedIcon className="mr-1 h-4 w-4" />
@@ -319,7 +318,7 @@ export function RecordItemValue({
               displayDataTypes={false}
               enableClipboard={false}
               disabled={disabled}
-              readOnly={isReadOnly}
+              readOnly={item.readOnly}
               collapsed
             />
             {endEnhancer}
@@ -344,7 +343,7 @@ export function RecordItemValue({
             onChange={(evt) => updateValue(evt.target.value)}
             value={value.toString()}
             disabled={disabled}
-            readOnly={isReadOnly}
+            readOnly={item.readOnly}
           />
           {error && (
             <p className="mt-2 text-xs text-red-600 my-2">
@@ -371,7 +370,7 @@ export function RecordItemValue({
             onChange={(evt) => updateValue(evt.target.value)}
             value={value}
             disabled={disabled}
-            readOnly={isReadOnly}
+            readOnly={item.readOnly}
           />
           {error && (
             <p className="mt-2 text-xs text-red-600 my-2">
@@ -403,7 +402,7 @@ export function RecordItemValue({
           error={error}
           disabled={disabled}
           caption={endEnhancer}
-          readOnly={isReadOnly}
+          readOnly={item.readOnly}
           showError
         />
       );

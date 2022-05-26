@@ -46,6 +46,7 @@ export function useSyncRecord({
                 value: updatedData[item.name] ?? item.value,
                 count: updatedData[`${item.name}_count`],
               };
+              updatedItem.readOnly = updatedItem.value?.length < updatedItem.count;
               if (updatedItem.isPii) return { ...updatedItem, includePii };
               return updatedItem;
             }));

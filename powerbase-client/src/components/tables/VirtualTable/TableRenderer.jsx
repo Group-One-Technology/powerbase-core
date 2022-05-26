@@ -120,11 +120,17 @@ export function TableRenderer({
     const updatedFields = initializeFields(initialFields, connections, {
       hidden: false,
     })
-      .map((item) => ({
-        ...item,
-        value: records[rowNo - 1][item.name],
-        count: records[rowNo - 1][`${item.name}_count`],
-      }))
+      .map((item) => {
+        const curValue = records[rowNo - 1][item.name];
+        const curCount = records[rowNo - 1][`${item.name}_count`];
+
+        return ({
+          ...item,
+          value: curValue,
+          count: curCount,
+          readOnly: curValue?.length < curCount,
+        });
+      })
       .sort((x, y) => x.order > y.order);
 
     setIsModalOpen(true);

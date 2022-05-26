@@ -73,7 +73,9 @@ export function BaseSingleRecordModal({
   });
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
-  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
+  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => (
+    baseUser?.can(PERMISSIONS.EditFieldData, item) && !item.readOnly && !item.isPrimaryKey
+  ));
   const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
@@ -87,8 +89,9 @@ export function BaseSingleRecordModal({
         const updatedItem = {
           ...item,
           value: remoteRecord[item.name] ?? item.value,
-          count: remoteRecord[`${item.name}_count`],
+          count: remoteRecord[`${item.name}_count`] ?? item[`${item.name}_count`],
         };
+        updatedItem.readOnly = updatedItem.value?.length < updatedItem.count;
         if (updatedItem.isPii) return { ...updatedItem, includePii };
         return updatedItem;
       }));
@@ -170,7 +173,7 @@ export function BaseSingleRecordModal({
         [item.name]: item.value,
       }), {});
     const updatedData = record
-      .filter((item) => item.updated)
+      .filter((item) => item.updated && !item.readOnly)
       .reduce((values, item) => ({
         ...values,
         [item.name]: item.value,
@@ -196,8 +199,8 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
-      mounted(() => setRecords(records));
       catchError(err);
+      mounted(() => setRecords(records));
     }
 
     mounted(() => setLoading(false));
@@ -422,7 +425,7 @@ export function BaseSingleRecordModal({
               <Button
                 type="submit"
                 className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                disabled={loading}
+                loading={loading}
               >
                 Update Record
               </Button>
