@@ -154,15 +154,7 @@ class PowerbaseDatabasesController < ApplicationController
     end
 
     @database.database_name = validator.database
-    @database.connection_string = connection_string
-
-    meta_query = Databases::MetaQuery.new @database
-    database_size = meta_query.database_size
-
-    if database_size.kilobytes > 2.gigabytes && @database.is_turbo
-      render json: { error: "Connecting to a database with over 2GB of data is currently restricted for turbo bases." }, status: :unprocessable_entity
-      return
-    end
+    @database.connection_string = connection_strin
 
     if @database.save
       render json: format_json(@database)
