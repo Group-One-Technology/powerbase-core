@@ -13,6 +13,7 @@ export function CellRenderer({
   rowIndex,
   isLoaded,
   style,
+  textCount,
   value,
   field,
   setHoveredCell,
@@ -30,7 +31,7 @@ export function CellRenderer({
   table,
   isAddRecord,
   isHighlighted,
-  isEditable,
+  canEditFieldData,
   handleExitEditing,
   handleValueChange,
   showAddRecord,
@@ -61,15 +62,36 @@ export function CellRenderer({
   });
 
   const handleEditCell = () => {
-    if (!isEditable) {
-      if (field.isPrimaryKey || field.isPii || fieldType.name === FieldType.JSON_TEXT) {
-        if (field.isPrimaryKey) {
-          catchError('Cannot update a primary key field.');
-        } else if (field.isPii) {
-          catchError('Cannot update a PII field. You can update it in the record modal instead if you have the permission.');
-        } else if (fieldType.name === FieldType.JSON_TEXT) {
-          catchError('Cannot update a JSON Text field. You can update it in the record modal instead if you have the permission.');
-        }
+    if (isRowNo || isLastRow || !field || !fieldType || fieldType?.name === FieldType.CHECKBOX) return;
+
+    if (!canEditFieldData) {
+      catchError('You do not have the right permissions to edit this data.');
+      return;
+    }
+
+    if (field.isPrimaryKey) {
+      catchError('Cannot update a primary key field.');
+      return;
+    }
+
+    if (field.isForeignKey) {
+      catchError('Cannot update a foreign key field.');
+      return;
+    }
+
+    if (field.isPii) {
+      catchError('Cannot update a PII field. You can update it in the record modal instead if you have the permission.');
+      return;
+    }
+
+    if (fieldType.name === FieldType.JSON_TEXT) {
+      catchError('Cannot update a JSON Text field. You can update it in the record modal instead if you have the permission.');
+      return;
+    }
+
+    if ([FieldType.SINGLE_LINE_TEXT, FieldType.LONG_TEXT].includes(fieldType.name) && value != null) {
+      if (value.length < textCount) {
+        catchError('Data has been truncated. If the data is not larger than 1M characters in length, you may update the data in the record modal instead.');
         return;
       }
     }
@@ -177,6 +199,7 @@ CellRenderer.propTypes = {
   columnIndex: PropTypes.number.isRequired,
   isLoaded: PropTypes.bool.isRequired,
   style: PropTypes.string.isRequired,
+  textCount: PropTypes.bool,
   value: PropTypes.any.isRequired,
   field: PropTypes.object,
   setHoveredCell: PropTypes.func.isRequired,
@@ -194,7 +217,7 @@ CellRenderer.propTypes = {
   setRecords: PropTypes.func.isRequired,
   table: PropTypes.object.isRequired,
   isAddRecord: PropTypes.bool,
-  isEditable: PropTypes.bool,
+  canEditFieldData: PropTypes.bool,
   handleExitEditing: PropTypes.func.isRequired,
   handleValueChange: PropTypes.func.isRequired,
   showAddRecord: PropTypes.func.isRequired,
