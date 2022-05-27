@@ -32,6 +32,11 @@ export function useSyncRecord({
         includePii,
       })
         .then((response) => {
+          if (response == null) {
+            setIsSyncing(false);
+            return;
+          }
+
           const { has_synced, ...updatedData } = response;
 
           if (has_synced) {
