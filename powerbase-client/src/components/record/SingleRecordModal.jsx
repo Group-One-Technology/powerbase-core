@@ -52,7 +52,7 @@ export function BaseSingleRecordModal({
   const { data: base } = useBase();
   const { data: fieldTypes } = useFieldTypes();
   const { data: records, mutate: mutateTableRecords } = useTableRecords();
-  const { data: remoteRecord, mutate: mutateTableRecord } = useTableRecord();
+  const { data: remoteRecord, isValidating: isRemoteRecordValidating, mutate: mutateTableRecord } = useTableRecord();
   const { setTotalRecords, mutate: mutateTableRecordsCount } = useTableRecordsCount();
   const { data: connections } = useTableConnections();
   const { data: referencedConnections } = useTableReferencedConnections();
@@ -73,12 +73,15 @@ export function BaseSingleRecordModal({
   });
 
   const canViewPIIFields = baseUser?.can(PERMISSIONS.ManageTable, table);
-  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => baseUser?.can(PERMISSIONS.EditFieldData, item));
+  const canUpdateFieldData = table.hasPrimaryKey && record.some((item) => (
+    baseUser?.can(PERMISSIONS.EditFieldData, item) && !item.readOnly && !item.isPrimaryKey
+  ));
   const hasPIIFields = record.some((item) => item.isPii);
   const hiddenFields = record.filter((item) => item.isHidden);
 
   useEffect(() => {
     setRecord(initialRecord);
+    mutateTableRecord();
   }, [table, initialRecord]);
 
   useEffect(() => {
@@ -87,7 +90,11 @@ export function BaseSingleRecordModal({
         const updatedItem = {
           ...item,
           value: remoteRecord[item.name] ?? item.value,
+          count: remoteRecord[`${item.name}_count`] ?? item[`${item.name}_count`],
         };
+        updatedItem.readOnly = updatedItem.count != null && updatedItem.value != null
+          ? updatedItem.value.length < updatedItem.count
+          : undefined;
         if (updatedItem.isPii) return { ...updatedItem, includePii };
         return updatedItem;
       }));
@@ -169,7 +176,7 @@ export function BaseSingleRecordModal({
         [item.name]: item.value,
       }), {});
     const updatedData = record
-      .filter((item) => item.updated)
+      .filter((item) => item.updated && !item.readOnly)
       .reduce((values, item) => ({
         ...values,
         [item.name]: item.value,
@@ -195,8 +202,8 @@ export function BaseSingleRecordModal({
       await mutateTableRecords(updatedRecords, false);
       saved(`Successfully updated record in table ${table.alias}.`);
     } catch (err) {
-      mounted(() => setRecords(records));
       catchError(err);
+      mounted(() => setRecords(records));
     }
 
     mounted(() => setLoading(false));
@@ -215,19 +222,21 @@ export function BaseSingleRecordModal({
               <Dialog.Title as="h3" className="text-2xl leading-6 font-medium">
                 {table.name.toUpperCase()}
               </Dialog.Title>
-              {(base.isTurbo && !table.isVirtual) && (
+              {(!table.isVirtual || (remoteRecord == null && !base.isTurbo)) && (
                 <Tooltip.Root delayDuration={0}>
                   <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
-                    <span className="sr-only">{isSyncing ? 'Syncing record' : 'Record synced'}</span>
-                    {isSyncing
-                      ? <Loader className="h-5 w-5" />
-                      : <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />}
+                    <span className="sr-only">
+                      {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo)) ? 'Record synced' : 'Syncing record'}
+                    </span>
+                    {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo))
+                      ? <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />
+                      : <Loader className="h-5 w-5" />}
                   </Tooltip.Trigger>
                   <Tooltip.Content className="py-1 px-2 bg-gray-900 text-white text-xs rounded">
                     <Tooltip.Arrow className="gray-900" />
-                    {isSyncing
-                      ? 'Checking if the record is in synced.'
-                      : 'Record is in-synced.'}
+                    {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo))
+                      ? 'Record is in-synced.'
+                      : 'Checking if the record is in synced.'}
                   </Tooltip.Content>
                 </Tooltip.Root>
               )}
@@ -419,7 +428,7 @@ export function BaseSingleRecordModal({
               <Button
                 type="submit"
                 className="inline-flex items-center justify-center border border-transparent font-medium px-4 py-2 text-sm rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                disabled={loading}
+                loading={loading}
               >
                 Update Record
               </Button>

@@ -200,6 +200,7 @@ module Powerbase
       query = Powerbase::QueryCompiler.new(@table, {
         include_pii: include_pii,
         include_json: include_json,
+        include_large_text: true,
       })
 
       if @is_turbo && !is_remote_record

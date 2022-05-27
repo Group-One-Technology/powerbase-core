@@ -143,6 +143,11 @@ class TableRecordsController < ApplicationController
     primary_keys = sanitize_field_data(safe_params[:primary_keys])
     data = sanitize_field_data(safe_params[:data], @guest)
 
+    if data&.length == 0
+      render json: { error: "Could not update record in '#{@table.name}'. No data has been provided." }, status: :unprocessable_entity
+      return
+    end
+
     model = Powerbase::Model.new(@table)
     if model.update_merged_record(primary_keys: primary_keys, data: data)
       render json: { updated: true }
