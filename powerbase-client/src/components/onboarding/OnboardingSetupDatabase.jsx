@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { RadioGroup } from '@headlessui/react';
-import { Chunk } from 'editmode-react';
 import { useHistory } from 'react-router-dom';
 import cn from 'classnames';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -57,9 +56,7 @@ export function OnboardingSetupDatabase({
   return (
     <Tabs.Content value={OnboardingTabs.SETUP_DATABASE}>
       <p className="mt-8 mb-4 text-center text-base text-gray-600">
-        <Chunk identifier="onboarding_database_type_description">
-          Start managing your database by
-        </Chunk>
+        Start managing your database by
       </p>
       <RadioGroup value={databaseType} onChange={setDatabaseType}>
         <RadioGroup.Label className="sr-only">Database Type</RadioGroup.Label>
@@ -110,9 +107,7 @@ export function OnboardingSetupDatabase({
       {databaseType !== 'sample' && (
         <>
           <p className="mt-8 mb-6 text-center text-base text-gray-600">
-            <Chunk identifier="onboarding_powerbase_type_description">
-              You can supercharge your database by making it Turbo.
-            </Chunk>
+            You can supercharge your database by making it Turbo.
           </p>
           <RadioGroup value={powerbaseType} onChange={setPowerbaseType}>
             <RadioGroup.Label className="sr-only">Powerbase Type</RadioGroup.Label>
@@ -128,9 +123,7 @@ export function OnboardingSetupDatabase({
                       : ' bg-gray-200 text-gray-600 hover:text-gray-700 focus:text-gray-700 hover:bg-gray-300 focus:bg-gray-300',
                   )}
                 >
-                  <Chunk identifier={option.nameId}>
-                    {option.name}
-                  </Chunk>
+                  {option.name}
                 </RadioGroup.Option>
               ))}
             </div>
@@ -138,9 +131,7 @@ export function OnboardingSetupDatabase({
 
           <div className="min-h-[33rem] my-4">
             <p className="mx-auto max-w-md my-2 px-8 text-center text-sm text-gray-600">
-              <Chunk identifier={powerbaseType.descriptionId}>
-                {powerbaseType.description}
-              </Chunk>
+              {powerbaseType.description}
             </p>
             <img
               src={`/public/img/${powerbaseType.name === 'Powerbase Turbo' ? 'turbo' : 'non-turbo'}-diagram.png`}
@@ -155,14 +146,10 @@ export function OnboardingSetupDatabase({
                   </div>
                   <div>
                     <dt className="text-base leading-6 font-medium text-gray-900">
-                      <Chunk identifier={feature.nameId}>
-                        {feature.name}
-                      </Chunk>
+                      {feature.name}
                     </dt>
                     <dd className="mt-2 text-sm text-gray-600">
-                      <Chunk identifier={feature.descriptionId}>
-                        {feature.description}
-                      </Chunk>
+                      {feature.description}
                     </dd>
                   </div>
                 </div>
@@ -180,15 +167,8 @@ export function OnboardingSetupDatabase({
           loading={loading}
         >
           {databaseType !== 'sample'
-            ? (
-              <Chunk identifier="onboarding_setup_button">
-                Setup Database
-              </Chunk>
-            ) : (
-              <Chunk identifier="onboarding_setup_sample_db_button">
-                View Sample Base
-              </Chunk>
-            )}
+            ? 'Setup Database'
+            : 'View Sample Base'}
         </Button>
       </div>
     </Tabs.Content>

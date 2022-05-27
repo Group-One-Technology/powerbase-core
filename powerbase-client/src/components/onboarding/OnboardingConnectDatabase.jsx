@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import * as Tabs from '@radix-ui/react-tabs';
-import { Chunk } from 'editmode-react';
 
 import { OnboardingTabs } from '@lib/constants/onboarding';
 import { connectDatabase, createDatabase } from '@lib/api/databases';
@@ -65,9 +64,7 @@ export function OnboardingConnectDatabase({
   return (
     <Tabs.Content value={OnboardingTabs.CONNECT_DATABASE}>
       <p className="mt-8 mb-4 text-center text-base text-gray-600">
-        <Chunk identifier="onboarding_connect_database_description">
-          Connect to your database
-        </Chunk>
+        Connect to your database
       </p>
       <BaseConnect
         submit={handleSubmit}

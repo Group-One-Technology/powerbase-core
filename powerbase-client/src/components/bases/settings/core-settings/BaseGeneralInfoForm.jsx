@@ -109,7 +109,7 @@ export function BaseGeneralInfoForm({ handleInit, handleSuccess, handleError }) 
             Enable Magic Tables and Fields
           </Switch.Label>
           <Switch.Description as="span" className="text-sm text-gray-500">
-            Magic tables and fields are accessible thru Powerbase but does not affect your current database. This is useful for storing data which you don&apos;t want to persist to your SQL database (e.g. comments magic field in a projects SQL table).
+            Magic tables and fields are accessible thru Powerbase but does not affect your current database. This is useful for storing data which you don&apos;t want to persist to your SQL database (e.g. comments magic field in a projects SQL table). For non-turbo bases, we store the primary keys as reference for the magic values.
           </Switch.Description>
         </span>
         <Switch

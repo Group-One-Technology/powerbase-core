@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import cn from 'classnames';
-import { Chunk } from 'editmode-react';
 
 import { useGeneralSettings } from '@models/GeneralSettings';
 import { OnboardingTabs, BASE_SOURCES } from '@lib/constants/onboarding';
@@ -44,11 +43,7 @@ export function OnboardingPage() {
       <div className="py-10">
         <PageHeader
           className="text-center"
-          title={(
-            <Chunk identifier="onboarding_headline">
-              Get Started with Powerbase
-            </Chunk>
-          )}
+          title="Get Started with Powerbase"
         />
         <PageContent>
           <Tabs.Root value={currentTab} onValueChange={handleTabsChange}>

@@ -71,38 +71,28 @@ export const DB_PLATFORMS = [
 
 export const POWERBASE_TYPE = [
   {
-    nameId: 'turbo_title',
-    descriptionId: 'turbo_description',
     name: 'Powerbase Turbo',
     description: 'Use Turbo to navigate tens or hundreds of millions of records instantly.',
     features: [
       {
-        nameId: 'cnk_c7554b55009b5af0cb58',
-        descriptionId: 'cnk_6c9d5cfdf37ced4096aa',
         name: 'Quickly navigate data',
-        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        description: 'With the power of Elasticsearch, navigating millions of data in a snap is made possible.',
         icon: LightningBoltIcon,
       },
       {
-        nameId: 'cnk_910382eec24c612597c1',
-        descriptionId: 'cnk_cbbb6b319c0d6e4ea7b0',
         name: 'Full text search',
-        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        description: 'Powerful full-text search capabilities where the speed comes from an inverted index at its core.',
         icon: SearchIcon,
       },
     ],
   },
   {
-    nameId: 'non_turbo_title',
-    descriptionId: 'non_turbo_description',
     name: 'Regular Database',
     description: 'Use your imported or newly created database in navigating records.',
     features: [
       {
-        nameId: 'cnk_36ba450dbbd4421ba232',
-        descriptionId: 'cnk_d7d6b06ecffad59ac0fd',
         name: 'Data is stored where you want it to be.',
-        description: 'Consequuntur omnis dicta cumque, inventore atque ab dolores aspernatur tempora ab doloremque.',
+        description: 'Powerbase does not store any data you don\'t give permission to.',
         icon: LockClosedIcon,
       },
     ],

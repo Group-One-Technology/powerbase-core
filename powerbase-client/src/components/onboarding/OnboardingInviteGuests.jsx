@@ -4,7 +4,6 @@ import cn from 'classnames';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { PlusIcon } from '@heroicons/react/outline';
-import { Chunk } from 'editmode-react';
 
 import { OnboardingTabs } from '@lib/constants/onboarding';
 import { ACCESS_LEVEL } from '@lib/constants/permissions';
@@ -120,9 +119,7 @@ export function OnboardingInviteGuests({ base }) {
   return (
     <Tabs.Content value={OnboardingTabs.INVITE_GUESTS}>
       <p className="mt-8 mb-4 text-center text-base text-gray-600">
-        <Chunk identifier="onboarding_invite_guests_description">
-          invite and collaborate with others. You can either invite them as:
-        </Chunk>
+        invite and collaborate with others. You can either invite them as:
       </p>
 
       <Tabs.Root
