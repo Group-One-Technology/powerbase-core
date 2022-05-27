@@ -41,7 +41,7 @@ export function CellInput({
 
   const handleBlur = () => {
     setFocus(false);
-    if (onSubmit) onSubmit(initialValue, value);
+    if (onSubmit && !isAddRecord) onSubmit(initialValue, value);
   };
 
   const handleKeyDown = (evt) => {
@@ -67,7 +67,7 @@ export function CellInput({
   };
 
   useEffect(() => {
-    if (onSubmit) setFocus(true);
+    if (onSubmit && !isAddRecord) setFocus(true);
     if ([FieldType.LONG_TEXT, FieldType.JSON_TEXT].includes(fieldType.name)) {
       inputRef.current?.focus();
     }
