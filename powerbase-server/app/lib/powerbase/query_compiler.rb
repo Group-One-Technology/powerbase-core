@@ -211,6 +211,32 @@ module Powerbase
         end
       end
 
+      text_field_names = included_fields
+        .select {|field| ["Single Line Text", "Long Text"].include?(@field_type[field.powerbase_field_type_id])}
+        .map {|field| field.name}
+
+      # Max character size is 1,000,000 cause at around 100,000,000 the browser freezes.
+      text_size = "1000000"
+      search_params[:script_fields] = {}
+
+      text_field_names.each do |field_name|
+        if !@include_large_text
+          search_params[:script_fields][field_name.to_sym] = {
+            script: {
+              lang: "painless",
+              source: "if (params._source.#{field_name} != null && params._source.#{field_name}.length() > #{text_size}) { return params._source.#{field_name}.substring(0, #{text_size}) } else { return params._source.#{field_name} }",
+            },
+          }
+        end
+
+        search_params[:script_fields]["#{field_name}_count".to_sym] = {
+          script: {
+            lang: "painless",
+            source: "if (params._source.#{field_name}_count != null) { return params._source.#{field_name}_count } else { return null }",
+          },
+        }
+      end
+
       # For sorting
       es_sort = format_sort(!@turbo, true)
       if es_sort.kind_of?(Array) && es_sort.length > 0

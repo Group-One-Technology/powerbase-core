@@ -49,11 +49,6 @@ class Databases::Creator
     query = Databases::MetaQuery.new @database
     @db_size = query.database_size || 0
 
-    if (@db_size * 1024) > 2.gigabytes && @database.is_turbo
-      @errors = { error: "Connecting to a database with over 2GB of data is currently restricted for turbo bases." }
-      return false
-    end
-
     if @database.save
       database_migration
     else
