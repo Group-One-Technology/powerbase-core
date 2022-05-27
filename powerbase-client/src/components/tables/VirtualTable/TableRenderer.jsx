@@ -20,7 +20,6 @@ import { PERMISSIONS } from '@lib/constants/permissions';
 import { initializeFields } from '@lib/helpers/fields/initializeFields';
 import { useEditingCell } from '@lib/hooks/useEditingCell';
 import { useAddRecord } from '@lib/hooks/virtual-table/useAddRecord';
-import { FieldType } from '@lib/constants/field-types';
 
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { GridHeader } from './GridHeader';
@@ -205,9 +204,12 @@ export function TableRenderer({
                         const isHoveredRow = hoveredCell.row === rowIndex;
                         const isHighlighted = records[rowIndex]?.doc_id === highlightedCell;
                         const isLastRow = rowIndex >= records.length;
-                        const isEditable = !isLastRow && !isRowNo && field && baseUser?.can(PERMISSIONS.EditFieldData, field)
-                          && !(field?.isPrimaryKey || field?.isForeignKey || field?.isPii)
-                          && fieldType != null && ![FieldType.CHECKBOX, FieldType.JSON_TEXT].includes(fieldType.name);
+                        const canEditFieldData = baseUser != null
+                          && !['viewer', 'commenter'].includes(baseUser.access)
+                          && baseUser.can(PERMISSIONS.EditFieldData, field);
+                        const textCount = field != null
+                          ? records[rowIndex]?.[`${field.name}_count`]
+                          : null;
 
                         let value = columnIndex !== 0 && !isLastRow
                           ? records[rowIndex][field.name]
@@ -223,6 +225,7 @@ export function TableRenderer({
                           isLastRow,
                           isLoaded: !!records[rowIndex],
                           value,
+                          textCount,
                           setHoveredCell,
                           isHoveredRow,
                           field,
@@ -241,7 +244,7 @@ export function TableRenderer({
                           table,
                           isAddRecord,
                           showAddRecord,
-                          isEditable,
+                          canEditFieldData,
                           handleExitEditing,
                           handleValueChange,
                           handleAddRecord,

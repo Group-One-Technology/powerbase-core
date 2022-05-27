@@ -190,12 +190,12 @@ export function RecordItemValue({
     )
     : null;
 
-  if (String(item.value).endsWith('...') && item.count > item.value?.length) {
+  if (item.count > item.value?.length) {
     endEnhancer = (
       <>
         {endEnhancer}
         <p className="mt-2 text-xs text-gray-700 my-2">
-          Displaying {(item.value.length - 3).toLocaleString()} characters out of {item.count.toLocaleString()}.
+          Displaying {(String(item.value).endsWith('...') ? item.value.length - 3 : item.value.length).toLocaleString()} characters out of {item.count.toLocaleString()}.
         </p>
       </>
     );
