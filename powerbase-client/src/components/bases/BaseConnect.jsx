@@ -175,8 +175,9 @@ export function BaseConnect({
                   Enable Magic Tables and Fields
                 </Switch.Label>
                 <Switch.Description as="span" className="text-sm text-gray-500">
-                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database. For non-turbo bases, we store the primary keys as reference for the magic values.
                   <br />
+
                   <span className="text-xs">Note: You can change this later.</span>
                 </Switch.Description>
               </span>
@@ -313,7 +314,7 @@ export function BaseConnect({
                   Enable Magic Tables and Fields
                 </Switch.Label>
                 <Switch.Description as="span" className="text-sm text-gray-500">
-                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database. For non-turbo bases, we store the primary keys as reference for the magic values.
                   <br />
                   <span className="text-xs">Note: You can change this later.</span>
                 </Switch.Description>
@@ -404,7 +405,7 @@ export function BaseConnect({
                   Enable Magic Tables and Fields
                 </Switch.Label>
                 <Switch.Description as="span" className="text-sm text-gray-500">
-                  Magic tables and fields are accessible thru Powerbase but does not affect your current database.
+                  Magic tables and fields are accessible thru Powerbase but does not affect your current database. For non-turbo bases, we store the primary keys as reference for the magic values.
                   <br />
                   <span className="text-xs">Note: You can change this later.</span>
                 </Switch.Description>

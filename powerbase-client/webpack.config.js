@@ -79,7 +79,6 @@ module.exports = {
         PUSHER_HOST: JSON.stringify(process.env.PUSHER_HOST),
         PUSHER_KEY: JSON.stringify(process.env.PUSHER_KEY),
         SENTRY_DSN: JSON.stringify(process.env.SENTRY_DSN),
-        EDITMODE_PROJECT_ID: JSON.stringify(process.env.EDITMODE_PROJECT_ID),
         ENABLE_LISTENER: JSON.stringify(process.env.ENABLE_LISTENER),
         ENABLE_SENTRY: JSON.stringify(process.env.ENABLE_SENTRY),
       },
