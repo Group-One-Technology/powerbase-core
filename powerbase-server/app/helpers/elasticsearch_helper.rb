@@ -144,7 +144,12 @@ module ElasticsearchHelper
   end
 
   # Format doc based on record field types
-  def format_record(record, fields)
+  # Options available are:
+  # :: truncate_text - boolean whether to truncate text fields or not.
+  # :: count_fields - boolean whether to include count fields or not.
+  def format_record(record, fields, options = {})
+    options[:count_fields] = options[:count_fields].nil? ? true : options[:count_fields]
+    options[:truncate_text] = options[:truncate_text].nil? ? true : options[:truncate_text]
     formatted_record = {}
 
     record&.each do |record_key, record_value|
@@ -161,6 +166,9 @@ module ElasticsearchHelper
         formatted_record[record_key] = nil
         next
       end
+
+      # Max character size is 1,000,000 cause at around 100,000,000 the browser freezes.
+      max_text_size = 1000000
 
       formatted_record[record_key] = case field.powerbase_field_type_id
         when number_field_type.id
@@ -182,6 +190,12 @@ module ElasticsearchHelper
               record_value
             end
           end
+        when single_line_text_field.id
+          formatted_record["#{record_key}_count".to_sym] = %Q(#{record_value}).length if options[:count_fields]
+          %Q(#{record_value}).truncate(max_text_size)
+        when long_text_field_type.id
+          formatted_record["#{record_key}_count".to_sym] = %Q(#{record_value}).length if options[:count_fields]
+          %Q(#{record_value}).truncate(max_text_size)
         else
           %Q(#{record_value})
         end

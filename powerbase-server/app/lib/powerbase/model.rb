@@ -1,5 +1,6 @@
 include ElasticsearchHelper
 include SequelHelper
+include FieldTypeHelper
 
 module Powerbase
   class Model
@@ -19,7 +20,10 @@ module Powerbase
     # Add record for both turbo/non turbo bases.
     def add_record(primary_keys: nil, data: nil)
       data = format_record(data, @fields)
-      primary_keys = format_record(primary_keys, @fields)
+      primary_keys = format_record(primary_keys, @fields, {
+        truncate_text: false,
+        count_fields: false,
+      })
 
       record = {}
       last_inserted_id = nil
@@ -28,11 +32,20 @@ module Powerbase
 
       data.each do |key, value|
         field = @fields.find {|field| field.name == key.to_s}
-        raise StandardError.new("Field with name of #{key} could not be found.") if !field
-        if field.is_virtual
-          virtual_data[key] = value
+        if !field
+          raise StandardError.new("Field with name of #{key} could not be found.") if !key.to_s.end_with?("_count")
+          field = @fields.find {|field| field.name == key.to_s.chomp("_count")}
+          next if !field
+
+          if field.is_virtual && [single_line_text_field.id, long_text_field_type.id].include?(field.powerbase_field_id)
+            virtual_data["#{key}_count".to_sym] = value
+          end
         else
-          remote_data[key] = value
+          if field.is_virtual
+            virtual_data[key] = value
+          else
+            remote_data[key] = value
+          end
         end
       end
 
@@ -86,11 +99,21 @@ module Powerbase
 
       data.each do |key, value|
         field = PowerbaseField.find_by(name: key.to_s, powerbase_table_id: @table.id)
-        raise StandardError.new("Field with name of #{key} could not be found.") if !field
-        if field.is_virtual
-          virtual_data[key] = value
+
+        if !field
+          raise StandardError.new("Field with name of #{key} could not be found.") if !key.to_s.end_with?("_count")
+          field = PowerbaseField.find_by(name: key.to_s.chomp("_count"), powerbase_table_id: @table.id)
+          next if !field
+
+          if field.is_virtual && [single_line_text_field.id, long_text_field_type.id].include?(field.powerbase_field_id)
+            virtual_data["#{key}_count".to_sym] = value
+          end
         else
-          remote_data[key] = value
+          if field.is_virtual
+            virtual_data[key] = value
+          else
+            remote_data[key] = value
+          end
         end
       end
 
@@ -108,8 +131,11 @@ module Powerbase
         return nil
       end
 
-      data = format_record(data, @fields)
-      primary_keys = format_record(primary_keys, @fields)
+      data = format_record(data, @fields, { count_fields: false })
+      primary_keys = format_record(primary_keys, @fields, {
+        truncate_text: false,
+        count_fields: false,
+      })
       is_turbo = @table.db.is_turbo
 
       if is_turbo
@@ -139,7 +165,10 @@ module Powerbase
       end
 
       data = format_record(data, @fields)
-      primary_keys = format_record(primary_keys, @fields)
+      primary_keys = format_record(primary_keys, @fields, {
+        truncate_text: false,
+        count_fields: false,
+      })
 
       create_index!(@index) if !@is_turbo
       data = @is_turbo ? data : { **data, **primary_keys }
