@@ -96,6 +96,7 @@ export function CellRenderer({
           onValueChange={handleValueChange}
           style={style}
           validate={field.hasValidation}
+          onSubmit={handleAddRecord}
           isAddRecord
         />
       </div>
