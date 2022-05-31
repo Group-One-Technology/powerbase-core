@@ -40,7 +40,7 @@ services:
   server:
     entrypoint: [bin/entry]
     build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 4001 -b '0.0.0.0' -e ${ENVIRONMENT}"
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 4001 -b '0.0.0.0' -e ${RAILS_ENV}"
     volumes:
       - .:/powerbase-server
     ports:
@@ -59,7 +59,7 @@ services:
       - 'elasticsearch'
       - 'web_socket'
     build: .
-    command: bundle exec sidekiq -e ${ENVIRONMENT} -c 3
+    command: bundle exec sidekiq -e ${RAILS_ENV} -c 3
     env_file:
       - '.env'
 volumes:
