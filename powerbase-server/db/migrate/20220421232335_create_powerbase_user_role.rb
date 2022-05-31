@@ -2,8 +2,14 @@ include SequelHelper
 
 class CreatePowerbaseUserRole < ActiveRecord::Migration[6.1]
   def up
-    powerbase = Powerbase::Schema.new
-    powerbase.create_role("powerbase_user")
+    begin
+      powerbase = Powerbase::Schema.new
+      powerbase.create_role("powerbase_user")
+    rescue Sequel::Error => exception
+      if !exception.message.include?("PG::DuplicateObject")
+        raise exception
+      end
+    end
   end
 
   def down
