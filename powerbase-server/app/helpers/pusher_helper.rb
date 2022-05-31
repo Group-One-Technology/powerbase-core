@@ -1,5 +1,10 @@
 module PusherHelper
   def pusher
+    if !ENV["PUSHER_URL"].to_s.empty?
+      @pusher = Pusher::Client.from_env
+      return @pusher
+    end
+
     scheme = ""
     host = ""
     port = ""
