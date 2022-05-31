@@ -25,7 +25,7 @@ bundle install
 
 3. Setup Environment Variables
 
-Copy and rename `config/application.example.yml` to `config/application.yml` and update the variables.
+Copy and rename `.env.example` to `.env` and update the variables.
 
 4. Setup Elastic Search and Poxa
 
@@ -142,6 +142,17 @@ Build and run the docker container:
 docker compose up
 ```
 
+## Updating Docker Image on Docker Hub
+
+To update the docker image on docker hub:
+
+1. Build the image with the updated tag:
+
+```
+docker build -t jorenrui/powerbase-server:0.1.0 .
+```
+
+2. Then you may push the docker image to docker hub.
 
 ## Testing the server
 
