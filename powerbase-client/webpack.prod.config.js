@@ -101,6 +101,8 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     host: '0.0.0.0',
-    port: 4000,
+    port: process.env.PORT
+      ? parseInt(process.env.PORT, 10)
+      : 4000,
   },
 };
