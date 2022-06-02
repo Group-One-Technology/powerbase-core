@@ -85,7 +85,7 @@ class PowerbaseDatabasesController < ApplicationController
     @database = PowerbaseDatabase.find(safe_params[:id])
     raise NotFound.new("Could not find database with id of #{safe_params[:id]}") if !@database
     current_user.can?(:manage_base, @database)
-    render json: { connection_string: Crypto.encrypt(@database.connection_string, @database.id) }
+    render json: { connection_string: @database.connection_string }
   end
 
   # GET /shared_databases

@@ -18,7 +18,7 @@ Deploy Powerbase Server to Heroku:
 
 Deploy Powerbase Client to Vercel:
 
-[![Deploy Powerbase Client to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGroup-One-Technology%2Fpowerbase-core%2Ftree%2Fmain%2Fpowerbase-client&env=API,API_ENCRYPTION_KEY,PUSHER_KEY,ENABLE_LISTENER&envDescription=If%20you're%20following%20the%20Heroku-Vercel%20deployment%20for%20this%2C%20the%20API%2C%20PUSHER_KEY%2C%20and%20API_ENCRYPTION_KEY%20can%20be%20found%20on%20the%20Heroku%20powerbase%20server%20app.%20You%20may%20want%20to%20checkout%20the%20documentation%20for%20more%20info.&envLink=https%3A%2F%powerbase.notaku.site%deploying-powerbase-to-heroku-vercel-b7f58fd8c5c14fd8871814c9e880f311&project-name=powerbase-client)
+[![Deploy Powerbase Client to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGroup-One-Technology%2Fpowerbase-core%2Ftree%2Fmain%2Fpowerbase-client&env=API,PUSHER_KEY,ENABLE_LISTENER&envDescription=If%20you're%20following%20the%20Heroku-Vercel%20deployment%20for%20this%2C%20the%20API%20and%20PUSHER_KEY%20can%20be%20found%20on%20the%20Heroku%20powerbase%20server%20app.%20You%20may%20want%20to%20checkout%20the%20documentation%20for%20more%20info.&envLink=https%3A%2F%powerbase.notaku.site%deploying-powerbase-to-heroku-vercel-b7f58fd8c5c14fd8871814c9e880f311&project-name=powerbase-client)
 
 For production or long-term use of Powerbase, we recommend some upgrades to avoid the limitation of Heroku's free tier. You can read more at [our documentation](https://powerbase.notaku.site/deploying-powerbase-to-heroku-vercel-b7f58fd8c5c14fd8871814c9e880f311)
 

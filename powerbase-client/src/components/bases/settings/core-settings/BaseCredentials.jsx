@@ -5,7 +5,6 @@ import { useBase } from '@models/Base';
 import { getDatabaseCredentials } from '@lib/api/databases';
 import { useData } from '@lib/hooks/useData';
 import { useBaseUser } from '@models/BaseUser';
-import { decrypt } from '@lib/helpers/crypto';
 
 import { ErrorAlert } from '@components/ui/ErrorAlert';
 import { Button } from '@components/ui/Button';
@@ -57,7 +56,7 @@ export function BaseCredentials() {
       {error && <ErrorAlert errors={error} />}
       {status === 'pending' && <Loader />}
       <p className={cn('text-base my-1', data?.length > 0 ? 'text-gray-900' : 'text-gray-500')}>
-        {data?.length > 0 ? decrypt(data, base.id) : '*'.repeat(30)}
+        {data?.length > 0 ? data : '*'.repeat(30)}
       </p>
     </div>
   );
