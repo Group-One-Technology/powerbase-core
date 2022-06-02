@@ -149,7 +149,7 @@ To update the docker image on docker hub:
 1. Build the image with the updated tag:
 
 ```
-docker build -t jorenrui/powerbase-server:0.1.0 .
+docker build -t powerbase/powerbase-server:0.1.0 .
 ```
 
 2. Then you may push the docker image to docker hub.
