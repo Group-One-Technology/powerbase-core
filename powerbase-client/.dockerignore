@@ -1,8 +1,8 @@
 .git
 .gitignore
 
-# Ignore dist
-dist
+# Ignore public
+public
 
 # Ignore all logfiles and tempfiles.
 /log/*

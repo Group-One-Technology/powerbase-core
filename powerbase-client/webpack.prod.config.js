@@ -12,7 +12,7 @@ module.exports = {
   context: __dirname,
   entry: './src/index.jsx',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'public'),
     filename: '[name].js',
     publicPath: '/',
     clean: true,
@@ -72,7 +72,7 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: path.resolve(__dirname, 'src', 'public'), to: path.resolve(__dirname, 'dist', 'public') },
+        { from: path.resolve(__dirname, 'src', 'public'), to: path.resolve(__dirname, 'public', 'public') },
       ],
     }),
     new webpack.DefinePlugin({
