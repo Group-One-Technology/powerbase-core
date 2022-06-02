@@ -4,7 +4,7 @@
 /node_modules
 
 # production
-/public
+/dist
 
 # misc
 .DS_Store
@@ -15,4 +15,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env
+.env*

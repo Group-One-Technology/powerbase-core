@@ -25,3 +25,13 @@ yarn
 ```bash
 yarn dev
 ```
+
+## Updating Docker Image on Docker Hub
+
+1. Build the image with the updated tag:
+
+```
+docker build -t jorenrui/powerbase-client:0.1.0 . --no-cache
+```
+
+2. Then you may push the docker image to docker hub.

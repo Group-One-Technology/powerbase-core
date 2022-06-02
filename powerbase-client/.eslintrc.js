@@ -15,7 +15,14 @@ module.exports = {
     commonjs: true,
   },
   settings: {
-    'import/resolver': 'webpack',
+    'import/resolver': {
+      webpack: {
+        config: 'webpack.config.js',
+      },
+      node: {
+        moduleDirectory: ['./node_modules'],
+      },
+    },
   },
   rules: {
     camelcase: 'off',

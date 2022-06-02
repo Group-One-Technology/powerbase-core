@@ -1,12 +1,22 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
 const webpack = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 require('dotenv').config();
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   context: __dirname,
   entry: './src/index.jsx',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    publicPath: '/',
+    clean: true,
+  },
   resolve: {
     alias: {
       '@pages': path.resolve(__dirname, 'src/pages'),
@@ -60,6 +70,11 @@ module.exports = {
       filename: 'index.html',
       template: './src/index.html',
     }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, 'src', 'public'), to: path.resolve(__dirname, 'dist', 'public') },
+      ],
+    }),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
@@ -72,12 +87,21 @@ module.exports = {
         ENABLE_SENTRY: JSON.stringify(process.env.ENABLE_SENTRY),
       },
     }),
-    new webpack.HotModuleReplacementPlugin(),
+    new webpack.optimize.AggressiveMergingPlugin(),
   ],
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin(),
+      new CssMinimizerPlugin(),
+    ],
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
   devServer: {
     historyApiFallback: true,
+    host: '0.0.0.0',
     port: 4000,
-    compress: true,
-    hot: true,
   },
 };

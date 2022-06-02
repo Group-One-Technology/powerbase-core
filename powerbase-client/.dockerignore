@@ -1,0 +1,21 @@
+.git
+.gitignore
+
+# Ignore dist
+dist
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+## Environment normalization:
+/.bundle
+/vendor/bundle
+
+# Ignore node_modules
+**/node_modules
+
+# Ignore environment variables
+.env*
