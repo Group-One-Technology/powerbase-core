@@ -1,12 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 require('dotenv').config();
 
 module.exports = {
   mode: 'development',
   context: __dirname,
   entry: './src/index.jsx',
+  output: {
+    path: path.resolve(__dirname, 'public'),
+    filename: '[name].js',
+    publicPath: '/',
+    clean: true,
+  },
   resolve: {
     alias: {
       '@pages': path.resolve(__dirname, 'src/pages'),
@@ -59,6 +66,11 @@ module.exports = {
     new HtmlPlugin({
       filename: 'index.html',
       template: './src/index.html',
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, 'src', 'public'), to: path.resolve(__dirname, 'public', 'public') },
+      ],
     }),
     new webpack.DefinePlugin({
       'process.env': {
