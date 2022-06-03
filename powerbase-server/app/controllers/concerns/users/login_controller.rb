@@ -18,9 +18,9 @@ class Users::LoginController < ApplicationController
       response.set_cookie(
         JWTSessions.access_cookie,
         value: tokens[:access],
-        httponly: true,
-        same_site: Rails.env.production? ? :none : nil,
-        secure: Rails.env.production?
+        httponly: Rails.env.production?,
+        same_site: :none,
+        secure: true
       )
 
       render json: { csrf: tokens[:csrf] }
