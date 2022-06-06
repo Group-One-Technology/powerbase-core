@@ -16,10 +16,10 @@ import { ITable } from '@lib/propTypes/table';
 import { useDidMountEffect } from '@lib/hooks/useDidMountEffect';
 import { useWindowSize } from '@lib/hooks/useWindowSize';
 
-import { VirtualTable } from '@components/tables/VirtualTable';
 import { Loader } from '@components/ui/Loader';
+import { VirtualTable } from './VirtualTable';
 import { TableViewsNav } from './TableViewsNav';
-import { TableFooter } from './TableFooter';
+// import { TableFooter } from './TableFooter';
 
 function BaseTableContent({ table }) {
   const { data: fields } = useViewFields();
@@ -28,7 +28,7 @@ function BaseTableContent({ table }) {
   const [records, setRecords] = useState(remoteRecords);
 
   const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 191 : 0;
+  const height = windowSize.height ? windowSize.height - 130 : 0;
 
   useDidMountEffect(() => {
     setRecords(remoteRecords);
@@ -48,11 +48,11 @@ function BaseTableContent({ table }) {
           records={records}
           setRecords={setRecords}
         />
-        <TableFooter
+        {/* <TableFooter
           table={table}
           records={records}
           setRecords={setRecords}
-        />
+        /> */}
       </AddRecordModalProvider>
     </ViewFieldStateProvider>
   );
