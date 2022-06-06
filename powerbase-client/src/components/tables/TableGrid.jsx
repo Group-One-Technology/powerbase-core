@@ -6,12 +6,14 @@ import { useViewFieldState } from '@models/view/ViewFieldState';
 import { useDataGrid } from '@lib/hooks/data-grid/useDataGrid';
 import { useResizeField } from '@lib/hooks/fields/useResizeField';
 import { useRearrangeColumns } from '@lib/hooks/fields/useRearrangeColumn';
+import { useLoadMoreRows } from '@lib/hooks/data-grid/useLoadMoreRows';
 
 export function TableGrid({ height, table, records }) {
   const { fields, setFields } = useViewFieldState();
   const { columns, getContent, getHeaderIcons } = useDataGrid({ table, fields, records });
   const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
   const { handleRearrangeColumn } = useRearrangeColumns({ fields, setFields });
+  const { handleLoadMoreRows } = useLoadMoreRows({ table, records });
 
   return (
     <DataEditor
@@ -28,6 +30,7 @@ export function TableGrid({ height, table, records }) {
       freezeColumns={1}
       overscrollX={100}
       overscrollY={100}
+      onVisibleRegionChanged={({ y, height: h }) => handleLoadMoreRows(y, h)}
       smoothScrollX
       smoothScrollY
     />
