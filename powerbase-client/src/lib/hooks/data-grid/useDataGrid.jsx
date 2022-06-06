@@ -31,8 +31,11 @@ export function useDataGrid({ table, records, fields }) {
       return {
         kind: GridCellKind.Text,
         allowOverlay: false,
-        displayData: '',
-        data: '',
+        displayData: 'NULL',
+        data,
+        themeOverride: {
+          textDark: '#9CA3AF',
+        },
       };
     }
 
