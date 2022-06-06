@@ -2,7 +2,6 @@ import React from 'react';
 import { GridCellKind } from '@glideapps/glide-data-grid';
 
 import { useFieldTypes } from '@models/FieldTypes';
-import { useViewFieldState } from '@models/view/ViewFieldState';
 import { getColumnInfo } from '@lib/helpers/data-grid/getColumnInfo';
 import { getCellValue } from '@lib/helpers/data-grid/getCellValue';
 import { FieldType } from '@lib/constants/field-types';
