@@ -17,8 +17,7 @@ const headerIcons = () => ({
   </svg>`,
 });
 
-export function useDataGrid({ table, records }) {
-  const { fields } = useViewFieldState();
+export function useDataGrid({ table, records, fields }) {
   const { data: fieldTypes } = useFieldTypes();
   const columns = fields.map((field) => getColumnInfo(field, fieldTypes))
     .sort((x, y) => x.order > y.order);
