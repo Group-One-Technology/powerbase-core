@@ -10,7 +10,7 @@ import { useRearrangeColumns } from '@lib/hooks/fields/useRearrangeColumn';
 export function TableGrid({ height, table, records }) {
   const { fields, setFields } = useViewFieldState();
   const { columns, getContent, getHeaderIcons } = useDataGrid({ table, fields, records });
-  const { handleResizeField } = useResizeField({ fields, setFields });
+  const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
   const { handleRearrangeColumn } = useRearrangeColumns({ fields, setFields });
 
   return (
@@ -23,7 +23,13 @@ export function TableGrid({ height, table, records }) {
       headerIcons={getHeaderIcons}
       rowMarkers="number"
       onColumnResize={(column, newSize) => handleResizeField(column.id, newSize)}
+      onColumnResizeEnd={(column, newSize) => handleResizeFieldEnd(column.id, newSize)}
       onColumnMoved={handleRearrangeColumn}
+      freezeColumns={1}
+      overscrollX={100}
+      overscrollY={100}
+      smoothScrollX
+      smoothScrollY
     />
   );
 }
