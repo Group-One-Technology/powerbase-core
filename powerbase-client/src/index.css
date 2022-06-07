@@ -58,6 +58,14 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 #0000, 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 #0000, 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
+#portal input,
+#portal textarea,
+#portal textarea:focus,
+#portal input:focus {
+  box-shadow: none !important;
+  line-height: normal;
+}
+
 @keyframes bg-fade-out {
   0%   {background: white;}
   10%  {background: rgba(255, 251, 235, 1);}

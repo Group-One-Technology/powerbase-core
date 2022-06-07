@@ -26,7 +26,6 @@ export function getCellValue(column, data = '') {
         : data.toString();
 
   return {
-    allowOverlay: false,
     data: value,
     displayData: Array.isArray(value)
       ? value.join(', ')

@@ -30,23 +30,29 @@ export function useDataGrid({ table, records, fields }) {
     if (data == null) {
       return {
         kind: GridCellKind.Text,
-        allowOverlay: false,
+        allowOverlay: true,
+        readonly: false,
         displayData: 'NULL',
         data,
-        themeOverride: {
-          textDark: '#9CA3AF',
-        },
       };
     }
 
     if (column) {
       const { field, ...options } = column;
-      return { ...options, ...getCellValue(column, data) };
+      const isEditableCell = ![GridCellKind.RowID, GridCellKind.Protected].includes(column.kind);
+
+      return {
+        ...options,
+        ...getCellValue(column, data),
+        allowOverlay: isEditableCell,
+        readonly: !isEditableCell,
+      };
     }
 
     return {
       kind: GridCellKind.Text,
-      allowOverlay: false,
+      allowOverlay: true,
+      readonly: false,
       displayData: data?.toString() ?? '',
       data: data ?? '',
     };
@@ -54,9 +60,24 @@ export function useDataGrid({ table, records, fields }) {
 
   const getHeaderIcons = React.useMemo(headerIcons, []);
 
+  const drawCustomCell = React.useCallback((ctx, cell, _theme, rect) => {
+    if (cell.kind === GridCellKind.RowID || cell.data !== null) return false;
+
+    ctx.save();
+    const { x, y, height } = rect;
+
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = 'normal 14px sans-serif';
+    ctx.fillText(cell.displayData, x + 8 + 0.5, y + height / 2 + 0.2);
+    ctx.restore();
+
+    return true;
+  }, []);
+
   return {
     columns,
     getContent,
     getHeaderIcons,
+    drawCustomCell,
   };
 }
