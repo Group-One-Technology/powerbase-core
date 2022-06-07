@@ -7,6 +7,7 @@ import { getColumnInfo } from '@lib/helpers/data-grid/getColumnInfo';
 import { getCellValue } from '@lib/helpers/data-grid/getCellValue';
 import { FieldType } from '@lib/constants/field-types';
 import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
+import { useTableRecords } from '@models/TableRecords';
 
 const headerIcons = () => ({
   [FieldType.LONG_TEXT]: ({ fgColor, bgColor }) => `
@@ -21,6 +22,8 @@ const headerIcons = () => ({
 export function useDataGrid({ table, records, fields }) {
   const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
+  const { highlightedCell } = useTableRecords();
+
   const columns = fields.map((field) => {
     const fieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
     let isEditable = true;
@@ -71,6 +74,9 @@ export function useDataGrid({ table, records, fields }) {
         ...getCellValue(column, data),
         allowOverlay: isEditable && !isTruncated,
         readonly: !isEditable && !isTruncated,
+        lastUpdated: highlightedCell === records[row].doc_id
+          ? new Date()
+          : undefined,
       };
     }
 
