@@ -19,7 +19,7 @@ export function TableGrid({
   const {
     columns, getContent, getHeaderIcons, drawCustomCell,
   } = useDataGrid({ table, fields, records });
-  const { handleCellEdited } = useEditCell({
+  const { handleCellEdited, handleCellActivated } = useEditCell({
     table, columns, records, setRecords,
   });
   const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
@@ -36,6 +36,7 @@ export function TableGrid({
       getCellContent={getContent}
       drawCustomCell={drawCustomCell}
       onCellEdited={handleCellEdited}
+      onCellActivated={handleCellActivated}
       rowMarkers="number"
       onColumnResize={(column, newSize) => handleResizeField(column.id, newSize)}
       onColumnResizeEnd={(column, newSize) => handleResizeFieldEnd(column.id, newSize)}

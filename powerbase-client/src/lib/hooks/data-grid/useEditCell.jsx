@@ -3,55 +3,28 @@ import React from 'react';
 import { GridCellKind } from '@glideapps/glide-data-grid';
 
 import { useBaseUser } from '@models/BaseUser';
-import { useFieldTypes } from '@models/FieldTypes';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableRecords } from '@models/TableRecords';
-import { PERMISSIONS } from '@lib/constants/permissions';
-import { FieldType } from '@lib/constants/field-types';
 import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
 import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
+import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
 import { updateFieldData } from '@lib/api/records';
 
 export function useEditCell({
   table, columns, records, setRecords,
 }) {
   const { baseUser } = useBaseUser();
-  const { data: fieldTypes } = useFieldTypes();
   const { saving, saved, catchError } = useSaveStatus();
   const { mutate: mutateTableRecords } = useTableRecords();
 
-  const _validateCellUpdate = React.useCallback((field, fieldType, value) => {
-    const canEditFieldData = baseUser?.can(PERMISSIONS.EditFieldData, field);
-
-    if (!canEditFieldData) {
-      catchError('You do not have permissions to update this field data.');
-      return 1;
-    }
-
-    if (field.isPrimaryKey || field.isPii || fieldType.name === FieldType.JSON_TEXT) {
-      if (field.isPrimaryKey) {
-        catchError('Cannot update a primary key field.');
-      } else if (field.isPii) {
-        catchError('Cannot update a PII field. You can update it in the record modal instead if you have the permission.');
-      } else if (fieldType.name === FieldType.JSON_TEXT) {
-        catchError('Cannot update a JSON Text field. You can update it in the record modal instead if you have the permission.');
-      }
-
-      return 1;
-    }
-
-    if (field.foreignKey?.columns.length > 1) {
-      catchError('Cannot update a field that is used to referenced to linked records.');
-      return 1;
-    }
-
+  const _validateCellUpdate = React.useCallback((field, fieldType, value = null, textCount = null) => {
     try {
-      CELL_VALUE_VALIDATOR({
-        name: field.alias,
+      FIELD_EDITABLE_VALIDATOR({
+        baseUser,
+        field,
+        fieldType,
+        textCount,
         value,
-        type: fieldType.name,
-        required: !field.isNullable && !field.isAutoIncrement,
-        strict: field.hasValidation || field.isPrimaryKey,
       });
       return 0;
     } catch (err) {
@@ -71,14 +44,26 @@ export function useEditCell({
     if (!column?.field) return;
 
     const { field } = column;
-    const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
-    if (_validateCellUpdate(field, fieldType, newValue.data)) return;
+    if (_validateCellUpdate(field, column.fieldType)) return;
+
+    try {
+      CELL_VALUE_VALIDATOR({
+        name: field.alias,
+        value: newValue.data,
+        type: column.fieldType.name,
+        required: !field.isNullable && !field.isAutoIncrement,
+        strict: field.hasValidation || field.isPrimaryKey,
+      });
+    } catch (err) {
+      catchError(err.message);
+      return;
+    }
 
     saving();
 
     const updatedFieldValue = sanitizeValue({
       field,
-      fieldType,
+      fieldType: column.fieldType,
       value: newValue.data,
     });
 
@@ -118,5 +103,13 @@ export function useEditCell({
     }
   }, [table.id, records, columns]);
 
-  return { handleCellEdited };
+  const handleCellActivated = React.useCallback((cell) => {
+    const [col, row] = cell;
+    const column = columns[col];
+    const data = records[row][column.name];
+    const textCount = records[row][`${column.name}_count`];
+    _validateCellUpdate(column.field, column.fieldType, data, textCount);
+  }, [table.id, columns, records]);
+
+  return { handleCellEdited, handleCellActivated };
 }

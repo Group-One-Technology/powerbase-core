@@ -2,9 +2,11 @@ import React from 'react';
 import { GridCellKind } from '@glideapps/glide-data-grid';
 
 import { useFieldTypes } from '@models/FieldTypes';
+import { useBaseUser } from '@models/BaseUser';
 import { getColumnInfo } from '@lib/helpers/data-grid/getColumnInfo';
 import { getCellValue } from '@lib/helpers/data-grid/getCellValue';
 import { FieldType } from '@lib/constants/field-types';
+import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
 
 const headerIcons = () => ({
   [FieldType.LONG_TEXT]: ({ fgColor, bgColor }) => `
@@ -17,8 +19,24 @@ const headerIcons = () => ({
 });
 
 export function useDataGrid({ table, records, fields }) {
+  const { baseUser } = useBaseUser();
   const { data: fieldTypes } = useFieldTypes();
-  const columns = fields.map((field) => getColumnInfo(field, fieldTypes))
+  const columns = fields.map((field) => {
+    const fieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
+    let isEditable = true;
+
+    try {
+      FIELD_EDITABLE_VALIDATOR({ baseUser, field, fieldType });
+    } catch (err) {
+      isEditable = false;
+    }
+
+    return ({
+      ...getColumnInfo(field, fieldType),
+      fieldType,
+      isEditable,
+    });
+  })
     .sort((x, y) => x.order > y.order);
 
   const getContent = React.useCallback((cell) => {
@@ -38,14 +56,21 @@ export function useDataGrid({ table, records, fields }) {
     }
 
     if (column) {
-      const { field, ...options } = column;
-      const isEditableCell = ![GridCellKind.RowID, GridCellKind.Protected].includes(column.kind);
+      const { field, isEditable, ...options } = column;
+      let isTruncated = false;
+
+      const textCount = records[row][`${column.name}_count`];
+      if ([FieldType.SINGLE_LINE_TEXT, FieldType.LONG_TEXT].includes(column.fieldType.name) && data != null && textCount != null) {
+        if (data.length < textCount) {
+          isTruncated = true;
+        }
+      }
 
       return {
         ...options,
         ...getCellValue(column, data),
-        allowOverlay: isEditableCell,
-        readonly: !isEditableCell,
+        allowOverlay: isEditable && !isTruncated,
+        readonly: !isEditable && !isTruncated,
       };
     }
 

@@ -10,7 +10,7 @@ import { FieldType } from '@lib/constants/field-types';
  * ...
  * return <DataEditor columns={columns} ... />
  * */
-export function getColumnInfo(field, fieldTypes) {
+export function getColumnInfo(field, fieldType) {
   const common = {
     id: field.id,
     title: field.alias,
@@ -35,8 +35,6 @@ export function getColumnInfo(field, fieldTypes) {
       icon: GridColumnIcon.HeaderReference,
     };
   }
-
-  const fieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
 
   switch (fieldType?.name) {
     case FieldType.LONG_TEXT:
