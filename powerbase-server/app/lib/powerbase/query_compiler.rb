@@ -103,7 +103,7 @@ module Powerbase
                 END
               ) AS '#{field_name}'
             ]))
-            db = db.select_append(Sequel.lit(%Q[LENGTH('#{field_name}') AS #{field_name}_count]))
+            db = db.select_append(Sequel.lit(%Q[LENGTH('#{field_name}') AS '#{field_name}_count']))
           else # postgresql
             db = db.select_append(Sequel.lit(%Q[
               (
@@ -114,7 +114,7 @@ module Powerbase
                 END
               ) AS "#{field_name}"
             ]))
-            db = db.select_append(Sequel.lit(%Q[LENGTH("#{field_name}") AS #{field_name}_count]))
+            db = db.select_append(Sequel.lit(%Q[LENGTH("#{field_name}") AS "#{field_name}_count"]))
           end
         end
 
