@@ -1,15 +1,16 @@
 import React from 'react';
-import { GridCellKind } from '@glideapps/glide-data-grid';
+import { GridCellKind, getMiddleCenterBias } from '@glideapps/glide-data-grid';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { useBaseUser } from '@models/BaseUser';
+import { useTableRecords } from '@models/TableRecords';
 import { getColumnInfo } from '@lib/helpers/data-grid/getColumnInfo';
 import { getCellValue } from '@lib/helpers/data-grid/getCellValue';
 import { FieldType } from '@lib/constants/field-types';
 import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
-import { useTableRecords } from '@models/TableRecords';
+import { CellEditor } from '@components/tables/TableGrid/CellEditor';
 
-const headerIcons = () => ({
+const fieldTypeIcons = () => ({
   [FieldType.LONG_TEXT]: ({ fgColor, bgColor }) => `
     <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="none" viewBox="0 0 24 24" stroke-width="2">
     <rect x="2.00015" y="2" width="20" height="20" rx="4" fill="${bgColor}"/>
@@ -26,23 +27,22 @@ export function useDataGrid({ table, records, fields }) {
 
   const columns = fields.map((field) => {
     const fieldType = fieldTypes?.find((item) => item.id === field.fieldTypeId);
-    let isEditable = true;
+    let editable = true;
 
     try {
       FIELD_EDITABLE_VALIDATOR({ baseUser, field, fieldType });
     } catch (err) {
-      isEditable = false;
+      editable = false;
     }
 
     return ({
       ...getColumnInfo(field, fieldType),
-      fieldType,
-      isEditable,
+      editable,
     });
   })
     .sort((x, y) => x.order > y.order);
 
-  const getContent = React.useCallback((cell) => {
+  const getCellContent = React.useCallback((cell) => {
     const [col, row] = cell;
     const dataRow = records[row];
     const column = columns[col];
@@ -59,11 +59,14 @@ export function useDataGrid({ table, records, fields }) {
     }
 
     if (column) {
-      const { field, isEditable, ...options } = column;
+      const {
+        field, fieldType, editable, ...options
+      } = column;
       let isTruncated = false;
 
       const textCount = records[row][`${column.name}_count`];
-      if ([FieldType.SINGLE_LINE_TEXT, FieldType.LONG_TEXT].includes(column.fieldType.name) && data != null && textCount != null) {
+      if ([FieldType.SINGLE_LINE_TEXT, FieldType.LONG_TEXT].includes(fieldType.name)
+        && data != null && textCount != null) {
         if (data.length < textCount) {
           isTruncated = true;
         }
@@ -72,8 +75,12 @@ export function useDataGrid({ table, records, fields }) {
       return {
         ...options,
         ...getCellValue(column, data),
-        allowOverlay: isEditable && !isTruncated,
-        readonly: !isEditable && !isTruncated,
+        row,
+        col,
+        editable,
+        fieldType: fieldType.name,
+        allowOverlay: editable && !isTruncated,
+        readonly: !editable && !isTruncated,
         lastUpdated: highlightedCell === records[row].doc_id
           ? new Date()
           : undefined,
@@ -89,26 +96,41 @@ export function useDataGrid({ table, records, fields }) {
     };
   }, [table.id, columns, records]);
 
-  const getHeaderIcons = React.useMemo(headerIcons, []);
+  const headerIcons = React.useMemo(fieldTypeIcons, []);
 
-  const drawCustomCell = React.useCallback((ctx, cell, _theme, rect) => {
-    if (cell.kind === GridCellKind.RowID || cell.data !== null) return false;
+  const drawCustomCell = React.useCallback((ctx, cell, theme, rect) => {
+    if (cell.kind !== GridCellKind.Custom) return false;
 
     ctx.save();
     const { x, y, height } = rect;
+    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
 
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = 'normal 14px sans-serif';
-    ctx.fillText(cell.displayData, x + 8 + 0.5, y + height / 2 + 0.2);
+    if (cell.data === null) {
+      ctx.fillStyle = theme.textLight;
+    } else {
+      ctx.fillStyle = theme.textDark;
+    }
+
+    ctx.font = font;
+    ctx.fillText(cell.displayData, x + theme.cellHorizontalPadding, y + height / 2 + getMiddleCenterBias(ctx, font));
     ctx.restore();
 
     return true;
   }, []);
 
+  const provideEditor = React.useCallback((cell) => {
+    if (cell.kind === GridCellKind.Custom) {
+      return (props) => CellEditor(props);
+    }
+
+    return undefined;
+  }, []);
+
   return {
     columns,
-    getContent,
-    getHeaderIcons,
+    getCellContent,
+    headerIcons,
     drawCustomCell,
+    provideEditor,
   };
 }

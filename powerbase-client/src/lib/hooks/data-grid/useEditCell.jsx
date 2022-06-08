@@ -38,6 +38,8 @@ export function useEditCell({
       return;
     }
 
+    if (newValue.oldData === newValue.data) return;
+
     const [col, row] = cell;
     const column = columns[col];
 
@@ -51,8 +53,8 @@ export function useEditCell({
         name: field.alias,
         value: newValue.data,
         type: column.fieldType.name,
-        required: !field.isNullable && !field.isAutoIncrement,
-        strict: field.hasValidation || field.isPrimaryKey,
+        required: column.required,
+        strict: column.strict,
       });
     } catch (err) {
       catchError(err.message);

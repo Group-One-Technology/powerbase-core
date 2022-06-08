@@ -16,9 +16,7 @@ export function TableGrid({
   setRecords,
 }) {
   const { fields, setFields } = useViewFieldState();
-  const {
-    columns, getContent, getHeaderIcons, drawCustomCell,
-  } = useDataGrid({ table, fields, records });
+  const { columns, ...options } = useDataGrid({ table, fields, records });
   const { handleCellEdited, handleCellActivated } = useEditCell({
     table, columns, records, setRecords,
   });
@@ -28,13 +26,11 @@ export function TableGrid({
 
   return (
     <DataEditor
+      {...options}
       height={height}
       width="100%"
       rows={records?.length}
       columns={columns}
-      headerIcons={getHeaderIcons}
-      getCellContent={getContent}
-      drawCustomCell={drawCustomCell}
       onCellEdited={handleCellEdited}
       onCellActivated={handleCellActivated}
       rowMarkers="number"
