@@ -47,6 +47,9 @@ export function useDataGrid({ table, records, fields }) {
     const dataRow = records[row];
     const column = columns[col];
     const data = dataRow[column?.name];
+    const lastUpdated = highlightedCell === records[row].doc_id
+      ? new Date()
+      : undefined;
 
     if (data == null) {
       return {
@@ -55,6 +58,7 @@ export function useDataGrid({ table, records, fields }) {
         readonly: false,
         displayData: 'NULL',
         data,
+        lastUpdated,
       };
     }
 
@@ -72,18 +76,21 @@ export function useDataGrid({ table, records, fields }) {
         }
       }
 
+      const additionalOptions = fieldType.name === FieldType.JSON_TEXT
+        ? { displayData: data?.length ? '{ ... }' : '{}' }
+        : {};
+
       return {
         ...options,
-        ...getCellValue(column, data),
+        ...getCellValue(column, data, isTruncated),
         row,
         col,
         editable,
         fieldType: fieldType.name,
         allowOverlay: editable && !isTruncated,
         readonly: !editable && !isTruncated,
-        lastUpdated: highlightedCell === records[row].doc_id
-          ? new Date()
-          : undefined,
+        lastUpdated,
+        ...additionalOptions,
       };
     }
 
@@ -93,6 +100,7 @@ export function useDataGrid({ table, records, fields }) {
       readonly: false,
       displayData: data?.toString() ?? '',
       data: data ?? '',
+      lastUpdated,
     };
   }, [table.id, columns, records]);
 

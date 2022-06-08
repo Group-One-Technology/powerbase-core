@@ -87,7 +87,7 @@ export function getColumnInfo(field, fieldType) {
     case FieldType.DATE:
       return {
         ...common,
-        kind: GridCellKind.Text,
+        kind: GridCellKind.Custom,
         icon: GridColumnIcon.HeaderDate,
       };
     case FieldType.EMAIL:

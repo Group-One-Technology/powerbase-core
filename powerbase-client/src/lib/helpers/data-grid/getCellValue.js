@@ -1,4 +1,7 @@
 import { GridCellKind } from '@glideapps/glide-data-grid';
+import { FieldType } from '@lib/constants/field-types';
+import { formatDate } from '@lib/helpers/formatDate';
+import { formatCurrency } from '@lib/helpers/formatCurrency';
 
 /**
  * Gets formatted value for <DataEditor />
@@ -16,19 +19,29 @@ import { GridCellKind } from '@glideapps/glide-data-grid';
  * ...
  * return <DataEditor getContent={getContent} ... />
  * */
-export function getCellValue(column, data = '') {
-  const value = column.kind === GridCellKind.Bubble
-    ? [data.toString()]
-    : column.kind === GridCellKind.Number
-      ? data
-      : column.kind === GridCellKind.Boolean
-        ? data.toString() === 'true'
-        : data.toString();
+export function getCellValue(column, value = '') {
+  let data = value;
+  let displayData = value;
 
-  return {
-    data: value,
-    displayData: Array.isArray(value)
+  if (column.kind === GridCellKind.Bubble) {
+    data = [value.toString()];
+    displayData = Array.isArray(value)
       ? value.join(', ')
-      : value.toString(),
-  };
+      : value.toString();
+  } else if (column.fieldType.name === FieldType.PERCENT) {
+    displayData = `${value}%`;
+  } else if (column.fieldType.name === FieldType.CURRENCY && column.field) {
+    const currency = formatCurrency(value, column.field.options);
+    displayData = currency;
+  } else if (column.kind === GridCellKind.Boolean) {
+    data = data.toString() === 'true';
+  } else if (column.fieldType.name === FieldType.DATE) {
+    const date = formatDate(value);
+    displayData = date;
+  } else {
+    data = value.toString();
+    displayData = value.toString();
+  }
+
+  return { data, displayData };
 }
