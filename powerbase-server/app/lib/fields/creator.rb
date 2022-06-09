@@ -175,7 +175,7 @@ class Fields::Creator
     when 3
       field.name.length > 4 ? field.name.length * 20 : 100
     else
-      300
+      150 # DEFAULT_CELL_WIDTH
     end
   end
 end

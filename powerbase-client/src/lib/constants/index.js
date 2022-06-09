@@ -27,7 +27,7 @@ export const OUTLINE_COLORS = {
 
 export const SCROLLBAR_WIDTH = 15;
 export const ROW_NO_CELL_WIDTH = 80;
-export const DEFAULT_CELL_WIDTH = 300;
+export const DEFAULT_CELL_WIDTH = 150;
 
 export const CURRENCY_OPTIONS = [
   { name: 'US Dollar', code: 'USD' },

@@ -78,7 +78,7 @@ class TableViewsController < ApplicationController
           when 3
             cur_field.name.length > 4 ? cur_field.name.length * 20 : 100
           else
-            300
+            150 # DEFAULT_CELL_WIDTHs
           end
         view_field.order = index + 1
         view_field.table_view_id = @view.id

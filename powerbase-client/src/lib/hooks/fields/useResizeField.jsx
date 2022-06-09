@@ -16,6 +16,8 @@ export function useResizeField({ fields, setFields }) {
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view) && !view.isLocked;
 
   const handleResizeField = (viewFieldId, newWidth) => {
+    if (newWidth <= 0) return;
+
     if (canManageView) {
       if (!loading) saving();
       const updatedFields = fields.map((column) => ({
@@ -30,6 +32,8 @@ export function useResizeField({ fields, setFields }) {
   };
 
   const handleResizeFieldEnd = async (viewFieldId, newWidth) => {
+    if (newWidth <= 0) return;
+
     if (canManageView) {
       if (!loading) saving();
       const updatedFields = fields.map((column) => ({
