@@ -19,6 +19,7 @@ export function getColumnInfo(field, fieldType) {
     width: field.width,
     required: !field.isNullable && !field.isAutoIncrement,
     strict: field.hasValidation || field.isPrimaryKey,
+    hasMenu: true,
     fieldType,
     field,
   };

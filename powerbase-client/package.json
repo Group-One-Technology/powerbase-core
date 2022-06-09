@@ -53,6 +53,7 @@
     "react-helmet": "^6.1.0",
     "react-hot-toast": "^2.1.1",
     "react-json-view": "^1.21.3",
+    "react-laag": "^2.0.4",
     "react-multi-select-component": "^4.1.8",
     "react-papaparse": "^3.18.1",
     "react-relative-portal": "^1.8.0",

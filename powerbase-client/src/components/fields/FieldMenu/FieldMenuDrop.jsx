@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as ContextMenu from '@radix-ui/react-context-menu';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
@@ -40,13 +39,14 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
   };
 
   return (
-    <ContextMenu.Item
-      className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
-      onSelect={handleDropField}
+    <button
+      type="button"
+      className="px-4 py-1 w-full text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
+      onClick={handleDropField}
     >
       <TrashIcon className="h-4 w-4 mr-1.5" />
       Drop Field
-    </ContextMenu.Item>
+    </button>
   );
 }
 
