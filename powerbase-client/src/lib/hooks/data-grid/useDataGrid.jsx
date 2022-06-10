@@ -96,20 +96,27 @@ export function useDataGrid({ table, records, fields }) {
   const headerIcons = React.useMemo(fieldTypeIcons, []);
 
   const drawCustomCell = React.useCallback((ctx, cell, theme, rect) => {
-    if (cell.kind !== GridCellKind.Custom) return false;
+    if (cell.kind !== GridCellKind.Custom && cell.data !== null) return false;
 
     ctx.save();
     const { x, y, height } = rect;
     const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    const fillStyle = cell.data === null
+      ? theme.textLight
+      : theme.textDark;
 
-    if (cell.data === null) {
-      ctx.fillStyle = theme.textLight;
-    } else {
-      ctx.fillStyle = theme.textDark;
+    ctx.fillStyle = fillStyle;
+    ctx.font = font;
+
+    const textX = x + theme.cellHorizontalPadding;
+    const textY = y + height / 2 + getMiddleCenterBias(ctx, font);
+    ctx.fillText(cell.displayData, textX, textY);
+
+    if (cell.fieldType === FieldType.URL) {
+      const textWidth = ctx.measureText(cell.displayData).width;
+      ctx.fillRect(textX, textY + 8, textWidth, 1);
     }
 
-    ctx.font = font;
-    ctx.fillText(cell.displayData, x + theme.cellHorizontalPadding, y + height / 2 + getMiddleCenterBias(ctx, font));
     ctx.restore();
 
     return true;

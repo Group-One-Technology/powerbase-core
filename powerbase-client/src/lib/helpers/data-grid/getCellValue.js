@@ -39,11 +39,11 @@ export function getCellValue(column, value = '') {
     const date = formatDate(value);
     displayData = date;
   } else {
-    data = value.toString();
-    displayData = value.toString();
+    data = value != null ? value.toString() : value;
+    displayData = value?.toString() ?? '';
   }
 
-  if (data == null) {
+  if (data === null) {
     displayData = 'NULL';
   }
 
