@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EyeOffIcon, LockClosedIcon } from '@heroicons/react/outline';
 
@@ -14,7 +14,6 @@ import { captureError } from '@lib/helpers/captureError';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
-import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { FieldOptions } from './FieldOptions';
 import { FormatCurrencyOption } from './FormatCurrencyOption';
 import { FieldMenuDrop } from './FieldMenuDrop';
@@ -26,17 +25,15 @@ export function FieldMenu({
   alias,
   setAlias,
   close,
+  setConfirmModal,
 }) {
-  const {
-    saving, catchError, saved, loading,
-  } = useSaveStatus();
+  const { saving, catchError, saved } = useSaveStatus();
   const { baseUser } = useBaseUser();
   const { data: view } = useTableView();
   const { data: fieldTypes } = useFieldTypes();
   const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { modal: permissionsModal } = useFieldPermissionsModal();
 
-  const [confirmModal, setConfirmModal] = useState({ open: false });
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
   const canManageView = baseUser?.can(PERMISSIONS.ManageView, view);
@@ -189,17 +186,6 @@ export function FieldMenu({
           />
         </div>
       </div>
-
-      {confirmModal.open && (
-        <ConfirmationModal
-          open={confirmModal.open}
-          setOpen={(value) => setConfirmModal((curVal) => ({ ...curVal, open: value }))}
-          title={confirmModal.title}
-          description={confirmModal.description}
-          onConfirm={confirmModal.onConfirm}
-          loading={loading}
-        />
-      )}
     </>
   );
 }
@@ -210,4 +196,5 @@ FieldMenu.propTypes = {
   alias: PropTypes.string,
   setAlias: PropTypes.func.isRequired,
   close: PropTypes.func.isRequired,
+  setConfirmModal: PropTypes.func.isRequired,
 };

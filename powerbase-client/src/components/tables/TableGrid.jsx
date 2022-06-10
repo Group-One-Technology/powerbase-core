@@ -31,9 +31,7 @@ export const TableGrid = React.memo(({
 
   const [confirmModal, setConfirmModal] = useState();
 
-  const { onHeaderMenuClick, headerMenu } = useHeaderMenu({
-    table, fields, columns, setConfirmModal,
-  });
+  const { onHeaderMenuClick, headerMenu } = useHeaderMenu({ table, columns, setConfirmModal });
   const { onCellContextMenu, recordMenu } = useRecordMenu({
     table, columns, records, setRecords, setConfirmModal,
   });

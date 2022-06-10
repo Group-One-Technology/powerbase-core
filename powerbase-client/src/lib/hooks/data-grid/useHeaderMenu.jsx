@@ -9,7 +9,7 @@ import { updateFieldAlias } from '@lib/api/fields';
 import { captureError } from '@lib/helpers/captureError';
 import { FieldMenu } from '@components/fields/FieldMenu';
 
-export function useHeaderMenu({ table, columns }) {
+export function useHeaderMenu({ table, columns, setConfirmModal }) {
   const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { baseUser } = useBaseUser();
   const { saving, catchError, saved } = useSaveStatus();
@@ -98,6 +98,7 @@ export function useHeaderMenu({ table, columns }) {
           alias={alias}
           setAlias={setAlias}
           close={() => setShowMenu(null)}
+          setConfirmModal={setConfirmModal}
         />
       </div>,
     ) : null

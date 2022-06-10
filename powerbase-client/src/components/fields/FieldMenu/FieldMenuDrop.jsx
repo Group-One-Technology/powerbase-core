@@ -19,11 +19,11 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
 
     try {
       await dropField({ fieldId: field.fieldId });
-      setConfirmModal({ open: false });
+      setConfirmModal(null);
       mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      setConfirmModal({ open: false });
+      setConfirmModal(null);
       setFields(fields);
       catchError(err);
     }
@@ -34,7 +34,7 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
       open: true,
       title: 'Drop Field',
       description: `Are you sure you want to drop "${field.alias}" field? This action cannot be undone.`,
-      onConfirm: handleConfirmDropField,
+      confirm: handleConfirmDropField,
     });
   };
 
