@@ -45,6 +45,17 @@ export function useDataGrid({ table, records, fields }) {
   const getCellContent = React.useCallback((cell) => {
     const [col, row] = cell;
     const dataRow = records[row];
+
+    if (dataRow == null) {
+      return {
+        kind: GridCellKind.Loading,
+        allowOverlay: false,
+        readonly: true,
+        displayData: '',
+        data: null,
+      };
+    }
+
     const column = columns[col];
     const data = dataRow[column?.name];
     const lastUpdated = highlightedCell === records[row].doc_id
