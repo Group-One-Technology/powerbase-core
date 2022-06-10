@@ -43,5 +43,9 @@ export function getCellValue(column, value = '') {
     displayData = value.toString();
   }
 
+  if (data == null) {
+    displayData = 'NULL';
+  }
+
   return { data, displayData };
 }

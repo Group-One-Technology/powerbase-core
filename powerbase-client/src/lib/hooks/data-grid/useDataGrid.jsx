@@ -51,17 +51,6 @@ export function useDataGrid({ table, records, fields }) {
       ? new Date()
       : undefined;
 
-    if (data == null) {
-      return {
-        kind: GridCellKind.Text,
-        allowOverlay: true,
-        readonly: false,
-        displayData: 'NULL',
-        data,
-        lastUpdated,
-      };
-    }
-
     if (column) {
       const {
         field, fieldType, editable, ...options
