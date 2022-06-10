@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useValidState } from '@lib/hooks/useValidState';
@@ -61,6 +62,7 @@ export function CellEditor({ value: cellData, onChange, onFinishedEditing }) {
             rows={4}
             value={value}
             onKeyDown={handleKeyDown}
+            autoFocus="true"
           />
         </div>
       );
@@ -75,6 +77,7 @@ export function CellEditor({ value: cellData, onChange, onFinishedEditing }) {
             onChange={handleValueChange}
             value={value}
             onKeyDown={handleKeyDown}
+            autoFocus="true"
           />
         </div>
       );
