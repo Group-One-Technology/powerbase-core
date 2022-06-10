@@ -7,6 +7,8 @@ import { useTableRecords } from '@models/TableRecords';
 import { getColumnInfo } from '@lib/helpers/data-grid/getColumnInfo';
 import { getCellValue } from '@lib/helpers/data-grid/getCellValue';
 import { FieldType } from '@lib/constants/field-types';
+import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
+import { isValidEmail } from '@lib/helpers/isValidEmail';
 import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
 import { CellEditor } from '@components/tables/TableGrid/CellEditor';
 
@@ -123,7 +125,9 @@ export function useDataGrid({ table, records, fields }) {
     const textY = y + height / 2 + getMiddleCenterBias(ctx, font);
     ctx.fillText(cell.displayData, textX, textY);
 
-    if (cell.fieldType === FieldType.URL) {
+    if (cell.data != null
+      && ((cell.fieldType === FieldType.URL && isValidHttpUrl(cell.data))
+        || (cell.fieldType === FieldType.EMAIL && isValidEmail(cell.data)))) {
       const textWidth = ctx.measureText(cell.displayData).width;
       ctx.fillRect(textX, textY + 8, textWidth, 1);
     }
