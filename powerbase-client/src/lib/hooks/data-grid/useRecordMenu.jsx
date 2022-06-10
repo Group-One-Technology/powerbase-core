@@ -8,6 +8,7 @@ export function useRecordMenu({
   records,
   setRecords,
   setConfirmModal,
+  setRecordModal,
 }) {
   const [showMenu, setShowMenu] = useState(null);
 
@@ -56,6 +57,8 @@ export function useRecordMenu({
           records={records}
           setRecords={setRecords}
           setConfirmModal={setConfirmModal}
+          setRecordModal={setRecordModal}
+          close={() => setShowMenu(null)}
         />
       </div>,
     ) : null

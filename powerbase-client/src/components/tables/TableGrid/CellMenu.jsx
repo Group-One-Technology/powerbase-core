@@ -1,27 +1,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TrashIcon } from '@heroicons/react/solid';
+import { ArrowsExpandIcon, TrashIcon } from '@heroicons/react/solid';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFields } from '@models/ViewFields';
 import { useTableRecords } from '@models/TableRecords';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
+import { useViewFieldState } from '@models/view/ViewFieldState';
 import { deleteRecord } from '@lib/api/records';
 import { useMounted } from '@lib/hooks/useMounted';
+import { initializeFields } from '@lib/helpers/fields/initializeFields';
+import { useTableConnections } from '@models/TableConnections';
 
 export function CellMenu({
   cell,
   table,
+  close,
   records,
   setRecords,
   setConfirmModal,
+  setRecordModal,
 }) {
   const {
     saved, saving, catchError, loading,
   } = useSaveStatus();
+  const { initialFields } = useViewFieldState();
   const { data: viewFields } = useViewFields();
+  const { data: connections } = useTableConnections();
   const { mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateTableRecordsCount, setTotalRecords } = useTableRecordsCount();
+
+  const handleExpandRecord = () => {
+    const [, row] = cell;
+
+    const record = initializeFields(initialFields, connections, {
+      hidden: false,
+    })
+      .map((item) => {
+        const curValue = records[row][item.name];
+        const curCount = records[row][`${item.name}_count`];
+
+        return ({
+          ...item,
+          value: curValue,
+          count: curCount,
+          readOnly: curCount != null && curValue != null
+            ? curValue.length < curCount
+            : undefined,
+        });
+      })
+      .sort((x, y) => x.order > y.order);
+
+    setRecordModal({ open: true, record });
+    close();
+  };
 
   const confirmDeleteRecord = async () => {
     if (!table.hasPrimaryKey) return;
@@ -73,10 +105,19 @@ export function CellMenu({
       <button
         type="button"
         className="p-2.5 w-full text-sm flex items-center cursor-pointer hover:bg-gray-700 focus:bg-gray-700"
+        onClick={handleExpandRecord}
+        disabled={loading}
+      >
+        <ArrowsExpandIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
+        Expand Record
+      </button>
+      <button
+        type="button"
+        className="p-2.5 w-full text-sm flex items-center cursor-pointer hover:bg-gray-700 focus:bg-gray-700"
         onClick={handleDeleteRecord}
         disabled={loading}
       >
-        <TrashIcon className="h-4 w-4 mr-1.5" />
+        <TrashIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />
         Delete Record
       </button>
     </div>
@@ -89,4 +130,6 @@ CellMenu.propTypes = {
   records: PropTypes.array.isRequired,
   setRecords: PropTypes.func.isRequired,
   setConfirmModal: PropTypes.func.isRequired,
+  setRecordModal: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
 };

@@ -4,6 +4,7 @@ import { DataEditor } from '@glideapps/glide-data-grid';
 
 import { useSaveStatus } from '@models/SaveStatus';
 import { useViewFieldState } from '@models/view/ViewFieldState';
+import { RecordsModalStateProvider } from '@models/record/RecordsModalState';
 import { useDataGrid } from '@lib/hooks/data-grid/useDataGrid';
 import { useResizeField } from '@lib/hooks/fields/useResizeField';
 import { useRearrangeColumns } from '@lib/hooks/fields/useRearrangeColumn';
@@ -12,6 +13,7 @@ import { useEditCell } from '@lib/hooks/data-grid/useEditCell';
 import { useHeaderMenu } from '@lib/hooks/data-grid/useHeaderMenu';
 import { useRecordMenu } from '@lib/hooks/data-grid/useRecordMenu';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
+import { SingleRecordModal } from '@components/record/SingleRecordModal';
 
 export const TableGrid = React.memo(({
   height,
@@ -30,10 +32,11 @@ export const TableGrid = React.memo(({
   const { handleLoadMoreRows } = useLoadMoreRows({ table, records });
 
   const [confirmModal, setConfirmModal] = useState();
+  const [recordModal, setRecordModal] = useState();
 
   const { onHeaderMenuClick, headerMenu } = useHeaderMenu({ table, columns, setConfirmModal });
   const { onCellContextMenu, recordMenu } = useRecordMenu({
-    table, columns, records, setRecords, setConfirmModal,
+    table, columns, records, setRecords, setConfirmModal, setRecordModal,
   });
 
   return (
@@ -71,6 +74,18 @@ export const TableGrid = React.memo(({
           onConfirm={confirmModal.confirm}
           loading={loading}
         />
+      )}
+
+      {recordModal?.open && (
+        <RecordsModalStateProvider rootRecord={recordModal.record}>
+          <SingleRecordModal
+            table={table}
+            open={recordModal.open}
+            setOpen={(value) => setRecordModal((state) => ({ ...state, open: value }))}
+            record={recordModal.record}
+            setRecords={setRecords}
+          />
+        </RecordsModalStateProvider>
       )}
     </>
   );
