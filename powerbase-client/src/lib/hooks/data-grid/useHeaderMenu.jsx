@@ -26,7 +26,7 @@ export function useHeaderMenu({ table, columns }) {
     if (!canManageField) return;
 
     setAlias(field.alias || field.name);
-    setShowMenu({ col, bounds });
+    setShowMenu({ field, bounds });
   }, [baseUser, columns]);
 
   const _handleOutsideClick = async () => {
@@ -37,7 +37,7 @@ export function useHeaderMenu({ table, columns }) {
     }
 
     if (showMenu == null) return;
-    const { field } = columns[showMenu.col];
+    const { field } = showMenu;
     const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
 
     if (!canManageField || alias === field.alias) {
@@ -94,7 +94,7 @@ export function useHeaderMenu({ table, columns }) {
       >
         <FieldMenu
           table={table}
-          field={columns[showMenu.col].field}
+          field={showMenu.field}
           alias={alias}
           setAlias={setAlias}
           close={() => setShowMenu(null)}
