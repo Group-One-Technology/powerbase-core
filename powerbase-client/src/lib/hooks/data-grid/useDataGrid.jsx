@@ -60,6 +60,7 @@ export function useDataGrid({ table, records, fields }) {
 
     const column = columns[col];
     const data = dataRow[column?.name];
+    const isNewRecord = !!records[row].new;
     const lastUpdated = highlightedCell === records[row].doc_id
       ? new Date()
       : undefined;
@@ -91,6 +92,7 @@ export function useDataGrid({ table, records, fields }) {
         fieldType: fieldType.name,
         allowOverlay: editable && !isTruncated,
         readonly: !editable && !isTruncated,
+        new: isNewRecord,
         lastUpdated,
         ...additionalOptions,
       };
@@ -102,6 +104,7 @@ export function useDataGrid({ table, records, fields }) {
       readonly: false,
       displayData: data?.toString() ?? '',
       data: data ?? '',
+      new: isNewRecord,
       lastUpdated,
     };
   }, [table.id, columns, records]);
@@ -109,10 +112,28 @@ export function useDataGrid({ table, records, fields }) {
   const headerIcons = React.useMemo(fieldTypeIcons, []);
 
   const drawCustomCell = React.useCallback((ctx, cell, theme, rect) => {
-    if (cell.kind !== GridCellKind.Custom && cell.data !== null) return false;
+    const isNewRecord = records[cell.row]?.new;
+
+    if (cell.kind !== GridCellKind.Custom && cell.data !== null) {
+      if (isNewRecord) {
+        ctx.save();
+        const { x, y, width, height } = rect;
+        ctx.fillStyle = '#bfffcd';
+        ctx.fillRect(x + 1, y + 1, width - 1, height - 1);
+        ctx.restore();
+      }
+
+      return false;
+    }
 
     ctx.save();
-    const { x, y, height } = rect;
+    const { x, y, width, height } = rect;
+
+    if (isNewRecord) {
+      ctx.fillStyle = '#bfffcd';
+      ctx.fillRect(x + 1, y + 1, width - 1, height - 1);
+    }
+
     const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     const fillStyle = cell.data === null
       ? theme.textLight
@@ -135,7 +156,7 @@ export function useDataGrid({ table, records, fields }) {
     ctx.restore();
 
     return true;
-  }, []);
+  }, [records]);
 
   const provideEditor = React.useCallback((cell) => {
     if (cell.kind === GridCellKind.Custom) {

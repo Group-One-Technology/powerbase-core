@@ -14,17 +14,19 @@ export function useRecordMenu({
 
   const onCellContextMenu = React.useCallback((cell, evt) => {
     evt.preventDefault();
+
     if (showMenu) {
       setShowMenu(null);
       return;
     }
 
-    const [col] = cell;
+    const [col, row] = cell;
     const { field } = columns[col];
-    if (!field) return;
+    const isNewRecord = !!records[row]?.new; // * Show different menu for added row.
+    if (!field || isNewRecord) return;
 
     setShowMenu({ cell, bounds: evt.bounds });
-  }, [columns]);
+  }, [columns, records]);
 
   const { renderLayer, layerProps } = useLayer({
     isOpen: showMenu != null,

@@ -14,6 +14,7 @@ import { useHeaderMenu } from '@lib/hooks/data-grid/useHeaderMenu';
 import { useRecordMenu } from '@lib/hooks/data-grid/useRecordMenu';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
+import { useRowAdd } from '@lib/hooks/data-grid/useRowAdd';
 
 export const TableGrid = React.memo(({
   height,
@@ -29,6 +30,7 @@ export const TableGrid = React.memo(({
   });
   const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
   const { handleRearrangeColumn } = useRearrangeColumns({ fields, setFields });
+  const { onRowAppended } = useRowAdd({ fields, records, setRecords });
   const { handleLoadMoreRows } = useLoadMoreRows({ table, records });
 
   const [confirmModal, setConfirmModal] = useState();
@@ -56,6 +58,12 @@ export const TableGrid = React.memo(({
         onColumnResizeEnd={(column, newSize) => handleResizeFieldEnd(column.id, newSize)}
         onColumnMoved={handleRearrangeColumn}
         freezeColumns={1}
+        onRowAppended={onRowAppended}
+        trailingRowOptions={{
+          sticky: true,
+          tint: true,
+          hint: 'New row...',
+        }}
         onVisibleRegionChanged={({ y, height: h }) => handleLoadMoreRows(y, h)}
         overscrollX={100}
         overscrollY={100}
