@@ -10,7 +10,11 @@ import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDAT
 import { updateFieldData } from '@lib/api/records';
 
 export function useEditCell({
-  table, columns, records, setRecords,
+  table,
+  columns,
+  records,
+  setRecords,
+  setNewRecords,
 }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
@@ -33,14 +37,26 @@ export function useEditCell({
   }, [baseUser]);
 
   const handleCellEdited = React.useCallback(async (cell, newValue) => {
-    if ([GridCellKind.RowID, GridCellKind.Bubble, GridCellKind.Protected].includes(newValue.kind)) {
-      return;
-    }
-
     if (newValue.oldData === newValue.data) return;
 
     const [col, row] = cell;
     const column = columns[col];
+    const isNewRecord = records[row]?.new;
+
+    if (isNewRecord) {
+      const recordIndex = records[row].index;
+      setNewRecords((curNewRecords) => curNewRecords.map((item, index) => ({
+        ...item,
+        [column.name]: index === recordIndex
+          ? newValue.data
+          : item[column.name],
+      })));
+      return;
+    }
+
+    if ([GridCellKind.RowID, GridCellKind.Bubble, GridCellKind.Protected].includes(newValue.kind)) {
+      return;
+    }
 
     if (!column?.field) return;
 
@@ -106,9 +122,14 @@ export function useEditCell({
 
   const handleCellActivated = React.useCallback((cell) => {
     const [col, row] = cell;
+
+    // Enable editing for new records
+    if (records[row]?.new) return;
+
     const column = columns[col];
     const data = records[row][column.name];
     const textCount = records[row][`${column.name}_count`];
+
     _validateCellUpdate(column.field, column.fieldType, data, textCount);
   }, [table.id, columns, records]);
 

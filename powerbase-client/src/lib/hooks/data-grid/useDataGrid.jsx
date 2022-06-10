@@ -47,10 +47,13 @@ export function useDataGrid({ table, records, fields }) {
   const getCellContent = React.useCallback((cell) => {
     const [col, row] = cell;
     const dataRow = records[row];
+    const isNewRecord = records[row]?.new === true;
 
     if (dataRow == null) {
       return {
-        kind: GridCellKind.Loading,
+        kind: isNewRecord
+          ? GridCellKind.Custom
+          : GridCellKind.Loading,
         allowOverlay: false,
         readonly: true,
         displayData: '',
@@ -60,10 +63,21 @@ export function useDataGrid({ table, records, fields }) {
 
     const column = columns[col];
     const data = dataRow[column?.name];
-    const isNewRecord = !!records[row].new;
+    const newRecordOptions = isNewRecord
+      ? {
+        new: true,
+        index: records[row].index,
+        allowOverlay: true,
+        readonly: false,
+      }
+      : {};
     const lastUpdated = highlightedCell === records[row].doc_id
       ? new Date()
       : undefined;
+
+    if (isNewRecord && [GridCellKind.RowID, GridCellKind.Protected].includes(column.kind)) {
+      newRecordOptions.kind = GridCellKind.Custom;
+    }
 
     if (column) {
       const {
@@ -83,6 +97,10 @@ export function useDataGrid({ table, records, fields }) {
         ? { displayData: data?.length ? '{ ... }' : '{}' }
         : {};
 
+      if (isNewRecord && newRecordOptions.kind !== GridCellKind.Custom && field.isPii) {
+        newRecordOptions.kind = GridCellKind.Custom;
+      }
+
       return {
         ...options,
         ...getCellValue(column, data, isTruncated),
@@ -90,11 +108,11 @@ export function useDataGrid({ table, records, fields }) {
         col,
         editable,
         fieldType: fieldType.name,
-        allowOverlay: editable && !isTruncated,
+        allowOverlay: editable,
         readonly: !editable && !isTruncated,
-        new: isNewRecord,
         lastUpdated,
         ...additionalOptions,
+        ...newRecordOptions,
       };
     }
 
@@ -104,8 +122,8 @@ export function useDataGrid({ table, records, fields }) {
       readonly: false,
       displayData: data?.toString() ?? '',
       data: data ?? '',
-      new: isNewRecord,
       lastUpdated,
+      ...newRecordOptions,
     };
   }, [table.id, columns, records]);
 
