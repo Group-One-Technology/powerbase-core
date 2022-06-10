@@ -76,7 +76,7 @@ export function getColumnInfo(field, fieldType) {
     case FieldType.SINGLE_SELECT:
       return {
         ...common,
-        kind: GridCellKind.Bubble,
+        kind: GridCellKind.Text, // * Turn into a bubble
         icon: GridColumnIcon.HeaderSingleValue,
       };
     case FieldType.MULTIPLE_SELECT:
