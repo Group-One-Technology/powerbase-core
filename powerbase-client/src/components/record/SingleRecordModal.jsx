@@ -224,7 +224,7 @@ export function BaseSingleRecordModal({
               </Dialog.Title>
               {(!table.isVirtual || (remoteRecord == null && !base.isTurbo)) && (
                 <Tooltip.Root delayDuration={0}>
-                  <Tooltip.Trigger className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
+                  <Tooltip.Trigger type="button" tabindex="-1" className="ml-auto py-[1px] px-0.5 rounded text-gray-500">
                     <span className="sr-only">
                       {(!isSyncing || (!isRemoteRecordValidating && !base.isTurbo)) ? 'Record synced' : 'Syncing record'}
                     </span>
