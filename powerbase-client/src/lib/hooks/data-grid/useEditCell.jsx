@@ -50,6 +50,7 @@ export function useEditCell({
         [column.name]: index === recordIndex
           ? newValue.data
           : item[column.name],
+        edited: true,
       })));
       return;
     }

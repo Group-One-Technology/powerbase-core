@@ -48,7 +48,8 @@ export function CellEditor({ value: cellData, onChange, onFinishedEditing }) {
   const handleValueChange = (evt) => setValue(evt.target.value);
 
   const handleKeyDown = (evt) => {
-    if (evt.code === 'Enter' && !evt.shiftKey) onFinishedEditing(newValue);
+    if (evt.key === 'Enter' && !evt.shiftKey) onFinishedEditing(newValue);
+    if (evt.ctrlKey && evt.key === 's') onFinishedEditing(newValue);
   };
 
   switch (cellData.fieldType) {
@@ -62,7 +63,7 @@ export function CellEditor({ value: cellData, onChange, onFinishedEditing }) {
             rows={4}
             value={value}
             onKeyDown={handleKeyDown}
-            autoFocus="true"
+            autoFocus
           />
         </div>
       );
@@ -77,7 +78,7 @@ export function CellEditor({ value: cellData, onChange, onFinishedEditing }) {
             onChange={handleValueChange}
             value={value}
             onKeyDown={handleKeyDown}
-            autoFocus="true"
+            autoFocus
           />
         </div>
       );

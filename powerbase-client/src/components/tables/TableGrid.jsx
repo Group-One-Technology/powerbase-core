@@ -14,23 +14,29 @@ import { useHeaderMenu } from '@lib/hooks/data-grid/useHeaderMenu';
 import { useRecordMenu } from '@lib/hooks/data-grid/useRecordMenu';
 import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
-import { useRowAdd } from '@lib/hooks/data-grid/useRowAdd';
+import { useAddRow } from '@lib/hooks/data-grid/useAddRow';
+import { AddRecordModal } from '@components/record/AddRecordModal';
 
 export const TableGrid = React.memo(({
   height,
   table,
-  records,
+  records: initialRecords,
   setRecords,
 }) => {
   const { loading } = useSaveStatus();
   const { fields, setFields } = useViewFieldState();
+
+  const { newRecords, setNewRecords, handleSaveNewRecord, ...addRecordOptions } = useAddRow({
+    table, fields, records: initialRecords, setRecords,
+  });
+  const records = [...initialRecords, ...newRecords];
+
   const { columns, ...options } = useDataGrid({ table, fields, records });
   const { handleCellEdited, handleCellActivated } = useEditCell({
-    table, columns, records, setRecords,
+    table, columns, records, setRecords, setNewRecords,
   });
   const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
   const { handleRearrangeColumn } = useRearrangeColumns({ fields, setFields });
-  const { onRowAppended } = useRowAdd({ fields, records, setRecords });
   const { handleLoadMoreRows } = useLoadMoreRows({ table, records });
 
   const [confirmModal, setConfirmModal] = useState();
@@ -41,35 +47,43 @@ export const TableGrid = React.memo(({
     table, columns, records, setRecords, setConfirmModal, setRecordModal,
   });
 
+  const handleKeyDown = React.useCallback((evt) => {
+    if (evt.ctrlKey && evt.key === 's') {
+      evt.preventDefault();
+
+      if (newRecords.length) {
+        handleSaveNewRecord();
+      }
+    }
+  }, [newRecords, handleSaveNewRecord]);
+
   return (
     <>
-      <DataEditor
-        {...options}
-        height={height}
-        width="100%"
-        rows={records?.length}
-        columns={columns}
-        onCellEdited={handleCellEdited}
-        onCellActivated={handleCellActivated}
-        rowMarkers="number"
-        onHeaderMenuClick={onHeaderMenuClick}
-        onCellContextMenu={onCellContextMenu}
-        onColumnResize={(column, newSize) => handleResizeField(column.id, newSize)}
-        onColumnResizeEnd={(column, newSize) => handleResizeFieldEnd(column.id, newSize)}
-        onColumnMoved={handleRearrangeColumn}
-        freezeColumns={1}
-        onRowAppended={onRowAppended}
-        trailingRowOptions={{
-          sticky: true,
-          tint: true,
-          hint: 'New row...',
-        }}
-        onVisibleRegionChanged={({ y, height: h }) => handleLoadMoreRows(y, h)}
-        overscrollX={100}
-        overscrollY={100}
-        smoothScrollX
-        smoothScrollY
-      />
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div onKeyDown={handleKeyDown}>
+        <DataEditor
+          {...options}
+          {...addRecordOptions}
+          height={height}
+          width="100%"
+          rows={records?.length}
+          columns={columns}
+          onCellEdited={handleCellEdited}
+          onCellActivated={handleCellActivated}
+          rowMarkers="number"
+          onHeaderMenuClick={onHeaderMenuClick}
+          onCellContextMenu={onCellContextMenu}
+          onColumnResize={(column, newSize) => handleResizeField(column.id, newSize)}
+          onColumnResizeEnd={(column, newSize) => handleResizeFieldEnd(column.id, newSize)}
+          onColumnMoved={handleRearrangeColumn}
+          freezeColumns={1}
+          onVisibleRegionChanged={({ y, height: h }) => handleLoadMoreRows(y, h)}
+          overscrollX={100}
+          overscrollY={100}
+          smoothScrollX
+          smoothScrollY
+        />
+      </div>
       {headerMenu}
       {recordMenu}
 
@@ -95,6 +109,12 @@ export const TableGrid = React.memo(({
           />
         </RecordsModalStateProvider>
       )}
+
+      <AddRecordModal
+        table={table}
+        records={records}
+        setRecords={setRecords}
+      />
     </>
   );
 });

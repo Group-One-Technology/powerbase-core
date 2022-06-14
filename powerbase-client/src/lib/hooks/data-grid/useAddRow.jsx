@@ -7,6 +7,7 @@ import { useViewFields } from '@models/ViewFields';
 import { useFieldTypes } from '@models/FieldTypes';
 import { useSaveStatus } from '@models/SaveStatus';
 import { useTableRecords } from '@models/TableRecords';
+import { useAddRecordModal } from '@models/modals/AddRecordModal';
 import { useTableRecordsCount } from '@models/TableRecordsCount';
 import { PERMISSIONS } from '@lib/constants/permissions';
 import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
@@ -23,9 +24,9 @@ export function useAddRow({ table, records, setRecords }) {
   const { data: fieldTypes } = useFieldTypes();
   const { mutate: mutateTableRecords } = useTableRecords();
   const { mutate: mutateTableRecordsCount } = useTableRecordsCount();
+  const { setOpen: setNewRecordModalOpen } = useAddRecordModal();
 
   const [newRecords, setNewRecords] = useState([]);
-  const [newRecordModalOpen, setNewRecordModalOpen] = useState(false);
 
   const canAddRecord = baseUser?.can(PERMISSIONS.AddRecords, table);
 
@@ -57,7 +58,8 @@ export function useAddRow({ table, records, setRecords }) {
     }
 
     const hasValue = Object.keys(newRecords[0]).some((key) => newRecords[0][key] != null);
-    if (!hasValue) {
+    const hasEdited = newRecords[0].edited;
+    if (!hasValue || !hasEdited) {
       setNewRecords([]);
       return;
     }
@@ -135,7 +137,7 @@ export function useAddRow({ table, records, setRecords }) {
       mounted(() => setRecords(records));
       catchError(err);
     }
-  }, [newRecords]);
+  }, [newRecords, table]);
 
   return {
     trailingRowOptions,
@@ -144,7 +146,6 @@ export function useAddRow({ table, records, setRecords }) {
     onRowAppended: newRecords.length === 0
       ? onRowAppended
       : undefined,
-    newRecordModalOpen,
     handleSaveNewRecord,
   };
 }
