@@ -122,7 +122,7 @@ export function RecordItemValue({
           )}
           {item.readOnly && (
             <Tooltip.Root delayDuration={0}>
-              <Tooltip.Trigger className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
+              <Tooltip.Trigger type="button" tabindex="-1" className="mx-2 inline-flex items-center px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-80 whitespace-nowrap">
                 <LockClosedIcon className="mr-1 h-4 w-4" />
                 Read Only
               </Tooltip.Trigger>

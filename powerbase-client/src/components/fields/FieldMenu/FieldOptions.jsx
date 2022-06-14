@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import * as ContextMenu from '@radix-ui/react-context-menu';
 import { CogIcon, ChevronRightIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
@@ -17,12 +16,25 @@ import {
   unsetFieldAsNullable,
 } from '@lib/api/fields';
 import { captureError } from '@lib/helpers/captureError';
+import { useLayer } from 'react-laag';
 
-export function FieldOptions({ table, field, setOpen }) {
+export function FieldOptions({
+  table,
+  field,
+  close,
+}) {
   const { baseUser } = useBaseUser();
   const { saving, catchError, saved } = useSaveStatus();
   const { fields, setFields, mutateViewFields } = useViewFieldState();
   const { mutate: mutateTableRecords } = useTableRecords();
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { renderLayer, triggerProps, layerProps } = useLayer({
+    isOpen,
+    placement: 'right-center',
+    onParentClose: () => setIsOpen(false),
+  });
 
   const canManageField = baseUser?.can(PERMISSIONS.ManageField, field);
   const canSetPII = (canManageField && table.hasPrimaryKey && (field.isPii || !field.isPrimaryKey));
@@ -39,8 +51,8 @@ export function FieldOptions({ table, field, setOpen }) {
         : item.hasValidation,
     }));
 
-    setOpen(false);
     setFields(updatedFields);
+    close();
 
     try {
       if (!field.hasValidation) {
@@ -69,7 +81,7 @@ export function FieldOptions({ table, field, setOpen }) {
     }));
 
     setFields(updatedFields);
-    setOpen(false);
+    close();
 
     try {
       if (!field.isPii) {
@@ -99,7 +111,7 @@ export function FieldOptions({ table, field, setOpen }) {
     }));
 
     setFields(updatedFields);
-    setOpen(false);
+    close();
 
     try {
       if (!field.isNullable) {
@@ -118,40 +130,50 @@ export function FieldOptions({ table, field, setOpen }) {
   };
 
   return (
-    <ContextMenu.Root>
-      <ContextMenu.TriggerItem className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100">
+    <>
+      <button
+        {...triggerProps}
+        type="button"
+        className="px-4 py-1 w-full text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+        onClick={() => setIsOpen((state) => !state)}
+      >
         <CogIcon className="h-4 w-4 mr-1.5" />
         Options
         <ChevronRightIcon className="ml-auto h-4 w-4" />
-      </ContextMenu.TriggerItem>
-      <ContextMenu.Content sideOffset={2} alignOffset={-8} className="py-2 block overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
-        <ContextMenu.Item
-          className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-          onSelect={handleToggleValidation}
-        >
-          {!field.hasValidation ? 'Enable Validation' : 'Disable Validation'}
-        </ContextMenu.Item>
-        {canSetPII && (
-          <ContextMenu.Item
-            className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-            onSelect={handleTogglePII}
+      </button>
+      {isOpen && renderLayer((
+        <div {...layerProps} className="py-2 flex flex-col overflow-hidden rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 w-60">
+          <button
+            type="button"
+            className="px-4 py-1 w-full text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+            onClick={handleToggleValidation}
           >
-            {!field.isPii ? 'Set as PII' : 'Unset as PII'}
-          </ContextMenu.Item>
-        )}
-        <ContextMenu.Item
-          className="px-4 py-1 text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
-          onSelect={handleToggleNullable}
-        >
-          {!field.isNullable ? 'Allow Null' : 'Set as Required'}
-        </ContextMenu.Item>
-      </ContextMenu.Content>
-    </ContextMenu.Root>
+            {!field.hasValidation ? 'Enable Validation' : 'Disable Validation'}
+          </button>
+          {canSetPII && (
+            <button
+              type="button"
+              className="px-4 py-1 w-full text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+              onClick={handleTogglePII}
+            >
+              {!field.isPii ? 'Set as PII' : 'Unset as PII'}
+            </button>
+          )}
+          <button
+            type="button"
+            className="px-4 py-1 w-full text-sm cursor-pointer flex items-center hover:bg-gray-100 focus:bg-gray-100"
+            onClick={handleToggleNullable}
+          >
+            {!field.isNullable ? 'Allow Null' : 'Set as Required'}
+          </button>
+        </div>
+      ))}
+    </>
   );
 }
 
 FieldOptions.propTypes = {
   table: PropTypes.object.isRequired,
   field: PropTypes.object.isRequired,
-  setOpen: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
 };

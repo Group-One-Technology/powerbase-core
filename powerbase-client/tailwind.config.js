@@ -3,9 +3,7 @@ const forms = require('@tailwindcss/forms');
 const colors = require('tailwindcss/colors');
 
 module.exports = {
-  mode: 'jit',
-  purge: ['./public/*.html', './src/**/*.{js,jsx}'],
-  darkMode: 'class',
+  content: ['./public/*.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -19,11 +17,13 @@ module.exports = {
         sky: colors.sky,
         lime: colors.lime,
         orange: colors.orange,
+        green: colors.emerald,
+        yellow: colors.amber,
+        purple: colors.violet,
+        gray: colors.neutral,
+        current: 'currentColor',
       },
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [forms],
 };

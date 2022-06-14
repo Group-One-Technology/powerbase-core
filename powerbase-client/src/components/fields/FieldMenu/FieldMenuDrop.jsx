@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as ContextMenu from '@radix-ui/react-context-menu';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import { useSaveStatus } from '@models/SaveStatus';
@@ -20,11 +19,11 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
 
     try {
       await dropField({ fieldId: field.fieldId });
-      setConfirmModal({ open: false });
+      setConfirmModal(null);
       mutateViewFields(updatedFields);
       saved();
     } catch (err) {
-      setConfirmModal({ open: false });
+      setConfirmModal(null);
       setFields(fields);
       catchError(err);
     }
@@ -35,18 +34,19 @@ export function FieldMenuDrop({ field, setConfirmModal }) {
       open: true,
       title: 'Drop Field',
       description: `Are you sure you want to drop "${field.alias}" field? This action cannot be undone.`,
-      onConfirm: handleConfirmDropField,
+      confirm: handleConfirmDropField,
     });
   };
 
   return (
-    <ContextMenu.Item
-      className="px-4 py-1 text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
-      onSelect={handleDropField}
+    <button
+      type="button"
+      className="px-4 py-1 w-full text-sm flex items-center cursor-pointer hover:bg-gray-100 focus:bg-gray-100"
+      onClick={handleDropField}
     >
       <TrashIcon className="h-4 w-4 mr-1.5" />
       Drop Field
-    </ContextMenu.Item>
+    </button>
   );
 }
 

@@ -35,6 +35,8 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-nested-ternary': 'off',
     'no-unused-vars': 'warn',
+    'no-underscore-dangle': 'off',
+    'object-curly-newline': 'off',
     'react/jsx-props-no-spreading': 'off',
     'jsx-a11y/label-has-associated-control': 'off',
     'max-len': 'off',

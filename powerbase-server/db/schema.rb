@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_23_123454) do
+ActiveRecord::Schema.define(version: 2022_06_09_082940) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -228,7 +228,7 @@ ActiveRecord::Schema.define(version: 2022_05_23_123454) do
   end
 
   create_table "view_field_options", force: :cascade do |t|
-    t.integer "width", default: 300
+    t.integer "width", default: 150
     t.boolean "is_frozen", default: false
     t.boolean "is_hidden", default: false
     t.integer "order", null: false

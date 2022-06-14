@@ -79,7 +79,8 @@ class ViewFieldOptionsController < ApplicationController
 
   # PUT /view_fields/:id/resize
   def resize
-    @view_field.update_attribute(:width, safe_params[:width])
+    width = safe_params[:width] <= 0 ? 150 : safe_params[:width]
+    @view_field.update_attribute(:width, width)
     render json: format_json(@view_field) if @view_field.save!
   end
 

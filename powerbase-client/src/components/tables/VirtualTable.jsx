@@ -11,8 +11,7 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
 import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
-import { TableRenderer } from './TableRenderer';
-import 'react-virtualized/styles.css';
+import { TableGrid } from './TableGrid';
 
 export function VirtualTable({
   height,
@@ -46,7 +45,7 @@ export function VirtualTable({
 
   return (
     <FieldPermissionsModalProvider>
-      <TableRenderer
+      <TableGrid
         height={height}
         table={table}
         records={records}
