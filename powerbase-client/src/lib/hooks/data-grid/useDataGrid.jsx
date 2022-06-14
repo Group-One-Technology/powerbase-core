@@ -11,6 +11,7 @@ import { isValidHttpUrl } from '@lib/helpers/isValidHttpUrl';
 import { isValidEmail } from '@lib/helpers/isValidEmail';
 import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
 import { CellEditor } from '@components/tables/TableGrid/CellEditor';
+import { LinkCellEditor } from '@components/tables/TableGrid/LinkCellEditor';
 
 const fieldTypeIcons = () => ({
   [FieldType.LONG_TEXT]: ({ fgColor, bgColor }) => `
@@ -168,7 +169,7 @@ export function useDataGrid({ table, records, fields }) {
       && ((cell.fieldType === FieldType.URL && isValidHttpUrl(cell.data))
         || (cell.fieldType === FieldType.EMAIL && isValidEmail(cell.data)))) {
       const textWidth = ctx.measureText(cell.displayData).width;
-      ctx.fillRect(textX, textY + 8, textWidth, 1);
+      ctx.fillRect(textX, textY + 6, textWidth, 1);
     }
 
     ctx.restore();
@@ -178,6 +179,10 @@ export function useDataGrid({ table, records, fields }) {
 
   const provideEditor = React.useCallback((cell) => {
     if (cell.kind === GridCellKind.Custom) {
+      if ([FieldType.EMAIL, FieldType.URL].includes(cell.fieldType)) {
+        return (props) => LinkCellEditor(props);
+      }
+
       return (props) => CellEditor(props);
     }
 
