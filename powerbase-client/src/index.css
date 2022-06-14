@@ -14,25 +14,6 @@
   cursor: grab;
 }
 
-.cursor-resize {
-  cursor: col-resize;
-}
-
-.single-line {
-  white-space: nowrap;
-  width: 200px;
-  overflow: hidden;
-}
-
-.single-line br {
-  display: none;
-}
-
-.single-line *:not(.block) {
-  display: inline;
-  white-space: nowrap;
-}
-
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
