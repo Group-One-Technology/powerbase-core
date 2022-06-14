@@ -8,7 +8,7 @@ export function useLoadMoreRows({ table, records }) {
   const handleLoadMoreRows = (startRowNo, visibleRowCount) => {
     if (isLoading) return;
 
-    const lastVisibleRow = startRowNo + visibleRowCount + (table.pageSize / 2);
+    const lastVisibleRow = startRowNo + visibleRowCount + table.pageSize;
 
     if (lastVisibleRow >= records.length && totalRecords > records.length) {
       loadMoreRows();
