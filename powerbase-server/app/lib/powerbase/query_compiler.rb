@@ -294,7 +294,7 @@ module Powerbase
     end
 
     def merge_records(records, magic_records)
-      return records if magic_records == nil
+      return records if magic_records == nil || magic_records.length == 0
       primary_keys = @table.primary_keys
       actual_fields = @table.actual_fields
       merged_records = nil
