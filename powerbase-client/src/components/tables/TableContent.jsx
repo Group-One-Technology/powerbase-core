@@ -19,7 +19,6 @@ import { useWindowSize } from '@lib/hooks/useWindowSize';
 import { Loader } from '@components/ui/Loader';
 import { VirtualTable } from './VirtualTable';
 import { TableViewsNav } from './TableViewsNav';
-// import { TableFooter } from './TableFooter';
 
 function BaseTableContent({ table }) {
   const { data: fields } = useViewFields();
@@ -48,11 +47,6 @@ function BaseTableContent({ table }) {
           records={records}
           setRecords={setRecords}
         />
-        {/* <TableFooter
-          table={table}
-          records={records}
-          setRecords={setRecords}
-        /> */}
       </AddRecordModalProvider>
     </ViewFieldStateProvider>
   );

@@ -11,7 +11,6 @@ import { ITable } from '@lib/propTypes/table';
 
 import { Loader } from '@components/ui/Loader';
 import { FieldPermissionsModal } from '@components/permissions/FieldPermissionsModal';
-import 'react-virtualized/styles.css';
 import { TableGrid } from './TableGrid';
 
 export function VirtualTable({
