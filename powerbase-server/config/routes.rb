@@ -116,6 +116,7 @@ Rails.application.routes.draw do
         put 'clear_error_logs'
         put 'alias'
         put 'hide'
+        put 'unhide'
         delete 'drop'
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'

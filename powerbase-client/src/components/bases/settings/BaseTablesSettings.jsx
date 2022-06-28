@@ -5,10 +5,11 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
-import { updateTables } from '@lib/api/tables';
+import { hideTable, unhideTable, updateTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useBase } from '@models/Base';
 import { useBaseTables } from '@models/BaseTables';
+import { useSaveStatus } from '@models/SaveStatus';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
@@ -30,6 +31,7 @@ const INITIAL_MODAL_VALUE = {
 
 export function BaseTablesSettings() {
   const { data: base, mutate: mutateBase } = useBase();
+  const { catchError } = useSaveStatus();
   const { data: initialData, mutate: mutateTables } = useBaseTables();
   const sensors = useSensors();
 
@@ -82,12 +84,21 @@ export function BaseTablesSettings() {
     })));
   };
 
-  const handleToggleVisibility = (tableId) => {
+  const handleToggleVisibility = async (tableId, isHidden) => {
     setTables((curTable) => curTable.map((item) => ({
       ...item,
       isHidden: item.id === tableId ? !item.isHidden : item.isHidden,
-      updated: item.id === tableId ? true : item.updated,
     })));
+
+    try {
+      if (!isHidden) {
+        await hideTable({ tableId });
+      } else {
+        await unhideTable({ tableId });
+      }
+    } catch (err) {
+      catchError(err);
+    }
   };
 
   const handleTablesOrderChange = ({ active, over }) => {
@@ -173,7 +184,7 @@ export function BaseTablesSettings() {
                                     ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700'
                                     : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
                                 )}
-                                onClick={() => handleToggleVisibility(table.id)}
+                                onClick={() => handleToggleVisibility(table.id, table.isHidden)}
                                 disabled={loading}
                               >
                                 {table.isHidden ? 'Unhide' : 'Hide'}
