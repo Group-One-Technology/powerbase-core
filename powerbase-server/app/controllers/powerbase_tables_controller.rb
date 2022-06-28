@@ -34,7 +34,7 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  schema(:update_tables) do
+  schema(:update_tables, :reorder) do
     required(:database_id)
     required(:tables)
   end
@@ -199,6 +199,20 @@ class PowerbaseTablesController < ApplicationController
     else
       render json: @table.errors, status: :unprocessable_entity
     end
+  end
+
+  # PUT /databases/:database_id/tables/reorder
+  def reorder
+    @database = PowerbaseDatabase.find(safe_params[:database_id])
+    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
+    current_user.can?(:manage_base, @database)
+
+    safe_params[:tables].each do |table|
+      @table = PowerbaseTable.find(table[:id])
+      @table.update(order: table[:order])
+    end
+
+    render status: :no_content
   end
 
   # PUT /databases/:database_id/tables/update

@@ -88,6 +88,16 @@ export async function getTableByName({ databaseId, alias, name }) {
   return undefined;
 }
 
+export async function reorderTables({ databaseId, tables }) {
+  const response = await securedApi.put(
+    `/databases/${databaseId}/tables/reorder`,
+    { tables },
+  );
+
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function updateTables({ databaseId, ...payload }) {
   const response = await securedApi.put(
     `/databases/${databaseId}/tables/update`,

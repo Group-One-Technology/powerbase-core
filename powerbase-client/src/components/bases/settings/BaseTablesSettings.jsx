@@ -5,11 +5,12 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
-import { hideTable, unhideTable, updateTables } from '@lib/api/tables';
+import { hideTable, reorderTables, unhideTable, updateTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useBase } from '@models/Base';
 import { useBaseTables } from '@models/BaseTables';
 import { useSaveStatus } from '@models/SaveStatus';
+import { useMounted } from '@lib/hooks/useMounted';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
@@ -30,6 +31,7 @@ const INITIAL_MODAL_VALUE = {
 };
 
 export function BaseTablesSettings() {
+  const { mounted } = useMounted();
   const { data: base, mutate: mutateBase } = useBase();
   const { catchError } = useSaveStatus();
   const { data: initialData, mutate: mutateTables } = useBaseTables();
@@ -85,9 +87,12 @@ export function BaseTablesSettings() {
   };
 
   const handleToggleVisibility = async (tableId, isHidden) => {
-    setTables((curTable) => curTable.map((item) => ({
+    setLoading(true);
+
+    const currentTables = [...tables];
+    setTables(tables.map((item) => ({
       ...item,
-      isHidden: item.id === tableId ? !item.isHidden : item.isHidden,
+      isHidden: item.id === tableId ? !isHidden : item.isHidden,
     })));
 
     try {
@@ -96,22 +101,41 @@ export function BaseTablesSettings() {
       } else {
         await unhideTable({ tableId });
       }
+
+      mutateTables();
+      mutateBase();
     } catch (err) {
+      mounted(() => setTables(currentTables));
       catchError(err);
     }
+
+    mounted(() => setLoading(false));
   };
 
-  const handleTablesOrderChange = ({ active, over }) => {
+  const handleTablesOrderChange = async ({ active, over }) => {
     if (active.id !== over.id) {
-      setTables((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex).map((item, index) => ({
-          ...item,
-          order: index,
-          updated: true,
-        }));
-      });
+      setLoading(true);
+
+      const oldIndex = tables.findIndex((item) => item.id === active.id);
+      const newIndex = tables.findIndex((item) => item.id === over.id);
+
+      const currentTables = [...tables];
+      const updatedTables = arrayMove(tables, oldIndex, newIndex).map((item, index) => ({
+        ...item,
+        order: index,
+      }));
+      setTables(updatedTables);
+
+      try {
+        await reorderTables({ databaseId: base.id, tables: updatedTables });
+        mutateTables();
+        mutateBase();
+      } catch (err) {
+        setTables(currentTables);
+        catchError(err);
+      }
+
+      mounted(() => setLoading(false));
     }
   };
 
