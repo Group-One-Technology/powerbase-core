@@ -3,7 +3,7 @@ class PowerbaseFieldTypesController < ApplicationController
 
   # GET /field_types
   def index
-    @field_types = PowerbaseFieldType.all
+    @field_types = PowerbaseFieldType.order(:order).all
     render json: @field_types.map {|item| format_json(item)}
   end
 
