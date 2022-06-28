@@ -1,6 +1,6 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { useBaseUser } from '@models/BaseUser';
-import { updateTables } from '@lib/api/tables';
+import { reorderTables } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { PERMISSIONS } from '@lib/constants/permissions';
 
@@ -25,7 +25,7 @@ export function useTableTabsReorder({ base, setTables }) {
           ...item,
           order: index,
         }));
-        updateTables({ databaseId: base.id, tables: updatedTables });
+        reorderTables({ databaseId: base.id, tables: updatedTables });
         return updatedTables;
       });
     }

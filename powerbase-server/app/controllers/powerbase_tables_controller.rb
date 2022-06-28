@@ -9,7 +9,7 @@ class PowerbaseTablesController < ApplicationController
     optional(:alias).value(:string)
   end
 
-  schema(:show, :alias, :hide, :drop, :clear_error_logs, :logs, :update) do
+  schema(:show, :alias, :hide, :unhide, :drop, :clear_error_logs, :logs, :update) do
     required(:id).value(:integer)
     optional(:alias).value(:string)
   end
@@ -34,7 +34,7 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  schema(:update_tables) do
+  schema(:reorder) do
     required(:database_id)
     required(:tables)
   end
@@ -143,6 +143,19 @@ class PowerbaseTablesController < ApplicationController
       render json: @table.errors, status: :unprocessable_entity
     end
   end
+  
+  # PUT /tables/:id/unhide
+  def unhide
+    @table = PowerbaseTable.find(safe_params[:id])
+    raise NotFound.new("Could not find table with id of #{safe_params[:id]}") if !@table
+    current_user.can?(:manage_base, @table.db)
+
+    if @table.update(is_hidden: false)
+      render json: format_json(@table)
+    else
+      render json: @table.errors, status: :unprocessable_entity
+    end
+  end
 
   # DELETE /tables/:id/drop
   def drop
@@ -188,34 +201,18 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  # PUT /databases/:database_id/tables/update
-  def update_tables
+  # PUT /databases/:database_id/tables/reorder
+  def reorder
     @database = PowerbaseDatabase.find(safe_params[:database_id])
     raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
     current_user.can?(:manage_base, @database)
 
-    is_updated = false
-
-    ActiveRecord::Base.transaction do
-      safe_params[:tables].each do |table|
-        @table = PowerbaseTable.find(table[:id])
-        @table.update(alias: table[:alias], is_hidden: table[:is_hidden], order: table[:order])
-      end
-
-      visible_tables = @database.powerbase_tables.select {|item| !item.is_hidden}
-
-      if visible_tables.length <= 1
-        raise ActiveRecord::Rollback
-      else
-        is_updated = true
-      end
+    safe_params[:tables].each do |table|
+      @table = PowerbaseTable.find(table[:id])
+      @table.update(order: table[:order])
     end
 
-    if is_updated
-      render status: :no_content
-    else
-      render json: { error: "There must be at least one visible table in this base." }, status: :unprocessable_entity
-    end
+    render status: :no_content
   end
 
   # PUT tables/:id/update_default_view

@@ -63,6 +63,12 @@ export async function hideTable({ tableId }) {
   return undefined;
 }
 
+export async function unhideTable({ tableId }) {
+  const response = await securedApi.put(`/tables/${tableId}/unhide`);
+  if (isResponseSuccess(response)) return response.data;
+  return undefined;
+}
+
 export async function dropTable({ tableId }) {
   const response = await securedApi.delete(`/tables/${tableId}/drop`);
   if (isResponseSuccess(response)) return response.data;
@@ -82,10 +88,10 @@ export async function getTableByName({ databaseId, alias, name }) {
   return undefined;
 }
 
-export async function updateTables({ databaseId, ...payload }) {
+export async function reorderTables({ databaseId, tables }) {
   const response = await securedApi.put(
-    `/databases/${databaseId}/tables/update`,
-    payload,
+    `/databases/${databaseId}/tables/reorder`,
+    { tables },
   );
 
   if (isResponseSuccess(response)) return response.data;

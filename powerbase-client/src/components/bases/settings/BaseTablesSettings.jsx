@@ -1,106 +1,105 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import cn from 'classnames';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CheckIcon, ExclamationIcon } from '@heroicons/react/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import debounce from 'lodash.debounce';
 
-import { updateTables } from '@lib/api/tables';
+import { hideTable, reorderTables, unhideTable, updateTableAlias } from '@lib/api/tables';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
 import { useBase } from '@models/Base';
 import { useBaseTables } from '@models/BaseTables';
+import { useSaveStatus } from '@models/SaveStatus';
+import { useMounted } from '@lib/hooks/useMounted';
 
 import { SortableItem } from '@components/ui/SortableItem';
 import { GripVerticalIcon } from '@components/ui/icons/GripVerticalIcon';
 import { Input } from '@components/ui/Input';
 import { Loader } from '@components/ui/Loader';
-import { Button } from '@components/ui/Button';
-import { StatusModal } from '@components/ui/StatusModal';
-
-const INITIAL_MODAL_VALUE = {
-  open: false,
-  icon: (
-    <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-      <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
-    </div>
-  ),
-  title: 'Update Successful',
-  content: 'The tables\' info, aliases, order and/or visibility, have been updated.',
-};
 
 export function BaseTablesSettings() {
+  const { mounted } = useMounted();
   const { data: base, mutate: mutateBase } = useBase();
+  const { catchError } = useSaveStatus();
   const { data: initialData, mutate: mutateTables } = useBaseTables();
   const sensors = useSensors();
 
-  const [tables, setTables] = useState(initialData.map((item) => ({
-    ...item,
-    updated: false,
-  })));
-
-  const [modal, setModal] = useState(INITIAL_MODAL_VALUE);
+  const [tables, setTables] = useState(initialData);
   const [loading, setLoading] = useState(false);
 
   const visibleTables = tables.filter((item) => !item.isHidden);
 
-  const handleSubmit = async (evt) => {
-    evt.preventDefault();
+  const renameTableAlias = useCallback(debounce(async (tableId, alias, curTables) => {
+    try {
+      await updateTableAlias({ tableId, alias });
+      mutateTables();
+      mutateBase();
+    } catch (err) {
+      setTables(curTables);
+      catchError(err.response.data.exception || err.response.data.error);
+    }
+  }, 500), []);
 
-    if (visibleTables.length >= 1) {
-      setLoading(true);
-      setModal(INITIAL_MODAL_VALUE);
+  const handleChange = (tableId, alias) => {
+    const curTables = tables.map((item) => ({
+      ...item,
+      alias: item.id === tableId ? alias : item.alias,
+    }));
+    setTables(curTables);
 
-      const updatedTables = tables.filter((item) => item.updated);
+    renameTableAlias(tableId, alias, curTables);
+  };
 
-      try {
-        await updateTables({ databaseId: base.id, tables: updatedTables });
-        mutateTables();
-        mutateBase();
-        setModal((curVal) => ({ ...curVal, open: true }));
-      } catch (err) {
-        setModal({
-          open: true,
-          icon: (
-            <div className="mx-auto mb-2 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-              <ExclamationIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
-            </div>
-          ),
-          title: 'Update Failed',
-          content: err?.response?.data.error || err?.response?.data.exception || 'Something went wrong. Please try again later.',
-        });
+  const handleToggleVisibility = async (tableId, isHidden) => {
+    setLoading(true);
+
+    const currentTables = [...tables];
+    setTables(tables.map((item) => ({
+      ...item,
+      isHidden: item.id === tableId ? !isHidden : item.isHidden,
+    })));
+
+    try {
+      if (!isHidden) {
+        await hideTable({ tableId });
+      } else {
+        await unhideTable({ tableId });
       }
 
-      setLoading(false);
+      mutateTables();
+      mutateBase();
+    } catch (err) {
+      mounted(() => setTables(currentTables));
+      catchError(err.response.data.exception || err.response.data.error);
     }
+
+    mounted(() => setLoading(false));
   };
 
-  const handleChange = (tableId, value) => {
-    setTables((curTable) => curTable.map((item) => ({
-      ...item,
-      alias: item.id === tableId ? value.alias : item.alias,
-      updated: item.id === tableId ? true : item.updated,
-    })));
-  };
-
-  const handleToggleVisibility = (tableId) => {
-    setTables((curTable) => curTable.map((item) => ({
-      ...item,
-      isHidden: item.id === tableId ? !item.isHidden : item.isHidden,
-      updated: item.id === tableId ? true : item.updated,
-    })));
-  };
-
-  const handleTablesOrderChange = ({ active, over }) => {
+  const handleTablesOrderChange = async ({ active, over }) => {
     if (active.id !== over.id) {
-      setTables((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex).map((item, index) => ({
-          ...item,
-          order: index,
-          updated: true,
-        }));
-      });
+      setLoading(true);
+
+      const oldIndex = tables.findIndex((item) => item.id === active.id);
+      const newIndex = tables.findIndex((item) => item.id === over.id);
+
+      const currentTables = [...tables];
+      const updatedTables = arrayMove(tables, oldIndex, newIndex).map((item, index) => ({
+        ...item,
+        order: index,
+      }));
+      setTables(updatedTables);
+
+      try {
+        await reorderTables({ databaseId: base.id, tables: updatedTables });
+        mutateTables();
+        mutateBase();
+      } catch (err) {
+        setTables(currentTables);
+        catchError(err.response.data.exception || err.response.data.error);
+      }
+
+      mounted(() => setLoading(false));
     }
   };
 
@@ -109,7 +108,7 @@ export function BaseTablesSettings() {
       <h2 className="text-xl leading-6 font-medium text-gray-900">Tables</h2>
       {tables == null && <Loader className="h-[50vh]" />}
       {!!tables?.length && (
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="mt-6 bg-white border border-solid overflow-hidden sm:rounded-lg">
             <ul className="divide-y divide-gray-200">
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTablesOrderChange}>
@@ -144,7 +143,7 @@ export function BaseTablesSettings() {
                             name={`${table.name}-alias`}
                             value={table.alias || ''}
                             placeholder="Add Alias"
-                            onChange={(evt) => handleChange(table.id, { alias: evt.target.value })}
+                            onChange={(evt) => handleChange(table.id, evt.target.value)}
                             className="w-full"
                           />
                         </div>
@@ -173,7 +172,7 @@ export function BaseTablesSettings() {
                                     ? 'text-white bg-indigo-600 focus:ring-indigo-500 hover:bg-indigo-700'
                                     : 'text-gray-900 bg-gray-100 focus:ring-gray-300 hover:bg-gray-300',
                                 )}
-                                onClick={() => handleToggleVisibility(table.id)}
+                                onClick={() => handleToggleVisibility(table.id, table.isHidden)}
                                 disabled={loading}
                               >
                                 {table.isHidden ? 'Unhide' : 'Hide'}
@@ -187,26 +186,8 @@ export function BaseTablesSettings() {
               </DndContext>
             </ul>
           </div>
-          <div className="mt-4 py-4 border-t border-solid flex justify-end">
-            <Button
-              type="submit"
-              className="ml-5 bg-sky-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-              loading={loading}
-            >
-              Update
-            </Button>
-          </div>
-        </form>
+        </div>
       )}
-      <StatusModal
-        open={modal.open}
-        setOpen={(value) => setModal((curVal) => ({ ...curVal, open: value }))}
-        icon={modal.icon}
-        title={modal.title}
-        handleClick={() => setModal((curVal) => ({ ...curVal, open: false }))}
-      >
-        {modal.content}
-      </StatusModal>
     </div>
   );
 }

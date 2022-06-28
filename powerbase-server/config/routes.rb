@@ -108,7 +108,7 @@ Rails.application.routes.draw do
       end
 
       collection do
-        put 'update', to: 'powerbase_tables#update_tables', as: 'update_tables'
+        put 'reorder', to: 'powerbase_tables#reorder', as: 'reorder_tables'
       end
 
       member do
@@ -116,6 +116,7 @@ Rails.application.routes.draw do
         put 'clear_error_logs'
         put 'alias'
         put 'hide'
+        put 'unhide'
         delete 'drop'
         get 'fields', to: 'powerbase_fields#index', as: 'table_fields'
         post 'records', to: 'table_records#index', as: 'table_records'
