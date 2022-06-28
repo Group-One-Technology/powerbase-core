@@ -98,16 +98,6 @@ export async function reorderTables({ databaseId, tables }) {
   return undefined;
 }
 
-export async function updateTables({ databaseId, ...payload }) {
-  const response = await securedApi.put(
-    `/databases/${databaseId}/tables/update`,
-    payload,
-  );
-
-  if (isResponseSuccess(response)) return response.data;
-  return undefined;
-}
-
 export async function updateTableDefaultView({ tableId, viewId }) {
   const response = await securedApi.put(
     `tables/${tableId}/update_default_view`,

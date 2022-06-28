@@ -34,7 +34,7 @@ class PowerbaseTablesController < ApplicationController
     end
   end
 
-  schema(:update_tables, :reorder) do
+  schema(:reorder) do
     required(:database_id)
     required(:tables)
   end
@@ -213,36 +213,6 @@ class PowerbaseTablesController < ApplicationController
     end
 
     render status: :no_content
-  end
-
-  # PUT /databases/:database_id/tables/update
-  def update_tables
-    @database = PowerbaseDatabase.find(safe_params[:database_id])
-    raise NotFound.new("Could not find database with id of #{safe_params[:database_id]}") if !@database
-    current_user.can?(:manage_base, @database)
-
-    is_updated = false
-
-    ActiveRecord::Base.transaction do
-      safe_params[:tables].each do |table|
-        @table = PowerbaseTable.find(table[:id])
-        @table.update(alias: table[:alias], order: table[:order])
-      end
-
-      visible_tables = @database.powerbase_tables.select {|item| !item.is_hidden}
-
-      if visible_tables.length <= 1
-        raise ActiveRecord::Rollback
-      else
-        is_updated = true
-      end
-    end
-
-    if is_updated
-      render status: :no_content
-    else
-      render json: { error: "There must be at least one visible table in this base." }, status: :unprocessable_entity
-    end
   end
 
   # PUT tables/:id/update_default_view

@@ -108,7 +108,6 @@ Rails.application.routes.draw do
       end
 
       collection do
-        put 'update', to: 'powerbase_tables#update_tables', as: 'update_tables'
         put 'reorder', to: 'powerbase_tables#reorder', as: 'reorder_tables'
       end
 
