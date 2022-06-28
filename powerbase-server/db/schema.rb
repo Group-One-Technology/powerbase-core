@@ -140,7 +140,7 @@ ActiveRecord::Schema.define(version: 2022_06_28_071154) do
     t.string "data_type", default: "string", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "order"
+    t.integer "order", null: false
   end
 
   create_table "powerbase_fields", force: :cascade do |t|

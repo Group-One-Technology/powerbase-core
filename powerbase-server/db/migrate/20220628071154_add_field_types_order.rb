@@ -44,7 +44,7 @@ class AddFieldTypesOrder < ActiveRecord::Migration[6.1]
     field_type = PowerbaseFieldType.find_by(name: "Others")
     field_type&.update(order: 13)
 
-    change_column_null :powerbase_field_types, :order, true
+    change_column_null :powerbase_field_types, :order, false
   end
   
   def down
