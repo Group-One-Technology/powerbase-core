@@ -23,6 +23,10 @@ export function getCellValue(column, value = '') {
   let data = value;
   let displayData = value;
 
+  if (data === null) {
+    return { data: null, displayData: 'NULL' };
+  }
+
   if (column.kind === GridCellKind.Bubble) {
     data = [value.toString()];
     displayData = Array.isArray(value)
@@ -34,17 +38,13 @@ export function getCellValue(column, value = '') {
     const currency = formatCurrency(value, column.field.options);
     displayData = currency;
   } else if (column.kind === GridCellKind.Boolean) {
-    data = !!data && data.toString() === 'true';
+    data = data.toString() === 'true';
   } else if (column.fieldType.name === FieldType.DATE) {
     const date = formatDate(value);
     displayData = date;
   } else {
     data = value != null ? value.toString() : value;
     displayData = value?.toString() ?? '';
-  }
-
-  if (data === null) {
-    displayData = 'NULL';
   }
 
   return { data, displayData };
