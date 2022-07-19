@@ -29,6 +29,7 @@ class PowerbaseTablesController < ApplicationController
       required(:field_type_id).value(:integer)
       required(:is_virtual).value(:bool)
       required(:is_primary_key).value(:bool)
+      required(:is_auto_increment).value(:bool)
       required(:select_options).value(:array)
       optional(:options)
     end
@@ -124,6 +125,8 @@ class PowerbaseTablesController < ApplicationController
       alias: safe_params[:alias],
       is_virtual: safe_params[:is_virtual],
     }, safe_params[:fields])
+    
+    render status: :no_content
   end
 
   # PUT /tables/:id/hide
