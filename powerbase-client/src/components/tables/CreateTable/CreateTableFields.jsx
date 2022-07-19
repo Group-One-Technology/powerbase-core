@@ -9,6 +9,7 @@ import {
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSensors } from '@lib/hooks/dnd-kit/useSensors';
+import { FieldType } from '@lib/constants/field-types';
 
 import { useFieldTypes } from '@models/FieldTypes';
 import { FieldTypeIcon } from '@components/ui/FieldTypeIcon';
@@ -23,7 +24,9 @@ function FieldItem({
   remove,
   setAsPrimaryKey,
   unsetAsPrimaryKey,
+  toggleAutoIncrement,
   isVirtual,
+  sortable = false,
 }) {
   const fieldType = fieldTypes.find((item) => item.id === field.fieldTypeId);
 
@@ -34,7 +37,7 @@ function FieldItem({
       className="flex gap-2 items-center"
       handle={{
         position: 'left',
-        component: (
+        component: sortable ? (
           <button
             type="button"
             className="inline-flex items-center px-1 py-2 border border-transparent text-xs font-medium rounded cursor-grabbing text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -42,7 +45,7 @@ function FieldItem({
             <span className="sr-only">Reorder</span>
             <GripVerticalIcon className="h-3 w-3 text-gray-500" />
           </button>
-        ),
+        ) : null,
       }}
     >
       <div className="relative py-1 flex-1 flex items-center">
@@ -51,7 +54,7 @@ function FieldItem({
         </div>
         <span className="pl-6 text-sm">{field.alias || field.name}</span>
         <span className="pl-6 text-xs">
-          ({fieldType.name})
+          ({`${fieldType.name}${field.isAutoIncrement ? ', Auto Increment' : ''}`})
         </span>
       </div>
       {(field.isVirtual && !isVirtual) && (
@@ -63,12 +66,23 @@ function FieldItem({
         {((unsetAsPrimaryKey || setAsPrimaryKey) && !field.isVirtual) && (
           <button
             type="button"
-            className="p-2 inline-block rounded bg-gray-100 text-gray-700 text-sm capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+            className="p-1 inline-block rounded bg-gray-100 text-gray-700 text-xs capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
             onClick={field.isPrimaryKey ? unsetAsPrimaryKey : setAsPrimaryKey}
           >
             {field.isPrimaryKey
               ? 'Unset as Primary Key'
               : 'Set as Primary Key'}
+          </button>
+        )}
+        {(toggleAutoIncrement && !field.isVirtual && fieldType?.name === FieldType.NUMBER) && (
+          <button
+            type="button"
+            className="p-1 inline-block rounded bg-gray-100 text-gray-700 text-xs capitalize hover:text-indigo-600 hover:bg-indigo-200 focus:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:gray-500"
+            onClick={() => toggleAutoIncrement(!field.isAutoIncrement)}
+          >
+            {field.isAutoIncrement
+              ? 'Unset as Auto Increment'
+              : 'Set as Auto Increment'}
           </button>
         )}
         {update && (
@@ -103,7 +117,9 @@ FieldItem.propTypes = {
   update: PropTypes.func,
   setAsPrimaryKey: PropTypes.func,
   unsetAsPrimaryKey: PropTypes.func,
+  toggleAutoIncrement: PropTypes.func,
   isVirtual: PropTypes.bool,
+  sortable: PropTypes.bool,
 };
 
 export function CreateTableFields({
@@ -114,6 +130,7 @@ export function CreateTableFields({
 }) {
   const { data: fieldTypes } = useFieldTypes();
   const primaryKeys = fields.filter((item) => item.isPrimaryKey);
+  const isIncrementingPrimaryKey = primaryKeys.some((item) => item.isAutoIncrement);
 
   const [count, setCount] = useState(1);
   const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
@@ -140,6 +157,18 @@ export function CreateTableFields({
       isPrimaryKey: item.id === id
         ? value ?? !item.isPrimaryKey
         : item.isPrimaryKey,
+      isAutoIncrement: item.id === id && !value
+        ? false
+        : item.isAutoIncrement,
+    })));
+  };
+
+  const toggleAutoIncrement = (id, value) => {
+    setFields(fields.map((item) => ({
+      ...item,
+      isAutoIncrement: item.id === id
+        ? value ?? !item.isAutoIncrement
+        : item.isAutoIncrement,
     })));
   };
 
@@ -187,10 +216,11 @@ export function CreateTableFields({
                     fieldTypes={fieldTypes}
                     update={() => handleUpdateField(field.id)}
                     remove={() => handleRemoveField(field.id)}
-                    setAsPrimaryKey={field.isPrimaryKey
+                    setAsPrimaryKey={field.isPrimaryKey || isIncrementingPrimaryKey
                       ? null
                       : () => togglePrimaryKey(field.id, true)}
                     isVirtual={isVirtual}
+                    sortable
                   />
                 ))}
               </ul>
@@ -231,6 +261,9 @@ export function CreateTableFields({
               key={field.id}
               field={field}
               fieldTypes={fieldTypes}
+              toggleAutoIncrement={primaryKeys.length === 1
+                ? (value) => toggleAutoIncrement(field.id, value)
+                : null}
               unsetAsPrimaryKey={() => togglePrimaryKey(field.id, false)}
             />
           ))}
