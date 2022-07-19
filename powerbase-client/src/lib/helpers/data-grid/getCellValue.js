@@ -34,7 +34,7 @@ export function getCellValue(column, value = '') {
     const currency = formatCurrency(value, column.field.options);
     displayData = currency;
   } else if (column.kind === GridCellKind.Boolean) {
-    data = data.toString() === 'true';
+    data = !!data && data.toString() === 'true';
   } else if (column.fieldType.name === FieldType.DATE) {
     const date = formatDate(value);
     displayData = date;
