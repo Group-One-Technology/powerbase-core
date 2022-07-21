@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-import { XIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/outline';
 import { Dialog } from '@headlessui/react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 
 import { useBase } from '@models/Base';
 import { useFieldTypes } from '@models/FieldTypes';
@@ -72,6 +73,7 @@ export function CreateTableModal({ open, setOpen }) {
       fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.SINGLE_LINE_TEXT).id,
     },
   ]);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const disabled = !!(aliasError.error || tableNameError.error);
   const isVirtual = tableType.nameId === 'magic_table';
@@ -137,7 +139,7 @@ export function CreateTableModal({ open, setOpen }) {
 
   return (
     <Modal open={open} setOpen={setOpen}>
-      <div className="inline-flex flex-col align-bottom bg-white min-h-[400px] rounded-lg text-left shadow-xl transform transition-all my-8 max-w-xl w-full sm:align-middle">
+      <div className="inline-flex flex-col align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all my-8 max-w-xl w-full sm:align-middle">
         <div className="hidden sm:block absolute top-0 right-0 pt-2 pr-2">
           <button
             type="button"
@@ -168,19 +170,34 @@ export function CreateTableModal({ open, setOpen }) {
               className="mt-4"
             />
           )}
-          <CreateTableName
-            baseId={base.id}
-            tableName={tableName}
-            setTableName={setTableName}
-            tableNameError={tableNameError}
-            isVirtual={isVirtual}
-          />
-          <CreateTableFields
-            tableName={tableName}
-            isVirtual={isVirtual}
-            fields={fields}
-            setFields={setFields}
-          />
+          <Collapsible.Root open={showAdvancedOptions} onOpenChange={setShowAdvancedOptions}>
+            <div className="my-1 flex justify-end">
+              <Collapsible.Trigger
+                type="button"
+                className="inline-flex items-center px-1 py-0.5 border border-transparent text-xs rounded text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                {showAdvancedOptions
+                  ? <ChevronUpIcon className="h-3.5 w-3.5 mr-1" />
+                  : <ChevronDownIcon className="h-3.5 w-3.5 mr-1" />}
+                Advanced Options
+              </Collapsible.Trigger>
+            </div>
+            <Collapsible.Content>
+              <CreateTableName
+                baseId={base.id}
+                tableName={tableName}
+                setTableName={setTableName}
+                tableNameError={tableNameError}
+                isVirtual={isVirtual}
+              />
+              <CreateTableFields
+                tableName={tableName}
+                isVirtual={isVirtual}
+                fields={fields}
+                setFields={setFields}
+              />
+            </Collapsible.Content>
+          </Collapsible.Root>
 
           <div className="ml-auto mt-4">
             <button
