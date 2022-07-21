@@ -33,6 +33,7 @@ const INITIAL_FIELD = {
   isNullable: false,
   isPii: false,
   isVirtual: false,
+  isAutoIncrement: true,
   isPrimaryKey: true,
   options: null,
 };

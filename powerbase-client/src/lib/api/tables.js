@@ -40,6 +40,7 @@ export async function createTable({
       fieldTypeId: item.fieldTypeId,
       isVirtual: item.isVirtual,
       isPrimaryKey: item.isPrimaryKey,
+      isAutoIncrement: item.isAutoIncrement,
       dbType: item.dbType,
       selectOptions: item.selectOptions,
       options: item.options,
