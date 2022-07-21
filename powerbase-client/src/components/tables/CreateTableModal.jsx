@@ -24,7 +24,7 @@ import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 import { CreateTableName } from './CreateTable/CreateTableName';
 import { CreateTableFields } from './CreateTable/CreateTableFields';
 
-const INITIAL_FIELD = {
+const PRIMARY_KEY_FIELD = {
   id: 0,
   name: 'id',
   alias: 'Id',
@@ -38,6 +38,20 @@ const INITIAL_FIELD = {
   options: null,
 };
 
+const NAME_FIELD = {
+  id: 1,
+  name: 'name',
+  alias: 'Name',
+  dbType: 'character varying(255)',
+  hasValidation: true,
+  isNullable: true,
+  isPii: false,
+  isVirtual: false,
+  isAutoIncrement: false,
+  isPrimaryKey: false,
+  options: null,
+};
+
 export function CreateTableModal({ open, setOpen }) {
   const { mounted } = useMounted();
   const { data: base } = useBase();
@@ -48,10 +62,16 @@ export function CreateTableModal({ open, setOpen }) {
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
   const [tableType, setTableType] = useState(TABLE_TYPE[0]);
-  const [fields, setFields] = useState([{
-    ...INITIAL_FIELD,
-    fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
-  }]);
+  const [fields, setFields] = useState([
+    {
+      ...PRIMARY_KEY_FIELD,
+      fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
+    },
+    {
+      ...NAME_FIELD,
+      fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.SINGLE_LINE_TEXT).id,
+    },
+  ]);
 
   const disabled = !!(aliasError.error || tableNameError.error);
   const isVirtual = tableType.nameId === 'magic_table';
@@ -64,10 +84,16 @@ export function CreateTableModal({ open, setOpen }) {
     setTableName('', false);
     setAlias('', false);
     setTableType(TABLE_TYPE[0]);
-    setFields([{
-      ...INITIAL_FIELD,
-      fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
-    }]);
+    setFields([
+      {
+        ...PRIMARY_KEY_FIELD,
+        fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.NUMBER).id,
+      },
+      {
+        ...NAME_FIELD,
+        fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.SINGLE_LINE_TEXT).id,
+      },
+    ]);
   };
 
   const submit = async (evt) => {
