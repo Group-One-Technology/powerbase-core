@@ -87,14 +87,22 @@ module Powerbase
         .select {|field| !text_field_names.include?(field.name)}
         .map {|field| field.name.to_sym}
 
+      initial_select = false
+
       -> (db) {
-        db = db.select(*included_fields)
+        if included_fields.length > 0
+          db = db.select(*included_fields)
+          initial_select = true
+        end
 
         # Max character size is 1,000,000 cause at around 100,000,000 the browser freezes.
         text_size = !@include_large_text ? "1000" : "1000000"
         text_field_names.each do |field_name|
+          select_query = nil
+          count_select_query = nil
+
           if @adapter == "mysql2"
-            db = db.select_append(Sequel.lit(%Q[
+            select_query = Sequel.lit(%Q[
               (
                 CASE
                   WHEN LENGTH('#{field_name}') > #{text_size}
@@ -102,10 +110,10 @@ module Powerbase
                   ELSE '#{field_name}'
                 END
               ) AS '#{field_name}'
-            ]))
-            db = db.select_append(Sequel.lit(%Q[LENGTH('#{field_name}') AS '#{field_name}_count']))
+            ])
+            count_select_query = Sequel.lit(%Q[LENGTH('#{field_name}') AS '#{field_name}_count'])
           else # postgresql
-            db = db.select_append(Sequel.lit(%Q[
+            select_query = Sequel.lit(%Q[
               (
                 CASE
                   WHEN LENGTH("#{field_name}") > #{text_size}
@@ -113,17 +121,34 @@ module Powerbase
                   ELSE "#{field_name}"
                 END
               ) AS "#{field_name}"
-            ]))
-            db = db.select_append(Sequel.lit(%Q[LENGTH("#{field_name}") AS "#{field_name}_count"]))
+            ])
+            count_select_query = Sequel.lit(%Q[LENGTH("#{field_name}") AS "#{field_name}_count"])
           end
+          
+          if !initial_select
+            db = db.select(select_query)
+            initial_select = true
+          else
+            db = db.select_append(select_query)
+          end
+          
+          db = db.select_append(count_select_query)
         end
 
         if !@include_json
           json_fields.each do |field|
+            select_query = nil
             if @adapter == "mysql2"
-              db = db.select_append(Sequel.lit(%Q[SUBSTRING('#{field.name}', 1, 40) AS '#{field.name}']))
+              select_query = Sequel.lit(%Q[SUBSTRING('#{field.name}', 1, 40) AS '#{field.name}'])
             else # postgresql
-              db = db.select_append(Sequel.lit(%Q[SUBSTRING("#{field.name}", 1, 40) AS "#{field.name}"]))
+              select_query = Sequel.lit(%Q[SUBSTRING("#{field.name}", 1, 40) AS "#{field.name}"])
+            end
+
+            if !initial_select
+              db = db.select(select_query)
+              initial_select = true
+            else
+              db = db.select_append(select_query)
             end
           end
         end
