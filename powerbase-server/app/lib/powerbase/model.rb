@@ -37,7 +37,7 @@ module Powerbase
           field = @fields.find {|field| field.name == key.to_s.chomp("_count")}
           next if !field
 
-          if field.is_virtual && [single_line_text_field.id, long_text_field_type.id].include?(field.powerbase_field_id)
+          if field.is_virtual && [single_line_text_field.id, long_text_field_type.id].include?(field.powerbase_field_type_id)
             virtual_data["#{key}_count".to_sym] = value
           end
         else

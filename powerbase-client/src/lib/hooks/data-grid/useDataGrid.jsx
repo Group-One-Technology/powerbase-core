@@ -48,13 +48,10 @@ export function useDataGrid({ table, records, fields }) {
   const getCellContent = React.useCallback((cell) => {
     const [col, row] = cell;
     const dataRow = records[row];
-    const isNewRecord = records[row]?.new === true;
 
     if (dataRow == null) {
       return {
-        kind: isNewRecord
-          ? GridCellKind.Custom
-          : GridCellKind.Loading,
+        kind: GridCellKind.Loading,
         allowOverlay: false,
         readonly: true,
         displayData: '',
@@ -64,21 +61,9 @@ export function useDataGrid({ table, records, fields }) {
 
     const column = columns[col];
     const data = dataRow[column?.name];
-    const newRecordOptions = isNewRecord
-      ? {
-        new: true,
-        index: records[row].index,
-        allowOverlay: true,
-        readonly: false,
-      }
-      : {};
     const lastUpdated = highlightedCell === records[row].doc_id
       ? new Date()
       : undefined;
-
-    if (isNewRecord && [GridCellKind.RowID, GridCellKind.Protected].includes(column.kind)) {
-      newRecordOptions.kind = GridCellKind.Custom;
-    }
 
     if (column) {
       const {
@@ -98,10 +83,6 @@ export function useDataGrid({ table, records, fields }) {
         ? { displayData: data?.length ? '{ ... }' : '{}' }
         : {};
 
-      if (isNewRecord && newRecordOptions.kind !== GridCellKind.Custom && field.isPii) {
-        newRecordOptions.kind = GridCellKind.Custom;
-      }
-
       return {
         ...options,
         ...getCellValue(column, data, isTruncated),
@@ -113,7 +94,6 @@ export function useDataGrid({ table, records, fields }) {
         readonly: !editable && !isTruncated,
         lastUpdated,
         ...additionalOptions,
-        ...newRecordOptions,
       };
     }
 
@@ -124,35 +104,18 @@ export function useDataGrid({ table, records, fields }) {
       displayData: data?.toString() ?? '',
       data: data ?? '',
       lastUpdated,
-      ...newRecordOptions,
     };
   }, [table.id, columns, records]);
 
   const headerIcons = React.useMemo(fieldTypeIcons, []);
 
   const drawCustomCell = React.useCallback((ctx, cell, theme, rect) => {
-    const isNewRecord = records[cell.row]?.new;
-
     if (cell.kind !== GridCellKind.Custom && cell.data !== null) {
-      if (isNewRecord) {
-        ctx.save();
-        const { x, y, width, height } = rect;
-        ctx.fillStyle = '#bfffcd';
-        ctx.fillRect(x + 1, y + 1, width - 1, height - 1);
-        ctx.restore();
-      }
-
       return false;
     }
 
     ctx.save();
-    const { x, y, width, height } = rect;
-
-    if (isNewRecord) {
-      ctx.fillStyle = '#bfffcd';
-      ctx.fillRect(x + 1, y + 1, width - 1, height - 1);
-    }
-
+    const { x, y, height } = rect;
     const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
     const fillStyle = cell.data === null
       ? theme.textLight
