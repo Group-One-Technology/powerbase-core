@@ -20,20 +20,19 @@ import { AddRecordModal } from '@components/record/AddRecordModal';
 export const TableGrid = React.memo(({
   height,
   table,
-  records: initialRecords,
+  records,
   setRecords,
 }) => {
   const { loading } = useSaveStatus();
   const { fields, setFields } = useViewFieldState();
 
-  const { newRecords, setNewRecords, handleSaveNewRecord, ...addRecordOptions } = useAddRow({
-    table, fields, records: initialRecords, setRecords,
+  const addRecordOptions = useAddRow({
+    table, fields, records, setRecords,
   });
-  const records = [...initialRecords, ...newRecords];
 
   const { columns, ...options } = useDataGrid({ table, fields, records });
   const { handleCellEdited, handleCellActivated } = useEditCell({
-    table, columns, records, setRecords, setNewRecords,
+    table, columns, records, setRecords,
   });
   const { handleResizeField, handleResizeFieldEnd } = useResizeField({ fields, setFields });
   const { handleRearrangeColumn } = useRearrangeColumns({ fields, setFields });
@@ -47,20 +46,9 @@ export const TableGrid = React.memo(({
     table, columns, records, setRecords, setConfirmModal, setRecordModal,
   });
 
-  const handleKeyDown = React.useCallback((evt) => {
-    if (evt.ctrlKey && evt.key === 's') {
-      evt.preventDefault();
-
-      if (newRecords.length) {
-        handleSaveNewRecord();
-      }
-    }
-  }, [newRecords, handleSaveNewRecord]);
-
   return (
     <>
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-      <div onKeyDown={handleKeyDown}>
+      <div>
         <DataEditor
           {...options}
           {...addRecordOptions}

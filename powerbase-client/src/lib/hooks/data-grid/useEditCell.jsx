@@ -14,7 +14,6 @@ export function useEditCell({
   columns,
   records,
   setRecords,
-  setNewRecords,
 }) {
   const { baseUser } = useBaseUser();
   const { saving, saved, catchError } = useSaveStatus();
@@ -41,19 +40,6 @@ export function useEditCell({
 
     const [col, row] = cell;
     const column = columns[col];
-    const isNewRecord = records[row]?.new;
-
-    if (isNewRecord) {
-      const recordIndex = records[row].index;
-      setNewRecords((curNewRecords) => curNewRecords.map((item, index) => ({
-        ...item,
-        [column.name]: index === recordIndex
-          ? newValue.data
-          : item[column.name],
-        edited: true,
-      })));
-      return;
-    }
 
     if ([GridCellKind.RowID, GridCellKind.Bubble, GridCellKind.Protected].includes(newValue.kind)) {
       return;
@@ -123,9 +109,6 @@ export function useEditCell({
 
   const handleCellActivated = React.useCallback((cell) => {
     const [col, row] = cell;
-
-    // Enable editing for new records
-    if (records[row]?.new) return;
 
     const column = columns[col];
     const data = records[row][column.name];

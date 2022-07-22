@@ -162,6 +162,11 @@ module ElasticsearchHelper
         next
       end
 
+      if record_value == "SQL::DEFAULT"
+        formatted_record[record_key] = Sequel.lit("DEFAULT")
+        next
+      end
+
       if record_value == nil
         formatted_record[record_key] = nil
         next
