@@ -319,10 +319,16 @@ module Powerbase
     end
 
     def merge_records(records, magic_records)
-      return records if magic_records == nil || magic_records.length == 0
       primary_keys = @table.primary_keys
       actual_fields = @table.actual_fields
       merged_records = nil
+
+      if magic_records == nil || magic_records.length == 0
+        records.map do |record|
+          doc_id = get_doc_id(primary_keys, record, actual_fields)
+          record.merge(doc_id: doc_id)
+        end
+      end
 
       if @is_magic_sort
         merged_records = magic_records.map do |magic_record|
