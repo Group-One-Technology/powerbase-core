@@ -5,6 +5,10 @@ const colors = require('tailwindcss/colors');
 module.exports = {
   content: ['./public/*.html', './src/**/*.{js,jsx}'],
   theme: {
+    fontSize: {
+      xs: '.60rem',
+      sm: '.75rem',
+    },
     extend: {
       fontFamily: {
         sans: ['Inter var', ...defaultTheme.fontFamily.sans],
