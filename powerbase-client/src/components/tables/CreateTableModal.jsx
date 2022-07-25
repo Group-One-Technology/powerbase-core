@@ -11,7 +11,6 @@ import { useCurrentView } from '@models/views/CurrentTableView';
 import { useValidState } from '@lib/hooks/useValidState';
 import { SQL_IDENTIFIER_VALIDATOR } from '@lib/validators/SQL_IDENTIFIER_VALIDATOR';
 import { REQUIRED_VALIDATOR } from '@lib/validators/REQUIRED_VALIDATOR';
-import { TABLE_TYPE } from '@lib/constants/table';
 import { useData } from '@lib/hooks/useData';
 import { FieldType } from '@lib/constants/field-types';
 import { createTable } from '@lib/api/tables';
@@ -19,8 +18,8 @@ import { useMounted } from '@lib/hooks/useMounted';
 
 import { Modal } from '@components/ui/Modal';
 import { Button } from '@components/ui/Button';
-import { InlineRadio } from '@components/ui/InlineRadio';
 import { ErrorAlert } from '@components/ui/ErrorAlert';
+import { Checkbox } from '@components/ui/Checkbox';
 import { CreateTableAlias } from './CreateTable/CreateTableAlias';
 import { CreateTableName } from './CreateTable/CreateTableName';
 import { CreateTableFields } from './CreateTable/CreateTableFields';
@@ -58,11 +57,10 @@ export function CreateTableModal({ open, setOpen }) {
   const { data: base } = useBase();
   const { status, error, dispatch } = useData();
   const { data: fieldTypes } = useFieldTypes();
-  const { mutateTables } = useCurrentView();
+  const { mutateTables, handleTableChange } = useCurrentView();
 
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
-  const [tableType, setTableType] = useState(TABLE_TYPE[0]);
   const [fields, setFields] = useState([
     {
       ...PRIMARY_KEY_FIELD,
@@ -73,10 +71,10 @@ export function CreateTableModal({ open, setOpen }) {
       fieldTypeId: fieldTypes?.find((item) => item.name === FieldType.SINGLE_LINE_TEXT).id,
     },
   ]);
+  const [isVirtual, setIsVirtual] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const disabled = !!(aliasError.error || tableNameError.error);
-  const isVirtual = tableType.nameId === 'magic_table';
 
   if (!base || !fieldTypes) return null;
 
@@ -85,7 +83,7 @@ export function CreateTableModal({ open, setOpen }) {
   const resetInputs = () => {
     setTableName('', false);
     setAlias('', false);
-    setTableType(TABLE_TYPE[0]);
+    setIsVirtual(false);
     setFields([
       {
         ...PRIMARY_KEY_FIELD,
@@ -130,7 +128,8 @@ export function CreateTableModal({ open, setOpen }) {
       mounted(() => {
         dispatch.resolved(data);
         resetInputs();
-        setOpen(false);
+        if (data) handleTableChange({ table: data });
+        mounted(() => setOpen(false));
       });
     } catch (err) {
       dispatch.rejected(err.response.data.exception || err.response.data.error);
@@ -162,12 +161,19 @@ export function CreateTableModal({ open, setOpen }) {
             setTableName={setTableName}
           />
           {base.enableMagicData && (
-            <InlineRadio
-              aria-label="Table Type"
-              value={tableType}
-              setValue={setTableType}
-              options={TABLE_TYPE}
-              className="mt-4"
+            <Checkbox
+              id="is-magic-table"
+              label={(
+                <>
+                  Is Magic Table
+                  <span className="block text-xs">
+                    Accessible thru powerbase but will not affect your current database.
+                  </span>
+                </>
+              )}
+              value={isVirtual}
+              setValue={setIsVirtual}
+              className="mt-2"
             />
           )}
           <Collapsible.Root open={showAdvancedOptions} onOpenChange={setShowAdvancedOptions}>

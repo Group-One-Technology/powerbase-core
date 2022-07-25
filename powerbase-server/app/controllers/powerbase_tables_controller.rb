@@ -125,8 +125,19 @@ class PowerbaseTablesController < ApplicationController
       alias: safe_params[:alias],
       is_virtual: safe_params[:is_virtual],
     }, safe_params[:fields])
+    @table = schema.table
+
+    if !@table.is_virtual
+      field = PowerbaseField.find_by(name: "id", powerbase_table_id: @table.id)
+      if field
+        id_field = ViewFieldOption.find_by(powerbase_field_id: field.id, table_view_id: @table.default_view.id)
+        if id_field
+          id_field.update(is_hidden: true)
+        end
+      end
+    end
     
-    render status: :no_content
+    render json: format_json(@table), status: :ok
   end
 
   # PUT /tables/:id/hide

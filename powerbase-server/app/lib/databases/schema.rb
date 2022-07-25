@@ -1,7 +1,7 @@
 include SequelHelper
 
 class Databases::Schema
-  attr_accessor :database
+  attr_accessor :database, :table
 
   def initialize(database)
     @database = database
@@ -13,7 +13,7 @@ class Databases::Schema
       table_alias: table_params[:alias],
       is_virtual: table_params[:is_virtual]
     table_creator.save
-    table = table_creator.object
+    @table = table_creator.object
 
     fields.each_with_index do |field, index|
       is_virtual = table.is_virtual || field[:is_virtual]
@@ -84,12 +84,12 @@ class Databases::Schema
           end
         end
       rescue Sequel::DatabaseError => ex
-        table.remove
+        @table.remove
         raise ex
       end
     end
 
-    create_index!(table.index_name)
-    table.write_migration_logs!(status: "migrated")
+    create_index!(@table.index_name)
+    @table.write_migration_logs!(status: "migrated")
   end
 end

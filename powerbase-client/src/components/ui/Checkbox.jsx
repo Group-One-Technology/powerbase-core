@@ -32,7 +32,7 @@ export function Checkbox({
 
 Checkbox.propTypes = {
   id: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.any.isRequired,
   value: PropTypes.bool,
   setValue: PropTypes.func.isRequired,
   className: PropTypes.string,

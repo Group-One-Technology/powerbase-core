@@ -2,30 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
 }
 
-.cursor-grabbing {
-  cursor: grabbing;
-}
+@layer utilities {
+  .cursor-grabbing {
+    cursor: grabbing;
+  }
 
-.cursor-grab {
-  cursor: grab;
-}
+  .cursor-grab {
+    cursor: grab;
+  }
+  
+  .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
 
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-.update-highlight {
-  animation-name: bg-fade-out;
-  animation-duration: 2.5s;
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .react-json-view .variable-editor {
@@ -45,10 +44,4 @@
 #portal input:focus {
   box-shadow: none !important;
   line-height: normal;
-}
-
-@keyframes bg-fade-out {
-  0%   {background: white;}
-  10%  {background: rgba(255, 251, 235, 1);}
-  100% {background: white;}
 }
