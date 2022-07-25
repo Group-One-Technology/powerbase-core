@@ -126,7 +126,7 @@ class PowerbaseTablesController < ApplicationController
       is_virtual: safe_params[:is_virtual],
     }, safe_params[:fields])
     
-    render status: :no_content
+    render json: format_json(schema.table), status: :ok
   end
 
   # PUT /tables/:id/hide

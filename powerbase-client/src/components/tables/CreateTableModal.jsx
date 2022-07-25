@@ -58,7 +58,7 @@ export function CreateTableModal({ open, setOpen }) {
   const { data: base } = useBase();
   const { status, error, dispatch } = useData();
   const { data: fieldTypes } = useFieldTypes();
-  const { mutateTables } = useCurrentView();
+  const { mutateTables, handleTableChange } = useCurrentView();
 
   const [tableName, setTableName, tableNameError] = useValidState('', SQL_IDENTIFIER_VALIDATOR);
   const [alias, setAlias, aliasError] = useValidState('', REQUIRED_VALIDATOR);
@@ -130,7 +130,8 @@ export function CreateTableModal({ open, setOpen }) {
       mounted(() => {
         dispatch.resolved(data);
         resetInputs();
-        setOpen(false);
+        if (data) handleTableChange({ table: data });
+        mounted(() => setOpen(false));
       });
     } catch (err) {
       dispatch.rejected(err.response.data.exception || err.response.data.error);
