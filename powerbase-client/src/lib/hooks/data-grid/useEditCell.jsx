@@ -107,7 +107,7 @@ export function useEditCell({
       setRecords(records);
       catchError(err);
     }
-  }, [table.id, records, columns]);
+  }, [table.id, viewFields, records, columns]);
 
   const handleCellActivated = React.useCallback((cell) => {
     const [col, row] = cell;
