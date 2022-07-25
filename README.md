@@ -29,6 +29,7 @@ For production or long-term use of Powerbase, we recommend some upgrades to avoi
    - Due to the nature of our deployment in Cloud66 which uses a force pushed commit approach, we should avoid merging multiple PRs all at the same time or else there would be a deployment failure. We should wait for the deployment process on Cloud66 to be finished before triggering another deployment.
 - DO NOT push commits to the remote `main` branch consecutively with minutes time difference.
   - The same reason with above since this triggers the deployment also.
+- DO create a release on [GitHub](https://github.com/Group-One-Technology/powerbase-core) and [Docker Hub](https://hub.docker.com/u/powerbase) preferrable every Friday if there are any merged PRs.
 
 ### Environment Variables
 - When adding new environment variable either on the client or on the server make sure to do the ff:
