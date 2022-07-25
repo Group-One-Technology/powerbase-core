@@ -59,7 +59,7 @@ export function useAddRow({ table, records, setRecords }) {
       mounted(() => setRecords(records));
       catchError(err);
     }
-  }, [table, records]);
+  }, [table, viewFields, records]);
 
   const onRowAppended = () => {
     const hasNonNullableFields = initialFields.some((item) => !item.isNullable && !item.isAutoIncrement);
