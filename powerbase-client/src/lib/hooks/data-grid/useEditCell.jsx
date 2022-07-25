@@ -8,6 +8,7 @@ import { sanitizeValue } from '@lib/helpers/fields/sanitizeFieldValue';
 import { CELL_VALUE_VALIDATOR } from '@lib/validators/CELL_VALUE_VALIDATOR';
 import { FIELD_EDITABLE_VALIDATOR } from '@lib/validators/FIELD_EDITABLE_VALIDATOR';
 import { updateFieldData } from '@lib/api/records';
+import { useViewFields } from '@models/ViewFields';
 
 export function useEditCell({
   table,
@@ -16,6 +17,7 @@ export function useEditCell({
   setRecords,
 }) {
   const { baseUser } = useBaseUser();
+  const { data: viewFields } = useViewFields();
   const { saving, saved, catchError } = useSaveStatus();
   const { mutate: mutateTableRecords } = useTableRecords();
 
@@ -72,9 +74,9 @@ export function useEditCell({
     });
 
     const record = records[row];
-    const primaryKeys = columns
+    const primaryKeys = viewFields
       .map((item) => ({
-        ...item.field,
+        ...item,
         value: record[item.name],
       }))
       .filter((item) => item.isPrimaryKey)
