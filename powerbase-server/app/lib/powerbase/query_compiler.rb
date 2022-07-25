@@ -230,7 +230,7 @@ module Powerbase
           search_params[:script_fields][field_name.to_sym] = {
             script: {
               lang: "painless",
-              source: "if (params._source.#{field_name} != null && params._source.#{field_name}.length() > 40) { return params._source.#{field_name}.substring(0, 40) } else { return params._source.#{field_name} }",
+              source: "if (params._source[\"#{field_name}\"] != null && params._source[\"#{field_name}\"].length() > 40) { return params._source[\"#{field_name}\"].substring(0, 40) } else { return params._source[\"#{field_name}\"] }",
             },
           }
         end
@@ -249,7 +249,7 @@ module Powerbase
           search_params[:script_fields][field_name.to_sym] = {
             script: {
               lang: "painless",
-              source: "if (params._source.#{field_name} != null && params._source.#{field_name}.length() > #{text_size}) { return params._source.#{field_name}.substring(0, #{text_size}) } else { return params._source.#{field_name} }",
+              source: "if (params._source[\"#{field_name}\"] != null && params._source[\"#{field_name}\"].length() > #{text_size}) { return params._source[\"#{field_name}\"].substring(0, #{text_size}) } else { return params._source[\"#{field_name}\"] }",
             },
           }
         end
@@ -257,7 +257,7 @@ module Powerbase
         search_params[:script_fields]["#{field_name}_count".to_sym] = {
           script: {
             lang: "painless",
-            source: "if (params._source.#{field_name}_count != null) { return params._source.#{field_name}_count } else { return null }",
+            source: "if (params._source[\"#{field_name}_count\"] != null) { return params._source[\"#{field_name}_count\"] } else { return null }",
           },
         }
       end
@@ -687,9 +687,9 @@ module Powerbase
 
         if search_query != nil && search_query.length > 0
           if query_string.length > 0
-            "*:(#{sanitize(search_query)}) AND (#{query_string})"
+            "*:\"#{sanitize(search_query)}\" AND (#{query_string})"
           else
-            "*:(#{sanitize(search_query)})"
+            "*:\"#{sanitize(search_query)}\""
           end
         else
           query_string
