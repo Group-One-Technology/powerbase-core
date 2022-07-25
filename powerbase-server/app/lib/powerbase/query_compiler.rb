@@ -687,9 +687,9 @@ module Powerbase
 
         if search_query != nil && search_query.length > 0
           if query_string.length > 0
-            "*:(#{sanitize(search_query)}) AND (#{query_string})"
+            "*:\"#{sanitize(search_query)}\" AND (#{query_string})"
           else
-            "*:(#{sanitize(search_query)})"
+            "*:\"#{sanitize(search_query)}\""
           end
         else
           query_string
