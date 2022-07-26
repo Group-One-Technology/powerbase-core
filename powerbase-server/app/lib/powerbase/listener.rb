@@ -25,14 +25,14 @@ module Powerbase
     end
 
     def listen!
-      @db = powerbase_db._sequel
-
-      if !@db == nil
-        # TODO drop trigger for undefined bases.
-        raise StandardError.new("#{Time.now} -- Unable to listen to database##{@powerbase_db.id}. Sequel db is undefined")
-      end
-
       begin
+        @db = powerbase_db._sequel
+  
+        if !@db == nil
+          # TODO drop trigger for undefined bases.
+          raise StandardError.new("#{Time.now} -- Unable to listen to database##{@powerbase_db.id}. Sequel db is undefined")
+        end
+
         @db.listen("powerbase_table_update", :loop => true) do |ev, pid, payload|
           # Checking if listening database has been disconnected
           existing_db = PowerbaseDatabase.find powerbase_db.id
