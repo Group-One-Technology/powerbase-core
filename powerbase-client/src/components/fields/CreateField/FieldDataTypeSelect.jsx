@@ -127,7 +127,7 @@ export function FieldDataTypeSelect({
 FieldDataTypeSelect.propTypes = {
   tableName: PropTypes.string.isRequired,
   fieldName: PropTypes.string,
-  fieldTypeName: PropTypes.oneOf(FieldType),
+  fieldTypeName: PropTypes.any,
   dataType: PropTypes.string,
   setDataType: PropTypes.func.isRequired,
   isDecimal: PropTypes.bool,
