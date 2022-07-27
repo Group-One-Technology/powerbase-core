@@ -122,10 +122,10 @@ export function Sort({ table }) {
           sort.length ? 'text-indigo-700' : 'text-gray-700',
         )}
       >
-        <SwitchVerticalIcon className="block h-4 w-4 mr-1" />
+        <SwitchVerticalIcon className="h-4 w-4 mr-1" aria-hidden="true" />
         Sort
       </Popover.Trigger>
-      <Popover.Content className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 animate-show sm:px-0 lg:max-w-md">
+      <Popover.Content className="min-w-[325px] max-w-screen-sm px-4 mt-3 animate-show sm:px-0 md:max-w-screen-xl">
         <div className="overflow-hidden rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
           <div className="text-sm text-gray-900">
             <h4 className="flex mx-3 mt-3 items-center">

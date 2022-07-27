@@ -42,10 +42,10 @@ export function Fields({ table }) {
           open && 'ring-2',
         )}
       >
-        <AdjustmentsIcon className="block h-4 w-4 mr-1" />
+        <AdjustmentsIcon className="h-4 w-4 mr-1" aria-hidden="true" />
         Fields
       </Popover.Trigger>
-      <Popover.Content className="absolute z-10 w-screen px-4 mt-3 transform -translate-x-1/2 left-1/2 animate-show sm:px-0 lg:max-w-md">
+      <Popover.Content className="min-w-[325px] max-w-screen-sm px-4 mt-3 animate-show sm:px-0 md:max-w-screen-xl">
         <div className="rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
           {screen === FIELDS_SCREEN.Fields && (
             <FieldList fields={fields} setFields={setFields}>
