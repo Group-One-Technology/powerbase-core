@@ -96,7 +96,7 @@ module Powerbase
         end
 
         # Max character size is 1,000,000 cause at around 100,000,000 the browser freezes.
-        text_size = !@include_large_text ? "1000" : "1000000"
+        text_size = !@include_large_text ? "200" : "1000000"
         text_field_names.each do |field_name|
           select_query = nil
           count_select_query = nil
