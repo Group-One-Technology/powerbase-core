@@ -10,7 +10,7 @@ gem 'pg', '~> 1.1'
 # Use MySQL for connecting to user's database via sequel
 gem 'mysql2', '~> 0.5.3'
 # Use Puma as the app server
-gem 'puma', '~> 5.0'
+gem 'puma', '>= 5.6.4'
 # Use Sequel for Database Toolkit
 gem 'sequel', '~> 5.43'
 # Use Dry Rails for Validation
