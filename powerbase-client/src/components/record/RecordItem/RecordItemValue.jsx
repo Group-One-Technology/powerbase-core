@@ -362,7 +362,7 @@ export function RecordItemValue({
           <textarea
             id={item.name}
             name={item.name}
-            rows={item.count / 100 > 10 ? 10 : item.count / 100}
+            rows={item.count / 100 > 10 ? 10 : Number.isNaN(item.count / 100) ? 5 : item.count / 100}
             className={cn(
               'mt-2 shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md',
               disabled && 'bg-gray-100 cursor-not-allowed',
