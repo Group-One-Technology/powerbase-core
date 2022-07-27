@@ -1,30 +1,19 @@
-import React, { useCallback, useState } from 'react';
-import debounce from 'lodash.debounce';
+import React, { useState } from 'react';
 import { SearchIcon } from '@heroicons/react/outline';
 import * as Popover from '@radix-ui/react-popover';
 import cn from 'classnames';
 
-import { useTableView } from '@models/TableView';
 import { useTableRecords } from '@models/TableRecords';
 import { useViewOptions } from '@models/views/ViewOptions';
 
 export function Search() {
-  const { data: view } = useTableView();
-  const { query: initialQuery, setQuery: setRemoteQuery } = useViewOptions();
+  const { query, setQuery } = useViewOptions();
   const { mutate: mutateTableRecords } = useTableRecords();
   const [open, setOpen] = useState(false);
 
-  const [query, setQuery] = useState(initialQuery || '');
-
-  const updateTableRecords = useCallback(debounce(async (value) => {
-    setRemoteQuery(value);
-    await mutateTableRecords();
-  }, 500), [view]);
-
   const handleQueryChange = (evt) => {
-    const { value } = evt.target;
-    setQuery(value);
-    updateTableRecords(value);
+    setQuery(evt.target.value);
+    mutateTableRecords();
   };
 
   return (
