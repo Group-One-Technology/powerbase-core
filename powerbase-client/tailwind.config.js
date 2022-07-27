@@ -26,6 +26,15 @@ module.exports = {
         gray: colors.neutral,
         current: 'currentColor',
       },
+      animation: {
+        show: 'show 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+      },
+      keyframes: {
+        show: {
+          '0%': { opacity: 0, transform: 'translateY(2px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [forms],
