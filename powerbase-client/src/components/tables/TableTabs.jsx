@@ -77,7 +77,7 @@ function BaseTableTabs({ addTable, canAddTables }) {
         <button
           id="tableTabsLeftArrow"
           type="button"
-          className="relative inline-flex items-center m-2 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
+          className="relative inline-flex items-center mx-2 my-1.5 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
           onClick={() => handleScroll('left')}
         >
           <span className="sr-only">Previous</span>
@@ -133,7 +133,7 @@ function BaseTableTabs({ addTable, canAddTables }) {
         <button
           id="tableTabsRightArrow"
           type="button"
-          className="relative inline-flex items-center m-2 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
+          className="relative inline-flex items-center mx-2 my-1.5 p-0.5 rounded-full font-medium text-gray-200 bg-gray-900 bg-opacity-20 hover:bg-gray-900 hover:bg-opacity-25 focus:bg-gray-900 focus:bg-opacity-50 focus:text-white"
           onClick={() => handleScroll('right')}
         >
           <span className="sr-only">Previous</span>
