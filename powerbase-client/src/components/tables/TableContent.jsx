@@ -27,7 +27,7 @@ function BaseTableContent({ table }) {
   const [records, setRecords] = useState(remoteRecords);
 
   const windowSize = useWindowSize();
-  const height = windowSize.height ? windowSize.height - 130 : 0;
+  const height = windowSize.height ? windowSize.height - 126 : 0;
 
   useDidMountEffect(() => {
     setRecords(remoteRecords);

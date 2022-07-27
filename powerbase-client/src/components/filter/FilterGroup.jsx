@@ -183,7 +183,7 @@ export function FilterGroup({
             </p>
           )}
         </div>
-        {canManageViews && <AddFilterMenu root={root} level={level} handleAddFilter={handleAddFilter} />}
+        {canManageViews && <AddFilterMenu level={level} handleAddFilter={handleAddFilter} />}
       </div>
       {(!root && id && handleParentRemoveFilter && canManageViews) && (
         <div className="mt-2">
