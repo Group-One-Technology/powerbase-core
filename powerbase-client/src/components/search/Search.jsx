@@ -19,7 +19,7 @@ export function Search() {
   const updateTableRecords = useCallback(debounce(async (value) => {
     setRemoteQuery(value);
     await mutateTableRecords();
-  }, 500), [view]);
+  }, 100), [view]);
 
   const handleQueryChange = (evt) => {
     const { value } = evt.target;
