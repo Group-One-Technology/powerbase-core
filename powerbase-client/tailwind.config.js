@@ -6,8 +6,7 @@ module.exports = {
   content: ['./public/*.html', './src/**/*.{js,jsx}'],
   theme: {
     fontSize: {
-      xs: '.60rem',
-      sm: '.75rem',
+      sm: '.8rem',
     },
     extend: {
       fontFamily: {
