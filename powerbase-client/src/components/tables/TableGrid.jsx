@@ -57,7 +57,7 @@ export const TableGrid = React.memo(({
           {...addRecordOptions}
           height={height - FOOTER_HEIGHT}
           width="100%"
-          rows={records?.length}
+          rows={records?.length || 0}
           columns={columns}
           onCellEdited={handleCellEdited}
           onCellActivated={handleCellActivated}
