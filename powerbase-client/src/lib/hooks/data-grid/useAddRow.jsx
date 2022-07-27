@@ -27,8 +27,8 @@ export function useAddRow({ table, records, setRecords }) {
 
   const trailingRowOptions = React.useMemo(() => (canAddRecord
     ? ({
-      sticky: true,
-      tint: true,
+      sticky: false,
+      tint: false,
       hint: 'New row...',
     }) : null), [canAddRecord]);
 
@@ -71,8 +71,13 @@ export function useAddRow({ table, records, setRecords }) {
     }
   };
 
+  const handleOpenAddRecordModal = () => {
+    setNewRecordModalOpen(true);
+  };
+
   return {
     trailingRowOptions,
     onRowAppended,
+    handleOpenAddRecordModal,
   };
 }
