@@ -65,10 +65,9 @@ export function TableViewsNav() {
           <Fields table={table} />
           <Filter table={table} />
           <Sort table={table} />
-        </div>
-        <div className="flex-1 flex items-center justify-end">
           <Search />
         </div>
+        <div className="flex-1" />
       </div>
     </div>
   );
