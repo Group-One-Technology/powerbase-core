@@ -16,6 +16,9 @@ import { ConfirmationModal } from '@components/ui/ConfirmationModal';
 import { SingleRecordModal } from '@components/record/SingleRecordModal';
 import { useAddRow } from '@lib/hooks/data-grid/useAddRow';
 import { AddRecordModal } from '@components/record/AddRecordModal';
+import { PlusIcon } from '@heroicons/react/outline';
+
+const FOOTER_HEIGHT = 44;
 
 export const TableGrid = React.memo(({
   height,
@@ -26,7 +29,7 @@ export const TableGrid = React.memo(({
   const { loading } = useSaveStatus();
   const { fields, setFields } = useViewFieldState();
 
-  const addRecordOptions = useAddRow({
+  const { handleOpenAddRecordModal, ...addRecordOptions } = useAddRow({
     table, fields, records, setRecords,
   });
 
@@ -47,12 +50,12 @@ export const TableGrid = React.memo(({
   });
 
   return (
-    <>
-      <div>
+    <div>
+      <div className="relative">
         <DataEditor
           {...options}
           {...addRecordOptions}
-          height={height}
+          height={height - FOOTER_HEIGHT}
           width="100%"
           rows={records?.length}
           columns={columns}
@@ -67,11 +70,21 @@ export const TableGrid = React.memo(({
           freezeColumns={1}
           onVisibleRegionChanged={({ y, height: h }) => handleLoadMoreRows(y, h)}
           overscrollX={100}
-          overscrollY={100}
           smoothScrollX
           smoothScrollY
         />
       </div>
+      <div className="py-2 px-8 bg-white border-t border-gray-200">
+        <button
+          type="button"
+          className="px-1.5 py-1 inline-flex items-center text-xs font-medium rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 ring-gray-500"
+          onClick={handleOpenAddRecordModal}
+        >
+          <PlusIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+          Add Record
+        </button>
+      </div>
+
       {headerMenu}
       {recordMenu}
 
@@ -103,7 +116,7 @@ export const TableGrid = React.memo(({
         records={records}
         setRecords={setRecords}
       />
-    </>
+    </div>
   );
 });
 
