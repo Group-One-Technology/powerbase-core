@@ -7,11 +7,6 @@ class SyncTableWorker < ApplicationWorker
 
     table = PowerbaseTable.find table_id
 
-    if !table
-      puts "Could not find table with id of #{table_id}"
-      return
-    end
-
     if table.is_virtual
       puts "Table##{table_id} is a virtual table, it doesn't need to sync."
       return
