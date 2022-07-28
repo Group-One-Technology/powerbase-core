@@ -29,7 +29,7 @@ export const TableGrid = React.memo(({
   const { loading } = useSaveStatus();
   const { fields, setFields } = useViewFieldState();
 
-  const { handleOpenAddRecordModal, ...addRecordOptions } = useAddRow({
+  const { onRowAppended, ...addRecordOptions } = useAddRow({
     table, fields, records, setRecords,
   });
 
@@ -62,6 +62,7 @@ export const TableGrid = React.memo(({
           onCellEdited={handleCellEdited}
           onCellActivated={handleCellActivated}
           rowMarkers="number"
+          onRowAppended={onRowAppended}
           onHeaderMenuClick={onHeaderMenuClick}
           onCellContextMenu={onCellContextMenu}
           onColumnResize={(column, newSize) => handleResizeField(column.id, newSize)}
@@ -78,7 +79,7 @@ export const TableGrid = React.memo(({
         <button
           type="button"
           className="px-1.5 py-1 inline-flex items-center text-xs font-medium rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 ring-gray-500"
-          onClick={handleOpenAddRecordModal}
+          onClick={onRowAppended}
         >
           <PlusIcon className="h-4 w-4 mr-1" aria-hidden="true" />
           Add Record

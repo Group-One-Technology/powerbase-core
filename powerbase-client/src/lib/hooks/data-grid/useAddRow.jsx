@@ -71,13 +71,8 @@ export function useAddRow({ table, records, setRecords }) {
     }
   };
 
-  const handleOpenAddRecordModal = () => {
-    setNewRecordModalOpen(true);
-  };
-
   return {
     trailingRowOptions,
     onRowAppended,
-    handleOpenAddRecordModal,
   };
 }
