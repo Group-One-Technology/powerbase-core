@@ -13,11 +13,16 @@ class SyncDatabaseWorker < ApplicationWorker
     @new_connection = new_connection
     set_database(database_id)
 
-    if database.is_created && new_connection
-      create_listeners
-      set_database_as_migrated
-    else
-      initialize_sync_database
+    begin
+      if database.is_created && new_connection
+        create_listeners
+        set_database_as_migrated
+      else
+        initialize_sync_database
+      end
+    rescue => ex
+      puts "#{Time.now} -- An error occurred for database##{database_id}, a #{new_connection ? "new connection" : "syncing error"}"
+      puts ex
     end
   end
 
